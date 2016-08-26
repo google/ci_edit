@@ -862,7 +862,7 @@ class TextBuffer(Selectable):
     if not self.lines:
       return
     row = max(0, min(self.scrollRow + row, len(self.lines) - 1))
-    col = max(0, min(self.scrollCol + col, len(self.lines[row]) - 1))
+    col = max(0, min(self.scrollCol + col, len(self.lines[row])))
     self.cursorMove(row - self.cursorRow, col - self.cursorCol,
         col - self.goalCol)
     self.redo()
