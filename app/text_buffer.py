@@ -694,8 +694,8 @@ class TextBuffer(Selectable):
         self.stripTrailingWhiteSpace()
         def encode(line):
           return chr(int(line.groups()[0], 16))
-        assert(re.sub('\xfe([0-9a-fA-F][0-9a-fA-F])', encode,
-            "\xfe00") == "\x00")
+        assert re.sub('\xfe([0-9a-fA-F][0-9a-fA-F])', encode,
+            "\xfe00") == "\x00"
         self.lines = [re.sub('\xfe([0-9a-fA-F][0-9a-fA-F])', encode, i)
             for i in self.lines]
         self.data = '\n'.join(self.lines)
@@ -861,8 +861,8 @@ class TextBuffer(Selectable):
     self.prg.log(' mouse release', row, col)
     if not self.lines:
       return
-    row = min(self.scrollRow + row, len(self.lines))
-    col = min(self.scrollCol + col, len(self.lines[row]))
+    row = max(0, min(self.scrollRow + row, len(self.lines) - 1))
+    col = max(0, min(self.scrollCol + col, len(self.lines[row]) - 1))
     self.cursorMove(row - self.cursorRow, col - self.cursorCol,
         col - self.goalCol)
     self.redo()
@@ -1183,7 +1183,7 @@ class TextBuffer(Selectable):
       noOpInstructions = set([
         ('m', (0,0,0,0,0,0,0,0)),
       ])
-      assert( ('m', (0,0,0,0,0,0,0,0))  in noOpInstructions)
+      assert ('m', (0,0,0,0,0,0,0,0)) in noOpInstructions
       if change in noOpInstructions:
         return
       self.prg.log(change)
