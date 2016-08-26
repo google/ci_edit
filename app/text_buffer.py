@@ -933,6 +933,8 @@ class TextBuffer(Selectable):
     self.doSelectionMode(kSelectionNone)
 
   def selectWordAt(self, row, col):
+    row = max(0, min(row, len(self.lines)-1))
+    col = max(0, min(col, len(self.lines[row])-1))
     for i in re.finditer('(?:\w+)|(?:\W+)', self.lines[row]):
         if i.start() <= col < i.end():
           self.selectText(row, i.start(), i.end()-i.start())
