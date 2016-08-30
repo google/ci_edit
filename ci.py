@@ -399,8 +399,8 @@ class CiProgram:
     assert(curses.COLORS == 256)
     assert(curses.can_change_color() == 1)
     assert(curses.has_colors() == 1)
-    for i in range(1, curses.COLORS):
-      curses.init_color(i, 1000, 0, 0)
+    #for i in range(1, curses.COLORS):
+    #  curses.init_color(i, 1000, 0, 0)
     self.showPalette = 0
     self.shiftPalette()
 
@@ -606,7 +606,7 @@ class CiProgram:
       light = [231, 230, 228, 221,   255, 254, 253, 14]
       for i in range(1, curses.COLORS):
         curses.init_pair(i, dark[i%len(dark)], light[i/32])
-        #curses.init_pair(i + 1, i, (i+22)%256)
+        #curses.init_pair(i, i, i)
     elif self.showPalette == 2:
       for i in range(1, curses.COLORS):
         curses.init_pair(i, i, 231)
