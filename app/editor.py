@@ -224,6 +224,10 @@ class InteractiveFind(EditText):
   def focus(self):
     EditText.focus(self)
     self.findCmd = self.host.textBuffer.find
+    selection = self.host.textBuffer.getSelectedText(self.host.textBuffer)
+    if selection:
+      self.textBuffer.selectionAll()
+      self.textBuffer.insertLines(self.textBuffer, selection)
     self.textBuffer.selectionAll()
 
   def info(self):
