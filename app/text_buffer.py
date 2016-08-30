@@ -247,7 +247,7 @@ class Selectable:
           pass
 
 
-class TextBuffer(Selectable):
+class BackingTextBuffer(Selectable):
   def __init__(self, prg):
     Selectable.__init__(self)
     self.prg = prg
@@ -460,184 +460,6 @@ class TextBuffer(Selectable):
       change = ('d', line[self.cursorCol:])
       self.redoAddChange(change)
       self.redo()
-
-  def draw(self, window):
-    if 1: #self.scrollRow != self.scrollToRow:
-      maxy, maxx = window.cursorWindow.getmaxyx()
-
-      startCol = self.scrollCol
-      endCol = self.scrollCol+maxx
-
-      # Draw to screen.
-      limit = min(max(len(self.lines)-self.scrollRow, 0), maxy)
-      for i in range(limit):
-        line = self.lines[self.scrollRow+i][startCol:endCol]
-        window.addStr(i, 0, line + ' '*(maxx-len(line)), window.color)
-      if 1:
-        # Highlight comments.
-        for i in range(limit):
-          line = self.lines[self.scrollRow+i][startCol:endCol]
-          for k in re.finditer('^\s*#.*$', line):
-            for f in k.regs:
-              window.addStr(i, f[0], line[f[0]:f[1]], curses.color_pair(27))
-      if 1:
-        # Highlight keywords.
-        keywords = [
-          'and',
-          'case',
-          'def',
-          'elif',
-          'else',
-          'except',
-          'for',
-          'from',
-          'function',
-          'if',
-          'import',
-          'in',
-          'or',
-          'raise',
-          'range',
-          'switch',
-          'then',
-          'try',
-          'until',
-          'while',
-        ]
-        preprocessor = [
-          'define',
-          'elif',
-          'endif',
-          'if',
-          'include',
-          'undef',
-        ]
-        asdf = '\\b%s\\b'%('\\b|\\b'.join(keywords),)
-        asdf += '|#\s*%s\\b'%('\\b|#\s*'.join(preprocessor),)
-        for i in range(limit):
-          line = self.lines[self.scrollRow+i][startCol:endCol]
-          for k in re.finditer(asdf, line):
-            for f in k.regs:
-              window.addStr(i, f[0], line[f[0]:f[1]], curses.color_pair(21))
-      if 1:
-        # Highlight brackets.
-        for i in range(limit):
-          line = self.lines[self.scrollRow+i][startCol:endCol]
-          for k in re.finditer('[[\]{}()]', line):
-            for f in k.regs:
-              window.addStr(i, f[0], line[f[0]:f[1]], curses.color_pair(6))
-      if 1:
-        # Trivia: all English contractions except 'sup, 'tis and 'twas will
-        # match this regex (with re.I):  [adegIlnotuwy]'[acdmlsrtv]
-        # The prefix part of that is used in the expression below to identify
-        # English contractions.
-
-        # Highlight strings.
-        for i in range(limit):
-          line = self.lines[self.scrollRow+i][startCol:endCol]
-          for k in re.finditer('"[^"]*"|(?<![adegIlnotuwy])\'[^\']*\'', line, re.I):
-            for f in k.regs:
-              window.addStr(i, f[0], line[f[0]:f[1]], curses.color_pair(5))
-      if 1:
-        # Match brackets.
-        if (len(self.lines) > self.cursorRow and
-            len(self.lines[self.cursorRow]) > self.cursorCol):
-          ch = self.lines[self.cursorRow][self.cursorCol]
-          def searchBack(closeCh, openCh):
-            count = -1
-            for row in range(self.cursorRow, self.scrollRow, -1):
-              line = self.lines[row]
-              if row == self.cursorRow:
-                line = line[:self.cursorCol]
-              found = [i for i in
-                  re.finditer("(\\"+openCh+")|(\\"+closeCh+")", line)]
-              for i in reversed(found):
-                if i.group() == openCh:
-                  count += 1
-                else:
-                  count -= 1
-                if count == 0:
-                  if i.start()+self.cursorCol-self.scrollCol < maxx:
-                    window.addStr(row-self.scrollRow, i.start(), openCh,
-                        curses.color_pair(201))
-                  return
-          def searchForward(openCh, closeCh):
-            count = 1
-            colOffset = self.cursorCol+1
-            for row in range(self.cursorRow, self.scrollRow+maxy):
-              if row != self.cursorRow:
-                colOffset = 0
-              line = self.lines[row][colOffset:]
-              for i in re.finditer("(\\"+openCh+")|(\\"+closeCh+")", line):
-                if i.group() == openCh:
-                  count += 1
-                else:
-                  count -= 1
-                if count == 0:
-                  if i.start()+self.cursorCol-self.scrollCol < maxx:
-                    window.addStr(row-self.scrollRow, colOffset+i.start(),
-                        closeCh, curses.color_pair(201))
-                  return
-          matcher = {
-            '(': (')', searchForward),
-            '[': (']', searchForward),
-            '{': ('}', searchForward),
-            ')': ('(', searchBack),
-            ']': ('[', searchBack),
-            '}': ('{', searchBack),
-          }
-          look = matcher.get(ch)
-          if look:
-            look[1](ch, look[0])
-            window.addStr(self.cursorRow-self.scrollRow,
-                self.cursorCol-self.scrollCol,
-                self.lines[self.cursorRow][self.cursorCol],
-                curses.color_pair(201))
-      if 1:
-        # Highlight numbers.
-        for i in range(limit):
-          line = self.lines[self.scrollRow+i][startCol:endCol]
-          for k in re.finditer('0x[0-9a-fA-F]+|\d+', line):
-            for f in k.regs:
-              window.addStr(i, f[0], line[f[0]:f[1]], curses.color_pair(31))
-      if limit and self.selectionMode != kSelectionNone:
-        upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
-        selStartCol = max(upperCol - startCol, 0)
-        selEndCol = min(lowerCol - startCol, maxx)
-        start = max(0, upperRow-self.scrollRow)
-        end = min(lowerRow-self.scrollRow, maxy)
-
-        if self.selectionMode == kSelectionAll:
-          for i in range(limit):
-            line = self.lines[self.scrollRow+i][startCol:endCol]
-            window.addStr(i, 0, line, window.colorSelected)
-        elif self.selectionMode == kSelectionBlock:
-          for i in range(start, end+1):
-            line = self.lines[self.scrollRow+i][selStartCol:selEndCol]
-            window.addStr(i, selStartCol, line, window.colorSelected)
-        elif self.selectionMode == kSelectionCharacter:
-          for i in range(start, end+1):
-            line = self.lines[self.scrollRow+i][startCol:endCol]
-            try:
-              if i == end and i == start:
-                window.addStr(i, selStartCol,
-                    line[selStartCol:selEndCol], window.colorSelected)
-              elif i == end:
-                window.addStr(i, 0, line[:selEndCol], window.colorSelected)
-              elif i == start:
-                window.addStr(i, selStartCol, line[selStartCol:],
-                    window.colorSelected)
-              else:
-                window.addStr(i, 0, line, window.colorSelected)
-            except curses.error:
-              pass
-        elif self.selectionMode == kSelectionLine:
-          for i in range(start, end+1):
-            line = self.lines[self.scrollRow+i][selStartCol:selEndCol]
-            window.addStr(i, selStartCol,
-                line+' '*(maxx-len(line)), window.colorSelected)
-      for i in range(limit, maxy):
-        window.addStr(i, 0, ' '*maxx, window.color)
 
   def editCopy(self):
     text = self.getSelectedText(self)
@@ -1202,3 +1024,189 @@ class TextBuffer(Selectable):
       self.prg.log('--- redoIndex', self.redoIndex)
       for i,c in enumerate(self.redoChain):
         self.prg.log('%2d:'%i, repr(c))
+
+
+
+class TextBuffer(BackingTextBuffer):
+  def __init__(self, prg):
+    BackingTextBuffer.__init__(self, prg)
+    self.highlightKeywords = [
+      'and',
+      'case',
+      'class',
+      'def',
+      'elif',
+      'else',
+      'except',
+      'except',
+      'from',
+      'function',
+      'if',
+      'import',
+      'in',
+      'or',
+      'raise',
+      'range',
+      'switch',
+      'then',
+      'try',
+      'until',
+      'while',
+    ]
+    self.highlightPreprocessor = [
+      'define',
+      'elif',
+      'endif',
+      'if',
+      'include',
+      'undef',
+    ]
+    keywords = '\\b%s\\b'%('\\b|\\b'.join(self.highlightKeywords),)
+    keywords += '|#\s*%s\\b'%('\\b|#\s*'.join(self.highlightPreprocessor),)
+    self.highlightRe = re.compile(keywords)
+
+  def draw(self, window):
+    if 1: #self.scrollRow != self.scrollToRow:
+      maxy, maxx = window.cursorWindow.getmaxyx()
+
+      startCol = self.scrollCol
+      endCol = self.scrollCol+maxx
+
+      # Draw to screen.
+      limit = min(max(len(self.lines)-self.scrollRow, 0), maxy)
+      for i in range(limit):
+        line = self.lines[self.scrollRow+i][startCol:endCol]
+        window.addStr(i, 0, line + ' '*(maxx-len(line)), window.color)
+      if 1:
+        # Highlight comments.
+        for i in range(limit):
+          line = self.lines[self.scrollRow+i][startCol:endCol]
+          for k in re.finditer('^\s*#.*$', line):
+            for f in k.regs:
+              window.addStr(i, f[0], line[f[0]:f[1]], curses.color_pair(27))
+      if 1:
+        # Highlight keywords.
+        for i in range(limit):
+          line = self.lines[self.scrollRow+i][startCol:endCol]
+          for k in self.highlightRe.finditer(line):
+            for f in k.regs:
+              window.addStr(i, f[0], line[f[0]:f[1]], curses.color_pair(21))
+      if 1:
+        # Highlight brackets.
+        for i in range(limit):
+          line = self.lines[self.scrollRow+i][startCol:endCol]
+          for k in re.finditer('[[\]{}()]', line):
+            for f in k.regs:
+              window.addStr(i, f[0], line[f[0]:f[1]], curses.color_pair(6))
+      if 1:
+        # Trivia: all English contractions except 'sup, 'tis and 'twas will
+        # match this regex (with re.I):  [adegIlnotuwy]'[acdmlsrtv]
+        # The prefix part of that is used in the expression below to identify
+        # English contractions.
+
+        # Highlight strings.
+        for i in range(limit):
+          line = self.lines[self.scrollRow+i][startCol:endCol]
+          for k in re.finditer('"[^"]*"|(?<![adegIlnotuwy])\'[^\']*\'', line, re.I):
+            for f in k.regs:
+              window.addStr(i, f[0], line[f[0]:f[1]], curses.color_pair(5))
+      if 1:
+        # Match brackets.
+        if (len(self.lines) > self.cursorRow and
+            len(self.lines[self.cursorRow]) > self.cursorCol):
+          ch = self.lines[self.cursorRow][self.cursorCol]
+          def searchBack(closeCh, openCh):
+            count = -1
+            for row in range(self.cursorRow, self.scrollRow, -1):
+              line = self.lines[row]
+              if row == self.cursorRow:
+                line = line[:self.cursorCol]
+              found = [i for i in
+                  re.finditer("(\\"+openCh+")|(\\"+closeCh+")", line)]
+              for i in reversed(found):
+                if i.group() == openCh:
+                  count += 1
+                else:
+                  count -= 1
+                if count == 0:
+                  if i.start()+self.cursorCol-self.scrollCol < maxx:
+                    window.addStr(row-self.scrollRow, i.start(), openCh,
+                        curses.color_pair(201))
+                  return
+          def searchForward(openCh, closeCh):
+            count = 1
+            colOffset = self.cursorCol+1
+            for row in range(self.cursorRow, self.scrollRow+maxy):
+              if row != self.cursorRow:
+                colOffset = 0
+              line = self.lines[row][colOffset:]
+              for i in re.finditer("(\\"+openCh+")|(\\"+closeCh+")", line):
+                if i.group() == openCh:
+                  count += 1
+                else:
+                  count -= 1
+                if count == 0:
+                  if i.start()+self.cursorCol-self.scrollCol < maxx:
+                    window.addStr(row-self.scrollRow, colOffset+i.start(),
+                        closeCh, curses.color_pair(201))
+                  return
+          matcher = {
+            '(': (')', searchForward),
+            '[': (']', searchForward),
+            '{': ('}', searchForward),
+            ')': ('(', searchBack),
+            ']': ('[', searchBack),
+            '}': ('{', searchBack),
+          }
+          look = matcher.get(ch)
+          if look:
+            look[1](ch, look[0])
+            window.addStr(self.cursorRow-self.scrollRow,
+                self.cursorCol-self.scrollCol,
+                self.lines[self.cursorRow][self.cursorCol],
+                curses.color_pair(201))
+      if 1:
+        # Highlight numbers.
+        for i in range(limit):
+          line = self.lines[self.scrollRow+i][startCol:endCol]
+          for k in re.finditer('0x[0-9a-fA-F]+|\d+', line):
+            for f in k.regs:
+              window.addStr(i, f[0], line[f[0]:f[1]], curses.color_pair(31))
+      if limit and self.selectionMode != kSelectionNone:
+        upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
+        selStartCol = max(upperCol - startCol, 0)
+        selEndCol = min(lowerCol - startCol, maxx)
+        start = max(0, upperRow-self.scrollRow)
+        end = min(lowerRow-self.scrollRow, maxy)
+
+        if self.selectionMode == kSelectionAll:
+          for i in range(limit):
+            line = self.lines[self.scrollRow+i][startCol:endCol]
+            window.addStr(i, 0, line, window.colorSelected)
+        elif self.selectionMode == kSelectionBlock:
+          for i in range(start, end+1):
+            line = self.lines[self.scrollRow+i][selStartCol:selEndCol]
+            window.addStr(i, selStartCol, line, window.colorSelected)
+        elif self.selectionMode == kSelectionCharacter:
+          for i in range(start, end+1):
+            line = self.lines[self.scrollRow+i][startCol:endCol]
+            try:
+              if i == end and i == start:
+                window.addStr(i, selStartCol,
+                    line[selStartCol:selEndCol], window.colorSelected)
+              elif i == end:
+                window.addStr(i, 0, line[:selEndCol], window.colorSelected)
+              elif i == start:
+                window.addStr(i, selStartCol, line[selStartCol:],
+                    window.colorSelected)
+              else:
+                window.addStr(i, 0, line, window.colorSelected)
+            except curses.error:
+              pass
+        elif self.selectionMode == kSelectionLine:
+          for i in range(start, end+1):
+            line = self.lines[self.scrollRow+i][selStartCol:selEndCol]
+            window.addStr(i, selStartCol,
+                line+' '*(maxx-len(line)), window.colorSelected)
+      for i in range(limit, maxy):
+        window.addStr(i, 0, ' '*maxx, window.color)
