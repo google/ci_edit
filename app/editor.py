@@ -207,7 +207,9 @@ class InteractiveFind(EditText):
     self.commandSet.update({
       curses.ascii.ESC: self.changeToInputWindow,
       curses.KEY_F1: self.info,
+      CTRL_F: self.findNext,
       CTRL_J: self.changeToInputWindow,
+      CTRL_R: self.findPrior,
       curses.KEY_DOWN: self.findNext,
       curses.KEY_MOUSE: self.changeToInputWindow,
       curses.KEY_UP: self.findPrior,
