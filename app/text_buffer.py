@@ -283,6 +283,14 @@ class TextBuffer(Selectable):
   def carrageReturn(self):
     self.redoAddChange(('n', (1, -self.cursorCol, -self.goalCol)))
     self.redo()
+    if 1: # todo: if indent on CR
+      line = self.lines[self.cursorRow-1]
+      indent = 0
+      while indent < len(line) and line[indent] == ' ':
+        indent += 1
+      if indent:
+        self.redoAddChange(('i', ' '*indent));
+        self.redo()
 
   def cursorCrLf(self):
     maxy, maxx = self.prg.inputWindow.cursorWindow.getmaxyx() #hack
