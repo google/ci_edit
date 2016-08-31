@@ -41,6 +41,7 @@ class Controller:
     pass
 
   def changeToInputWindow(self, ignored=1):
+    self.host.statusLine.show()
     self.prg.changeTo = self.prg.inputWindow
 
 
@@ -477,6 +478,7 @@ class CuaEdit(Controller):
     self.prg.changeTo = self.host.headerLine
 
   def switchToFind(self):
+    self.host.statusLine.hide()
     self.prg.changeTo = self.host.interactiveFind
 
   def showPalette(self):
