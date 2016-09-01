@@ -412,7 +412,7 @@ class CiProgram:
     parsed."""
     maxy, maxx = self.stdscr.getmaxyx()
     if self.showLogWindow:
-      inputWidth = min(88, maxx)
+      inputWidth = min(78, maxx)
       debugWidth = max(maxx-inputWidth-1, 0)
       debugRows = 10
 

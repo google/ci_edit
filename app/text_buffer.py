@@ -37,6 +37,7 @@ class BufferManager:
   def loadTextBuffer(self, path):
     expandedPath = os.path.abspath(os.path.expanduser(os.path.expandvars(path)))
     textBuffer = self.buffers.get(path, None)
+    self.prg.log('X textBuffer', repr(textBuffer));
     if not textBuffer:
       self.prg.log(' loadTextBuffer new')
       textBuffer = TextBuffer(self.prg)
@@ -52,9 +53,11 @@ class BufferManager:
       self.prg.log('  ', i)
       self.prg.log('    ', k)
       self.prg.log('    ', repr(k.lines))
-      self.prg.log('    ', k.lines[0])
-    self.prg.log(' loadTextBuffer', expandedPath)
-    self.prg.log(' loadTextBuffer', repr(textBuffer))
+      self.prg.log('    ', len(k.lines) and k.lines[0])
+    self.prg.log(' loadTextBuffer')
+    self.prg.log(expandedPath)
+    self.prg.log(' loadTextBuffer')
+    self.prg.log(repr(textBuffer))
     return textBuffer
 
   def fileClose(self, path):

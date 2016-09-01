@@ -102,6 +102,8 @@ class InteractiveOpener(EditText):
   def focus(self):
     self.prg.log('InteractiveOpener.focus')
     EditText.focus(self)
+    # Create a new text buffer to display dir listing.
+    self.host.setTextBuffer(text_buffer.TextBuffer(self.prg))
 
   def info(self):
     self.prg.log('InteractiveOpener command set')
@@ -179,7 +181,6 @@ class InteractiveOpener(EditText):
     self.textBuffer.goalCol = self.textBuffer.cursorCol
 
   def onChange(self):
-    self.host.textBuffer.fileClose()
     path = os.path.expanduser(os.path.expandvars(self.textBuffer.lines[0]))
     dirPath, fileName = os.path.split(path)
     dirPath = dirPath or '.'
@@ -190,7 +191,6 @@ class InteractiveOpener(EditText):
         if i.startswith(fileName):
           lines.append(i)
       if len(lines) == 1 and os.path.isfile(os.path.join(dirPath, fileName)):
-        #self.host.textBuffer.fileLoad(os.path.join(dirPath, fileName))
         self.host.setTextBuffer(self.prg.bufferManager.loadTextBuffer(
             os.path.join(dirPath, fileName)))
       else:
