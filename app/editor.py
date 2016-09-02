@@ -492,6 +492,29 @@ class CuaEdit(Controller):
     self.prg.shiftPalette()
 
 
+class CuaPlusEdit(CuaEdit):
+  """Keyboard mappings for CUA, plus some extra."""
+  def __init__(self, prg, host):
+    CuaEdit.__init__(self, prg, host)
+    self.prg.log('CuaPlusEdit.__init__')
+
+  def setTextBuffer(self, textBuffer):
+    CuaEdit.__init__(self, textBuffer)
+
+  def info(self):
+    self.prg.log('CuaPlusEdit Command set main')
+    self.prg.log(repr(self))
+
+  def setTextBuffer(self, textBuffer):
+    self.prg.log('CuaPlusEdit.__init__')
+    CuaEdit.setTextBuffer(self, textBuffer)
+    commandSet = self.commandSet_Main.copy()
+    commandSet.update({
+      CTRL_E: self.info,
+    })
+    self.commandSet_Main = commandSet
+
+
 class EmacsEdit:
   """Emacs is a common Unix based text editor. This keyboard mapping is similar
   to basic Emacs commands."""
@@ -614,11 +637,12 @@ class MainController:
     self.commandDefault = None
     self.commandSet = None
     self.controllers = {
+      'cuaPlus': CuaPlusEdit(prg, host),
       'cua': CuaEdit(prg, host),
       'emacs': EmacsEdit(prg, host),
       'vim': VimEdit(prg, host),
     }
-    self.controller = self.controllers['cua']
+    self.controller = self.controllers['cuaPlus']
 
   def doCommand(self, ch):
       cmd = self.commandSet.get(ch)
@@ -656,7 +680,10 @@ class MainController:
     self.commandLoop()
 
   def nextController(self):
-    if self.controller is self.controllers['cua']:
+    if self.controller is self.controllers['cuaPlus']:
+      self.prg.log('MainController.nextController cua')
+      self.controller = self.controllers['cua']
+    elif self.controller is self.controllers['cua']:
       self.prg.log('MainController.nextController emacs')
       self.controller = self.controllers['emacs']
     elif self.controller is self.controllers['emacs']:
