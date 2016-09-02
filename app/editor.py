@@ -255,6 +255,9 @@ class InteractiveGoto(EditText):
       curses.KEY_F1: self.info,
       CTRL_J: self.changeToInputWindow,
       curses.KEY_MOUSE: self.changeToInputWindow,
+      ord('b'): self.gotoBottom,
+      ord('h'): self.gotoHalfway,
+      ord('t'): self.gotoTop,
     })
     self.commandSet = commandSet
 
@@ -267,16 +270,31 @@ class InteractiveGoto(EditText):
   def info(self):
     self.prg.log('InteractiveGoto command set')
 
-  def onChange(self):
-    gotoLine = 0
-    try: gotoLine = int(self.textBuffer.lines[0])
-    except: pass
+  def gotoBottom(self):
+    self.textBuffer.lines[0] = str(len(self.host.textBuffer.lines))
+
+  def gotoHalfway(self):
+    half = len(self.host.textBuffer.lines)/2+1
+    self.textBuffer.lines[0] = str(half)
+
+  def gotoTop(self):
+    self.textBuffer.lines[0] = '1'
+
+  def cursorMoveTo(self, row, col):
     textBuffer = self.host.textBuffer
-    cursorRow = min(max(gotoLine - 1, 0), len(textBuffer.lines)-1)
+    cursorRow = min(max(row - 1, 0), len(textBuffer.lines)-1)
+    self.prg.log('cursorMoveTo row', row, cursorRow)
     textBuffer.cursorMove(cursorRow-textBuffer.cursorRow,
         0-textBuffer.cursorCol,
         0-textBuffer.goalCol)
     textBuffer.redo()
+
+  def onChange(self):
+    gotoLine = 0
+    try: line = self.textBuffer.lines[0]
+    except: pass
+    gotoLine, gotoCol = (line.split(',') + ['0', '0'])[:2]
+    self.cursorMoveTo(int(gotoLine), int(gotoCol))
 
 
 class CiEdit(Controller):

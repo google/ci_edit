@@ -522,10 +522,12 @@ class CiProgram:
         elif bstate & curses.REPORT_MOUSE_POSITION:
           #self.log('REPORT_MOUSE_POSITION')
           if self.savedMouseX == mousex and self.savedMouseY == mousey:
+            # This is a hack for dtterm on Mac OS X.
             i.mouseWheelUp(bstate&curses.BUTTON_SHIFT,
                 bstate&curses.BUTTON_CTRL, bstate&curses.BUTTON_ALT)
           else:
-            self.log('unhandled REPORT_MOUSE_POSITION')
+            i.mouseMoved(mousey, mousex, bstate&curses.BUTTON_SHIFT,
+                bstate&curses.BUTTON_CTRL, bstate&curses.BUTTON_ALT)
         else:
           self.log('got bstate', app.ci_curses.mouseButtonName(bstate), bstate)
         self.savedMouseX = mousex
