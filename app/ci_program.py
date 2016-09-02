@@ -235,7 +235,7 @@ class DirectoryPanel(Window):
   def __init__(self, prg, rows, cols, top, left):
     self.prg = prg
     Window.__init__(self, prg, rows, cols, top, left)
-    self.color = curses.color_pair(0)
+    self.color = curses.color_pair(18)
     self.colorSelected = curses.color_pair(3)
 
 
@@ -243,7 +243,7 @@ class FilePanel(Window):
   def __init__(self, prg, rows, cols, top, left):
     self.prg = prg
     Window.__init__(self, prg, rows, cols, top, left)
-    self.color = curses.color_pair(0)
+    self.color = curses.color_pair(18)
     self.colorSelected = curses.color_pair(3)
 
 
@@ -281,11 +281,11 @@ class InputWindow(Window):
       left += 7
     if 1:
       self.rightColumn = StaticWindow(prg, rows, 1, top, left+cols-1)
-      self.rightColumn.color = curses.color_pair(0)
+      self.rightColumn.color = curses.color_pair(18)
       self.rightColumn.colorSelected = curses.color_pair(105)
       cols -= 1
     Window.__init__(self, prg, rows, cols, top, left)
-    self.color = curses.color_pair(0)
+    self.color = curses.color_pair(18)
     self.colorSelected = curses.color_pair(228)
     self.controller = app.editor.MainController(prg, self)
     if header:
@@ -356,9 +356,9 @@ class PaletteWindow(Window):
   def __init__(self, prg):
     Window.__init__(self, prg, 16, 16*5, 8, 8);
     self.controller = app.editor.MainController(prg, self)
-    # textBuffer = self.prg.bufferManager.loadTextBuffer(sys.argv[1])
-    # self.controller.setTextBuffer(textBuffer)
-    # Window.setTextBuffer(self, textBuffer)
+    textBuffer = app.text_buffer.TextBuffer(self.prg)
+    self.controller.setTextBuffer(textBuffer)
+    Window.setTextBuffer(self, textBuffer)
 
   def draw(self):
     width = 16
@@ -425,12 +425,12 @@ class CiProgram:
           inputWidth+1)
       self.logWindow.setTextBuffer(app.text_buffer.TextBuffer(self))
 
-      self.paletteWindow = PaletteWindow(self)
     else:
       inputWidth = maxx
       self.debugWindow = None
       self.logWindow = None
       self.paletteWindow = None
+    self.paletteWindow = PaletteWindow(self)
 
     self.inputWindow = InputWindow(self, maxy, inputWidth, 0, 0, True, True,
         True)
