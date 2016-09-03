@@ -2,7 +2,6 @@
 # Use of this source code is governed by an Apache-style license that can be
 # found in the LICENSE file.
 
-import curses
 import curses.ascii
 import os
 import re
@@ -105,6 +104,8 @@ class Selectable:
     elif self.selectionMode == kSelectionLine:
       for i in range(upperRow, lowerRow+1):
         lines.append(buffer.lines[i])
+      if len(lines):
+        lines.append('')
     return tuple(lines)
 
   def doDeleteSelection(self, buffer):
