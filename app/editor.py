@@ -12,6 +12,29 @@ import re
 import text_buffer
 
 
+def parseInt(str):
+  i = 0
+  k = 0
+  if len(str) > i and str[i] in ('+', '-'):
+    i += 1
+  k = i
+  while len(str) > k and str[k].isdigit():
+    k += 1
+  if k > i:
+    return int(str[:k])
+  return 0
+
+def test_parseInt():
+  assert parseInt('0') == 0
+  assert parseInt('0e') == 0
+  assert parseInt('qwee') == 0
+  assert parseInt('10') == 10
+  assert parseInt('+10') == 10
+  assert parseInt('-10') == -10
+  assert parseInt('--10') == 0
+  assert parseInt('--10') == 0
+
+
 class Controller:
   """A Controller is a keyboard mapping from keyboard/mouse events to editor
   commands."""
@@ -271,14 +294,24 @@ class InteractiveGoto(EditText):
     self.prg.log('InteractiveGoto command set')
 
   def gotoBottom(self):
-    self.textBuffer.lines[0] = str(len(self.host.textBuffer.lines))
+    textBuffer = self.textBuffer
+    textBuffer.selectionAll()
+    textBuffer.insertLines(self.textBuffer,
+        [str(len(self.host.textBuffer.lines))])
+    textBuffer.cursorEndOfLine()
 
   def gotoHalfway(self):
+    textBuffer = self.textBuffer
     half = len(self.host.textBuffer.lines)/2+1
-    self.textBuffer.lines[0] = str(half)
+    textBuffer.selectionAll()
+    textBuffer.insertLines(self.textBuffer, [str(half)])
+    textBuffer.cursorEndOfLine()
 
   def gotoTop(self):
-    self.textBuffer.lines[0] = '1'
+    textBuffer = self.textBuffer
+    textBuffer.selectionAll()
+    textBuffer.insertLines(self.textBuffer, ['1'])
+    textBuffer.cursorEndOfLine()
 
   def cursorMoveTo(self, row, col):
     textBuffer = self.host.textBuffer
@@ -294,7 +327,7 @@ class InteractiveGoto(EditText):
     try: line = self.textBuffer.lines[0]
     except: pass
     gotoLine, gotoCol = (line.split(',') + ['0', '0'])[:2]
-    self.cursorMoveTo(int(gotoLine), int(gotoCol))
+    self.cursorMoveTo(parseInt(gotoLine), parseInt(gotoCol))
 
 
 class CiEdit(Controller):
