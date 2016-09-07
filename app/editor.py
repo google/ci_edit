@@ -104,6 +104,9 @@ class EditText(Controller):
   def info(self):
     self.prg.log('EditText command set')
 
+  def unfocus(self):
+    pass
+
 
 class InteractiveOpener(EditText):
   """Open a file to edit."""

@@ -104,10 +104,18 @@ class StaticWindow:
 
 class Window(StaticWindow):
   """A Window may have focus."""
-  def __init__(self, prg, rows, cols, top, left):
+  def __init__(self, prg, rows, cols, top, left, controller=None):
     StaticWindow.__init__(self, prg, rows, cols, top, left)
+    self.controller = controller
     self.cursorWindow.keypad(1)
     self.textBuffer = None
+
+  def focus(self):
+    try: self.prg.zOrder.remove(self)
+    except ValueError: self.prg.log('not found')
+    self.prg.zOrder.append(self)
+    self.controller.focus()
+    self.controller.commandLoop()
 
   def mouseClick(self, row, col, shift, ctrl, alt):
     self.textBuffer.mouseClick(row, col, shift, ctrl, alt)
@@ -129,11 +137,6 @@ class Window(StaticWindow):
 
   def mouseWheelUp(self, shift, ctrl, alt):
     self.textBuffer.mouseWheelUp(shift, ctrl, alt)
-
-  def focus(self):
-    try: self.prg.zOrder.remove(self)
-    except ValueError: self.prg.log('not found')
-    self.prg.zOrder.append(self)
 
   def refresh(self):
     self.textBuffer.draw(self)
@@ -158,7 +161,7 @@ class Window(StaticWindow):
     self.textBuffer = textBuffer
 
   def unfocus(self):
-    self.prg.log('unfocus', repr(self))
+    self.controller.unfocus()
 
 
 class HeaderLine(Window):
@@ -166,11 +169,6 @@ class HeaderLine(Window):
     Window.__init__(self, prg, rows, cols, top, left)
     self.setTextBuffer(app.text_buffer.TextBuffer(prg))
     self.controller = app.editor.InteractiveOpener(prg, host, self.textBuffer)
-
-  def focus(self):
-    Window.focus(self)
-    self.controller.focus()
-    self.controller.commandLoop()
 
 
 class InteractiveFind(Window):
@@ -180,18 +178,13 @@ class InteractiveFind(Window):
     self.setTextBuffer(app.text_buffer.TextBuffer(prg))
     self.controller = app.editor.InteractiveFind(prg, self, self.textBuffer)
 
-  def focus(self):
-    Window.focus(self)
-    self.controller.focus()
-    self.controller.commandLoop()
 
-  def refresh(self):
-    if self.prg.zOrder[-1] is self:
-      Window.refresh(self)
-
-  def unfocus(self):
-    self.controller.unfocus()
-    Window.unfocus(self)
+class InteractiveReplace(Window):
+  def __init__(self, prg, host, rows, cols, top, left):
+    Window.__init__(self, prg, rows, cols, top, left)
+    self.host = host
+    self.setTextBuffer(app.text_buffer.TextBuffer(prg))
+    self.controller = app.editor.InteractiveReplace(prg, self, self.textBuffer)
 
 
 class LineNumberVertical(StaticWindow):
@@ -236,11 +229,6 @@ class StatusLine(Window):
     self.host = host
     self.setTextBuffer(app.text_buffer.TextBuffer(prg))
     self.controller = app.editor.InteractiveGoto(prg, host, self.textBuffer)
-
-  def focus(self):
-    Window.focus(self)
-    self.controller.focus()
-    self.controller.commandLoop()
 
   def refresh(self):
     maxy, maxx = self.cursorWindow.getmaxyx()
@@ -324,10 +312,6 @@ class InputWindow(Window):
         self.headerLine.controller.setFileName(scratchPath)
         self.setTextBuffer(self.prg.bufferManager.loadTextBuffer(scratchPath))
 
-  def focus(self):
-    Window.focus(self)
-    self.controller.focus()
-
   def drawLineNumbers(self):
     maxy, maxx = self.cursorWindow.getmaxyx()
     limit = min(maxy, len(self.textBuffer.lines)-self.textBuffer.scrollRow)
@@ -393,10 +377,6 @@ class PaletteWindow(Window):
       for k in range(rows):
         self.addStr(k, i*5, ' %3d '%(i+k*width,), curses.color_pair(i+k*width))
     self.cursorWindow.refresh()
-
-  def focus(self):
-    Window.focus(self)
-    self.controller.focus()
 
   def refresh(self):
     self.draw()
@@ -603,6 +583,9 @@ class CiProgram:
 
   def refresh(self):
     """Repaint stacked windows, furthest to nearest."""
+    if 0:
+      self.zOrder[-1].refresh()
+      return
     #self.log('-'*80)
     for i,k in enumerate(self.zOrder):
       #self.log("[[%d]] %r"%(i, k))
