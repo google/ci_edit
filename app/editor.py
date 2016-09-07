@@ -64,7 +64,6 @@ class Controller:
     pass
 
   def changeToInputWindow(self, ignored=1):
-    self.host.statusLine.show()
     self.prg.changeTo = self.prg.inputWindow
 
 
@@ -228,6 +227,7 @@ class InteractiveFind(EditText):
   """Find text within the current document."""
   def __init__(self, prg, host, textBuffer):
     EditText.__init__(self, prg, host, textBuffer)
+    self.document = host.host
     self.commandSet.update({
       curses.ascii.ESC: self.changeToInputWindow,
       curses.KEY_F1: self.info,
@@ -235,21 +235,27 @@ class InteractiveFind(EditText):
       CTRL_G: self.findNext,
       CTRL_J: self.changeToInputWindow,
       CTRL_R: self.findPrior,
+      CTRL_S: self.replacementTextEdit,
       curses.KEY_DOWN: self.findNext,
       curses.KEY_MOUSE: self.changeToInputWindow,
       curses.KEY_UP: self.findPrior,
     })
 
   def findNext(self):
-    self.findCmd = self.host.textBuffer.findNext
+    self.findCmd = self.document.textBuffer.findNext
 
   def findPrior(self):
-    self.findCmd = self.host.textBuffer.findPrior
+    self.findCmd = self.document.textBuffer.findPrior
 
   def focus(self):
+    self.document.statusLine.hide()
+    self.document.resizeBy(-2, 0)
+    self.host.moveBy(-2, 0)
+    self.host.resizeBy(2, 0)
     EditText.focus(self)
-    self.findCmd = self.host.textBuffer.find
-    selection = self.host.textBuffer.getSelectedText(self.host.textBuffer)
+    self.findCmd = self.document.textBuffer.find
+    selection = self.document.textBuffer.getSelectedText(
+        self.document.textBuffer)
     if selection:
       self.textBuffer.selectionAll()
       self.textBuffer.insertLines(self.textBuffer, selection)
@@ -265,7 +271,17 @@ class InteractiveFind(EditText):
       self.findCmd(searchFor)
     except re.error, e:
       self.error = e.message
-    self.findCmd = self.host.textBuffer.find
+    self.findCmd = self.document.textBuffer.find
+
+  def replacementTextEdit(self):
+    pass
+
+  def unfocus(self):
+    self.prg.log('unfocus Find')
+    self.document.resizeBy(2, 0)
+    self.host.resizeBy(-2, 0)
+    self.host.moveBy(2, 0)
+    self.document.statusLine.show()
 
 
 class InteractiveGoto(EditText):
@@ -530,7 +546,6 @@ class CuaEdit(Controller):
     self.prg.changeTo = self.host.headerLine
 
   def switchToFind(self):
-    self.host.statusLine.hide()
     self.prg.changeTo = self.host.interactiveFind
 
   def showPalette(self):

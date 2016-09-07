@@ -67,25 +67,45 @@ class StaticWindow:
   def mouseWheelUp(self, shift, ctrl, alt):
     pass
 
+  def refresh(self):
+    """Redraw window."""
+    self.cursorWindow.refresh()
+
+  def moveTo(self, top, left):
+    self.prg.log('move')
+    self.top = top
+    self.left = left
+    self.cursorWindow.mvwin(self.top, self.left)
+
+  def moveBy(self, top, left):
+    self.prg.log('move')
+    self.top += top
+    self.left += left
+    self.cursorWindow.mvwin(self.top, self.left)
+
+  def resizeTo(self, rows, cols):
+    self.prg.log('resize')
+    self.rows += rows
+    self.cols += cols
+    self.cursorWindow.resize(self.rows, self.cols)
+
+  def resizeBy(self, rows, cols):
+    self.prg.log('resize')
+    self.rows += rows
+    self.cols += cols
+    self.cursorWindow.resize(self.rows, self.cols)
+
   def show(self):
     """Show window and bring it to the top layer."""
     try: self.prg.zOrder.remove(self)
     except: pass
     self.prg.zOrder.append(self)
 
-  def refresh(self):
-    """Redraw window."""
-    self.cursorWindow.refresh()
-
 
 class Window(StaticWindow):
   """A Window may have focus."""
   def __init__(self, prg, rows, cols, top, left):
     StaticWindow.__init__(self, prg, rows, cols, top, left)
-    self.rows = rows
-    self.cols = cols
-    self.top = top
-    self.left = left
     self.cursorWindow.keypad(1)
     self.textBuffer = None
 
@@ -156,8 +176,9 @@ class HeaderLine(Window):
 class InteractiveFind(Window):
   def __init__(self, prg, host, rows, cols, top, left):
     Window.__init__(self, prg, rows, cols, top, left)
+    self.host = host
     self.setTextBuffer(app.text_buffer.TextBuffer(prg))
-    self.controller = app.editor.InteractiveFind(prg, host, self.textBuffer)
+    self.controller = app.editor.InteractiveFind(prg, self, self.textBuffer)
 
   def focus(self):
     Window.focus(self)
@@ -167,6 +188,10 @@ class InteractiveFind(Window):
   def refresh(self):
     if self.prg.zOrder[-1] is self:
       Window.refresh(self)
+
+  def unfocus(self):
+    self.controller.unfocus()
+    Window.unfocus(self)
 
 
 class LineNumberVertical(StaticWindow):
@@ -262,8 +287,9 @@ class InputWindow(Window):
       top += 1
     self.showFooter = footer
     if footer:
-      self.interactiveFind = InteractiveFind(prg, self, 1, cols, top+rows-1,
-          left)
+      findReplaceHeight = 1
+      self.interactiveFind = InteractiveFind(prg, self, findReplaceHeight, cols,
+          top+rows-findReplaceHeight, left)
       self.interactiveFind.color = curses.color_pair(205)
       self.interactiveFind.colorSelected = curses.color_pair(87)
     if footer:
