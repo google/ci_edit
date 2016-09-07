@@ -103,7 +103,8 @@ class StaticWindow:
 
 
 class Window(StaticWindow):
-  """A Window may have focus."""
+  """A Window may have focus. A Window holds a TextBuffer and a
+    controller that operates on the TextBuffer."""
   def __init__(self, prg, rows, cols, top, left, controller=None):
     StaticWindow.__init__(self, prg, rows, cols, top, left)
     self.controller = controller
@@ -177,48 +178,6 @@ class InteractiveFind(Window):
     self.host = host
     self.setTextBuffer(app.text_buffer.TextBuffer(prg))
     self.controller = app.editor.InteractiveFind(prg, self, self.textBuffer)
-
-
-class InteractiveReplace(Window):
-  def __init__(self, prg, host, rows, cols, top, left):
-    Window.__init__(self, prg, rows, cols, top, left)
-    self.host = host
-    self.setTextBuffer(app.text_buffer.TextBuffer(prg))
-    self.controller = app.editor.InteractiveReplace(prg, self, self.textBuffer)
-
-
-class LineNumberVertical(StaticWindow):
-  """The left hand column with the line numbers displayed."""
-  def __init__(self, prg, host, rows, cols, top, left):
-    Window.__init__(self, prg, rows, cols, top, left)
-    self.host = host
-    self.setTextBuffer(app.text_buffer.TextBuffer(prg))
-
-  def refresh(self):
-    maxy, maxx = self.cursorWindow.getmaxyx()
-    limit = min(maxy, len(self.textBuffer.lines)-self.textBuffer.scrollRow)
-    for i in range(limit):
-      self.leftColumn.addStr(i, 0,
-          ' %5d  '%(self.textBuffer.scrollRow+i+1), self.leftColumn.color)
-    for i in range(limit, maxy):
-      self.leftColumn.addStr(i, 0,
-          '       ', self.leftColumn.color)
-    if 1:
-      cursorAt = self.textBuffer.cursorRow-self.textBuffer.scrollRow
-      self.leftColumn.addStr(cursorAt, 1,
-          '%5d'%(self.textBuffer.cursorRow+1), self.leftColumn.colorSelected)
-    self.leftColumn.cursorWindow.refresh()
-
-
-class RightVertical(StaticWindow):
-  """There is a thin vertical panel reserved for long line indicators."""
-  def __init__(self, prg, host, rows, cols, top, left):
-    Window.__init__(self, prg, rows, cols, top, left)
-    self.host = host
-    self.setTextBuffer(app.text_buffer.TextBuffer(prg))
-
-  def refresh(self):
-    pass
 
 
 class StatusLine(Window):
@@ -339,8 +298,7 @@ class InputWindow(Window):
         color = self.rightColumn.colorSelected
       self.rightColumn.addStr(i, 0, ' ', color)
     for i in range(limit, maxy):
-      self.rightColumn.addStr(i, 0,
-          '       ', self.leftColumn.color)
+      self.rightColumn.addStr(i, 0, ' ', self.leftColumn.color)
     self.rightColumn.cursorWindow.refresh()
 
   def refresh(self):
