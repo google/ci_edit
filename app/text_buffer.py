@@ -99,7 +99,8 @@ class Selectable:
     elif self.selectionMode == kSelectionBlock:
       for i in range(upperRow, lowerRow+1):
         lines.append(buffer.lines[i][upperCol:lowerCol])
-    elif self.selectionMode == kSelectionCharacter:
+    elif (self.selectionMode == kSelectionCharacter or
+        self.selectionMode == kSelectionWord):
       if upperRow == lowerRow:
         lines.append(buffer.lines[upperRow][upperCol:lowerCol])
       else:
@@ -119,13 +120,15 @@ class Selectable:
 
   def doDeleteSelection(self, buffer):
     upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
+    self.prg.log('doDeleteSelection', upperRow, upperCol, lowerRow, lowerCol)
     if self.selectionMode == kSelectionAll:
       buffer.lines = [""]
     elif self.selectionMode == kSelectionBlock:
       for i in range(upperRow, lowerRow+1):
         line = buffer.lines[i]
         buffer.lines[i] = line[:upperCol] + line[lowerCol:]
-    elif self.selectionMode == kSelectionCharacter:
+    elif (self.selectionMode == kSelectionCharacter or
+        self.selectionMode == kSelectionWord):
       if upperRow == lowerRow:
         line = buffer.lines[upperRow]
         buffer.lines[upperRow] = line[:upperCol] + line[lowerCol:]
@@ -143,7 +146,8 @@ class Selectable:
     if len(lines) == 0:
       return
     if (self.selectionMode == kSelectionNone or
-        self.selectionMode == kSelectionCharacter):
+        self.selectionMode == kSelectionCharacter or
+        self.selectionMode == kSelectionWord):
       firstLine = buffer.lines[self.cursorRow]
       if len(lines) == 1:
         buffer.lines[self.cursorRow] = (firstLine[:self.cursorCol] + lines[0] +
@@ -219,6 +223,45 @@ class Selectable:
       upperCol = 0
       lowerRow = max(self.markerRow, self.cursorRow)
       lowerCol = sys.maxint
+    elif self.selectionMode == kSelectionWord:
+      upperRow = self.markerRow
+      upperCol = self.markerCol
+      lowerRow = self.cursorRow
+      lowerCol = self.cursorCol
+      if upperRow == lowerRow and upperCol > lowerCol:
+        upperCol, lowerCol = lowerCol, upperCol
+      elif upperRow > lowerRow:
+        upperRow, lowerRow = lowerRow, upperRow
+        upperCol, lowerCol = lowerCol, upperCol
+      if 1:
+        if upperRow == lowerRow:
+          line = self.lines[upperRow]
+          for segment in re.finditer('(?:\w+)|(?:\W+)', line):
+            if segment.start() <= upperCol < segment.end():
+              upperCol = segment.start()
+            if segment.start() < lowerCol < segment.end():
+              lowerCol = segment.end()
+              break
+          for segment in re.finditer('(?:\w+)|(?:\W+)', line):
+            if segment.start() <= upperCol < segment.end():
+              upperCol = segment.start()
+            if segment.start() < lowerCol < segment.end():
+              lowerCol = segment.end()
+              break
+        else:
+          line = self.lines[upperRow]
+          for segment in re.finditer('(?:\w+)|(?:\W+)', line):
+            if segment.start() <= upperCol < segment.end():
+              upperCol = segment.start()
+              break
+          line = self.lines[lowerRow]
+          for segment in re.finditer('(?:\w+)|(?:\W+)', line):
+                  if segment.start() < lowerCol < segment.end():
+                    lowerCol = segment.end()
+                    break
+
+    self.prg.log('upperRow, upperCol, lowerRow, lowerCol, mode',
+        upperRow, upperCol, lowerRow, lowerCol, self.selectionMode)
     return (upperRow, upperCol, lowerRow, lowerCol)
 
   def highlight(self, maxRow, maxCol):
@@ -232,7 +275,8 @@ class Selectable:
       for i in range(start, end+1):
         line = self.lines[self.scrollRow+i][selStartCol:selEndCol]
         self.cursorWindow.addstr(i, selStartCol, line, curses.color_pair(3))
-    elif self.selectionMode == kSelectionCharacter:
+    elif (self.selectionMode == kSelectionCharacter or
+        self.selectionMode == kSelectionWord):
       for i in range(start, end+1):
         line = self.lines[self.scrollRow+i][startCol:endCol]
         try:
@@ -554,7 +598,7 @@ class BackingTextBuffer(Selectable):
     except:
       self.prg.log('except had exception')
 
-  def selectText(self, lineNumber, start, length):
+  def selectText(self, lineNumber, start, length, mode):
     scrollTo = self.scrollRow
     maxy, maxx = self.prg.inputWindow.cursorWindow.getmaxyx() #hack
     if not (self.scrollRow < lineNumber <= self.scrollRow + maxy):
@@ -566,7 +610,7 @@ class BackingTextBuffer(Selectable):
         start+length-self.goalCol,
         scrollTo-self.scrollRow, 0)
     self.redo()
-    self.doSelectionMode(kSelectionCharacter)
+    self.doSelectionMode(mode)
     self.cursorMove(0, -length, -length)
     self.redo()
 
@@ -587,12 +631,14 @@ class BackingTextBuffer(Selectable):
       searchFor = '(?:.*)('+searchFor+')'
       text = text[:self.cursorCol]
       offset = 0
-    found = re.search(searchFor, text)
+    self.findRe = re.compile(searchFor)
+    found = self.findRe.search(text)
     if found:
       start = found.regs[-1][0]
       end = found.regs[-1][1]
       self.prg.log('a found on line', self.cursorRow, start)
-      self.selectText(self.cursorRow, offset+start, end-start)
+      self.selectText(self.cursorRow, offset+start, end-start,
+          kSelectionCharacter)
       return
     # To end of file.
     if direction >= 0:
@@ -605,7 +651,7 @@ class BackingTextBuffer(Selectable):
         self.prg.log('b found on line', i, repr(found))
         start = found.regs[-1][0]
         end = found.regs[-1][1]
-        self.selectText(i, start, end-start)
+        self.selectText(i, start, end-start, kSelectionCharacter)
         return
     # Warp around to the start of the file.
     self.prg.log('find hit end of file')
@@ -619,7 +665,7 @@ class BackingTextBuffer(Selectable):
         self.prg.log('c found on line', i, repr(found))
         start = found.regs[-1][0]
         end = found.regs[-1][1]
-        self.selectText(i, start, end-start)
+        self.selectText(i, start, end-start, kSelectionCharacter)
         return
     self.prg.log('find not found')
 
@@ -775,13 +821,13 @@ class BackingTextBuffer(Selectable):
   def selectionNone(self):
     self.doSelectionMode(kSelectionNone)
 
+  def selectionWord(self):
+    self.doSelectionMode(kSelectionWord)
+
   def selectWordAt(self, row, col):
     row = max(0, min(row, len(self.lines)-1))
     col = max(0, min(col, len(self.lines[row])-1))
-    for i in re.finditer('(?:\w+)|(?:\W+)', self.lines[row]):
-        if i.start() <= col < i.end():
-          self.selectText(row, i.start(), i.end()-i.start())
-          return
+    self.selectText(row, col, 0, kSelectionWord)
 
   def splitLine(self):
     """split the line into two at current column."""
@@ -932,8 +978,8 @@ class BackingTextBuffer(Selectable):
         self.lines[self.cursorRow] = line[:x] + line[x+len(change[1]):]
       elif change[0] == 'ds':
         self.setSelection(change[1])
-        self.doDeleteSelection(self)
         upperRow, upperCol, a,b = self.startAndEnd()
+        self.doDeleteSelection(self)
         self.selectionMode = kSelectionNone
         self.cursorRow += upperRow-self.cursorRow
         self.cursorCol += upperCol-self.cursorCol
@@ -1200,7 +1246,8 @@ class TextBuffer(BackingTextBuffer):
           for i in range(start, end+1):
             line = self.lines[self.scrollRow+i][selStartCol:selEndCol]
             window.addStr(i, selStartCol, line, window.colorSelected)
-        elif self.selectionMode == kSelectionCharacter:
+        elif (self.selectionMode == kSelectionCharacter or
+            self.selectionMode == kSelectionWord):
           for i in range(start, end+1):
             line = self.lines[self.scrollRow+i][startCol:endCol]
             try:
