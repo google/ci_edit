@@ -232,26 +232,25 @@ class Selectable:
       elif upperRow > lowerRow:
         upperRow, lowerRow = lowerRow, upperRow
         upperCol, lowerCol = lowerCol, upperCol
-      if 1:
-        if upperRow == lowerRow:
-          line = self.lines[upperRow]
-          for segment in re.finditer('(?:\w+)|(?:\W+)', line):
-            if segment.start() <= upperCol < segment.end():
-              upperCol = segment.start()
-            if segment.start() < lowerCol < segment.end():
-              lowerCol = segment.end()
-              break
-        else:
-          line = self.lines[upperRow]
-          for segment in re.finditer('(?:\w+)|(?:\W+)', line):
-            if segment.start() <= upperCol < segment.end():
-              upperCol = segment.start()
-              break
-          line = self.lines[lowerRow]
-          for segment in re.finditer('(?:\w+)|(?:\W+)', line):
-            if segment.start() < lowerCol < segment.end():
-              lowerCol = segment.end()
-              break
+      if upperRow == lowerRow:
+        line = self.lines[upperRow]
+        for segment in re.finditer('(?:\w+)|(?:\W+)', line):
+          if segment.start() <= upperCol < segment.end():
+            upperCol = segment.start()
+          if segment.start() < lowerCol < segment.end():
+            lowerCol = segment.end()
+            break
+      else:
+        line = self.lines[upperRow]
+        for segment in re.finditer('(?:\w+)|(?:\W+)', line):
+          if segment.start() <= upperCol < segment.end():
+            upperCol = segment.start()
+            break
+        line = self.lines[lowerRow]
+        for segment in re.finditer('(?:\w+)|(?:\W+)', line):
+          if segment.start() < lowerCol < segment.end():
+            lowerCol = segment.end()
+            break
     return (upperRow, upperCol, lowerRow, lowerCol)
 
   def highlight(self, maxRow, maxCol):
