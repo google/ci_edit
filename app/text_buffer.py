@@ -835,28 +835,23 @@ class BackingTextBuffer(Selectable):
       self.lines[i] = self.lines[i].rstrip()
 
   def unindent(self):
-    if self.selectionMode == kSelectionNone:
-      self.cursorMoveAndMark(0, -self.cursorCol, -self.goalCol,
-          self.cursorRow-self.markerRow, self.cursorCol-self.markerCol, 0)
-      self.redo()
-      self.unindentLines()
-    elif self.selectionMode == kSelectionAll:
+    if self.selectionMode == kSelectionAll:
       self.cursorMoveAndMark(len(self.lines)-1-self.cursorRow, -self.cursorCol,
           -self.goalCol,
           -self.markerRow, -self.markerCol, kSelectionLine-self.selectionMode)
       self.redo()
       self.unindentLines()
     else:
-      col = min(self.cursorCol, self.markerCol)
-      self.cursorMoveAndMark(0, col-self.cursorCol, col-self.goalCol,
-          0, col-self.markerCol, kSelectionLine-self.selectionMode)
+      self.cursorMoveAndMark(0, -self.cursorCol, -self.goalCol,
+          0, -self.markerCol, kSelectionLine-self.selectionMode)
       self.redo()
       self.unindentLines()
 
   def unindentLines(self):
-    row = min(self.markerRow, self.cursorRow)
-    endRow = max(self.markerRow, self.cursorRow)
-    for line in self.lines[row:endRow+1]:
+    upperRow = min(self.markerRow, self.cursorRow)
+    lowerRow = max(self.markerRow, self.cursorRow)
+    self.prg.log('unindentLines', upperRow, lowerRow)
+    for line in self.lines[upperRow:lowerRow+1]:
       if line[:2] != '  ':
         # Handle multi-delete.
         return
@@ -932,12 +927,12 @@ class BackingTextBuffer(Selectable):
           self.lines[self.cursorRow] = line[:x] + change[1] + line[x:]
         self.cursorCol += len(change[1])
       elif change[0] == 'vd':
-        row = min(self.markerRow, self.cursorRow)
-        endRow = max(self.markerRow, self.cursorRow)
-        for i in range(row, endRow+1):
+        upperRow = min(self.markerRow, self.cursorRow)
+        lowerRow = max(self.markerRow, self.cursorRow)
+        for i in range(upperRow, lowerRow+1):
           line = self.lines[self.cursorRow]
           x = self.cursorCol
-          self.lines[self.cursorRow] = line[:x] + change[1] + line[x:]
+          self.lines[i] = line[:x] + change[1] + line[x:]
       elif change[0] == 'vi':
         text = change[1]
         col = self.cursorCol
@@ -1022,12 +1017,12 @@ class BackingTextBuffer(Selectable):
           x = self.cursorCol
           self.lines[self.cursorRow] = line[:x] + line[x+len(change[1]):]
       elif change[0] == 'vd':
-        row = min(self.markerRow, self.cursorRow)
-        rowEnd = max(self.markerRow, self.cursorRow)
-        for i in range(row, rowEnd+1):
+        upperRow = min(self.markerRow, self.cursorRow)
+        lowerRow = max(self.markerRow, self.cursorRow)
+        for i in range(upperRow, lowerRow+1):
           line = self.lines[i]
           x = self.cursorCol
-          self.lines[self.cursorRow] = line[:x] + line[x+len(change[1]):]
+          self.lines[i] = line[:x] + line[x+len(change[1]):]
       elif change[0] == 'vi':
         text = change[1]
         col = self.cursorCol
