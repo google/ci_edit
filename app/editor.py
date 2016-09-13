@@ -234,8 +234,7 @@ class InteractiveFind(EditText):
     self.commandSet.update({
       curses.ascii.ESC: self.changeToInputWindow,
       curses.KEY_F1: self.info,
-      CTRL_F: self.changeToInputWindow,
-      CTRL_G: self.findNext,
+      CTRL_F: self.findNext,
       CTRL_J: self.changeToInputWindow,
       CTRL_R: self.findPrior,
       CTRL_S: self.replacementTextEdit,
@@ -579,7 +578,7 @@ class CuaPlusEdit(CuaEdit):
     CuaEdit.setTextBuffer(self, textBuffer)
     commandSet = self.commandSet_Main.copy()
     commandSet.update({
-      CTRL_E: self.info,
+      CTRL_E: textBuffer.nextSelectionMode,
     })
     self.commandSet_Main = commandSet
 
