@@ -194,9 +194,13 @@ class StatusLine(Window):
     if self.prg.zOrder[-1] is self:
       Window.refresh(self)
     else:
+      tb = self.host.textBuffer
       statusLine = ' * '
-      rightSide = '%d,%d '%(
-          self.host.textBuffer.cursorRow+1, self.host.textBuffer.cursorCol)
+      rightSide = '%s | %d,%d %d%%,%d%%'%(
+          app.text_buffer.kSelectionModeNames[tb.selectionMode],
+          tb.cursorRow+1, tb.cursorCol,
+          tb.cursorRow*100/(len(tb.lines)+1),
+          tb.cursorCol*100/(len(tb.lines[tb.cursorRow])+1))
       statusLine += ' '*(maxx-len(statusLine)-len(rightSide)) + rightSide
       self.addStr(0, 0, statusLine, self.color)
       self.cursorWindow.refresh()

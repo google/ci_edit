@@ -23,6 +23,15 @@ kSelectionWord = 5
 # How many selection modes are there.
 kSelectionModeCount = 6
 
+kSelectionModeNames = [
+  'None',
+  'All',
+  'Block',
+  'Char',
+  'Line',
+  'Word',
+];
+
 
 def addVectors(a, b):
   return tuple([a[i]+b[i] for i in range(len(a))])
