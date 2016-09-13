@@ -3,7 +3,7 @@
 # Use of this source code is governed by an Apache-style license that can be
 # found in the LICENSE file.
 
-import app.ci_curses
+import app.curses_util
 import app.editor
 import app.text_buffer
 import sys
@@ -439,7 +439,7 @@ class CiProgram:
           self.debugWindow.color)
       self.debugWindow.addStr(7, 0,
           "bstate %s %d         "
-          %(app.ci_curses.mouseButtonName(bstate), bstate),
+          %(app.curses_util.mouseButtonName(bstate), bstate),
           self.debugWindow.color)
     except curses.error:
       self.debugWindow.addStr(6, 0, "mouse is not available.  ",
@@ -456,7 +456,7 @@ class CiProgram:
       if i.contains(mousey, mousex):
         mousey -= i.top
         mousex -= i.left
-        #self.log('bstate', app.ci_curses.mouseButtonName(bstate))
+        #self.log('bstate', app.curses_util.mouseButtonName(bstate))
         if bstate & curses.BUTTON1_RELEASED:
           if self.priorClick + rapidClickTimeout <= time.time():
             i.mouseRelease(mousey, mousex, bstate&curses.BUTTON_SHIFT,
@@ -497,7 +497,7 @@ class CiProgram:
             i.mouseMoved(mousey, mousex, bstate&curses.BUTTON_SHIFT,
                 bstate&curses.BUTTON_CTRL, bstate&curses.BUTTON_ALT)
         else:
-          self.log('got bstate', app.ci_curses.mouseButtonName(bstate), bstate)
+          self.log('got bstate', app.curses_util.mouseButtonName(bstate), bstate)
         self.savedMouseX = mousex
         self.savedMouseY = mousey
         return

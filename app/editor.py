@@ -4,7 +4,7 @@
 
 """Key bindings for the ciEditor."""
 
-from app.ci_curses import *
+from app.curses_util import *
 import curses
 import curses.ascii
 import os
