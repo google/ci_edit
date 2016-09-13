@@ -81,12 +81,12 @@ class Selectable:
     self.selectionMode = kSelectionNone
 
   def getSelection(self):
-    return (self.markerRow, self.markerCol, self.cursorRow, self.cursorCol,
-      self.selectionMode)
+    upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
+    return (upperRow, upperCol, lowerRow, lowerCol, self.selectionMode)
 
   def setSelection(self, other):
     (self.markerRow, self.markerCol, self.cursorRow, self.cursorCol,
-      self.selectionMode) = other
+        self.selectionMode) = other
 
   def getSelectedText(self, buffer):
     upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
