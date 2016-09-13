@@ -310,6 +310,7 @@ class BackingTextBuffer(Selectable):
     self.prg = prg
     self.clipList = []
     self.debugRedo = False
+    self.findRe = None
     self.goalCol = 0
     self.lines = []
     self.scrollRow = 0
@@ -618,6 +619,7 @@ class BackingTextBuffer(Selectable):
     """direction is -1 for findPrior, 0 for at cursor, 1 for findNext."""
     self.prg.log('find', searchFor, direction)
     if not len(searchFor):
+      self.findRe = None
       self.doSelectionMode(kSelectionNone)
       return
     searchForLen = len(searchFor)
@@ -1091,26 +1093,42 @@ class TextBuffer(BackingTextBuffer):
     BackingTextBuffer.__init__(self, prg)
     self.highlightKeywords = [
       'and',
-      'case',
+      'break',
+      'continue',
       'class',
       'def',
       'elif',
       'else',
       'except',
       'except',
+      'False',
       'from',
       'function',
+      'global',
       'if',
       'import',
       'in',
+      'is',
+      'None',
+      'not',
       'or',
       'raise',
       'range',
-      'switch',
       'then',
+      'True',
       'try',
       'until',
       'while',
+    ]
+    self.highlightKeywords += [
+      'case',
+      'public',
+      'private',
+      'protected',
+      'const',
+      'static',
+      'switch',
+      'throw',
     ]
     self.highlightPreprocessor = [
       'define',
@@ -1231,6 +1249,13 @@ class TextBuffer(BackingTextBuffer):
           for k in re.finditer('0x[0-9a-fA-F]+|\d+', line):
             for f in k.regs:
               window.addStr(i, f[0], line[f[0]:f[1]], curses.color_pair(31))
+      if self.findRe is not None:
+        # Highlight find.
+        for i in range(limit):
+          line = self.lines[self.scrollRow+i][startCol:endCol]
+          for k in self.findRe.finditer(line):
+            for f in k.regs:
+              window.addStr(i, f[0], line[f[0]:f[1]], curses.color_pair(64))
       if limit and self.selectionMode != kSelectionNone:
         upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
         selStartCol = max(upperCol - startCol, 0)
