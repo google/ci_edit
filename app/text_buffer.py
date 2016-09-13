@@ -120,7 +120,6 @@ class Selectable:
 
   def doDeleteSelection(self, buffer):
     upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
-    self.prg.log('doDeleteSelection', upperRow, upperCol, lowerRow, lowerCol)
     if self.selectionMode == kSelectionAll:
       buffer.lines = [""]
     elif self.selectionMode == kSelectionBlock:
@@ -242,12 +241,6 @@ class Selectable:
             if segment.start() < lowerCol < segment.end():
               lowerCol = segment.end()
               break
-          for segment in re.finditer('(?:\w+)|(?:\W+)', line):
-            if segment.start() <= upperCol < segment.end():
-              upperCol = segment.start()
-            if segment.start() < lowerCol < segment.end():
-              lowerCol = segment.end()
-              break
         else:
           line = self.lines[upperRow]
           for segment in re.finditer('(?:\w+)|(?:\W+)', line):
@@ -256,12 +249,9 @@ class Selectable:
               break
           line = self.lines[lowerRow]
           for segment in re.finditer('(?:\w+)|(?:\W+)', line):
-                  if segment.start() < lowerCol < segment.end():
-                    lowerCol = segment.end()
-                    break
-
-    self.prg.log('upperRow, upperCol, lowerRow, lowerCol, mode',
-        upperRow, upperCol, lowerRow, lowerCol, self.selectionMode)
+            if segment.start() < lowerCol < segment.end():
+              lowerCol = segment.end()
+              break
     return (upperRow, upperCol, lowerRow, lowerCol)
 
   def highlight(self, maxRow, maxCol):
