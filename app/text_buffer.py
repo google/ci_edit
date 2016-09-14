@@ -906,8 +906,12 @@ class BackingTextBuffer(Selectable):
         for i in range(change[1][0]):
           del self.lines[self.cursorRow+1]
       elif change[0] == 'v': # undo paste
-        upperRow = self.cursorRow-(len(change[1])-1)
-        upperCol = len(self.lines[upperRow])-(len(change[1][0]))
+        lineCount = len(change[1])
+        upperRow = self.cursorRow-(lineCount-1)
+        if lineCount == 1:
+          upperCol = self.cursorCol-(len(change[1][0]))
+        else:
+          upperCol = len(self.lines[upperRow])-(len(change[1][0]))
         a = (upperRow, upperCol,
             self.cursorRow, self.cursorCol, kSelectionCharacter)
         self.prg.log('undo v', a)
