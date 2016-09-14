@@ -34,10 +34,12 @@ kSelectionModeNames = [
 
 
 def addVectors(a, b):
+  """Add two list-like objects, pair-wise."""
   return tuple([a[i]+b[i] for i in range(len(a))])
 
 
 class BufferManager:
+  """Manage a set of text buffers. Some text buffers may be hidden."""
   def __init__(self, prg):
     self.prg = prg
     self.buffers = {}
@@ -1131,9 +1133,26 @@ class TextBuffer(BackingTextBuffer):
     keywords += '|#\s*%s\\b'%('\\b|#\s*'.join(self.highlightPreprocessor),)
     self.highlightRe = re.compile(keywords)
 
+  def scrollToCursor(self, window):
+    maxy, maxx = window.cursorWindow.getmaxyx() #hack
+    rows = 0
+    if self.scrollRow > self.cursorRow:
+      rows = self.cursorRow - self.scrollRow
+    elif self.cursorRow >= self.scrollRow+maxy:
+      rows = self.cursorRow - (self.scrollRow+maxy-1)
+    cols = 0
+    if self.scrollCol > self.cursorCol:
+      cols = self.cursorCol - self.scrollCol
+    elif self.cursorCol >= self.scrollCol+maxx:
+      cols = self.cursorCol - (self.scrollCol+maxx-1)
+    self.scrollRow += rows
+    self.scrollCol += cols
+
   def draw(self, window):
     if 1: #self.scrollRow != self.scrollToRow:
       maxy, maxx = window.cursorWindow.getmaxyx()
+
+      self.scrollToCursor(window)
 
       startCol = self.scrollCol
       endCol = self.scrollCol+maxx
