@@ -12,7 +12,6 @@ import time
 import traceback
 import os
 
-
 class StaticWindow:
   """A static window does not get focus."""
   def __init__(self, prg, rows, cols, top, left):
@@ -195,7 +194,9 @@ class StatusLine(Window):
       Window.refresh(self)
     else:
       tb = self.host.textBuffer
-      statusLine = ' * '
+      statusLine = ' . '
+      if tb.isDirty():
+        statusLine = ' * '
       rightSide = '%s | %d,%d %d%%,%d%%'%(
           app.text_buffer.kSelectionModeNames[tb.selectionMode],
           tb.cursorRow+1, tb.cursorCol,

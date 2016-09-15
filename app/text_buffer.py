@@ -309,10 +309,15 @@ class BackingTextBuffer(Selectable):
     self.scrollCol = 0
     self.redoChain = []
     self.redoIndex = 0
+    self.savedAtRedoIndex = 0
 
   def addLine(self, msg):
     self.lines.append(msg)
     self.cursorRow += 1
+    assert 0 # is this used
+
+  def isDirty(self):
+    return self.savedAtRedoIndex != self.redoIndex
 
   def backspace(self):
     if self.selectionMode != kSelectionNone:
@@ -546,6 +551,7 @@ class BackingTextBuffer(Selectable):
   def fileCreate(self, path):
     self.file = open(os.path.expandvars(os.path.expanduser(path)), 'w+')
     self.fileFilter()
+    self.savedAtRedoIndex = self.redoIndex
 
   def fileFilter(self):
     def parse(line):
@@ -555,6 +561,7 @@ class BackingTextBuffer(Selectable):
     #self.lines[0] += "\x00\x01\x1f\x7f\xff"
     self.lines = [re.sub('([\0-\x1f\x7f-\xff])', parse, i) for i in self.lines]
     #self.prg.log('lines', len(self.lines), self)
+    self.savedAtRedoIndex = self.redoIndex
 
   def fileLoad(self, path):
     self.prg.log('fileLoad', path)
@@ -587,6 +594,7 @@ class BackingTextBuffer(Selectable):
         self.file.truncate()
         self.file.write(self.data)
         self.file.close()
+        self.savedAtRedoIndex = self.redoIndex
       except Exception as e:
         type_, value, tb = sys.exc_info()
         self.prg.log('error writing file')
