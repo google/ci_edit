@@ -539,6 +539,7 @@ class BackingTextBuffer(Selectable):
       self.fileWrite()
       # todo handle error writing
       self.data = ""
+      self.fullPath = ""
       self.lines = []
       self.file.close()
 
@@ -565,11 +566,15 @@ class BackingTextBuffer(Selectable):
         self.file = open(fullPath, 'w+')
       except:
         self.prg.log('error opening file', fullPath)
+        return
+    self.fullPath = fullPath
     self.fileFilter()
+    self.file.close()
 
   def fileWrite(self):
     try:
       try:
+        self.file = open(self.fullPath, 'r+')
         self.stripTrailingWhiteSpace()
         def encode(line):
           return chr(int(line.groups()[0], 16))
@@ -581,6 +586,7 @@ class BackingTextBuffer(Selectable):
         self.file.seek(0)
         self.file.truncate()
         self.file.write(self.data)
+        self.file.close()
       except Exception as e:
         type_, value, tb = sys.exc_info()
         self.prg.log('error writing file')
