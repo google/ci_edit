@@ -446,6 +446,10 @@ class CiProgram:
           self.debugWindow.color)
     self.debugWindow.cursorWindow.refresh()
 
+  def clickedNearby(self, row, col):
+    y, x = self.priorClickRowCol
+    return y-1 <= row <= y+1 and x-1 <= col <= x+1
+
   def handleMouse(self):
     """Mouse handling is a special case. The getch() curses function will
     signal the existence of a mouse event, but the event must be fetched and
@@ -462,7 +466,8 @@ class CiProgram:
             i.mouseRelease(mousey, mousex, bstate&curses.BUTTON_SHIFT,
                 bstate&curses.BUTTON_CTRL, bstate&curses.BUTTON_ALT)
         elif bstate & curses.BUTTON1_PRESSED:
-          if self.priorClick + rapidClickTimeout > time.time():
+          if (self.priorClick + rapidClickTimeout > time.time() and
+              self.clickedNearby(mousey, mousex)):
             self.clicks += 1
             self.priorClick = time.time()
             if self.clicks == 2:
@@ -475,6 +480,7 @@ class CiProgram:
           else:
             self.clicks = 1
             self.priorClick = time.time()
+            self.priorClickRowCol = (mousey, mousex)
             i.mouseClick(mousey, mousex, bstate&curses.BUTTON_SHIFT,
                 bstate&curses.BUTTON_CTRL, bstate&curses.BUTTON_ALT)
         elif bstate & curses.BUTTON2_PRESSED:
