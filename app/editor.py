@@ -481,6 +481,7 @@ class CuaEdit(Controller):
     self.textBuffer = textBuffer
     self.commandSet_Main = {
       curses.ascii.ESC: textBuffer.selectionNone,
+      curses.KEY_DC: textBuffer.delete,
       curses.KEY_MOUSE: self.prg.handleMouse,
 
       curses.KEY_F1: self.info,
@@ -504,7 +505,7 @@ class CuaEdit(Controller):
 
       CTRL_G: self.switchToCommandSetInteractiveGoto,
 
-      CTRL_H: textBuffer.backspace,
+      #CTRL_H: textBuffer.backspace,
       curses.ascii.DEL: textBuffer.backspace,
       curses.KEY_BACKSPACE: textBuffer.backspace,
 
