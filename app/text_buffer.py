@@ -314,7 +314,6 @@ class BackingTextBuffer(Selectable):
   def addLine(self, msg):
     self.lines.append(msg)
     self.cursorRow += 1
-    assert 0 # is this used
 
   def isDirty(self):
     return self.savedAtRedoIndex != self.redoIndex
