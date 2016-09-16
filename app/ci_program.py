@@ -33,13 +33,15 @@ class CiProgram:
     #print '\033[?1005;h'
     curses.meta(1)
     curses.raw()
-    curses.start_color()
-    curses.use_default_colors()
+    #curses.start_color()
+    #curses.use_default_colors()
     assert(curses.COLORS == 256)
     assert(curses.can_change_color() == 1)
     assert(curses.has_colors() == 1)
     #for i in range(1, curses.COLORS):
     #  curses.init_color(i, 1000, 0, 0)
+    for i in range(16, curses.COLORS):
+      curses.init_color(i, 500, 500, i*787%1000)
     self.showPalette = 0
     self.shiftPalette()
 
