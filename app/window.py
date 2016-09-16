@@ -3,14 +3,14 @@
 # Use of this source code is governed by an Apache-style license that can be
 # found in the LICENSE file.
 
-import app.curses_util
+#import app.curses_util
 import app.editor
 import app.text_buffer
 import sys
 import curses
-import time
-import traceback
-import os
+#import time
+#import traceback
+#import os
 
 class StaticWindow:
   """A static window does not get focus."""

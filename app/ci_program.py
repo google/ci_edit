@@ -4,14 +4,14 @@
 # found in the LICENSE file.
 
 import app.curses_util
-import app.editor
+#import app.editor
 import app.text_buffer
 import app.window
 import sys
 import curses
 import time
-import traceback
-import os
+#import traceback
+#import os
 
 
 class CiProgram:
