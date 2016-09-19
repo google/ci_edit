@@ -567,9 +567,6 @@ class CuaPlusEdit(CuaEdit):
     CuaEdit.__init__(self, prg, host)
     self.prg.log('CuaPlusEdit.__init__')
 
-  def setTextBuffer(self, textBuffer):
-    CuaEdit.__init__(self, textBuffer)
-
   def info(self):
     self.prg.log('CuaPlusEdit Command set main')
     self.prg.log(repr(self))
