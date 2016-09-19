@@ -266,9 +266,13 @@ class CiProgram:
       for i in range(1, curses.COLORS):
         curses.init_pair(i, 16, i)
 
-def run_ci(stdscr):
+def wrapped_ci(stdscr):
   prg = CiProgram(stdscr)
   prg.run()
 
+def run_ci():
+  curses.wrapper(wrapped_ci)
+
 if __name__ == '__main__':
-    curses.wrapper(run_ci)
+  run_ci()
+
