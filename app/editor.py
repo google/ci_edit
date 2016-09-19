@@ -600,6 +600,7 @@ class EmacsEdit:
     pass
 
   def setTextBuffer(self, textBuffer):
+    self.prg.log('EmacsEdit.setTextBuffer')
     self.textBuffer = textBuffer
     self.commandSet_Main = {
       curses.KEY_F1: self.info,
@@ -671,6 +672,7 @@ class VimEdit:
     pass
 
   def setTextBuffer(self, textBuffer):
+    self.prg.log('VimEdit.setTextBuffer');
     self.textBuffer = textBuffer
     self.commandSet_Normal = {
       ord('^'): textBuffer.cursorStartOfLine,
@@ -765,7 +767,7 @@ class MainController:
     self.focus()
 
   def setTextBuffer(self, textBuffer):
-    self.prg.log('MainController.setTextBuffer')
+    self.prg.log('MainController.setTextBuffer', self.controller)
     self.textBuffer = textBuffer
     self.controller.setTextBuffer(textBuffer)
 
