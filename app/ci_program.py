@@ -13,6 +13,14 @@ import time
 #import traceback
 #import os
 
+globalPrintLog = "--- begin log ---"
+def logPrint(*args):
+  global globalPrintLog
+  msg = str(args[0])
+  for i in args[1:]:
+    msg += ' '+str(i)
+  globalPrintLog += msg + "\n"
+
 
 class CiProgram:
   """This is the main editor program. It holds top level information and runs
@@ -38,10 +46,16 @@ class CiProgram:
     assert(curses.COLORS == 256)
     assert(curses.can_change_color() == 1)
     assert(curses.has_colors() == 1)
+    logPrint("color_content:")
+    for i in range(0, curses.COLORS):
+      logPrint("color", i, ": ", curses.color_content(i))
     #for i in range(1, curses.COLORS):
     #  curses.init_color(i, 1000, 0, 0)
     for i in range(16, curses.COLORS):
       curses.init_color(i, 500, 500, i*787%1000)
+    logPrint("color_content, after:")
+    for i in range(0, curses.COLORS):
+      logPrint("color", i, ": ", curses.color_content(i))
     self.showPalette = 0
     self.shiftPalette()
 
@@ -271,7 +285,9 @@ def wrapped_ci(stdscr):
   prg.run()
 
 def run_ci():
+  global globalPrintLog
   curses.wrapper(wrapped_ci)
+  print globalPrintLog
 
 if __name__ == '__main__':
   run_ci()
