@@ -33,6 +33,11 @@ kSelectionModeNames = [
 ];
 
 
+kReBrackets = re.compile('[[\]{}()]')
+kReNumbers = re.compile('0x[0-9a-fA-F]+|\d+')
+kReWordBoundary = re.compile('(?:\w+)|(?:\W+)')
+
+
 def addVectors(a, b):
   """Add two list-like objects, pair-wise."""
   return tuple([a[i]+b[i] for i in range(len(a))])
@@ -236,7 +241,7 @@ class Selectable:
         upperCol, lowerCol = lowerCol, upperCol
       if upperRow == lowerRow:
         line = self.lines[upperRow]
-        for segment in re.finditer('(?:\w+)|(?:\W+)', line):
+        for segment in re.finditer(kReWordBoundary, line):
           if segment.start() <= upperCol < segment.end():
             upperCol = segment.start()
           if segment.start() < lowerCol < segment.end():
@@ -244,12 +249,12 @@ class Selectable:
             break
       else:
         line = self.lines[upperRow]
-        for segment in re.finditer('(?:\w+)|(?:\W+)', line):
+        for segment in re.finditer(kReWordBoundary, line):
           if segment.start() <= upperCol < segment.end():
             upperCol = segment.start()
             break
         line = self.lines[lowerRow]
-        for segment in re.finditer('(?:\w+)|(?:\W+)', line):
+        for segment in re.finditer(kReWordBoundary, line):
           if segment.start() < lowerCol < segment.end():
             lowerCol = segment.end()
             break
@@ -1193,7 +1198,7 @@ class TextBuffer(BackingTextBuffer):
         # Highlight brackets.
         for i in range(limit):
           line = self.lines[self.scrollRow+i][startCol:endCol]
-          for k in re.finditer('[[\]{}()]', line):
+          for k in re.finditer(kReBrackets, line):
             for f in k.regs:
               window.addStr(i, f[0], line[f[0]:f[1]], curses.color_pair(6))
       if 1:
@@ -1267,7 +1272,7 @@ class TextBuffer(BackingTextBuffer):
         # Highlight numbers.
         for i in range(limit):
           line = self.lines[self.scrollRow+i][startCol:endCol]
-          for k in re.finditer('0x[0-9a-fA-F]+|\d+', line):
+          for k in re.finditer(kReNumbers, line):
             for f in k.regs:
               window.addStr(i, f[0], line[f[0]:f[1]], curses.color_pair(31))
       if self.findRe is not None:
