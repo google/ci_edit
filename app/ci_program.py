@@ -42,7 +42,7 @@ class CiProgram:
     curses.meta(1)
     curses.raw()
     #curses.start_color()
-    #curses.use_default_colors()
+    curses.use_default_colors()
     assert(curses.COLORS == 256)
     assert(curses.can_change_color() == 1)
     assert(curses.has_colors() == 1)
@@ -269,7 +269,7 @@ class CiProgram:
          0,  1,   2,   3,    4,  5,  6,  7,    8,  9, 10, 11,   12, 13, 14, 160,
         94, 134,  18, 240,  138, 21, 22, 23,   24, 25, 26, 27,   28, 29, 30, 57,
       ]
-      light = [111, 230, 228, 221,   255, 254, 253, 14]
+      light = [-1, 230, 228, 221,   255, 254, 253, 14]
       for i in range(1, curses.COLORS):
         curses.init_pair(i, dark[i%len(dark)], light[i/32])
         #curses.init_pair(i, i, i)

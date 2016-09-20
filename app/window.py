@@ -266,7 +266,7 @@ class InputWindow(Window):
       self.rightColumn.colorSelected = curses.color_pair(105)
       cols -= 1
     Window.__init__(self, prg, rows, cols, top, left)
-    self.color = curses.color_pair(18)
+    self.color = curses.color_pair(0)
     self.colorSelected = curses.color_pair(228)
     self.controller = app.editor.MainController(prg, self)
     if header:
