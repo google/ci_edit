@@ -1210,7 +1210,10 @@ class TextBuffer(BackingTextBuffer):
         # Highlight strings.
         for i in range(limit):
           line = self.lines[self.scrollRow+i][startCol:endCol]
-          for k in re.finditer('"[^"]*"|(?<![adegIlnotuwy])\'[^\']*\'', line, re.I):
+          for k in re.finditer(
+              #r"(\"(\\\"|[^\"])*?\")|(?<![adegIlnotuwy])('(\\\'|[^'])*?')",
+              r"(\"\"\".*?(?<!\\)\"\"\")|('''.*?(?<!\\)''')|(\".*?(?<!\\)\")|('.*?(?<!\\)')",
+              line, re.I):
             for f in k.regs:
               window.addStr(i, f[0], line[f[0]:f[1]], curses.color_pair(5))
       if 1:
