@@ -304,6 +304,7 @@ class InteractiveGoto(EditText):
 
   def focus(self):
     self.prg.log('InteractiveGoto.focus')
+    self.textBuffer.selectionAll()
     self.textBuffer.insert(str(self.host.textBuffer.cursorRow+1))
     self.textBuffer.selectionAll()
     EditText.focus(self)
@@ -312,32 +313,24 @@ class InteractiveGoto(EditText):
     self.prg.log('InteractiveGoto command set')
 
   def gotoBottom(self):
-    textBuffer = self.textBuffer
-    textBuffer.selectionAll()
-    textBuffer.insertLines(self.textBuffer,
-        [str(len(self.host.textBuffer.lines))])
-    textBuffer.cursorEndOfLine()
+    self.cursorMoveTo(len(self.host.textBuffer.lines), 0)
+    self.changeToInputWindow()
 
   def gotoHalfway(self):
-    textBuffer = self.textBuffer
-    half = len(self.host.textBuffer.lines)/2+1
-    textBuffer.selectionAll()
-    textBuffer.insertLines(self.textBuffer, [str(half)])
-    textBuffer.cursorEndOfLine()
+    self.cursorMoveTo(len(self.host.textBuffer.lines)/2+1, 0)
+    self.changeToInputWindow()
 
   def gotoTop(self):
-    textBuffer = self.textBuffer
-    textBuffer.selectionAll()
-    textBuffer.insertLines(self.textBuffer, ['1'])
-    textBuffer.cursorEndOfLine()
+    self.cursorMoveTo(1, 0)
+    self.changeToInputWindow()
 
   def cursorMoveTo(self, row, col):
     textBuffer = self.host.textBuffer
     cursorRow = min(max(row - 1, 0), len(textBuffer.lines)-1)
     self.prg.log('cursorMoveTo row', row, cursorRow)
     textBuffer.cursorMove(cursorRow-textBuffer.cursorRow,
-        0-textBuffer.cursorCol,
-        0-textBuffer.goalCol)
+        col-textBuffer.cursorCol,
+        col-textBuffer.goalCol)
     textBuffer.redo()
 
   def onChange(self):
