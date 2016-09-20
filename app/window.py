@@ -197,11 +197,14 @@ class StatusLine(Window):
       statusLine = ' . '
       if tb.isDirty():
         statusLine = ' * '
+      colPercentage = 0
+      if len(tb.lines):
+         colPercentage = tb.cursorCol*100/(len(tb.lines[tb.cursorRow])+1)
       rightSide = '%s | %d,%d %d%%,%d%%'%(
           app.text_buffer.kSelectionModeNames[tb.selectionMode],
           tb.cursorRow+1, tb.cursorCol,
           tb.cursorRow*100/(len(tb.lines)+1),
-          tb.cursorCol*100/(len(tb.lines[tb.cursorRow])+1))
+          colPercentage)
       statusLine += ' '*(maxx-len(statusLine)-len(rightSide)) + rightSide
       self.addStr(0, 0, statusLine, self.color)
       self.cursorWindow.refresh()
