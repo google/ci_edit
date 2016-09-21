@@ -35,6 +35,8 @@ kSelectionModeNames = [
 
 kReBrackets = re.compile('[[\]{}()]')
 kReNumbers = re.compile('0x[0-9a-fA-F]+|\d+')
+kReStrings = re.compile(
+    r"(\"\"\".*?(?<!\\)\"\"\")|('''.*?(?<!\\)''')|(\".*?(?<!\\)\")|('.*?(?<!\\)')")
 kReWordBoundary = re.compile('(?:\w+)|(?:\W+)')
 
 
@@ -1192,14 +1194,12 @@ class TextBuffer(BackingTextBuffer):
         # match this regex (with re.I):  [adegIlnotuwy]'[acdmlsrtv]
         # The prefix part of that is used in the expression below to identify
         # English contractions.
+        # r"(\"(\\\"|[^\"])*?\")|(?<![adegIlnotuwy])('(\\\'|[^'])*?')",
 
         # Highlight strings.
         for i in range(limit):
           line = self.lines[self.scrollRow+i][startCol:endCol]
-          for k in re.finditer(
-              #r"(\"(\\\"|[^\"])*?\")|(?<![adegIlnotuwy])('(\\\'|[^'])*?')",
-              r"(\"\"\".*?(?<!\\)\"\"\")|('''.*?(?<!\\)''')|(\".*?(?<!\\)\")|('.*?(?<!\\)')",
-              line, re.I):
+          for k in re.finditer(kReStrings, line):
             for f in k.regs:
               window.addStr(i, f[0], line[f[0]:f[1]], curses.color_pair(5))
       if 1:
