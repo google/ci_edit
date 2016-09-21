@@ -78,7 +78,6 @@ class CiProgram:
       self.logWindow = app.window.Window(self, maxy-debugRows, debugWidth, debugRows,
           inputWidth+1)
       self.logWindow.setTextBuffer(app.text_buffer.TextBuffer(self))
-
     else:
       inputWidth = maxx
       self.debugWindow = None
@@ -112,7 +111,7 @@ class CiProgram:
         self.debugWindow.color)
     self.debugWindow.addStr(3, 0,
         "ch %3s %s          "
-        %(self.ch, curses.keyname(self.ch)),
+        %(self.ch, app.curses_util.cursesKeyName(self.ch)),
         self.debugWindow.color)
     self.debugWindow.addStr(4, 0,
         "sm %d win %r    "

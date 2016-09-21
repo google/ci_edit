@@ -89,3 +89,10 @@ def mouseButtonName(bstate):
   if bstate & curses.BUTTON_ALT:
     result += ' ALT'
   return result
+
+def cursesKeyName(keyCode):
+  try:
+    return curese.keyname(keyCode)
+  except:
+    pass
+  return 'unknown'
