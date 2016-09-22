@@ -83,7 +83,7 @@ class StaticWindow:
       self.prg.logPrint('error mvwin', top, left, repr(self))
 
   def moveBy(self, top, left):
-    self.prg.log('move')
+    self.prg.log('moveBy', top, left, repr(self))
     if top == 0 and left == 0:
       return
     self.top += top
@@ -98,7 +98,7 @@ class StaticWindow:
     self.resizeTo(rows, cols)
 
   def resizeTo(self, rows, cols):
-    self.prg.log('resize')
+    self.prg.log('resizeTo', rows, cols)
     self.rows = rows
     self.cols = cols
     try:
@@ -107,10 +107,10 @@ class StaticWindow:
       self.prg.logPrint('resize failed', self.rows, self.cols)
 
   def resizeBy(self, rows, cols):
-    self.prg.log('resize')
+    self.prg.log('resizeBy', rows, cols, repr(self))
     self.rows += rows
     self.cols += cols
-    if self.top <= 0 or self.left <= 0:
+    if self.rows <= 0 or self.cols <= 0:
       return
     self.cursorWindow.resize(self.rows, self.cols)
 
