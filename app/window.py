@@ -71,27 +71,47 @@ class StaticWindow:
     self.cursorWindow.refresh()
 
   def moveTo(self, top, left):
-    self.prg.log('move')
+    self.prg.log('move', top, left)
+    if top == self.top and left == self.left:
+      return
     self.top = top
     self.left = left
-    self.cursorWindow.mvwin(self.top, self.left)
+    try:
+      self.cursorWindow.mvwin(self.top, self.left)
+    except:
+      self.prg.log('error mvwin', top, left, repr(self))
+      self.prg.logPrint('error mvwin', top, left, repr(self))
 
   def moveBy(self, top, left):
     self.prg.log('move')
+    if top == 0 and left == 0:
+      return
     self.top += top
     self.left += left
     self.cursorWindow.mvwin(self.top, self.left)
 
+  def reshape(self, rows, cols, top, left):
+    self.prg.logPrint('reshape',
+        self.rows, self.cols, self.top, self.left, "to",
+        rows, cols, top, left, repr(self))
+    self.moveTo(top, left)
+    self.resizeTo(rows, cols)
+
   def resizeTo(self, rows, cols):
     self.prg.log('resize')
-    self.rows += rows
-    self.cols += cols
-    self.cursorWindow.resize(self.rows, self.cols)
+    self.rows = rows
+    self.cols = cols
+    try:
+      self.cursorWindow.resize(self.rows, self.cols)
+    except:
+      self.prg.logPrint('resize failed', self.rows, self.cols)
 
   def resizeBy(self, rows, cols):
     self.prg.log('resize')
     self.rows += rows
     self.cols += cols
+    if self.top <= 0 or self.left <= 0:
+      return
     self.cursorWindow.resize(self.rows, self.cols)
 
   def show(self):
@@ -234,38 +254,30 @@ class InputWindow(Window):
     self.prg = prg
     self.showHeader = header
     if header:
-      self.headerLine = HeaderLine(prg, self, 1, cols, top, left)
+      self.headerLine = HeaderLine(prg, self, 1, 1, 0, 0)
       self.headerLine.color = curses.color_pair(168)
       self.headerLine.colorSelected = curses.color_pair(47)
       self.headerLine.show()
-      rows -= 1
-      top += 1
     self.showFooter = footer
     if footer:
-      findReplaceHeight = 1
-      self.interactiveFind = InteractiveFind(prg, self, findReplaceHeight, cols,
-          top+rows-findReplaceHeight, left)
+      self.interactiveFind = InteractiveFind(prg, self, 1, 1, 0, 0)
       self.interactiveFind.color = curses.color_pair(205)
       self.interactiveFind.colorSelected = curses.color_pair(87)
     if footer:
-      self.statusLine = StatusLine(prg, self, 1, cols, top+rows-1, left)
+      self.statusLine = StatusLine(prg, self, 1, 1, 0, 0)
       self.statusLine.color = curses.color_pair(168)
       self.statusLine.colorSelected = curses.color_pair(47)
       self.statusLine.show()
-      rows -= 1
     self.showLineNumbers = lineNumbers
     if lineNumbers:
-      self.leftColumn = StaticWindow(prg, rows, 7, top, left)
+      self.leftColumn = StaticWindow(prg, 1, 1, 0, 0)
       self.leftColumn.color = curses.color_pair(211)
       self.leftColumn.colorSelected = curses.color_pair(146)
-      cols -= 7
-      left += 7
     if 1:
-      self.rightColumn = StaticWindow(prg, rows, 1, top, left+cols-1)
+      self.rightColumn = StaticWindow(prg, 1, 1, 0, 0)
       self.rightColumn.color = curses.color_pair(18)
       self.rightColumn.colorSelected = curses.color_pair(105)
-      cols -= 1
-    Window.__init__(self, prg, rows, cols, top, left)
+    Window.__init__(self, prg, 1, 1, 0, 0)
     self.color = curses.color_pair(0)
     self.colorSelected = curses.color_pair(228)
     self.controller = app.editor.MainController(prg, self)
@@ -278,6 +290,29 @@ class InputWindow(Window):
         scratchPath = "~/ci_scratch"
         self.headerLine.controller.setFileName(scratchPath)
         self.setTextBuffer(self.prg.bufferManager.loadTextBuffer(scratchPath))
+    self.reshape(rows, cols, top, left)
+
+  def reshape(self, rows, cols, top, left):
+    self.prg.log('reshape', rows, cols, top, left)
+    if self.showHeader:
+      self.headerLine.reshape(1, cols, top, left)
+      rows -= 1
+      top += 1
+    if self.showFooter:
+      findReplaceHeight = 1
+      self.interactiveFind.reshape(findReplaceHeight, cols,
+          top+rows-findReplaceHeight, left)
+    if self.showFooter:
+      self.statusLine.reshape(1, cols, top+rows-1, left)
+      rows -= 1
+    if self.showLineNumbers:
+      self.leftColumn.reshape(rows, 7, top, left)
+      cols -= 7
+      left += 7
+    if 1:
+      self.rightColumn.reshape(rows, 1, top, left+cols-1)
+      cols -= 1
+    Window.reshape(self, rows, cols, top, left)
 
   def drawLineNumbers(self):
     maxy, maxx = self.cursorWindow.getmaxyx()

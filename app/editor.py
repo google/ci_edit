@@ -476,6 +476,7 @@ class CuaEdit(Controller):
       curses.ascii.ESC: textBuffer.selectionNone,
       curses.KEY_DC: textBuffer.delete,
       curses.KEY_MOUSE: self.prg.handleMouse,
+      curses.KEY_RESIZE: self.prg.handleScreenResize,
 
       curses.KEY_F1: self.info,
       curses.KEY_F3: self.testPalette,

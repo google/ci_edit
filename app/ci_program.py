@@ -66,31 +66,37 @@ class CiProgram:
   def startup(self):
     """A second init-like function. Called after command line arguments are
     parsed."""
-    maxy, maxx = self.stdscr.getmaxyx()
     if self.showLogWindow:
-      inputWidth = min(78, maxx)
-      debugWidth = max(maxx-inputWidth-1, 0)
-      debugRows = 10
-
-      self.debugWindow = app.window.StaticWindow(self, debugRows, debugWidth, 0,
-          inputWidth+1)
+      self.debugWindow = app.window.StaticWindow(self, 0, 1, 0, 0)
       self.zOrder += [
         self.debugWindow,
       ]
-      self.logWindow = app.window.Window(self, maxy-debugRows, debugWidth, debugRows,
-          inputWidth+1)
+      self.logWindow = app.window.Window(self, 1, 1, 0, 0)
       self.logWindow.setTextBuffer(app.text_buffer.TextBuffer(self))
     else:
-      inputWidth = maxx
       self.debugWindow = None
       self.logWindow = None
       self.paletteWindow = None
     self.paletteWindow = app.window.PaletteWindow(self)
-
-    self.inputWindow = app.window.InputWindow(self, maxy, inputWidth, 0, 0, True, True,
+    self.inputWindow = app.window.InputWindow(self, 10, 10, 0, 0, True, True,
         True)
-    self.log('db', self.debugWindow)
-    self.log('in', self.inputWindow)
+    self.layout()
+
+  def layout(self):
+    """"""
+    rows, cols = self.stdscr.getmaxyx()
+    logPrint('layout', rows, cols)
+    if self.showLogWindow:
+      inputWidth = min(78, cols)
+      debugWidth = max(cols-inputWidth-1, 0)
+      debugRows = 10
+      self.debugWindow.reshape(debugRows, debugWidth, 0,
+          inputWidth+1)
+      self.logWindow.reshape(rows-debugRows, debugWidth, debugRows,
+          inputWidth+1)
+    else:
+      inputWidth = cols
+    self.inputWindow.reshape(rows, inputWidth, 0, 0)
 
   def debugDraw(self, win):
     """Draw real-time debug information to the screen."""
@@ -195,6 +201,10 @@ class CiProgram:
         self.savedMouseY = mousey
         return
     self.log('click landed on screen')
+
+  def handleScreenResize(self):
+    self.log('handleScreenResize')
+    self.layout()
 
   def logNoRefresh(self, *args):
     """Most code will want the log() function rather than this one. This is
