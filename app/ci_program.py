@@ -46,16 +46,18 @@ class CiProgram:
     assert(curses.COLORS == 256)
     assert(curses.can_change_color() == 1)
     assert(curses.has_colors() == 1)
-    logPrint("color_content:")
-    for i in range(0, curses.COLORS):
-      logPrint("color", i, ": ", curses.color_content(i))
+    if 0:
+      logPrint("color_content:")
+      for i in range(0, curses.COLORS):
+        logPrint("color", i, ": ", curses.color_content(i))
     #for i in range(1, curses.COLORS):
     #  curses.init_color(i, 1000, 0, 0)
     for i in range(16, curses.COLORS):
       curses.init_color(i, 500, 500, i*787%1000)
-    logPrint("color_content, after:")
-    for i in range(0, curses.COLORS):
-      logPrint("color", i, ": ", curses.color_content(i))
+    if 0:
+      logPrint("color_content, after:")
+      for i in range(0, curses.COLORS):
+        logPrint("color", i, ": ", curses.color_content(i))
     self.showPalette = 0
     self.shiftPalette()
 
@@ -212,6 +214,9 @@ class CiProgram:
       return
     self.logNoRefresh(*args)
     self.logWindow.refresh()
+
+  def logPrint(self, *args):
+    logPrint(*args)
 
   def parseArgs(self):
     """Interpret the command line arguments."""
