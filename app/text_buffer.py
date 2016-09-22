@@ -1016,6 +1016,8 @@ class BackingTextBuffer(Selectable):
         self.markerRow += change[1][5]
         self.markerCol += change[1][6]
         self.selectionMode += change[1][7]
+        if self.redoIndex == 1:
+          self.savedAtRedoIndex = 1
       elif change[0] == 'n':
         # Split lines.
         line = self.lines[self.cursorRow]
