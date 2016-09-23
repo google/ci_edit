@@ -130,7 +130,20 @@ def init_windows_clipboard():
                     count = len(text) + 1
                     handle = safeGlobalAlloc(GMEM_MOVEABLE,
                                              count * sizeof(c_wchar))
+                    if not handle:
+                        # This might not ever happen. It won't happen
+                        # if get_errno() is set. Still, I'm concerned
+                        # with security, so the check is here.
+                        return
                     locked_handle = safeGlobalLock(handle)
+                    if not locked_handle:
+                        # This might not ever happen. It won't happen
+                        # if get_errno() is set.
+                        # If this were to happen, then this could
+                        # leak 'handle', from ealier. My concern is
+                        # security rather than a leak, so I'm
+                        # leaving the possilbe leak for another day.
+                        return
 
                     ctypes.memmove(c_wchar_p(locked_handle), c_wchar_p(text), count * sizeof(c_wchar))
 
