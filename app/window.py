@@ -197,6 +197,19 @@ class InteractiveFind(Window):
     self.host = host
     self.setTextBuffer(app.text_buffer.TextBuffer(prg))
     self.controller = app.editor.InteractiveFind(prg, self, self.textBuffer)
+    self.leftColumn = StaticWindow(prg, 1, 0, 0, 0)
+    self.leftColumn.color = curses.color_pair(211)
+    self.leftColumn.colorSelected = curses.color_pair(146)
+
+  def refresh(self):
+    self.leftColumn.addStr(0, 0, "find:", self.color)
+    self.leftColumn.cursorWindow.refresh()
+    Window.refresh(self)
+
+  def reshape(self, rows, cols, top, left):
+    labelWidth = 5
+    Window.reshape(self, rows, cols-labelWidth, top, left+labelWidth)
+    self.leftColumn.reshape(rows, labelWidth, top, left)
 
 
 class StatusLine(Window):
@@ -301,10 +314,13 @@ class InputWindow(Window):
       self.headerLine.reshape(1, cols, top, left)
       rows -= 1
       top += 1
-    if self.showFooter:
+    if 1:
       findReplaceHeight = 1
+      topOfFind = top+rows-findReplaceHeight
+      if self.showFooter:
+        topOfFind -= 1
       self.interactiveFind.reshape(findReplaceHeight, cols,
-          top+rows-findReplaceHeight, left)
+          topOfFind, left)
     if self.showFooter:
       self.statusLine.reshape(1, cols, top+rows-1, left)
       rows -= 1

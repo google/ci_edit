@@ -242,6 +242,7 @@ class InteractiveFind(EditText):
       curses.KEY_MOUSE: self.changeToInputWindow,
       curses.KEY_UP: self.findPrior,
     })
+    self.height = 1
 
   def findNext(self):
     self.findCmd = self.document.textBuffer.findNext
@@ -251,9 +252,9 @@ class InteractiveFind(EditText):
 
   def focus(self):
     self.document.statusLine.hide()
-    self.document.resizeBy(-2, 0)
-    self.host.moveBy(-2, 0)
-    self.host.resizeBy(2, 0)
+    self.document.resizeBy(-self.height, 0)
+    #self.host.moveBy(-self.height, 0)
+    #self.host.resizeBy(self.height-1, 0)
     EditText.focus(self)
     self.findCmd = self.document.textBuffer.find
     selection = self.document.textBuffer.getSelectedText(
@@ -280,9 +281,9 @@ class InteractiveFind(EditText):
 
   def unfocus(self):
     self.prg.log('unfocus Find')
-    self.document.resizeBy(2, 0)
-    self.host.resizeBy(-2, 0)
-    self.host.moveBy(2, 0)
+    self.document.resizeBy(self.height, 0)
+    #self.host.resizeBy(-self.height, 0)
+    #self.host.moveBy(self.height, 0)
     self.document.statusLine.show()
 
 
