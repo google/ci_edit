@@ -2,6 +2,7 @@
 # Use of this source code is governed by an Apache-style license that can be
 # found in the LICENSE file.
 
+import third_party.pyperclip as clipboard
 import curses.ascii
 import os
 import re
@@ -525,6 +526,7 @@ class BackingTextBuffer(Selectable):
     text = self.getSelectedText(self)
     if len(text):
       self.clipList.append(text)
+      clipboard.copy("\n".join(text))
 
   def editCut(self):
     text = self.getSelectedText(self)
@@ -534,12 +536,17 @@ class BackingTextBuffer(Selectable):
       self.redo()
 
   def editPaste(self):
-    if len(self.clipList):
+    osClip = clipboard.paste()
+    if len(self.clipList or osClip):
       if self.selectionMode != kSelectionNone:
         self.redoAddChange(('ds', self.getSelection(),
             self.getSelectedText(self)))
         self.redo()
-      self.redoAddChange(('v', self.clipList[-1]))
+      if osClip:
+        clip = tuple(osClip.split("\n"))
+      else:
+        clip = self.clipList[-1]
+      self.redoAddChange(('v', clip))
       self.redo()
     else:
       self.prg.log('clipList empty')
