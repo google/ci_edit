@@ -532,6 +532,7 @@ class BackingTextBuffer(Selectable):
     text = self.getSelectedText(self)
     if len(text):
       self.clipList.append(text)
+      clipboard.copy("\n".join(text))
       self.redoAddChange(('ds', self.getSelection(), text))
       self.redo()
 
