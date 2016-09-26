@@ -346,9 +346,12 @@ class BackingTextBuffer(Selectable):
     self.redo()
     if 1: # todo: if indent on CR
       line = self.lines[self.cursorRow-1]
+      commonIndent = 2
       indent = 0
       while indent < len(line) and line[indent] == ' ':
         indent += 1
+      if len(line) and line[-1] == ':':
+        indent += commonIndent
       if indent:
         self.redoAddChange(('i', ' '*indent));
         self.redo()
