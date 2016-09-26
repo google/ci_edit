@@ -324,7 +324,12 @@ class BackingTextBuffer(Selectable):
     self.cursorRow += 1
 
   def isDirty(self):
-    return self.savedAtRedoIndex != self.redoIndex
+    clean = (self.savedAtRedoIndex == self.redoIndex or
+        (self.redoIndex + 1 == self.savedAtRedoIndex and
+        self.redoChain[self.redoIndex][0] == 'm') or
+        (self.redoIndex - 1 == self.savedAtRedoIndex and
+        self.redoChain[self.redoIndex-1][0] == 'm'))
+    return not clean
 
   def backspace(self):
     if self.selectionMode != kSelectionNone:
@@ -1031,8 +1036,6 @@ class BackingTextBuffer(Selectable):
         self.markerRow += change[1][5]
         self.markerCol += change[1][6]
         self.selectionMode += change[1][7]
-        if self.redoIndex == 1:
-          self.savedAtRedoIndex = 1
       elif change[0] == 'n':
         # Split lines.
         line = self.lines[self.cursorRow]
