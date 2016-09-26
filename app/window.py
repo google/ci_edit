@@ -195,6 +195,7 @@ class InteractiveFind(Window):
   def __init__(self, prg, host, rows, cols, top, left):
     Window.__init__(self, prg, rows, cols, top, left)
     self.host = host
+    self.label = "find: "
     self.setTextBuffer(app.text_buffer.TextBuffer(prg))
     self.controller = app.editor.InteractiveFind(prg, self, self.textBuffer)
     self.leftColumn = StaticWindow(prg, 1, 0, 0, 0)
@@ -202,12 +203,12 @@ class InteractiveFind(Window):
     self.leftColumn.colorSelected = curses.color_pair(146)
 
   def refresh(self):
-    self.leftColumn.addStr(0, 0, "find:", self.color)
+    self.leftColumn.addStr(0, 0, self.label, self.color)
     self.leftColumn.cursorWindow.refresh()
     Window.refresh(self)
 
   def reshape(self, rows, cols, top, left):
-    labelWidth = 5
+    labelWidth = len(self.label)
     Window.reshape(self, rows, cols-labelWidth, top, left+labelWidth)
     self.leftColumn.reshape(rows, labelWidth, top, left)
 
