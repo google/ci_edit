@@ -1145,6 +1145,7 @@ class TextBuffer(BackingTextBuffer):
       'or',
       'raise',
       'range',
+      'return',
       'then',
       'True',
       'try',
