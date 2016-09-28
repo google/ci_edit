@@ -1144,6 +1144,7 @@ class TextBuffer(BackingTextBuffer):
       'None',
       'not',
       'or',
+      'pass',
       'raise',
       'range',
       'return',
