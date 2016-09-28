@@ -9,6 +9,7 @@ import re
 import sys
 import traceback
 
+
 # No selection.
 kSelectionNone = 0
 # Entire document selected.
@@ -326,9 +327,9 @@ class BackingTextBuffer(Selectable):
   def isDirty(self):
     clean = (self.savedAtRedoIndex == self.redoIndex or
         (self.redoIndex + 1 == self.savedAtRedoIndex and
-        self.redoChain[self.redoIndex][0] == 'm') or
+          self.redoChain[self.redoIndex][0] == 'm') or
         (self.redoIndex - 1 == self.savedAtRedoIndex and
-        self.redoChain[self.redoIndex-1][0] == 'm'))
+          self.redoChain[self.redoIndex-1][0] == 'm'))
     return not clean
 
   def backspace(self):
@@ -584,9 +585,7 @@ class BackingTextBuffer(Selectable):
       self.lines = self.data.split('\n')
     if len(self.lines) == 1:
       self.lines = self.data.split('\r')
-    #self.lines[0] += "\x00\x01\x1f\x7f\xff"
     self.lines = [re.sub('([\0-\x1f\x7f-\xff])', parse, i) for i in self.lines]
-    #self.prg.log('lines', len(self.lines), self)
     self.savedAtRedoIndex = self.redoIndex
 
   def fileLoad(self, path):

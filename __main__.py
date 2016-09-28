@@ -1,5 +1,4 @@
+import app.ci_program
 
-import ci
-import curses
-
-curses.wrapper(ci.run_ci)
+# This command will run if the module is executed as "python ci_edit".
+app.ci_program.run_ci()

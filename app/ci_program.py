@@ -4,14 +4,11 @@
 # found in the LICENSE file.
 
 import app.curses_util
-#import app.editor
 import app.text_buffer
 import app.window
 import sys
 import curses
 import time
-#import traceback
-#import os
 
 
 globalPrintLog = "--- begin log ---\n"
@@ -44,21 +41,19 @@ class CiProgram:
     print '\033[?1002;h'
     #print '\033[?1005;h'
     curses.meta(1)
+    # Access ^c before shell does.
     curses.raw()
     #curses.start_color()
     curses.use_default_colors()
-    assert(curses.COLORS == 256)
-    assert(curses.can_change_color() == 1)
-    assert(curses.has_colors() == 1)
     if 0:
+      assert(curses.COLORS == 256)
+      assert(curses.can_change_color() == 1)
+      assert(curses.has_colors() == 1)
       logPrint("color_content:")
       for i in range(0, curses.COLORS):
         logPrint("color", i, ": ", curses.color_content(i))
-    #for i in range(1, curses.COLORS):
-    #  curses.init_color(i, 1000, 0, 0)
-    for i in range(16, curses.COLORS):
-      curses.init_color(i, 500, 500, i*787%1000)
-    if 0:
+      for i in range(16, curses.COLORS):
+        curses.init_color(i, 500, 500, i*787%1000)
       logPrint("color_content, after:")
       for i in range(0, curses.COLORS):
         logPrint("color", i, ": ", curses.color_content(i))
@@ -72,9 +67,7 @@ class CiProgram:
     parsed."""
     if self.showLogWindow:
       self.debugWindow = app.window.StaticWindow(self, 0, 1, 0, 0)
-      self.zOrder += [
-        self.debugWindow,
-      ]
+      self.zOrder += [self.debugWindow]
       self.logWindow = app.window.Window(self, 1, 1, 0, 0)
       self.logWindow.setTextBuffer(app.text_buffer.TextBuffer(self))
     else:
@@ -87,7 +80,7 @@ class CiProgram:
     self.layout()
 
   def layout(self):
-    """"""
+    """Arrange the debug, log, and input windows."""
     rows, cols = self.stdscr.getmaxyx()
     #logPrint('layout', rows, cols)
     if self.showLogWindow:
@@ -258,10 +251,6 @@ class CiProgram:
 
   def refresh(self):
     """Repaint stacked windows, furthest to nearest."""
-    if 0:
-      self.zOrder[-1].refresh()
-      return
-    #self.log('-'*80)
     for i,k in enumerate(self.zOrder):
       #self.log("[[%d]] %r"%(i, k))
       k.refresh()
@@ -271,14 +260,10 @@ class CiProgram:
     self.startup()
     self.changeTo = self.inputWindow
     while not self.exiting:
-      # try:
-        #self.log(self.changeTo.__name__)
         win = self.changeTo
         self.changeTo = None
         win.focus()
         win.unfocus()
-      # except:
-      #   self.log('exception')
 
   def shiftPalette(self):
     """Test different palette options. Each call to shiftPalette will change the
@@ -286,14 +271,12 @@ class CiProgram:
     self.showPalette = (self.showPalette+1)%3
     if self.showPalette == 1:
       dark = [
-        #1,   2,   3,   4,    5,  7,  8,  9,   10, 11, 57, 12,   12, 13, 14, 15,
-         0,  1,   2,   3,    4,  5,  6,  7,    8,  9, 10, 11,   12, 13, 14, 160,
-        94, 134,  18, 240,  138, 21, 22, 23,   24, 25, 26, 27,   28, 29, 30, 57,
+        0,   1,   2,   3,    4,   5,  6,  7,    8,  9, 10, 11,   12, 13, 14,  15,
+        94, 134,  18, 240, 138,  21, 22, 23,   24, 25, 26, 27,   28, 29, 30,  57,
       ]
       light = [-1, 230, 228, 221,   255, 254, 253, 14]
       for i in range(1, curses.COLORS):
         curses.init_pair(i, dark[i%len(dark)], light[i/32])
-        #curses.init_pair(i, i, i)
     elif self.showPalette == 2:
       for i in range(1, curses.COLORS):
         curses.init_pair(i, i, 231)
