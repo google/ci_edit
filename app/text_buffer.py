@@ -4,6 +4,7 @@
 
 import app.log
 import app.selectable
+import app.prefs
 import third_party.pyperclip as clipboard
 import curses.ascii
 import os
