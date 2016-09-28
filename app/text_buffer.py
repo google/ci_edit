@@ -191,14 +191,18 @@ class Selectable:
       buffer.log('selection mode not recognized', self.selectionMode)
 
   def selectUpper(self):
+    """Select the earlier (or upper-left most) of the cursor or marker."""
     self.cursorRow, self.cursorCol, a,b = self.startAndEnd()
     self.selectionMode = kSelectionNone
 
   def selectLower(self):
+    """Select the latter (or lower-right most) of the cursor or marker."""
     a,b, self.cursorRow, self.cursorCol = self.startAndEnd()
     self.selectionMode = kSelectionNone
 
   def startAndEnd(self):
+    """Get the marker and cursor pair as the ealier of the two then the later
+    of the two. The result accounts for the current selection mode."""
     upperRow = 0
     upperCol = 0
     lowerRow = 0
@@ -265,6 +269,8 @@ class Selectable:
     return (upperRow, upperCol, lowerRow, lowerCol)
 
   def highlight(self, maxRow, maxCol):
+    """Draw the selected text with a color highlight. The selection mode is
+    accounted for."""
     upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
     selStartCol = max(upperCol - startCol, 0)
     selEndCol = min(lowerCol - startCol, maxCol)
@@ -305,6 +311,8 @@ class Selectable:
 
 
 class BackingTextBuffer(Selectable):
+  """This base class to TextBuffer handles the text manipulation (without
+  handling the drawing/rendering of the text."""
   def __init__(self, prg):
     Selectable.__init__(self)
     self.prg = prg
@@ -1121,8 +1129,10 @@ class BackingTextBuffer(Selectable):
 
 
 class TextBuffer(BackingTextBuffer):
+  """The TextBuffer adds the drawing/rendering to the BackingTextBuffer."""
   def __init__(self, prg):
     BackingTextBuffer.__init__(self, prg)
+    #todo(dschuyler): move keywords out to a data file.
     self.highlightKeywords = [
       'and',
       'break',
@@ -1177,6 +1187,7 @@ class TextBuffer(BackingTextBuffer):
     self.highlightRe = re.compile(keywords)
 
   def scrollToCursor(self, window):
+    """Move the selected view rectangle so that the cursor is visible."""
     maxy, maxx = window.cursorWindow.getmaxyx() #hack
     rows = 0
     if self.scrollRow > self.cursorRow:
