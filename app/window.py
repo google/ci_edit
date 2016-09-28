@@ -91,9 +91,9 @@ class StaticWindow:
     self.cursorWindow.mvwin(self.top, self.left)
 
   def reshape(self, rows, cols, top, left):
-    self.prg.logPrint('reshape',
-        self.rows, self.cols, self.top, self.left, "to",
-        rows, cols, top, left, repr(self))
+    #self.prg.logPrint('reshape',
+    #    self.rows, self.cols, self.top, self.left, "to",
+    #    rows, cols, top, left, repr(self))
     self.moveTo(top, left)
     self.resizeTo(rows, cols)
 

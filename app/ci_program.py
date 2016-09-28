@@ -13,7 +13,11 @@ import time
 #import traceback
 #import os
 
-globalPrintLog = "--- begin log ---"
+
+globalPrintLog = "--- begin log ---\n"
+shouldWritePrintLog = False
+
+
 def logPrint(*args):
   global globalPrintLog
   msg = str(args[0])
@@ -85,7 +89,7 @@ class CiProgram:
   def layout(self):
     """"""
     rows, cols = self.stdscr.getmaxyx()
-    logPrint('layout', rows, cols)
+    #logPrint('layout', rows, cols)
     if self.showLogWindow:
       inputWidth = min(78, cols)
       debugWidth = max(cols-inputWidth-1, 0)
@@ -238,6 +242,9 @@ class CiProgram:
       if not takeAll and i[:2] == '--':
         self.debugRedo = self.debugRedo or i == '--debugRedo'
         self.showLogWindow = self.showLogWindow or i == '--log'
+        global shouldWritePrintLog
+        shouldWritePrintLog = shouldWritePrintLog or i == '--logPrint'
+        shouldWritePrintLog = shouldWritePrintLog or i == '--p'
         if i == '--':
           # All remaining args are file paths.
           takeAll = True
@@ -301,7 +308,8 @@ def wrapped_ci(stdscr):
 def run_ci():
   global globalPrintLog
   curses.wrapper(wrapped_ci)
-  print globalPrintLog
+  if shouldWritePrintLog:
+    print globalPrintLog
 
 if __name__ == '__main__':
   run_ci()
