@@ -901,6 +901,8 @@ class BackingTextBuffer(Selectable):
   def undo(self):
     if self.redoIndex > 0:
       self.redoIndex -= 1
+      if self.redoIndex < self.savedAtRedoIndex:
+        self.savedAtRedoIndex = None
       change = self.redoChain[self.redoIndex]
       if self.debugRedo:
         self.prg.log('undo', self.redoIndex, repr(change))
