@@ -239,7 +239,7 @@ class StatusLine(Window):
          colPercentage = tb.cursorCol*100/(len(tb.lines[tb.cursorRow])+1)
       rightSide = '%s | %4d,%2d | %3d%%,%3d%%'%(
           app.text_buffer.kSelectionModeNames[tb.selectionMode],
-          tb.cursorRow+1, tb.cursorCol,
+          tb.cursorRow+1, tb.cursorCol+1,
           rowPercentage,
           colPercentage)
       statusLine += ' '*(maxx-len(statusLine)-len(rightSide)) + rightSide
