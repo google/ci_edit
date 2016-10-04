@@ -1132,6 +1132,7 @@ class TextBuffer(BackingTextBuffer):
   """The TextBuffer adds the drawing/rendering to the BackingTextBuffer."""
   def __init__(self, prg):
     BackingTextBuffer.__init__(self, prg)
+    self.lineLimitIndicator = 80
     #todo(dschuyler): move keywords out to a data file.
     self.highlightKeywords = [
       'and',
@@ -1312,15 +1313,16 @@ class TextBuffer(BackingTextBuffer):
           for k in re.finditer(kReNumbers, line):
             for f in k.regs:
               window.addStr(i, f[0], line[f[0]:f[1]], curses.color_pair(31))
-      if endCol >= 80:
+      lengthLimit = self.lineLimitIndicator
+      if endCol >= lengthLimit:
         # Highlight long lines.
         for i in range(limit):
           line = self.lines[self.scrollRow+i]
-          if len(line) < 80:
+          if len(line) < lengthLimit:
             continue
-          length = min(endCol, len(line)-80)
-          window.addStr(i, 80-startCol, line[80:endCol],
-              curses.color_pair(31))
+          length = min(endCol, len(line)-lengthLimit)
+          window.addStr(i, lengthLimit-startCol, line[lengthLimit:endCol],
+              curses.color_pair(224))
       if self.findRe is not None:
         # Highlight find.
         for i in range(limit):
