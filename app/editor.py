@@ -524,6 +524,18 @@ class CuaEdit(Controller):
       curses.KEY_SLEFT: textBuffer.cursorSelectLeft,
       curses.KEY_SRIGHT: textBuffer.cursorSelectRight,
       curses.KEY_UP: textBuffer.cursorUp,
+
+      KEY_SHIFT_DOWN: textBuffer.cursorSelectDown,
+      KEY_SHIFT_UP: textBuffer.cursorSelectUp,
+
+      KEY_CTRL_DOWN: textBuffer.cursorDownScroll,
+      KEY_CTRL_SHIFT_DOWN: textBuffer.cursorSelectDownScroll,
+      KEY_CTRL_LEFT: textBuffer.cursorMoveWordLeft,
+      KEY_CTRL_SHIFT_LEFT: textBuffer.cursorSelectWordLeft,
+      KEY_CTRL_RIGHT: textBuffer.cursorMoveWordRight,
+      KEY_CTRL_SHIFT_RIGHT: textBuffer.cursorSelectWordRight,
+      KEY_CTRL_UP: textBuffer.cursorUpScroll,
+      KEY_CTRL_SHIFT_UP: textBuffer.cursorSelectUpScroll,
     }
 
   def focus(self):

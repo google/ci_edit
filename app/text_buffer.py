@@ -388,9 +388,13 @@ class BackingTextBuffer(Selectable):
     return lineLen - self.cursorCol
 
   def cursorDown(self):
-    if self.cursorRow+1 < len(self.lines):
-      self.cursorMove(1, self.cursorColDelta(self.cursorRow+1), 0)
-      self.redo()
+    self.selectionNone()
+    self.cursorMoveDown()
+
+  def cursorDownScroll(self):
+    #todo:
+    self.selectionNone()
+    self.cursorMoveDown()
 
   def cursorLeft(self):
     self.selectionNone()
@@ -420,6 +424,11 @@ class BackingTextBuffer(Selectable):
     self.redoAddChange(('m', (rowDelta, colDelta, goalColDelta, scrollRowDelta,
         scrollColDelta,0,0,0)))
 
+  def cursorMoveDown(self):
+    if self.cursorRow+1 < len(self.lines):
+      self.cursorMove(1, self.cursorColDelta(self.cursorRow+1), 0)
+      self.redo()
+
   def cursorMoveLeft(self):
     if self.cursorCol > 0:
       self.cursorMove(0, -1, self.cursorCol-1 - self.goalCol)
@@ -440,9 +449,62 @@ class BackingTextBuffer(Selectable):
           self.cursorCol - self.goalCol)
       self.redo()
 
+  def cursorMoveUp(self):
+    if self.cursorRow > 0:
+      lineLen = len(self.lines[self.cursorRow-1])
+      if self.goalCol <= lineLen:
+        self.cursorMove(-1, self.goalCol - self.cursorCol, 0)
+        self.redo()
+      else:
+        self.cursorMove(-1, lineLen - self.cursorCol, 0)
+        self.redo()
+
+  def cursorMoveWordLeft(self):
+    if self.cursorCol > 0:
+      line = self.lines[self.cursorRow]
+      pos = self.cursorCol
+      for segment in re.finditer(kReWordBoundary, line):
+        if segment.start() < pos <= segment.end():
+          pos = segment.start()
+          break
+      self.cursorMove(0, pos-self.cursorCol, pos-self.cursorCol - self.goalCol)
+      self.redo()
+    elif self.cursorRow > 0:
+      self.cursorMove(-1, len(self.lines[self.cursorRow-1]),
+          self.cursorCol - self.goalCol)
+      self.redo()
+
+  def cursorMoveWordRight(self):
+    if not self.lines:
+      return
+    if self.cursorCol < len(self.lines[self.cursorRow]):
+      line = self.lines[self.cursorRow]
+      pos = self.cursorCol
+      for segment in re.finditer(kReWordBoundary, line):
+        if segment.start() <= pos < segment.end():
+          pos = segment.end()
+          break
+      self.cursorMove(0, pos-self.cursorCol, pos-self.cursorCol - self.goalCol)
+      self.redo()
+    elif self.cursorRow+1 < len(self.lines):
+      self.cursorMove(1, -len(self.lines[self.cursorRow]),
+          self.cursorCol - self.goalCol)
+      self.redo()
+
   def cursorRight(self):
     self.selectionNone()
     self.cursorMoveRight()
+
+  def cursorSelectDown(self):
+    if self.selectionMode == kSelectionNone:
+      self.selectionCharacter()
+    self.cursorMoveDown()
+
+  def cursorSelectDownScroll(self):
+    #todo:
+    if self.selectionMode == kSelectionNone:
+      self.selectionCharacter()
+    self.cursorMoveDown()
 
   def cursorSelectLeft(self):
     if self.selectionMode == kSelectionNone:
@@ -453,6 +515,27 @@ class BackingTextBuffer(Selectable):
     if self.selectionMode == kSelectionNone:
       self.selectionCharacter()
     self.cursorMoveRight()
+
+  def cursorSelectWordLeft(self):
+    if self.selectionMode == kSelectionNone:
+      self.selectionCharacter()
+    self.cursorMoveWordLeft()
+
+  def cursorSelectWordRight(self):
+    if self.selectionMode == kSelectionNone:
+      self.selectionCharacter()
+    self.cursorMoveWordRight()
+
+  def cursorSelectUp(self):
+    if self.selectionMode == kSelectionNone:
+      self.selectionCharacter()
+    self.cursorMoveUp()
+
+  def cursorSelectUpScroll(self):
+    #todo:
+    if self.selectionMode == kSelectionNone:
+      self.selectionCharacter()
+    self.cursorMoveUp()
 
   def cursorEndOfLine(self):
     lineLen = len(self.lines[self.cursorRow])
@@ -502,14 +585,13 @@ class BackingTextBuffer(Selectable):
     self.redo()
 
   def cursorUp(self):
-    if self.cursorRow > 0:
-      lineLen = len(self.lines[self.cursorRow-1])
-      if self.goalCol <= lineLen:
-        self.cursorMove(-1, self.goalCol - self.cursorCol, 0)
-        self.redo()
-      else:
-        self.cursorMove(-1, lineLen - self.cursorCol, 0)
-        self.redo()
+    self.selectionNone()
+    self.cursorMoveUp()
+
+  def cursorUpScroll(self):
+    #todo:
+    self.selectionNone()
+    self.cursorMoveUp()
 
   def delCh(self):
     line = self.lines[self.cursorRow]

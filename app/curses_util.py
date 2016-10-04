@@ -39,6 +39,18 @@ CTRL_CLOSE_BRACKET = 0x1d  # ^]
 CTRL_CARROT = 0x1e  # ^^
 CTRL_UNDERBAR = 0x1f  # ^_
 
+KEY_CTRL_DOWN = 521
+KEY_CTRL_SHIFT_DOWN = 522
+KEY_CTRL_LEFT = 541
+KEY_CTRL_SHIFT_LEFT = 542
+KEY_CTRL_RIGHT = 556
+KEY_CTRL_SHIFT_RIGHT = 557
+KEY_CTRL_UP = 562
+KEY_CTRL_SHIFT_UP = 563
+
+KEY_SHIFT_DOWN = 336
+KEY_SHIFT_UP = 337
+
 
 def mouseButtonName(bstate):
   """Curses debugging. Prints readable name for state of mouse buttons."""
