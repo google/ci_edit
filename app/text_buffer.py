@@ -1312,6 +1312,15 @@ class TextBuffer(BackingTextBuffer):
           for k in re.finditer(kReNumbers, line):
             for f in k.regs:
               window.addStr(i, f[0], line[f[0]:f[1]], curses.color_pair(31))
+      if endCol >= 80:
+        # Highlight long lines.
+        for i in range(limit):
+          line = self.lines[self.scrollRow+i]
+          if len(line) < 80:
+            continue
+          length = min(endCol, len(line)-80)
+          window.addStr(i, 80-startCol, line[80:endCol],
+              curses.color_pair(31))
       if self.findRe is not None:
         # Highlight find.
         for i in range(limit):
