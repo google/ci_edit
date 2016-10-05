@@ -183,7 +183,7 @@ class Selectable:
         self.cursorRow += 1
       self.goalCol = self.cursorCol
     elif self.selectionMode == kSelectionLine:
-      for line in lines:
+      for line in lines[:-1]:
         buffer.lines.insert(self.cursorRow, line)
         self.cursorRow += 1
       self.goalCol = self.cursorCol
@@ -1009,6 +1009,7 @@ class BackingTextBuffer(Selectable):
         self.selectionMode = change[1][-1]
         self.insertLines(self, change[2])
         self.setSelection(change[1])
+        self.cursorCol = 0
         self.goalCol = self.cursorCol
       elif change[0] == 'i':
         line = self.lines[self.cursorRow]
