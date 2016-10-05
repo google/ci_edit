@@ -1400,11 +1400,11 @@ class TextBuffer(BackingTextBuffer):
         # Highlight long lines.
         for i in range(limit):
           line = self.lines[self.scrollRow+i]
-          if len(line) < lengthLimit:
+          if len(line) < lengthLimit or startCol > lengthLimit:
             continue
           length = min(endCol, len(line)-lengthLimit)
           window.addStr(i, lengthLimit-startCol, line[lengthLimit:endCol],
-              curses.color_pair(224))
+              curses.color_pair(96))
       if self.findRe is not None:
         # Highlight find.
         for i in range(limit):
