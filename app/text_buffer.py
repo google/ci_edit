@@ -236,7 +236,7 @@ class Selectable:
       upperRow = min(self.markerRow, self.cursorRow)
       upperCol = 0
       lowerRow = max(self.markerRow, self.cursorRow)
-      lowerCol = sys.maxint
+      lowerCol = 0
     elif self.selectionMode == kSelectionWord:
       upperRow = self.markerRow
       upperCol = self.markerCol
