@@ -1228,6 +1228,7 @@ class TextBuffer(BackingTextBuffer):
       'except',
       'except',
       'False',
+      'for',
       'from',
       'function',
       'global',
