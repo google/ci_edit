@@ -877,6 +877,11 @@ class BackingTextBuffer(Selectable):
     self.cursorMove(row - self.cursorRow, col - self.cursorCol,
         col - self.goalCol)
     self.redo()
+    if self.selectionMode == kSelectionWord:
+      if self.cursorRow < self.markerRow or self.cursorCol < self.markerCol:
+        self.cursorSelectWordLeft()
+      else:
+        self.cursorSelectWordRight()
 
   def mouseTripleClick(self, row, col, shift, ctrl, alt):
     self.prg.log('triple click', row, col)
@@ -950,6 +955,7 @@ class BackingTextBuffer(Selectable):
     row = max(0, min(row, len(self.lines)-1))
     col = max(0, min(col, len(self.lines[row])-1))
     self.selectText(row, col, 0, kSelectionWord)
+    self.cursorSelectWordRight()
 
   def splitLine(self):
     """split the line into two at current column."""
@@ -1009,7 +1015,6 @@ class BackingTextBuffer(Selectable):
         self.selectionMode = change[1][-1]
         self.insertLines(self, change[2])
         self.setSelection(change[1])
-        self.cursorCol = 0
         self.goalCol = self.cursorCol
       elif change[0] == 'i':
         line = self.lines[self.cursorRow]
@@ -1449,7 +1454,7 @@ class TextBuffer(BackingTextBuffer):
               pass
         elif self.selectionMode == kSelectionLine:
           for i in range(start, end+1):
-            line = self.lines[self.scrollRow+i][selStartCol:selEndCol]
+            line = self.lines[self.scrollRow+i][selStartCol:maxx]
             window.addStr(i, selStartCol,
                 line+' '*(maxx-len(line)), window.colorSelected)
       for i in range(limit, maxy):
