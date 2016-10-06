@@ -85,18 +85,22 @@ class BufferManager:
 
 class Selectable:
   def __init__(self):
-    self.markerRow = 0
-    self.markerCol = 0
     self.cursorRow = 0
     self.cursorCol = 0
+    self.markerRow = 0
+    self.markerCol = 0
+    self.markerEndRow = 0
+    self.markerEndCol = 0
     self.selectionMode = kSelectionNone
 
   def getSelection(self):
     upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
-    return (upperRow, upperCol, lowerRow, lowerCol, self.selectionMode)
+    return (self.cursorRow, self.cursorCol, upperRow, upperCol,
+        lowerRow, lowerCol, self.selectionMode)
 
   def setSelection(self, other):
-    (self.markerRow, self.markerCol, self.cursorRow, self.cursorCol,
+    (self.cursorRow, self.cursorCol, self.markerRow, self.markerCol,
+        self.markerEndRow, self.markerEndCol,
         self.selectionMode) = other
 
   def getSelectedText(self, buffer):
@@ -123,10 +127,8 @@ class Selectable:
           else:
             lines.append(buffer.lines[i])
     elif self.selectionMode == kSelectionLine:
-      for i in range(upperRow, lowerRow+1):
+      for i in range(upperRow, lowerRow):
         lines.append(buffer.lines[i])
-      if len(lines):
-        lines.append('')
     return tuple(lines)
 
   def doDeleteSelection(self, buffer):
@@ -150,7 +152,7 @@ class Selectable:
         upperRow += 1
         del self.lines[upperRow:lowerRow+1]
     elif self.selectionMode == kSelectionLine:
-      del self.lines[upperRow:lowerRow+1]
+      del self.lines[upperRow:lowerRow]
 
   def insertLines(self, buffer, lines):
     if len(lines) == 0:
@@ -183,7 +185,7 @@ class Selectable:
         self.cursorRow += 1
       self.goalCol = self.cursorCol
     elif self.selectionMode == kSelectionLine:
-      for line in lines[:-1]:
+      for line in lines:
         buffer.lines.insert(self.cursorRow, line)
         self.cursorRow += 1
       self.goalCol = self.cursorCol
@@ -236,6 +238,8 @@ class Selectable:
       upperRow = min(self.markerRow, self.cursorRow)
       upperCol = 0
       lowerRow = max(self.markerRow, self.cursorRow)
+      if self.cursorRow != lowerRow:
+        lowerRow += 1
       lowerCol = 0
     elif self.selectionMode == kSelectionWord:
       upperRow = self.markerRow
@@ -417,12 +421,12 @@ class BackingTextBuffer(Selectable):
     elif self.cursorCol+colDelta >= self.scrollCol+maxx:
       cols = self.cursorCol+colDelta - (self.scrollCol+maxx-1)
     self.redoAddChange(('m', (rowDelta, colDelta, goalColDelta, rows, cols,
-        markRowDelta, markColDelta, selectionModeDelta)))
+        markRowDelta, markColDelta, 0, 0, selectionModeDelta)))
 
   def cursorMoveScroll(self, rowDelta, colDelta, goalColDelta,
       scrollRowDelta, scrollColDelta):
     self.redoAddChange(('m', (rowDelta, colDelta, goalColDelta, scrollRowDelta,
-        scrollColDelta,0,0,0)))
+        scrollColDelta,0,0, 0, 0,0)))
 
   def cursorMoveDown(self):
     if self.cursorRow+1 < len(self.lines):
@@ -511,6 +515,12 @@ class BackingTextBuffer(Selectable):
       self.selectionCharacter()
     self.cursorMoveLeft()
 
+  def cursorSelectLineDown(self):
+    self.selectionLine()
+    if self.lines and self.cursorRow+1 < len(self.lines):
+      self.cursorMove(1, -self.cursorCol, -self.goalCol)
+      self.redo()
+
   def cursorSelectRight(self):
     if self.selectionMode == kSelectionNone:
       self.selectionCharacter()
@@ -519,6 +529,7 @@ class BackingTextBuffer(Selectable):
   def cursorSelectWordLeft(self):
     if self.selectionMode == kSelectionNone:
       self.selectionCharacter()
+
     self.cursorMoveWordLeft()
 
   def cursorSelectWordRight(self):
@@ -625,13 +636,14 @@ class BackingTextBuffer(Selectable):
     text = self.getSelectedText(self)
     if len(text):
       self.clipList.append(text)
+      if self.selectionMode == kSelectionLine:
+        text = text + ('',)
       clipboard.copy("\n".join(text))
 
   def editCut(self):
+    self.editCopy()
     text = self.getSelectedText(self)
     if len(text):
-      self.clipList.append(text)
-      clipboard.copy("\n".join(text))
       self.redoAddChange(('ds', self.getSelection(), text))
       self.redo()
 
@@ -846,7 +858,7 @@ class BackingTextBuffer(Selectable):
 
   def markerPlace(self):
     self.redoAddChange(('m', (0, 0, 0, 0, 0, self.cursorRow-self.markerRow,
-        self.cursorCol-self.markerCol, 0)))
+        self.cursorCol-self.markerCol, 0, 0, 0)))
     self.redo()
 
   def mouseClick(self, row, col, shift, ctrl, alt):
@@ -877,16 +889,22 @@ class BackingTextBuffer(Selectable):
     self.cursorMove(row - self.cursorRow, col - self.cursorCol,
         col - self.goalCol)
     self.redo()
-    if self.selectionMode == kSelectionWord:
+    if self.selectionMode == kSelectionLine:
+      if self.cursorRow < self.markerRow:
+        self.cursorStartOfLine()
+      else:
+        self.cursorSelectLineDown()
+    elif self.selectionMode == kSelectionWord:
       if self.cursorRow < self.markerRow or self.cursorCol < self.markerCol:
         self.cursorSelectWordLeft()
       else:
         self.cursorSelectWordRight()
 
-  def mouseTripleClick(self, row, col, shift, ctrl, alt):
-    self.prg.log('triple click', row, col)
-    self.mouseRelease(row, col, shift, ctrl, alt)
-    self.selectionLine()
+  def mouseTripleClick(self, paneRow, paneCol, shift, ctrl, alt):
+    self.prg.log('triple click', paneRow, paneCol)
+    self.mouseRelease(paneRow, paneCol, shift, ctrl, alt)
+    self.selectLineAt(self.scrollRow + paneRow)
+    #self.selectionLine()
 
   def scrollWindow(self, rows, cols):
     self.cursorMoveScroll(rows, self.cursorColDelta(self.cursorRow-rows),
@@ -929,8 +947,10 @@ class BackingTextBuffer(Selectable):
 
   def doSelectionMode(self, mode):
     if self.selectionMode != mode:
-      self.redoAddChange(('m', (0, 0, 0, 0, 0, self.cursorRow-self.markerRow,
-          self.cursorCol-self.markerCol, mode-self.selectionMode)))
+      self.redoAddChange(('m', (0, 0, 0, 0, 0,
+          self.cursorRow-self.markerRow,
+          self.cursorCol-self.markerCol, 0, 0,
+          mode-self.selectionMode)))
       self.redo()
 
   def selectionAll(self):
@@ -950,6 +970,11 @@ class BackingTextBuffer(Selectable):
 
   def selectionWord(self):
     self.doSelectionMode(kSelectionWord)
+
+  def selectLineAt(self, row):
+    row = max(0, min(row, len(self.lines)-1))
+    #self.selectText(row, 0, 0, kSelectionLine)
+    self.cursorSelectLineDown()
 
   def selectWordAt(self, row, col):
     row = max(0, min(row, len(self.lines)-1))
@@ -1035,7 +1060,9 @@ class BackingTextBuffer(Selectable):
         self.scrollCol -= change[1][4]
         self.markerRow -= change[1][5]
         self.markerCol -= change[1][6]
-        self.selectionMode -= change[1][7]
+        self.markerEndRow -= change[1][7]
+        self.markerEndCol -= change[1][8]
+        self.selectionMode -= change[1][9]
       elif change[0] == 'n':
         # Split lines.
         self.cursorRow -= change[1][0]
@@ -1051,7 +1078,7 @@ class BackingTextBuffer(Selectable):
           upperCol = self.cursorCol-(len(change[1][0]))
         else:
           upperCol = len(self.lines[upperRow])-(len(change[1][0]))
-        a = (upperRow, upperCol,
+        a = (self.cursorRow, self.cursorCol, upperRow, upperCol,
             self.cursorRow, self.cursorCol, kSelectionCharacter)
         self.prg.log('undo v', a)
         self.setSelection(a)
@@ -1132,7 +1159,9 @@ class BackingTextBuffer(Selectable):
         self.scrollCol += change[1][4]
         self.markerRow += change[1][5]
         self.markerCol += change[1][6]
-        self.selectionMode += change[1][7]
+        self.markerEndRow += change[1][7]
+        self.markerEndCol += change[1][8]
+        self.selectionMode += change[1][9]
       elif change[0] == 'n':
         # Split lines.
         line = self.lines[self.cursorRow]
@@ -1202,9 +1231,9 @@ class BackingTextBuffer(Selectable):
     if 1:
       # Eliminate no-op entries
       noOpInstructions = set([
-        ('m', (0,0,0,0,0,0,0,0)),
+        ('m', (0,0,0,0,0,0,0,0,0,0)),
       ])
-      assert ('m', (0,0,0,0,0,0,0,0)) in noOpInstructions
+      assert ('m', (0,0,0,0,0,0,0,0,0,0)) in noOpInstructions
       if change in noOpInstructions:
         return
       self.prg.log(change)
@@ -1453,7 +1482,7 @@ class TextBuffer(BackingTextBuffer):
             except curses.error:
               pass
         elif self.selectionMode == kSelectionLine:
-          for i in range(start, end+1):
+          for i in range(start, end):
             line = self.lines[self.scrollRow+i][selStartCol:maxx]
             window.addStr(i, selStartCol,
                 line+' '*(maxx-len(line)), window.colorSelected)
