@@ -192,16 +192,6 @@ class Selectable:
     else:
       buffer.log('selection mode not recognized', self.selectionMode)
 
-  def selectUpper(self):
-    """Select the earlier (or upper-left most) of the cursor or marker."""
-    self.cursorRow, self.cursorCol, a,b = self.startAndEnd()
-    self.selectionMode = kSelectionNone
-
-  def selectLower(self):
-    """Select the latter (or lower-right most) of the cursor or marker."""
-    a,b, self.cursorRow, self.cursorCol = self.startAndEnd()
-    self.selectionMode = kSelectionNone
-
   def startAndEnd(self):
     """Get the marker and cursor pair as the ealier of the two then the later
     of the two. The result accounts for the current selection mode."""
@@ -271,47 +261,6 @@ class Selectable:
             lowerCol = segment.end()
             break
     return (upperRow, upperCol, lowerRow, lowerCol)
-
-  def highlight(self, maxRow, maxCol):
-    """Draw the selected text with a color highlight. The selection mode is
-    accounted for."""
-    upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
-    selStartCol = max(upperCol - startCol, 0)
-    selEndCol = min(lowerCol - startCol, maxCol)
-    start = max(0, upperRow-self.scrollRow)
-    end = min(lowerRow-self.scrollRow, maxRow)
-
-    if self.selectionMode == kSelectionBlock:
-      for i in range(start, end+1):
-        line = self.lines[self.scrollRow+i][selStartCol:selEndCol]
-        self.cursorWindow.addstr(i, selStartCol, line, curses.color_pair(3))
-    elif (self.selectionMode == kSelectionCharacter or
-        self.selectionMode == kSelectionWord):
-      for i in range(start, end+1):
-        line = self.lines[self.scrollRow+i][startCol:endCol]
-        try:
-          if i == end and i == start:
-            self.prg.log('startCol', startCol, 'endCol', endCol, repr(line))
-            self.cursorWindow.addstr(i, selStartCol,
-                line[selStartCol:selEndCol], curses.color_pair(3))
-          elif i == end:
-            self.cursorWindow.addstr(i, 0, line[:selEndCol],
-                curses.color_pair(3))
-          elif i == start:
-            self.cursorWindow.addstr(i, selStartCol, line[selStartCol:],
-                curses.color_pair(3))
-          else:
-            self.cursorWindow.addstr(i, 0, line, curses.color_pair(3))
-        except:
-          pass
-    elif self.selectionMode == kSelectionLine:
-      for i in range(start, end+1):
-        line = self.lines[self.scrollRow+i][selStartCol:selEndCol]
-        try:
-          self.cursorWindow.addstr(i, selStartCol,
-              line+' '*(maxx-len(line)), curses.color_pair(3))
-        except:
-          pass
 
 
 class BackingTextBuffer(Selectable):
