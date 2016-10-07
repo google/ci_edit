@@ -104,22 +104,31 @@ class CiProgram:
     y, x = win.cursorWindow.getyx()
     maxy, maxx = win.cursorWindow.getmaxyx()
     self.debugWindow.addStr(0, 0,
-        "debug cRow %3d cCol %3d goalCol %2d lines %3d      "
-        %(textBuffer.cursorRow, textBuffer.cursorCol, textBuffer.goalCol,
-          len(textBuffer.lines)), self.debugWindow.color)
+        "     cRow %3d      cCol %2d goalCol %2d      "
+        %(textBuffer.cursorRow, textBuffer.cursorCol,
+          textBuffer.goalCol), self.debugWindow.color)
     self.debugWindow.addStr(1, 0,
-        "scrlRow %3d scrlCol %2d mkrRow %3d mkrCol %2d     "
-        %(textBuffer.scrollRow, textBuffer.scrollCol, textBuffer.markerRow,
-          textBuffer.markerCol), self.debugWindow.color)
+        "mkrBgnRow %3d mkrBgnCol %2d lines %3d     "
+        %(textBuffer.markerRow, textBuffer.markerCol,
+          len(textBuffer.lines)),
+          self.debugWindow.color)
     self.debugWindow.addStr(2, 0,
+        "mkrEndRow %3d mkrEndCol %2d     "
+        %(textBuffer.markerEndCol, textBuffer.markerEndCol),
+          self.debugWindow.color)
+    self.debugWindow.addStr(3, 0,
+        "scrlRow %3d scrlCol %2d     "
+        %(textBuffer.scrollRow, textBuffer.scrollCol),
+        self.debugWindow.color)
+    self.debugWindow.addStr(4, 0,
         "y %2d x %2d maxy %d maxx %d baud %d color %d   "
         %(y, x, maxy, maxx, curses.baudrate(), curses.can_change_color()),
         self.debugWindow.color)
-    self.debugWindow.addStr(3, 0,
+    self.debugWindow.addStr(5, 0,
         "ch %3s %s          "
         %(self.ch, app.curses_util.cursesKeyName(self.ch)),
         self.debugWindow.color)
-    self.debugWindow.addStr(4, 0,
+    self.debugWindow.addStr(6, 0,
         "sm %d win %r    "
         %(textBuffer.selectionMode, win), self.debugWindow.color)
     try:
