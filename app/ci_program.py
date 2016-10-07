@@ -9,6 +9,7 @@ import app.window
 import sys
 import curses
 import time
+import traceback
 
 
 globalPrintLog = "--- begin log ---\n"
@@ -212,7 +213,8 @@ class CiProgram:
     msg = str(args[0])
     for i in args[1:]:
       msg += ' '+str(i)
-    self.logWindow.textBuffer.addLine(msg)
+    for line in msg.split('\n'):
+      self.logWindow.textBuffer.addLine(line)
     self.logWindow.textBuffer.cursorScrollTo(-1, self.logWindow.cursorWindow)
 
   def log(self, *args):
@@ -285,14 +287,22 @@ class CiProgram:
         curses.init_pair(i, 16, i)
 
 def wrapped_ci(stdscr):
-  prg = CiProgram(stdscr)
-  prg.run()
+  try:
+    prg = CiProgram(stdscr)
+    prg.run()
+  except Exception, e:
+    errorType, value, tb = sys.exc_info()
+    out = traceback.format_exception(errorType, value, tb)
+    for i in out:
+      logPrint(i[:-1])
 
 def run_ci():
   global globalPrintLog
-  curses.wrapper(wrapped_ci)
-  if shouldWritePrintLog:
-    print globalPrintLog
+  try:
+    curses.wrapper(wrapped_ci)
+  finally:
+    if shouldWritePrintLog:
+      print globalPrintLog
 
 if __name__ == '__main__':
   run_ci()
