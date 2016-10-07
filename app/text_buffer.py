@@ -1402,34 +1402,28 @@ class TextBuffer(BackingTextBuffer):
         upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
         selStartCol = max(upperCol - startCol, 0)
         selEndCol = min(lowerCol - startCol, maxx)
-        start = max(0, upperRow-self.scrollRow)
-        end = min(lowerRow-self.scrollRow, maxy)
-
-        if self.selectionMode == kSelectionAll:
-          for i in range(limit):
-            line = self.lines[self.scrollRow+i][startCol:endCol]
-            window.addStr(i, 0, line, window.colorSelected)
-        elif self.selectionMode == kSelectionBlock:
+        start = max(0, min(upperRow-self.scrollRow, maxy))
+        end = max(0, min(lowerRow-self.scrollRow, maxy))
+        if self.selectionMode == kSelectionBlock:
           for i in range(start, end+1):
             line = self.lines[self.scrollRow+i][selStartCol:selEndCol]
             window.addStr(i, selStartCol, line, window.colorSelected)
-        elif (self.selectionMode == kSelectionCharacter or
+        elif (self.selectionMode == kSelectionAll or
+            self.selectionMode == kSelectionCharacter or
             self.selectionMode == kSelectionWord):
-          for i in range(start, end+1):
+          # Go one row past the selection or to the last line.
+          for i in range(start, min(end+1, len(self.lines)-self.scrollRow)):
             line = self.lines[self.scrollRow+i][startCol:endCol]
-            try:
-              if i == end and i == start:
-                window.addStr(i, selStartCol,
-                    line[selStartCol:selEndCol], window.colorSelected)
-              elif i == end:
-                window.addStr(i, 0, line[:selEndCol], window.colorSelected)
-              elif i == start:
-                window.addStr(i, selStartCol, line[selStartCol:],
-                    window.colorSelected)
-              else:
-                window.addStr(i, 0, line, window.colorSelected)
-            except curses.error:
-              pass
+            if i == end and i == start:
+              window.addStr(i, selStartCol,
+                  line[selStartCol:selEndCol], window.colorSelected)
+            elif i == end:
+              window.addStr(i, 0, line[:selEndCol], window.colorSelected)
+            elif i == start:
+              window.addStr(i, selStartCol, line[selStartCol:],
+                  window.colorSelected)
+            else:
+              window.addStr(i, 0, line, window.colorSelected)
         elif self.selectionMode == kSelectionLine:
           for i in range(start, end):
             line = self.lines[self.scrollRow+i][selStartCol:maxx]
