@@ -1,28 +1,25 @@
-#!/usr/bin/python
 # Copyright 2016 The ci_edit Authors. All rights reserved.
 # Use of this source code is governed by an Apache-style license that can be
 # found in the LICENSE file.
 
-#import app.curses_util
 import app.editor
 import app.text_buffer
 import sys
 import curses
 #import time
 #import traceback
-#import os
 
 class StaticWindow:
   """A static window does not get focus."""
-  def __init__(self, prg, rows, cols, top, left):
+  def __init__(self, prg):
     self.prg = prg
     self.color = 0
     self.colorSelected = 1
-    self.top = top
-    self.left = left
-    self.rows = rows
-    self.cols = cols
-    self.cursorWindow = curses.newwin(rows, cols, top, left)
+    self.top = 0
+    self.left = 0
+    self.rows = 1
+    self.cols = 1
+    self.cursorWindow = curses.newwin(1, 1)
 
   def addStr(self, row, col, text, colorPair):
     """Overwrite text a row, column with text."""
@@ -131,8 +128,8 @@ class StaticWindow:
 class Window(StaticWindow):
   """A Window may have focus. A Window holds a TextBuffer and a
     controller that operates on the TextBuffer."""
-  def __init__(self, prg, rows, cols, top, left, controller=None):
-    StaticWindow.__init__(self, prg, rows, cols, top, left)
+  def __init__(self, prg, controller=None):
+    StaticWindow.__init__(self, prg)
     self.controller = controller
     self.cursorWindow.keypad(1)
     self.textBuffer = None
@@ -192,21 +189,21 @@ class Window(StaticWindow):
 
 
 class HeaderLine(Window):
-  def __init__(self, prg, host, rows, cols, top, left):
-    Window.__init__(self, prg, rows, cols, top, left)
+  def __init__(self, prg, host):
+    Window.__init__(self, prg)
     self.setTextBuffer(app.text_buffer.TextBuffer(prg))
     self.controller = app.editor.InteractiveOpener(prg, host, self.textBuffer)
 
 
 class InteractiveFind(Window):
-  def __init__(self, prg, host, rows, cols, top, left):
-    Window.__init__(self, prg, rows, cols, top, left)
+  def __init__(self, prg, host):
+    Window.__init__(self, prg)
     self.host = host
     self.label = "find: "
     self.setTextBuffer(app.text_buffer.TextBuffer(prg))
     self.controller = app.editor.InteractiveFind(prg, self,
         self.textBuffer)
-    self.leftColumn = StaticWindow(prg, 1, 0, 0, 0)
+    self.leftColumn = StaticWindow(prg)
 
   def refresh(self):
     self.leftColumn.addStr(0, 0, self.label, self.color)
@@ -226,14 +223,14 @@ class InteractiveFind(Window):
 
 
 class InteractiveGoto(Window):
-  def __init__(self, prg, host, rows, cols, top, left):
-    Window.__init__(self, prg, rows, cols, top, left)
+  def __init__(self, prg, host):
+    Window.__init__(self, prg)
     self.host = host
     self.label = "goto: "
     self.setTextBuffer(app.text_buffer.TextBuffer(prg))
     self.controller = app.editor.InteractiveGoto(prg, host,
         self.textBuffer)
-    self.leftColumn = StaticWindow(prg, 1, 0, 0, 0)
+    self.leftColumn = StaticWindow(prg)
 
   def refresh(self):
     self.leftColumn.addStr(0, 0, self.label, self.color)
@@ -255,8 +252,8 @@ class InteractiveGoto(Window):
 class StatusLine(StaticWindow):
   """The status line appears at the bottom of the screen. It shows the current
   line and column the cursor is on."""
-  def __init__(self, prg, host, rows, cols, top, left):
-    StaticWindow.__init__(self, prg, rows, cols, top, left)
+  def __init__(self, prg, host):
+    StaticWindow.__init__(self, prg)
     self.host = host
 
   def refresh(self):
@@ -286,17 +283,17 @@ class StatusLine(StaticWindow):
 
 class DirectoryPanel(Window):
   """A content area panel that shows a file directory list."""
-  def __init__(self, prg, rows, cols, top, left):
+  def __init__(self, prg):
     self.prg = prg
-    Window.__init__(self, prg, rows, cols, top, left)
+    Window.__init__(self, prg)
     self.color = curses.color_pair(18)
     self.colorSelected = curses.color_pair(3)
 
 
 class FilePanel(Window):
-  def __init__(self, prg, rows, cols, top, left):
+  def __init__(self, prg):
     self.prg = prg
-    Window.__init__(self, prg, rows, cols, top, left)
+    Window.__init__(self, prg)
     self.color = curses.color_pair(18)
     self.colorSelected = curses.color_pair(3)
 
@@ -308,36 +305,36 @@ class InputWindow(Window):
     self.prg = prg
     self.showHeader = header
     if header:
-      self.headerLine = HeaderLine(prg, self, 1, 1, 0, 0)
+      self.headerLine = HeaderLine(prg, self)
       self.headerLine.color = curses.color_pair(168)
       self.headerLine.colorSelected = curses.color_pair(47)
       self.headerLine.show()
     self.showFooter = footer
     if 1:
-      self.interactiveFind = InteractiveFind(prg, self, 1, 1, 0, 0)
+      self.interactiveFind = InteractiveFind(prg, self)
       self.interactiveFind.hide()
       self.interactiveFind.color = curses.color_pair(0)
       self.interactiveFind.colorSelected = curses.color_pair(87)
     if 1:
-      self.interactiveGoto = InteractiveGoto(prg, self, 1, 1, 0, 0)
+      self.interactiveGoto = InteractiveGoto(prg, self)
       self.interactiveGoto.hide()
       self.interactiveGoto.color = curses.color_pair(0)
       self.interactiveGoto.colorSelected = curses.color_pair(87)
     if footer:
-      self.statusLine = StatusLine(prg, self, 1, 1, 0, 0)
+      self.statusLine = StatusLine(prg, self)
       self.statusLine.color = curses.color_pair(168)
       self.statusLine.colorSelected = curses.color_pair(47)
       self.statusLine.show()
     self.showLineNumbers = lineNumbers
     if lineNumbers:
-      self.leftColumn = StaticWindow(prg, 1, 1, 0, 0)
+      self.leftColumn = StaticWindow(prg)
       self.leftColumn.color = curses.color_pair(211)
       self.leftColumn.colorSelected = curses.color_pair(146)
     if 1:
-      self.rightColumn = StaticWindow(prg, 1, 1, 0, 0)
+      self.rightColumn = StaticWindow(prg)
       self.rightColumn.color = curses.color_pair(18)
       self.rightColumn.colorSelected = curses.color_pair(105)
-    Window.__init__(self, prg, 1, 1, 0, 0)
+    Window.__init__(self, prg)
     self.color = curses.color_pair(0)
     self.colorSelected = curses.color_pair(228)
     self.controller = app.editor.MainController(prg, self)
@@ -429,7 +426,9 @@ class InputWindow(Window):
 class PaletteWindow(Window):
   """A window with example foreground and background text colors."""
   def __init__(self, prg):
-    Window.__init__(self, prg, 16, 16*5, 8, 8);
+    Window.__init__(self, prg)
+    self.resizeTo(16, 16*5)
+    self.moveTo(8, 8)
     self.controller = app.editor.MainController(prg, self)
     textBuffer = app.text_buffer.TextBuffer(self.prg)
     self.controller.setTextBuffer(textBuffer)
