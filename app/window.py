@@ -7,8 +7,7 @@ import app.editor
 import app.text_buffer
 import sys
 import curses
-#import time
-#import traceback
+
 
 class StaticWindow:
   """A static window does not get focus."""
@@ -96,9 +95,6 @@ class StaticWindow:
     self.cursorWindow.mvwin(self.top, self.left)
 
   def reshape(self, rows, cols, top, left):
-    #self.prg.logPrint('reshape',
-    #    self.rows, self.cols, self.top, self.left, "to",
-    #    rows, cols, top, left, repr(self))
     self.moveTo(top, left)
     self.resizeTo(rows, cols)
 
@@ -263,9 +259,11 @@ class StatusLine(StaticWindow):
       Window.refresh(self)
     else:
       tb = self.host.textBuffer
-      statusLine = ' . '
+      statusLine = self.host.textBuffer.fullPath
       if tb.isDirty():
-        statusLine = ' * '
+        statusLine += ' * '
+      else:
+        statusLine += ' . '
       rowPercentage = tb.cursorRow*100/(len(tb.lines)+1)
       if tb.cursorRow == len(tb.lines) - 1:
          rowPercentage = 100
