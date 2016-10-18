@@ -40,6 +40,13 @@ class StaticWindow:
     except: pass
     self.prg.zOrder.insert(layerIndex, self)
 
+  def blank(self):
+    """Clear the window."""
+    self.prg.log('blank', self.rows, self.cols)
+    for i in range(self.rows):
+      self.addStr(0, i, ' '*self.cols, self.color)
+    self.cursorWindow.refresh()
+
   def hide(self):
     """Remove window from the render list."""
     try: self.prg.zOrder.remove(self)
@@ -197,10 +204,9 @@ class InteractiveFind(Window):
     self.host = host
     self.label = "find: "
     self.setTextBuffer(app.text_buffer.TextBuffer(prg))
-    self.controller = app.editor.InteractiveFind(prg, self, self.textBuffer)
+    self.controller = app.editor.InteractiveFind(prg, self,
+        self.textBuffer)
     self.leftColumn = StaticWindow(prg, 1, 0, 0, 0)
-    self.leftColumn.color = curses.color_pair(211)
-    self.leftColumn.colorSelected = curses.color_pair(146)
 
   def refresh(self):
     self.leftColumn.addStr(0, 0, self.label, self.color)
@@ -212,15 +218,46 @@ class InteractiveFind(Window):
     Window.reshape(self, rows, cols-labelWidth, top, left+labelWidth)
     self.leftColumn.reshape(rows, labelWidth, top, left)
 
+  def unfocus(self):
+    self.leftColumn.blank()
+    self.leftColumn.hide()
+    self.blank()
+    self.hide()
 
-class StatusLine(Window):
-  """The status line appears at the bottom of the screen. It shows the current
-  line and column the cursor is on."""
+
+class InteractiveGoto(Window):
   def __init__(self, prg, host, rows, cols, top, left):
     Window.__init__(self, prg, rows, cols, top, left)
     self.host = host
+    self.label = "goto: "
     self.setTextBuffer(app.text_buffer.TextBuffer(prg))
-    self.controller = app.editor.InteractiveGoto(prg, host, self.textBuffer)
+    self.controller = app.editor.InteractiveGoto(prg, host,
+        self.textBuffer)
+    self.leftColumn = StaticWindow(prg, 1, 0, 0, 0)
+
+  def refresh(self):
+    self.leftColumn.addStr(0, 0, self.label, self.color)
+    self.leftColumn.cursorWindow.refresh()
+    Window.refresh(self)
+
+  def reshape(self, rows, cols, top, left):
+    labelWidth = len(self.label)
+    Window.reshape(self, rows, cols-labelWidth, top, left+labelWidth)
+    self.leftColumn.reshape(rows, labelWidth, top, left)
+
+  def unfocus(self):
+    self.leftColumn.blank()
+    self.leftColumn.hide()
+    self.blank()
+    self.hide()
+
+
+class StatusLine(StaticWindow):
+  """The status line appears at the bottom of the screen. It shows the current
+  line and column the cursor is on."""
+  def __init__(self, prg, host, rows, cols, top, left):
+    StaticWindow.__init__(self, prg, rows, cols, top, left)
+    self.host = host
 
   def refresh(self):
     maxy, maxx = self.cursorWindow.getmaxyx()
@@ -276,10 +313,16 @@ class InputWindow(Window):
       self.headerLine.colorSelected = curses.color_pair(47)
       self.headerLine.show()
     self.showFooter = footer
-    if footer:
+    if 1:
       self.interactiveFind = InteractiveFind(prg, self, 1, 1, 0, 0)
-      self.interactiveFind.color = curses.color_pair(205)
+      self.interactiveFind.hide()
+      self.interactiveFind.color = curses.color_pair(0)
       self.interactiveFind.colorSelected = curses.color_pair(87)
+    if 1:
+      self.interactiveGoto = InteractiveGoto(prg, self, 1, 1, 0, 0)
+      self.interactiveGoto.hide()
+      self.interactiveGoto.color = curses.color_pair(0)
+      self.interactiveGoto.colorSelected = curses.color_pair(87)
     if footer:
       self.statusLine = StatusLine(prg, self, 1, 1, 0, 0)
       self.statusLine.color = curses.color_pair(168)
@@ -318,13 +361,14 @@ class InputWindow(Window):
     if 1:
       findReplaceHeight = 1
       topOfFind = top+rows-findReplaceHeight
-      if self.showFooter:
-        topOfFind -= 1
       self.interactiveFind.reshape(findReplaceHeight, cols,
           topOfFind, left)
+    if 1:
+      topOfGoto = top+rows-findReplaceHeight
+      self.interactiveGoto.reshape(1, cols, topOfGoto, left)
     if self.showFooter:
-      self.statusLine.reshape(1, cols, top+rows-1, left)
-      rows -= 1
+      self.statusLine.reshape(1, cols, top+rows-2, left)
+      rows -= 2
     if self.showLineNumbers:
       self.leftColumn.reshape(rows, 7, top, left)
       cols -= 7

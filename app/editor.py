@@ -251,8 +251,8 @@ class InteractiveFind(EditText):
     self.findCmd = self.document.textBuffer.findPrior
 
   def focus(self):
-    self.document.statusLine.hide()
-    self.document.resizeBy(-self.height, 0)
+    #self.document.statusLine.hide()
+    #self.document.resizeBy(-self.height, 0)
     #self.host.moveBy(-self.height, 0)
     #self.host.resizeBy(self.height-1, 0)
     EditText.focus(self)
@@ -281,6 +281,8 @@ class InteractiveFind(EditText):
 
   def unfocus(self):
     self.prg.log('unfocus Find')
+    #self.hide()
+    return
     self.document.resizeBy(self.height, 0)
     #self.host.resizeBy(-self.height, 0)
     #self.host.moveBy(self.height, 0)
@@ -340,6 +342,9 @@ class InteractiveGoto(EditText):
     except: pass
     gotoLine, gotoCol = (line.split(',') + ['0', '0'])[:2]
     self.cursorMoveTo(parseInt(gotoLine), parseInt(gotoCol))
+
+  #def unfocus(self):
+  #  self.hide()
 
 
 class CiEdit(Controller):
@@ -498,7 +503,7 @@ class CuaEdit(Controller):
 
       CTRL_F: self.switchToFind,
 
-      CTRL_G: self.switchToCommandSetInteractiveGoto,
+      CTRL_G: self.switchToGoto,
 
       #CTRL_H: textBuffer.backspace,
       curses.ascii.DEL: textBuffer.backspace,
@@ -549,14 +554,14 @@ class CuaEdit(Controller):
   def onChange(self):
     pass
 
-  def switchToCommandSetInteractiveGoto(self):
-    self.prg.changeTo = self.host.statusLine
-
   def switchToCommandSetInteractiveOpen(self):
     self.prg.changeTo = self.host.headerLine
 
   def switchToFind(self):
     self.prg.changeTo = self.host.interactiveFind
+
+  def switchToGoto(self):
+    self.prg.changeTo = self.host.interactiveGoto
 
   def showPalette(self):
     self.prg.paletteWindow.focus()
