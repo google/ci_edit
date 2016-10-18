@@ -2,6 +2,7 @@
 # Use of this source code is governed by an Apache-style license that can be
 # found in the LICENSE file.
 
+import app.controller
 import app.editor
 import app.text_buffer
 import sys
@@ -337,7 +338,13 @@ class InputWindow(Window):
     Window.__init__(self, prg)
     self.color = curses.color_pair(0)
     self.colorSelected = curses.color_pair(228)
-    self.controller = app.editor.MainController(prg, self)
+    self.controller = app.controller.MainController(prg, self)
+    self.controller.add(app.editor.CuaPlusEdit(prg, self))
+    #  'cuaPlus': CuaPlusEdit(prg, host),
+    #  'cua': CuaEdit(prg, host),
+    #  'emacs': EmacsEdit(prg, host),
+    #  'vim': VimEdit(prg, host),
+
     if header:
       if self.prg.cliFiles:
         self.headerLine.controller.setFileName(self.prg.cliFiles[0]['path'])
@@ -429,7 +436,8 @@ class PaletteWindow(Window):
     Window.__init__(self, prg)
     self.resizeTo(16, 16*5)
     self.moveTo(8, 8)
-    self.controller = app.editor.MainController(prg, self)
+    self.controller = app.controller.MainController(prg, self)
+    self.controller.add(app.editor.CuaPlusEdit(prg, self))
     textBuffer = app.text_buffer.TextBuffer(self.prg)
     self.controller.setTextBuffer(textBuffer)
     Window.setTextBuffer(self, textBuffer)
