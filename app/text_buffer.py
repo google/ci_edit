@@ -263,13 +263,11 @@ class Selectable:
     return (upperRow, upperCol, lowerRow, lowerCol)
 
 
-class BackingTextBuffer(Selectable):
-  """This base class to TextBuffer handles the text manipulation (without
-  handling the drawing/rendering of the text."""
+class Mutator(Selectable):
+  """Track changes to a body of text."""
   def __init__(self, prg):
     Selectable.__init__(self)
     self.prg = prg
-    self.clipList = []
     self.debugRedo = False
     self.findRe = None
     self.goalCol = 0
@@ -282,16 +280,254 @@ class BackingTextBuffer(Selectable):
     self.savedAtRedoIndex = 0
 
   def addLine(self, msg):
+    """Direct manipulator for logging to a read-only buffer."""
     self.lines.append(msg)
     self.cursorRow += 1
 
   def isDirty(self):
+    """Whether the buffer contains non-trival changes since the last save."""
     clean = (self.savedAtRedoIndex == self.redoIndex or
         (self.redoIndex + 1 == self.savedAtRedoIndex and
           self.redoChain[self.redoIndex][0] == 'm') or
         (self.redoIndex - 1 == self.savedAtRedoIndex and
           self.redoChain[self.redoIndex-1][0] == 'm'))
     return not clean
+
+  def undo(self):
+    """Undo the most recent change to the buffer."""
+    if self.redoIndex > 0:
+      self.redoIndex -= 1
+      if self.redoIndex < self.savedAtRedoIndex:
+        self.savedAtRedoIndex = None
+      change = self.redoChain[self.redoIndex]
+      if self.debugRedo:
+        self.prg.log('undo', self.redoIndex, repr(change))
+      if change[0] == 'b':
+        line = self.lines[self.cursorRow]
+        x = self.cursorCol
+        self.lines[self.cursorRow] = line[:x] + change[1] + line[x:]
+        self.cursorCol += len(change[1])
+      elif change[0] == 'd':
+        line = self.lines[self.cursorRow]
+        x = self.cursorCol
+        self.lines[self.cursorRow] = line[:x] + change[1] + line[x:]
+      elif change[0] == 'ds':
+        self.selectionMode = change[1][-1]
+        self.insertLines(self, change[2])
+        self.setSelection(change[1])
+        self.goalCol = self.cursorCol
+      elif change[0] == 'i':
+        line = self.lines[self.cursorRow]
+        x = self.cursorCol
+        self.cursorCol -= len(change[1])
+        self.lines[self.cursorRow] = line[:x-len(change[1])] + line[x:]
+        self.goalCol = self.cursorCol
+      elif change[0] == 'j':
+        # Join lines.
+        line = self.lines[self.cursorRow]
+        self.lines.insert(self.cursorRow+1, line[self.cursorCol:])
+        self.lines[self.cursorRow] = line[:self.cursorCol]
+      elif change[0] == 'm':
+        self.cursorRow -= change[1][0]
+        self.cursorCol -= change[1][1]
+        self.goalCol -= change[1][2]
+        self.scrollRow -= change[1][3]
+        self.scrollCol -= change[1][4]
+        self.markerRow -= change[1][5]
+        self.markerCol -= change[1][6]
+        self.markerEndRow -= change[1][7]
+        self.markerEndCol -= change[1][8]
+        self.selectionMode -= change[1][9]
+      elif change[0] == 'n':
+        # Split lines.
+        self.cursorRow -= change[1][0]
+        self.cursorCol -= change[1][1]
+        self.goalCol -= change[1][2]
+        self.lines[self.cursorRow] += self.lines[self.cursorRow+change[1][0]]
+        for i in range(change[1][0]):
+          del self.lines[self.cursorRow+1]
+      elif change[0] == 'v': # undo paste
+        lineCount = len(change[1])
+        upperRow = self.cursorRow-(lineCount-1)
+        if lineCount == 1:
+          upperCol = self.cursorCol-(len(change[1][0]))
+        else:
+          upperCol = len(self.lines[upperRow])-(len(change[1][0]))
+        a = (self.cursorRow, self.cursorCol, upperRow, upperCol,
+            self.cursorRow, self.cursorCol, kSelectionCharacter)
+        self.prg.log('undo v', a)
+        self.setSelection(a)
+        self.doDeleteSelection(self)
+        upperRow, upperCol, a,b = self.startAndEnd()
+        self.selectionMode = kSelectionNone
+        self.cursorRow += upperRow-self.cursorRow
+        self.cursorCol += upperCol-self.cursorCol
+        self.goalCol = self.cursorCol
+      elif change[0] == 'vb':
+        row = min(self.markerRow, self.cursorRow)
+        endRow = max(self.markerRow, self.cursorRow)
+        for i in range(row, endRow+1):
+          line = self.lines[self.cursorRow]
+          x = self.cursorCol
+          self.lines[self.cursorRow] = line[:x] + change[1] + line[x:]
+        self.cursorCol += len(change[1])
+      elif change[0] == 'vd':
+        upperRow = min(self.markerRow, self.cursorRow)
+        lowerRow = max(self.markerRow, self.cursorRow)
+        for i in range(upperRow, lowerRow+1):
+          line = self.lines[self.cursorRow]
+          x = self.cursorCol
+          self.lines[i] = line[:x] + change[1] + line[x:]
+      elif change[0] == 'vi':
+        text = change[1]
+        col = self.cursorCol
+        row = min(self.markerRow, self.cursorRow)
+        endRow = max(self.markerRow, self.cursorRow)
+        textLen = len(text)
+        self.prg.log('undo vi', textLen)
+        for i in range(row, endRow+1):
+          line = self.lines[i]
+          self.lines[i] = line[:col-textLen] + line[col:]
+        self.cursorCol -= textLen
+        self.goalCol = self.cursorCol
+      else:
+        self.prg.log('ERROR: unknown undo.')
+
+  def redo(self):
+    """Replay the next action on the redoChain."""
+    if self.redoIndex < len(self.redoChain):
+      change = self.redoChain[self.redoIndex]
+      if self.debugRedo:
+        self.prg.log('redo', self.redoIndex, repr(change))
+      self.redoIndex += 1
+      if change[0] == 'b':
+        line = self.lines[self.cursorRow]
+        self.cursorCol -= len(change[1])
+        x = self.cursorCol
+        self.lines[self.cursorRow] = line[:x] + line[x+len(change[1]):]
+      elif change[0] == 'd':
+        line = self.lines[self.cursorRow]
+        x = self.cursorCol
+        self.lines[self.cursorRow] = line[:x] + line[x+len(change[1]):]
+      elif change[0] == 'ds':
+        self.setSelection(change[1])
+        upperRow, upperCol, a,b = self.startAndEnd()
+        self.doDeleteSelection(self)
+        self.selectionMode = kSelectionNone
+        self.cursorRow += upperRow-self.cursorRow
+        self.cursorCol += upperCol-self.cursorCol
+        self.goalCol = self.cursorCol
+      elif change[0] == 'i':
+        line = self.lines[self.cursorRow]
+        x = self.cursorCol
+        self.lines[self.cursorRow] = line[:x] + change[1] + line[x:]
+        self.cursorCol += len(change[1])
+        self.goalCol = self.cursorCol
+      elif change[0] == 'j':
+        # Join lines.
+        self.lines[self.cursorRow] += self.lines[self.cursorRow+1]
+        del self.lines[self.cursorRow+1]
+      elif change[0] == 'm':
+        self.cursorRow += change[1][0]
+        self.cursorCol += change[1][1]
+        self.goalCol += change[1][2]
+        self.scrollRow += change[1][3]
+        self.scrollCol += change[1][4]
+        self.markerRow += change[1][5]
+        self.markerCol += change[1][6]
+        self.markerEndRow += change[1][7]
+        self.markerEndCol += change[1][8]
+        self.selectionMode += change[1][9]
+      elif change[0] == 'n':
+        # Split lines.
+        line = self.lines[self.cursorRow]
+        self.lines.insert(self.cursorRow+1, line[self.cursorCol:])
+        self.lines[self.cursorRow] = line[:self.cursorCol]
+        for i in range(max(change[1][0] - 1, 0)):
+          self.lines.insert(self.cursorRow+1, "")
+        self.cursorRow += change[1][0]
+        self.cursorCol += change[1][1]
+        self.goalCol += change[1][2]
+      elif change[0] == 'v':
+        self.insertLines(self, change[1])
+        self.selectionMode = kSelectionNone
+        maxy, maxx = self.prg.inputWindow.cursorWindow.getmaxyx() #hack
+        if self.cursorRow > self.scrollRow + maxy:
+          self.scrollRow = self.cursorRow
+        if self.cursorCol > self.scrollCol + maxx:
+          self.scrollCol = self.cursorCol
+      elif change[0] == 'vb':
+        self.cursorCol -= len(change[1])
+        row = min(self.markerRow, self.cursorRow)
+        rowEnd = max(self.markerRow, self.cursorRow)
+        for i in range(row, rowEnd+1):
+          line = self.lines[i]
+          x = self.cursorCol
+          self.lines[self.cursorRow] = line[:x] + line[x+len(change[1]):]
+      elif change[0] == 'vd':
+        upperRow = min(self.markerRow, self.cursorRow)
+        lowerRow = max(self.markerRow, self.cursorRow)
+        for i in range(upperRow, lowerRow+1):
+          line = self.lines[i]
+          x = self.cursorCol
+          self.lines[i] = line[:x] + line[x+len(change[1]):]
+      elif change[0] == 'vi':
+        text = change[1]
+        col = self.cursorCol
+        row = min(self.markerRow, self.cursorRow)
+        rowEnd = max(self.markerRow, self.cursorRow)
+        self.prg.log('do vi')
+        for i in range(row, rowEnd+1):
+          line = self.lines[i]
+          self.lines[i] = line[:col] + text + line[col:]
+        self.cursorCol += len(text)
+        self.goalCol = self.cursorCol
+      else:
+        self.prg.log('ERROR: unknown redo.')
+
+  def redoAddChange(self, change):
+    """Push a change onto the end of the redoChain. Call redo() to enact the
+        change."""
+    if self.debugRedo:
+      self.prg.log('redoAddChange', change)
+    self.redoChain = self.redoChain[:self.redoIndex]
+    if 1: # optimizer
+      if len(self.redoChain):
+        if self.redoChain[-1][0] == change[0] and change[0] in ('d', 'i', 'vi'):
+          change = (change[0], self.redoChain[-1][1] + change[1])
+          self.undo()
+          self.redoChain.pop()
+        elif change[0] == 'm':
+          if self.redoChain[-1][0] == 'm':
+            change = (change[0], addVectors(self.redoChain[-1][1], change[1]))
+            self.undo()
+            self.redoChain.pop()
+        elif self.redoChain[-1][0] == change[0] and change[0] == 'n':
+          change = (change[0], addVectors(self.redoChain[-1][1], change[1]))
+          self.undo()
+          self.redoChain.pop()
+    if 1:
+      # Eliminate no-op entries
+      noOpInstructions = set([
+        ('m', (0,0,0,0,0,0,0,0,0,0)),
+      ])
+      assert ('m', (0,0,0,0,0,0,0,0,0,0)) in noOpInstructions
+      if change in noOpInstructions:
+        return
+      self.prg.log(change)
+    self.redoChain.append(change)
+    if self.debugRedo:
+      self.prg.log('--- redoIndex', self.redoIndex)
+      for i,c in enumerate(self.redoChain):
+        self.prg.log('%2d:'%i, repr(c))
+
+
+class BackingTextBuffer(Mutator):
+  """This base class to TextBuffer handles the text manipulation (without
+  handling the drawing/rendering of the text)."""
+  def __init__(self, prg):
+    Mutator.__init__(self, prg)
+    self.clipList = []
 
   def backspace(self):
     if self.selectionMode != kSelectionNone:
@@ -967,230 +1203,6 @@ class BackingTextBuffer(Selectable):
         return
     self.redoAddChange(('vd', ('  ')))
     self.redo()
-
-  def undo(self):
-    if self.redoIndex > 0:
-      self.redoIndex -= 1
-      if self.redoIndex < self.savedAtRedoIndex:
-        self.savedAtRedoIndex = None
-      change = self.redoChain[self.redoIndex]
-      if self.debugRedo:
-        self.prg.log('undo', self.redoIndex, repr(change))
-      if change[0] == 'b':
-        line = self.lines[self.cursorRow]
-        x = self.cursorCol
-        self.lines[self.cursorRow] = line[:x] + change[1] + line[x:]
-        self.cursorCol += len(change[1])
-      elif change[0] == 'd':
-        line = self.lines[self.cursorRow]
-        x = self.cursorCol
-        self.lines[self.cursorRow] = line[:x] + change[1] + line[x:]
-      elif change[0] == 'ds':
-        self.selectionMode = change[1][-1]
-        self.insertLines(self, change[2])
-        self.setSelection(change[1])
-        self.goalCol = self.cursorCol
-      elif change[0] == 'i':
-        line = self.lines[self.cursorRow]
-        x = self.cursorCol
-        self.cursorCol -= len(change[1])
-        self.lines[self.cursorRow] = line[:x-len(change[1])] + line[x:]
-        self.goalCol = self.cursorCol
-      elif change[0] == 'j':
-        # Join lines.
-        line = self.lines[self.cursorRow]
-        self.lines.insert(self.cursorRow+1, line[self.cursorCol:])
-        self.lines[self.cursorRow] = line[:self.cursorCol]
-      elif change[0] == 'm':
-        self.cursorRow -= change[1][0]
-        self.cursorCol -= change[1][1]
-        self.goalCol -= change[1][2]
-        self.scrollRow -= change[1][3]
-        self.scrollCol -= change[1][4]
-        self.markerRow -= change[1][5]
-        self.markerCol -= change[1][6]
-        self.markerEndRow -= change[1][7]
-        self.markerEndCol -= change[1][8]
-        self.selectionMode -= change[1][9]
-      elif change[0] == 'n':
-        # Split lines.
-        self.cursorRow -= change[1][0]
-        self.cursorCol -= change[1][1]
-        self.goalCol -= change[1][2]
-        self.lines[self.cursorRow] += self.lines[self.cursorRow+change[1][0]]
-        for i in range(change[1][0]):
-          del self.lines[self.cursorRow+1]
-      elif change[0] == 'v': # undo paste
-        lineCount = len(change[1])
-        upperRow = self.cursorRow-(lineCount-1)
-        if lineCount == 1:
-          upperCol = self.cursorCol-(len(change[1][0]))
-        else:
-          upperCol = len(self.lines[upperRow])-(len(change[1][0]))
-        a = (self.cursorRow, self.cursorCol, upperRow, upperCol,
-            self.cursorRow, self.cursorCol, kSelectionCharacter)
-        self.prg.log('undo v', a)
-        self.setSelection(a)
-        self.doDeleteSelection(self)
-        upperRow, upperCol, a,b = self.startAndEnd()
-        self.selectionMode = kSelectionNone
-        self.cursorRow += upperRow-self.cursorRow
-        self.cursorCol += upperCol-self.cursorCol
-        self.goalCol = self.cursorCol
-      elif change[0] == 'vb':
-        row = min(self.markerRow, self.cursorRow)
-        endRow = max(self.markerRow, self.cursorRow)
-        for i in range(row, endRow+1):
-          line = self.lines[self.cursorRow]
-          x = self.cursorCol
-          self.lines[self.cursorRow] = line[:x] + change[1] + line[x:]
-        self.cursorCol += len(change[1])
-      elif change[0] == 'vd':
-        upperRow = min(self.markerRow, self.cursorRow)
-        lowerRow = max(self.markerRow, self.cursorRow)
-        for i in range(upperRow, lowerRow+1):
-          line = self.lines[self.cursorRow]
-          x = self.cursorCol
-          self.lines[i] = line[:x] + change[1] + line[x:]
-      elif change[0] == 'vi':
-        text = change[1]
-        col = self.cursorCol
-        row = min(self.markerRow, self.cursorRow)
-        endRow = max(self.markerRow, self.cursorRow)
-        textLen = len(text)
-        self.prg.log('undo vi', textLen)
-        for i in range(row, endRow+1):
-          line = self.lines[i]
-          self.lines[i] = line[:col-textLen] + line[col:]
-        self.cursorCol -= textLen
-        self.goalCol = self.cursorCol
-      else:
-        self.prg.log('ERROR: unknown undo.')
-
-  def redo(self):
-    if self.redoIndex < len(self.redoChain):
-      change = self.redoChain[self.redoIndex]
-      if self.debugRedo:
-        self.prg.log('redo', self.redoIndex, repr(change))
-      self.redoIndex += 1
-      if change[0] == 'b':
-        line = self.lines[self.cursorRow]
-        self.cursorCol -= len(change[1])
-        x = self.cursorCol
-        self.lines[self.cursorRow] = line[:x] + line[x+len(change[1]):]
-      elif change[0] == 'd':
-        line = self.lines[self.cursorRow]
-        x = self.cursorCol
-        self.lines[self.cursorRow] = line[:x] + line[x+len(change[1]):]
-      elif change[0] == 'ds':
-        self.setSelection(change[1])
-        upperRow, upperCol, a,b = self.startAndEnd()
-        self.doDeleteSelection(self)
-        self.selectionMode = kSelectionNone
-        self.cursorRow += upperRow-self.cursorRow
-        self.cursorCol += upperCol-self.cursorCol
-        self.goalCol = self.cursorCol
-      elif change[0] == 'i':
-        line = self.lines[self.cursorRow]
-        x = self.cursorCol
-        self.lines[self.cursorRow] = line[:x] + change[1] + line[x:]
-        self.cursorCol += len(change[1])
-        self.goalCol = self.cursorCol
-      elif change[0] == 'j':
-        # Join lines.
-        self.lines[self.cursorRow] += self.lines[self.cursorRow+1]
-        del self.lines[self.cursorRow+1]
-      elif change[0] == 'm':
-        self.cursorRow += change[1][0]
-        self.cursorCol += change[1][1]
-        self.goalCol += change[1][2]
-        self.scrollRow += change[1][3]
-        self.scrollCol += change[1][4]
-        self.markerRow += change[1][5]
-        self.markerCol += change[1][6]
-        self.markerEndRow += change[1][7]
-        self.markerEndCol += change[1][8]
-        self.selectionMode += change[1][9]
-      elif change[0] == 'n':
-        # Split lines.
-        line = self.lines[self.cursorRow]
-        self.lines.insert(self.cursorRow+1, line[self.cursorCol:])
-        self.lines[self.cursorRow] = line[:self.cursorCol]
-        for i in range(max(change[1][0] - 1, 0)):
-          self.lines.insert(self.cursorRow+1, "")
-        self.cursorRow += change[1][0]
-        self.cursorCol += change[1][1]
-        self.goalCol += change[1][2]
-      elif change[0] == 'v':
-        self.insertLines(self, change[1])
-        self.selectionMode = kSelectionNone
-        maxy, maxx = self.prg.inputWindow.cursorWindow.getmaxyx() #hack
-        if self.cursorRow > self.scrollRow + maxy:
-          self.scrollRow = self.cursorRow
-        if self.cursorCol > self.scrollCol + maxx:
-          self.scrollCol = self.cursorCol
-      elif change[0] == 'vb':
-        self.cursorCol -= len(change[1])
-        row = min(self.markerRow, self.cursorRow)
-        rowEnd = max(self.markerRow, self.cursorRow)
-        for i in range(row, rowEnd+1):
-          line = self.lines[i]
-          x = self.cursorCol
-          self.lines[self.cursorRow] = line[:x] + line[x+len(change[1]):]
-      elif change[0] == 'vd':
-        upperRow = min(self.markerRow, self.cursorRow)
-        lowerRow = max(self.markerRow, self.cursorRow)
-        for i in range(upperRow, lowerRow+1):
-          line = self.lines[i]
-          x = self.cursorCol
-          self.lines[i] = line[:x] + line[x+len(change[1]):]
-      elif change[0] == 'vi':
-        text = change[1]
-        col = self.cursorCol
-        row = min(self.markerRow, self.cursorRow)
-        rowEnd = max(self.markerRow, self.cursorRow)
-        self.prg.log('do vi')
-        for i in range(row, rowEnd+1):
-          line = self.lines[i]
-          self.lines[i] = line[:col] + text + line[col:]
-        self.cursorCol += len(text)
-        self.goalCol = self.cursorCol
-      else:
-        self.prg.log('ERROR: unknown redo.')
-
-  def redoAddChange(self, change):
-    if self.debugRedo:
-      self.prg.log('redoAddChange', change)
-    self.redoChain = self.redoChain[:self.redoIndex]
-    if 1: # optimizer
-      if len(self.redoChain):
-        if self.redoChain[-1][0] == change[0] and change[0] in ('d', 'i', 'vi'):
-          change = (change[0], self.redoChain[-1][1] + change[1])
-          self.undo()
-          self.redoChain.pop()
-        elif change[0] == 'm':
-          if self.redoChain[-1][0] == 'm':
-            change = (change[0], addVectors(self.redoChain[-1][1], change[1]))
-            self.undo()
-            self.redoChain.pop()
-        elif self.redoChain[-1][0] == change[0] and change[0] == 'n':
-          change = (change[0], addVectors(self.redoChain[-1][1], change[1]))
-          self.undo()
-          self.redoChain.pop()
-    if 1:
-      # Eliminate no-op entries
-      noOpInstructions = set([
-        ('m', (0,0,0,0,0,0,0,0,0,0)),
-      ])
-      assert ('m', (0,0,0,0,0,0,0,0,0,0)) in noOpInstructions
-      if change in noOpInstructions:
-        return
-      self.prg.log(change)
-    self.redoChain.append(change)
-    if self.debugRedo:
-      self.prg.log('--- redoIndex', self.redoIndex)
-      for i,c in enumerate(self.redoChain):
-        self.prg.log('%2d:'%i, repr(c))
 
 
 
