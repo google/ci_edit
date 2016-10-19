@@ -309,7 +309,7 @@ class Mutator(Selectable):
         line = self.lines[self.cursorRow]
         x = self.cursorCol
         self.lines[self.cursorRow] = line[:x] + line[x+len(change[1]):]
-      elif change[0] == 'ds':
+      elif change[0] == 'ds':  # Redo delete selection.
         self.setSelection(change[1])
         upperRow, upperCol, a,b = self.startAndEnd()
         self.doDeleteSelection(self)
@@ -439,7 +439,7 @@ class Mutator(Selectable):
         line = self.lines[self.cursorRow]
         x = self.cursorCol
         self.lines[self.cursorRow] = line[:x] + change[1] + line[x:]
-      elif change[0] == 'ds':
+      elif change[0] == 'ds':  # Undo delete selection.
         self.selectionMode = change[1][-1]
         self.insertLines(self, change[2])
         self.setSelection(change[1])
@@ -474,7 +474,7 @@ class Mutator(Selectable):
         self.lines[self.cursorRow] += self.lines[self.cursorRow+change[1][0]]
         for i in range(change[1][0]):
           del self.lines[self.cursorRow+1]
-      elif change[0] == 'v': # undo paste
+      elif change[0] == 'v':  # undo paste
         lineCount = len(change[1])
         upperRow = self.cursorRow-(lineCount-1)
         if lineCount == 1:

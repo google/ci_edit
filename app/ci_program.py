@@ -114,7 +114,7 @@ class CiProgram:
           self.debugWindow.color)
     self.debugWindow.addStr(2, 0,
         "mkrEndRow %3d mkrEndCol %2d     "
-        %(textBuffer.markerEndCol, textBuffer.markerEndCol),
+        %(textBuffer.markerEndRow, textBuffer.markerEndCol),
           self.debugWindow.color)
     self.debugWindow.addStr(3, 0,
         "scrlRow %3d scrlCol %2d     "
