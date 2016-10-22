@@ -19,12 +19,22 @@ class StaticWindow:
     self.left = 0
     self.rows = 1
     self.cols = 1
+    self.writeLineRow = 0
     self.cursorWindow = curses.newwin(1, 1)
 
   def addStr(self, row, col, text, colorPair):
     """Overwrite text a row, column with text."""
     try: self.cursorWindow.addstr(row, col, text, colorPair)
     except curses.error: pass
+
+  def writeLine(self, text, colorPair=1):
+    """Simple line writer for static windows."""
+    text = str(text)
+    text = text + ' '*max(0, self.cols-len(text))
+    try: self.cursorWindow.addstr(self.writeLineRow, 0, text,
+        curses.color_pair(colorPair))
+    except curses.error: pass
+    self.writeLineRow += 1
 
   def contains(self, row, col):
     """Determine whether the position at row, col lay within this window."""
