@@ -1172,6 +1172,15 @@ class BackingTextBuffer(Mutator):
     self.redoAddChange(('n', (0, 0, 0)))
     self.redo()
 
+  def swapCursorAndMarker(self):
+    self.prg.log('swapCursorAndMarker')
+    self.cursorMoveAndMark(self.markerRow-self.cursorRow,
+        self.markerCol-self.cursorCol,
+        self.markerCol-self.goalCol,
+        self.cursorRow-self.markerRow,
+        self.cursorCol-self.markerCol, 0)
+    self.redo()
+
   def test(self):
     self.prg.log('test')
     self.insertPrintable(0x00)
