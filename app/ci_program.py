@@ -87,7 +87,7 @@ class CiProgram:
     if self.showLogWindow:
       inputWidth = min(78, cols)
       debugWidth = max(cols-inputWidth-1, 0)
-      debugRows = 10
+      debugRows = 15
       self.debugWindow.reshape(debugRows, debugWidth, 0,
           inputWidth+1)
       self.logWindow.reshape(rows-debugRows, debugWidth, debugRows,
@@ -103,47 +103,57 @@ class CiProgram:
     textBuffer = win.textBuffer
     y, x = win.cursorWindow.getyx()
     maxy, maxx = win.cursorWindow.getmaxyx()
-    self.debugWindow.addStr(0, 0,
-        "     cRow %3d      cCol %2d goalCol %2d      "
+    self.debugWindow.writeLineRow = 0
+    self.debugWindow.writeLine(
+        "   cRow %3d    cCol %2d goalCol %2d"
         %(textBuffer.cursorRow, textBuffer.cursorCol,
           textBuffer.goalCol), self.debugWindow.color)
-    self.debugWindow.addStr(1, 0,
-        "mkrBgnRow %3d mkrBgnCol %2d lines %3d     "
-        %(textBuffer.markerRow, textBuffer.markerCol,
+    self.debugWindow.writeLine(
+        " mkrRow %3d  mkrCol %2d"
+        %(textBuffer.markerRow, textBuffer.markerCol),
+          self.debugWindow.color)
+    self.debugWindow.writeLine(
+        "scrlRow %3d scrlCol %2d lines %3d"
+        %(textBuffer.scrollRow, textBuffer.scrollCol,
           len(textBuffer.lines)),
-          self.debugWindow.color)
-    self.debugWindow.addStr(2, 0,
-        "mkrEndRow %3d mkrEndCol %2d     "
-        %(textBuffer.markerEndRow, textBuffer.markerEndCol),
-          self.debugWindow.color)
-    self.debugWindow.addStr(3, 0,
-        "scrlRow %3d scrlCol %2d     "
-        %(textBuffer.scrollRow, textBuffer.scrollCol),
         self.debugWindow.color)
-    self.debugWindow.addStr(4, 0,
-        "y %2d x %2d maxy %d maxx %d baud %d color %d   "
+    self.debugWindow.writeLine(
+        "y %2d x %2d maxy %d maxx %d baud %d color %d"
         %(y, x, maxy, maxx, curses.baudrate(), curses.can_change_color()),
         self.debugWindow.color)
-    self.debugWindow.addStr(5, 0,
-        "ch %3s %s          "
+    self.debugWindow.writeLine(
+        "ch %3s %s"
         %(self.ch, app.curses_util.cursesKeyName(self.ch)),
         self.debugWindow.color)
-    self.debugWindow.addStr(6, 0,
-        "sm %d win %r    "
+    self.debugWindow.writeLine(
+        "sm %d win %r"
         %(textBuffer.selectionMode, win), self.debugWindow.color)
     try:
       (id, mousex, mousey, mousez, bstate) = curses.getmouse()
-      self.debugWindow.addStr(6, 0,
-          "mouse id %d, mousex %d, mousey %d, mousez %d         "
+      self.debugWindow.writeLine(
+          "mouse id %d, mousex %d, mousey %d, mousez %d"
           %(id, mousex, mousey, mousez),
           self.debugWindow.color)
-      self.debugWindow.addStr(7, 0,
-          "bstate %s %d         "
+      self.debugWindow.writeLine(
+          "bstate %s %d"
           %(app.curses_util.mouseButtonName(bstate), bstate),
           self.debugWindow.color)
     except curses.error:
-      self.debugWindow.addStr(6, 0, "mouse is not available.  ",
+      self.debugWindow.writeLine("mouse is not available.",
           self.debugWindow.color)
+    # Display some of the redo chain.
+    self.debugWindow.writeLine(
+        "redoIndex %3d savedAt %3d depth %3d"
+        %(textBuffer.redoIndex, textBuffer.savedAtRedoIndex,
+          len(textBuffer.redoChain)),
+        self.debugWindow.color+100)
+    lenChain = len(textBuffer.redoChain)
+    cursor = len(textBuffer.redoChain)-textBuffer.redoIndex+1
+    for i in range(5, 0, -1):
+      self.debugWindow.writeLine(
+          lenChain >= i and textBuffer.redoChain[-i] or '',
+          i >= cursor and 101 or 1)
+    # Refresh the display.
     self.debugWindow.cursorWindow.refresh()
 
   def clickedNearby(self, row, col):
