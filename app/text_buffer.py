@@ -93,11 +93,6 @@ class Selectable:
     self.markerEndCol = 0
     self.selectionMode = kSelectionNone
 
-  def getSelection(self):
-    upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
-    return (self.cursorRow, self.cursorCol, upperRow, upperCol,
-        lowerRow, lowerCol, self.selectionMode)
-
   def setSelection(self, other):
     (self.cursorRow, self.cursorCol, self.markerRow, self.markerCol,
         self.markerEndRow, self.markerEndCol,
@@ -133,6 +128,7 @@ class Selectable:
 
   def doDeleteSelection(self, buffer):
     upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
+    self.prg.log('doDelete', upperRow, upperCol, lowerRow, lowerCol)
     if self.selectionMode == kSelectionAll:
       buffer.lines = [""]
     elif self.selectionMode == kSelectionBlock:
@@ -155,6 +151,8 @@ class Selectable:
       del self.lines[upperRow:lowerRow]
 
   def insertLines(self, buffer, lines):
+    lines = list(lines)
+    lines.reverse()
     if len(lines) == 0:
       return
     if (self.selectionMode == kSelectionNone or
@@ -164,17 +162,14 @@ class Selectable:
       if len(lines) == 1:
         buffer.lines[self.cursorRow] = (firstLine[:self.cursorCol] + lines[0] +
             firstLine[self.cursorCol:])
-        self.cursorCol += len(lines[-1])
       else:
-        buffer.lines[self.cursorRow] = firstLine[:self.cursorCol] + lines[0]
+        buffer.lines[self.cursorRow] = (firstLine[:self.cursorCol] +
+            lines[-1])
+        row = self.cursorRow + 1
+        buffer.lines.insert(row,
+            lines[0] + firstLine[self.cursorCol:])
         for line in lines[1:-1]:
-          self.cursorRow += 1
-          buffer.lines.insert(self.cursorRow, line)
-        self.cursorRow += 1
-        buffer.lines.insert(self.cursorRow,
-            lines[-1] + firstLine[self.cursorCol:])
-        self.cursorCol = len(lines[-1])
-      self.goalCol = self.cursorCol
+          buffer.lines.insert(row, line)
     elif self.selectionMode == kSelectionAll:
       self.lines = list(lines)
     elif self.selectionMode == kSelectionBlock:
@@ -182,15 +177,63 @@ class Selectable:
         buffer.lines[self.cursorRow] = (
             buffer.lines[self.cursorRow][:self.cursorCol] + line +
             buffer.lines[self.cursorRow][self.cursorCol:])
-        self.cursorRow += 1
-      self.goalCol = self.cursorCol
     elif self.selectionMode == kSelectionLine:
       for line in lines:
         buffer.lines.insert(self.cursorRow, line)
-        self.cursorRow += 1
-      self.goalCol = self.cursorCol
     else:
       buffer.log('selection mode not recognized', self.selectionMode)
+
+  def extendWords(self, upperRow, upperCol, lowerRow, lowerCol):
+    line = self.lines[upperRow]
+    for segment in re.finditer(kReWordBoundary, line):
+      if segment.start() <= upperCol < segment.end():
+        upperCol = segment.start()
+        break
+    line = self.lines[lowerRow]
+    for segment in re.finditer(kReWordBoundary, line):
+      if segment.start() < lowerCol < segment.end():
+        lowerCol = segment.end()
+        break
+    return upperCol, lowerCol
+
+  def extendSelection(self):
+    self.prg.log('extend a', self.cursorRow, self.cursorCol,
+        self.markerRow, self.markerCol, self.selectionMode)
+    if self.selectionMode == kSelectionNone:
+      self.cursorMoveAndMark(0, 0, 0, -self.markerRow,
+          -self.markerCol, 0)
+    elif self.selectionMode == kSelectionAll:
+      if len(self.lines):
+        self.cursorMoveAndMark(len(self.lines)-self.cursorRow,
+            len(self.lines[-1])-self.cursorCol,
+            len(self.lines[-1])-self.goalCol,
+            -self.markerRow, -self.markerCol, 0)
+    elif self.selectionMode == kSelectionLine:
+      row = self.markerRow == self.cursorRow and 1 or 0
+      self.prg.log('extend m', self.cursorRow, self.cursorCol,
+        self.markerRow, self.markerCol)
+      self.cursorMoveAndMark(row, -self.cursorCol, -self.goalCol,
+          0, -self.markerCol, 0)
+    elif self.selectionMode == kSelectionWord:
+      if self.cursorRow > self.markerRow or (
+          self.cursorRow == self.markerRow and
+          self.cursorCol > self.markerCol):
+        upperCol, lowerCol = self.extendWords(self.markerRow,
+            self.markerCol, self.cursorRow, self.cursorCol)
+        self.cursorMoveAndMark(0,
+            lowerCol-self.cursorCol,
+            lowerCol-self.goalCol,
+            0, upperCol-self.markerCol, 0)
+      else:
+        upperCol, lowerCol = self.extendWords(self.cursorRow,
+            self.cursorCol, self.markerRow, self.markerCol)
+        self.cursorMoveAndMark(0,
+            upperCol-self.cursorCol,
+            upperCol-self.goalCol,
+            0, lowerCol-self.markerCol, 0)
+    self.redo()
+    self.prg.log('extend z', self.cursorRow, self.cursorCol,
+        self.markerRow, self.markerCol)
 
   def startAndEnd(self):
     """Get the marker and cursor pair as the ealier of the two then the later
@@ -228,8 +271,6 @@ class Selectable:
       upperRow = min(self.markerRow, self.cursorRow)
       upperCol = 0
       lowerRow = max(self.markerRow, self.cursorRow)
-      if self.cursorRow != lowerRow:
-        lowerRow += 1
       lowerCol = 0
     elif self.selectionMode == kSelectionWord:
       upperRow = self.markerRow
@@ -241,25 +282,7 @@ class Selectable:
       elif upperRow > lowerRow:
         upperRow, lowerRow = lowerRow, upperRow
         upperCol, lowerCol = lowerCol, upperCol
-      if upperRow == lowerRow:
-        line = self.lines[upperRow]
-        for segment in re.finditer(kReWordBoundary, line):
-          if segment.start() <= upperCol < segment.end():
-            upperCol = segment.start()
-          if segment.start() < lowerCol < segment.end():
-            lowerCol = segment.end()
-            break
-      else:
-        line = self.lines[upperRow]
-        for segment in re.finditer(kReWordBoundary, line):
-          if segment.start() <= upperCol < segment.end():
-            upperCol = segment.start()
-            break
-        line = self.lines[lowerRow]
-        for segment in re.finditer(kReWordBoundary, line):
-          if segment.start() < lowerCol < segment.end():
-            lowerCol = segment.end()
-            break
+    self.prg.log('start and end', upperRow, upperCol, lowerRow, lowerCol)
     return (upperRow, upperCol, lowerRow, lowerCol)
 
 
@@ -310,13 +333,7 @@ class Mutator(Selectable):
         x = self.cursorCol
         self.lines[self.cursorRow] = line[:x] + line[x+len(change[1]):]
       elif change[0] == 'ds':  # Redo delete selection.
-        self.setSelection(change[1])
-        upperRow, upperCol, a,b = self.startAndEnd()
         self.doDeleteSelection(self)
-        self.selectionMode = kSelectionNone
-        self.cursorRow += upperRow-self.cursorRow
-        self.cursorCol += upperCol-self.cursorCol
-        self.goalCol = self.cursorCol
       elif change[0] == 'i':
         line = self.lines[self.cursorRow]
         x = self.cursorCol
@@ -350,7 +367,6 @@ class Mutator(Selectable):
         self.goalCol += change[1][2]
       elif change[0] == 'v':
         self.insertLines(self, change[1])
-        self.selectionMode = kSelectionNone
         maxy, maxx = self.prg.inputWindow.cursorWindow.getmaxyx() #hack
         if self.cursorRow > self.scrollRow + maxy:
           self.scrollRow = self.cursorRow
@@ -440,10 +456,7 @@ class Mutator(Selectable):
         x = self.cursorCol
         self.lines[self.cursorRow] = line[:x] + change[1] + line[x:]
       elif change[0] == 'ds':  # Undo delete selection.
-        self.selectionMode = change[1][-1]
-        self.insertLines(self, change[2])
-        self.setSelection(change[1])
-        self.goalCol = self.cursorCol
+        self.insertLines(self, change[1])
       elif change[0] == 'i':
         line = self.lines[self.cursorRow]
         x = self.cursorCol
@@ -529,11 +542,23 @@ class BackingTextBuffer(Mutator):
     Mutator.__init__(self, prg)
     self.clipList = []
 
-  def backspace(self):
+  def performDelete(self):
+    self.prg.log('backspace', self.cursorRow > self.markerRow)
     if self.selectionMode != kSelectionNone:
-      self.redoAddChange(('ds', self.getSelection(),
-          self.getSelectedText(self)))
-      self.redo()
+      text = self.getSelectedText(self)
+      if text:
+        if (self.cursorRow > self.markerRow or
+            (self.cursorRow == self.markerRow and
+            self.cursorCol > self.markerCol)):
+          self.swapCursorAndMarker()
+        self.redoAddChange(('ds', text))
+        self.redo()
+      self.selectionNone()
+
+  def backspace(self):
+    self.prg.log('backspace', self.cursorRow > self.markerRow)
+    if self.selectionMode != kSelectionNone:
+      self.performDelete()
     elif self.cursorCol == 0:
       if self.cursorRow > 0:
         self.cursorLeft()
@@ -594,6 +619,8 @@ class BackingTextBuffer(Mutator):
 
   def cursorMoveAndMark(self, rowDelta, colDelta, goalColDelta, markRowDelta,
       markColDelta, selectionModeDelta):
+    self.prg.log('cursorMoveAndMark', rowDelta, colDelta, goalColDelta, markRowDelta,
+        markColDelta, selectionModeDelta)
     maxy, maxx = self.prg.inputWindow.cursorWindow.getmaxyx() #hack
     rows = 0
     if self.scrollRow > self.cursorRow+rowDelta:
@@ -705,6 +732,7 @@ class BackingTextBuffer(Mutator):
     if self.lines and self.cursorRow+1 < len(self.lines):
       self.cursorMove(1, -self.cursorCol, -self.goalCol)
       self.redo()
+      self.extendSelection()
 
   def cursorSelectRight(self):
     if self.selectionMode == kSelectionNone:
@@ -712,15 +740,19 @@ class BackingTextBuffer(Mutator):
     self.cursorMoveRight()
 
   def cursorSelectWordLeft(self):
+    self.prg.log('cursorSelectWordLeft')
     if self.selectionMode == kSelectionNone:
       self.selectionCharacter()
-
     self.cursorMoveWordLeft()
+    self.extendSelection()
 
   def cursorSelectWordRight(self):
+    self.prg.log('cursorSelectWordRight')
     if self.selectionMode == kSelectionNone:
       self.selectionCharacter()
     self.cursorMoveWordRight()
+    self.extendSelection()
+
 
   def cursorSelectUp(self):
     if self.selectionMode == kSelectionNone:
@@ -798,9 +830,7 @@ class BackingTextBuffer(Mutator):
   def delete(self):
     """Delete character to right of cursor i.e. Del key."""
     if self.selectionMode != kSelectionNone:
-      self.redoAddChange(('ds', self.getSelection(),
-          self.getSelectedText(self)))
-      self.redo()
+      self.performDelete()
     elif self.cursorCol == len(self.lines[self.cursorRow]):
       if self.cursorRow+1 < len(self.lines):
         self.joinLines()
@@ -827,18 +857,13 @@ class BackingTextBuffer(Mutator):
 
   def editCut(self):
     self.editCopy()
-    text = self.getSelectedText(self)
-    if len(text):
-      self.redoAddChange(('ds', self.getSelection(), text))
-      self.redo()
+    self.performDelete()
 
   def editPaste(self):
     osClip = clipboard.paste()
     if len(self.clipList or osClip):
       if self.selectionMode != kSelectionNone:
-        self.redoAddChange(('ds', self.getSelection(),
-            self.getSelectedText(self)))
-        self.redo()
+        self.performDelete()
       if osClip:
         clip = tuple(osClip.split("\n"))
       else:
@@ -1022,10 +1047,7 @@ class BackingTextBuffer(Mutator):
     self.redo()
 
   def insert(self, text):
-    if self.selectionMode != kSelectionNone:
-      self.redoAddChange(('ds', self.getSelection(),
-          self.getSelectedText(self)))
-      self.redo()
+    self.performDelete()
     self.redoAddChange(('i', text))
     self.redo()
 
@@ -1079,6 +1101,7 @@ class BackingTextBuffer(Mutator):
         self.cursorStartOfLine()
       else:
         self.cursorSelectLineDown()
+      self.extendSelection()
     elif self.selectionMode == kSelectionWord:
       if self.cursorRow < self.markerRow or self.cursorCol < self.markerCol:
         self.cursorSelectWordLeft()
@@ -1158,7 +1181,6 @@ class BackingTextBuffer(Mutator):
 
   def selectLineAt(self, row):
     row = max(0, min(row, len(self.lines)-1))
-    #self.selectText(row, 0, 0, kSelectionLine)
     self.cursorSelectLineDown()
 
   def selectWordAt(self, row, col):
