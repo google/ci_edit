@@ -968,20 +968,22 @@ class BackingTextBuffer(Mutator):
     searchForLen = len(searchFor)
     # Current line.
     text = self.lines[self.cursorRow]
+    # Save the re for highlighting.
+    self.findRe =  re.compile(searchFor)
+    localRe = self.findRe
     if direction >= 0:
-      searchFor = '('+searchFor+')'
       text = text[self.cursorCol+direction:]
       offset = self.cursorCol+direction
     else:
-      searchFor = '(?:.*)('+searchFor+')'
+      localRe = re.compile('(?:.*)'+searchFor)
       text = text[:self.cursorCol]
       offset = 0
-    self.findRe = re.compile(searchFor)
-    found = self.findRe.search(text)
+    self.prg.log('searching', repr(text))
+    found = localRe.search(text)
     if found:
-      start = found.regs[-1][0]
-      end = found.regs[-1][1]
-      self.prg.log('a found on line', self.cursorRow, start)
+      start = found.regs[0][0]
+      end = found.regs[0][1]
+      self.prg.log('found on line', self.cursorRow, start)
       self.selectText(self.cursorRow, offset+start, end-start,
           kSelectionCharacter)
       return
@@ -993,9 +995,11 @@ class BackingTextBuffer(Mutator):
     for i in theRange:
       found = re.search(searchFor, self.lines[i])
       if found:
+        for k in found.regs:
+          self.prg.log('AAA', k[0], k[1])
         self.prg.log('b found on line', i, repr(found))
-        start = found.regs[-1][0]
-        end = found.regs[-1][1]
+        start = found.regs[0][0]
+        end = found.regs[0][1]
         self.selectText(i, start, end-start, kSelectionCharacter)
         return
     # Warp around to the start of the file.
@@ -1008,8 +1012,8 @@ class BackingTextBuffer(Mutator):
       found = re.search(searchFor, self.lines[i])
       if found:
         self.prg.log('c found on line', i, repr(found))
-        start = found.regs[-1][0]
-        end = found.regs[-1][1]
+        start = found.regs[0][0]
+        end = found.regs[0][1]
         self.selectText(i, start, end-start, kSelectionCharacter)
         return
     self.prg.log('find not found')
@@ -1440,7 +1444,8 @@ class TextBuffer(BackingTextBuffer):
         for i in range(limit):
           line = self.lines[self.scrollRow+i][startCol:endCol]
           for k in self.findRe.finditer(line):
-            f = k.regs[-1]
+            f = k.regs[0]
+            #for f in k.regs[1:]:
             window.addStr(i, f[0], line[f[0]:f[1]], curses.color_pair(32))
       if limit and self.selectionMode != kSelectionNone:
         # Highlight selected text.
