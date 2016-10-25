@@ -293,6 +293,7 @@ class Mutator(Selectable):
     self.prg = prg
     self.debugRedo = False
     self.findRe = None
+    self.fullPath = ''
     self.goalCol = 0
     self.lines = []
     self.scrollRow = 0
