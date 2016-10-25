@@ -232,6 +232,7 @@ class InteractiveFind(EditText):
       self.textBuffer.selectionAll()
       self.textBuffer.insertLines(self.textBuffer, selection)
     self.textBuffer.selectionAll()
+    self.prg.log('find tb', self.textBuffer.cursorCol)
 
   def info(self):
     self.prg.log('InteractiveFind command set')

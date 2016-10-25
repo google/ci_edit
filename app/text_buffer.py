@@ -204,7 +204,7 @@ class Selectable:
           -self.markerCol, 0)
     elif self.selectionMode == kSelectionAll:
       if len(self.lines):
-        self.cursorMoveAndMark(len(self.lines)-self.cursorRow,
+        self.cursorMoveAndMark(len(self.lines)-1-self.cursorRow,
             len(self.lines[-1])-self.cursorCol,
             len(self.lines[-1])-self.goalCol,
             -self.markerRow, -self.markerCol, 0)
@@ -1163,6 +1163,7 @@ class BackingTextBuffer(Mutator):
 
   def selectionAll(self):
     self.doSelectionMode(kSelectionAll)
+    self.extendSelection()
 
   def selectionBlock(self):
     self.doSelectionMode(kSelectionBlock)
