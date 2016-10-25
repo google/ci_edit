@@ -98,59 +98,59 @@ class Selectable:
         self.markerEndRow, self.markerEndCol,
         self.selectionMode) = other
 
-  def getSelectedText(self, buffer):
+  def getSelectedText(self):
     upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
-    return self.getText(buffer, upperRow, upperCol, lowerRow, lowerCol)
+    return self.getText(upperRow, upperCol, lowerRow, lowerCol)
 
-  def getText(self, buffer, upperRow, upperCol, lowerRow, lowerCol):
+  def getText(self, upperRow, upperCol, lowerRow, lowerCol):
     lines = []
     if self.selectionMode == kSelectionAll:
-      lines = buffer.lines[:]
+      lines = self.lines[:]
     elif self.selectionMode == kSelectionBlock:
       for i in range(upperRow, lowerRow+1):
-        lines.append(buffer.lines[i][upperCol:lowerCol])
+        lines.append(self.lines[i][upperCol:lowerCol])
     elif (self.selectionMode == kSelectionCharacter or
         self.selectionMode == kSelectionWord):
       if upperRow == lowerRow:
-        lines.append(buffer.lines[upperRow][upperCol:lowerCol])
+        lines.append(self.lines[upperRow][upperCol:lowerCol])
       else:
         for i in range(upperRow, lowerRow+1):
           if i == upperRow:
-            lines.append(buffer.lines[i][upperCol:])
+            lines.append(self.lines[i][upperCol:])
           elif i == lowerRow:
-            lines.append(buffer.lines[i][:lowerCol])
+            lines.append(self.lines[i][:lowerCol])
           else:
-            lines.append(buffer.lines[i])
+            lines.append(self.lines[i])
     elif self.selectionMode == kSelectionLine:
       for i in range(upperRow, lowerRow):
-        lines.append(buffer.lines[i])
+        lines.append(self.lines[i])
     return tuple(lines)
 
-  def doDeleteSelection(self, buffer):
+  def doDeleteSelection(self):
     upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
     self.prg.log('doDelete', upperRow, upperCol, lowerRow, lowerCol)
     if self.selectionMode == kSelectionAll:
-      buffer.lines = [""]
+      self.lines = [""]
     elif self.selectionMode == kSelectionBlock:
       for i in range(upperRow, lowerRow+1):
-        line = buffer.lines[i]
-        buffer.lines[i] = line[:upperCol] + line[lowerCol:]
+        line = self.lines[i]
+        self.lines[i] = line[:upperCol] + line[lowerCol:]
     elif (self.selectionMode == kSelectionCharacter or
         self.selectionMode == kSelectionWord):
       if upperRow == lowerRow:
-        line = buffer.lines[upperRow]
-        buffer.lines[upperRow] = line[:upperCol] + line[lowerCol:]
+        line = self.lines[upperRow]
+        self.lines[upperRow] = line[:upperCol] + line[lowerCol:]
       elif upperCol == 0 and lowerCol == 0:
         del self.lines[upperRow:lowerRow]
       else:
-        buffer.lines[upperRow] = (buffer.lines[upperRow][:upperCol] +
-            buffer.lines[lowerRow][lowerCol:])
+        self.lines[upperRow] = (self.lines[upperRow][:upperCol] +
+            self.lines[lowerRow][lowerCol:])
         upperRow += 1
         del self.lines[upperRow:lowerRow+1]
     elif self.selectionMode == kSelectionLine:
       del self.lines[upperRow:lowerRow]
 
-  def insertLines(self, buffer, lines):
+  def insertLines(self, lines):
     lines = list(lines)
     lines.reverse()
     if len(lines) == 0:
@@ -158,30 +158,30 @@ class Selectable:
     if (self.selectionMode == kSelectionNone or
         self.selectionMode == kSelectionCharacter or
         self.selectionMode == kSelectionWord):
-      firstLine = buffer.lines[self.cursorRow]
+      firstLine = self.lines[self.cursorRow]
       if len(lines) == 1:
-        buffer.lines[self.cursorRow] = (firstLine[:self.cursorCol] + lines[0] +
+        self.lines[self.cursorRow] = (firstLine[:self.cursorCol] + lines[0] +
             firstLine[self.cursorCol:])
       else:
-        buffer.lines[self.cursorRow] = (firstLine[:self.cursorCol] +
+        self.lines[self.cursorRow] = (firstLine[:self.cursorCol] +
             lines[-1])
         row = self.cursorRow + 1
-        buffer.lines.insert(row,
+        self.lines.insert(row,
             lines[0] + firstLine[self.cursorCol:])
         for line in lines[1:-1]:
-          buffer.lines.insert(row, line)
+          self.lines.insert(row, line)
     elif self.selectionMode == kSelectionAll:
       self.lines = list(lines)
     elif self.selectionMode == kSelectionBlock:
       for line in lines:
-        buffer.lines[self.cursorRow] = (
-            buffer.lines[self.cursorRow][:self.cursorCol] + line +
-            buffer.lines[self.cursorRow][self.cursorCol:])
+        self.lines[self.cursorRow] = (
+            self.lines[self.cursorRow][:self.cursorCol] + line +
+            self.lines[self.cursorRow][self.cursorCol:])
     elif self.selectionMode == kSelectionLine:
       for line in lines:
-        buffer.lines.insert(self.cursorRow, line)
+        self.lines.insert(self.cursorRow, line)
     else:
-      buffer.log('selection mode not recognized', self.selectionMode)
+      self.prg.log('selection mode not recognized', self.selectionMode)
 
   def extendWords(self, upperRow, upperCol, lowerRow, lowerCol):
     line = self.lines[upperRow]
@@ -334,7 +334,7 @@ class Mutator(Selectable):
         x = self.cursorCol
         self.lines[self.cursorRow] = line[:x] + line[x+len(change[1]):]
       elif change[0] == 'ds':  # Redo delete selection.
-        self.doDeleteSelection(self)
+        self.doDeleteSelection()
       elif change[0] == 'i':
         line = self.lines[self.cursorRow]
         x = self.cursorCol
@@ -367,7 +367,7 @@ class Mutator(Selectable):
         self.cursorCol += change[1][1]
         self.goalCol += change[1][2]
       elif change[0] == 'v':
-        self.insertLines(self, change[1])
+        self.insertLines(change[1])
         maxy, maxx = self.prg.inputWindow.cursorWindow.getmaxyx() #hack
         if self.cursorRow > self.scrollRow + maxy:
           self.scrollRow = self.cursorRow
@@ -457,7 +457,7 @@ class Mutator(Selectable):
         x = self.cursorCol
         self.lines[self.cursorRow] = line[:x] + change[1] + line[x:]
       elif change[0] == 'ds':  # Undo delete selection.
-        self.insertLines(self, change[1])
+        self.insertLines(change[1])
       elif change[0] == 'i':
         line = self.lines[self.cursorRow]
         x = self.cursorCol
@@ -499,7 +499,7 @@ class Mutator(Selectable):
             self.cursorRow, self.cursorCol, kSelectionCharacter)
         self.prg.log('undo v', a)
         self.setSelection(a)
-        self.doDeleteSelection(self)
+        self.doDeleteSelection()
         upperRow, upperCol, a,b = self.startAndEnd()
         self.selectionMode = kSelectionNone
         self.cursorRow += upperRow-self.cursorRow
@@ -546,7 +546,7 @@ class BackingTextBuffer(Mutator):
   def performDelete(self):
     self.prg.log('backspace', self.cursorRow > self.markerRow)
     if self.selectionMode != kSelectionNone:
-      text = self.getSelectedText(self)
+      text = self.getSelectedText()
       if text:
         if (self.cursorRow > self.markerRow or
             (self.cursorRow == self.markerRow and
@@ -849,7 +849,7 @@ class BackingTextBuffer(Mutator):
       self.redo()
 
   def editCopy(self):
-    text = self.getSelectedText(self)
+    text = self.getSelectedText()
     if len(text):
       self.clipList.append(text)
       if self.selectionMode == kSelectionLine:

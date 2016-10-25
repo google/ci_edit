@@ -226,11 +226,10 @@ class InteractiveFind(EditText):
     #self.host.resizeBy(self.height-1, 0)
     EditText.focus(self)
     self.findCmd = self.document.textBuffer.find
-    selection = self.document.textBuffer.getSelectedText(
-        self.document.textBuffer)
+    selection = self.document.textBuffer.getSelectedText()
     if selection:
       self.textBuffer.selectionAll()
-      self.textBuffer.insertLines(self.textBuffer, selection)
+      self.textBuffer.insertLines(selection)
     self.textBuffer.selectionAll()
     self.prg.log('find tb', self.textBuffer.cursorCol)
 
