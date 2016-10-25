@@ -1,4 +1,4 @@
-
+#!/usr/bin/python
 import tests.selectable_tests
 import tests.text_buffer_tests
 import unittest
