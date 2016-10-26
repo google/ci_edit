@@ -367,7 +367,7 @@ class Mutator(Selectable):
         self.cursorRow += change[1][0]
         self.cursorCol += change[1][1]
         self.goalCol += change[1][2]
-      elif change[0] == 'v':
+      elif change[0] == 'v':  # Redo paste.
         self.insertLines(change[1])
         maxy, maxx = self.prg.inputWindow.cursorWindow.getmaxyx() #hack
         if self.cursorRow > self.scrollRow + maxy:
@@ -490,22 +490,19 @@ class Mutator(Selectable):
         for i in range(change[1][0]):
           del self.lines[self.cursorRow+1]
       elif change[0] == 'v':  # undo paste
-        lineCount = len(change[1])
-        upperRow = self.cursorRow-(lineCount-1)
-        if lineCount == 1:
-          upperCol = self.cursorCol-(len(change[1][0]))
+        clip = change[1]
+        row = self.cursorRow
+        col = self.cursorCol
+        self.prg.log('len clip', len(clip))
+        if len(clip) == 1:
+          self.lines[row] = (
+              self.lines[row][:col] +
+              self.lines[row][col+len(clip[0]):])
         else:
-          upperCol = len(self.lines[upperRow])-(len(change[1][0]))
-        a = (self.cursorRow, self.cursorCol, upperRow, upperCol,
-            self.cursorRow, self.cursorCol, kSelectionCharacter)
-        self.prg.log('undo v', a)
-        self.setSelection(a)
-        self.doDeleteSelection()
-        upperRow, upperCol, a,b = self.startAndEnd()
-        self.selectionMode = kSelectionNone
-        self.cursorRow += upperRow-self.cursorRow
-        self.cursorCol += upperCol-self.cursorCol
-        self.goalCol = self.cursorCol
+          self.lines[row] = (self.lines[row][:col]+
+              self.lines[row+len(clip)-1][len(clip[-1]):])
+          delLineCount = len(clip[1:-1])
+          del self.lines[row+1:row+1+delLineCount+1]
       elif change[0] == 'vb':
         row = min(self.markerRow, self.cursorRow)
         endRow = max(self.markerRow, self.cursorRow)
@@ -871,6 +868,14 @@ class BackingTextBuffer(Mutator):
       else:
         clip = self.clipList[-1]
       self.redoAddChange(('v', clip))
+      self.redo()
+      rowDelta = len(clip)-1
+      if rowDelta == 0:
+        endCol = self.cursorCol+len(clip[0])
+      else:
+        endCol = len(clip[-1])
+      self.cursorMove(rowDelta, endCol-self.cursorCol,
+          endCol-self.goalCol)
       self.redo()
     else:
       self.prg.log('clipList empty')
