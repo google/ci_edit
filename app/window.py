@@ -57,7 +57,7 @@ class StaticWindow:
   def hide(self):
     """Remove window from the render list."""
     try: self.prg.zOrder.remove(self)
-    except ValueError: self.prg.log('not found')
+    except ValueError: self.prg.logPrint(repr(self)+'not found in zOrder')
 
   def mouseClick(self, row, col, shift, ctrl, alt):
     pass
@@ -85,7 +85,7 @@ class StaticWindow:
     self.cursorWindow.refresh()
 
   def moveTo(self, top, left):
-    self.prg.log('move', top, left)
+    self.prg.logPrint('move', top, left)
     if top == self.top and left == self.left:
       return
     self.top = top
@@ -97,7 +97,7 @@ class StaticWindow:
       self.prg.logPrint('error mvwin', top, left, repr(self))
 
   def moveBy(self, top, left):
-    self.prg.log('moveBy', top, left, repr(self))
+    self.prg.logPrint('moveBy', top, left, repr(self))
     if top == 0 and left == 0:
       return
     self.top += top
@@ -109,7 +109,7 @@ class StaticWindow:
     self.resizeTo(rows, cols)
 
   def resizeTo(self, rows, cols):
-    self.prg.log('resizeTo', rows, cols)
+    self.prg.logPrint('resizeTo', rows, cols)
     self.rows = rows
     self.cols = cols
     try:
@@ -118,7 +118,7 @@ class StaticWindow:
       self.prg.logPrint('resize failed', self.rows, self.cols)
 
   def resizeBy(self, rows, cols):
-    self.prg.log('resizeBy', rows, cols, repr(self))
+    self.prg.logPrint('resizeBy', rows, cols, repr(self))
     self.rows += rows
     self.cols += cols
     if self.rows <= 0 or self.cols <= 0:
@@ -143,7 +143,7 @@ class Window(StaticWindow):
 
   def focus(self):
     try: self.prg.zOrder.remove(self)
-    except ValueError: self.prg.log('not found')
+    except ValueError: self.prg.logPrint(repr(self)+'not found in zOrder')
     self.prg.zOrder.append(self)
     self.controller.focus()
     self.controller.commandLoop()
@@ -366,7 +366,7 @@ class InputWindow(Window):
     self.reshape(rows, cols, top, left)
 
   def reshape(self, rows, cols, top, left):
-    self.prg.log('reshape', rows, cols, top, left)
+    self.prg.logPrint('reshape', rows, cols, top, left)
     if self.showHeader:
       self.headerLine.reshape(1, cols, top, left)
       rows -= 1
