@@ -269,7 +269,7 @@ class StatusLine(StaticWindow):
       Window.refresh(self)
     else:
       tb = self.host.textBuffer
-      statusLine = self.host.textBuffer.fullPath
+      statusLine = self.host.textBuffer.relativePath
       if tb.isDirty():
         statusLine += ' * '
       else:
@@ -355,9 +355,10 @@ class InputWindow(Window):
 
     if header:
       if self.prg.cliFiles:
-        self.headerLine.controller.setFileName(self.prg.cliFiles[0]['path'])
-        self.setTextBuffer(self.prg.bufferManager.loadTextBuffer(
-            self.prg.cliFiles[0]['path']))
+        path = self.prg.cliFiles[0]['path']
+        self.headerLine.controller.setFileName(path)
+        self.setTextBuffer(
+            self.prg.bufferManager.loadTextBuffer(path))
       else:
         scratchPath = "~/ci_scratch"
         self.headerLine.controller.setFileName(scratchPath)
@@ -429,6 +430,7 @@ class InputWindow(Window):
 
   def setTextBuffer(self, textBuffer):
     self.prg.log('setTextBuffer')
+    self.headerLine.controller.setFileName(textBuffer.fullPath)
     self.controller.setTextBuffer(textBuffer)
     Window.setTextBuffer(self, textBuffer)
     self.textBuffer.debugRedo = self.prg.debugRedo

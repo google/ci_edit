@@ -294,6 +294,7 @@ class Mutator(Selectable):
     self.debugRedo = False
     self.findRe = None
     self.fullPath = ''
+    self.relativePath = ''
     self.goalCol = 0
     self.lines = []
     self.scrollRow = 0
@@ -881,6 +882,7 @@ class BackingTextBuffer(Mutator):
       # todo handle error writing
       self.data = ""
       self.fullPath = ""
+      self.relativePath = ""
       self.lines = []
       self.file.close()
 
@@ -913,6 +915,10 @@ class BackingTextBuffer(Mutator):
         self.prg.log('error opening file', fullPath)
         return
     self.fullPath = fullPath
+    self.relativePath = os.path.relpath(path, os.getcwd())
+    self.prg.log('fullPath', self.fullPath)
+    self.prg.log('cwd', os.getcwd())
+    self.prg.log('relativePath', self.relativePath)
     self.fileFilter()
     self.file.close()
 
