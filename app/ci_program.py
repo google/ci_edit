@@ -142,11 +142,13 @@ class CiProgram:
       self.debugWindow.writeLine("mouse is not available.",
           self.debugWindow.color)
     # Display some of the redo chain.
-    self.debugWindow.writeLine(
-        "redoIndex %3d savedAt %3d depth %3d"
-        %(textBuffer.redoIndex, textBuffer.savedAtRedoIndex,
-          len(textBuffer.redoChain)),
-        self.debugWindow.color+100)
+    try:
+      self.debugWindow.writeLine(
+          "redoIndex %3d savedAt %3d depth %3d"
+          %(textBuffer.redoIndex, textBuffer.savedAtRedoIndex,
+            len(textBuffer.redoChain)),
+          self.debugWindow.color+100)
+    except: pass
     lenChain = len(textBuffer.redoChain)
     cursor = len(textBuffer.redoChain)-textBuffer.redoIndex+1
     for i in range(5, 0, -1):
