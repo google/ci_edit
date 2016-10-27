@@ -40,6 +40,11 @@ class Controller:
   def changeToInputWindow(self, ignored=1):
     self.prg.changeTo = self.prg.inputWindow
 
+  def saveEventChangeToInputWindow(self, ignored=1):
+    self.prg.log('ungetch')
+    curses.ungetch(self.prg.ch)
+    self.prg.changeTo = self.prg.inputWindow
+
 
 class MainController:
   """The different keyboard mappings are different controllers. This class

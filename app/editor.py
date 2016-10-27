@@ -208,7 +208,7 @@ class InteractiveFind(EditText):
       CTRL_R: self.findPrior,
       CTRL_S: self.replacementTextEdit,
       curses.KEY_DOWN: self.findNext,
-      curses.KEY_MOUSE: self.changeToInputWindow,
+      curses.KEY_MOUSE: self.saveEventChangeToInputWindow,
       curses.KEY_UP: self.findPrior,
     })
     self.height = 1
