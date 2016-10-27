@@ -267,7 +267,7 @@ class InteractiveGoto(EditText):
       curses.ascii.ESC: self.changeToInputWindow,
       curses.KEY_F1: self.info,
       CTRL_J: self.changeToInputWindow,
-      curses.KEY_MOUSE: self.changeToInputWindow,
+      curses.KEY_MOUSE: self.saveEventChangeToInputWindow,
       ord('b'): self.gotoBottom,
       ord('h'): self.gotoHalfway,
       ord('t'): self.gotoTop,
