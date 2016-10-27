@@ -398,8 +398,7 @@ class InputWindow(Window):
       self.leftColumn.addStr(i, 0,
           ' %5d  '%(self.textBuffer.scrollRow+i+1), self.leftColumn.color)
     for i in range(limit, maxy):
-      self.leftColumn.addStr(i, 0,
-          '       ', self.leftColumn.color)
+      self.leftColumn.addStr(i, 0, '       ', 0)
     if 1:
       cursorAt = self.textBuffer.cursorRow-self.textBuffer.scrollRow
       self.leftColumn.addStr(cursorAt, 1,

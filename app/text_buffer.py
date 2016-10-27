@@ -1092,8 +1092,8 @@ class BackingTextBuffer(Mutator):
       self.mouseRelease(row, col, shift, ctrl, alt)
     else:
       self.prg.log(' click', row, col, shift, ctrl, alt)
-      self.mouseRelease(row, col, shift, ctrl, alt)
       self.selectionNone()
+      self.mouseRelease(row, col, shift, ctrl, alt)
 
   def mouseDoubleClick(self, row, col, shift, ctrl, alt):
     self.prg.log('double click', row, col)
