@@ -282,7 +282,7 @@ class Selectable:
       elif upperRow > lowerRow:
         upperRow, lowerRow = lowerRow, upperRow
         upperCol, lowerCol = lowerCol, upperCol
-    self.prg.log('start and end', upperRow, upperCol, lowerRow, lowerCol)
+    #self.prg.log('start and end', upperRow, upperCol, lowerRow, lowerCol)
     return (upperRow, upperCol, lowerRow, lowerCol)
 
 
@@ -432,7 +432,7 @@ class Mutator(Selectable):
       assert ('m', (0,0,0,0,0,0,0,0,0,0)) in noOpInstructions
       if change in noOpInstructions:
         return
-      self.prg.log(change)
+      #self.prg.log('opti', change)
     self.redoChain.append(change)
     if self.debugRedo:
       self.prg.log('--- redoIndex', self.redoIndex)
@@ -742,6 +742,8 @@ class BackingTextBuffer(Mutator):
     self.prg.log('cursorSelectWordLeft')
     if self.selectionMode == kSelectionNone:
       self.selectionCharacter()
+    if self.cursorRow == self.markerRow and self.cursorCol == self.markerCol:
+      self.prg.log('They match')
     self.cursorMoveWordLeft()
     self.extendSelection()
 
@@ -751,7 +753,6 @@ class BackingTextBuffer(Mutator):
       self.selectionCharacter()
     self.cursorMoveWordRight()
     self.extendSelection()
-
 
   def cursorSelectUp(self):
     if self.selectionMode == kSelectionNone:
@@ -994,7 +995,7 @@ class BackingTextBuffer(Mutator):
     if found:
       start = found.regs[0][0]
       end = found.regs[0][1]
-      self.prg.log('found on line', self.cursorRow, start)
+      #self.prg.log('found on line', self.cursorRow, start)
       self.selectText(self.cursorRow, offset+start, end-start,
           kSelectionCharacter)
       return
@@ -1006,9 +1007,10 @@ class BackingTextBuffer(Mutator):
     for i in theRange:
       found = re.search(searchFor, self.lines[i])
       if found:
-        for k in found.regs:
-          self.prg.log('AAA', k[0], k[1])
-        self.prg.log('b found on line', i, repr(found))
+        if 0:
+          for k in found.regs:
+            self.prg.log('AAA', k[0], k[1])
+          self.prg.log('b found on line', i, repr(found))
         start = found.regs[0][0]
         end = found.regs[0][1]
         self.selectText(i, start, end-start, kSelectionCharacter)
@@ -1022,7 +1024,7 @@ class BackingTextBuffer(Mutator):
     for i in theRange:
       found = re.search(searchFor, self.lines[i])
       if found:
-        self.prg.log('c found on line', i, repr(found))
+        #self.prg.log('c found on line', i, repr(found))
         start = found.regs[0][0]
         end = found.regs[0][1]
         self.selectText(i, start, end-start, kSelectionCharacter)
@@ -1109,8 +1111,26 @@ class BackingTextBuffer(Mutator):
       return
     row = max(0, min(self.scrollRow + row, len(self.lines) - 1))
     col = max(0, min(self.scrollCol + col, len(self.lines[row])))
-    self.cursorMove(row - self.cursorRow, col - self.cursorCol,
-        col - self.goalCol)
+    markerCol = 0
+    if self.cursorRow == self.markerRow:
+      if row == self.cursorRow:
+        if self.cursorCol > self.markerCol and col < self.markerCol:
+          self.prg.log('@@@@ left')
+          markerCol = 1
+        if self.cursorCol < self.markerCol and col > self.markerCol:
+          self.prg.log('@@@@ right')
+          markerCol = -1
+      else:
+        if (row < self.cursorRow and
+            self.cursorCol > self.markerCol):
+          self.prg.log('@@@@ up')
+          markerCol = 1
+        if (row > self.cursorRow and
+            self.cursorCol < self.markerCol):
+          self.prg.log('@@@@ down')
+          markerCol = -1
+    self.cursorMoveAndMark(row - self.cursorRow, col - self.cursorCol,
+        col - self.goalCol, 0, markerCol, 0)
     self.redo()
     if self.selectionMode == kSelectionLine:
       if self.cursorRow < self.markerRow:
@@ -1119,7 +1139,9 @@ class BackingTextBuffer(Mutator):
         self.cursorSelectLineDown()
       self.extendSelection()
     elif self.selectionMode == kSelectionWord:
-      if self.cursorRow < self.markerRow or self.cursorCol < self.markerCol:
+      if (self.cursorRow < self.markerRow or
+         (self.cursorRow == self.markerRow and
+          self.cursorCol < self.markerCol)):
         self.cursorSelectWordLeft()
       else:
         self.cursorSelectWordRight()
