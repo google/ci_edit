@@ -42,7 +42,6 @@ class InteractiveOpener(app.editor.InteractiveOpener):
   def __init__(self, prg, host, textBuffer):
     app.editor.InteractiveOpener.__init__(self, prg, host, textBuffer)
     self.document = host
-    self.prg.log('xxxxx', self.document)
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
       curses.ascii.ESC: self.changeToInputWindow,
@@ -68,7 +67,6 @@ class InteractiveFind(app.editor.InteractiveFind):
       CTRL_F: self.findNext,
       CTRL_J: self.changeToInputWindow,
       CTRL_R: self.findPrior,
-      #CTRL_S: self.replacementTextEdit,
       curses.KEY_DOWN: self.findNext,
       curses.KEY_MOUSE: self.saveEventChangeToInputWindow,
       curses.KEY_UP: self.findPrior,
@@ -122,13 +120,9 @@ class CuaEdit(app.controller.Controller):
       curses.KEY_NPAGE: textBuffer.cursorPageDown,
 
       CTRL_A: textBuffer.selectionAll,
-
       CTRL_C: textBuffer.editCopy,
-
       CTRL_E: textBuffer.nextSelectionMode,
-
       CTRL_F: self.switchToFind,
-
       CTRL_G: self.switchToGoto,
 
       #CTRL_H: textBuffer.backspace,
@@ -136,9 +130,7 @@ class CuaEdit(app.controller.Controller):
       curses.KEY_BACKSPACE: textBuffer.backspace,
 
       CTRL_I: textBuffer.indent,
-
       CTRL_J: textBuffer.carrageReturn,
-
       CTRL_N: textBuffer.cursorDown,
 
       CTRL_O: self.switchToCommandSetInteractiveOpen,
