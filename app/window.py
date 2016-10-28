@@ -4,6 +4,7 @@
 
 import app.controller
 import app.editor
+import app.cu_editor
 import app.text_buffer
 import sys
 import curses
@@ -199,7 +200,7 @@ class HeaderLine(Window):
   def __init__(self, prg, host):
     Window.__init__(self, prg)
     self.setTextBuffer(app.text_buffer.TextBuffer(prg))
-    self.controller = app.editor.InteractiveOpener(prg, host, self.textBuffer)
+    self.controller = app.cu_editor.InteractiveOpener(prg, host, self.textBuffer)
 
 
 class InteractiveFind(Window):
@@ -208,7 +209,7 @@ class InteractiveFind(Window):
     self.host = host
     self.label = "find: "
     self.setTextBuffer(app.text_buffer.TextBuffer(prg))
-    self.controller = app.editor.InteractiveFind(prg, self,
+    self.controller = app.cu_editor.InteractiveFind(prg, self,
         self.textBuffer)
     self.leftColumn = StaticWindow(prg)
 
@@ -235,7 +236,7 @@ class InteractiveGoto(Window):
     self.host = host
     self.label = "goto: "
     self.setTextBuffer(app.text_buffer.TextBuffer(prg))
-    self.controller = app.editor.InteractiveGoto(prg, self,
+    self.controller = app.cu_editor.InteractiveGoto(prg, self,
         self.textBuffer)
     self.leftColumn = StaticWindow(prg)
 
@@ -317,7 +318,7 @@ class InputWindow(Window):
     self.color = curses.color_pair(0)
     self.colorSelected = curses.color_pair(228)
     self.controller = app.controller.MainController(prg, self)
-    self.controller.add(app.editor.CuaPlusEdit(prg, self))
+    self.controller.add(app.cu_editor.CuaPlusEdit(prg, self))
     if header:
       self.headerLine = HeaderLine(prg, self)
       self.headerLine.color = curses.color_pair(168)
@@ -442,7 +443,7 @@ class PaletteWindow(Window):
     self.resizeTo(16, 16*5)
     self.moveTo(8, 8)
     self.controller = app.controller.MainController(prg, self)
-    self.controller.add(app.editor.CuaPlusEdit(prg, self))
+    self.controller.add(app.cu_editor.CuaPlusEdit(prg, self))
     textBuffer = app.text_buffer.TextBuffer(self.prg)
     self.controller.setTextBuffer(textBuffer)
     Window.setTextBuffer(self, textBuffer)
