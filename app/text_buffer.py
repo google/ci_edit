@@ -1497,6 +1497,8 @@ class TextBuffer(BackingTextBuffer):
           # Go one row past the selection or to the last line.
           for i in range(start, min(end+1, len(self.lines)-self.scrollRow)):
             line = self.lines[self.scrollRow+i][startCol:endCol]
+            if len(line) == len(self.lines[self.scrollRow+i]):
+              line += " "  # Maybe do: "\\n".
             if i == end and i == start:
               window.addStr(i, selStartCol,
                   line[selStartCol:selEndCol], window.colorSelected)
