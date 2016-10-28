@@ -54,6 +54,7 @@ class EditText(app.controller.Controller):
       curses.ascii.DEL: textBuffer.backspace,
 
       CTRL_Q: self.prg.quit,
+      CTRL_S: self.saveDocument,
       CTRL_V: textBuffer.editPaste,
       CTRL_X: textBuffer.editCut,
       CTRL_Y: textBuffer.redo,
@@ -72,6 +73,10 @@ class EditText(app.controller.Controller):
 
   def info(self):
     self.prg.log('EditText command set')
+
+  def saveDocument(self):
+    if self.host.host.textBuffer:
+      self.host.host.textBuffer.fileWrite()
 
   def unfocus(self):
     pass
@@ -206,7 +211,7 @@ class InteractiveFind(EditText):
       CTRL_F: self.findNext,
       CTRL_J: self.changeToInputWindow,
       CTRL_R: self.findPrior,
-      CTRL_S: self.replacementTextEdit,
+      #CTRL_S: self.replacementTextEdit,
       curses.KEY_DOWN: self.findNext,
       curses.KEY_MOUSE: self.saveEventChangeToInputWindow,
       curses.KEY_UP: self.findPrior,
@@ -245,8 +250,8 @@ class InteractiveFind(EditText):
       self.error = e.message
     self.findCmd = self.document.textBuffer.find
 
-  def replacementTextEdit(self):
-    pass
+  #def replacementTextEdit(self):
+  #  pass
 
   def unfocus(self):
     self.prg.log('unfocus Find')

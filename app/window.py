@@ -313,6 +313,11 @@ class InputWindow(Window):
     assert(prg)
     self.prg = prg
     self.showHeader = header
+    Window.__init__(self, prg)
+    self.color = curses.color_pair(0)
+    self.colorSelected = curses.color_pair(228)
+    self.controller = app.controller.MainController(prg, self)
+    self.controller.add(app.editor.CuaPlusEdit(prg, self))
     if header:
       self.headerLine = HeaderLine(prg, self)
       self.headerLine.color = curses.color_pair(168)
@@ -343,15 +348,6 @@ class InputWindow(Window):
       self.rightColumn = StaticWindow(prg)
       self.rightColumn.color = curses.color_pair(18)
       self.rightColumn.colorSelected = curses.color_pair(105)
-    Window.__init__(self, prg)
-    self.color = curses.color_pair(0)
-    self.colorSelected = curses.color_pair(228)
-    self.controller = app.controller.MainController(prg, self)
-    self.controller.add(app.editor.CuaPlusEdit(prg, self))
-    #  'cuaPlus': CuaPlusEdit(prg, host),
-    #  'cua': CuaEdit(prg, host),
-    #  'emacs': EmacsEdit(prg, host),
-    #  'vim': VimEdit(prg, host),
 
     if header:
       if self.prg.cliFiles:
