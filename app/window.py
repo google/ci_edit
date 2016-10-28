@@ -235,7 +235,7 @@ class InteractiveGoto(Window):
     self.host = host
     self.label = "goto: "
     self.setTextBuffer(app.text_buffer.TextBuffer(prg))
-    self.controller = app.editor.InteractiveGoto(prg, host,
+    self.controller = app.editor.InteractiveGoto(prg, self,
         self.textBuffer)
     self.leftColumn = StaticWindow(prg)
 

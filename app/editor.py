@@ -40,6 +40,7 @@ class EditText(app.controller.Controller):
   """An EditText is a base class for one-line controllers."""
   def __init__(self, prg, host, textBuffer):
     app.controller.Controller.__init__(self, prg, host, 'EditText')
+    self.document = None
     self.textBuffer = textBuffer
     textBuffer.lines = [""]
     self.commandSet = {
@@ -75,8 +76,9 @@ class EditText(app.controller.Controller):
     self.prg.log('EditText command set')
 
   def saveDocument(self):
-    if self.host.host.textBuffer:
-      self.host.host.textBuffer.fileWrite()
+    self.prg.log('saveDocument', self.document)
+    if self.document and self.document.textBuffer:
+      self.document.textBuffer.fileWrite()
 
   def unfocus(self):
     pass
@@ -267,6 +269,7 @@ class InteractiveGoto(EditText):
   """Jump to a particular line number."""
   def __init__(self, prg, host, textBuffer):
     EditText.__init__(self, prg, host, textBuffer)
+    self.document = host.host
     commandSet = self.commandSet.copy()
     commandSet.update({
       curses.ascii.ESC: self.changeToInputWindow,
@@ -282,7 +285,7 @@ class InteractiveGoto(EditText):
   def focus(self):
     self.prg.log('InteractiveGoto.focus')
     self.textBuffer.selectionAll()
-    self.textBuffer.insert(str(self.host.textBuffer.cursorRow+1))
+    self.textBuffer.insert(str(self.document.textBuffer.cursorRow+1))
     self.textBuffer.selectionAll()
     EditText.focus(self)
 
@@ -290,11 +293,11 @@ class InteractiveGoto(EditText):
     self.prg.log('InteractiveGoto command set')
 
   def gotoBottom(self):
-    self.cursorMoveTo(len(self.host.textBuffer.lines), 0)
+    self.cursorMoveTo(len(self.document.textBuffer.lines), 0)
     self.changeToInputWindow()
 
   def gotoHalfway(self):
-    self.cursorMoveTo(len(self.host.textBuffer.lines)/2+1, 0)
+    self.cursorMoveTo(len(self.document.textBuffer.lines)/2+1, 0)
     self.changeToInputWindow()
 
   def gotoTop(self):
@@ -302,7 +305,7 @@ class InteractiveGoto(EditText):
     self.changeToInputWindow()
 
   def cursorMoveTo(self, row, col):
-    textBuffer = self.host.textBuffer
+    textBuffer = self.document.textBuffer
     cursorRow = min(max(row - 1, 0), len(textBuffer.lines)-1)
     self.prg.log('cursorMoveTo row', row, cursorRow)
     textBuffer.cursorMove(cursorRow-textBuffer.cursorRow,
