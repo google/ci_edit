@@ -1,14 +1,29 @@
 # These prefs are not fully working.
 prefs = {
   'filetype': {
+    'bash': {
+      'ext': ['.sh'],
+      'grammer': 'bash',
+      'type': 'text',
+    },
     'binary': {
       'ext': ['.exe', '.jpg', '.jpeg', '.png', '.o', '.obj', '.pyc', '.pyo'],
       'grammer': None,
       'type': 'binary',
     },
     'c': {
-      'ext': ['.c', '.cc', '.cpp', '.h', '.hpp'],
+      'ext': ['.c', '.h'],
       'grammer': 'c',
+      'type': 'text',
+    },
+    'cpp': {
+      'ext': ['.cc', '.cpp', '.cxx', '.c++', '.hpp', '.hxx', '.h++'],
+      'grammer': 'cpp',
+      'type': 'text',
+    },
+    'css': {
+      'ext': ['.css', '_css.html'],
+      'grammer': 'css',
       'type': 'text',
     },
     'html': {
@@ -31,13 +46,22 @@ prefs = {
     # A grammer is
     # 'grammer_name': {
     #   'begin': None or string,
-    #   'continuation': None or string,
+    #   'continued': None or string, Prefixed used when continuing to another line,
     #   'end': None or string,
     #   'escape': None or string,
     #   'indent': None or string,
     #   'keywords': None or list of string,
-    #   'within': None or list of 'grammer_name',
+    #   'single_line': Boolean, Whether entire grammer must be on a single line,
     # }
+    'bash': {
+      'escape': '\\',
+      'indent': '  ',
+      'keywords': [
+        'break', 'continue', 'if', 'for',
+        'return', 'while',
+      ],
+      'contains': ['c_string1', 'c_string2', 'pound_comment'],
+    },
     'c': {
       'begin': None,
       'end': None,
@@ -52,23 +76,43 @@ prefs = {
         'int8_t', 'int16_t', 'int32_t', 'int64_t',
         'uint8_t', 'uint16_t', 'uint32_t', 'uint64_t',
       ],
-      'within': None,
+      'contains': ['cpp_block_comment', 'cpp_line_comment', 'c_preprocessor',
+        'c_string1', 'c_string2', 'hex_number'],
     },
-    'c_block_comment': {
-      'begin': '/*',
-      'end': '*/',
+    'cpp': {
+      'begin': None,
+      'end': None,
+      'escape': None,
+      'indent': '  ',
+      'keywords': [
+        'class', 'else', 'for', 'if', 'return', 'sizeof', 'static', 'struct',
+        'typedef', 'while',
+      ],
+      'types': [
+        'char', 'double', 'float', 'int', 'long', 'short', 'unsigned',
+        'int8_t', 'int16_t', 'int32_t', 'int64_t',
+        'uint8_t', 'uint16_t', 'uint32_t', 'uint64_t',
+      ],
+      'contains': ['cpp_block_comment', 'cpp_line_comment', 'c_preprocessor',
+        'c_string1', 'c_string2', 'hex_number'],
+    },
+    'cpp_block_comment': {
+      'begin': '/\\*',
+      'continued': ' * ',
+      'end': '\\*/',
       'escape': None,
       'indent': '  ',
       'keywords': [],
-      'within': 'c',
+      'nestable': False,
     },
-    'c_line_comment': {
+    'cpp_line_comment': {
       'begin': '//',
+      'continued': '// ',
       'end': '\n',
       'escape': '\\',
       'indent': '  ',
       'keywords': [],
-      'within': 'c',
+      'nestable': False,
     },
     'c_preprocessor': {
       'begin': '#',
@@ -76,9 +120,10 @@ prefs = {
       'escape': None,
       'indent': '  ',
       'keywords': [
-        'define', 'defined', 'endif', 'if', 'ifdef', 'ifndef', 'include', 'undef',
+        'define', 'defined', 'endif', 'if', 'ifdef', 'ifndef', 'include',
+        'undef',
       ],
-      'within': 'c',
+      'contains': ['file_path_quoted', 'file_path_bracketed'],
     },
     'c_string1': {
       'begin': '"',
@@ -86,7 +131,15 @@ prefs = {
       'escape': '\\',
       'indent': '  ',
       'keywords': [],
-      'within': 'c',
+      'single_line': True,
+    },
+    'c_string2': {
+      'begin': "'",
+      'end': "'",
+      'escape': '\\',
+      'indent': '  ',
+      'keywords': [],
+      'single_line': True,
     },
     'css': {
       'begin': '<style',
@@ -94,45 +147,71 @@ prefs = {
       'escape': None,
       'indent': '  ',
       'keywords': [],
-      'within': 'html',
+      'contains': ['cpp_block_comment'],
     },
     'html': {
       'escape': None,
       'indent': '  ',
       'keywords': [
-        'a', 'div', 'img', 'span',
+        'a', 'b', 'div', 'img', 'input', 'select', 'span',
       ],
+      'contains': ['css', 'html_block_comment', 'js'],
+    },
+    'hex_number': {
+      'begin': '0x',
+      'end': '[^0-9a-fA-F]',
+    },
+    'html_block_comment': {
+      'begin': '<!--',
+      'end': '-->',
+      'escape': None,
+      'indent': '  ',
+      'keywords': [],
+      'prefix': '',
     },
     'js': {
+      'begin': '<script',
+      'end': '</script>',
       'escape': None,
       'indent': '  ',
       'keywords': [
         'if', 'for', 'return', 'while',
       ],
-      'within': 'html',
+      'contains': ['c_string1', 'c_string2', 'cpp_block_comment',
+          'cpp_line_comment'],
     },
     'md': {
       'escape': None,
       'indent': '  ',
       'keywords': [],
     },
+    'number': {
+      'begin': '[1-9]',
+      'end': '[^0-9]',
+    },
+    'octal_number': {
+      'begin': '0',
+      'end': '[^0-7]',
+    },
     'py': {
       'escape': '\\',
       'indent': '  ',
       'keywords': [
-        'and', 'as', 'class', 'def', 'from', 'if', 'import', 'for', 'or',
-        'return', 'while',
+        'and', 'as', 'break', 'class', 'continue',
+        'def', 'except', 'from', 'if',
+        'import', 'in', 'for', 'or',
+        'return', 'try', 'while', 'yeild',
       ],
-      'within': None,
+      'contains': ['c_string1', 'c_string2',
+          'pound_comment', 'py_string1', 'py_string2'],
     },
-    'py_comment': {
+    'pound_comment': {
       'begin': '#',
       'continuation': '# ',
       'end': '\n',
       'escape': None,
       'indent': '  ',
       'keywords': [],
-      'within': ['py'],
     },
     'py_string1': {
       'begin': "'''",
@@ -156,6 +235,7 @@ prefs = {
       'escape': None,
       'indent': '  ',
       'keywords': [],
+      'contains': ['quoted_string'],
     },
   },
 }
