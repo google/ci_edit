@@ -47,7 +47,6 @@ class EditText(app.controller.Controller):
   def focus(self):
     self.prg.log('EditText.focus', repr(self))
     self.commandDefault = self.textBuffer.insertPrintable
-    self.commandSet = self.commandSet ################
 
   def info(self):
     self.prg.log('EditText command set')
@@ -206,17 +205,9 @@ class InteractiveFind(EditText):
       self.error = e.message
     self.findCmd = self.document.textBuffer.find
 
-  #def replacementTextEdit(self):
-  #  pass
-
   def unfocus(self):
     self.prg.log('unfocus Find')
     #self.hide()
-    return
-    self.document.resizeBy(self.height, 0)
-    #self.host.resizeBy(-self.height, 0)
-    #self.host.moveBy(self.height, 0)
-    self.document.statusLine.show()
 
 
 class InteractiveGoto(EditText):
