@@ -810,7 +810,7 @@ class BackingTextBuffer(Mutator):
 
   def cursorScrollToMiddle(self):
     maxy, maxx = self.prg.inputWindow.cursorWindow.getmaxyx() #hack
-    self.cursorMoveScroll(0, 0, 0, maxy/2-self.markerRow, 0)
+    #self.cursorMoveScroll(0, 0, 0, maxy/2-self.markerRow, 0)
 
   def cursorStartOfLine(self):
     self.cursorMoveScroll(0, -self.cursorCol, -self.goalCol, 0, -self.scrollCol)
