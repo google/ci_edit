@@ -14,6 +14,8 @@ class StaticWindow:
   """A static window does not get focus."""
   def __init__(self, prg):
     self.prg = prg
+    self.parent = prg
+    self.zOrder = []
     self.color = 0
     self.colorSelected = 1
     self.top = 0
@@ -39,14 +41,11 @@ class StaticWindow:
 
   def contains(self, row, col):
     """Determine whether the position at row, col lay within this window."""
-    return (row >= self.top and row < self.top+self.rows and
-        col >= self.left and col < self.left + self.cols)
-
-  def layer(self, layerIndex):
-    """Move window to specified z order."""
-    try: self.prg.zOrder.remove(self)
-    except: pass
-    self.prg.zOrder.insert(layerIndex, self)
+    for i in self.zOrder:
+      if i.contains(row, col):
+        return i
+    return (self.top <= row < self.top+self.rows and
+        self.left <= col < self.left + self.cols and self)
 
   def blank(self):
     """Clear the window."""
@@ -57,7 +56,7 @@ class StaticWindow:
 
   def hide(self):
     """Remove window from the render list."""
-    try: self.prg.zOrder.remove(self)
+    try: self.parent.zOrder.remove(self)
     except ValueError: self.prg.logPrint(repr(self)+'not found in zOrder')
 
   def mouseClick(self, row, col, shift, ctrl, alt):
@@ -84,6 +83,8 @@ class StaticWindow:
   def refresh(self):
     """Redraw window."""
     self.cursorWindow.refresh()
+    for child in reversed(self.zOrder):
+      child.refresh()
 
   def moveTo(self, top, left):
     self.prg.logPrint('move', top, left)
@@ -126,11 +127,19 @@ class StaticWindow:
       return
     self.cursorWindow.resize(self.rows, self.cols)
 
+  def setParent(self, parent, layerIndex):
+    if self.parent:
+      try: self.parent.zOrder.remove(self)
+      except: pass
+    self.parent = parent
+    if parent:
+      self.parent.zOrder.insert(layerIndex, self)
+
   def show(self):
     """Show window and bring it to the top layer."""
-    try: self.prg.zOrder.remove(self)
+    try: self.parent.zOrder.remove(self)
     except: pass
-    self.prg.zOrder.append(self)
+    self.parent.zOrder.append(self)
 
 
 class Window(StaticWindow):
@@ -143,9 +152,9 @@ class Window(StaticWindow):
     self.textBuffer = None
 
   def focus(self):
-    try: self.prg.zOrder.remove(self)
+    try: self.parent.zOrder.remove(self)
     except ValueError: self.prg.logPrint(repr(self)+'not found in zOrder')
-    self.prg.zOrder.append(self)
+    self.parent.zOrder.append(self)
     self.controller.focus()
     self.controller.commandLoop()
 
@@ -174,13 +183,13 @@ class Window(StaticWindow):
     self.textBuffer.draw(self)
     if self.prg.zOrder[-1] is self:
       self.prg.debugDraw(self)
-    try:
-      self.cursorWindow.move(
-          self.textBuffer.cursorRow - self.textBuffer.scrollRow,
-          self.textBuffer.cursorCol - self.textBuffer.scrollCol)
-    except curses.error:
-      pass
-    self.cursorWindow.refresh()
+      try:
+        self.cursorWindow.move(
+            self.textBuffer.cursorRow - self.textBuffer.scrollRow,
+            self.textBuffer.cursorCol - self.textBuffer.scrollCol)
+      except curses.error:
+        pass
+    StaticWindow.refresh(self)
 
   def getCh(self):
     self.prg.refresh()
@@ -257,6 +266,31 @@ class InteractiveGoto(Window):
     self.hide()
 
 
+class LineNumbers(StaticWindow):
+  def __init__(self, prg, host):
+    StaticWindow.__init__(self, prg)
+    self.host = host
+    #self.controller = app.cu_editor.LineNumberController(prg, self)
+
+  def drawLineNumbers(self):
+    maxy, maxx = self.cursorWindow.getmaxyx()
+    textBuffer = self.host.textBuffer
+    limit = min(maxy, len(textBuffer.lines)-textBuffer.scrollRow)
+    for i in range(limit):
+      self.addStr(i, 0,
+          ' %5d  '%(textBuffer.scrollRow+i+1), self.color)
+    for i in range(limit, maxy):
+      self.addStr(i, 0, '       ', 0)
+    if 1:
+      cursorAt = textBuffer.cursorRow-textBuffer.scrollRow
+      self.addStr(cursorAt, 1,
+          '%5d'%(textBuffer.cursorRow+1), self.colorSelected)
+    self.cursorWindow.refresh()
+
+  def refresh(self):
+    self.drawLineNumbers()
+
+
 class StatusLine(StaticWindow):
   """The status line appears at the bottom of the screen. It shows the current
   line and column the cursor is on."""
@@ -266,7 +300,7 @@ class StatusLine(StaticWindow):
 
   def refresh(self):
     maxy, maxx = self.cursorWindow.getmaxyx()
-    if self.prg.zOrder[-1] is self:
+    if False and self.parent.zOrder[-1] is self:
       Window.refresh(self)
     else:
       tb = self.host.textBuffer
@@ -323,32 +357,36 @@ class InputWindow(Window):
       self.headerLine = HeaderLine(prg, self)
       self.headerLine.color = curses.color_pair(168)
       self.headerLine.colorSelected = curses.color_pair(47)
-      self.headerLine.show()
+      self.headerLine.setParent(self, 0)
     self.showFooter = footer
     if 1:
       self.interactiveFind = InteractiveFind(prg, self)
-      self.interactiveFind.hide()
       self.interactiveFind.color = curses.color_pair(0)
       self.interactiveFind.colorSelected = curses.color_pair(87)
+      self.interactiveFind.setParent(self, 0)
+      self.interactiveFind.hide()
     if 1:
       self.interactiveGoto = InteractiveGoto(prg, self)
-      self.interactiveGoto.hide()
       self.interactiveGoto.color = curses.color_pair(0)
       self.interactiveGoto.colorSelected = curses.color_pair(87)
+      self.interactiveGoto.setParent(self, 0)
+      self.interactiveGoto.hide()
     if footer:
       self.statusLine = StatusLine(prg, self)
       self.statusLine.color = curses.color_pair(168)
       self.statusLine.colorSelected = curses.color_pair(47)
-      self.statusLine.show()
+      self.statusLine.setParent(self, 0)
     self.showLineNumbers = lineNumbers
     if lineNumbers:
-      self.leftColumn = StaticWindow(prg)
+      self.leftColumn = LineNumbers(prg, self)
       self.leftColumn.color = curses.color_pair(211)
       self.leftColumn.colorSelected = curses.color_pair(146)
+      self.leftColumn.setParent(self, 0)
     if 1:
       self.rightColumn = StaticWindow(prg)
       self.rightColumn.color = curses.color_pair(18)
       self.rightColumn.colorSelected = curses.color_pair(105)
+      self.rightColumn.setParent(self, 0)
 
     if header:
       if self.prg.cliFiles:
@@ -388,20 +426,6 @@ class InputWindow(Window):
       cols -= 1
     Window.reshape(self, rows, cols, top, left)
 
-  def drawLineNumbers(self):
-    maxy, maxx = self.cursorWindow.getmaxyx()
-    limit = min(maxy, len(self.textBuffer.lines)-self.textBuffer.scrollRow)
-    for i in range(limit):
-      self.leftColumn.addStr(i, 0,
-          ' %5d  '%(self.textBuffer.scrollRow+i+1), self.leftColumn.color)
-    for i in range(limit, maxy):
-      self.leftColumn.addStr(i, 0, '       ', 0)
-    if 1:
-      cursorAt = self.textBuffer.cursorRow-self.textBuffer.scrollRow
-      self.leftColumn.addStr(cursorAt, 1,
-          '%5d'%(self.textBuffer.cursorRow+1), self.leftColumn.colorSelected)
-    self.leftColumn.cursorWindow.refresh()
-
   def drawRightEdge(self):
     """Draw makers to indicate text extending past the right edge of the
     window."""
@@ -419,8 +443,6 @@ class InputWindow(Window):
 
   def refresh(self):
     Window.refresh(self)
-    if self.showLineNumbers:
-      self.drawLineNumbers()
     self.drawRightEdge()
     self.cursorWindow.refresh()
 
