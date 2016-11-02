@@ -66,7 +66,8 @@ class BufferManager:
         self.prg.log('Tried to open directory as a file', expandedPath)
         return
       else:
-        textBuffer.fileCreate(expandedPath)
+        self.prg.log('creating a new file at\n ', expandedPath)
+        textBuffer.fileLoad(expandedPath)
     self.buffers[expandedPath] = textBuffer
     for i,k in self.buffers.items():
       self.prg.log('  ', i)
@@ -896,11 +897,6 @@ class BackingTextBuffer(Mutator):
       self.lines = []
       self.file.close()
 
-  def fileCreate(self, path):
-    self.file = open(os.path.expandvars(os.path.expanduser(path)), 'w+')
-    self.fileFilter()
-    self.savedAtRedoIndex = self.redoIndex
-
   def fileFilter(self):
     def parse(line):
       return "\xfe%02x"%ord(line.groups()[0])
@@ -920,7 +916,9 @@ class BackingTextBuffer(Mutator):
       self.file = open(fullPath, 'r+')
     except:
       try:
+        # Create a new file.
         self.file = open(fullPath, 'w+')
+        self.file.write('')
       except:
         self.prg.log('error opening file', fullPath)
         return
