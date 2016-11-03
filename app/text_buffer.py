@@ -543,7 +543,6 @@ class BackingTextBuffer(Mutator):
     self.clipList = []
 
   def performDelete(self):
-    self.prg.log('backspace', self.cursorRow > self.markerRow)
     if self.selectionMode != kSelectionNone:
       text = self.getSelectedText()
       if text:
@@ -570,6 +569,7 @@ class BackingTextBuffer(Mutator):
       self.redo()
 
   def carrageReturn(self):
+    self.performDelete()
     self.redoAddChange(('n', (1, -self.cursorCol, -self.goalCol)))
     self.redo()
     if 1: # todo: if indent on CR
@@ -583,15 +583,6 @@ class BackingTextBuffer(Mutator):
       if indent:
         self.redoAddChange(('i', ' '*indent));
         self.redo()
-
-  def cursorCrLf(self):
-    maxy, maxx = self.prg.inputWindow.cursorWindow.getmaxyx() #hack
-    rows = 0
-    if self.cursorRow == self.scrollRow+maxy:
-      rows = 1
-    self.cursorMoveScroll(1, -self.cursorCol, -self.goalCol, rows,
-        -self.scrollCol)
-    self.redo()
 
   def cursorColDelta(self, toRow):
     if toRow >= len(self.lines):
