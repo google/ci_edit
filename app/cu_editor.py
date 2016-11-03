@@ -15,37 +15,37 @@ import text_buffer
 def initCommandSet(editText, textBuffer):
   """The basic command set includes line editing controls."""
   return {
-      CTRL_A: textBuffer.selectionAll,
+    CTRL_A: textBuffer.selectionAll,
 
-      CTRL_C: textBuffer.editCopy,
+    CTRL_C: textBuffer.editCopy,
 
-      CTRL_H: textBuffer.backspace,
+    CTRL_H: textBuffer.backspace,
 
-      CTRL_Q: editText.prg.quit,
-      CTRL_S: textBuffer.fileWrite,
-      CTRL_V: textBuffer.editPaste,
-      CTRL_X: textBuffer.editCut,
-      CTRL_Y: textBuffer.redo,
-      CTRL_Z: textBuffer.undo,
+    CTRL_Q: editText.prg.quit,
+    CTRL_S: textBuffer.fileWrite,
+    CTRL_V: textBuffer.editPaste,
+    CTRL_X: textBuffer.editCut,
+    CTRL_Y: textBuffer.redo,
+    CTRL_Z: textBuffer.undo,
 
-      127: textBuffer.backspace,
-      curses.ascii.DEL: textBuffer.backspace,
+    127: textBuffer.backspace,
+    curses.ascii.DEL: textBuffer.backspace,
 
-      curses.KEY_BACKSPACE: textBuffer.backspace,
-      curses.KEY_DC: textBuffer.delete,
-      curses.KEY_HOME: textBuffer.cursorStartOfLine,
-      curses.KEY_END: textBuffer.cursorEndOfLine,
+    curses.KEY_BACKSPACE: textBuffer.backspace,
+    curses.KEY_DC: textBuffer.delete,
+    curses.KEY_HOME: textBuffer.cursorStartOfLine,
+    curses.KEY_END: textBuffer.cursorEndOfLine,
 
-      # curses.KEY_DOWN: textBuffer.cursorDown,
-      curses.KEY_LEFT: textBuffer.cursorLeft,
-      curses.KEY_RIGHT: textBuffer.cursorRight,
-      # curses.KEY_UP: textBuffer.cursorUp,
+    # curses.KEY_DOWN: textBuffer.cursorDown,
+    curses.KEY_LEFT: textBuffer.cursorLeft,
+    curses.KEY_RIGHT: textBuffer.cursorRight,
+    # curses.KEY_UP: textBuffer.cursorUp,
 
-      KEY_CTRL_LEFT: textBuffer.cursorMoveWordLeft,
-      KEY_CTRL_SHIFT_LEFT: textBuffer.cursorSelectWordLeft,
-      KEY_CTRL_RIGHT: textBuffer.cursorMoveWordRight,
-      KEY_CTRL_SHIFT_RIGHT: textBuffer.cursorSelectWordRight,
-    }
+    KEY_CTRL_LEFT: textBuffer.cursorMoveWordLeft,
+    KEY_CTRL_SHIFT_LEFT: textBuffer.cursorSelectWordLeft,
+    KEY_CTRL_RIGHT: textBuffer.cursorMoveWordRight,
+    KEY_CTRL_SHIFT_RIGHT: textBuffer.cursorSelectWordRight,
+  }
 
 
 class InteractiveOpener(app.editor.InteractiveOpener):

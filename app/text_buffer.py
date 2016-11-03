@@ -1045,9 +1045,8 @@ class BackingTextBuffer(Mutator):
       self.redo()
       self.indentLines()
     else:
-      col = min(self.cursorCol, self.markerCol)
-      self.cursorMoveAndMark(0, col-self.cursorCol, col-self.goalCol,
-          0, col-self.markerCol, kSelectionLine-self.selectionMode)
+      self.cursorMoveAndMark(0, -self.cursorCol, -self.goalCol,
+          0, -self.markerCol, kSelectionLine-self.selectionMode)
       self.redo()
       self.indentLines()
 
@@ -1267,7 +1266,8 @@ class BackingTextBuffer(Mutator):
     lowerRow = max(self.markerRow, self.cursorRow)
     self.prg.log('unindentLines', upperRow, lowerRow)
     for line in self.lines[upperRow:lowerRow+1]:
-      if line[:2] != '  ':
+      if ((len(line) == 1 and line[:1] != ' ') or
+          (len(line) >= 2 and line[:2] != '  ')):
         # Handle multi-delete.
         return
     self.redoAddChange(('vd', ('  ')))
