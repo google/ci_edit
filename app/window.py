@@ -465,7 +465,8 @@ class PaletteWindow(Window):
     self.resizeTo(16, 16*5)
     self.moveTo(8, 8)
     self.controller = app.controller.MainController(prg, self)
-    self.controller.add(app.cu_editor.CuaPlusEdit(prg, self))
+    self.controller.add(app.cu_editor.PaletteDialogController(
+        prg, self))
     textBuffer = app.text_buffer.TextBuffer(self.prg)
     self.controller.setTextBuffer(textBuffer)
     Window.setTextBuffer(self, textBuffer)

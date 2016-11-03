@@ -13,27 +13,38 @@ import text_buffer
 
 
 def initCommandSet(editText, textBuffer):
-   return {
+  """The basic command set includes line editing controls."""
+  return {
       CTRL_A: textBuffer.selectionAll,
-      curses.KEY_BACKSPACE: textBuffer.backspace,
-      127: textBuffer.backspace,
 
       CTRL_C: textBuffer.editCopy,
 
       CTRL_H: textBuffer.backspace,
-      curses.ascii.DEL: textBuffer.backspace,
 
       CTRL_Q: editText.prg.quit,
-      CTRL_S: editText.saveDocument,
+      CTRL_S: textBuffer.fileWrite,
       CTRL_V: textBuffer.editPaste,
       CTRL_X: textBuffer.editCut,
       CTRL_Y: textBuffer.redo,
       CTRL_Z: textBuffer.undo,
 
+      127: textBuffer.backspace,
+      curses.ascii.DEL: textBuffer.backspace,
+
+      curses.KEY_BACKSPACE: textBuffer.backspace,
+      curses.KEY_DC: textBuffer.delete,
+      curses.KEY_HOME: textBuffer.cursorStartOfLine,
+      curses.KEY_END: textBuffer.cursorEndOfLine,
+
       # curses.KEY_DOWN: textBuffer.cursorDown,
       curses.KEY_LEFT: textBuffer.cursorLeft,
       curses.KEY_RIGHT: textBuffer.cursorRight,
       # curses.KEY_UP: textBuffer.cursorUp,
+
+      KEY_CTRL_LEFT: textBuffer.cursorMoveWordLeft,
+      KEY_CTRL_SHIFT_LEFT: textBuffer.cursorSelectWordLeft,
+      KEY_CTRL_RIGHT: textBuffer.cursorMoveWordRight,
+      KEY_CTRL_SHIFT_RIGHT: textBuffer.cursorSelectWordRight,
     }
 
 
@@ -50,7 +61,6 @@ class InteractiveOpener(app.editor.InteractiveOpener):
       CTRL_J: self.createOrOpen,
       CTRL_N: self.createOrOpen,
       CTRL_O: self.createOrOpen,
-      CTRL_Q: self.prg.quit,
     })
     self.commandSet = commandSet
 
@@ -67,6 +77,7 @@ class InteractiveFind(app.editor.InteractiveFind):
       CTRL_F: self.findNext,
       CTRL_J: self.changeToInputWindow,
       CTRL_R: self.findPrior,
+      CTRL_S: self.saveDocument,
       curses.KEY_DOWN: self.findNext,
       curses.KEY_MOUSE: self.saveEventChangeToInputWindow,
       curses.KEY_UP: self.findPrior,
@@ -84,6 +95,7 @@ class InteractiveGoto(app.editor.InteractiveGoto):
       curses.ascii.ESC: self.changeToInputWindow,
       curses.KEY_F1: self.info,
       CTRL_J: self.changeToInputWindow,
+      CTRL_S: self.saveDocument,
       curses.KEY_MOUSE: self.saveEventChangeToInputWindow,
       ord('b'): self.gotoBottom,
       ord('h'): self.gotoHalfway,
@@ -102,48 +114,27 @@ class CuaEdit(app.controller.Controller):
 
   def setTextBuffer(self, textBuffer):
     self.textBuffer = textBuffer
-    self.commandSet_Main = {
+    commandSet = initCommandSet(self, textBuffer)
+    commandSet.update({
       curses.ascii.ESC: textBuffer.selectionNone,
-      curses.KEY_DC: textBuffer.delete,
       curses.KEY_MOUSE: self.prg.handleMouse,
       curses.KEY_RESIZE: self.prg.handleScreenResize,
 
       curses.KEY_F1: self.info,
-      curses.KEY_F3: self.testPalette,
-      curses.KEY_F4: self.showPalette,
-      curses.KEY_F5: self.hidePalette,
 
       curses.KEY_BTAB: textBuffer.unindent,
-      curses.KEY_HOME: textBuffer.cursorStartOfLine,
-      curses.KEY_END: textBuffer.cursorEndOfLine,
       curses.KEY_PPAGE: textBuffer.cursorPageUp,
       curses.KEY_NPAGE: textBuffer.cursorPageDown,
 
-      CTRL_A: textBuffer.selectionAll,
-      CTRL_C: textBuffer.editCopy,
-      CTRL_E: textBuffer.nextSelectionMode,
       CTRL_F: self.switchToFind,
       CTRL_G: self.switchToGoto,
 
-      #CTRL_H: textBuffer.backspace,
-      curses.ascii.DEL: textBuffer.backspace,
-      curses.KEY_BACKSPACE: textBuffer.backspace,
-
       CTRL_I: textBuffer.indent,
       CTRL_J: textBuffer.carriageReturn,
-      CTRL_N: textBuffer.cursorDown,
 
       CTRL_O: self.switchToCommandSetInteractiveOpen,
-      CTRL_Q: self.prg.quit,
-      CTRL_S: textBuffer.fileWrite,
-      CTRL_V: textBuffer.editPaste,
-      CTRL_X: textBuffer.editCut,
-      CTRL_Y: textBuffer.redo,
-      CTRL_Z: textBuffer.undo,
 
       curses.KEY_DOWN: textBuffer.cursorDown,
-      curses.KEY_LEFT: textBuffer.cursorLeft,
-      curses.KEY_RIGHT: textBuffer.cursorRight,
       curses.KEY_SLEFT: textBuffer.cursorSelectLeft,
       curses.KEY_SRIGHT: textBuffer.cursorSelectRight,
       curses.KEY_UP: textBuffer.cursorUp,
@@ -153,13 +144,10 @@ class CuaEdit(app.controller.Controller):
 
       KEY_CTRL_DOWN: textBuffer.cursorDownScroll,
       KEY_CTRL_SHIFT_DOWN: textBuffer.cursorSelectDownScroll,
-      KEY_CTRL_LEFT: textBuffer.cursorMoveWordLeft,
-      KEY_CTRL_SHIFT_LEFT: textBuffer.cursorSelectWordLeft,
-      KEY_CTRL_RIGHT: textBuffer.cursorMoveWordRight,
-      KEY_CTRL_SHIFT_RIGHT: textBuffer.cursorSelectWordRight,
       KEY_CTRL_UP: textBuffer.cursorUpScroll,
       KEY_CTRL_SHIFT_UP: textBuffer.cursorSelectUpScroll,
-    }
+    })
+    self.commandSet_Main = commandSet
 
   def focus(self):
     self.commandDefault = self.textBuffer.insertPrintable
@@ -181,15 +169,6 @@ class CuaEdit(app.controller.Controller):
   def switchToGoto(self):
     self.prg.changeTo = self.host.interactiveGoto
 
-  def showPalette(self):
-    self.prg.paletteWindow.focus()
-
-  def hidePalette(self):
-    self.prg.paletteWindow.hide()
-
-  def testPalette(self):
-    self.prg.shiftPalette()
-
 
 class CuaPlusEdit(CuaEdit):
   """Keyboard mappings for CUA, plus some extra."""
@@ -207,5 +186,33 @@ class CuaPlusEdit(CuaEdit):
     commandSet = self.commandSet_Main.copy()
     commandSet.update({
       CTRL_E: textBuffer.nextSelectionMode,
+
+      curses.KEY_F3: self.prg.shiftPalette,
+      curses.KEY_F4: self.prg.paletteWindow.focus,
     })
     self.commandSet_Main = commandSet
+
+
+class PaletteDialogController(app.controller.Controller):
+  """."""
+  def __init__(self, prg, host):
+    app.controller.Controller.__init__(self, prg, None, 'Palette')
+    self.prg.log('PaletteDialogController.__init__')
+
+  def focus(self):
+    def noOp(c):
+      self.prg.log('noOp in PaletteDialogController')
+    self.commandDefault = noOp
+    self.commandSet = {
+      CTRL_J: self.changeToInputWindow,
+      curses.ascii.ESC: self.changeToInputWindow,
+      curses.KEY_F3: self.prg.shiftPalette,
+      curses.KEY_F5: self.prg.paletteWindow.hide,
+    }
+
+  def info(self):
+    self.prg.log('PaletteDialogController command set')
+    self.prg.log(repr(self))
+
+  def setTextBuffer(self, textBuffer):
+    pass
