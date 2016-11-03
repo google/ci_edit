@@ -41,7 +41,7 @@ class CiEdit(app.controller.Controller):
       CTRL_F: self.cursorRight,
       curses.KEY_RIGHT: self.cursorRight,
 
-      CTRL_J: self.carrageReturn,
+      CTRL_J: self.carriageReturn,
 
       CTRL_K: self.deleteToEndOfLine,
 

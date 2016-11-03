@@ -130,7 +130,7 @@ class CuaEdit(app.controller.Controller):
       curses.KEY_BACKSPACE: textBuffer.backspace,
 
       CTRL_I: textBuffer.indent,
-      CTRL_J: textBuffer.carrageReturn,
+      CTRL_J: textBuffer.carriageReturn,
       CTRL_N: textBuffer.cursorDown,
 
       CTRL_O: self.switchToCommandSetInteractiveOpen,

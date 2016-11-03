@@ -353,7 +353,7 @@ class CiEdit(app.controller.Controller):
       CTRL_F: self.cursorRight,
       curses.KEY_RIGHT: self.cursorRight,
 
-      CTRL_J: self.carrageReturn,
+      CTRL_J: self.carriageReturn,
 
       CTRL_K: self.deleteToEndOfLine,
 
@@ -491,7 +491,7 @@ class CuaEdit(app.controller.Controller):
 
       CTRL_I: textBuffer.indent,
 
-      CTRL_J: textBuffer.carrageReturn,
+      CTRL_J: textBuffer.carriageReturn,
 
       CTRL_N: textBuffer.cursorDown,
 
@@ -610,7 +610,7 @@ class EmacsEdit:
       CTRL_F: textBuffer.cursorRight,
       curses.KEY_RIGHT: textBuffer.cursorRight,
 
-      CTRL_J: textBuffer.carrageReturn,
+      CTRL_J: textBuffer.carriageReturn,
 
       CTRL_K: textBuffer.deleteToEndOfLine,
 

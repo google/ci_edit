@@ -568,7 +568,7 @@ class BackingTextBuffer(Mutator):
       self.redoAddChange(change)
       self.redo()
 
-  def carrageReturn(self):
+  def carriageReturn(self):
     self.performDelete()
     self.redoAddChange(('n', (1, -self.cursorCol, -self.goalCol)))
     self.redo()
