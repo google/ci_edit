@@ -1182,8 +1182,9 @@ class BackingTextBuffer(Mutator):
     self.redo()
 
   def nextSelectionMode(self):
-    self.selectionMode += 1
-    self.selectionMode %= kSelectionModeCount
+    next = self.selectionMode + 1
+    next %= kSelectionModeCount
+    self.doSelectionMode(next)
     self.prg.log('nextSelectionMode', self.selectionMode)
 
   def noOp(self, ignored):
