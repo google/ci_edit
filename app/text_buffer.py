@@ -421,7 +421,8 @@ class Mutator(Selectable):
     self.redoChain = self.redoChain[:self.redoIndex]
     if 1: # optimizer
       if len(self.redoChain):
-        if self.redoChain[-1][0] == change[0] and change[0] in ('d', 'i', 'vi'):
+        if (self.redoChain[-1][0] == change[0] and
+            change[0] in ('d', 'i')):
           change = (change[0], self.redoChain[-1][1] + change[1])
           self.undo()
           self.redoChain.pop()
