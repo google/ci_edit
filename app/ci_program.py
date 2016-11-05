@@ -229,6 +229,7 @@ class CiProgram:
     """Most code will want the log() function rather than this one. This is
     useful to log information while currently logging information (which would
     otherwise create an unending recursion)."""
+    logPrint(*args)
     if not self.logWindow:
       return
     msg = str(args[0])
@@ -277,6 +278,7 @@ class CiProgram:
     for i,k in enumerate(self.zOrder):
       #self.log("[[%d]] %r"%(i, k))
       k.refresh()
+    self.logPrint(" "*40, "- screen refresh -")
 
   def run(self):
     self.parseArgs()
