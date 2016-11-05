@@ -399,10 +399,12 @@ class Mutator(Selectable):
         for i in range(row, rowEnd+1):
           line = self.lines[i]
           self.lines[i] = line[:col] + text + line[col:]
-        self.cursorCol += len(text)
-        self.goalCol = self.cursorCol
       else:
         self.prg.log('ERROR: unknown redo.')
+    # Redo again if there is a move next.
+    if (self.redoIndex < len(self.redoChain) and
+        self.redoChain[self.redoIndex][0] == 'm'):
+      self.redo()
 
   def redoAddChange(self, change):
     """Push a change onto the end of the redoChain. Call redo() to enact the
@@ -485,6 +487,7 @@ class Mutator(Selectable):
         self.markerEndRow -= change[1][7]
         self.markerEndCol -= change[1][8]
         self.selectionMode -= change[1][9]
+        self.undo()
       elif change[0] == 'n':
         # Split lines.
         self.cursorRow -= change[1][0]
