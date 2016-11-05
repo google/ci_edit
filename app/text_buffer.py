@@ -123,7 +123,7 @@ class Selectable:
           else:
             lines.append(self.lines[i])
     elif self.selectionMode == kSelectionLine:
-      for i in range(upperRow, lowerRow):
+      for i in range(upperRow, lowerRow+1):
         lines.append(self.lines[i])
     return tuple(lines)
 
@@ -149,7 +149,11 @@ class Selectable:
         upperRow += 1
         del self.lines[upperRow:lowerRow+1]
     elif self.selectionMode == kSelectionLine:
-      del self.lines[upperRow:lowerRow]
+      self.prg.log('doDeleteSelection', lowerRow, len(self.lines),
+          self.cursorRow, self.markerRow)
+      if lowerRow+1 == len(self.lines):
+        self.lines.append('')
+      del self.lines[upperRow:lowerRow+1]
 
   def insertLines(self, lines):
     lines = list(lines)
@@ -179,6 +183,10 @@ class Selectable:
             self.lines[self.cursorRow][:self.cursorCol] + line +
             self.lines[self.cursorRow][self.cursorCol:])
     elif self.selectionMode == kSelectionLine:
+      self.prg.log('insertLines', self.cursorRow, len(lines))
+      if (self.cursorRow == len(self.lines)-1 and
+          len(self.lines[-1]) == 0):
+        self.lines = self.lines[:-1]
       for line in lines:
         self.lines.insert(self.cursorRow, line)
     else:
@@ -210,10 +218,9 @@ class Selectable:
             len(self.lines[-1])-self.goalCol,
             -self.markerRow, -self.markerCol, 0)
     elif self.selectionMode == kSelectionLine:
-      row = self.markerRow == self.cursorRow and 1 or 0
       self.prg.log('extend m', self.cursorRow, self.cursorCol,
-        self.markerRow, self.markerCol)
-      self.cursorMoveAndMark(row, -self.cursorCol, -self.goalCol,
+          self.markerRow, self.markerCol)
+      self.cursorMoveAndMark(0, -self.cursorCol, -self.goalCol,
           0, -self.markerCol, 0)
     elif self.selectionMode == kSelectionWord:
       if self.cursorRow > self.markerRow or (
@@ -534,9 +541,7 @@ class Mutator(Selectable):
         self.prg.log('undo vi', textLen)
         for i in range(row, endRow+1):
           line = self.lines[i]
-          self.lines[i] = line[:col-textLen] + line[col:]
-        self.cursorCol -= textLen
-        self.goalCol = self.cursorCol
+          self.lines[i] = line[:col] + line[col+textLen:]
       else:
         self.prg.log('ERROR: unknown undo.')
 
@@ -1138,10 +1143,6 @@ class BackingTextBuffer(Mutator):
         col - self.goalCol, 0, markerCol, 0)
     self.redo()
     if self.selectionMode == kSelectionLine:
-      if self.cursorRow < self.markerRow:
-        self.cursorStartOfLine()
-      else:
-        self.cursorSelectLineDown()
       self.extendSelection()
     elif self.selectionMode == kSelectionWord:
       if (self.cursorRow < self.markerRow or
@@ -1155,7 +1156,6 @@ class BackingTextBuffer(Mutator):
     self.prg.log('triple click', paneRow, paneCol)
     self.mouseRelease(paneRow, paneCol, shift, ctrl, alt)
     self.selectLineAt(self.scrollRow + paneRow)
-    #self.selectionLine()
 
   def scrollWindow(self, rows, cols):
     self.cursorMoveScroll(rows, self.cursorColDelta(self.cursorRow-rows),
@@ -1225,8 +1225,8 @@ class BackingTextBuffer(Mutator):
     self.doSelectionMode(kSelectionWord)
 
   def selectLineAt(self, row):
-    row = max(0, min(row, len(self.lines)-1))
-    self.cursorSelectLineDown()
+    self.selectionLine()
+    self.extendSelection()
 
   def selectWordAt(self, row, col):
     row = max(0, min(row, len(self.lines)-1))
@@ -1517,7 +1517,7 @@ class TextBuffer(BackingTextBuffer):
             else:
               window.addStr(i, 0, line, window.colorSelected)
         elif self.selectionMode == kSelectionLine:
-          for i in range(start, end):
+          for i in range(start, end+1):
             line = self.lines[self.scrollRow+i][selStartCol:maxx]
             window.addStr(i, selStartCol,
                 line+' '*(maxx-len(line)), window.colorSelected)
