@@ -719,6 +719,7 @@ class BackingTextBuffer(Mutator):
     self.cursorMoveLeft()
 
   def cursorSelectLineDown(self):
+    """Set line selection and extend selection one row down."""
     self.selectionLine()
     if self.lines and self.cursorRow+1 < len(self.lines):
       self.cursorMove(1, -self.cursorCol, -self.goalCol)
