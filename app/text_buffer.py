@@ -386,11 +386,11 @@ class Mutator(Selectable):
       elif change[0] == 'vd':
         upperRow = min(self.markerRow, self.cursorRow)
         lowerRow = max(self.markerRow, self.cursorRow)
+        x = self.cursorCol
         for i in range(upperRow, lowerRow+1):
           line = self.lines[i]
-          x = self.cursorCol
           self.lines[i] = line[:x] + line[x+len(change[1]):]
-      elif change[0] == 'vi':
+      elif change[0] == 'vi':  # Redo
         text = change[1]
         col = self.cursorCol
         row = min(self.markerRow, self.cursorRow)
@@ -442,6 +442,7 @@ class Mutator(Selectable):
 
   def undo(self):
     """Undo the most recent change to the buffer."""
+    self.prg.logPrint('undo')
     if self.redoIndex > 0:
       self.redoIndex -= 1
       if self.redoIndex < self.savedAtRedoIndex:
@@ -459,6 +460,7 @@ class Mutator(Selectable):
         x = self.cursorCol
         self.lines[self.cursorRow] = line[:x] + change[1] + line[x:]
       elif change[0] == 'ds':  # Undo delete selection.
+        self.prg.logPrint('undo ds', change[1])
         self.insertLines(change[1])
       elif change[0] == 'i':
         line = self.lines[self.cursorRow]
@@ -472,6 +474,7 @@ class Mutator(Selectable):
         self.lines.insert(self.cursorRow+1, line[self.cursorCol:])
         self.lines[self.cursorRow] = line[:self.cursorCol]
       elif change[0] == 'm':
+        self.prg.logPrint('undo move');
         self.cursorRow -= change[1][0]
         self.cursorCol -= change[1][1]
         self.goalCol -= change[1][2]
@@ -515,11 +518,11 @@ class Mutator(Selectable):
       elif change[0] == 'vd':
         upperRow = min(self.markerRow, self.cursorRow)
         lowerRow = max(self.markerRow, self.cursorRow)
+        x = self.cursorCol
         for i in range(upperRow, lowerRow+1):
-          line = self.lines[self.cursorRow]
-          x = self.cursorCol
+          line = self.lines[i]
           self.lines[i] = line[:x] + change[1] + line[x:]
-      elif change[0] == 'vi':
+      elif change[0] == 'vi':  # Undo.
         text = change[1]
         col = self.cursorCol
         row = min(self.markerRow, self.cursorRow)
