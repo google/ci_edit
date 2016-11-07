@@ -156,10 +156,13 @@ class Selectable:
       del self.lines[upperRow:lowerRow+1]
 
   def insertLines(self, lines):
-    lines = list(lines)
-    lines.reverse()
     if len(lines) == 0:
       return
+    lines = list(lines)
+    if self.selectionMode == kSelectionAll:
+      self.lines = lines
+      return
+    lines.reverse()
     if (self.selectionMode == kSelectionNone or
         self.selectionMode == kSelectionCharacter or
         self.selectionMode == kSelectionWord):
@@ -175,8 +178,6 @@ class Selectable:
             lines[0] + firstLine[self.cursorCol:])
         for line in lines[1:-1]:
           self.lines.insert(row, line)
-    elif self.selectionMode == kSelectionAll:
-      self.lines = list(lines)
     elif self.selectionMode == kSelectionBlock:
       for line in lines:
         self.lines[self.cursorRow] = (
