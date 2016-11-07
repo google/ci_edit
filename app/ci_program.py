@@ -149,12 +149,13 @@ class CiProgram:
             len(textBuffer.redoChain)),
           self.debugWindow.color+100)
     except: pass
-    lenChain = len(textBuffer.redoChain)
-    cursor = len(textBuffer.redoChain)-textBuffer.redoIndex+1
-    for i in range(5, 0, -1):
-      self.debugWindow.writeLine(
-          lenChain >= i and textBuffer.redoChain[-i] or '',
-          i >= cursor and 101 or 1)
+    lenChain = textBuffer.redoIndex
+    for i in range(textBuffer.redoIndex-3, textBuffer.redoIndex):
+      text = i >= 0 and textBuffer.redoChain[i] or ''
+      self.debugWindow.writeLine(text, 101)
+    for i in range(textBuffer.redoIndex, textBuffer.redoIndex+2):
+      text = i < len(textBuffer.redoChain) and textBuffer.redoChain[i] or ''
+      self.debugWindow.writeLine(text, 1)
     # Refresh the display.
     self.debugWindow.cursorWindow.refresh()
 
