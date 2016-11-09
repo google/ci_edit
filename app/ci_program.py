@@ -109,9 +109,10 @@ class CiProgram:
         %(textBuffer.cursorRow, textBuffer.cursorCol,
           textBuffer.goalCol), self.debugWindow.color)
     self.debugWindow.writeLine(
-        " mkrRow %3d  mkrCol %2d"
-        %(textBuffer.markerRow, textBuffer.markerCol),
-          self.debugWindow.color)
+        " mkrRow %3d  mkrCol %2d sm %d"
+        %(textBuffer.markerRow, textBuffer.markerCol,
+          textBuffer.selectionMode),
+        self.debugWindow.color)
     self.debugWindow.writeLine(
         "scrlRow %3d scrlCol %2d lines %3d"
         %(textBuffer.scrollRow, textBuffer.scrollCol,
@@ -125,9 +126,10 @@ class CiProgram:
         "ch %3s %s"
         %(self.ch, app.curses_util.cursesKeyName(self.ch)),
         self.debugWindow.color)
-    self.debugWindow.writeLine(
-        "sm %d win %r"
-        %(textBuffer.selectionMode, win), self.debugWindow.color)
+    self.debugWindow.writeLine("win %r"%(win,),
+        self.debugWindow.color)
+    self.debugWindow.writeLine("tb %r"%(textBuffer,),
+        self.debugWindow.color)
     try:
       (id, mousex, mousey, mousez, bstate) = curses.getmouse()
       self.debugWindow.writeLine(
