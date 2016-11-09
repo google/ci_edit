@@ -18,13 +18,8 @@ class Controller:
     self.commandSet = None
     self.name = name
 
-  def doCommand(self, ch):
-      cmd = self.commandSet.get(ch)
-      if cmd:
-        cmd()
-      else:
-        self.prg.log('commandDefault', repr(self.commandDefault))
-        self.commandDefault(ch)
+  def changeToInputWindow(self, ignored=1):
+    self.prg.changeTo = self.prg.inputWindow
 
   def commandLoop(self):
     while not self.prg.exiting and not self.prg.changeTo:
@@ -34,16 +29,27 @@ class Controller:
       self.prg.ch = ch
       self.doCommand(ch)
 
-  def onChange(self):
+  def doCommand(self, ch):
+      cmd = self.commandSet.get(ch)
+      if cmd:
+        cmd()
+      else:
+        self.prg.log('commandDefault', repr(self.commandDefault))
+        self.commandDefault(ch)
+
+  def focus(self):
     pass
 
-  def changeToInputWindow(self, ignored=1):
-    self.prg.changeTo = self.prg.inputWindow
+  def onChange(self):
+    pass
 
   def saveEventChangeToInputWindow(self, ignored=1):
     self.prg.log('ungetch')
     curses.ungetch(self.prg.ch)
     self.prg.changeTo = self.prg.inputWindow
+
+  def unfocus(self):
+    pass
 
 
 class MainController:
@@ -120,4 +126,7 @@ class MainController:
     self.prg.log('MainController.setTextBuffer', self.controller)
     self.textBuffer = textBuffer
     self.controller.setTextBuffer(textBuffer)
+
+  def unfocus(self):
+    self.controller.unfocus()
 

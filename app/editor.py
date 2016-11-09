@@ -56,9 +56,6 @@ class EditText(app.controller.Controller):
     if self.document and self.document.textBuffer:
       self.document.textBuffer.fileWrite()
 
-  def unfocus(self):
-    pass
-
 
 class InteractiveOpener(EditText):
   """Open a file to edit."""

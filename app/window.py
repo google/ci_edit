@@ -24,6 +24,7 @@ class StaticWindow:
     self.cols = 1
     self.writeLineRow = 0
     self.cursorWindow = curses.newwin(1, 1)
+    self.cursorWindow.leaveok(1)
 
   def addStr(self, row, col, text, colorPair):
     """Overwrite text a row, column with text."""
@@ -149,12 +150,16 @@ class Window(StaticWindow):
     StaticWindow.__init__(self, prg)
     self.controller = controller
     self.cursorWindow.keypad(1)
+    self.hasFocus = False
     self.textBuffer = None
 
   def focus(self):
+    self.prg.log('focus', self)
+    self.hasFocus = True
     try: self.parent.zOrder.remove(self)
     except ValueError: self.prg.logPrint(repr(self)+'not found in zOrder')
     self.parent.zOrder.append(self)
+    self.cursorWindow.leaveok(0)  # Do update cursor position.
     self.controller.focus()
     self.controller.commandLoop()
 
@@ -180,16 +185,17 @@ class Window(StaticWindow):
     self.textBuffer.mouseWheelUp(shift, ctrl, alt)
 
   def refresh(self):
+    StaticWindow.refresh(self)
     self.textBuffer.draw(self)
-    if self.prg.zOrder[-1] is self:
+    if self.hasFocus:
       self.prg.debugDraw(self)
       try:
+        self.prg.log('moving cursor\n', self)
         self.cursorWindow.move(
             self.textBuffer.cursorRow - self.textBuffer.scrollRow,
             self.textBuffer.cursorCol - self.textBuffer.scrollCol)
       except curses.error:
         pass
-    StaticWindow.refresh(self)
 
   def getCh(self):
     self.prg.refresh()
@@ -202,6 +208,9 @@ class Window(StaticWindow):
     self.textBuffer = textBuffer
 
   def unfocus(self):
+    self.prg.log('unfocus', self)
+    self.hasFocus = False
+    self.cursorWindow.leaveok(1)  # Don't update cursor position.
     self.controller.unfocus()
 
 
@@ -237,6 +246,7 @@ class InteractiveFind(Window):
     self.leftColumn.hide()
     self.blank()
     self.hide()
+    Window.unfocus(self)
 
 
 class InteractiveGoto(Window):
@@ -264,6 +274,7 @@ class InteractiveGoto(Window):
     self.leftColumn.hide()
     self.blank()
     self.hide()
+    Window.unfocus(self)
 
 
 class LineNumbers(StaticWindow):
@@ -456,6 +467,7 @@ class InputWindow(Window):
   def unfocus(self):
     self.statusLine.cursorWindow.addstr(0, 0, ".")
     self.statusLine.refresh()
+    Window.unfocus(self)
 
 
 class PaletteWindow(Window):

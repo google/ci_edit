@@ -303,6 +303,7 @@ class CiProgram:
     while not self.exiting:
         win = self.changeTo
         self.changeTo = None
+        win.refresh()
         win.focus()
         win.unfocus()
 
