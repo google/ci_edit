@@ -159,6 +159,21 @@ class CiProgram:
     # Refresh the display.
     self.debugWindow.cursorWindow.refresh()
 
+  def debugWindowOrder(self):
+    self.log('debugWindowOrder')
+    def recurse(list, indent):
+      for i in list:
+        self.log(indent, i)
+        recurse(i.zOrder, indent+'  ')
+    recurse(self.zOrder, '  ')
+    self.log('top window', self.topWindow())
+
+  def topWindow(self):
+    top = self
+    while len(top.zOrder):
+      top = top.zOrder[-1]
+    return top
+
   def clickedNearby(self, row, col):
     y, x = self.priorClickRowCol
     return y-1 <= row <= y+1 and x-1 <= col <= x+1

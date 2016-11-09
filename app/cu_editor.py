@@ -15,6 +15,7 @@ import text_buffer
 def initCommandSet(editText, textBuffer):
   """The basic command set includes line editing controls."""
   return {
+    curses.KEY_F10: editText.prg.debugWindowOrder,
     CTRL_A: textBuffer.selectionAll,
 
     CTRL_C: textBuffer.editCopy,
