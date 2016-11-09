@@ -425,16 +425,16 @@ class Mutator(Selectable):
         if (self.redoChain[-1][0] == change[0] and
             change[0] in ('d', 'i')):
           change = (change[0], self.redoChain[-1][1] + change[1])
-          self.undo()
+          self.undoOne()
           self.redoChain.pop()
         elif change[0] == 'm':
           if self.redoChain[-1][0] == 'm':
             change = (change[0], addVectors(self.redoChain[-1][1], change[1]))
-            self.undo()
+            self.undoOne()
             self.redoChain.pop()
         elif self.redoChain[-1][0] == change[0] and change[0] == 'n':
           change = (change[0], addVectors(self.redoChain[-1][1], change[1]))
-          self.undo()
+          self.undoOne()
           self.redoChain.pop()
     if 1:
       # Eliminate no-op entries
@@ -452,7 +452,13 @@ class Mutator(Selectable):
         self.prg.log('%2d:'%i, repr(c))
 
   def undo(self):
-    """Undo the most recent change to the buffer."""
+    """Undo a set of redo nodes."""
+    while self.undoOne():
+      pass
+
+  def undoOne(self):
+    """Undo the most recent change to the buffer.
+    return whether undo should be repeated."""
     self.prg.logPrint('undo')
     if self.redoIndex > 0:
       self.redoIndex -= 1
@@ -496,7 +502,7 @@ class Mutator(Selectable):
         self.markerEndRow -= change[1][7]
         self.markerEndCol -= change[1][8]
         self.selectionMode -= change[1][9]
-        self.undo()
+        return True
       elif change[0] == 'n':
         # Split lines.
         self.cursorRow -= change[1][0]
@@ -546,6 +552,7 @@ class Mutator(Selectable):
           self.lines[i] = line[:col] + line[col+textLen:]
       else:
         self.prg.log('ERROR: unknown undo.')
+    return False
 
 
 class BackingTextBuffer(Mutator):
