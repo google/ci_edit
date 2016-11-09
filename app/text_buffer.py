@@ -999,7 +999,7 @@ class BackingTextBuffer(Mutator):
       localRe = re.compile('(?:.*)'+searchFor)
       text = text[:self.cursorCol]
       offset = 0
-    self.prg.log('searching', repr(text))
+    #self.prg.log('find() searching', repr(text))
     found = localRe.search(text)
     if found:
       start = found.regs[0][0]

@@ -50,7 +50,6 @@ class StaticWindow:
 
   def blank(self):
     """Clear the window."""
-    self.prg.log('blank', self.rows, self.cols)
     for i in range(self.rows):
       self.addStr(0, i, ' '*self.cols, self.color)
     self.cursorWindow.refresh()
