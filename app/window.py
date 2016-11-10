@@ -210,6 +210,7 @@ class Window(StaticWindow):
     self.hasFocus = False
     self.cursorWindow.leaveok(1)  # Don't update cursor position.
     self.controller.unfocus()
+    #assert(self.prg.exiting or self.prg.changeTo)
 
 
 class HeaderLine(Window):

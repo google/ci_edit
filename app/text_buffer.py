@@ -421,7 +421,7 @@ class Mutator(Selectable):
       self.prg.log('redoAddChange', change)
     self.redoChain = self.redoChain[:self.redoIndex]
     if 1: # optimizer
-      if len(self.redoChain):
+      if len(self.redoChain) and self.savedAtRedoIndex != self.redoIndex:
         if (self.redoChain[-1][0] == change[0] and
             change[0] in ('d', 'i')):
           change = (change[0], self.redoChain[-1][1] + change[1])
@@ -463,7 +463,7 @@ class Mutator(Selectable):
     if self.redoIndex > 0:
       self.redoIndex -= 1
       if self.redoIndex < self.savedAtRedoIndex:
-        self.savedAtRedoIndex = None
+        self.savedAtRedoIndex = -1
       change = self.redoChain[self.redoIndex]
       if self.debugRedo:
         self.prg.log('undo', self.redoIndex, repr(change))

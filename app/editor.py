@@ -237,7 +237,7 @@ class InteractiveGoto(EditText):
   def cursorMoveTo(self, row, col):
     textBuffer = self.document.textBuffer
     cursorRow = min(max(row - 1, 0), len(textBuffer.lines)-1)
-    self.prg.log('cursorMoveTo row', row, cursorRow)
+    #self.prg.log('cursorMoveTo row', row, cursorRow)
     textBuffer.cursorMove(cursorRow-textBuffer.cursorRow,
         col-textBuffer.cursorCol,
         col-textBuffer.goalCol)
