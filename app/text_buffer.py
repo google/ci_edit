@@ -1294,7 +1294,7 @@ class TextBuffer(BackingTextBuffer):
   """The TextBuffer adds the drawing/rendering to the BackingTextBuffer."""
   def __init__(self, prg):
     BackingTextBuffer.__init__(self, prg)
-    self.lineLimitIndicator = 80
+    self.lineLimitIndicator = sys.maxint
     #todo(dschuyler): move keywords out to a data file.
     self.highlightKeywords = [
       'and',

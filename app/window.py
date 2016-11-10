@@ -459,6 +459,7 @@ class InputWindow(Window):
   def setTextBuffer(self, textBuffer):
     self.prg.log('setTextBuffer')
     self.headerLine.controller.setFileName(textBuffer.fullPath)
+    textBuffer.lineLimitIndicator = 80
     self.controller.setTextBuffer(textBuffer)
     Window.setTextBuffer(self, textBuffer)
     self.textBuffer.debugRedo = self.prg.debugRedo
