@@ -36,6 +36,7 @@ kSelectionModeNames = [
 
 
 kReBrackets = re.compile('[[\]{}()]')
+kReComments = re.compile('(?:#|//).*$|(?:/\*.*?\*/)')
 kReNumbers = re.compile('0x[0-9a-fA-F]+|\d+')
 kReStrings = re.compile(
     r"(\"\"\".*?(?<!\\)\"\"\")|('''.*?(?<!\\)''')|(\".*?(?<!\\)\")|('.*?(?<!\\)')")
@@ -1404,7 +1405,7 @@ class TextBuffer(BackingTextBuffer):
         # Highlight comments.
         for i in range(limit):
           line = self.lines[self.scrollRow+i][startCol:endCol]
-          for k in re.finditer('^\s*#.*$', line):
+          for k in re.finditer(kReComments, line):
             for f in k.regs:
               window.addStr(i, f[0], line[f[0]:f[1]], curses.color_pair(2))
       if 1:
