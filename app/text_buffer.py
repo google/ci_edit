@@ -630,8 +630,6 @@ class BackingTextBuffer(Mutator):
 
   def cursorMoveAndMark(self, rowDelta, colDelta, goalColDelta, markRowDelta,
       markColDelta, selectionModeDelta):
-    self.prg.log('cursorMoveAndMark', rowDelta, colDelta, goalColDelta, markRowDelta,
-        markColDelta, selectionModeDelta)
     maxy, maxx = self.prg.inputWindow.cursorWindow.getmaxyx() #hack
     rows = 0
     if self.scrollRow > self.cursorRow+rowDelta:
@@ -1085,7 +1083,7 @@ class BackingTextBuffer(Mutator):
     self.redo()
 
   def insertPrintable(self, ch):
-    self.prg.log('insertPrintable')
+    #self.prg.log('insertPrintable')
     if curses.ascii.isprint(ch):
       self.insert(chr(ch))
     # else:

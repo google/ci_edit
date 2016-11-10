@@ -189,7 +189,6 @@ class Window(StaticWindow):
     if self.hasFocus:
       self.prg.debugDraw(self)
       try:
-        self.prg.log('moving cursor\n', self)
         self.cursorWindow.move(
             self.textBuffer.cursorRow - self.textBuffer.scrollRow,
             self.textBuffer.cursorCol - self.textBuffer.scrollCol)

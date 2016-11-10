@@ -71,28 +71,19 @@ class MainController:
     self.controller = controller
 
   def doCommand(self, ch):
-      cmd = self.commandSet.get(ch)
-      if cmd:
-        cmd()
-      else:
-        self.prg.log('commandDefault', repr(self.commandDefault))
-        self.commandDefault(ch)
+    cmd = self.commandSet.get(ch)
+    if cmd:
+      cmd()
+    else:
+      self.commandDefault(ch)
 
   def commandLoop(self):
-    self.prg.log('MainController.commandLoop')
     while not self.prg.exiting and not self.prg.changeTo:
       self.controller.onChange()
       self.prg.refresh()
       ch = self.host.cursorWindow.getch()
       self.prg.ch = ch
       self.doCommand(ch)
-      if 0:
-        self.commandDefault = self.controller.commandDefault
-        commandSet = self.controller.commandSet.copy()
-        commandSet.update({
-          curses.KEY_F2: self.nextController,
-        })
-        self.commandSet = commandSet
 
   def focus(self):
     self.prg.log('MainController.focus')
