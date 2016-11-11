@@ -321,7 +321,8 @@ class Mutator(Selectable):
 
   def isDirty(self):
     """Whether the buffer contains non-trival changes since the last save."""
-    clean = (self.savedAtRedoIndex == self.redoIndex or
+    clean = self.savedAtRedoIndex >= 0 and (
+        self.savedAtRedoIndex == self.redoIndex or
         (self.redoIndex + 1 == self.savedAtRedoIndex and
           self.redoChain[self.redoIndex][0] == 'm') or
         (self.redoIndex - 1 == self.savedAtRedoIndex and
@@ -420,6 +421,9 @@ class Mutator(Selectable):
         change."""
     if self.debugRedo:
       self.prg.log('redoAddChange', change)
+    # When the redoChain is trimmed we lose the saved at.
+    if self.redoIndex < self.savedAtRedoIndex:
+      self.savedAtRedoIndex = -1
     self.redoChain = self.redoChain[:self.redoIndex]
     if 1: # optimizer
       if len(self.redoChain) and self.savedAtRedoIndex != self.redoIndex:
@@ -463,8 +467,6 @@ class Mutator(Selectable):
     self.prg.logPrint('undo')
     if self.redoIndex > 0:
       self.redoIndex -= 1
-      if self.redoIndex < self.savedAtRedoIndex:
-        self.savedAtRedoIndex = -1
       change = self.redoChain[self.redoIndex]
       if self.debugRedo:
         self.prg.log('undo', self.redoIndex, repr(change))
