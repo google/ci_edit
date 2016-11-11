@@ -11,18 +11,13 @@ class SelectableTestCases(unittest.TestCase):
 
   def test_default_values(self):
     selectable = self.selectable
-    self.assertEqual(selectable.cursorRow, 0)
-    self.assertEqual(selectable.cursorCol, 0)
-    self.assertEqual(selectable.markerRow, 0)
-    self.assertEqual(selectable.markerCol, 0)
+    self.assertEqual(selectable.selection(), (0, 0, 0, 0))
 
   def test_selection_all(self):
     selectable = self.selectable
-    selectable.selectionAll()
-    self.assertEqual(selectable.cursorRow, 0)
-    self.assertEqual(selectable.cursorCol, 0)
-    self.assertEqual(selectable.markerRow, 0)
-    self.assertEqual(selectable.markerCol, 0)
+    selectable.lines = ['one', '', 'five']
+    selectable.selectionMode = app.text_buffer.kSelectionAll
+    self.assertEqual(selectable.extendSelection(), (2, 4, 4, 0, 0, 0))
 
 if __name__ == '__main__':
   unittest.main()

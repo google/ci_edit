@@ -87,13 +87,18 @@ class BufferManager:
 
 class Selectable:
   def __init__(self):
+    self.lines = []
     self.cursorRow = 0
     self.cursorCol = 0
+    self.goalCol = 0
     self.markerRow = 0
     self.markerCol = 0
     self.markerEndRow = 0
     self.markerEndCol = 0
     self.selectionMode = kSelectionNone
+
+  def selection(self):
+    return (self.cursorRow, self.cursorCol, self.markerRow, self.markerCol)
 
   def setSelection(self, other):
     (self.cursorRow, self.cursorCol, self.markerRow, self.markerCol,
@@ -150,8 +155,6 @@ class Selectable:
         upperRow += 1
         del self.lines[upperRow:lowerRow+1]
     elif self.selectionMode == kSelectionLine:
-      self.prg.log('doDeleteSelection', lowerRow, len(self.lines),
-          self.cursorRow, self.markerRow)
       if lowerRow+1 == len(self.lines):
         self.lines.append('')
       del self.lines[upperRow:lowerRow+1]
@@ -208,21 +211,17 @@ class Selectable:
     return upperCol, lowerCol
 
   def extendSelection(self):
-    self.prg.log('extend a', self.cursorRow, self.cursorCol,
-        self.markerRow, self.markerCol, self.selectionMode)
     if self.selectionMode == kSelectionNone:
-      self.cursorMoveAndMark(0, 0, 0, -self.markerRow,
+      return (0, 0, 0, -self.markerRow,
           -self.markerCol, 0)
     elif self.selectionMode == kSelectionAll:
       if len(self.lines):
-        self.cursorMoveAndMark(len(self.lines)-1-self.cursorRow,
+        return (len(self.lines)-1-self.cursorRow,
             len(self.lines[-1])-self.cursorCol,
             len(self.lines[-1])-self.goalCol,
             -self.markerRow, -self.markerCol, 0)
     elif self.selectionMode == kSelectionLine:
-      self.prg.log('extend m', self.cursorRow, self.cursorCol,
-          self.markerRow, self.markerCol)
-      self.cursorMoveAndMark(0, -self.cursorCol, -self.goalCol,
+      return (0, -self.cursorCol, -self.goalCol,
           0, -self.markerCol, 0)
     elif self.selectionMode == kSelectionWord:
       if self.cursorRow > self.markerRow or (
@@ -230,20 +229,17 @@ class Selectable:
           self.cursorCol > self.markerCol):
         upperCol, lowerCol = self.extendWords(self.markerRow,
             self.markerCol, self.cursorRow, self.cursorCol)
-        self.cursorMoveAndMark(0,
+        return (0,
             lowerCol-self.cursorCol,
             lowerCol-self.goalCol,
             0, upperCol-self.markerCol, 0)
       else:
         upperCol, lowerCol = self.extendWords(self.cursorRow,
             self.cursorCol, self.markerRow, self.markerCol)
-        self.cursorMoveAndMark(0,
+        return (0,
             upperCol-self.cursorCol,
             upperCol-self.goalCol,
             0, lowerCol-self.markerCol, 0)
-    self.redo()
-    self.prg.log('extend z', self.cursorRow, self.cursorCol,
-        self.markerRow, self.markerCol)
 
   def startAndEnd(self):
     """Get the marker and cursor pair as the ealier of the two then the later
@@ -305,8 +301,6 @@ class Mutator(Selectable):
     self.findRe = None
     self.fullPath = ''
     self.relativePath = ''
-    self.goalCol = 0
-    self.lines = []
     self.scrollRow = 0
     self.scrollToRow = 0
     self.scrollCol = 0
@@ -745,7 +739,8 @@ class BackingTextBuffer(Mutator):
     if self.lines and self.cursorRow+1 < len(self.lines):
       self.cursorMove(1, -self.cursorCol, -self.goalCol)
       self.redo()
-      self.extendSelection()
+      self.cursorMoveAndMark(*self.extendSelection())
+      self.redo()
 
   def cursorSelectRight(self):
     if self.selectionMode == kSelectionNone:
@@ -759,14 +754,16 @@ class BackingTextBuffer(Mutator):
     if self.cursorRow == self.markerRow and self.cursorCol == self.markerCol:
       self.prg.log('They match')
     self.cursorMoveWordLeft()
-    self.extendSelection()
+    self.cursorMoveAndMark(*self.extendSelection())
+    self.redo()
 
   def cursorSelectWordRight(self):
     self.prg.log('cursorSelectWordRight')
     if self.selectionMode == kSelectionNone:
       self.selectionCharacter()
     self.cursorMoveWordRight()
-    self.extendSelection()
+    self.cursorMoveAndMark(*self.extendSelection())
+    self.redo()
 
   def cursorSelectUp(self):
     if self.selectionMode == kSelectionNone:
@@ -1153,7 +1150,8 @@ class BackingTextBuffer(Mutator):
         col - self.goalCol, 0, markerCol, 0)
     self.redo()
     if self.selectionMode == kSelectionLine:
-      self.extendSelection()
+      self.cursorMoveAndMark(*self.extendSelection())
+      self.redo()
     elif self.selectionMode == kSelectionWord:
       if (self.cursorRow < self.markerRow or
          (self.cursorRow == self.markerRow and
@@ -1217,7 +1215,8 @@ class BackingTextBuffer(Mutator):
 
   def selectionAll(self):
     self.doSelectionMode(kSelectionAll)
-    self.extendSelection()
+    self.cursorMoveAndMark(*self.extendSelection())
+    self.redo()
 
   def selectionBlock(self):
     self.doSelectionMode(kSelectionBlock)
@@ -1236,7 +1235,8 @@ class BackingTextBuffer(Mutator):
 
   def selectLineAt(self, row):
     self.selectionLine()
-    self.extendSelection()
+    self.cursorMoveAndMark(*self.extendSelection())
+    self.redo()
 
   def selectWordAt(self, row, col):
     row = max(0, min(row, len(self.lines)-1))
