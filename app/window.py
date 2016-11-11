@@ -319,12 +319,20 @@ class StatusLine(StaticWindow):
         statusLine += ' * '
       else:
         statusLine += ' . '
-      rowPercentage = tb.cursorRow*100/(len(tb.lines)+1)
-      if tb.cursorRow == len(tb.lines) - 1:
-         rowPercentage = 100
+      # Percentages.
+      rowPercentage = 0
       colPercentage = 0
-      if len(tb.lines):
-         colPercentage = tb.cursorCol*100/(len(tb.lines[tb.cursorRow])+1)
+      lineCount = len(tb.lines)
+      if lineCount:
+        rowPercentage = tb.cursorRow*100/lineCount
+        if tb.cursorRow >= lineCount - 1:
+           rowPercentage = 100
+        charCount = len(tb.lines[tb.cursorRow])
+        if (tb.cursorCol < charCount):
+          colPercentage = tb.cursorCol*100/charCount
+        else:
+          colPercentage = 100
+      # Format.
       rightSide = '%s | %4d,%2d | %3d%%,%3d%%'%(
           app.text_buffer.kSelectionModeNames[tb.selectionMode],
           tb.cursorRow+1, tb.cursorCol+1,
