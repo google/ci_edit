@@ -3,8 +3,8 @@
 # found in the LICENSE file.
 
 import app.controller
-import app.editor
 import app.cu_editor
+import app.editor
 import app.text_buffer
 import sys
 import curses
@@ -334,7 +334,7 @@ class StatusLine(StaticWindow):
           colPercentage = 100
       # Format.
       rightSide = '%s | %4d,%2d | %3d%%,%3d%%'%(
-          app.text_buffer.kSelectionModeNames[tb.selectionMode],
+          tb.selectionModeName(),
           tb.cursorRow+1, tb.cursorCol+1,
           rowPercentage,
           colPercentage)
