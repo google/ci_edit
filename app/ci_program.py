@@ -4,24 +4,13 @@
 # found in the LICENSE file.
 
 import app.curses_util
+import app.log
 import app.text_buffer
 import app.window
 import sys
 import curses
 import time
 import traceback
-
-
-globalPrintLog = "--- begin log ---\n"
-shouldWritePrintLog = False
-
-
-def logPrint(*args):
-  global globalPrintLog
-  msg = str(args[0])
-  for i in args[1:]:
-    msg += ' '+str(i)
-  globalPrintLog += msg + "\n"
 
 
 class CiProgram:
@@ -50,14 +39,14 @@ class CiProgram:
       assert(curses.COLORS == 256)
       assert(curses.can_change_color() == 1)
       assert(curses.has_colors() == 1)
-      logPrint("color_content:")
+      app.log.log("color_content:")
       for i in range(0, curses.COLORS):
-        logPrint("color", i, ": ", curses.color_content(i))
+        app.log.log("color", i, ": ", curses.color_content(i))
       for i in range(16, curses.COLORS):
         curses.init_color(i, 500, 500, i*787%1000)
-      logPrint("color_content, after:")
+      app.log.log("color_content, after:")
       for i in range(0, curses.COLORS):
-        logPrint("color", i, ": ", curses.color_content(i))
+        app.log.log("color", i, ": ", curses.color_content(i))
     self.showPalette = 0
     self.shiftPalette()
 
@@ -83,7 +72,7 @@ class CiProgram:
   def layout(self):
     """Arrange the debug, log, and input windows."""
     rows, cols = self.stdscr.getmaxyx()
-    #logPrint('layout', rows, cols)
+    #app.log.log('layout', rows, cols)
     if self.showLogWindow:
       inputWidth = min(78, cols)
       debugWidth = max(cols-inputWidth-1, 0)
@@ -245,7 +234,7 @@ class CiProgram:
     """Most code will want the log() function rather than this one. This is
     useful to log information while currently logging information (which would
     otherwise create an unending recursion)."""
-    logPrint(*args)
+    app.log.log(*args)
     if not self.logWindow:
       return
     msg = str(args[0])
@@ -263,7 +252,7 @@ class CiProgram:
     self.logWindow.refresh()
 
   def logPrint(self, *args):
-    logPrint(*args)
+    app.log.log(*args)
 
   def parseArgs(self):
     """Interpret the command line arguments."""
@@ -275,9 +264,8 @@ class CiProgram:
       if not takeAll and i[:2] == '--':
         self.debugRedo = self.debugRedo or i == '--debugRedo'
         self.showLogWindow = self.showLogWindow or i == '--log'
-        global shouldWritePrintLog
-        shouldWritePrintLog = shouldWritePrintLog or i == '--logPrint'
-        shouldWritePrintLog = shouldWritePrintLog or i == '--p'
+        app.log.shouldWritePrintLog = app.log.shouldWritePrintLog or i == '--logPrint'
+        app.log.shouldWritePrintLog = app.log.shouldWritePrintLog or i == '--p'
         if i == '--':
           # All remaining args are file paths.
           takeAll = True
@@ -334,15 +322,13 @@ def wrapped_ci(stdscr):
     errorType, value, tb = sys.exc_info()
     out = traceback.format_exception(errorType, value, tb)
     for i in out:
-      logPrint(i[:-1])
+      app.log.log(i[:-1])
 
 def run_ci():
-  global globalPrintLog
   try:
     curses.wrapper(wrapped_ci)
   finally:
-    if shouldWritePrintLog:
-      print globalPrintLog
+    app.log.flush()
 
 if __name__ == '__main__':
   run_ci()
