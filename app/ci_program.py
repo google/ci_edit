@@ -39,14 +39,14 @@ class CiProgram:
       assert(curses.COLORS == 256)
       assert(curses.can_change_color() == 1)
       assert(curses.has_colors() == 1)
-      app.log.log("color_content:")
+      app.log.detail("color_content:")
       for i in range(0, curses.COLORS):
-        app.log.log("color", i, ": ", curses.color_content(i))
+        app.log.detail("color", i, ": ", curses.color_content(i))
       for i in range(16, curses.COLORS):
         curses.init_color(i, 500, 500, i*787%1000)
-      app.log.log("color_content, after:")
+      app.log.detail("color_content, after:")
       for i in range(0, curses.COLORS):
-        app.log.log("color", i, ": ", curses.color_content(i))
+        app.log.detail("color", i, ": ", curses.color_content(i))
     self.showPalette = 0
     self.shiftPalette()
 
@@ -60,6 +60,7 @@ class CiProgram:
       self.zOrder += [self.debugWindow]
       self.logWindow = app.window.Window(self)
       self.logWindow.setTextBuffer(app.text_buffer.TextBuffer(self))
+      self.logWindow.textBuffer.lines = app.log.getLines()
     else:
       self.debugWindow = None
       self.logWindow = None
@@ -72,7 +73,7 @@ class CiProgram:
   def layout(self):
     """Arrange the debug, log, and input windows."""
     rows, cols = self.stdscr.getmaxyx()
-    #app.log.log('layout', rows, cols)
+    #app.log.detail('layout', rows, cols)
     if self.showLogWindow:
       inputWidth = min(78, cols)
       debugWidth = max(cols-inputWidth-1, 0)
@@ -230,29 +231,16 @@ class CiProgram:
     self.log('handleScreenResize')
     self.layout()
 
-  def logNoRefresh(self, *args):
-    """Most code will want the log() function rather than this one. This is
-    useful to log information while currently logging information (which would
-    otherwise create an unending recursion)."""
-    app.log.log(*args)
-    if not self.logWindow:
-      return
-    msg = str(args[0])
-    for i in args[1:]:
-      msg += ' '+str(i)
-    for line in msg.split('\n'):
-      self.logWindow.textBuffer.addLine(line)
-    self.logWindow.textBuffer.cursorScrollTo(-1, self.logWindow.cursorWindow)
-
   def log(self, *args):
     """Log text to the logging window (for debugging)."""
     if not self.logWindow:
       return
-    self.logNoRefresh(*args)
+    app.log.info(*args)
+    self.logWindow.textBuffer.cursorScrollTo(-1, self.logWindow.cursorWindow)
     self.logWindow.refresh()
 
   def logPrint(self, *args):
-    app.log.log(*args)
+    app.log.detail(*args)
 
   def parseArgs(self):
     """Interpret the command line arguments."""
@@ -322,7 +310,7 @@ def wrapped_ci(stdscr):
     errorType, value, tb = sys.exc_info()
     out = traceback.format_exception(errorType, value, tb)
     for i in out:
-      app.log.log(i[:-1])
+      app.log.error(i[:-1])
 
 def run_ci():
   try:
