@@ -2,6 +2,7 @@
 # Use of this source code is governed by an Apache-style license that can be
 # found in the LICENSE file.
 
+import app.log
 import re
 
 
@@ -91,7 +92,7 @@ class Selectable:
 
   def doDeleteSelection(self):
     upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
-    self.prg.log('doDelete', upperRow, upperCol, lowerRow, lowerCol)
+    app.log.detail('doDelete', upperRow, upperCol, lowerRow, lowerCol)
     if self.selectionMode == kSelectionAll:
       self.lines = [""]
     elif self.selectionMode == kSelectionBlock:
@@ -144,14 +145,14 @@ class Selectable:
             self.lines[self.cursorRow][:self.cursorCol] + line +
             self.lines[self.cursorRow][self.cursorCol:])
     elif self.selectionMode == kSelectionLine:
-      self.prg.log('insertLines', self.cursorRow, len(lines))
+      app.log.detail('insertLines', self.cursorRow, len(lines))
       if (self.cursorRow == len(self.lines)-1 and
           len(self.lines[-1]) == 0):
         self.lines = self.lines[:-1]
       for line in lines:
         self.lines.insert(self.cursorRow, line)
     else:
-      self.prg.log('selection mode not recognized', self.selectionMode)
+      app.log.info('selection mode not recognized', self.selectionMode)
 
   def extendWords(self, upperRow, upperCol, lowerRow, lowerCol):
     line = self.lines[upperRow]
@@ -244,5 +245,5 @@ class Selectable:
       elif upperRow > lowerRow:
         upperRow, lowerRow = lowerRow, upperRow
         upperCol, lowerCol = lowerCol, upperCol
-    #self.prg.log('start and end', upperRow, upperCol, lowerRow, lowerCol)
+    #app.log.detail('start and end', upperRow, upperCol, lowerRow, lowerCol)
     return (upperRow, upperCol, lowerRow, lowerCol)

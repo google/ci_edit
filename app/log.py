@@ -34,6 +34,15 @@ def info(*args):
   screenLog += lines
   fullLog += lines
 
+def debug(*args):
+  global screenLog
+  global fullLog
+  lines = parseLines(*args)
+  for i in parseLines(*args):
+    line = "@@@ "+i
+    screenLog.append(line)
+    fullLog.append(line)
+
 def detail(*args):
   global screenLog
   global fullLog

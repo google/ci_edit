@@ -2,6 +2,7 @@
 # Use of this source code is governed by an Apache-style license that can be
 # found in the LICENSE file.
 
+import app.log
 import app.selectable
 import third_party.pyperclip as clipboard
 import curses.ascii
@@ -25,28 +26,28 @@ class BufferManager:
   def loadTextBuffer(self, path):
     expandedPath = os.path.abspath(os.path.expanduser(os.path.expandvars(path)))
     textBuffer = self.buffers.get(path, None)
-    self.prg.log('X textBuffer', repr(textBuffer));
+    app.log.info('X textBuffer', repr(textBuffer));
     if not textBuffer:
-      self.prg.log(' loadTextBuffer new')
+      app.log.info(' loadTextBuffer new')
       textBuffer = TextBuffer(self.prg)
       if os.path.isfile(expandedPath):
         textBuffer.fileLoad(expandedPath)
       elif os.path.isdir(expandedPath):
-        self.prg.log('Tried to open directory as a file', expandedPath)
+        app.log.info('Tried to open directory as a file', expandedPath)
         return
       else:
-        self.prg.log('creating a new file at\n ', expandedPath)
+        app.log.info('creating a new file at\n ', expandedPath)
         textBuffer.fileLoad(expandedPath)
     self.buffers[expandedPath] = textBuffer
     for i,k in self.buffers.items():
-      self.prg.log('  ', i)
-      self.prg.log('    ', k)
-      self.prg.log('    ', repr(k.lines))
-      self.prg.log('    ', len(k.lines) and k.lines[0])
-    self.prg.log(' loadTextBuffer')
-    self.prg.log(expandedPath)
-    self.prg.log(' loadTextBuffer')
-    self.prg.log(repr(textBuffer))
+      app.log.info('  ', i)
+      app.log.info('    ', k)
+      app.log.info('    ', repr(k.lines))
+      app.log.info('    ', len(k.lines) and k.lines[0])
+    app.log.info(' loadTextBuffer')
+    app.log.info(expandedPath)
+    app.log.info(' loadTextBuffer')
+    app.log.info(repr(textBuffer))
     return textBuffer
 
   def fileClose(self, path):
@@ -89,7 +90,7 @@ class Mutator(app.selectable.Selectable):
     if self.redoIndex < len(self.redoChain):
       change = self.redoChain[self.redoIndex]
       if self.debugRedo:
-        self.prg.log('redo', self.redoIndex, repr(change))
+        app.log.info('redo', self.redoIndex, repr(change))
       self.redoIndex += 1
       if change[0] == 'b':
         line = self.lines[self.cursorRow]
@@ -160,12 +161,12 @@ class Mutator(app.selectable.Selectable):
         col = self.cursorCol
         row = min(self.markerRow, self.cursorRow)
         rowEnd = max(self.markerRow, self.cursorRow)
-        self.prg.log('do vi')
+        app.log.info('do vi')
         for i in range(row, rowEnd+1):
           line = self.lines[i]
           self.lines[i] = line[:col] + text + line[col:]
       else:
-        self.prg.log('ERROR: unknown redo.')
+        app.log.info('ERROR: unknown redo.')
     # Redo again if there is a move next.
     if (self.redoIndex < len(self.redoChain) and
         self.redoChain[self.redoIndex][0] == 'm'):
@@ -175,7 +176,7 @@ class Mutator(app.selectable.Selectable):
     """Push a change onto the end of the redoChain. Call redo() to enact the
         change."""
     if self.debugRedo:
-      self.prg.log('redoAddChange', change)
+      app.log.info('redoAddChange', change)
     # When the redoChain is trimmed we lose the saved at.
     if self.redoIndex < self.savedAtRedoIndex:
       self.savedAtRedoIndex = -1
@@ -204,12 +205,12 @@ class Mutator(app.selectable.Selectable):
       assert ('m', (0,0,0,0,0,0,0,0,0,0)) in noOpInstructions
       if change in noOpInstructions:
         return
-      #self.prg.log('opti', change)
+      #app.log.info('opti', change)
     self.redoChain.append(change)
     if self.debugRedo:
-      self.prg.log('--- redoIndex', self.redoIndex)
+      app.log.info('--- redoIndex', self.redoIndex)
       for i,c in enumerate(self.redoChain):
-        self.prg.log('%2d:'%i, repr(c))
+        app.log.info('%2d:'%i, repr(c))
 
   def undo(self):
     """Undo a set of redo nodes."""
@@ -219,12 +220,12 @@ class Mutator(app.selectable.Selectable):
   def undoOne(self):
     """Undo the most recent change to the buffer.
     return whether undo should be repeated."""
-    self.prg.logPrint('undo')
+    app.log.detail('undo')
     if self.redoIndex > 0:
       self.redoIndex -= 1
       change = self.redoChain[self.redoIndex]
       if self.debugRedo:
-        self.prg.log('undo', self.redoIndex, repr(change))
+        app.log.info('undo', self.redoIndex, repr(change))
       if change[0] == 'b':
         line = self.lines[self.cursorRow]
         x = self.cursorCol
@@ -235,7 +236,7 @@ class Mutator(app.selectable.Selectable):
         x = self.cursorCol
         self.lines[self.cursorRow] = line[:x] + change[1] + line[x:]
       elif change[0] == 'ds':  # Undo delete selection.
-        self.prg.logPrint('undo ds', change[1])
+        app.log.detail('undo ds', change[1])
         self.insertLines(change[1])
       elif change[0] == 'i':
         line = self.lines[self.cursorRow]
@@ -249,7 +250,7 @@ class Mutator(app.selectable.Selectable):
         self.lines.insert(self.cursorRow+1, line[self.cursorCol:])
         self.lines[self.cursorRow] = line[:self.cursorCol]
       elif change[0] == 'm':
-        self.prg.logPrint('undo move');
+        app.log.detail('undo move');
         self.cursorRow -= change[1][0]
         self.cursorCol -= change[1][1]
         self.goalCol -= change[1][2]
@@ -273,7 +274,7 @@ class Mutator(app.selectable.Selectable):
         clip = change[1]
         row = self.cursorRow
         col = self.cursorCol
-        self.prg.log('len clip', len(clip))
+        app.log.info('len clip', len(clip))
         if len(clip) == 1:
           self.lines[row] = (
               self.lines[row][:col] +
@@ -304,12 +305,12 @@ class Mutator(app.selectable.Selectable):
         row = min(self.markerRow, self.cursorRow)
         endRow = max(self.markerRow, self.cursorRow)
         textLen = len(text)
-        self.prg.log('undo vi', textLen)
+        app.log.info('undo vi', textLen)
         for i in range(row, endRow+1):
           line = self.lines[i]
           self.lines[i] = line[:col] + line[col+textLen:]
       else:
-        self.prg.log('ERROR: unknown undo.')
+        app.log.info('ERROR: unknown undo.')
     return False
 
 
@@ -333,7 +334,7 @@ class BackingTextBuffer(Mutator):
       self.selectionNone()
 
   def backspace(self):
-    self.prg.log('backspace', self.cursorRow > self.markerRow)
+    app.log.info('backspace', self.cursorRow > self.markerRow)
     if self.selectionMode != app.selectable.kSelectionNone:
       self.performDelete()
     elif self.cursorCol == 0:
@@ -509,17 +510,17 @@ class BackingTextBuffer(Mutator):
     self.cursorMoveRight()
 
   def cursorSelectWordLeft(self):
-    self.prg.log('cursorSelectWordLeft')
+    app.log.info('cursorSelectWordLeft')
     if self.selectionMode == app.selectable.kSelectionNone:
       self.selectionCharacter()
     if self.cursorRow == self.markerRow and self.cursorCol == self.markerCol:
-      self.prg.log('They match')
+      app.log.info('They match')
     self.cursorMoveWordLeft()
     self.cursorMoveAndMark(*self.extendSelection())
     self.redo()
 
   def cursorSelectWordRight(self):
-    self.prg.log('cursorSelectWordRight')
+    app.log.info('cursorSelectWordRight')
     if self.selectionMode == app.selectable.kSelectionNone:
       self.selectionCharacter()
     self.cursorMoveWordRight()
@@ -657,10 +658,10 @@ class BackingTextBuffer(Mutator):
           endCol-self.goalCol)
       self.redo()
     else:
-      self.prg.log('clipList empty')
+      app.log.info('clipList empty')
 
   def fileClose(self):
-    self.prg.log('fileClose')
+    app.log.info('fileClose')
     if not self.file.closed:
       self.fileWrite()
       # todo handle error writing
@@ -683,7 +684,7 @@ class BackingTextBuffer(Mutator):
     self.savedAtRedoIndex = self.redoIndex
 
   def fileLoad(self, path):
-    self.prg.log('fileLoad', path)
+    app.log.info('fileLoad', path)
     fullPath = os.path.expandvars(os.path.expanduser(path))
     try:
       self.file = open(fullPath, 'r+')
@@ -693,13 +694,13 @@ class BackingTextBuffer(Mutator):
         self.file = open(fullPath, 'w+')
         self.file.write('')
       except:
-        self.prg.log('error opening file', fullPath)
+        app.log.info('error opening file', fullPath)
         return
     self.fullPath = fullPath
     self.relativePath = os.path.relpath(path, os.getcwd())
-    self.prg.log('fullPath', self.fullPath)
-    self.prg.log('cwd', os.getcwd())
-    self.prg.log('relativePath', self.relativePath)
+    app.log.info('fullPath', self.fullPath)
+    app.log.info('cwd', os.getcwd())
+    app.log.info('relativePath', self.relativePath)
     self.fileFilter()
     self.file.close()
 
@@ -722,12 +723,12 @@ class BackingTextBuffer(Mutator):
         self.savedAtRedoIndex = self.redoIndex
       except Exception as e:
         type_, value, tb = sys.exc_info()
-        self.prg.log('error writing file')
+        app.log.info('error writing file')
         out = traceback.format_exception(type_, value, tb)
         for i in out:
-          self.prg.log(i)
+          app.log.info(i)
     except:
-      self.prg.log('except had exception')
+      app.log.info('except had exception')
 
   def selectText(self, lineNumber, start, length, mode):
     scrollTo = self.scrollRow
@@ -747,7 +748,7 @@ class BackingTextBuffer(Mutator):
 
   def find(self, searchFor, direction=0):
     """direction is -1 for findPrior, 0 for at cursor, 1 for findNext."""
-    self.prg.log('find', searchFor, direction)
+    app.log.info('find', searchFor, direction)
     if not len(searchFor):
       self.findRe = None
       self.doSelectionMode(app.selectable.kSelectionNone)
@@ -765,12 +766,12 @@ class BackingTextBuffer(Mutator):
       localRe = re.compile('(?:.*)'+searchFor)
       text = text[:self.cursorCol]
       offset = 0
-    #self.prg.log('find() searching', repr(text))
+    #app.log.info('find() searching', repr(text))
     found = localRe.search(text)
     if found:
       start = found.regs[0][0]
       end = found.regs[0][1]
-      #self.prg.log('found on line', self.cursorRow, start)
+      #app.log.info('found on line', self.cursorRow, start)
       self.selectText(self.cursorRow, offset+start, end-start,
           app.selectable.kSelectionCharacter)
       return
@@ -784,14 +785,14 @@ class BackingTextBuffer(Mutator):
       if found:
         if 0:
           for k in found.regs:
-            self.prg.log('AAA', k[0], k[1])
-          self.prg.log('b found on line', i, repr(found))
+            app.log.info('AAA', k[0], k[1])
+          app.log.info('b found on line', i, repr(found))
         start = found.regs[0][0]
         end = found.regs[0][1]
         self.selectText(i, start, end-start, app.selectable.kSelectionCharacter)
         return
     # Warp around to the start of the file.
-    self.prg.log('find hit end of file')
+    app.log.info('find hit end of file')
     if direction >= 0:
       theRange = range(self.cursorRow)
     else:
@@ -799,12 +800,12 @@ class BackingTextBuffer(Mutator):
     for i in theRange:
       found = re.search(searchFor, self.lines[i])
       if found:
-        #self.prg.log('c found on line', i, repr(found))
+        #app.log.info('c found on line', i, repr(found))
         start = found.regs[0][0]
         end = found.regs[0][1]
         self.selectText(i, start, end-start, app.selectable.kSelectionCharacter)
         return
-    self.prg.log('find not found')
+    app.log.info('find not found')
 
   def findNext(self, searchFor):
     self.find(searchFor, 1)
@@ -844,7 +845,7 @@ class BackingTextBuffer(Mutator):
     self.redo()
 
   def insertPrintable(self, ch):
-    #self.prg.log('insertPrintable')
+    #app.log.info('insertPrintable')
     if curses.ascii.isprint(ch):
       self.insert(chr(ch))
     # else:
@@ -862,25 +863,25 @@ class BackingTextBuffer(Mutator):
 
   def mouseClick(self, row, col, shift, ctrl, alt):
     if shift:
-      self.prg.log(' shift click', row, col, shift, ctrl, alt)
+      app.log.info(' shift click', row, col, shift, ctrl, alt)
       if self.selectionMode == app.selectable.kSelectionNone:
         self.selectionCharacter()
       self.mouseRelease(row, col, shift, ctrl, alt)
     else:
-      self.prg.log(' click', row, col, shift, ctrl, alt)
+      app.log.info(' click', row, col, shift, ctrl, alt)
       self.selectionNone()
       self.mouseRelease(row, col, shift, ctrl, alt)
 
   def mouseDoubleClick(self, row, col, shift, ctrl, alt):
-    self.prg.log('double click', row, col)
+    app.log.info('double click', row, col)
     self.selectWordAt(self.scrollRow + row, self.scrollCol + col)
 
   def mouseMoved(self, row, col, shift, ctrl, alt):
-    self.prg.log(' mouseMoved', row, col, shift, ctrl, alt)
+    app.log.info(' mouseMoved', row, col, shift, ctrl, alt)
     self.mouseClick(row, col, True, ctrl, alt)
 
   def mouseRelease(self, row, col, shift, ctrl, alt):
-    self.prg.log(' mouse release', row, col)
+    app.log.info(' mouse release', row, col)
     if not self.lines:
       return
     row = max(0, min(self.scrollRow + row, len(self.lines) - 1))
@@ -922,7 +923,7 @@ class BackingTextBuffer(Mutator):
         self.cursorSelectWordRight()
 
   def mouseTripleClick(self, paneRow, paneCol, shift, ctrl, alt):
-    self.prg.log('triple click', paneRow, paneCol)
+    app.log.info('triple click', paneRow, paneCol)
     self.mouseRelease(paneRow, paneCol, shift, ctrl, alt)
     self.selectLineAt(self.scrollRow + paneRow)
 
@@ -961,7 +962,7 @@ class BackingTextBuffer(Mutator):
     next = self.selectionMode + 1
     next %= app.selectable.kSelectionModeCount
     self.doSelectionMode(next)
-    self.prg.log('nextSelectionMode', self.selectionMode)
+    app.log.info('nextSelectionMode', self.selectionMode)
 
   def noOp(self, ignored):
     pass
@@ -1011,7 +1012,7 @@ class BackingTextBuffer(Mutator):
     self.redo()
 
   def swapCursorAndMarker(self):
-    self.prg.log('swapCursorAndMarker')
+    app.log.info('swapCursorAndMarker')
     self.cursorMoveAndMark(self.markerRow-self.cursorRow,
         self.markerCol-self.cursorCol,
         self.markerCol-self.goalCol,
@@ -1020,7 +1021,7 @@ class BackingTextBuffer(Mutator):
     self.redo()
 
   def test(self):
-    self.prg.log('test')
+    app.log.info('test')
     self.insertPrintable(0x00)
 
   def stripTrailingWhiteSpace(self):
@@ -1043,7 +1044,7 @@ class BackingTextBuffer(Mutator):
   def unindentLines(self):
     upperRow = min(self.markerRow, self.cursorRow)
     lowerRow = max(self.markerRow, self.cursorRow)
-    self.prg.log('unindentLines', upperRow, lowerRow)
+    app.log.info('unindentLines', upperRow, lowerRow)
     for line in self.lines[upperRow:lowerRow+1]:
       if ((len(line) == 1 and line[:1] != ' ') or
           (len(line) >= 2 and line[:2] != '  ')):
