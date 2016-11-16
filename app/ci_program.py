@@ -262,6 +262,7 @@ class CiProgram:
   def quit(self):
     """Set the intent to exit the program. The actual exit will occur a bit
     later."""
+    app.log.info('self.exiting = True')
     self.exiting = True
 
   def refresh(self):

@@ -33,7 +33,7 @@ class StaticWindow:
 
   def writeLine(self, text, colorPair=1):
     """Simple line writer for static windows."""
-    text = str(text)
+    text = str(text)[:self.cols]
     text = text + ' '*max(0, self.cols-len(text))
     try: self.cursorWindow.addstr(self.writeLineRow, 0, text,
         curses.color_pair(colorPair))
@@ -294,19 +294,18 @@ class LineNumbers(StaticWindow):
     self.drawLineNumbers()
 
 
-class LogWindow(Window):
+class LogWindow(StaticWindow):
   def __init__(self, prg):
-    Window.__init__(self, prg)
-    self.setTextBuffer(app.text_buffer.TextBuffer(self))
-    self.textBuffer.lines = app.log.getLines()
+    StaticWindow.__init__(self, prg)
+    self.lines = app.log.getLines()
 
   def refresh(self):
     app.log.info(" "*40, "- screen refresh -")
-    app.log.info("3")
-    app.log.info("2")
-    app.log.info("1")
-    Window.refresh(self)
-    self.textBuffer.cursorScrollTo(-1, self.cursorWindow)
+    maxy, maxx = self.cursorWindow.getmaxyx()
+    self.writeLineRow = 0
+    for i in self.lines[-maxy:]:
+      self.writeLine(i);
+    StaticWindow.refresh(self)
 
 
 class StatusLine(StaticWindow):
