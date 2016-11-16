@@ -57,7 +57,7 @@ class StaticWindow:
   def hide(self):
     """Remove window from the render list."""
     try: self.parent.zOrder.remove(self)
-    except ValueError: self.prg.logPrint(repr(self)+'not found in zOrder')
+    except ValueError: app.log.detail(repr(self)+'not found in zOrder')
 
   def mouseClick(self, row, col, shift, ctrl, alt):
     pass
@@ -87,7 +87,7 @@ class StaticWindow:
       child.refresh()
 
   def moveTo(self, top, left):
-    self.prg.logPrint('move', top, left)
+    app.log.detail('move', top, left)
     if top == self.top and left == self.left:
       return
     self.top = top
@@ -96,10 +96,10 @@ class StaticWindow:
       self.cursorWindow.mvwin(self.top, self.left)
     except:
       self.prg.log('error mvwin', top, left, repr(self))
-      self.prg.logPrint('error mvwin', top, left, repr(self))
+      app.log.detail('error mvwin', top, left, repr(self))
 
   def moveBy(self, top, left):
-    self.prg.logPrint('moveBy', top, left, repr(self))
+    app.log.detail('moveBy', top, left, repr(self))
     if top == 0 and left == 0:
       return
     self.top += top
@@ -111,16 +111,16 @@ class StaticWindow:
     self.resizeTo(rows, cols)
 
   def resizeTo(self, rows, cols):
-    self.prg.logPrint('resizeTo', rows, cols)
+    app.log.detail('resizeTo', rows, cols)
     self.rows = rows
     self.cols = cols
     try:
       self.cursorWindow.resize(self.rows, self.cols)
     except:
-      self.prg.logPrint('resize failed', self.rows, self.cols)
+      app.log.detail('resize failed', self.rows, self.cols)
 
   def resizeBy(self, rows, cols):
-    self.prg.logPrint('resizeBy', rows, cols, repr(self))
+    app.log.detail('resizeBy', rows, cols, repr(self))
     self.rows += rows
     self.cols += cols
     if self.rows <= 0 or self.cols <= 0:
@@ -156,7 +156,7 @@ class Window(StaticWindow):
     self.prg.log('focus', self)
     self.hasFocus = True
     try: self.parent.zOrder.remove(self)
-    except ValueError: self.prg.logPrint(repr(self)+'not found in zOrder')
+    except ValueError: app.log.detail(repr(self)+'not found in zOrder')
     self.parent.zOrder.append(self)
     self.cursorWindow.leaveok(0)  # Do update cursor position.
     self.controller.focus()
@@ -426,7 +426,7 @@ class InputWindow(Window):
     self.reshape(rows, cols, top, left)
 
   def reshape(self, rows, cols, top, left):
-    self.prg.logPrint('reshape', rows, cols, top, left)
+    app.log.detail('reshape', rows, cols, top, left)
     if self.showHeader:
       self.headerLine.reshape(1, cols, top, left)
       rows -= 1

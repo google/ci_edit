@@ -235,11 +235,6 @@ class CiProgram:
     if not self.logWindow:
       return
     app.log.info(*args)
-    self.logWindow.textBuffer.cursorScrollTo(-1, self.logWindow.cursorWindow)
-    self.logWindow.refresh()
-
-  def logPrint(self, *args):
-    app.log.detail(*args)
 
   def parseArgs(self):
     """Interpret the command line arguments."""
@@ -251,7 +246,7 @@ class CiProgram:
       if not takeAll and i[:2] == '--':
         self.debugRedo = self.debugRedo or i == '--debugRedo'
         self.showLogWindow = self.showLogWindow or i == '--log'
-        app.log.shouldWritePrintLog = app.log.shouldWritePrintLog or i == '--logPrint'
+        app.log.shouldWritePrintLog = app.log.shouldWritePrintLog or i == '--logDetail'
         app.log.shouldWritePrintLog = app.log.shouldWritePrintLog or i == '--p'
         if i == '--':
           # All remaining args are file paths.
