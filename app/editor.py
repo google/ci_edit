@@ -251,6 +251,3 @@ class InteractiveGoto(EditText):
     except: pass
     gotoLine, gotoCol = (line.split(',') + ['0', '0'])[:2]
     self.cursorMoveTo(parseInt(gotoLine), parseInt(gotoCol))
-
-  #def unfocus(self):
-  #  self.hide()

@@ -134,6 +134,7 @@ class CuaEdit(app.controller.Controller):
       CTRL_J: textBuffer.carriageReturn,
 
       CTRL_O: self.switchToCommandSetInteractiveOpen,
+      CTRL_R: self.switchToFindPrior,
 
       curses.KEY_DOWN: textBuffer.cursorDown,
       curses.KEY_SLEFT: textBuffer.cursorSelectLeft,
@@ -165,6 +166,10 @@ class CuaEdit(app.controller.Controller):
     self.prg.changeTo = self.host.headerLine
 
   def switchToFind(self):
+    self.prg.changeTo = self.host.interactiveFind
+
+  def switchToFindPrior(self):
+    curses.ungetch(self.prg.ch)
     self.prg.changeTo = self.host.interactiveFind
 
   def switchToGoto(self):
