@@ -58,9 +58,8 @@ class CiProgram:
     if self.showLogWindow:
       self.debugWindow = app.window.StaticWindow(self)
       self.zOrder += [self.debugWindow]
-      self.logWindow = app.window.Window(self)
-      self.logWindow.setTextBuffer(app.text_buffer.TextBuffer(self))
-      self.logWindow.textBuffer.lines = app.log.getLines()
+      self.logWindow = app.window.LogWindow(self)
+      #self.zOrder += [self.logWindow]
     else:
       self.debugWindow = None
       self.logWindow = None
@@ -270,7 +269,9 @@ class CiProgram:
     for i,k in enumerate(self.zOrder):
       #self.log("[[%d]] %r"%(i, k))
       k.refresh()
-    self.logPrint(" "*40, "- screen refresh -")
+    if self.showLogWindow:
+      # Refresh the log window last to pick up whole command loop output.
+      self.logWindow.refresh()
 
   def run(self):
     self.parseArgs()

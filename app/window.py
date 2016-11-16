@@ -195,13 +195,6 @@ class Window(StaticWindow):
       except curses.error:
         pass
 
-  def getCh(self):
-    self.prg.refresh()
-    return self.cursorWindow.getch()
-
-  def log(self, *args):
-    self.prg.log(*args)
-
   def setTextBuffer(self, textBuffer):
     self.textBuffer = textBuffer
 
@@ -299,6 +292,21 @@ class LineNumbers(StaticWindow):
 
   def refresh(self):
     self.drawLineNumbers()
+
+
+class LogWindow(Window):
+  def __init__(self, prg):
+    Window.__init__(self, prg)
+    self.setTextBuffer(app.text_buffer.TextBuffer(self))
+    self.textBuffer.lines = app.log.getLines()
+
+  def refresh(self):
+    app.log.info(" "*40, "- screen refresh -")
+    app.log.info("3")
+    app.log.info("2")
+    app.log.info("1")
+    Window.refresh(self)
+    self.textBuffer.cursorScrollTo(-1, self.cursorWindow)
 
 
 class StatusLine(StaticWindow):
