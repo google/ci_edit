@@ -520,7 +520,6 @@ class BackingTextBuffer(Mutator):
     self.redo()
 
   def cursorSelectWordRight(self):
-    app.log.info('cursorSelectWordRight')
     if self.selectionMode == app.selectable.kSelectionNone:
       self.selectionCharacter()
     self.cursorMoveWordRight()
@@ -886,6 +885,7 @@ class BackingTextBuffer(Mutator):
     if not self.lines:
       return
     row = max(0, min(self.scrollRow + row, len(self.lines) - 1))
+    inLine = col < len(self.lines[row])
     col = max(0, min(self.scrollCol + col, len(self.lines[row])))
     # Adjust the marker column delta when the cursor and marker positions
     # cross over each other.
@@ -920,7 +920,7 @@ class BackingTextBuffer(Mutator):
          (self.cursorRow == self.markerRow and
           self.cursorCol < self.markerCol)):
         self.cursorSelectWordLeft()
-      else:
+      elif inLine:
         self.cursorSelectWordRight()
 
   def mouseTripleClick(self, paneRow, paneCol, shift, ctrl, alt):
@@ -1003,9 +1003,11 @@ class BackingTextBuffer(Mutator):
 
   def selectWordAt(self, row, col):
     row = max(0, min(row, len(self.lines)-1))
+    inLine = col < len(self.lines[row])
     col = max(0, min(col, len(self.lines[row])-1))
     self.selectText(row, col, 0, app.selectable.kSelectionWord)
-    self.cursorSelectWordRight()
+    if inLine:
+      self.cursorSelectWordRight()
 
   def splitLine(self):
     """split the line into two at current column."""
