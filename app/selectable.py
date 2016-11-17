@@ -197,6 +197,7 @@ class Selectable:
             upperCol-self.cursorCol,
             upperCol-self.goalCol,
             0, lowerCol-self.markerCol, 0)
+    return (0, 0, 0, 0, 0, 0)
 
   def startAndEnd(self):
     """Get the marker and cursor pair as the ealier of the two then the later
