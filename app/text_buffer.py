@@ -874,7 +874,8 @@ class BackingTextBuffer(Mutator):
 
   def mouseDoubleClick(self, row, col, shift, ctrl, alt):
     app.log.info('double click', row, col)
-    self.selectWordAt(self.scrollRow + row, self.scrollCol + col)
+    if len(self.lines[self.scrollRow + row]):
+      self.selectWordAt(self.scrollRow + row, self.scrollCol + col)
 
   def mouseMoved(self, row, col, shift, ctrl, alt):
     app.log.info(' mouseMoved', row, col, shift, ctrl, alt)
