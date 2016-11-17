@@ -186,7 +186,9 @@ class InteractiveFind(EditText):
     selection = self.document.textBuffer.getSelectedText()
     if selection:
       self.textBuffer.selectionAll()
-      self.textBuffer.insertLines(selection)
+      selection = "\\n".join(selection)
+      app.log.info(selection)
+      self.textBuffer.insert(selection)
     self.textBuffer.selectionAll()
     self.prg.log('find tb', self.textBuffer.cursorCol)
 
