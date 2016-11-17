@@ -262,12 +262,11 @@ class CiProgram:
 
   def refresh(self):
     """Repaint stacked windows, furthest to nearest."""
+    if self.showLogWindow:
+      self.logWindow.refresh()
     for i,k in enumerate(self.zOrder):
       #self.log("[[%d]] %r"%(i, k))
       k.refresh()
-    if self.showLogWindow:
-      # Refresh the log window last to pick up whole command loop output.
-      self.logWindow.refresh()
 
   def run(self):
     self.parseArgs()
