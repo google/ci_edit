@@ -45,7 +45,7 @@ class EditText(app.controller.Controller):
     textBuffer.lines = [""]
 
   def focus(self):
-    self.prg.log('EditText.focus', repr(self))
+    app.log.info('EditText.focus', repr(self))
     self.commandDefault = self.textBuffer.insertPrintable
 
   def info(self):
@@ -63,7 +63,7 @@ class InteractiveOpener(EditText):
     EditText.__init__(self, prg, host, textBuffer)
 
   def focus(self):
-    self.prg.log('InteractiveOpener.focus')
+    app.log.info('InteractiveOpener.focus')
     EditText.focus(self)
     # Create a new text buffer to display dir listing.
     self.host.setTextBuffer(text_buffer.TextBuffer(self.prg))
@@ -177,6 +177,7 @@ class InteractiveFind(EditText):
     self.findCmd = self.document.textBuffer.findPrior
 
   def focus(self):
+    app.log.info('InteractiveFind focus()')
     #self.document.statusLine.hide()
     #self.document.resizeBy(-self.height, 0)
     #self.host.moveBy(-self.height, 0)
@@ -215,7 +216,7 @@ class InteractiveGoto(EditText):
     EditText.__init__(self, prg, host, textBuffer)
 
   def focus(self):
-    self.prg.log('InteractiveGoto.focus')
+    app.log.info('InteractiveGoto.focus')
     self.textBuffer.selectionAll()
     self.textBuffer.insert(str(self.document.textBuffer.cursorRow+1))
     self.textBuffer.selectionAll()

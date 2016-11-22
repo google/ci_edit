@@ -241,6 +241,7 @@ class CiProgram:
     self.debugRedo = False
     self.showLogWindow = False
     self.cliFiles = []
+    self.readStdin = False
     takeAll = False
     for i in sys.argv[1:]:
       if not takeAll and i[:2] == '--':
@@ -252,7 +253,10 @@ class CiProgram:
           # All remaining args are file paths.
           takeAll = True
         continue
-      self.cliFiles.append({'path': i})
+      if i == '-':
+        self.readStdin = True
+      else:
+        self.cliFiles.append({'path': i})
 
   def quit(self):
     """Set the intent to exit the program. The actual exit will occur a bit

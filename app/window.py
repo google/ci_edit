@@ -298,9 +298,11 @@ class LogWindow(StaticWindow):
   def __init__(self, prg):
     StaticWindow.__init__(self, prg)
     self.lines = app.log.getLines()
+    self.refreshCounter = 0
 
   def refresh(self):
-    app.log.info(" "*40, "- screen refresh -")
+    self.refreshCounter += 1
+    app.log.info(" "*40, self.refreshCounter, "- screen refresh -")
     maxy, maxx = self.cursorWindow.getmaxyx()
     self.writeLineRow = 0
     for i in self.lines[-maxy:]:
@@ -419,6 +421,9 @@ class InputWindow(Window):
         self.headerLine.controller.setFileName(path)
         self.setTextBuffer(
             self.prg.bufferManager.loadTextBuffer(path))
+      elif self.prg.readStdin:
+        self.headerLine.controller.setFileName("stdin")
+        self.setTextBuffer(self.prg.bufferManager.readStdin())
       else:
         scratchPath = "~/ci_scratch"
         self.headerLine.controller.setFileName(scratchPath)

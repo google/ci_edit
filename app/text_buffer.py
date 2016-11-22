@@ -50,6 +50,29 @@ class BufferManager:
     app.log.info(repr(textBuffer))
     return textBuffer
 
+  def readStdin(self):
+    app.log.info('reading from stdin')
+    # Create a new input stream for the file data.
+    # Fd is short for file descriptor. os.dup and os.dup2 will duplicate file
+    # descriptors.
+    stdinFd = sys.stdin.fileno()
+    newFd = os.dup(stdinFd)
+    newStdin = open("/dev/tty")
+    os.dup2(newStdin.fileno(), stdinFd)
+    fileInput = os.fdopen(newFd, "r")
+    # Create a text buffer to read from alternate stream.
+    textBuffer = TextBuffer(self.prg)
+    textBuffer.lines = [""]
+    textBuffer.savedAtRedoIndex = 0
+    textBuffer.file = fileInput
+    textBuffer.fileFilter()
+    textBuffer.file.close()
+    textBuffer.file = None
+    app.log.info('finished reading from stdin')
+    self.fullPath = None
+    self.relativePath = None
+    return textBuffer
+
   def fileClose(self, path):
     pass
 
@@ -1121,16 +1144,27 @@ class TextBuffer(BackingTextBuffer):
   def scrollToCursor(self, window):
     """Move the selected view rectangle so that the cursor is visible."""
     maxy, maxx = window.cursorWindow.getmaxyx() #hack
+    #     self.cursorRow >= self.scrollRow+maxy 1 0
     rows = 0
     if self.scrollRow > self.cursorRow:
       rows = self.cursorRow - self.scrollRow
+      app.log.error('AAA self.scrollRow > self.cursorRow',
+          self.scrollRow, self.cursorRow, self)
     elif self.cursorRow >= self.scrollRow+maxy:
       rows = self.cursorRow - (self.scrollRow+maxy-1)
+      app.log.error('BBB self.cursorRow >= self.scrollRow+maxy',
+          self.cursorRow, self.scrollRow, maxy, self)
     cols = 0
     if self.scrollCol > self.cursorCol:
       cols = self.cursorCol - self.scrollCol
+      app.log.error('CCC self.scrollCol > self.cursorCol',
+          self.scrollCol, self.cursorCol, self)
     elif self.cursorCol >= self.scrollCol+maxx:
       cols = self.cursorCol - (self.scrollCol+maxx-1)
+      app.log.error('DDD self.cursorCol >= self.scrollCol+maxx',
+          self.cursorCol, self.scrollCol, maxx, self)
+    assert not rows
+    assert not cols
     self.scrollRow += rows
     self.scrollCol += cols
 

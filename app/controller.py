@@ -4,6 +4,7 @@
 
 """Manager for key bindings."""
 
+import app.log
 import curses
 import curses.ascii
 
@@ -26,6 +27,9 @@ class Controller:
       self.onChange()
       self.prg.refresh()
       ch = self.host.cursorWindow.getch()
+      app.log.info('commandLoop', ch)
+      if ch == -1:
+        self.prg.quit()
       self.prg.ch = ch
       self.doCommand(ch)
 
@@ -37,6 +41,7 @@ class Controller:
       self.commandDefault(ch)
 
   def focus(self):
+    app.log.info('base controller focus()')
     pass
 
   def onChange(self):
