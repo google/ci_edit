@@ -39,7 +39,7 @@ def test_parseInt():
 class InteractiveOpener(app.controller.Controller):
   """Open a file to edit."""
   def __init__(self, prg, host, textBuffer):
-    app.controller.Controller.__init__(self, host, textBuffer)
+    app.controller.Controller.__init__(self, host, 'opener')
     self.prg = prg
     self.textBuffer = textBuffer
     self.textBuffer.lines = [""]
@@ -59,7 +59,7 @@ class InteractiveOpener(app.controller.Controller):
     if not os.path.isdir(expandedPath):
       self.host.setTextBuffer(
           self.prg.bufferManager.loadTextBuffer(expandedPath))
-    self.changeToInputWindow()
+    self.changeToHostWindow()
 
   def maybeSlash(self, expandedPath):
     if (self.textBuffer.lines[0] and self.textBuffer.lines[0][-1] != '/' and
@@ -151,7 +151,7 @@ class InteractiveOpener(app.controller.Controller):
 class InteractiveFind(app.controller.Controller):
   """Find text within the current document."""
   def __init__(self, prg, host, textBuffer):
-    app.controller.Controller.__init__(self, host, textBuffer)
+    app.controller.Controller.__init__(self, host, 'find')
     self.prg = prg
     self.textBuffer = textBuffer
     self.textBuffer.lines = [""]
@@ -195,7 +195,7 @@ class InteractiveFind(app.controller.Controller):
 class InteractiveGoto(app.controller.Controller):
   """Jump to a particular line number."""
   def __init__(self, prg, host, textBuffer):
-    app.controller.Controller.__init__(self, host, textBuffer)
+    app.controller.Controller.__init__(self, host, 'goto')
     self.prg = prg
     self.textBuffer = textBuffer
     self.textBuffer.lines = [""]
@@ -212,15 +212,15 @@ class InteractiveGoto(app.controller.Controller):
 
   def gotoBottom(self):
     self.cursorMoveTo(len(self.document.textBuffer.lines), 0)
-    self.changeToInputWindow()
+    self.changeToHostWindow()
 
   def gotoHalfway(self):
     self.cursorMoveTo(len(self.document.textBuffer.lines)/2+1, 0)
-    self.changeToInputWindow()
+    self.changeToHostWindow()
 
   def gotoTop(self):
     self.cursorMoveTo(1, 0)
-    self.changeToInputWindow()
+    self.changeToHostWindow()
 
   def cursorMoveTo(self, row, col):
     textBuffer = self.document.textBuffer

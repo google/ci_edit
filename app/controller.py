@@ -18,7 +18,7 @@ class Controller:
     self.commandSet = None
     self.name = name
 
-  def changeToInputWindow(self, ignored=1):
+  def changeToHostWindow(self, ignored=1):
     self.host.changeFocusTo(self.host)
 
   def doCommand(self, ch):
@@ -41,7 +41,7 @@ class Controller:
     if self.document and self.document.textBuffer:
       self.document.textBuffer.fileWrite()
 
-  def saveEventChangeToInputWindow(self, ignored=1):
+  def saveEventChangeToHostWindow(self, ignored=1):
     curses.ungetch(self.savedCh)
     self.host.changeFocusTo(self.host)
 

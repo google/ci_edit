@@ -56,7 +56,7 @@ class InteractiveOpener(app.editor.InteractiveOpener):
     self.document = host
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
-      curses.ascii.ESC: self.changeToInputWindow,
+      curses.ascii.ESC: self.changeToHostWindow,
       curses.KEY_F1: self.info,
       CTRL_I: self.tabCompleteExtend,
       CTRL_J: self.createOrOpen,
@@ -73,14 +73,14 @@ class InteractiveFind(app.editor.InteractiveFind):
     self.document = host
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
-      curses.ascii.ESC: self.changeToInputWindow,
+      curses.ascii.ESC: self.changeToHostWindow,
       curses.KEY_F1: self.info,
       CTRL_F: self.findNext,
-      CTRL_J: self.changeToInputWindow,
+      CTRL_J: self.changeToHostWindow,
       CTRL_R: self.findPrior,
       CTRL_S: self.saveDocument,
       curses.KEY_DOWN: self.findNext,
-      curses.KEY_MOUSE: self.saveEventChangeToInputWindow,
+      curses.KEY_MOUSE: self.saveEventChangeToHostWindow,
       curses.KEY_UP: self.findPrior,
     })
     self.commandSet = commandSet
@@ -93,11 +93,11 @@ class InteractiveGoto(app.editor.InteractiveGoto):
     self.document = host
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
-      curses.ascii.ESC: self.changeToInputWindow,
+      curses.ascii.ESC: self.changeToHostWindow,
       curses.KEY_F1: self.info,
-      CTRL_J: self.changeToInputWindow,
+      CTRL_J: self.changeToHostWindow,
       CTRL_S: self.saveDocument,
-      curses.KEY_MOUSE: self.saveEventChangeToInputWindow,
+      curses.KEY_MOUSE: self.saveEventChangeToHostWindow,
       ord('b'): self.gotoBottom,
       ord('h'): self.gotoHalfway,
       ord('t'): self.gotoTop,
@@ -211,8 +211,8 @@ class PaletteDialogController(app.controller.Controller):
       app.log.info('noOp in PaletteDialogController')
     self.commandDefault = noOp
     self.commandSet = {
-      CTRL_J: self.changeToInputWindow,
-      curses.ascii.ESC: self.changeToInputWindow,
+      CTRL_J: self.changeToHostWindow,
+      curses.ascii.ESC: self.changeToHostWindow,
       curses.KEY_F3: self.prg.shiftPalette,
       curses.KEY_F5: self.prg.paletteWindow.hide,
     }
