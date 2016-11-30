@@ -199,18 +199,66 @@ class Window(StaticWindow):
     self.textBuffer = textBuffer
 
   def unfocus(self):
-    self.prg.log('unfocus', self)
+    app.log.info('unfocus', self)
     self.hasFocus = False
     self.cursorWindow.leaveok(1)  # Don't update cursor position.
     self.controller.unfocus()
     #assert(self.prg.exiting or self.prg.changeTo)
 
 
-class HeaderLine(Window):
+class HeaderLine(StaticWindow):
+  def __init__(self, prg, host):
+    StaticWindow.__init__(self, prg)
+    self.host = host
+    self.textLine = None
+
+  def refresh(self):
+    textLine = self.host.textBuffer.fullPath
+    if self.textLine == textLine:
+      return
+    self.textLine = textLine
+    self.blank()
+    self.addStr(0, 0, textLine, self.color)
+    self.cursorWindow.refresh()
+
+
+class FileListPanel(Window):
+  def __init__(self, prg):
+    self.prg = prg
+    Window.__init__(self, prg)
+    self.color = curses.color_pair(18)
+    self.colorSelected = curses.color_pair(3)
+
+
+class InteractiveOpener(Window):
   def __init__(self, prg, host):
     Window.__init__(self, prg)
+    self.host = host
+    self.label = "file: "
     self.setTextBuffer(app.text_buffer.TextBuffer(prg))
-    self.controller = app.cu_editor.InteractiveOpener(prg, host, self.textBuffer)
+    self.fileListing = app.text_buffer.TextBuffer(prg)
+    #self.fileListing.fullPath = self.host.textBuffer.fullPath
+    #self.host.setTextBuffer(self.fileListing)
+    self.controller = app.cu_editor.InteractiveOpener(prg, self,
+        self.fileListing)
+    self.leftColumn = StaticWindow(prg)
+
+  def refresh(self):
+    self.leftColumn.addStr(0, 0, self.label, self.color)
+    self.leftColumn.cursorWindow.refresh()
+    Window.refresh(self)
+
+  def reshape(self, rows, cols, top, left):
+    labelWidth = len(self.label)
+    Window.reshape(self, rows, cols-labelWidth, top, left+labelWidth)
+    self.leftColumn.reshape(rows, labelWidth, top, left)
+
+  def unfocus(self):
+    self.leftColumn.blank()
+    self.leftColumn.hide()
+    self.blank()
+    self.hide()
+    Window.unfocus(self)
 
 
 class InteractiveFind(Window):
@@ -352,16 +400,8 @@ class StatusLine(StaticWindow):
       self.cursorWindow.refresh()
 
 
-class DirectoryPanel(Window):
+class xDirectoryPanel(Window):
   """A content area panel that shows a file directory list."""
-  def __init__(self, prg):
-    self.prg = prg
-    Window.__init__(self, prg)
-    self.color = curses.color_pair(18)
-    self.colorSelected = curses.color_pair(3)
-
-
-class FilePanel(Window):
   def __init__(self, prg):
     self.prg = prg
     Window.__init__(self, prg)
@@ -373,19 +413,21 @@ class InputWindow(Window):
   """This is the main content window. Often the largest pane displayed."""
   def __init__(self, prg, rows, cols, top, left, header, footer, lineNumbers):
     assert(prg)
+    Window.__init__(self, prg)
     self.prg = prg
     self.showHeader = header
-    Window.__init__(self, prg)
+    self.showFooter = footer
+    self.showLineNumbers = lineNumbers
     self.color = curses.color_pair(0)
     self.colorSelected = curses.color_pair(228)
     self.controller = app.controller.MainController(prg, self)
     self.controller.add(app.cu_editor.CuaPlusEdit(prg, self))
-    if header:
-      self.headerLine = HeaderLine(prg, self)
-      self.headerLine.color = curses.color_pair(168)
-      self.headerLine.colorSelected = curses.color_pair(47)
-      self.headerLine.setParent(self, 0)
-    self.showFooter = footer
+    if 1:
+      self.interactiveOpen = InteractiveOpener(prg, self)
+      self.interactiveOpen.color = curses.color_pair(0)
+      self.interactiveOpen.colorSelected = curses.color_pair(87)
+      self.interactiveOpen.setParent(self, 0)
+      self.interactiveOpen.hide()
     if 1:
       self.interactiveFind = InteractiveFind(prg, self)
       self.interactiveFind.color = curses.color_pair(0)
@@ -398,12 +440,16 @@ class InputWindow(Window):
       self.interactiveGoto.colorSelected = curses.color_pair(87)
       self.interactiveGoto.setParent(self, 0)
       self.interactiveGoto.hide()
+    if header:
+      self.headerLine = HeaderLine(prg, self)
+      self.headerLine.color = curses.color_pair(168)
+      self.headerLine.colorSelected = curses.color_pair(47)
+      self.headerLine.setParent(self, 0)
     if footer:
       self.statusLine = StatusLine(prg, self)
       self.statusLine.color = curses.color_pair(168)
       self.statusLine.colorSelected = curses.color_pair(47)
       self.statusLine.setParent(self, 0)
-    self.showLineNumbers = lineNumbers
     if lineNumbers:
       self.leftColumn = LineNumbers(prg, self)
       self.leftColumn.color = curses.color_pair(211)
@@ -418,15 +464,15 @@ class InputWindow(Window):
     if header:
       if self.prg.cliFiles:
         path = self.prg.cliFiles[0]['path']
-        self.headerLine.controller.setFileName(path)
+        #self.headerLine.setFileName(path)
         self.setTextBuffer(
             self.prg.bufferManager.loadTextBuffer(path))
       elif self.prg.readStdin:
-        self.headerLine.controller.setFileName("stdin")
+        #self.headerLine.setFileName("stdin")
         self.setTextBuffer(self.prg.bufferManager.readStdin())
       else:
         scratchPath = "~/ci_scratch"
-        self.headerLine.controller.setFileName(scratchPath)
+        #self.headerLine.setFileName(scratchPath)
         self.setTextBuffer(self.prg.bufferManager.loadTextBuffer(scratchPath))
     self.reshape(rows, cols, top, left)
 
@@ -436,6 +482,7 @@ class InputWindow(Window):
       self.headerLine.reshape(1, cols, top, left)
       rows -= 1
       top += 1
+    self.interactiveOpen.reshape(1, cols, top+rows-1, left)
     if 1:
       findReplaceHeight = 1
       topOfFind = top+rows-findReplaceHeight
@@ -478,7 +525,7 @@ class InputWindow(Window):
 
   def setTextBuffer(self, textBuffer):
     self.prg.log('setTextBuffer')
-    self.headerLine.controller.setFileName(textBuffer.fullPath)
+    #self.headerLine.controller.setFileName(textBuffer.fullPath)
     textBuffer.lineLimitIndicator = 80
     self.controller.setTextBuffer(textBuffer)
     Window.setTextBuffer(self, textBuffer)

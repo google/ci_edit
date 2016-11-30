@@ -60,8 +60,8 @@ class MainController:
   manages a collection of keyboard mappings and allows the user to switch
   between them."""
   def __init__(self, prg, host):
-    self.prg = prg
-    self.host = host
+    #self.prg = prg
+    #self.view = host
     self.commandDefault = None
     self.commandSet = None
     self.controllers = {}
