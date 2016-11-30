@@ -29,7 +29,7 @@ class Controller:
       ch = self.host.cursorWindow.getch()
       app.log.info('commandLoop', ch)
       if ch == -1:
-        self.prg.quit()
+        self.host.quit()
       self.prg.ch = ch
       self.doCommand(ch)
 

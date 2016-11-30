@@ -521,6 +521,9 @@ class InputWindow(Window):
       self.rightColumn.addStr(i, 0, ' ', self.leftColumn.color)
     self.rightColumn.cursorWindow.refresh()
 
+  def quit(self):
+    self.prg.quit()
+
   def refresh(self):
     Window.refresh(self)
     self.drawRightEdge()

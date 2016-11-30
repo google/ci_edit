@@ -22,7 +22,7 @@ def initCommandSet(editText, textBuffer):
 
     CTRL_H: textBuffer.backspace,
 
-    CTRL_Q: editText.prg.quit,
+    CTRL_Q: editText.host.quit,
     CTRL_S: textBuffer.fileWrite,
     CTRL_V: textBuffer.editPaste,
     CTRL_X: textBuffer.editCut,
