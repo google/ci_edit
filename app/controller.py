@@ -12,8 +12,7 @@ import curses.ascii
 class Controller:
   """A Controller is a keyboard mapping from keyboard/mouse events to editor
   commands."""
-  def __init__(self, prg, host, name):
-    self.prg = prg
+  def __init__(self, host, name):
     self.host = host
     self.commandDefault = None
     self.commandSet = None
@@ -23,6 +22,7 @@ class Controller:
     self.host.changeFocusTo(self.host)
 
   def doCommand(self, ch):
+    self.savedCh = ch
     cmd = self.commandSet.get(ch)
     if cmd:
       cmd()
@@ -36,8 +36,13 @@ class Controller:
   def onChange(self):
     pass
 
+  def saveDocument(self):
+    app.log.info('saveDocument', self.document)
+    if self.document and self.document.textBuffer:
+      self.document.textBuffer.fileWrite()
+
   def saveEventChangeToInputWindow(self, ignored=1):
-    curses.ungetch(self.prg.ch)
+    curses.ungetch(self.savedCh)
     self.host.changeFocusTo(self.host)
 
   def unfocus(self):

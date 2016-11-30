@@ -108,7 +108,7 @@ class InteractiveGoto(app.editor.InteractiveGoto):
 class CuaEdit(app.controller.Controller):
   """Keyboard mappings for CUA. CUA is the Cut/Copy/Paste paradigm."""
   def __init__(self, prg, host):
-    app.controller.Controller.__init__(self, prg, host, 'CuaEdit')
+    app.controller.Controller.__init__(self, host, 'CuaEdit')
     self.prg = prg
     self.host = host
     app.log.info('CuaEdit.__init__')
@@ -202,7 +202,8 @@ class CuaPlusEdit(CuaEdit):
 class PaletteDialogController(app.controller.Controller):
   """."""
   def __init__(self, prg, host):
-    app.controller.Controller.__init__(self, prg, host, 'Palette')
+    app.controller.Controller.__init__(self, host, 'Palette')
+    self.prg = prg
     app.log.info('PaletteDialogController.__init__')
 
   def focus(self):
