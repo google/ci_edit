@@ -24,11 +24,13 @@ Features of ci
 - select by line, character, or all
 - brace matching
 - mouse support
+- pipe to editor
 
 Future features (todo)
 
+- bookmarks
+- find in files
 - search and replace
-- pipe to editor
 - spell check
 - user customizable keywords
 - user customizable color scheme
