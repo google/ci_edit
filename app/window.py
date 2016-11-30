@@ -160,7 +160,6 @@ class Window(StaticWindow):
     self.parent.zOrder.append(self)
     self.cursorWindow.leaveok(0)  # Do update cursor position.
     self.controller.focus()
-    self.controller.commandLoop()
 
   def mouseClick(self, row, col, shift, ctrl, alt):
     self.textBuffer.mouseClick(row, col, shift, ctrl, alt)

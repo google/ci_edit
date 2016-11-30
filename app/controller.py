@@ -22,17 +22,6 @@ class Controller:
   def changeToInputWindow(self, ignored=1):
     self.host.changeFocusTo(self.host)
 
-  def commandLoop(self):
-    while not self.prg.exiting and not self.prg.changeTo:
-      self.onChange()
-      self.prg.refresh()
-      ch = self.host.cursorWindow.getch()
-      app.log.info('commandLoop', ch)
-      if ch == -1:
-        self.host.quit()
-      self.prg.ch = ch
-      self.doCommand(ch)
-
   def doCommand(self, ch):
     cmd = self.commandSet.get(ch)
     if cmd:
@@ -73,8 +62,8 @@ class MainController:
     self.controllerList.append(controller)
     self.controller = controller
 
-  def commandLoop(self):
-    self.controller.commandLoop()
+  def doCommand(self, ch):
+    self.controller.doCommand(ch)
 
   def focus(self):
     app.log.info('MainController.focus')
@@ -86,6 +75,9 @@ class MainController:
         curses.KEY_F2: self.nextController,
       })
       self.controller.commandSet = commandSet
+
+  def onChange(self):
+    self.controller.onChange()
 
   def nextController(self):
     app.log.info('nextController')

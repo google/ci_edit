@@ -52,6 +52,18 @@ class CiProgram:
 
     self.zOrder = []
 
+  def commandLoop(self, window):
+    app.log.debug('commandLoop', window)
+    while not self.exiting and not self.changeTo:
+      window.controller.onChange()
+      self.refresh()
+      ch = window.cursorWindow.getch()
+      app.log.info('commandLoop asdf', ch)
+      if ch == -1:
+        self.quit()
+      self.ch = ch
+      window.controller.doCommand(ch)
+
   def startup(self):
     """A second init-like function. Called after command line arguments are
     parsed."""
@@ -281,6 +293,7 @@ class CiProgram:
         self.changeTo = None
         win.refresh()
         win.focus()
+        self.commandLoop(win)
         win.unfocus()
 
   def shiftPalette(self):
