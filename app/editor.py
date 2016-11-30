@@ -52,7 +52,7 @@ class EditTextController(app.controller.Controller):
     app.log.info('EditTextController command set')
 
   def saveDocument(self):
-    self.prg.log('saveDocument', self.document)
+    app.log.info('saveDocument', self.document)
     if self.document and self.document.textBuffer:
       self.document.textBuffer.fileWrite()
 
@@ -149,7 +149,7 @@ class InteractiveOpener(EditTextController):
     path = os.path.expanduser(os.path.expandvars(self.textBuffer.lines[0]))
     dirPath, fileName = os.path.split(path)
     dirPath = dirPath or '.'
-    self.prg.log('O.onChange', dirPath, fileName)
+    app.log.info('O.onChange', dirPath, fileName)
     if os.path.isdir(dirPath):
       lines = []
       for i in os.listdir(dirPath):
@@ -242,7 +242,7 @@ class InteractiveGoto(EditTextController):
   def cursorMoveTo(self, row, col):
     textBuffer = self.document.textBuffer
     cursorRow = min(max(row - 1, 0), len(textBuffer.lines)-1)
-    #self.prg.log('cursorMoveTo row', row, cursorRow)
+    #app.log.info('cursorMoveTo row', row, cursorRow)
     textBuffer.cursorMove(cursorRow-textBuffer.cursorRow,
         col-textBuffer.cursorCol,
         col-textBuffer.goalCol)

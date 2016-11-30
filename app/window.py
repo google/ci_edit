@@ -524,7 +524,7 @@ class InputWindow(Window):
     self.cursorWindow.refresh()
 
   def setTextBuffer(self, textBuffer):
-    self.prg.log('setTextBuffer')
+    app.log.info('setTextBuffer')
     #self.headerLine.controller.setFileName(textBuffer.fullPath)
     textBuffer.lineLimitIndicator = 80
     self.controller.setTextBuffer(textBuffer)

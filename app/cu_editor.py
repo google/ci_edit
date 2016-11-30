@@ -203,7 +203,7 @@ class PaletteDialogController(app.controller.Controller):
   """."""
   def __init__(self, prg, host):
     app.controller.Controller.__init__(self, prg, None, 'Palette')
-    self.prg.log('PaletteDialogController.__init__')
+    app.log.info('PaletteDialogController.__init__')
 
   def focus(self):
     def noOp(c):
