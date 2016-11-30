@@ -20,7 +20,7 @@ class Controller:
     self.name = name
 
   def changeToInputWindow(self, ignored=1):
-    self.prg.changeTo = self.prg.inputWindow
+    self.host.changeFocusTo(self.host)
 
   def commandLoop(self):
     while not self.prg.exiting and not self.prg.changeTo:
@@ -49,7 +49,7 @@ class Controller:
 
   def saveEventChangeToInputWindow(self, ignored=1):
     curses.ungetch(self.prg.ch)
-    self.prg.changeTo = self.prg.inputWindow
+    self.host.changeFocusTo(self.host)
 
   def unfocus(self):
     pass

@@ -70,7 +70,7 @@ class InteractiveFind(app.editor.InteractiveFind):
   """Find text within the current document."""
   def __init__(self, prg, host, textBuffer):
     app.editor.InteractiveFind.__init__(self, prg, host, textBuffer)
-    self.document = host.host
+    self.document = host
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
       curses.ascii.ESC: self.changeToInputWindow,
@@ -90,7 +90,7 @@ class InteractiveGoto(app.editor.InteractiveGoto):
   """Jump to a particular line number."""
   def __init__(self, prg, host, textBuffer):
     app.editor.InteractiveGoto.__init__(self, prg, host, textBuffer)
-    self.document = host.host
+    self.document = host
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
       curses.ascii.ESC: self.changeToInputWindow,
@@ -108,7 +108,7 @@ class InteractiveGoto(app.editor.InteractiveGoto):
 class CuaEdit(app.controller.Controller):
   """Keyboard mappings for CUA. CUA is the Cut/Copy/Paste paradigm."""
   def __init__(self, prg, host):
-    app.controller.Controller.__init__(self, prg, None, 'CuaEdit')
+    app.controller.Controller.__init__(self, prg, host, 'CuaEdit')
     self.prg = prg
     self.host = host
     app.log.info('CuaEdit.__init__')
@@ -202,7 +202,7 @@ class CuaPlusEdit(CuaEdit):
 class PaletteDialogController(app.controller.Controller):
   """."""
   def __init__(self, prg, host):
-    app.controller.Controller.__init__(self, prg, None, 'Palette')
+    app.controller.Controller.__init__(self, prg, host, 'Palette')
     app.log.info('PaletteDialogController.__init__')
 
   def focus(self):

@@ -239,7 +239,7 @@ class InteractiveOpener(Window):
     self.fileListing = app.text_buffer.TextBuffer(prg)
     #self.fileListing.fullPath = self.host.textBuffer.fullPath
     #self.host.setTextBuffer(self.fileListing)
-    self.controller = app.cu_editor.InteractiveOpener(prg, self,
+    self.controller = app.cu_editor.InteractiveOpener(prg, host,
         self.fileListing)
     self.leftColumn = StaticWindow(prg)
 
@@ -267,7 +267,7 @@ class InteractiveFind(Window):
     self.host = host
     self.label = "find: "
     self.setTextBuffer(app.text_buffer.TextBuffer(prg))
-    self.controller = app.cu_editor.InteractiveFind(prg, self,
+    self.controller = app.cu_editor.InteractiveFind(prg, host,
         self.textBuffer)
     self.leftColumn = StaticWindow(prg)
 
@@ -295,7 +295,7 @@ class InteractiveGoto(Window):
     self.host = host
     self.label = "goto: "
     self.setTextBuffer(app.text_buffer.TextBuffer(prg))
-    self.controller = app.cu_editor.InteractiveGoto(prg, self,
+    self.controller = app.cu_editor.InteractiveGoto(prg, host,
         self.textBuffer)
     self.leftColumn = StaticWindow(prg)
 
@@ -502,6 +502,9 @@ class InputWindow(Window):
       self.rightColumn.reshape(rows, 1, top, left+cols-1)
       cols -= 1
     Window.reshape(self, rows, cols, top, left)
+
+  def changeFocusTo(self, changeTo):
+    self.prg.changeTo = changeTo
 
   def drawRightEdge(self):
     """Draw makers to indicate text extending past the right edge of the
