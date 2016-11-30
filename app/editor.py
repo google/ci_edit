@@ -36,10 +36,10 @@ def test_parseInt():
   assert parseInt('--10') == 0
 
 
-class EditText(app.controller.Controller):
+class EditTextController(app.controller.Controller):
   """An EditText is a base class for one-line controllers."""
   def __init__(self, prg, host, textBuffer):
-    app.controller.Controller.__init__(self, prg, host, 'EditText')
+    app.controller.Controller.__init__(self, prg, host, 'EditTextController')
     self.document = None
     self.textBuffer = textBuffer
     textBuffer.lines = [""]
@@ -49,7 +49,7 @@ class EditText(app.controller.Controller):
     self.commandDefault = self.textBuffer.insertPrintable
 
   def info(self):
-    app.log.info('EditText command set')
+    app.log.info('EditTextController command set')
 
   def saveDocument(self):
     self.prg.log('saveDocument', self.document)
@@ -57,14 +57,14 @@ class EditText(app.controller.Controller):
       self.document.textBuffer.fileWrite()
 
 
-class InteractiveOpener(EditText):
+class InteractiveOpener(EditTextController):
   """Open a file to edit."""
   def __init__(self, prg, host, textBuffer):
-    EditText.__init__(self, prg, host, textBuffer)
+    EditTextController.__init__(self, prg, host, textBuffer)
 
   def focus(self):
     app.log.info('InteractiveOpener.focus')
-    EditText.focus(self)
+    EditTextController.focus(self)
     # Create a new text buffer to display dir listing.
     self.host.setTextBuffer(text_buffer.TextBuffer(self.prg))
 
@@ -166,10 +166,10 @@ class InteractiveOpener(EditText):
           os.path.abspath(os.path.expanduser(dirPath))+": not found"]
 
 
-class InteractiveFind(EditText):
+class InteractiveFind(EditTextController):
   """Find text within the current document."""
   def __init__(self, prg, host, textBuffer):
-    EditText.__init__(self, prg, host, textBuffer)
+    EditTextController.__init__(self, prg, host, textBuffer)
     self.height = 1
 
   def findNext(self):
@@ -184,7 +184,7 @@ class InteractiveFind(EditText):
     #self.document.resizeBy(-self.height, 0)
     #self.host.moveBy(-self.height, 0)
     #self.host.resizeBy(self.height-1, 0)
-    EditText.focus(self)
+    EditTextController.focus(self)
     self.findCmd = self.document.textBuffer.find
     selection = self.document.textBuffer.getSelectedText()
     if selection:
@@ -212,17 +212,17 @@ class InteractiveFind(EditText):
     #self.hide()
 
 
-class InteractiveGoto(EditText):
+class InteractiveGoto(EditTextController):
   """Jump to a particular line number."""
   def __init__(self, prg, host, textBuffer):
-    EditText.__init__(self, prg, host, textBuffer)
+    EditTextController.__init__(self, prg, host, textBuffer)
 
   def focus(self):
     app.log.info('InteractiveGoto.focus')
     self.textBuffer.selectionAll()
     self.textBuffer.insert(str(self.document.textBuffer.cursorRow+1))
     self.textBuffer.selectionAll()
-    EditText.focus(self)
+    EditTextController.focus(self)
 
   def info(self):
     app.log.info('InteractiveGoto command set')
