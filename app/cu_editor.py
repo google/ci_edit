@@ -111,7 +111,7 @@ class CuaEdit(app.controller.Controller):
     app.controller.Controller.__init__(self, prg, None, 'CuaEdit')
     self.prg = prg
     self.host = host
-    self.prg.log('CuaEdit.__init__')
+    app.log.info('CuaEdit.__init__')
 
   def setTextBuffer(self, textBuffer):
     self.textBuffer = textBuffer

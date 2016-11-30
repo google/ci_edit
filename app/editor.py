@@ -112,7 +112,8 @@ class InteractiveOpener(EditText):
       if i.startswith(fileName):
         matches.append(i)
       else:
-        self.prg.log('not', i)
+        pass
+        #app.log.info('not', i)
     if len(matches) <= 0:
       self.maybeSlash(expandedDir)
       self.onChange()
