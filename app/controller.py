@@ -77,7 +77,7 @@ class MainController:
     self.controller.commandLoop()
 
   def focus(self):
-    self.prg.log('MainController.focus')
+    app.log.info('MainController.focus')
     self.controller.focus()
     if 0:
       self.commandDefault = self.controller.commandDefault
@@ -88,25 +88,25 @@ class MainController:
       self.controller.commandSet = commandSet
 
   def nextController(self):
-    self.prg.log('nextController')
+    app.log.info('nextController')
     return
     if self.controller is self.controllers['cuaPlus']:
-      self.prg.log('MainController.nextController cua')
+      app.log.info('MainController.nextController cua')
       self.controller = self.controllers['cua']
     elif self.controller is self.controllers['cua']:
-      self.prg.log('MainController.nextController emacs')
+      app.log.info('MainController.nextController emacs')
       self.controller = self.controllers['emacs']
     elif self.controller is self.controllers['emacs']:
-      self.prg.log('MainController.nextController vim')
+      app.log.info('MainController.nextController vim')
       self.controller = self.controllers['vim']
     else:
-      self.prg.log('MainController.nextController cua')
+      app.log.info('MainController.nextController cua')
       self.controller = self.controllers['cua']
     self.controller.setTextBuffer(self.textBuffer)
     self.focus()
 
   def setTextBuffer(self, textBuffer):
-    self.prg.log('MainController.setTextBuffer', self.controller)
+    app.log.info('MainController.setTextBuffer', self.controller)
     self.textBuffer = textBuffer
     self.controller.setTextBuffer(textBuffer)
 

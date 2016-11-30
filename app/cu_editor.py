@@ -133,7 +133,7 @@ class CuaEdit(app.controller.Controller):
       CTRL_I: textBuffer.indent,
       CTRL_J: textBuffer.carriageReturn,
 
-      CTRL_O: self.switchToCommandSetInteractiveOpen,
+      CTRL_O: self.switchToFileOpen,
       CTRL_R: self.switchToFindPrior,
 
       curses.KEY_DOWN: textBuffer.cursorDown,
@@ -156,14 +156,14 @@ class CuaEdit(app.controller.Controller):
     self.commandSet = self.commandSet_Main
 
   def info(self):
-    self.prg.log('CuaEdit Command set main')
-    self.prg.log(repr(self))
+    app.log.info('CuaEdit Command set main')
+    app.log.info(repr(self))
 
   def onChange(self):
     pass
 
-  def switchToCommandSetInteractiveOpen(self):
-    self.prg.changeTo = self.host.headerLine
+  def switchToFileOpen(self):
+    self.prg.changeTo = self.host.interactiveOpen
 
   def switchToFind(self):
     self.prg.changeTo = self.host.interactiveFind
@@ -180,14 +180,14 @@ class CuaPlusEdit(CuaEdit):
   """Keyboard mappings for CUA, plus some extra."""
   def __init__(self, prg, host):
     CuaEdit.__init__(self, prg, host)
-    self.prg.log('CuaPlusEdit.__init__')
+    app.log.info('CuaPlusEdit.__init__')
 
   def info(self):
-    self.prg.log('CuaPlusEdit Command set main')
-    self.prg.log(repr(self))
+    app.log.info('CuaPlusEdit Command set main')
+    app.log.info(repr(self))
 
   def setTextBuffer(self, textBuffer):
-    self.prg.log('CuaPlusEdit.__init__')
+    app.log.info('CuaPlusEdit.__init__')
     CuaEdit.setTextBuffer(self, textBuffer)
     commandSet = self.commandSet_Main.copy()
     commandSet.update({
@@ -207,7 +207,7 @@ class PaletteDialogController(app.controller.Controller):
 
   def focus(self):
     def noOp(c):
-      self.prg.log('noOp in PaletteDialogController')
+      app.log.info('noOp in PaletteDialogController')
     self.commandDefault = noOp
     self.commandSet = {
       CTRL_J: self.changeToInputWindow,
@@ -217,8 +217,8 @@ class PaletteDialogController(app.controller.Controller):
     }
 
   def info(self):
-    self.prg.log('PaletteDialogController command set')
-    self.prg.log(repr(self))
+    app.log.info('PaletteDialogController command set')
+    app.log.info(repr(self))
 
   def setTextBuffer(self, textBuffer):
     pass

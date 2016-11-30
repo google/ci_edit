@@ -95,7 +95,7 @@ class StaticWindow:
     try:
       self.cursorWindow.mvwin(self.top, self.left)
     except:
-      self.prg.log('error mvwin', top, left, repr(self))
+      app.log.info('error mvwin', top, left, repr(self))
       app.log.detail('error mvwin', top, left, repr(self))
 
   def moveBy(self, top, left):
@@ -153,7 +153,7 @@ class Window(StaticWindow):
     self.textBuffer = None
 
   def focus(self):
-    self.prg.log('focus', self)
+    app.log.info('focus', self)
     self.hasFocus = True
     try: self.parent.zOrder.remove(self)
     except ValueError: app.log.detail(repr(self)+'not found in zOrder')

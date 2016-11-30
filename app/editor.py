@@ -45,11 +45,11 @@ class EditText(app.controller.Controller):
     textBuffer.lines = [""]
 
   def focus(self):
-    app.log.info('EditText.focus', repr(self))
+    app.log.info('EditTextController.focus', repr(self))
     self.commandDefault = self.textBuffer.insertPrintable
 
   def info(self):
-    self.prg.log('EditText command set')
+    app.log.info('EditText command set')
 
   def saveDocument(self):
     self.prg.log('saveDocument', self.document)
@@ -69,11 +69,11 @@ class InteractiveOpener(EditText):
     self.host.setTextBuffer(text_buffer.TextBuffer(self.prg))
 
   def info(self):
-    self.prg.log('InteractiveOpener command set')
+    app.log.info('InteractiveOpener command set')
 
   def createOrOpen(self):
-    self.prg.log('createOrOpen')
     expandedPath = os.path.abspath(os.path.expanduser(self.textBuffer.lines[0]))
+    app.log.info('createOrOpen', expandedPath)
     if not os.path.isdir(expandedPath):
       self.host.setTextBuffer(
           self.prg.bufferManager.loadTextBuffer(expandedPath))
@@ -88,6 +88,7 @@ class InteractiveOpener(EditText):
     """Find the first file that starts with the pattern."""
     dirPath, fileName = os.path.split(self.lines[0])
     foundOnce = ''
+    app.log.debug('tabComplete\n', dirPath, '\n', fileName)
     for i in os.listdir(os.path.expandvars(os.path.expanduser(dirPath)) or '.'):
       if i.startswith(fileName):
         if foundOnce:
@@ -191,13 +192,13 @@ class InteractiveFind(EditText):
       app.log.info(selection)
       self.textBuffer.insert(selection)
     self.textBuffer.selectionAll()
-    self.prg.log('find tb', self.textBuffer.cursorCol)
+    app.log.info('find tb', self.textBuffer.cursorCol)
 
   def info(self):
-    self.prg.log('InteractiveFind command set')
+    app.log.info('InteractiveFind command set')
 
   def onChange(self):
-    self.prg.log('InteractiveFind.onChange')
+    app.log.info('InteractiveFind.onChange')
     searchFor = self.textBuffer.lines[0]
     try:
       self.findCmd(searchFor)
@@ -206,7 +207,7 @@ class InteractiveFind(EditText):
     self.findCmd = self.document.textBuffer.find
 
   def unfocus(self):
-    self.prg.log('unfocus Find')
+    app.log.info('unfocus Find')
     #self.hide()
 
 
@@ -223,7 +224,7 @@ class InteractiveGoto(EditText):
     EditText.focus(self)
 
   def info(self):
-    self.prg.log('InteractiveGoto command set')
+    app.log.info('InteractiveGoto command set')
 
   def gotoBottom(self):
     self.cursorMoveTo(len(self.document.textBuffer.lines), 0)
