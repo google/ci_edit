@@ -79,9 +79,8 @@ class BufferManager:
 
 class Mutator(app.selectable.Selectable):
   """Track changes to a body of text."""
-  def __init__(self, prg):
+  def __init__(self):
     app.selectable.Selectable.__init__(self)
-    self.prg = prg
     self.debugRedo = False
     self.findRe = None
     self.fullPath = ''
@@ -159,11 +158,6 @@ class Mutator(app.selectable.Selectable):
         self.goalCol += change[1][2]
       elif change[0] == 'v':  # Redo paste.
         self.insertLines(change[1])
-        maxy, maxx = self.prg.inputWindow.cursorWindow.getmaxyx() #hack
-        if self.cursorRow > self.scrollRow + maxy:
-          self.scrollRow = self.cursorRow
-        if self.cursorCol > self.scrollCol + maxx:
-          self.scrollCol = self.cursorCol
       elif change[0] == 'vb':
         self.cursorCol -= len(change[1])
         row = min(self.markerRow, self.cursorRow)
@@ -341,7 +335,8 @@ class BackingTextBuffer(Mutator):
   """This base class to TextBuffer handles the text manipulation (without
   handling the drawing/rendering of the text)."""
   def __init__(self, prg):
-    Mutator.__init__(self, prg)
+    Mutator.__init__(self)
+    self.prg = prg
     self.clipList = []
 
   def performDelete(self):
