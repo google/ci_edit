@@ -17,7 +17,7 @@ class CiProgram:
   """This is the main editor program. It holds top level information and runs
   the main loop. The CiProgram is intended as a singleton."""
   def __init__(self, stdscr):
-    self.bufferManager = app.text_buffer.BufferManager(self)
+    self.bufferManager = app.text_buffer.BufferManager()
     self.exiting = False
     self.modeStack = []
     self.priorClick = 0

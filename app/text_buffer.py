@@ -19,8 +19,7 @@ def addVectors(a, b):
 
 class BufferManager:
   """Manage a set of text buffers. Some text buffers may be hidden."""
-  def __init__(self, prg):
-    self.prg = prg
+  def __init__(self):
     self.buffers = {}
 
   def loadTextBuffer(self, path):
