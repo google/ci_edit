@@ -163,17 +163,17 @@ class CuaEdit(app.controller.Controller):
     pass
 
   def switchToFileOpen(self):
-    self.prg.changeTo = self.host.interactiveOpen
+    self.host.changeFocusTo(self.host.interactiveOpen)
 
   def switchToFind(self):
-    self.prg.changeTo = self.host.interactiveFind
+    self.host.changeFocusTo(self.host.interactiveFind)
 
   def switchToFindPrior(self):
     curses.ungetch(self.prg.ch)
-    self.prg.changeTo = self.host.interactiveFind
+    self.host.changeFocusTo(self.host.interactiveFind)
 
   def switchToGoto(self):
-    self.prg.changeTo = self.host.interactiveGoto
+    self.host.changeFocusTo(self.host.interactiveGoto)
 
 
 class CuaPlusEdit(CuaEdit):
