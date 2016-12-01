@@ -420,7 +420,7 @@ class InputWindow(Window):
     self.showLineNumbers = lineNumbers
     self.color = curses.color_pair(0)
     self.colorSelected = curses.color_pair(228)
-    self.controller = app.controller.MainController(prg, self)
+    self.controller = app.controller.MainController(self)
     self.controller.add(app.cu_editor.CuaPlusEdit(prg, self))
     if 1:
       self.interactiveOpen = InteractiveOpener(prg, self)
@@ -549,7 +549,7 @@ class PaletteWindow(Window):
     Window.__init__(self, prg)
     self.resizeTo(16, 16*5)
     self.moveTo(8, 8)
-    self.controller = app.controller.MainController(prg, self)
+    self.controller = app.controller.MainController(self)
     self.controller.add(app.cu_editor.PaletteDialogController(
         prg, self))
     textBuffer = app.text_buffer.TextBuffer()

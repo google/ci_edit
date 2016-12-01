@@ -53,8 +53,7 @@ class MainController:
   """The different keyboard mappings are different controllers. This class
   manages a collection of keyboard mappings and allows the user to switch
   between them."""
-  def __init__(self, prg, host):
-    #self.prg = prg
+  def __init__(self, host):
     #self.view = host
     self.commandDefault = None
     self.commandSet = None
