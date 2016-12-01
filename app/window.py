@@ -240,7 +240,7 @@ class InteractiveOpener(Window):
     #self.fileListing.fullPath = self.host.textBuffer.fullPath
     #self.host.setTextBuffer(self.fileListing)
     self.controller = app.cu_editor.InteractiveOpener(prg, host,
-        self.fileListing)
+        self.textBuffer)
     self.leftColumn = StaticWindow(prg)
 
   def refresh(self):
