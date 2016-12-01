@@ -29,7 +29,7 @@ class BufferManager:
     app.log.info('X textBuffer', repr(textBuffer));
     if not textBuffer:
       app.log.info(' loadTextBuffer new')
-      textBuffer = TextBuffer(self.prg)
+      textBuffer = TextBuffer()
       if os.path.isfile(expandedPath):
         textBuffer.fileLoad(expandedPath)
       elif os.path.isdir(expandedPath):
@@ -61,7 +61,7 @@ class BufferManager:
     os.dup2(newStdin.fileno(), stdinFd)
     fileInput = os.fdopen(newFd, "r")
     # Create a text buffer to read from alternate stream.
-    textBuffer = TextBuffer(self.prg)
+    textBuffer = TextBuffer()
     textBuffer.lines = [""]
     textBuffer.savedAtRedoIndex = 0
     textBuffer.file = fileInput
@@ -334,10 +334,13 @@ class Mutator(app.selectable.Selectable):
 class BackingTextBuffer(Mutator):
   """This base class to TextBuffer handles the text manipulation (without
   handling the drawing/rendering of the text)."""
-  def __init__(self, prg):
+  def __init__(self):
     Mutator.__init__(self)
-    self.prg = prg
+    self.view = None
     self.clipList = []
+
+  def setView(self, view):
+    self.view = view
 
   def performDelete(self):
     if self.selectionMode != app.selectable.kSelectionNone:
@@ -407,7 +410,7 @@ class BackingTextBuffer(Mutator):
 
   def cursorMoveAndMark(self, rowDelta, colDelta, goalColDelta, markRowDelta,
       markColDelta, selectionModeDelta):
-    maxy, maxx = self.prg.inputWindow.cursorWindow.getmaxyx() #hack
+    maxy, maxx = self.view.cursorWindow.getmaxyx()
     rows = 0
     if self.scrollRow > self.cursorRow+rowDelta:
       rows = self.cursorRow+rowDelta - self.scrollRow
@@ -563,7 +566,7 @@ class BackingTextBuffer(Mutator):
   def cursorPageDown(self):
     if self.cursorRow == len(self.lines):
       return
-    maxy, maxx = self.prg.inputWindow.cursorWindow.getmaxyx() #hack
+    maxy, maxx = self.view.cursorWindow.getmaxyx()
     cursorRowDelta = maxy
     scrollDelta = maxy
     if self.cursorRow + 2*maxy >= len(self.lines):
@@ -576,7 +579,7 @@ class BackingTextBuffer(Mutator):
   def cursorPageUp(self):
     if self.cursorRow == 0:
       return
-    maxy, maxx = self.prg.inputWindow.cursorWindow.getmaxyx() #hack
+    maxy, maxx = self.view.cursorWindow.getmaxyx()
     cursorRowDelta = -maxy
     scrollDelta = -maxy
     if self.cursorRow < 2*maxy:
@@ -599,7 +602,7 @@ class BackingTextBuffer(Mutator):
     self.cursorRow = self.scrollRow = goalRow #hack
 
   def cursorScrollToMiddle(self):
-    maxy, maxx = self.prg.inputWindow.cursorWindow.getmaxyx() #hack
+    maxy, maxx = self.view.cursorWindow.getmaxyx()
     rowDelta = min(len(self.lines)-maxy,
                    max(0, self.cursorRow-maxy/2))-self.scrollRow
     self.cursorMoveScroll(0, 0, 0, rowDelta, 0)
@@ -749,7 +752,7 @@ class BackingTextBuffer(Mutator):
 
   def selectText(self, lineNumber, start, length, mode):
     scrollTo = self.scrollRow
-    maxy, maxx = self.prg.inputWindow.cursorWindow.getmaxyx() #hack
+    maxy, maxx = self.view.cursorWindow.getmaxyx()
     if not (self.scrollRow < lineNumber <= self.scrollRow + maxy):
       scrollTo = max(lineNumber-10, 0)
     self.doSelectionMode(app.selectable.kSelectionNone)
@@ -956,7 +959,7 @@ class BackingTextBuffer(Mutator):
       self.selectionNone()
     if self.scrollRow == 0:
       return
-    maxy, maxx = self.prg.inputWindow.cursorWindow.getmaxyx() #hack
+    maxy, maxx = self.view.cursorWindow.getmaxyx()
     cursorDelta = 0
     if self.cursorRow >= self.scrollRow + maxy - 2:
       cursorDelta = self.scrollRow + maxy - 2 - self.cursorRow
@@ -967,7 +970,7 @@ class BackingTextBuffer(Mutator):
   def mouseWheelUp(self, shift, ctrl, alt):
     if not shift:
       self.selectionNone()
-    maxy, maxx = self.prg.inputWindow.cursorWindow.getmaxyx() #hack
+    maxy, maxx = self.view.cursorWindow.getmaxyx()
     if self.scrollRow+maxy >= len(self.lines):
       return
     cursorDelta = 0
@@ -1078,8 +1081,8 @@ class BackingTextBuffer(Mutator):
 
 class TextBuffer(BackingTextBuffer):
   """The TextBuffer adds the drawing/rendering to the BackingTextBuffer."""
-  def __init__(self, prg):
-    BackingTextBuffer.__init__(self, prg)
+  def __init__(self):
+    BackingTextBuffer.__init__(self)
     self.lineLimitIndicator = sys.maxint
     #todo(dschuyler): move keywords out to a data file.
     self.highlightKeywords = [
@@ -1138,7 +1141,7 @@ class TextBuffer(BackingTextBuffer):
 
   def scrollToCursor(self, window):
     """Move the selected view rectangle so that the cursor is visible."""
-    maxy, maxx = window.cursorWindow.getmaxyx() #hack
+    maxy, maxx = window.cursorWindow.getmaxyx()
     #     self.cursorRow >= self.scrollRow+maxy 1 0
     rows = 0
     if self.scrollRow > self.cursorRow:

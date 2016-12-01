@@ -48,7 +48,7 @@ class InteractiveOpener(app.controller.Controller):
     app.log.info('InteractiveOpener.focus')
     self.commandDefault = self.textBuffer.insertPrintable
     # Create a new text buffer to display dir listing.
-    self.host.setTextBuffer(text_buffer.TextBuffer(self.prg))
+    self.host.setTextBuffer(text_buffer.TextBuffer())
 
   def info(self):
     app.log.info('InteractiveOpener command set')

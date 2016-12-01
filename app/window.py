@@ -195,6 +195,7 @@ class Window(StaticWindow):
         pass
 
   def setTextBuffer(self, textBuffer):
+    textBuffer.setView(self)
     self.textBuffer = textBuffer
 
   def unfocus(self):
@@ -234,8 +235,8 @@ class InteractiveOpener(Window):
     Window.__init__(self, prg)
     self.host = host
     self.label = "file: "
-    self.setTextBuffer(app.text_buffer.TextBuffer(prg))
-    self.fileListing = app.text_buffer.TextBuffer(prg)
+    self.setTextBuffer(app.text_buffer.TextBuffer())
+    self.fileListing = app.text_buffer.TextBuffer()
     #self.fileListing.fullPath = self.host.textBuffer.fullPath
     #self.host.setTextBuffer(self.fileListing)
     self.controller = app.cu_editor.InteractiveOpener(prg, host,
@@ -265,7 +266,7 @@ class InteractiveFind(Window):
     Window.__init__(self, prg)
     self.host = host
     self.label = "find: "
-    self.setTextBuffer(app.text_buffer.TextBuffer(prg))
+    self.setTextBuffer(app.text_buffer.TextBuffer())
     self.controller = app.cu_editor.InteractiveFind(prg, host,
         self.textBuffer)
     self.leftColumn = StaticWindow(prg)
@@ -293,7 +294,7 @@ class InteractiveGoto(Window):
     Window.__init__(self, prg)
     self.host = host
     self.label = "goto: "
-    self.setTextBuffer(app.text_buffer.TextBuffer(prg))
+    self.setTextBuffer(app.text_buffer.TextBuffer())
     self.controller = app.cu_editor.InteractiveGoto(prg, host,
         self.textBuffer)
     self.leftColumn = StaticWindow(prg)
@@ -551,7 +552,7 @@ class PaletteWindow(Window):
     self.controller = app.controller.MainController(prg, self)
     self.controller.add(app.cu_editor.PaletteDialogController(
         prg, self))
-    textBuffer = app.text_buffer.TextBuffer(self.prg)
+    textBuffer = app.text_buffer.TextBuffer()
     self.controller.setTextBuffer(textBuffer)
     Window.setTextBuffer(self, textBuffer)
 
