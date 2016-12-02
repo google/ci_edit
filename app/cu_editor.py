@@ -207,8 +207,6 @@ class PaletteDialogController(app.controller.Controller):
     self.prg = prg
     self.view = view
     app.log.info('PaletteDialogController.__init__')
-
-    #def focus(self):
     def noOp(c):
       app.log.info('noOp in PaletteDialogController')
     self.commandDefault = noOp

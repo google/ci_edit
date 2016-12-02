@@ -230,91 +230,79 @@ class FileListPanel(Window):
     self.colorSelected = curses.color_pair(3)
 
 
-class InteractiveOpener(Window):
-  def __init__(self, prg, host):
+class LabeledLine(Window):
+  def __init__(self, prg, label):
     Window.__init__(self, prg)
+    self.label = label
+    self.leftColumn = StaticWindow(prg)
+
+  def refresh(self):
+    self.leftColumn.addStr(0, 0, self.label, self.color)
+    self.leftColumn.cursorWindow.refresh()
+    Window.refresh(self)
+
+  def reshape(self, rows, cols, top, left):
+    labelWidth = len(self.label)
+    Window.reshape(self, rows, cols-labelWidth, top, left+labelWidth)
+    self.leftColumn.reshape(rows, labelWidth, top, left)
+
+  def unfocus(self):
+    self.leftColumn.blank()
+    self.leftColumn.hide()
+    Window.unfocus(self)
+
+
+class InteractiveOpener(LabeledLine):
+  def __init__(self, prg, host):
+    LabeledLine.__init__(self, prg, "file: ")
     self.host = host
-    self.label = "file: "
     self.setTextBuffer(app.text_buffer.TextBuffer())
     self.fileListing = app.text_buffer.TextBuffer()
     #self.fileListing.fullPath = self.host.textBuffer.fullPath
     #self.host.setTextBuffer(self.fileListing)
     self.controller = app.cu_editor.InteractiveOpener(prg, host,
         self.textBuffer)
-    self.leftColumn = StaticWindow(prg)
-
-  def refresh(self):
-    self.leftColumn.addStr(0, 0, self.label, self.color)
-    self.leftColumn.cursorWindow.refresh()
-    Window.refresh(self)
-
-  def reshape(self, rows, cols, top, left):
-    labelWidth = len(self.label)
-    Window.reshape(self, rows, cols-labelWidth, top, left+labelWidth)
-    self.leftColumn.reshape(rows, labelWidth, top, left)
 
   def unfocus(self):
-    self.leftColumn.blank()
-    self.leftColumn.hide()
     self.blank()
     self.hide()
-    Window.unfocus(self)
+    LabeledLine.unfocus(self)
 
 
-class InteractiveFind(Window):
+class InteractiveSaveAs(Window):
   def __init__(self, prg, host):
-    Window.__init__(self, prg)
+    Window.__init__(self, prg, host)
+    self.label = "save as: "
+    #self.controller.setControllerSaveAs()
+
+
+class InteractiveFind(LabeledLine):
+  def __init__(self, prg, host):
+    LabeledLine.__init__(self, prg, "find: ")
     self.host = host
-    self.label = "find: "
     self.setTextBuffer(app.text_buffer.TextBuffer())
-    self.controller = app.cu_editor.InteractiveFind(prg, host,
+    self.controller = app.cu_editor.InteractiveFind(host,
+        self.textBuffer)
+
+  def unfocus(self):
+    self.blank()
+    self.hide()
+    LabeledLine.unfocus(self)
+
+
+class InteractiveGoto(LabeledLine):
+  def __init__(self, prg, host):
+    LabeledLine.__init__(self, prg, "goto: ")
+    self.host = host
+    self.setTextBuffer(app.text_buffer.TextBuffer())
+    self.controller = app.cu_editor.InteractiveGoto(host,
         self.textBuffer)
     self.leftColumn = StaticWindow(prg)
 
-  def refresh(self):
-    self.leftColumn.addStr(0, 0, self.label, self.color)
-    self.leftColumn.cursorWindow.refresh()
-    Window.refresh(self)
-
-  def reshape(self, rows, cols, top, left):
-    labelWidth = len(self.label)
-    Window.reshape(self, rows, cols-labelWidth, top, left+labelWidth)
-    self.leftColumn.reshape(rows, labelWidth, top, left)
-
   def unfocus(self):
-    self.leftColumn.blank()
-    self.leftColumn.hide()
     self.blank()
     self.hide()
-    Window.unfocus(self)
-
-
-class InteractiveGoto(Window):
-  def __init__(self, prg, host):
-    Window.__init__(self, prg)
-    self.host = host
-    self.label = "goto: "
-    self.setTextBuffer(app.text_buffer.TextBuffer())
-    self.controller = app.cu_editor.InteractiveGoto(prg, host,
-        self.textBuffer)
-    self.leftColumn = StaticWindow(prg)
-
-  def refresh(self):
-    self.leftColumn.addStr(0, 0, self.label, self.color)
-    self.leftColumn.cursorWindow.refresh()
-    Window.refresh(self)
-
-  def reshape(self, rows, cols, top, left):
-    labelWidth = len(self.label)
-    Window.reshape(self, rows, cols-labelWidth, top, left+labelWidth)
-    self.leftColumn.reshape(rows, labelWidth, top, left)
-
-  def unfocus(self):
-    self.leftColumn.blank()
-    self.leftColumn.hide()
-    self.blank()
-    self.hide()
-    Window.unfocus(self)
+    LabeledLine.unfocus(self)
 
 
 class LineNumbers(StaticWindow):
