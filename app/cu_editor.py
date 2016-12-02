@@ -15,7 +15,7 @@ import text_buffer
 def initCommandSet(editText, textBuffer):
   """The basic command set includes line editing controls."""
   return {
-    curses.KEY_F10: editText.prg.debugWindowOrder,
+    #curses.KEY_F10: editText.prg.debugWindowOrder,
     CTRL_A: textBuffer.selectionAll,
 
     CTRL_C: textBuffer.editCopy,
@@ -64,12 +64,13 @@ class InteractiveOpener(app.editor.InteractiveOpener):
       CTRL_O: self.createOrOpen,
     })
     self.commandSet = commandSet
+    self.commandDefault = self.textBuffer.insertPrintable
 
 
 class InteractiveFind(app.editor.InteractiveFind):
   """Find text within the current document."""
-  def __init__(self, prg, host, textBuffer):
-    app.editor.InteractiveFind.__init__(self, prg, host, textBuffer)
+  def __init__(self, host, textBuffer):
+    app.editor.InteractiveFind.__init__(self, host, textBuffer)
     self.document = host
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
@@ -84,12 +85,13 @@ class InteractiveFind(app.editor.InteractiveFind):
       curses.KEY_UP: self.findPrior,
     })
     self.commandSet = commandSet
+    self.commandDefault = self.textBuffer.insertPrintable
 
 
 class InteractiveGoto(app.editor.InteractiveGoto):
   """Jump to a particular line number."""
-  def __init__(self, prg, host, textBuffer):
-    app.editor.InteractiveGoto.__init__(self, prg, host, textBuffer)
+  def __init__(self, host, textBuffer):
+    app.editor.InteractiveGoto.__init__(self, host, textBuffer)
     self.document = host
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
@@ -103,6 +105,7 @@ class InteractiveGoto(app.editor.InteractiveGoto):
       ord('t'): self.gotoTop,
     })
     self.commandSet = commandSet
+    self.commandDefault = self.textBuffer.insertPrintable
 
 
 class CuaEdit(app.controller.Controller):
@@ -169,7 +172,7 @@ class CuaEdit(app.controller.Controller):
     self.host.changeFocusTo(self.host.interactiveFind)
 
   def switchToFindPrior(self):
-    curses.ungetch(self.prg.ch)
+    curses.ungetch(self.savedCh)
     self.host.changeFocusTo(self.host.interactiveFind)
 
   def switchToGoto(self):

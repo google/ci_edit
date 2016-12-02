@@ -148,11 +148,26 @@ class InteractiveOpener(app.controller.Controller):
           os.path.abspath(os.path.expanduser(dirPath))+": not found"]
 
 
+class InteractiveSaveAs(app.controller.Controller):
+  """Save buffer under specified file name."""
+  def __init__(self, prg, host, textBuffer):
+    app.controller.Controller.__init__(self, host, 'opener')
+    self.prg = prg
+    self.textBuffer = textBuffer
+    self.textBuffer.lines = [""]
+
+  def focus(self):
+    app.log.info('InteractiveSaveAs.focus')
+    self.commandDefault = self.textBuffer.insertPrintable
+
+  def info(self):
+    app.log.info('InteractiveSaveAs command set')
+
+
 class InteractiveFind(app.controller.Controller):
   """Find text within the current document."""
-  def __init__(self, prg, host, textBuffer):
+  def __init__(self, host, textBuffer):
     app.controller.Controller.__init__(self, host, 'find')
-    self.prg = prg
     self.textBuffer = textBuffer
     self.textBuffer.lines = [""]
 
@@ -194,9 +209,8 @@ class InteractiveFind(app.controller.Controller):
 
 class InteractiveGoto(app.controller.Controller):
   """Jump to a particular line number."""
-  def __init__(self, prg, host, textBuffer):
+  def __init__(self, host, textBuffer):
     app.controller.Controller.__init__(self, host, 'goto')
-    self.prg = prg
     self.textBuffer = textBuffer
     self.textBuffer.lines = [""]
 
