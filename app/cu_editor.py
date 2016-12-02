@@ -153,8 +153,6 @@ class CuaEdit(app.controller.Controller):
       KEY_CTRL_SHIFT_UP: textBuffer.cursorSelectUpScroll,
     })
     self.commandSet_Main = commandSet
-
-  def focus(self):
     self.commandDefault = self.textBuffer.insertPrintable
     self.commandSet = self.commandSet_Main
 
@@ -204,12 +202,13 @@ class CuaPlusEdit(CuaEdit):
 
 class PaletteDialogController(app.controller.Controller):
   """."""
-  def __init__(self, prg, host):
-    app.controller.Controller.__init__(self, host, 'Palette')
+  def __init__(self, prg, view):
+    app.controller.Controller.__init__(self, prg, 'Palette')
     self.prg = prg
+    self.view = view
     app.log.info('PaletteDialogController.__init__')
 
-  def focus(self):
+    #def focus(self):
     def noOp(c):
       app.log.info('noOp in PaletteDialogController')
     self.commandDefault = noOp
@@ -217,8 +216,12 @@ class PaletteDialogController(app.controller.Controller):
       CTRL_J: self.changeToHostWindow,
       curses.ascii.ESC: self.changeToHostWindow,
       curses.KEY_F3: self.prg.shiftPalette,
-      curses.KEY_F5: self.prg.paletteWindow.hide,
+      curses.KEY_F5: self.changeToHostWindow,
     }
+
+  def changeToHostWindow(self):
+    self.view.hide()
+    app.controller.Controller.changeToHostWindow(self)
 
   def info(self):
     app.log.info('PaletteDialogController command set')
