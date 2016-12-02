@@ -176,6 +176,10 @@ class CuaEdit(app.controller.Controller):
   def switchToGoto(self):
     self.host.changeFocusTo(self.host.interactiveGoto)
 
+  def switchToSaveAs(self):
+    app.log.debug('switchToSaveAs')
+    self.host.changeFocusTo(self.host.interactiveSaveAs)
+
 
 class CuaPlusEdit(CuaEdit):
   """Keyboard mappings for CUA, plus some extra."""

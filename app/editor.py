@@ -179,7 +179,6 @@ class InteractiveFind(app.controller.Controller):
 
   def focus(self):
     app.log.info('InteractiveFind focus()')
-    self.commandDefault = self.textBuffer.insertPrintable
     self.findCmd = self.document.textBuffer.find
     selection = self.document.textBuffer.getSelectedText()
     if selection:
@@ -219,7 +218,6 @@ class InteractiveGoto(app.controller.Controller):
     self.textBuffer.selectionAll()
     self.textBuffer.insert(str(self.document.textBuffer.cursorRow+1))
     self.textBuffer.selectionAll()
-    self.commandDefault = self.textBuffer.insertPrintable
 
   def info(self):
     app.log.info('InteractiveGoto command set')

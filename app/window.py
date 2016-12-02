@@ -11,10 +11,11 @@ import curses
 
 
 class StaticWindow:
-  """A static window does not get focus."""
-  def __init__(self, prg):
-    self.prg = prg
-    self.parent = prg
+  """A static window does not get focus.
+  parent is responsible for the order in which this window is updated, relative
+  to its siblings."""
+  def __init__(self, parent):
+    self.parent = parent
     self.zOrder = []
     self.color = 0
     self.colorSelected = 1
@@ -145,8 +146,8 @@ class StaticWindow:
 class Window(StaticWindow):
   """A Window may have focus. A Window holds a TextBuffer and a
     controller that operates on the TextBuffer."""
-  def __init__(self, prg, controller=None):
-    StaticWindow.__init__(self, prg)
+  def __init__(self, parent, controller=None):
+    StaticWindow.__init__(self, parent)
     self.controller = controller
     self.cursorWindow.keypad(1)
     self.hasFocus = False
@@ -186,7 +187,7 @@ class Window(StaticWindow):
     StaticWindow.refresh(self)
     self.textBuffer.draw(self)
     if self.hasFocus:
-      self.prg.debugDraw(self)
+      #self.prg.debugDraw(self)
       try:
         self.cursorWindow.move(
             self.textBuffer.cursorRow - self.textBuffer.scrollRow,
@@ -207,8 +208,8 @@ class Window(StaticWindow):
 
 
 class HeaderLine(StaticWindow):
-  def __init__(self, prg, host):
-    StaticWindow.__init__(self, prg)
+  def __init__(self, parent, host):
+    StaticWindow.__init__(self, parent)
     self.host = host
     self.textLine = None
 
@@ -223,18 +224,17 @@ class HeaderLine(StaticWindow):
 
 
 class FileListPanel(Window):
-  def __init__(self, prg):
-    self.prg = prg
-    Window.__init__(self, prg)
+  def __init__(self, parent):
+    Window.__init__(self, parent)
     self.color = curses.color_pair(18)
     self.colorSelected = curses.color_pair(3)
 
 
 class LabeledLine(Window):
-  def __init__(self, prg, label):
-    Window.__init__(self, prg)
+  def __init__(self, parent, label):
+    Window.__init__(self, parent)
     self.label = label
-    self.leftColumn = StaticWindow(prg)
+    self.leftColumn = StaticWindow(parent)
 
   def refresh(self):
     self.leftColumn.addStr(0, 0, self.label, self.color)
@@ -254,7 +254,8 @@ class LabeledLine(Window):
 
 class InteractiveOpener(LabeledLine):
   def __init__(self, prg, host):
-    LabeledLine.__init__(self, prg, "file: ")
+    """|host| is used as parent and host."""
+    LabeledLine.__init__(self, host, "file: ")
     self.host = host
     self.setTextBuffer(app.text_buffer.TextBuffer())
     self.fileListing = app.text_buffer.TextBuffer()
@@ -271,14 +272,14 @@ class InteractiveOpener(LabeledLine):
 
 class InteractiveSaveAs(Window):
   def __init__(self, prg, host):
-    Window.__init__(self, prg, host)
+    Window.__init__(self, host)
     self.label = "save as: "
     #self.controller.setControllerSaveAs()
 
 
 class InteractiveFind(LabeledLine):
-  def __init__(self, prg, host):
-    LabeledLine.__init__(self, prg, "find: ")
+  def __init__(self, host):
+    LabeledLine.__init__(self, host, "find: ")
     self.host = host
     self.setTextBuffer(app.text_buffer.TextBuffer())
     self.controller = app.cu_editor.InteractiveFind(host,
@@ -291,13 +292,13 @@ class InteractiveFind(LabeledLine):
 
 
 class InteractiveGoto(LabeledLine):
-  def __init__(self, prg, host):
-    LabeledLine.__init__(self, prg, "goto: ")
+  def __init__(self, parent, host):
+    LabeledLine.__init__(self, parent, "goto: ")
     self.host = host
     self.setTextBuffer(app.text_buffer.TextBuffer())
     self.controller = app.cu_editor.InteractiveGoto(host,
         self.textBuffer)
-    self.leftColumn = StaticWindow(prg)
+    self.leftColumn = StaticWindow(parent)
 
   def unfocus(self):
     self.blank()
@@ -306,10 +307,9 @@ class InteractiveGoto(LabeledLine):
 
 
 class LineNumbers(StaticWindow):
-  def __init__(self, prg, host):
-    StaticWindow.__init__(self, prg)
+  def __init__(self, parent, host):
+    StaticWindow.__init__(self, parent)
     self.host = host
-    #self.controller = app.cu_editor.LineNumberController(prg, self)
 
   def drawLineNumbers(self):
     maxy, maxx = self.cursorWindow.getmaxyx()
@@ -331,8 +331,8 @@ class LineNumbers(StaticWindow):
 
 
 class LogWindow(StaticWindow):
-  def __init__(self, prg):
-    StaticWindow.__init__(self, prg)
+  def __init__(self, parent):
+    StaticWindow.__init__(self, parent)
     self.lines = app.log.getLines()
     self.refreshCounter = 0
 
@@ -349,8 +349,8 @@ class LogWindow(StaticWindow):
 class StatusLine(StaticWindow):
   """The status line appears at the bottom of the screen. It shows the current
   line and column the cursor is on."""
-  def __init__(self, prg, host):
-    StaticWindow.__init__(self, prg)
+  def __init__(self, parent, host):
+    StaticWindow.__init__(self, parent)
     self.host = host
 
   def refresh(self):
@@ -388,15 +388,6 @@ class StatusLine(StaticWindow):
       self.cursorWindow.refresh()
 
 
-class xDirectoryPanel(Window):
-  """A content area panel that shows a file directory list."""
-  def __init__(self, prg):
-    self.prg = prg
-    Window.__init__(self, prg)
-    self.color = curses.color_pair(18)
-    self.colorSelected = curses.color_pair(3)
-
-
 class InputWindow(Window):
   """This is the main content window. Often the largest pane displayed."""
   def __init__(self, prg, rows, cols, top, left, header, footer, lineNumbers):
@@ -417,7 +408,13 @@ class InputWindow(Window):
       self.interactiveOpen.setParent(self, 0)
       self.interactiveOpen.hide()
     if 1:
-      self.interactiveFind = InteractiveFind(prg, self)
+      self.interactiveSaveAs = InteractiveSaveAs(prg, self)
+      self.interactiveSaveAs.color = curses.color_pair(0)
+      self.interactiveSaveAs.colorSelected = curses.color_pair(87)
+      self.interactiveSaveAs.setParent(self, 0)
+      self.interactiveSaveAs.hide()
+    if 1:
+      self.interactiveFind = InteractiveFind(self)
       self.interactiveFind.color = curses.color_pair(0)
       self.interactiveFind.colorSelected = curses.color_pair(87)
       self.interactiveFind.setParent(self, 0)
@@ -429,22 +426,22 @@ class InputWindow(Window):
       self.interactiveGoto.setParent(self, 0)
       self.interactiveGoto.hide()
     if header:
-      self.headerLine = HeaderLine(prg, self)
+      self.headerLine = HeaderLine(self, self)
       self.headerLine.color = curses.color_pair(168)
       self.headerLine.colorSelected = curses.color_pair(47)
       self.headerLine.setParent(self, 0)
     if footer:
-      self.statusLine = StatusLine(prg, self)
+      self.statusLine = StatusLine(self, self)
       self.statusLine.color = curses.color_pair(168)
       self.statusLine.colorSelected = curses.color_pair(47)
       self.statusLine.setParent(self, 0)
     if lineNumbers:
-      self.leftColumn = LineNumbers(prg, self)
+      self.leftColumn = LineNumbers(self, self)
       self.leftColumn.color = curses.color_pair(211)
       self.leftColumn.colorSelected = curses.color_pair(146)
       self.leftColumn.setParent(self, 0)
     if 1:
-      self.rightColumn = StaticWindow(prg)
+      self.rightColumn = StaticWindow(self)
       self.rightColumn.color = curses.color_pair(18)
       self.rightColumn.colorSelected = curses.color_pair(105)
       self.rightColumn.setParent(self, 0)
@@ -471,6 +468,7 @@ class InputWindow(Window):
       rows -= 1
       top += 1
     self.interactiveOpen.reshape(1, cols, top+rows-1, left)
+    self.interactiveSaveAs.reshape(1, cols, top+rows-1, left)
     if 1:
       findReplaceHeight = 1
       topOfFind = top+rows-findReplaceHeight
