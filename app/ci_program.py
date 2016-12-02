@@ -3,6 +3,7 @@
 # Use of this source code is governed by an Apache-style license that can be
 # found in the LICENSE file.
 
+import app.buffer_manager
 import app.curses_util
 import app.log
 import app.text_buffer
@@ -17,7 +18,7 @@ class CiProgram:
   """This is the main editor program. It holds top level information and runs
   the main loop. The CiProgram is intended as a singleton."""
   def __init__(self, stdscr):
-    self.bufferManager = app.text_buffer.BufferManager()
+    self.bufferManager = app.buffer_manager.BufferManager()
     self.exiting = False
     self.modeStack = []
     self.priorClick = 0
