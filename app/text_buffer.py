@@ -352,17 +352,18 @@ class BackingTextBuffer(Mutator):
   def cursorMoveAndMark(self, rowDelta, colDelta, goalColDelta, markRowDelta,
       markColDelta, selectionModeDelta):
     maxy, maxx = self.view.cursorWindow.getmaxyx()
-    rows = 0
+    scrollRows = 0
     if self.scrollRow > self.cursorRow+rowDelta:
-      rows = self.cursorRow+rowDelta - self.scrollRow
+      scrollRows = self.cursorRow+rowDelta - self.scrollRow
     elif self.cursorRow+rowDelta >= self.scrollRow+maxy:
-      rows = self.cursorRow+rowDelta - (self.scrollRow+maxy-1)
-    cols = 0
+      scrollRows = self.cursorRow+rowDelta - (self.scrollRow+maxy-1)
+    scrollCols = 0
     if self.scrollCol > self.cursorCol+colDelta:
-      cols = self.cursorCol+colDelta - self.scrollCol
+      scrollCols = self.cursorCol+colDelta - self.scrollCol
     elif self.cursorCol+colDelta >= self.scrollCol+maxx:
-      cols = self.cursorCol+colDelta - (self.scrollCol+maxx-1)
-    self.redoAddChange(('m', (rowDelta, colDelta, goalColDelta, rows, cols,
+      scrollCols = self.cursorCol+colDelta - (self.scrollCol+maxx-1)
+    self.redoAddChange(('m', (rowDelta, colDelta, goalColDelta,
+        scrollRows, scrollCols,
         markRowDelta, markColDelta, 0, 0, selectionModeDelta)))
 
   def cursorMoveScroll(self, rowDelta, colDelta, goalColDelta,
