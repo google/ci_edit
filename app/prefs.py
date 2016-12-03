@@ -3,55 +3,55 @@ prefs = {
   'filetype': {
     'bash': {
       'ext': ['.sh'],
-      'grammer': 'bash',
+      'grammar': 'bash',
       'type': 'text',
     },
     'binary': {
       'ext': ['.exe', '.jpg', '.jpeg', '.png', '.o', '.obj', '.pyc', '.pyo'],
-      'grammer': None,
+      'grammar': None,
       'type': 'binary',
     },
     'c': {
       'ext': ['.c', '.h'],
-      'grammer': 'c',
+      'grammar': 'c',
       'type': 'text',
     },
     'cpp': {
       'ext': ['.cc', '.cpp', '.cxx', '.c++', '.hpp', '.hxx', '.h++'],
-      'grammer': 'cpp',
+      'grammar': 'cpp',
       'type': 'text',
     },
     'css': {
       'ext': ['.css', '_css.html'],
-      'grammer': 'css',
+      'grammar': 'css',
       'type': 'text',
     },
     'html': {
       'ext': ['.htm', '.html'],
-      'grammer': 'html',
+      'grammar': 'html',
       'type': 'text',
     },
     'js': {
       'ext': ['.json', '.js'],
-      'grammer': 'js',
+      'grammar': 'js',
       'type': 'text',
     },
     'python': {
       'ext': ['.py'],
-      'grammer': 'py',
+      'grammar': 'py',
       'type': 'text',
     },
   },
-  'grammer': {
-    # A grammer is
-    # 'grammer_name': {
+  'grammar': {
+    # A grammar is
+    # 'grammar_name': {
     #   'begin': None or string,
     #   'continued': None or string, Prefixed used when continuing to another line,
     #   'end': None or string,
     #   'escape': None or string,
     #   'indent': None or string,
     #   'keywords': None or list of string,
-    #   'single_line': Boolean, Whether entire grammer must be on a single line,
+    #   'single_line': Boolean, Whether entire grammar must be on a single line,
     # }
     'bash': {
       'escape': '\\',
@@ -85,8 +85,15 @@ prefs = {
       'escape': None,
       'indent': '  ',
       'keywords': [
+        'case',
+        'public',
+        'private',
+        'protected',
+        'const',
         'class', 'else', 'for', 'if', 'return', 'sizeof', 'static', 'struct',
         'typedef', 'while',
+        'switch',
+        'throw',
       ],
       'types': [
         'char', 'double', 'float', 'int', 'long', 'short', 'unsigned',
@@ -120,8 +127,9 @@ prefs = {
       'escape': None,
       'indent': '  ',
       'keywords': [
-        'define', 'defined', 'endif', 'if', 'ifdef', 'ifndef', 'include',
-        'undef',
+        '#\s*?define', '#\s*?defined', '#\s*?elif', '#\s*?endif',
+        '#\s*?if', '#\s*?ifdef', '#\s*?ifndef', '#\s*?include',
+        '#\s*?undef',
       ],
       'contains': ['file_path_quoted', 'file_path_bracketed'],
     },
@@ -197,10 +205,15 @@ prefs = {
       'escape': '\\',
       'indent': '  ',
       'keywords': [
-        'and', 'as', 'break', 'class', 'continue',
-        'def', 'except', 'from', 'if',
-        'import', 'in', 'for', 'or',
-        'return', 'try', 'while', 'yeild',
+        'and', 'as'  'break', 'class', 'continue',
+        'def', 'elif', 'else', 'except',
+        'False', 'for', 'from', 'function',
+        'global', 'if', 'import', 'in', 'is',
+        'None', 'not',
+        'or', 'pass',
+        'raise', 'range', 'return',
+        'then', 'True', 'try',
+        'until', 'while', 'yeild',
       ],
       'contains': ['c_string1', 'c_string2',
           'pound_comment', 'py_string1', 'py_string2'],

@@ -1025,60 +1025,16 @@ class TextBuffer(BackingTextBuffer):
   def __init__(self):
     BackingTextBuffer.__init__(self)
     self.lineLimitIndicator = sys.maxint
-    #todo(dschuyler): move keywords out to a data file.
-    self.highlightKeywords = [
-      'and',
-      'break',
-      'continue',
-      'class',
-      'def',
-      'elif',
-      'else',
-      'except',
-      'except',
-      'False',
-      'for',
-      'from',
-      'function',
-      'global',
-      'if',
-      'import',
-      'in',
-      'is',
-      'None',
-      'not',
-      'or',
-      'pass',
-      'raise',
-      'range',
-      'return',
-      'then',
-      'True',
-      'try',
-      'until',
-      'while',
-    ]
-    self.highlightKeywords += [
-      'case',
-      'public',
-      'private',
-      'protected',
-      'const',
-      'static',
-      'switch',
-      'throw',
-    ]
-    self.highlightPreprocessor = [
-      'define',
-      'elif',
-      'endif',
-      'if',
-      'include',
-      'undef',
-    ]
-    keywords = '\\b%s\\b'%('\\b|\\b'.join(self.highlightKeywords),)
-    keywords += '|#\s*%s\\b'%('\\b|#\s*'.join(self.highlightPreprocessor),)
-    self.highlightRe = re.compile(keywords)
+    self.highlightRe = None
+
+  def setKeywordsByFileType(self):
+    grammar = app.prefs.GetGrammar('foo.py')
+    if grammar:
+      self.highlightKeywords = grammar['keywords']
+
+  def setKeywords(self, highlightKeywords):
+      keywords = '\\b%s\\b'%('\\b|\\b'.join(highlightKeywords),)
+      self.highlightRe = re.compile(keywords)
 
   def scrollToCursor(self, window):
     """Move the selected view rectangle so that the cursor is visible."""
@@ -1121,7 +1077,7 @@ class TextBuffer(BackingTextBuffer):
       for i in range(limit):
         line = self.lines[self.scrollRow+i][startCol:endCol]
         window.addStr(i, 0, line + ' '*(maxx-len(line)), window.color)
-      if 1:
+      if self.highlightRe:
         # Highlight keywords.
         for i in range(limit):
           line = self.lines[self.scrollRow+i][startCol:endCol]

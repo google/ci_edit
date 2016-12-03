@@ -59,7 +59,6 @@ class CiProgram:
       window.controller.onChange()
       self.refresh()
       ch = window.cursorWindow.getch()
-      app.log.info('commandLoop asdf', ch)
       if ch == -1:
         self.quit()
       self.ch = ch
