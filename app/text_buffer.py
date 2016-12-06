@@ -88,15 +88,12 @@ class Mutator(app.selectable.Selectable):
         self.markerEndCol += change[1][8]
         self.selectionMode += change[1][9]
       elif change[0] == 'n':
-        # Split lines.
+        # Redo split lines.
         line = self.lines[self.cursorRow]
         self.lines.insert(self.cursorRow+1, line[self.cursorCol:])
         self.lines[self.cursorRow] = line[:self.cursorCol]
         for i in range(max(change[1][0] - 1, 0)):
           self.lines.insert(self.cursorRow+1, "")
-        self.cursorRow += change[1][0]
-        self.cursorCol += change[1][1]
-        self.goalCol += change[1][2]
       elif change[0] == 'v':  # Redo paste.
         self.insertLines(change[1])
       elif change[0] == 'vb':
@@ -221,10 +218,7 @@ class Mutator(app.selectable.Selectable):
         self.selectionMode -= change[1][9]
         return True
       elif change[0] == 'n':
-        # Split lines.
-        self.cursorRow -= change[1][0]
-        self.cursorCol -= change[1][1]
-        self.goalCol -= change[1][2]
+        # Undo split lines.
         self.lines[self.cursorRow] += self.lines[self.cursorRow+change[1][0]]
         for i in range(change[1][0]):
           del self.lines[self.cursorRow+1]
@@ -311,9 +305,10 @@ class BackingTextBuffer(Mutator):
 
   def carriageReturn(self):
     self.performDelete()
-    self.redoAddChange(('n', (1, -self.cursorCol, -self.goalCol)))
+    self.redoAddChange(('n', (1,)))
     self.redo()
-    #self.cursorMove(1, -self.cursorCol, -self.goalCol)
+    self.cursorMove(1, -self.cursorCol, -self.goalCol)
+    self.redo()
     app.log.debug('carriageReturn d')
     if 1: # todo: if indent on CR
       line = self.lines[self.cursorRow-1]
@@ -977,7 +972,7 @@ class BackingTextBuffer(Mutator):
 
   def splitLine(self):
     """split the line into two at current column."""
-    self.redoAddChange(('n', (0, 0, 0)))
+    self.redoAddChange(('n', (1,)))
     self.redo()
 
   def swapCursorAndMarker(self):
