@@ -32,14 +32,11 @@ class StaticWindow:
     try: self.cursorWindow.addstr(row, col, text, colorPair)
     except curses.error: pass
 
-  def writeLine(self, text, colorPair=1):
-    """Simple line writer for static windows."""
-    text = str(text)[:self.cols]
-    text = text + ' '*max(0, self.cols-len(text))
-    try: self.cursorWindow.addstr(self.writeLineRow, 0, text,
-        curses.color_pair(colorPair))
-    except curses.error: pass
-    self.writeLineRow += 1
+  def blank(self):
+    """Clear the window."""
+    for i in range(self.rows):
+      self.addStr(0, i, ' '*self.cols, self.color)
+    self.cursorWindow.refresh()
 
   def contains(self, row, col):
     """Determine whether the position at row, col lay within this window."""
@@ -49,11 +46,8 @@ class StaticWindow:
     return (self.top <= row < self.top+self.rows and
         self.left <= col < self.left + self.cols and self)
 
-  def blank(self):
-    """Clear the window."""
-    for i in range(self.rows):
-      self.addStr(0, i, ' '*self.cols, self.color)
-    self.cursorWindow.refresh()
+  def debugDraw(self, win):
+    self.parent.debugDraw(win)
 
   def hide(self):
     """Remove window from the render list."""
@@ -81,12 +75,6 @@ class StaticWindow:
   def mouseWheelUp(self, shift, ctrl, alt):
     pass
 
-  def refresh(self):
-    """Redraw window."""
-    self.cursorWindow.refresh()
-    for child in reversed(self.zOrder):
-      child.refresh()
-
   def moveTo(self, top, left):
     app.log.detail('move', top, left)
     if top == self.top and left == self.left:
@@ -106,6 +94,12 @@ class StaticWindow:
     self.top += top
     self.left += left
     self.cursorWindow.mvwin(self.top, self.left)
+
+  def refresh(self):
+    """Redraw window."""
+    self.cursorWindow.refresh()
+    for child in reversed(self.zOrder):
+      child.refresh()
 
   def reshape(self, rows, cols, top, left):
     self.moveTo(top, left)
@@ -141,6 +135,15 @@ class StaticWindow:
     try: self.parent.zOrder.remove(self)
     except: pass
     self.parent.zOrder.append(self)
+
+  def writeLine(self, text, colorPair=1):
+    """Simple line writer for static windows."""
+    text = str(text)[:self.cols]
+    text = text + ' '*max(0, self.cols-len(text))
+    try: self.cursorWindow.addstr(self.writeLineRow, 0, text,
+        curses.color_pair(colorPair))
+    except curses.error: pass
+    self.writeLineRow += 1
 
 
 class Window(StaticWindow):
@@ -187,7 +190,7 @@ class Window(StaticWindow):
     StaticWindow.refresh(self)
     self.textBuffer.draw(self)
     if self.hasFocus:
-      #self.prg.debugDraw(self)
+      self.parent.debugDraw(self)
       try:
         self.cursorWindow.move(
             self.textBuffer.cursorRow - self.textBuffer.scrollRow,
