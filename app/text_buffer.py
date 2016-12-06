@@ -313,6 +313,8 @@ class BackingTextBuffer(Mutator):
     self.performDelete()
     self.redoAddChange(('n', (1, -self.cursorCol, -self.goalCol)))
     self.redo()
+    #self.cursorMove(1, -self.cursorCol, -self.goalCol)
+    app.log.debug('carriageReturn d')
     if 1: # todo: if indent on CR
       line = self.lines[self.cursorRow-1]
       commonIndent = 2
@@ -665,6 +667,7 @@ class BackingTextBuffer(Mutator):
     app.log.info('relativePath', self.relativePath)
     self.fileFilter()
     self.file.close()
+    self.setKeywordsByFileType(os.path.splitext(fullPath)[1])
 
   def fileWrite(self):
     try:
@@ -1028,10 +1031,12 @@ class TextBuffer(BackingTextBuffer):
     self.lineLimitIndicator = sys.maxint
     self.highlightRe = None
 
-  def setKeywordsByFileType(self):
-    grammar = app.prefs.GetGrammar('foo.py')
+  def setKeywordsByFileType(self, extension):
+    grammar = app.prefs.util.getGrammar(extension)
     if grammar:
-      self.highlightKeywords = grammar['keywords']
+      self.setKeywords(grammar.get('keywords', [])+
+          grammar.get('namespaces', [])+
+          grammar.get('types', []))
 
   def setKeywords(self, highlightKeywords):
       keywords = '\\b%s\\b'%('\\b|\\b'.join(highlightKeywords),)

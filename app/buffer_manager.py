@@ -32,8 +32,8 @@ class BufferManager:
     for i,k in self.buffers.items():
       app.log.info('  ', i)
       app.log.info('    ', k)
-      app.log.info('    ', repr(k.lines))
-      app.log.info('    ', len(k.lines) and k.lines[0])
+      #app.log.info('    ', repr(k.lines))
+      #app.log.info('    ', len(k.lines) and k.lines[0])
     app.log.info(' loadTextBuffer')
     app.log.info(expandedPath)
     app.log.info(' loadTextBuffer')
