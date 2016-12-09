@@ -851,24 +851,30 @@ class BackingTextBuffer(Mutator):
     # Adjust the marker column delta when the cursor and marker positions
     # cross over each other.
     markerCol = 0
-    if self.cursorRow == self.markerRow:
-      if row == self.cursorRow:
-        if self.cursorCol > self.markerCol and col < self.markerCol:
+    if self.selectionMode == app.selectable.kSelectionWord:
+      if self.cursorRow == self.markerRow:
+        if False:
+          pass
+        elif row == self.cursorRow:
+          if False:
+            pass
+          elif self.cursorCol > self.markerCol and col < self.markerCol:
+            markerCol = 1
+          elif self.cursorCol < self.markerCol and col >= self.markerCol:
+            markerCol = -1
+          app.log.debug('markerCol', markerCol)
+        else:
+          if (row < self.cursorRow and
+              self.cursorCol > self.markerCol):
+            markerCol = 1
+          elif (row > self.cursorRow and
+              self.cursorCol < self.markerCol):
+            markerCol = -1
+      elif row == self.markerRow:
+        if col < self.markerCol and row < self.cursorRow:
           markerCol = 1
-        elif self.cursorCol < self.markerCol and col >= self.markerCol:
+        elif col >= self.markerCol and row > self.cursorRow:
           markerCol = -1
-      else:
-        if (row < self.cursorRow and
-            self.cursorCol > self.markerCol):
-          markerCol = 1
-        elif (row > self.cursorRow and
-            self.cursorCol < self.markerCol):
-          markerCol = -1
-    elif row == self.markerRow:
-      if col < self.markerCol and row < self.cursorRow:
-        markerCol = 1
-      elif col >= self.markerCol and row > self.cursorRow:
-        markerCol = -1
 
     self.cursorMoveAndMark(row - self.cursorRow, col - self.cursorCol,
         col - self.goalCol, 0, markerCol, 0)
