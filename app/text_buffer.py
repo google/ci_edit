@@ -853,12 +853,8 @@ class BackingTextBuffer(Mutator):
     markerCol = 0
     if self.selectionMode == app.selectable.kSelectionWord:
       if self.cursorRow == self.markerRow:
-        if False:
-          pass
-        elif row == self.cursorRow:
-          if False:
-            pass
-          elif self.cursorCol > self.markerCol and col < self.markerCol:
+        if row == self.cursorRow:
+          if self.cursorCol > self.markerCol and col < self.markerCol:
             markerCol = 1
           elif self.cursorCol < self.markerCol and col >= self.markerCol:
             markerCol = -1
