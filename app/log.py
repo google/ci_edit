@@ -3,6 +3,7 @@
 # Use of this source code is governed by an Apache-style license that can be
 # found in the LICENSE file.
 
+import inspect
 import sys
 import traceback
 
@@ -19,6 +20,8 @@ def parseLines(*args):
   if not len(args):
     return [""]
   msg = str(args[0])
+  if 1:
+    msg = "%s: %s"%(inspect.stack()[2][3], msg)
   prior = msg
   for i in args[1:]:
     if not len(prior) or prior[-1] != '\n':
@@ -55,7 +58,9 @@ def error(*args):
   lines = parseLines(*args)
   fullLog += lines
 
-def wrapper(func):
+def wrapper(func, shouldWrite=True):
+  global shouldWritePrintLog
+  shouldWritePrintLog = shouldWrite
   try:
     try:
       func()
