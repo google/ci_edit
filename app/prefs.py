@@ -302,24 +302,27 @@ prefs = {
 class PrefsUtil:
   def __init__(self, prefs):
     self.grammars = {}
-    app.log.info('grammars', prefs['grammar'])
+    if 0:
+      app.log.info('grammars', prefs['grammar'])
     for k,v in prefs['grammar'].items():
       self.grammars[k] = v
-    app.log.info('grammars')
-    for k,v in self.grammars.items():
-      app.log.info('  ', k, ':', v)
+    if 0:
+      app.log.info('grammars')
+      for k,v in self.grammars.items():
+        app.log.info('  ', k, ':', v)
     self.extensions = {}
     self.filetypes = {}
     for k,v in prefs['filetype'].items():
       for ext in v['ext']:
         self.extensions[ext] = v.get('grammar')
       self.filetypes[k] = v
-    app.log.info('extensions')
-    for k,v in self.extensions.items():
-      app.log.info('  ', k, ':', v)
-    app.log.info('filetypes')
-    for k,v in self.filetypes.items():
-      app.log.info('  ', k, ':', v)
+    if 0:
+      app.log.info('extensions')
+      for k,v in self.extensions.items():
+        app.log.info('  ', k, ':', v)
+      app.log.info('filetypes')
+      for k,v in self.filetypes.items():
+        app.log.info('  ', k, ':', v)
 
   def getGrammar(self, fileExtension):
     filetype = self.extensions.get(fileExtension)
