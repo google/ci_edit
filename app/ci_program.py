@@ -86,7 +86,7 @@ class CiProgram:
     rows, cols = self.stdscr.getmaxyx()
     #app.log.detail('layout', rows, cols)
     if self.showLogWindow:
-      inputWidth = min(78, cols)
+      inputWidth = min(80, cols)
       debugWidth = max(cols-inputWidth-1, 0)
       debugRows = 15
       self.debugWindow.reshape(debugRows, debugWidth, 0,
