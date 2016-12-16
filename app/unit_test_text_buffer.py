@@ -131,6 +131,6 @@ void blah();
 
     self.textBuffer.mouseMoved(row, 1, False, False, False)
     self.assertEqual(self.textBuffer.markerRow, row)
-    self.assertEqual(self.textBuffer.markerCol, wordBegin)
+    self.assertEqual(self.textBuffer.markerCol, wordEnd)
     self.assertEqual(self.textBuffer.cursorRow, row)
     self.assertEqual(self.textBuffer.cursorCol, 0)
