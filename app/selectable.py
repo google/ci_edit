@@ -41,7 +41,7 @@ kSelectionModeNames = [
 
 class Selectable:
   def __init__(self):
-    self.lines = []
+    self.lines = [""]
     self.cursorRow = 0
     self.cursorCol = 0
     self.goalCol = 0
@@ -50,6 +50,11 @@ class Selectable:
     self.markerEndRow = 0
     self.markerEndCol = 0
     self.selectionMode = kSelectionNone
+
+  def debug(self):
+    return "(Selectable: line count %d, cursor %d,%d, marker %d,%d, mode %s)"%(
+        len(self.lines), self.cursorRow, self.cursorCol, self.markerRow,
+        self.markerCol, self.selectionModeName())
 
   def selection(self):
     return (self.cursorRow, self.cursorCol, self.markerRow, self.markerCol)
@@ -154,7 +159,10 @@ class Selectable:
     else:
       app.log.info('selection mode not recognized', self.selectionMode)
 
-  def extendWords(self, upperRow, upperCol, lowerRow, lowerCol):
+  def __extendWords(self, upperRow, upperCol, lowerRow, lowerCol):
+    """Extends and existing selection to the nearest word boundaries. The cursor
+        and marker will be extended away from each other. The extension may
+        occur in one, both, or neither direction."""
     line = self.lines[upperRow]
     for segment in re.finditer(kReWordBoundary, line):
       if segment.start() <= upperCol < segment.end():
@@ -184,14 +192,14 @@ class Selectable:
       if self.cursorRow > self.markerRow or (
           self.cursorRow == self.markerRow and
           self.cursorCol > self.markerCol):
-        upperCol, lowerCol = self.extendWords(self.markerRow,
+        upperCol, lowerCol = self.__extendWords(self.markerRow,
             self.markerCol, self.cursorRow, self.cursorCol)
         return (0,
             lowerCol-self.cursorCol,
             lowerCol-self.goalCol,
             0, upperCol-self.markerCol, 0)
       else:
-        upperCol, lowerCol = self.extendWords(self.cursorRow,
+        upperCol, lowerCol = self.__extendWords(self.cursorRow,
             self.cursorCol, self.markerRow, self.markerCol)
         return (0,
             upperCol-self.cursorCol,
