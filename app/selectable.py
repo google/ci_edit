@@ -97,20 +97,21 @@ class Selectable:
 
   def doDeleteSelection(self):
     upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
-    app.log.detail('doDelete', upperRow, upperCol, lowerRow, lowerCol)
-    if self.selectionMode == kSelectionAll:
-      self.lines = [""]
-    elif self.selectionMode == kSelectionBlock:
+    if self.selectionMode == kSelectionBlock:
       for i in range(upperRow, lowerRow+1):
         line = self.lines[i]
         self.lines[i] = line[:upperCol] + line[lowerCol:]
-    elif (self.selectionMode == kSelectionCharacter or
+    elif (self.selectionMode == kSelectionAll or
+        self.selectionMode == kSelectionCharacter or
         self.selectionMode == kSelectionWord):
-      if upperRow == lowerRow:
+      if upperRow == lowerRow and len(self.lines) > 1:
         line = self.lines[upperRow]
         self.lines[upperRow] = line[:upperCol] + line[lowerCol:]
-      elif upperCol == 0 and lowerCol == 0:
+      elif upperCol == 0 and lowerCol == 0 or (
+          lowerRow == len(self.lines) and lowerCol == len(self.lines[-1])):
         del self.lines[upperRow:lowerRow]
+        if not len(self.lines):
+          self.lines.append("")
       else:
         self.lines[upperRow] = (self.lines[upperRow][:upperCol] +
             self.lines[lowerRow][lowerCol:])
