@@ -24,6 +24,7 @@ class Mutator(app.selectable.Selectable):
     app.selectable.Selectable.__init__(self)
     self.debugRedo = False
     self.findRe = None
+    self.findBackRe = None
     self.fullPath = ''
     self.relativePath = ''
     self.scrollRow = 0
@@ -713,17 +714,24 @@ class BackingTextBuffer(Mutator):
       self.findRe = None
       self.doSelectionMode(app.selectable.kSelectionNone)
       return
-    searchForLen = len(searchFor)
+    # The saved re is also used for highlighting.
+    self.findRe = re.compile(searchFor)
+    self.findBackRe = re.compile('(?:.*)'+searchFor)
+    self.findCurrentPattern(direction)
+
+  def findCurrentPattern(self, direction):
+    localRe = self.findRe
+    if direction < 0:
+      localRe = self.findBackRe
+    if localRe is None:
+      app.log.info('localRe is None')
+      return
     # Current line.
     text = self.lines[self.cursorRow]
-    # Save the re for highlighting.
-    self.findRe =  re.compile(searchFor)
-    localRe = self.findRe
     if direction >= 0:
       text = text[self.cursorCol+direction:]
       offset = self.cursorCol+direction
     else:
-      localRe = re.compile('(?:.*)'+searchFor)
       text = text[:self.cursorCol]
       offset = 0
     #app.log.info('find() searching', repr(text))
@@ -741,7 +749,7 @@ class BackingTextBuffer(Mutator):
     else:
       theRange = range(self.cursorRow-1, -1, -1)
     for i in theRange:
-      found = re.search(searchFor, self.lines[i])
+      found = localRe.search(self.lines[i])
       if found:
         if 0:
           for k in found.regs:
@@ -758,7 +766,7 @@ class BackingTextBuffer(Mutator):
     else:
       theRange = range(len(self.lines)-1, self.cursorRow, -1)
     for i in theRange:
-      found = re.search(searchFor, self.lines[i])
+      found = localRe.search(self.lines[i])
       if found:
         #app.log.info('c found on line', i, repr(found))
         start = found.regs[0][0]
@@ -766,11 +774,22 @@ class BackingTextBuffer(Mutator):
         self.selectText(i, start, end-start, app.selectable.kSelectionCharacter)
         return
     app.log.info('find not found')
+    self.doSelectionMode(app.selectable.kSelectionNone)
+
+  def findAgain(self):
+    """Find the current pattern, searching down the document."""
+    self.findCurrentPattern(1)
+
+  def findBack(self):
+    """Find the current pattern, searching up the document."""
+    self.findCurrentPattern(-1)
 
   def findNext(self, searchFor):
+    """Find a new pattern, searching down the document."""
     self.find(searchFor, 1)
 
   def findPrior(self, searchFor):
+    """Find a new pattern, searching up the document."""
     self.find(searchFor, -1)
 
   def indent(self):

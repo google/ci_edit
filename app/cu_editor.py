@@ -76,7 +76,10 @@ class InteractiveFind(app.editor.InteractiveFind):
     commandSet.update({
       curses.ascii.ESC: self.changeToHostWindow,
       curses.KEY_F1: self.info,
+      curses.KEY_F3: self.saveEventChangeToHostWindow,
+      KEY_SHIFT_F3: self.saveEventChangeToHostWindow,
       CTRL_F: self.findNext,
+      CTRL_G: self.findNext,
       CTRL_J: self.changeToHostWindow,
       CTRL_R: self.findPrior,
       CTRL_S: self.saveDocument,
@@ -152,9 +155,8 @@ class CuaEdit(app.controller.Controller):
       KEY_CTRL_UP: textBuffer.cursorUpScroll,
       KEY_CTRL_SHIFT_UP: textBuffer.cursorSelectUpScroll,
     })
-    self.commandSet_Main = commandSet
+    self.commandSet = commandSet
     self.commandDefault = self.textBuffer.insertPrintable
-    self.commandSet = self.commandSet_Main
 
   def info(self):
     app.log.info('CuaEdit Command set main')
@@ -194,14 +196,16 @@ class CuaPlusEdit(CuaEdit):
   def setTextBuffer(self, textBuffer):
     app.log.info('CuaPlusEdit.__init__')
     CuaEdit.setTextBuffer(self, textBuffer)
-    commandSet = self.commandSet_Main.copy()
+    commandSet = self.commandSet.copy()
     commandSet.update({
       CTRL_E: textBuffer.nextSelectionMode,
 
-      curses.KEY_F3: self.prg.shiftPalette,
+      curses.KEY_F3: textBuffer.findAgain,
       curses.KEY_F4: self.prg.paletteWindow.focus,
+      curses.KEY_F6: self.prg.shiftPalette,
+      KEY_SHIFT_F3: textBuffer.findBack,
     })
-    self.commandSet_Main = commandSet
+    self.commandSet = commandSet
 
 
 class PaletteDialogController(app.controller.Controller):
