@@ -822,6 +822,11 @@ class BackingTextBuffer(Mutator):
     self.performDelete()
     self.redoAddChange(('i', text))
     self.redo()
+    maxRow, maxCol = self.view.cursorWindow.getmaxyx()
+    deltaCol = self.cursorCol - self.scrollCol - maxCol + 1
+    if deltaCol > 0:
+      self.cursorMoveScroll(0, 0, 0, 0, deltaCol);
+      self.redo()
 
   def insertPrintable(self, ch):
     #app.log.info('insertPrintable')
