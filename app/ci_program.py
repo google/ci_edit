@@ -61,7 +61,7 @@ class CiProgram:
       ch = window.cursorWindow.getch()
       if ch == -1:
         app.log.debug('getch() returned -1')
-        self.quit()
+        #self.quit()
       self.ch = ch
       window.controller.doCommand(ch)
 
