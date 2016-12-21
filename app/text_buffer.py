@@ -715,8 +715,8 @@ class BackingTextBuffer(Mutator):
       self.doSelectionMode(app.selectable.kSelectionNone)
       return
     # The saved re is also used for highlighting.
-    self.findRe = re.compile(searchFor)
-    self.findBackRe = re.compile('(?:.*)'+searchFor)
+    self.findRe = re.compile('()'+searchFor)
+    self.findBackRe = re.compile('(.*)'+searchFor)
     self.findCurrentPattern(direction)
 
   def findCurrentPattern(self, direction):
@@ -737,7 +737,7 @@ class BackingTextBuffer(Mutator):
     #app.log.info('find() searching', repr(text))
     found = localRe.search(text)
     if found:
-      start = found.regs[0][0]
+      start = found.regs[1][1]
       end = found.regs[0][1]
       #app.log.info('found on line', self.cursorRow, start)
       self.selectText(self.cursorRow, offset+start, end-start,
@@ -755,7 +755,7 @@ class BackingTextBuffer(Mutator):
           for k in found.regs:
             app.log.info('AAA', k[0], k[1])
           app.log.info('b found on line', i, repr(found))
-        start = found.regs[0][0]
+        start = found.regs[1][1]
         end = found.regs[0][1]
         self.selectText(i, start, end-start, app.selectable.kSelectionCharacter)
         return
@@ -769,7 +769,7 @@ class BackingTextBuffer(Mutator):
       found = localRe.search(self.lines[i])
       if found:
         #app.log.info('c found on line', i, repr(found))
-        start = found.regs[0][0]
+        start = found.regs[1][1]
         end = found.regs[0][1]
         self.selectText(i, start, end-start, app.selectable.kSelectionCharacter)
         return
