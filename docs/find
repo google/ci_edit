@@ -43,4 +43,4 @@ that is: -marked -selected -changed
   paths: +example.txt
 exit^w  forward^f  reverse^r  replace^s  all^e  mark^m
 
-undo/redo/save/quite
+undo/redo/save/quit

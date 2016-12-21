@@ -60,6 +60,7 @@ class CiProgram:
       self.refresh()
       ch = window.cursorWindow.getch()
       if ch == -1:
+        app.log.debug('getch() returned -1')
         self.quit()
       self.ch = ch
       window.controller.doCommand(ch)
@@ -161,13 +162,13 @@ class CiProgram:
     self.debugWindow.cursorWindow.refresh()
 
   def debugWindowOrder(self):
-    self.log('debugWindowOrder')
+    app.log.info('debugWindowOrder')
     def recurse(list, indent):
       for i in list:
-        self.log(indent, i)
+        app.log.info(indent, i)
         recurse(i.zOrder, indent+'  ')
     recurse(self.zOrder, '  ')
-    self.log('top window', self.topWindow())
+    app.log.info('top window', self.topWindow())
 
   def topWindow(self):
     top = self
@@ -189,7 +190,7 @@ class CiProgram:
       if i.contains(mousey, mousex):
         mousey -= i.top
         mousex -= i.left
-        #self.log('bstate', app.curses_util.mouseButtonName(bstate))
+        #app.log.info('bstate', app.curses_util.mouseButtonName(bstate))
         if bstate & curses.BUTTON1_RELEASED:
           if self.priorClick + rapidClickTimeout <= time.time():
             i.mouseRelease(mousey, mousex, bstate&curses.BUTTON_SHIFT,
@@ -223,7 +224,7 @@ class CiProgram:
             i.mouseMoved(mousey, mousex, bstate&curses.BUTTON_SHIFT,
                 bstate&curses.BUTTON_CTRL, bstate&curses.BUTTON_ALT)
         elif bstate & curses.REPORT_MOUSE_POSITION:
-          #self.log('REPORT_MOUSE_POSITION')
+          #app.log.info('REPORT_MOUSE_POSITION')
           if self.savedMouseX == mousex and self.savedMouseY == mousey:
             # This is a hack for dtterm on Mac OS X.
             i.mouseWheelUp(bstate&curses.BUTTON_SHIFT,
@@ -232,21 +233,15 @@ class CiProgram:
             i.mouseMoved(mousey, mousex, bstate&curses.BUTTON_SHIFT,
                 bstate&curses.BUTTON_CTRL, bstate&curses.BUTTON_ALT)
         else:
-          self.log('got bstate', app.curses_util.mouseButtonName(bstate), bstate)
+          app.log.info('got bstate', app.curses_util.mouseButtonName(bstate), bstate)
         self.savedMouseX = mousex
         self.savedMouseY = mousey
         return
-    self.log('click landed on screen')
+    app.log.info('click landed on screen')
 
   def handleScreenResize(self):
-    self.log('handleScreenResize')
+    app.log.info('handleScreenResize')
     self.layout()
-
-  def log(self, *args):
-    """Log text to the logging window (for debugging)."""
-    if not self.logWindow:
-      return
-    app.log.info(*args)
 
   def parseArgs(self):
     """Interpret the command line arguments."""
@@ -281,7 +276,7 @@ class CiProgram:
     if self.showLogWindow:
       self.logWindow.refresh()
     for i,k in enumerate(self.zOrder):
-      #self.log("[[%d]] %r"%(i, k))
+      #app.log.info("[[%d]] %r"%(i, k))
       k.refresh()
 
   def run(self):
