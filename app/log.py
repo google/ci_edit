@@ -18,7 +18,7 @@ def getLines():
 
 def parseLines(*args):
   if not len(args):
-    return [""]
+    args = [""]
   msg = str(args[0])
   if 1:
     msg = "%s: %s"%(inspect.stack()[2][3], msg)
