@@ -266,6 +266,11 @@ class CiProgram:
         self.cliFiles.append({'path': i})
 
   def quit(self):
+    """Determine whether it's ok to quit. quitNow() will be called if it
+        looks ok to quit."""
+    self.exiting = True
+
+  def quitNow(self):
     """Set the intent to exit the program. The actual exit will occur a bit
     later."""
     app.log.info('self.exiting = True')

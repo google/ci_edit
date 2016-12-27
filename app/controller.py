@@ -21,6 +21,27 @@ class Controller:
   def changeToHostWindow(self, ignored=1):
     self.host.changeFocusTo(self.host)
 
+  def changeToFileOpen(self):
+    self.host.changeFocusTo(self.host.interactiveOpen)
+
+  def changeToFind(self):
+    self.host.changeFocusTo(self.host.interactiveFind)
+
+  def changeToFindPrior(self):
+    curses.ungetch(self.savedCh)
+    self.host.changeFocusTo(self.host.interactiveFind)
+
+  def changeToGoto(self):
+    self.host.changeFocusTo(self.host.interactiveGoto)
+
+  def changeToQuit(self):
+    app.log.debug('changeToQuit')
+    self.host.changeFocusTo(self.host.interactiveQuit)
+
+  def changeToSaveAs(self):
+    app.log.debug('changeToSaveAs')
+    self.host.changeFocusTo(self.host.interactiveSaveAs)
+
   def doCommand(self, ch):
     self.savedCh = ch
     cmd = self.commandSet.get(ch)
@@ -32,6 +53,12 @@ class Controller:
   def focus(self):
     app.log.info('base controller focus()')
     pass
+
+  def maybeChangeToQuit(self):
+    app.log.debug()
+    if not self.host.textBuffer.isDirty():
+      self.host.quitNow()
+    self.host.changeFocusTo(self.host.interactiveQuit)
 
   def onChange(self):
     pass

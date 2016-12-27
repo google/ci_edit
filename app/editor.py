@@ -148,6 +148,17 @@ class InteractiveOpener(app.controller.Controller):
           os.path.abspath(os.path.expanduser(dirPath))+": not found"]
 
 
+class InteractiveQuit(app.controller.Controller):
+  """Prompt user about unsaved changes."""
+  def __init__(self, host, textBuffer):
+    app.controller.Controller.__init__(self, host, 'unsavedChanges')
+    self.textBuffer = textBuffer
+    self.textBuffer.lines = [""] #####################
+
+  def info(self):
+    app.log.info('InteractiveQuit command set')
+
+
 class InteractiveSaveAs(app.controller.Controller):
   """Save buffer under specified file name."""
   def __init__(self, prg, host, textBuffer):
@@ -200,10 +211,6 @@ class InteractiveFind(app.controller.Controller):
     except re.error, e:
       self.error = e.message
     self.findCmd = self.document.textBuffer.find
-
-  def unfocus(self):
-    app.log.info('unfocus Find')
-    #self.hide()
 
 
 class InteractiveGoto(app.controller.Controller):

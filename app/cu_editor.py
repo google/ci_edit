@@ -22,7 +22,8 @@ def initCommandSet(editText, textBuffer):
 
     CTRL_H: textBuffer.backspace,
 
-    CTRL_Q: editText.host.quit,
+    CTRL_Q: editText.maybeChangeToQuit,
+    CTRL_P: editText.host.quitNow, ##########################
     CTRL_S: textBuffer.fileWrite,
     CTRL_V: textBuffer.editPaste,
     CTRL_X: textBuffer.editCut,
@@ -47,24 +48,6 @@ def initCommandSet(editText, textBuffer):
     KEY_CTRL_RIGHT: textBuffer.cursorMoveWordRight,
     KEY_CTRL_SHIFT_RIGHT: textBuffer.cursorSelectWordRight,
   }
-
-
-class InteractiveOpener(app.editor.InteractiveOpener):
-  """Open a file to edit."""
-  def __init__(self, prg, host, textBuffer):
-    app.editor.InteractiveOpener.__init__(self, prg, host, textBuffer)
-    self.document = host
-    commandSet = initCommandSet(self, textBuffer)
-    commandSet.update({
-      curses.ascii.ESC: self.changeToHostWindow,
-      curses.KEY_F1: self.info,
-      CTRL_I: self.tabCompleteExtend,
-      CTRL_J: self.createOrOpen,
-      CTRL_N: self.createOrOpen,
-      CTRL_O: self.createOrOpen,
-    })
-    self.commandSet = commandSet
-    self.commandDefault = self.textBuffer.insertPrintable
 
 
 class InteractiveFind(app.editor.InteractiveFind):
@@ -111,6 +94,45 @@ class InteractiveGoto(app.editor.InteractiveGoto):
     self.commandDefault = self.textBuffer.insertPrintable
 
 
+class InteractiveOpener(app.editor.InteractiveOpener):
+  """Open a file to edit."""
+  def __init__(self, prg, host, textBuffer):
+    app.editor.InteractiveOpener.__init__(self, prg, host, textBuffer)
+    self.document = host
+    commandSet = initCommandSet(self, textBuffer)
+    commandSet.update({
+      curses.ascii.ESC: self.changeToHostWindow,
+      curses.KEY_F1: self.info,
+      CTRL_I: self.tabCompleteExtend,
+      CTRL_J: self.createOrOpen,
+      CTRL_N: self.createOrOpen,
+      CTRL_O: self.createOrOpen,
+    })
+    self.commandSet = commandSet
+    self.commandDefault = self.textBuffer.insertPrintable
+
+
+class InteractiveQuit(app.editor.InteractiveQuit):
+  """Ask about unsaved changes."""
+  def __init__(self, host, textBuffer):
+    app.editor.InteractiveQuit.__init__(self, host, textBuffer)
+    self.document = host
+    commandSet = initCommandSet(self, textBuffer)
+    commandSet.update({
+      curses.KEY_F1: self.info,
+      ord('n'): host.quitNow,
+      ord('y'): self.saveAndQuit,
+    })
+    self.commandSet = commandSet
+    self.commandDefault = self.changeToHostWindow
+
+  def saveAndQuit(self):
+    app.log.info('aaaaaaaaaaaaaaaaaaaaaaaaaaa')
+    self.document.textBuffer.fileWrite()
+    # check for write error.
+    self.host.quitNow()
+
+
 class CuaEdit(app.controller.Controller):
   """Keyboard mappings for CUA. CUA is the Cut/Copy/Paste paradigm."""
   def __init__(self, prg, host):
@@ -133,14 +155,14 @@ class CuaEdit(app.controller.Controller):
       curses.KEY_PPAGE: textBuffer.cursorPageUp,
       curses.KEY_NPAGE: textBuffer.cursorPageDown,
 
-      CTRL_F: self.switchToFind,
-      CTRL_G: self.switchToGoto,
+      CTRL_F: self.changeToFind,
+      CTRL_G: self.changeToGoto,
 
       CTRL_I: textBuffer.indent,
       CTRL_J: textBuffer.carriageReturn,
 
-      CTRL_O: self.switchToFileOpen,
-      CTRL_R: self.switchToFindPrior,
+      CTRL_O: self.changeToFileOpen,
+      CTRL_R: self.changeToFindPrior,
 
       curses.KEY_DOWN: textBuffer.cursorDown,
       curses.KEY_SLEFT: textBuffer.cursorSelectLeft,
@@ -164,23 +186,6 @@ class CuaEdit(app.controller.Controller):
 
   def onChange(self):
     pass
-
-  def switchToFileOpen(self):
-    self.host.changeFocusTo(self.host.interactiveOpen)
-
-  def switchToFind(self):
-    self.host.changeFocusTo(self.host.interactiveFind)
-
-  def switchToFindPrior(self):
-    curses.ungetch(self.savedCh)
-    self.host.changeFocusTo(self.host.interactiveFind)
-
-  def switchToGoto(self):
-    self.host.changeFocusTo(self.host.interactiveGoto)
-
-  def switchToSaveAs(self):
-    app.log.debug('switchToSaveAs')
-    self.host.changeFocusTo(self.host.interactiveSaveAs)
 
 
 class CuaPlusEdit(CuaEdit):

@@ -250,9 +250,30 @@ class LabeledLine(Window):
     self.leftColumn.reshape(rows, labelWidth, top, left)
 
   def unfocus(self):
+    self.blank()
+    self.hide()
     self.leftColumn.blank()
     self.leftColumn.hide()
     Window.unfocus(self)
+
+
+class InteractiveFind(LabeledLine):
+  def __init__(self, host):
+    LabeledLine.__init__(self, host, "find: ")
+    self.host = host
+    self.setTextBuffer(app.text_buffer.TextBuffer())
+    self.controller = app.cu_editor.InteractiveFind(host,
+        self.textBuffer)
+
+
+class InteractiveGoto(LabeledLine):
+  def __init__(self, parent, host):
+    LabeledLine.__init__(self, parent, "goto: ")
+    self.host = host
+    self.setTextBuffer(app.text_buffer.TextBuffer())
+    self.controller = app.cu_editor.InteractiveGoto(host,
+        self.textBuffer)
+    self.leftColumn = StaticWindow(parent)
 
 
 class InteractiveOpener(LabeledLine):
@@ -267,46 +288,22 @@ class InteractiveOpener(LabeledLine):
     self.controller = app.cu_editor.InteractiveOpener(prg, host,
         self.textBuffer)
 
-  def unfocus(self):
-    self.blank()
-    self.hide()
-    LabeledLine.unfocus(self)
 
-
-class InteractiveSaveAs(Window):
-  def __init__(self, prg, host):
-    Window.__init__(self, host)
-    self.label = "save as: "
-    #self.controller.setControllerSaveAs()
-
-
-class InteractiveFind(LabeledLine):
-  def __init__(self, host):
-    LabeledLine.__init__(self, host, "find: ")
-    self.host = host
-    self.setTextBuffer(app.text_buffer.TextBuffer())
-    self.controller = app.cu_editor.InteractiveFind(host,
-        self.textBuffer)
-
-  def unfocus(self):
-    self.blank()
-    self.hide()
-    LabeledLine.unfocus(self)
-
-
-class InteractiveGoto(LabeledLine):
+class InteractiveQuit(LabeledLine):
   def __init__(self, parent, host):
-    LabeledLine.__init__(self, parent, "goto: ")
+    LabeledLine.__init__(self, parent,
+        "Save changes? (yes, no, or cancel): ")
     self.host = host
     self.setTextBuffer(app.text_buffer.TextBuffer())
-    self.controller = app.cu_editor.InteractiveGoto(host,
+    self.controller = app.cu_editor.InteractiveQuit(host,
         self.textBuffer)
-    self.leftColumn = StaticWindow(parent)
 
-  def unfocus(self):
-    self.blank()
-    self.hide()
-    LabeledLine.unfocus(self)
+
+class InteractiveSaveAs(LabeledLine):
+  def __init__(self, prg, host):
+    LabeledLine.__init__(self, host, "save as: ")
+    #self.controller = app.cu_editor.InteractiveSaveAs(prg, host,
+    #    self.textBuffer)
 
 
 class LineNumbers(StaticWindow):
@@ -417,6 +414,12 @@ class InputWindow(Window):
       self.interactiveSaveAs.setParent(self, 0)
       self.interactiveSaveAs.hide()
     if 1:
+      self.interactiveQuit = InteractiveQuit(prg, self)
+      self.interactiveQuit.color = curses.color_pair(0)
+      self.interactiveQuit.colorSelected = curses.color_pair(87)
+      self.interactiveQuit.setParent(self, 0)
+      self.interactiveQuit.hide()
+    if 1:
       self.interactiveFind = InteractiveFind(self)
       self.interactiveFind.color = curses.color_pair(0)
       self.interactiveFind.colorSelected = curses.color_pair(87)
@@ -471,6 +474,7 @@ class InputWindow(Window):
       rows -= 1
       top += 1
     self.interactiveOpen.reshape(1, cols, top+rows-1, left)
+    self.interactiveQuit.reshape(1, cols, top+rows-1, left)
     self.interactiveSaveAs.reshape(1, cols, top+rows-1, left)
     if 1:
       findReplaceHeight = 1
@@ -510,8 +514,8 @@ class InputWindow(Window):
       self.rightColumn.addStr(i, 0, ' ', self.leftColumn.color)
     self.rightColumn.cursorWindow.refresh()
 
-  def quit(self):
-    self.prg.quit()
+  def quitNow(self):
+    self.prg.quitNow()
 
   def refresh(self):
     Window.refresh(self)
