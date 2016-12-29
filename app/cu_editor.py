@@ -127,9 +127,13 @@ class InteractiveQuit(app.editor.InteractiveQuit):
     self.commandDefault = self.changeToHostWindow
 
   def saveAndQuit(self):
-    app.log.info('aaaaaaaaaaaaaaaaaaaaaaaaaaa')
+    app.log.info('saveAndQuit')
+    # Preload the message with an error that should be overwritten.
+    self.document.textBuffer.setMessage('Error saving file')
     self.document.textBuffer.fileWrite()
     # check for write error.
+    if self.document.textBuffer.message[0] != 'File saved':
+      return
     self.host.quitNow()
 
 

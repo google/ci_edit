@@ -685,6 +685,9 @@ class BackingTextBuffer(Mutator):
         self.savedAtRedoIndex = self.redoIndex
       except Exception as e:
         type_, value, tb = sys.exc_info()
+        self.setMessage(
+            'Error writing file. The file did not save properly.',
+            color=3)
         app.log.info('error writing file')
         out = traceback.format_exception(type_, value, tb)
         for i in out:
