@@ -58,6 +58,7 @@ class CiProgram:
     while not self.exiting and not self.changeTo:
       window.controller.onChange()
       self.refresh()
+      window.textBuffer.setMessage()
       ch = window.cursorWindow.getch()
       if ch == -1:
         app.log.debug('getch() returned -1')

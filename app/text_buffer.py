@@ -681,6 +681,7 @@ class BackingTextBuffer(Mutator):
         self.file.truncate()
         self.file.write(self.data)
         self.file.close()
+        self.setMessage('File saved')
         self.savedAtRedoIndex = self.redoIndex
       except Exception as e:
         type_, value, tb = sys.exc_info()

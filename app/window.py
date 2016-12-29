@@ -25,7 +25,7 @@ class StaticWindow:
     self.cols = 1
     self.writeLineRow = 0
     self.cursorWindow = curses.newwin(1, 1)
-    self.cursorWindow.leaveok(1)
+    self.cursorWindow.leaveok(1)  # Don't update cursor position.
 
   def addStr(self, row, col, text, colorPair):
     """Overwrite text a row, column with text."""
@@ -346,6 +346,31 @@ class LogWindow(StaticWindow):
     StaticWindow.refresh(self)
 
 
+class MessageLine(StaticWindow):
+  """The message line appears at the bottom of the screen. It shows
+       messages to the user, such as error messages."""
+  def __init__(self, parent, host):
+    StaticWindow.__init__(self, parent)
+    self.host = host
+    self.renderedMessage = None
+
+  def refresh(self):
+    tb = self.host.textBuffer
+    #maxy, maxx = self.cursorWindow.getmaxyx()
+    if not tb or self.renderedMessage is tb.message:
+      #self.writeLine('<no text buffer>', 0)
+      return
+    app.log.debug('update message line\n',self.renderedMessage, '\n',
+      tb.message)
+    self.renderedMessage = tb.message
+    self.writeLineRow = 0
+    if tb.message:
+      self.writeLine(tb.message[0], tb.message[1])
+    else:
+      self.blank()
+    self.cursorWindow.refresh()
+
+
 class StatusLine(StaticWindow):
   """The status line appears at the bottom of the screen. It shows the current
   line and column the cursor is on."""
@@ -451,6 +476,11 @@ class InputWindow(Window):
       self.rightColumn.color = curses.color_pair(18)
       self.rightColumn.colorSelected = curses.color_pair(105)
       self.rightColumn.setParent(self, 0)
+    if True:
+      self.messageLine = MessageLine(self, self)
+      self.messageLine.color = curses.color_pair(168)
+      self.messageLine.colorSelected = curses.color_pair(47)
+      self.messageLine.setParent(self, 0)
 
     if header:
       if self.prg.cliFiles:
@@ -476,6 +506,7 @@ class InputWindow(Window):
     self.interactiveOpen.reshape(1, cols, top+rows-1, left)
     self.interactiveQuit.reshape(1, cols, top+rows-1, left)
     self.interactiveSaveAs.reshape(1, cols, top+rows-1, left)
+    self.messageLine.reshape(1, cols, top+rows-1, left)
     if 1:
       findReplaceHeight = 1
       topOfFind = top+rows-findReplaceHeight
@@ -514,6 +545,10 @@ class InputWindow(Window):
       self.rightColumn.addStr(i, 0, ' ', self.leftColumn.color)
     self.rightColumn.cursorWindow.refresh()
 
+  def focus(self):
+    self.messageLine.show()
+    Window.focus(self)
+
   def quitNow(self):
     self.prg.quitNow()
 
@@ -533,6 +568,9 @@ class InputWindow(Window):
   def unfocus(self):
     self.statusLine.cursorWindow.addstr(0, 0, ".")
     self.statusLine.refresh()
+    app.log.debug('message line unfocus')
+    self.messageLine.blank()
+    self.messageLine.hide()
     Window.unfocus(self)
 
 

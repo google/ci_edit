@@ -36,12 +36,31 @@ kSelectionModeNames = [
   'Char',
   'Line',
   'Word',
-];
+]
 
 
-class Selectable:
+class BaseLineBuffer:
   def __init__(self):
     self.lines = [""]
+    self.message = ('New buffer', 0)
+
+  def setMessage(self, *args, **dict):
+    if not len(args):
+      self.message = None
+      return
+    msg = str(args[0])
+    prior = msg
+    for i in args[1:]:
+      if not len(prior) or prior[-1] != '\n':
+        msg += ' '
+      prior = str(i)
+      msg += prior
+    self.message = (repr(msg)[1:-1], dict.get('color', 0))
+
+
+class Selectable(BaseLineBuffer):
+  def __init__(self):
+    BaseLineBuffer.__init__(self)
     self.cursorRow = 0
     self.cursorCol = 0
     self.goalCol = 0
