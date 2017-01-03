@@ -478,8 +478,8 @@ class InputWindow(Window):
       self.rightColumn.setParent(self, 0)
     if True:
       self.messageLine = MessageLine(self, self)
-      self.messageLine.color = curses.color_pair(168)
-      self.messageLine.colorSelected = curses.color_pair(47)
+      self.messageLine.color = curses.color_pair(3)
+      self.messageLine.colorSelected = curses.color_pair(87)
       self.messageLine.setParent(self, 0)
 
     if header:

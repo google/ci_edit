@@ -622,6 +622,7 @@ class BackingTextBuffer(Mutator):
 
   def fileClose(self):
     app.log.info('fileClose')
+    assert False
     if not self.file.closed:
       self.fileWrite()
       # todo handle error writing
@@ -631,10 +632,10 @@ class BackingTextBuffer(Mutator):
       self.lines = []
       self.file.close()
 
-  def fileFilter(self):
+  def fileFilter(self, data):
     def parse(line):
       return "\xfe%02x"%ord(line.groups()[0])
-    self.data = self.file.read()
+    self.data = data
     self.lines = self.data.split('\r\n')
     if len(self.lines) == 1:
       self.lines = self.data.split('\n')
@@ -646,29 +647,33 @@ class BackingTextBuffer(Mutator):
   def fileLoad(self, path):
     app.log.info('fileLoad', path)
     fullPath = os.path.expandvars(os.path.expanduser(path))
+    file = None
     try:
-      self.file = open(fullPath, 'r+')
+      file = open(fullPath, 'r+')
+      self.setMessage('Opened exiting file')
     except:
       try:
         # Create a new file.
-        self.file = open(fullPath, 'w+')
-        self.file.write('')
+        self.savedAtRedoIndex = -1
+        self.setMessage('Creating new file')
       except:
         app.log.info('error opening file', fullPath)
+        self.setMessage('error opening file', fullPath)
         return
     self.fullPath = fullPath
     self.relativePath = os.path.relpath(path, os.getcwd())
     app.log.info('fullPath', self.fullPath)
     app.log.info('cwd', os.getcwd())
     app.log.info('relativePath', self.relativePath)
-    self.fileFilter()
-    self.file.close()
+    if file:
+      self.fileFilter(file.read())
+      file.close()
     self.setKeywordsByFileType(os.path.splitext(fullPath)[1])
 
   def fileWrite(self):
     try:
       try:
-        self.file = open(self.fullPath, 'r+')
+        file = open(self.fullPath, 'w+')
         self.stripTrailingWhiteSpace()
         def encode(line):
           return chr(int(line.groups()[0], 16))
@@ -677,10 +682,10 @@ class BackingTextBuffer(Mutator):
         self.lines = [re.sub('\xfe([0-9a-fA-F][0-9a-fA-F])', encode, i)
             for i in self.lines]
         self.data = '\n'.join(self.lines)
-        self.file.seek(0)
-        self.file.truncate()
-        self.file.write(self.data)
-        self.file.close()
+        file.seek(0)
+        file.truncate()
+        file.write(self.data)
+        file.close()
         self.setMessage('File saved')
         self.savedAtRedoIndex = self.redoIndex
       except Exception as e:
