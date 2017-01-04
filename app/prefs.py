@@ -83,6 +83,7 @@ prefs = {
     #   'contains': other grammars that may be contained within this grammar.
     # }
     'bash': {
+      'end': None,
       'escape': '\\',
       'indent': '  ',
       'keywords': [
@@ -92,6 +93,7 @@ prefs = {
       'contains': ['c_string1', 'c_string2', 'pound_comment'],
     },
     'binary': {
+      'end': None,
       'type': 'binary',
     },
     'c': {
@@ -110,8 +112,8 @@ prefs = {
       'escape': None,
       'indent': '  ',
       'keywords': __c_keywords + [
-        'catch', 'class', 'const',
-        'namespace',
+        'auto', 'catch', 'class', 'const',
+        'namespace', 'nullptr',
         'private', 'protected', 'public',
         'template', 'this', 'throw', 'typename',
       ],

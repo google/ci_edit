@@ -4,6 +4,7 @@
 
 import app.log
 import app.selectable
+import app.parser
 import app.prefs
 import third_party.pyperclip as clipboard
 import curses.ascii
@@ -669,7 +670,11 @@ class BackingTextBuffer(Mutator):
     if file:
       self.fileFilter(file.read())
       file.close()
-    self.setKeywordsByFileType(os.path.splitext(fullPath)[1])
+    fileExtension = os.path.splitext(fullPath)[1]
+    self.setKeywordsByFileType(fileExtension)
+    if self.data:
+      self.parser = app.parser.Parser()
+      self.parser.parse(self.data, app.prefs.prefs['grammar'][fileExtension[1:]])
 
   def fileWrite(self):
     try:
