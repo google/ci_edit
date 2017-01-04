@@ -592,14 +592,15 @@ class BackingTextBuffer(Mutator):
       self.clipList.append(text)
       if self.selectionMode == app.selectable.kSelectionLine:
         text = text + ('',)
-      clipboard.copy("\n".join(text))
+      if clipboard.copy:
+        clipboard.copy("\n".join(text))
 
   def editCut(self):
     self.editCopy()
     self.performDelete()
 
   def editPaste(self):
-    osClip = clipboard.paste()
+    osClip = clipboard.paste and clipboard.paste()
     if len(self.clipList or osClip):
       if self.selectionMode != app.selectable.kSelectionNone:
         self.performDelete()
