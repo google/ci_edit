@@ -8,10 +8,19 @@ import app.curses_util
 import app.log
 import app.text_buffer
 import app.window
+import os
 import sys
 import curses
 import time
 import traceback
+
+
+userConsoleMessage = None
+def userMessage(*args):
+  global userConsoleMessage
+  if not userConsoleMessage:
+    userConsoleMessage = ''
+  userConsoleMessage += ' '.join(args)
 
 
 class CiProgram:
@@ -257,6 +266,16 @@ class CiProgram:
         self.showLogWindow = self.showLogWindow or i == '--log'
         app.log.shouldWritePrintLog = app.log.shouldWritePrintLog or i == '--logDetail'
         app.log.shouldWritePrintLog = app.log.shouldWritePrintLog or i == '--p'
+        if i == '--version':
+          dirPath = os.path.split(os.path.abspath(os.path.dirname(app.log.__file__)))[0]
+          userMessage(
+              'Version: b1\n'
+              'See LICENSE for license information\n'
+              'See readme.md for an introduction\n'
+              'Both files may be found in "'+dirPath+'"\n'
+              'Please send feedback and bug reports to dschuyler@')
+          self.quitNow()
+          return
         if i == '--':
           # All remaining args are file paths.
           takeAll = True
@@ -331,6 +350,9 @@ def run_ci():
     curses.wrapper(wrapped_ci)
   finally:
     app.log.flush()
+  global userConsoleMessage
+  if userConsoleMessage:
+    print userConsoleMessage
 
 if __name__ == '__main__':
   run_ci()
