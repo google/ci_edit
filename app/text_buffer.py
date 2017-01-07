@@ -674,7 +674,9 @@ class BackingTextBuffer(Mutator):
     self.setKeywordsByFileType(fileExtension)
     if self.data:
       self.parser = app.parser.Parser()
-      self.parser.parse(self.data, app.prefs.prefs['grammar'][fileExtension[1:]])
+      self.parser.parse(
+          self.data,
+          app.prefs.util.getGrammar(fileExtension))
 
   def fileWrite(self):
     try:

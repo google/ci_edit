@@ -83,7 +83,6 @@ prefs = {
     #   'contains': other grammars that may be contained within this grammar.
     # }
     'bash': {
-      'end': None,
       'escape': '\\',
       'indent': '  ',
       'keywords': [
@@ -93,12 +92,10 @@ prefs = {
       'contains': ['c_string1', 'c_string2', 'pound_comment'],
     },
     'binary': {
-      'end': None,
       'type': 'binary',
     },
     'c': {
       'begin': None,
-      'end': None,
       'escape': None,
       'indent': '  ',
       'keywords': __c_keywords,
@@ -108,7 +105,6 @@ prefs = {
     },
     'cpp': {
       'begin': None,
-      'end': None,
       'escape': None,
       'indent': '  ',
       'keywords': __c_keywords + [
@@ -136,16 +132,16 @@ prefs = {
     'cpp_line_comment': {
       'begin': '//',
       'continued': '// ',
-      'end': '\n',
-      'escape': '\\\n',
+      'end': '\\n',
+      'escape': '\\\\n',
       'indent': '  ',
       'keywords': [],
       'nestable': False,
     },
     'c_preprocessor': {
       'begin': '#',
-      'end': '\n',
-      'escape': '\\\n',
+      'end': '\\n',
+      'escape': '\\\\n',
       'indent': '  ',
       'keywords': [
         '#\s*?define', '#\s*?defined', '#\s*?elif', '#\s*?endif',
@@ -205,7 +201,6 @@ prefs = {
     },
     'java': {
       'begin': None,
-      'end': None,
       'escape': None,
       'indent': '  ',
       'keywords': __common_keywords + [
@@ -268,7 +263,7 @@ prefs = {
     'pound_comment': {
       'begin': '#',
       'continuation': '# ',
-      'end': '\n',
+      'end': '\\n',
       'escape': None,
       'indent': '  ',
       'keywords': [],
@@ -291,7 +286,6 @@ prefs = {
     },
     'text': {
       'begin': None,
-      'end': None,
       'escape': None,
       'indent': '  ',
       'keywords': [],
@@ -307,6 +301,7 @@ class PrefsUtil:
     if 0:
       app.log.info('grammars', prefs['grammar'])
     for k,v in prefs['grammar'].items():
+      v['name'] = k
       self.grammars[k] = v
     if 0:
       app.log.info('grammars')

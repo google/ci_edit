@@ -3,6 +3,9 @@
 #include "project_file.h"
 #include <system_file.h>
 
+// comment with \
+a line continuation.
+
 namespace sample {
 
 /**
@@ -19,7 +22,7 @@ class Sample
   Sample(double param): member_var_(param) {}
 
   void thing() {
-    std::out << "thing " << this.member_var_;
+    std::out << "thing 234\"32 (class) void" << " 'blah'." << this.member_var_;
   }
 
  private:
