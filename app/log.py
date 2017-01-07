@@ -10,18 +10,19 @@ import traceback
 
 screenLog = ["--- screen log ---"]
 fullLog = ["--- begin log ---"]
+enabledChannels = {}
 shouldWritePrintLog = False
 
 def getLines():
   global screenLog
   return screenLog
 
-def parseLines(*args):
+def parseLines(channel, *args):
   if not len(args):
     args = [""]
   msg = str(args[0])
   if 1:
-    msg = "%s: %s"%(inspect.stack()[2][3], msg)
+    msg = "%10s %10s: %s"%(channel, inspect.stack()[2][3], msg)
   prior = msg
   for i in args[1:]:
     if not len(prior) or prior[-1] != '\n':
@@ -30,32 +31,41 @@ def parseLines(*args):
     msg += prior
   return msg.split("\n")
 
+def chanEnable(channel, isEnabled):
+  global enabledChannels, shouldWritePrintLog
+  enabledChannels[channel] = isEnabled
+  if isEnabled:
+    shouldWritePrintLog = True
+
+def chan(channel, *args):
+  global enabledChannels, fullLog, screenLog
+  if channel in enabledChannels:
+    lines = parseLines(channel, *args)
+    screenLog += lines
+    fullLog += lines
+
 def info(*args):
-  global screenLog
-  global fullLog
-  lines = parseLines(*args)
-  screenLog += lines
-  fullLog += lines
+  chan('info', *args)
+
+def parser(*args):
+  chan('parser', *args)
 
 def debug(*args):
-  global screenLog
-  global fullLog
-  lines = parseLines(*args)
-  for i in parseLines(*args):
-    line = "@@@ "+i
-    screenLog.append(line)
-    fullLog.append(line)
+  global enabledChannels, fullLog, screenLog
+  if 'debug' in enabledChannels:
+    lines = parseLines('debug_@@@', *args)
+    screenLog += lines
+    fullLog += lines
 
 def detail(*args):
-  global screenLog
-  global fullLog
-  lines = parseLines(*args)
-  fullLog += lines
+  global enabledChannels, fullLog, screenLog
+  if 'detail' in enabledChannels:
+    lines = parseLines('detail', *args)
+    fullLog += lines
 
 def error(*args):
-  global screenLog
-  global fullLog
-  lines = parseLines(*args)
+  global fullLog, screenLog
+  lines = parseLines('error', *args)
   fullLog += lines
 
 def wrapper(func, shouldWrite=True):
@@ -65,6 +75,7 @@ def wrapper(func, shouldWrite=True):
     try:
       func()
     except Exception, e:
+      shouldWritePrintLog = True
       errorType, value, tb = sys.exc_info()
       out = traceback.format_exception(errorType, value, tb)
       for i in out:

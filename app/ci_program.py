@@ -260,12 +260,15 @@ class CiProgram:
     self.cliFiles = []
     self.readStdin = False
     takeAll = False
+    logInfo = False
+    logParser = False
     for i in sys.argv[1:]:
       if not takeAll and i[:2] == '--':
         self.debugRedo = self.debugRedo or i == '--debugRedo'
         self.showLogWindow = self.showLogWindow or i == '--log'
-        app.log.shouldWritePrintLog = app.log.shouldWritePrintLog or i == '--logDetail'
-        app.log.shouldWritePrintLog = app.log.shouldWritePrintLog or i == '--p'
+        logInfo = logInfo or i == '--logDetail'
+        logInfo = logInfo or i == '--p'
+        logParser = logParser or i == '--parser'
         if i == '--version':
           dirPath = os.path.split(os.path.abspath(os.path.dirname(app.log.__file__)))[0]
           userMessage(
@@ -284,6 +287,12 @@ class CiProgram:
         self.readStdin = True
       else:
         self.cliFiles.append({'path': i})
+    if logInfo:
+      app.log.chanEnable('info', True)
+      app.log.chanEnable('debug', True)
+      app.log.chanEnable('detail', True)
+      app.log.chanEnable('error', True)
+    app.log.chanEnable('parser', logParser)
 
   def quit(self):
     """Determine whether it's ok to quit. quitNow() will be called if it
