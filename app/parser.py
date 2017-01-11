@@ -24,8 +24,8 @@ class ParserNode:
     #self.end = 0
 
   def debugLog(self, out, indent, data):
-    out('%sParserNode %12s %4d %r' % (indent, self.grammar['name'], self.begin,
-        data[self.begin:self.begin+15]))
+    out('%sParserNode %12s %4d %s' % (indent, self.grammar['name'], self.begin,
+        repr(data[self.begin:self.begin+15])[1:-1]))
 
 
 class Parser:
@@ -47,7 +47,7 @@ class Parser:
     startTime = time.time()
     self.findChildren()
     totalTime = time.time() - startTime
-    #self.debugLog(app.log.parser, data)
+    self.debugLog(app.log.parser, data)
     app.log.startup('parsing took', totalTime)
 
   def findChildren(self):
@@ -60,7 +60,6 @@ class Parser:
 
     cursor = 0
     app.log.parser('node', self.grammarList[-1].grammar['name'])
-    #grammar = node.grammar
     grammarStack = [self.grammarList[-1].grammar]
     while len(grammarStack):
       limit -= 1
@@ -75,7 +74,6 @@ class Parser:
         app.log.parser(grammarStack[-1]['name'], 'grammarStack will pop', len(grammarStack))
         for i in grammarStack:
           app.log.parser(grammarStack[-1]['name'], '  ', i['name'])
-        #grammar =
         grammarStack.pop()
         continue
       app.log.parser(grammarStack[-1]['name'], 'found regs', found.regs)
@@ -87,33 +85,31 @@ class Parser:
           break
       if grammarStack[-1].get('end') and index == 0:
         app.log.parser(grammarStack[-1]['name'], 'we found end of grammar ')
-        #node.end = found.regs[0][1]
         app.log.parser(grammarStack[-1]['name'], 'grammarStack will pop', len(grammarStack))
         for i in grammarStack:
           app.log.parser(grammarStack[-1]['name'], '  ', i['name'])
-        #grammar =
         grammarStack.pop()
         child = ParserNode()
         child.grammar = grammarStack[-1]
         child.begin = cursor + found.regs[index+1][1]
         cursor = child.begin
         app.log.parser('ended cursor', cursor)
-        #child.end = reg[1]
-        self.grammarList.append(child)
-        #node = child
+        if len(self.grammarList) and self.grammarList[-1].begin == child.begin:
+          self.grammarList[-1] = child
+        else:
+          self.grammarList.append(child)
       elif index >= 0:
         app.log.parser(grammarStack[-1]['name'], 'index >= 0')
         reg = found.regs[index+1]
-        #node.end = reg[0]
         child = ParserNode()
         child.grammar = grammarStack[-1].get('matchGrammars', [])[index]
         child.begin = cursor + found.regs[index+1][0]
         cursor += found.regs[index+1][1]
         app.log.parser('contents cursor', cursor)
-        #child.end = reg[1]
-        self.grammarList.append(child)
-        #node = child
-        #grammar = child.grammar
+        if len(self.grammarList) and self.grammarList[-1].begin == child.begin:
+          self.grammarList[-1] = child
+        else:
+          self.grammarList.append(child)
         grammarStack.append(child.grammar)
         app.log.parser(grammarStack[-1]['name'], 'grammarStack after append', len(grammarStack))
         for i in grammarStack:
