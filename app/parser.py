@@ -10,6 +10,7 @@ import curses.ascii
 import os
 import re
 import sys
+import time
 import traceback
 
 
@@ -43,13 +44,15 @@ class Parser:
     node.begin = 0
     self.grammarList = [node]
     #self.grammar.end = len(self.data)
+    startTime = time.time()
     self.findChildren()
-    self.debugLog(app.log.parser, data)
+    totalTime = time.time() - startTime
+    #self.debugLog(app.log.parser, data)
+    app.log.startup('parsing took', totalTime)
 
   def findChildren(self):
 
 
-    return
     limit = 300
 
 

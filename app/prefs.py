@@ -3,9 +3,12 @@
 # found in the LICENSE file.
 
 import app.log
+import re
 import sys
+import time
 import traceback
 
+importStartTime = time.time()
 
 __common_keywords = [
   'break', 'continue', 'do', 'else',
@@ -148,7 +151,7 @@ prefs = {
         '#\s*?if', '#\s*?ifdef', '#\s*?ifndef', '#\s*?include',
         '#\s*?undef',
       ],
-      'contains': ['file_path_quoted', 'file_path_bracketed'],
+      #'contains': ['file_path_quoted', 'file_path_bracketed'],
     },
     'c_string1': {
       'begin': "'",
@@ -284,55 +287,72 @@ prefs = {
       'keywords': [],
       'within': ['py'],
     },
+    #'quoted_string1': {
+    #  # This is not a programming string, there are no escape chars.
+    #  'begin': "'",
+    #  'end': "'",
+    #},
+    'quoted_string2': {
+      # This is not a programming string, there are no escape chars.
+      'begin': '"',
+      'end': '"',
+    },
     'text': {
       'begin': None,
       'escape': None,
       'indent': '  ',
       'keywords': [],
-      'contains': ['quoted_string'],
+      'contains': ['quoted_string2'],
     },
   },
 }
 
 
-class PrefsUtil:
-  def __init__(self, prefs):
-    self.grammars = {}
-    if 0:
-      app.log.info('grammars', prefs['grammar'])
-    for k,v in prefs['grammar'].items():
-      v['name'] = k
-      self.grammars[k] = v
-    if 0:
-      app.log.info('grammars')
-      for k,v in self.grammars.items():
-        app.log.info('  ', k, ':', v)
-    self.extensions = {}
-    self.filetypes = {}
-    for k,v in prefs['filetype'].items():
-      for ext in v['ext']:
-        self.extensions[ext] = v.get('grammar')
-      self.filetypes[k] = v
-    if 0:
-      app.log.info('extensions')
-      for k,v in self.extensions.items():
-        app.log.info('  ', k, ':', v)
-      app.log.info('filetypes')
-      for k,v in self.filetypes.items():
-        app.log.info('  ', k, ':', v)
+grammars = {}
+# Arrange all the grammars by name.
+for k,v in prefs['grammar'].items():
+  v['name'] = k
+  grammars[k] = v
 
-  def getGrammar(self, fileExtension):
-    filetype = self.extensions.get(fileExtension)
-    return self.grammars.get(filetype)
+# Compile regexes for each grammar.
+for k,v in prefs['grammar'].items():
+  grammarVectors = []
+  markers = []
+  if v.get('end'):
+    markers.append(v['end'])
+    grammarVectors.append(v)
+  for grammarName in v.get('contains', []):
+    g = grammars.get(grammarName, None)
+    if g is None:
+      app.log.startup('Available grammars:')
+      for k,v in grammars.items():
+        app.log.startup('  ', k, ':', len(v))
+      print 'missing grammar for "' + grammarName + '" in prefs.py'
+      sys.exit(1)
+    markers.append(g['begin'])
+    grammarVectors.append(g)
+  regex = "("+")|(".join(markers)+")"
+  v['markerRe'] = re.compile(regex)
+# Reset the re.cache for user regexes.
+re.purge()
 
-if 1:
-  try:
-    util = PrefsUtil(prefs)
-  except Exception, e:
-    errorType, value, tb = sys.exc_info()
-    out = traceback.format_exception(errorType, value, tb)
-    for i in out:
-      app.log.error(i[:-1])
-    app.log.flush()
+extensions = {}
+filetypes = {}
+for k,v in prefs['filetype'].items():
+  for ext in v['ext']:
+    extensions[ext] = v.get('grammar')
+  filetypes[k] = v
+if 0:
+  app.log.info('extensions')
+  for k,v in extensions.items():
+    app.log.info('  ', k, ':', v)
+  app.log.info('filetypes')
+  for k,v in filetypes.items():
+    app.log.info('  ', k, ':', v)
 
+def getGrammar(fileExtension):
+  filetype = extensions.get(fileExtension)
+  return grammars.get(filetype)
+
+app.log.startup('prefs.py import time', time.time() - importStartTime)
 

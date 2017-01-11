@@ -676,7 +676,7 @@ class BackingTextBuffer(Mutator):
       self.parser = app.parser.Parser()
       self.parser.parse(
           self.data,
-          app.prefs.util.getGrammar(fileExtension))
+          app.prefs.getGrammar(fileExtension))
 
   def fileWrite(self):
     try:
@@ -1070,7 +1070,7 @@ class TextBuffer(BackingTextBuffer):
     self.highlightRe = None
 
   def setKeywordsByFileType(self, extension):
-    grammar = app.prefs.util.getGrammar(extension)
+    grammar = app.prefs.getGrammar(extension)
     if grammar:
       self.setKeywords(grammar.get('keywords', [])+
           grammar.get('namespaces', [])+
