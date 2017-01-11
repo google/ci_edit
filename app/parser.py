@@ -67,26 +67,9 @@ class Parser:
       if limit < 0:
         app.log.parser('hit debug limit')
         return
-      starts = []
-      changers = []
-      if grammarStack[-1].get('end'):
-        starts.append(grammarStack[-1]['end'])
-        changers.append(grammarStack[-1])
-      for grammarName in grammarStack[-1].get('contains', []):
-        g = self.grammarPrefs[grammarName]
-        starts.append(g['begin'])
-        changers.append(g)
-      app.log.parser(grammarStack[-1]['name'], 'starts', starts)
-      if not len(starts):
-        app.log.parser('error  not len(starts)')
-        return
-      regex = "("+")|(".join(starts)+")"
-      app.log.parser(grammarStack[-1]['name'], 'starts regex', repr(regex))
-      beginRe = re.compile(regex)
-
       subdata = self.data[cursor:]
       app.log.parser(grammarStack[-1]['name'], 'subdata@@', repr(subdata)[:40])
-      found = beginRe.search(subdata)
+      found = grammarStack[-1].get('matchRe').search(subdata)
       if not found:
         app.log.parser(grammarStack[-1]['name'], 'not found')
         app.log.parser(grammarStack[-1]['name'], 'grammarStack will pop', len(grammarStack))
@@ -123,7 +106,7 @@ class Parser:
         reg = found.regs[index+1]
         #node.end = reg[0]
         child = ParserNode()
-        child.grammar = changers[index]
+        child.grammar = grammarStack[-1].get('matchGrammars', [])[index]
         child.begin = cursor + found.regs[index+1][0]
         cursor += found.regs[index+1][1]
         app.log.parser('contents cursor', cursor)

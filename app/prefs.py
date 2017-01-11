@@ -316,11 +316,11 @@ for k,v in prefs['grammar'].items():
 
 # Compile regexes for each grammar.
 for k,v in prefs['grammar'].items():
-  grammarVectors = []
+  matchGrammars = []
   markers = []
   if v.get('end'):
     markers.append(v['end'])
-    grammarVectors.append(v)
+    matchGrammars.append(v)
   for grammarName in v.get('contains', []):
     g = grammars.get(grammarName, None)
     if g is None:
@@ -330,9 +330,10 @@ for k,v in prefs['grammar'].items():
       print 'missing grammar for "' + grammarName + '" in prefs.py'
       sys.exit(1)
     markers.append(g['begin'])
-    grammarVectors.append(g)
+    matchGrammars.append(g)
   regex = "("+")|(".join(markers)+")"
-  v['markerRe'] = re.compile(regex)
+  v['matchRe'] = re.compile(regex)
+  v['matchGrammars'] = matchGrammars
 # Reset the re.cache for user regexes.
 re.purge()
 
