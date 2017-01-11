@@ -10,7 +10,7 @@ import traceback
 
 screenLog = ["--- screen log ---"]
 fullLog = ["--- begin log ---"]
-enabledChannels = {}
+enabledChannels = {'startup': True}
 shouldWritePrintLog = False
 
 def getLines():
@@ -32,10 +32,14 @@ def parseLines(channel, *args):
   return msg.split("\n")
 
 def chanEnable(channel, isEnabled):
-  global enabledChannels, shouldWritePrintLog
-  enabledChannels[channel] = isEnabled
+  global enabledChannels, fullLog, shouldWritePrintLog
+  fullLog += ["%10s %10s: %s %r" % ('logging', 'chanEnable', channel, isEnabled)]
   if isEnabled:
+    enabledChannels[channel] = isEnabled
     shouldWritePrintLog = True
+  else:
+    enabledChannels.pop(channel, None)
+
 
 def chan(channel, *args):
   global enabledChannels, fullLog, screenLog
@@ -49,6 +53,9 @@ def info(*args):
 
 def parser(*args):
   chan('parser', *args)
+
+def startup(*args):
+  chan('startup', *args)
 
 def debug(*args):
   global enabledChannels, fullLog, screenLog
@@ -74,7 +81,7 @@ def wrapper(func, shouldWrite=True):
   try:
     try:
       func()
-    except Exception, e:
+    except BaseException, e:
       shouldWritePrintLog = True
       errorType, value, tb = sys.exc_info()
       out = traceback.format_exception(errorType, value, tb)

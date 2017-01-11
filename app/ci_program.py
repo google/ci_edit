@@ -293,6 +293,7 @@ class CiProgram:
       app.log.chanEnable('detail', True)
       app.log.chanEnable('error', True)
     app.log.chanEnable('parser', logParser)
+    app.log.chanEnable('startup', True)
 
   def quit(self):
     """Determine whether it's ok to quit. quitNow() will be called if it
