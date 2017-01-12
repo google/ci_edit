@@ -49,21 +49,10 @@ class Parser:
     app.log.startup('parsing took', totalTime)
 
   def findChildren(self):
-
-
-    limit = 300
-
-
-
-
     cursor = 0
     app.log.parser('node', self.grammarList[-1].grammar['name'])
     grammarStack = [self.grammarList[-1].grammar]
     while len(grammarStack):
-      limit -= 1
-      if limit < 0:
-        app.log.parser('hit debug limit')
-        return
       subdata = self.data[cursor:]
       app.log.parser(grammarStack[-1]['name'], 'subdata@@', repr(subdata)[:40])
       found = grammarStack[-1].get('matchRe').search(subdata)

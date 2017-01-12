@@ -119,21 +119,21 @@ class CiProgram:
     self.debugWindow.writeLine(
         "   cRow %3d    cCol %2d goalCol %2d"
         %(textBuffer.cursorRow, textBuffer.cursorCol,
-          textBuffer.goalCol), self.debugWindow.color)
+            textBuffer.goalCol), self.debugWindow.color)
     self.debugWindow.writeLine(
         " mkrRow %3d  mkrCol %2d sm %d"
         %(textBuffer.markerRow, textBuffer.markerCol,
-          textBuffer.selectionMode),
+            textBuffer.selectionMode),
         self.debugWindow.color)
     self.debugWindow.writeLine(
         "scrlRow %3d scrlCol %2d lines %3d"
         %(textBuffer.scrollRow, textBuffer.scrollCol,
-          len(textBuffer.lines)),
+            len(textBuffer.lines)),
         self.debugWindow.color)
     self.debugWindow.writeLine(
         "y %2d x %2d maxy %d maxx %d baud %d color %d"
         %(y, x, maxy, maxx, curses.baudrate(), curses.can_change_color()),
-        self.debugWindow.color)
+            self.debugWindow.color)
     self.debugWindow.writeLine(
         "ch %3s %s"
         %(self.ch, app.curses_util.cursesKeyName(self.ch)),
@@ -146,12 +146,11 @@ class CiProgram:
       (id, mousex, mousey, mousez, bstate) = curses.getmouse()
       self.debugWindow.writeLine(
           "mouse id %d, mousex %d, mousey %d, mousez %d"
-          %(id, mousex, mousey, mousez),
-          self.debugWindow.color)
+          %(id, mousex, mousey, mousez), self.debugWindow.color)
       self.debugWindow.writeLine(
           "bstate %s %d"
           %(app.curses_util.mouseButtonName(bstate), bstate),
-          self.debugWindow.color)
+              self.debugWindow.color)
     except curses.error:
       self.debugWindow.writeLine("mouse is not available.",
           self.debugWindow.color)
@@ -243,7 +242,8 @@ class CiProgram:
             i.mouseMoved(mousey, mousex, bstate&curses.BUTTON_SHIFT,
                 bstate&curses.BUTTON_CTRL, bstate&curses.BUTTON_ALT)
         else:
-          app.log.info('got bstate', app.curses_util.mouseButtonName(bstate), bstate)
+          app.log.info('got bstate', app.curses_util.mouseButtonName(bstate),
+              bstate)
         self.savedMouseX = mousex
         self.savedMouseY = mousey
         return
@@ -270,7 +270,8 @@ class CiProgram:
         logInfo = logInfo or i == '--p'
         logParser = logParser or i == '--parser'
         if i == '--version':
-          dirPath = os.path.split(os.path.abspath(os.path.dirname(app.log.__file__)))[0]
+          dirPath = os.path.split(os.path.abspath(os.path.dirname(
+              app.log.__file__)))[0]
           userMessage(
               'Version: b1\n'
               'See LICENSE for license information\n'
@@ -332,8 +333,8 @@ class CiProgram:
     self.showPalette = (self.showPalette+1)%3
     if self.showPalette == 1:
       dark = [
-        0,   1,   2,   3,    4,   5,  6,  7,    8,  9, 10, 11,   12, 13, 14,  15,
-        94, 134,  18, 240, 138,  21, 22, 23,   24, 25, 26, 27,   28, 29, 30,  57,
+        0,   1,   2,   3,    4,   5,  6,  7,   8,  9, 10, 11,   12, 13, 14,  15,
+        94, 134,  18, 240, 138,  21, 22, 23,  24, 25, 26, 27,   28, 29, 30,  57,
       ]
       light = [-1, 230, 147, 221,   255, 254, 253, 14]
       for i in range(1, curses.COLORS):
