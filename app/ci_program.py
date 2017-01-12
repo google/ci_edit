@@ -262,6 +262,7 @@ class CiProgram:
     takeAll = False
     logInfo = False
     logParser = False
+    logStartup = False
     for i in sys.argv[1:]:
       if not takeAll and i[:2] == '--':
         self.debugRedo = self.debugRedo or i == '--debugRedo'
@@ -269,6 +270,7 @@ class CiProgram:
         logInfo = logInfo or i == '--logDetail'
         logInfo = logInfo or i == '--p'
         logParser = logParser or i == '--parser'
+        logStartup = logStartup or i == '--startup'
         if i == '--version':
           dirPath = os.path.split(os.path.abspath(os.path.dirname(
               app.log.__file__)))[0]
@@ -294,7 +296,7 @@ class CiProgram:
       app.log.chanEnable('detail', True)
       app.log.chanEnable('error', True)
     app.log.chanEnable('parser', logParser)
-    app.log.chanEnable('startup', True)
+    app.log.chanEnable('startup', logStartup)
 
   def quit(self):
     """Determine whether it's ok to quit. quitNow() will be called if it
