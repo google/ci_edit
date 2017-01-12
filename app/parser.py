@@ -83,7 +83,7 @@ class Parser:
           break
       assert index >= 0
       child = ParserNode()
-      if grammarStack[-1].get('end') and index == 0:
+      if index == 0:
         if 0:
                   app.log.parser(grammarStack[-1]['name'], 'we found end of grammar ')
                   app.log.parser(grammarStack[-1]['name'], 'grammarStack will pop', len(grammarStack))
@@ -110,30 +110,6 @@ class Parser:
         self.grammarList[-1] = child
       else:
         self.grammarList.append(child)
-
-  def xfindChildren(self, node):
-    app.log.info('node', node)
-    starts = []
-    for grammarName in node.grammar.get('contains', []):
-      starts.append(self.grammarPrefs[grammarName]['begin'])
-    app.log.info('starts', starts)
-    if not len(starts):
-      return
-    regex = r"|".join(starts)
-    app.log.info('regex', regex)
-    beginRe = re.compile(regex)
-    subdata = self.data[node.begin:node.end]
-    app.log.info('subdata', subdata)
-    found = beginRe.search(subdata)
-    app.log.info('found', found.regs)
-    if found:
-      node.end = found.regs[0][0]
-      child = ParserNode()
-      child.grammar = self.grammarPrefs['py']
-      child.begin = found.regs[0][0]
-      child.end = found.regs[0][1]
-      node.next = child
-      self.findChildren(child)
 
   def debugLog(self, out, data):
     out('parser debug:')

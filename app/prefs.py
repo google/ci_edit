@@ -321,6 +321,10 @@ for k,v in prefs['grammar'].items():
   if v.get('end'):
     markers.append(v['end'])
     matchGrammars.append(v)
+  else:
+    # Add a non-matchable placeholder.
+    markers.append('^\\b$')
+    matchGrammars.append(None)
   for grammarName in v.get('contains', []):
     g = grammars.get(grammarName, None)
     if g is None:
