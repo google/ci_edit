@@ -50,26 +50,26 @@ __common_numbers = [
 
 numbersRe = re.compile(joinReList(__common_numbers))
 
-def numberTest(str, expectRegs=True):
+def numberTest(str, expectRegs):
   sre = numbersRe.search(str)
   if sre:
-    app.log.startup('asdf', str, sre.regs, sre.groups())
+    app.log.startup('%16s %16s %-16s %s ' % (str, expectRegs, sre.regs[0], sre.groups()))
   else:
-    app.log.startup('asdf', str, sre)
+    app.log.startup('%16s %16s %-16s ' % (str, expectRegs, sre))
 
 
 app.log.startup('asdf', numbersRe.pattern)
-numberTest('.', False)
-numberTest('2')
-numberTest(' 2 ')
-numberTest('242.2')
-numberTest('.2')
-numberTest('2.')
-numberTest('.2a', False)
-numberTest('2.a')
-numberTest('+0.2e-15')
-numberTest('02factor', False)
-numberTest('02f')
+numberTest('.', None)
+numberTest('2', (0, 1))
+numberTest(' 2 ', (1, 2))
+numberTest('242.2', (0, 5))
+numberTest('.2', (0, 2))
+numberTest('2.', (0, 2))
+numberTest('.2a', None)
+numberTest('2.a', (0, 1))
+numberTest('+0.2e-15', (0, 8))
+numberTest('02factor', None)
+numberTest('02f', (0, 3))
 
 
 # These prefs are not fully working.
