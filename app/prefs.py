@@ -32,20 +32,10 @@ __c_primitive_types = [
 ]
 
 __common_numbers = [
-  #r'[-+]?[0-9]*\.?',
   r'[-+]?[0-9]*\.[0-9]+(?:[eE][+-][0-9]+)?[fF]?(?!\w)',
   r'[-+]?[0-9]+(?:\.[0-9]*(?:[eE][+-][0-9]+)?)?[fF]?(?!\w)',
-  #r'[-+]?[0-9]+(?:\.[0-9]*(?:[eE][+-][0-9]+)?[fF]?)?',
-  r'0[xX][^A-Fa-f0-0]+(?:[uUlL][lL]?[lL]?)?', # hexidecimal
-  #r'[0-9]+', # decimal
-  #r'[0-9]+\.[0-9]+', # float
-  #r'[0-9]+\.', # float
-  #r'\.[0-9]+', # float
-  #r'[0-9]+\.[0-9]+[eE][-+][0-9]+', # exponential
-  #r'[0-9]+\.[eE][-+][0-9]+', # exponential
-  #r'\.[0-9]+[eE][-+][0-9]+', # exponential
-  #r'0[^0-7]+', # octal
-  #r'0[xX][^A-Fa-f0-0]+', # hexidecimal
+  r'[-+]?[0-9]+(?:[uUlL][lL]?[lL]?)?(?!\w)',
+  r'0[xX][^A-Fa-f0-9]+(?:[uUlL][lL]?[lL]?)?(?!\w)',
 ]
 
 numbersRe = re.compile(joinReList(__common_numbers))
@@ -145,7 +135,7 @@ prefs = {
       'keywords': __c_keywords,
       'types': __c_primitive_types,
       'contains': ['cpp_block_comment', 'cpp_line_comment', 'c_preprocessor',
-        'c_string1', 'c_string2', 'hex_number'],
+        'c_string1', 'c_string2'],
     },
     'cpp': {
       'indent': '  ',
@@ -160,7 +150,7 @@ prefs = {
       ],
       'types': __c_primitive_types,
       'contains': ['cpp_block_comment', 'cpp_line_comment', 'c_preprocessor',
-        'c_string1', 'c_string2', 'hex_number'],
+        'c_string1', 'c_string2'],
     },
     'cpp_block_comment': {
       'begin': r'/\*',
@@ -225,10 +215,10 @@ prefs = {
       ],
       'contains': ['c_string1', 'c_string2', 'css', 'html_block_comment', 'js'],
     },
-    'hex_number': {
-      'begin': '0x',
-      'end': '[^0-9a-fA-F]',
-    },
+    #'hex_number': {
+    #  'begin': '0x',
+    #  'end': '[^0-9a-fA-F]',
+    #},
     'html_block_comment': {
       'begin': '<!--',
       'end': '-->',
@@ -259,14 +249,14 @@ prefs = {
       'indent': '  ',
       'keywords': [],
     },
-    'number': {
-      'begin': '[1-9]',
-      'end': '[^0-9]',
-    },
-    'octal_number': {
-      'begin': '0',
-      'end': '[^0-7]',
-    },
+    #'number': {
+    #  'begin': '[1-9]',
+    #  'end': '[^0-9]',
+    #},
+    #'octal_number': {
+    #  'begin': '0',
+    #  'end': '[^0-7]',
+    #},
     'py': {
       'escape': '\\',
       'indent': '  ',
@@ -294,25 +284,21 @@ prefs = {
     'pound_comment': {
       'begin': '#',
       'continuation': '# ',
-      'end': '\\n',
+      'end': r'\n',
       'indent': '  ',
       'keywords': [],
     },
     'py_string1': {
       'begin': "'''",
-      'end': "'''",
-      'escape': '\\',
+      'end': r"(?<!\\)'''",
       'indent': '  ',
       'keywords': [],
-      'within': ['py'],
     },
     'py_string2': {
       'begin': '"""',
-      'end': '"""',
-      'escape': '\\',
+      'end': r'(?<!\\)"""',
       'indent': '  ',
       'keywords': [],
-      'within': ['py'],
     },
     #'quoted_string1': {
     #  # This is not a programming string, there are no escape chars.
