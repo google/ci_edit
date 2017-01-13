@@ -10,6 +10,9 @@ import traceback
 
 importStartTime = time.time()
 
+def joinReList(reList):
+  return r"("+r")|(".join(reList)+r")"
+
 __common_keywords = [
   'break', 'continue', 'do', 'else',
   'for', 'if', 'return', 'while',
@@ -27,6 +30,46 @@ __c_primitive_types = [
   'uint8_t', 'uint16_t', 'uint32_t', 'uint64_t',
   'void', 'wchar_t',
 ]
+
+__common_numbers = [
+  #r'[-+]?[0-9]*\.?',
+  r'[-+]?[0-9]*\.[0-9]+(?:[eE][+-][0-9]+)?[fF]?(?!\w)',
+  r'[-+]?[0-9]+(?:\.[0-9]*(?:[eE][+-][0-9]+)?)?[fF]?(?!\w)',
+  #r'[-+]?[0-9]+(?:\.[0-9]*(?:[eE][+-][0-9]+)?[fF]?)?',
+  r'0[xX][^A-Fa-f0-0]+(?:[uUlL][lL]?[lL]?)?', # hexidecimal
+  #r'[0-9]+', # decimal
+  #r'[0-9]+\.[0-9]+', # float
+  #r'[0-9]+\.', # float
+  #r'\.[0-9]+', # float
+  #r'[0-9]+\.[0-9]+[eE][-+][0-9]+', # exponential
+  #r'[0-9]+\.[eE][-+][0-9]+', # exponential
+  #r'\.[0-9]+[eE][-+][0-9]+', # exponential
+  #r'0[^0-7]+', # octal
+  #r'0[xX][^A-Fa-f0-0]+', # hexidecimal
+]
+
+numbersRe = re.compile(joinReList(__common_numbers))
+
+def numberTest(str, expectRegs=True):
+  sre = numbersRe.search(str)
+  if sre:
+    app.log.startup('asdf', str, sre.regs, sre.groups())
+  else:
+    app.log.startup('asdf', str, sre)
+
+
+app.log.startup('asdf', numbersRe.pattern)
+numberTest('.', False)
+numberTest('2')
+numberTest(' 2 ')
+numberTest('242.2')
+numberTest('.2')
+numberTest('2.')
+numberTest('.2a', False)
+numberTest('2.a')
+numberTest('+0.2e-15')
+numberTest('02factor', False)
+numberTest('02f')
 
 
 # These prefs are not fully working.
@@ -90,7 +133,7 @@ prefs = {
       'indent': '  ',
       'keywords': [
         'break', 'case', 'continue', 'do', 'done', 'exit', 'fi', 'if', 'for',
-        'return', 'switch', 'while',
+        'return', 'switch', 'then', 'while',
       ],
       'contains': ['c_string1', 'c_string2', 'pound_comment'],
     },
@@ -98,8 +141,6 @@ prefs = {
       'type': 'binary',
     },
     'c': {
-      'begin': None,
-      'escape': None,
       'indent': '  ',
       'keywords': __c_keywords,
       'types': __c_primitive_types,
@@ -107,11 +148,9 @@ prefs = {
         'c_string1', 'c_string2', 'hex_number'],
     },
     'cpp': {
-      'begin': None,
-      'escape': None,
       'indent': '  ',
       'keywords': __c_keywords + [
-        'auto', 'catch', 'class', 'const',
+        'auto', 'catch', 'class', 'constexpr',
         'namespace', 'nullptr',
         'private', 'protected', 'public',
         'template', 'this', 'throw', 'typename',
@@ -124,10 +163,9 @@ prefs = {
         'c_string1', 'c_string2', 'hex_number'],
     },
     'cpp_block_comment': {
-      'begin': '/\\*',
+      'begin': r'/\*',
       'continued': ' * ',
-      'end': '\\*/',
-      'escape': None,
+      'end': r'\*/',
       'indent': '  ',
       'keywords': [],
       'nestable': False,
@@ -135,16 +173,15 @@ prefs = {
     'cpp_line_comment': {
       'begin': '//',
       'continued': '// ',
-      'end': '\\n',
-      'escape': '\\\\n',
+      'end': r'(?<!\\)\n',
       'indent': '  ',
       'keywords': [],
       'nestable': False,
     },
     'c_preprocessor': {
       'begin': '#',
-      'end': '\\n',
-      'escape': '\\\\n',
+      'end': r'\n',
+      'escape': r'\\\n',
       'indent': '  ',
       'keywords': [
         '#\s*?define', '#\s*?defined', '#\s*?elif', '#\s*?endif',
@@ -159,7 +196,7 @@ prefs = {
       'escape': '\\',
       'indent': '  ',
       'keywords': [
-        '\\b', '\\f', '\\n', '\\r', '\\0..',
+        r'\b', r'\f', r'\n', r'\r', r'\t', r'\v', r'\0..',
       ],
       'single_line': True,
     },
@@ -169,20 +206,18 @@ prefs = {
       'escape': '\\',
       'indent': '  ',
       'keywords': [
-        '\\b', '\\f', '\\n', '\\r', '\\0..',
+        r'\b', r'\f', r'\n', r'\r', r'\t', r'\v', r'\0..',
       ],
       'single_line': True,
     },
     'css': {
       'begin': '<style',
       'end': '</style>',
-      'escape': None,
       'indent': '  ',
       'keywords': [],
       'contains': ['cpp_block_comment'],
     },
     'html': {
-      'escape': None,
       'indent': '  ',
       'keywords': [
         'a', 'b', 'body', 'button', 'div', 'head', 'html', 'img', 'input',
@@ -197,14 +232,9 @@ prefs = {
     'html_block_comment': {
       'begin': '<!--',
       'end': '-->',
-      'escape': None,
       'indent': '  ',
-      'keywords': [],
-      'prefix': '',
     },
     'java': {
-      'begin': None,
-      'escape': None,
       'indent': '  ',
       'keywords': __common_keywords + [
         'case', 'false',
@@ -216,7 +246,6 @@ prefs = {
     'js': {
       'begin': '<script',
       'end': '</script>',
-      'escape': None,
       'indent': '  ',
       'keywords': [
         'arguments', 'break', 'case', 'continue',
@@ -227,7 +256,6 @@ prefs = {
           'cpp_line_comment'],
     },
     'md': {
-      'escape': None,
       'indent': '  ',
       'keywords': [],
     },
@@ -267,7 +295,6 @@ prefs = {
       'begin': '#',
       'continuation': '# ',
       'end': '\\n',
-      'escape': None,
       'indent': '  ',
       'keywords': [],
     },
@@ -298,8 +325,6 @@ prefs = {
       'end': '"',
     },
     'text': {
-      'begin': None,
-      'escape': None,
       'indent': '  ',
       'keywords': [],
       'contains': ['quoted_string2'],
@@ -335,7 +360,7 @@ for k,v in prefs['grammar'].items():
       sys.exit(1)
     markers.append(g['begin'])
     matchGrammars.append(g)
-  regex = "("+")|(".join(markers)+")"
+  regex = joinReList(markers)
   v['matchRe'] = re.compile(regex)
   v['matchGrammars'] = matchGrammars
 # Reset the re.cache for user regexes.

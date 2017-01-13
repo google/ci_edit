@@ -670,6 +670,8 @@ class BackingTextBuffer(Mutator):
     if file:
       self.fileFilter(file.read())
       file.close()
+    else:
+      self.data = ""
     fileExtension = os.path.splitext(fullPath)[1]
     self.setKeywordsByFileType(fileExtension)
     if self.data:
