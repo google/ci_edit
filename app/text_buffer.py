@@ -27,6 +27,7 @@ class Mutator(app.selectable.Selectable):
     self.findRe = None
     self.findBackRe = None
     self.fullPath = ''
+    self.cursorGrammar = None
     self.relativePath = ''
     self.scrollRow = 0
     self.scrollToRow = 0
@@ -39,6 +40,20 @@ class Mutator(app.selectable.Selectable):
     """Direct manipulator for logging to a read-only buffer."""
     self.lines.append(msg)
     self.cursorRow += 1
+
+  def getCursorOffset(self):
+    """inefficent test hack. wip on parser"""
+    offset = 0
+    for i in range(self.cursorRow):
+      offset += len(self.lines[i])
+    return offset + self.cursorRow + self.cursorCol
+
+  def cursorGrammarName(self):
+    """inefficent test hack. wip on parser"""
+    self.cursorGrammar = self.parser.grammarFromOffset(self.getCursorOffset())
+    if self.cursorGrammar is None:
+      return 'None'
+    return self.cursorGrammar.grammar.get('name', 'unknown')
 
   def isDirty(self):
     """Whether the buffer contains non-trival changes since the last save."""

@@ -23,7 +23,7 @@ class ParserNode:
     self.begin = None
 
   def debugLog(self, out, indent, data):
-    out('%sParserNode %16s %4d %s' % (indent, self.grammar['name'], self.begin,
+    out('%sParserNode %16s %4d %s' % (indent, self.grammar.get('name', 'None'), self.begin,
         repr(data[self.begin:self.begin+15])[1:-1]))
 
 
@@ -34,6 +34,19 @@ class Parser:
     self.grammarPrefs = app.prefs.prefs['grammar']
     self.grammarList = []
     app.log.parser('__init__')
+
+  def grammarFromOffset(self, offset):
+    gl = self.grammarList
+    low = 0
+    high = len(gl)
+    while True:
+      index = (high+low)/2
+      if offset >= gl[index+1].begin:
+        low = index
+      elif offset < gl[index].begin:
+        high = index
+      else:
+        return gl[index]
 
   def parse(self, data, grammar):
     app.log.parser('grammar', grammar['name'])
@@ -83,12 +96,13 @@ class Parser:
         self.grammarList[-1] = child
       else:
         self.grammarList.append(child)
+    sentinel = ParserNode()
+    sentinel.grammar = {}
+    sentinel.begin = sys.maxint
+    self.grammarList.append(sentinel)
 
   def debugLog(self, out, data):
     out('parser debug:')
     for node in self.grammarList:
       node.debugLog(out, '  ', data)
-
-
-
 
