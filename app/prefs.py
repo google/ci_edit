@@ -181,7 +181,7 @@ prefs = {
       #'contains': ['file_path_quoted', 'file_path_bracketed'],
     },
     'c_string1': {
-      'begin': "'",
+      'begin': "'(?!'')",
       'end': "'",
       'escape': '\\',
       'indent': '  ',
@@ -191,7 +191,7 @@ prefs = {
       'single_line': True,
     },
     'c_string2': {
-      'begin': '"',
+      'begin': '"(?!"")',
       'end': '"',
       'escape': '\\',
       'indent': '  ',

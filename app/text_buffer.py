@@ -1162,12 +1162,12 @@ class TextBuffer(BackingTextBuffer):
             color = curses.color_pair(1)
           if length:
             window.addStr(i, k-self.scrollCol, line, color)
-            window.addStr(i, k-self.scrollCol, line[0], curses.color_pair(96))
+            #window.addStr(i, k-self.scrollCol, line[0], curses.color_pair(96))
             k += length
           else:
             window.addStr(i, k-self.scrollCol+length, ' '*(maxx-k-length),
                 curses.color_pair(2))
-            window.addStr(i, k-self.scrollCol, ' ', curses.color_pair(97+64))
+            #window.addStr(i, k-self.scrollCol, ' ', curses.color_pair(97+64))
             break
     else:
       self.xdraw(window)
