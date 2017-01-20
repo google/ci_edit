@@ -13,6 +13,9 @@ importStartTime = time.time()
 def joinReList(reList):
   return r"("+r")|(".join(reList)+r")"
 
+def joinReWordList(reList):
+  return r"(\b"+r"\b)|(\b".join(reList)+r"\b)"
+
 __common_keywords = [
   'break', 'continue', 'do', 'else',
   'for', 'if', 'return', 'while',
@@ -327,6 +330,9 @@ for k,v in prefs['grammar'].items():
 
 # Compile regexes for each grammar.
 for k,v in prefs['grammar'].items():
+  # keywords re.
+  v['keywordsRe'] = re.compile(joinReWordList(v.get('keywords', [])))
+  # contains and end re.
   matchGrammars = []
   markers = []
   if v.get('end'):
@@ -346,8 +352,7 @@ for k,v in prefs['grammar'].items():
       sys.exit(1)
     markers.append(g['begin'])
     matchGrammars.append(g)
-  regex = joinReList(markers)
-  v['matchRe'] = re.compile(regex)
+  v['matchRe'] = re.compile(joinReList(markers))
   v['matchGrammars'] = matchGrammars
 # Reset the re.cache for user regexes.
 re.purge()

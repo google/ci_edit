@@ -2,7 +2,7 @@
 # Use of this source code is governed by an Apache-style license that can be
 # found in the LICENSE file.
 
-import app.log #test comment
+import app.log
 import app.selectable
 import app.parser
 import app.prefs
@@ -698,7 +698,6 @@ class BackingTextBuffer(Mutator):
     else:
       self.data = ""
     fileExtension = os.path.splitext(fullPath)[1]
-    self.setKeywordsByFileType(fileExtension)
     if self.data:
       self.parser = app.parser.Parser()
       self.parser.parse(
@@ -1098,17 +1097,6 @@ class TextBuffer(BackingTextBuffer):
     self.lineLimitIndicator = sys.maxint
     self.highlightRe = None
 
-  def setKeywordsByFileType(self, extension):
-    grammar = app.prefs.getGrammar(extension)
-    if grammar:
-      self.setKeywords(grammar.get('keywords', [])+
-          grammar.get('namespaces', [])+
-          grammar.get('types', []))
-
-  def setKeywords(self, highlightKeywords):
-      keywords = '\\b%s\\b'%('\\b|\\b'.join(highlightKeywords),)
-      self.highlightRe = re.compile(keywords)
-
   def scrollToCursor(self, window):
     """Move the selected view rectangle so that the cursor is visible."""
     maxy, maxx = window.cursorWindow.getmaxyx()
@@ -1150,18 +1138,23 @@ class TextBuffer(BackingTextBuffer):
       for i in range(limit):
         k = startCol
         while k < endCol:
-          grammar, remaining = self.parser.grammarFromOffset(
+          node, remaining = self.parser.grammarFromOffset(
               self.getCursorOffset(self.scrollRow+i, k))
           lastCol = min(endCol, k+remaining)
           line = self.lines[self.scrollRow+i][k:lastCol]
           length = len(line)
           color = curses.color_pair(0)
-          if grammar.grammar['name'] == 'pound_comment':
+          if node.grammar['name'] == 'pound_comment':
             color = curses.color_pair(2)
-          elif grammar.grammar['name'] != 'py':
-            color = curses.color_pair(1)
+          elif node.grammar['name'] != 'py':
+            color = curses.color_pair(5)
           if length:
-            window.addStr(i, k-self.scrollCol, line, color)
+            col = k-self.scrollCol
+            window.addStr(i, col, line, color)
+            # Highlight keywords.
+            for found in node.grammar['keywordsRe'].finditer(line):
+              for f in found.regs:
+                window.addStr(i, col+f[0], line[f[0]:f[1]], curses.color_pair(21))
             #window.addStr(i, k-self.scrollCol, line[0], curses.color_pair(96))
             k += length
           else:
@@ -1169,6 +1162,7 @@ class TextBuffer(BackingTextBuffer):
                 curses.color_pair(2))
             #window.addStr(i, k-self.scrollCol, ' ', curses.color_pair(97+64))
             break
+      self.drawOverlays(window)
     else:
       self.xdraw(window)
 
@@ -1186,13 +1180,6 @@ class TextBuffer(BackingTextBuffer):
       for i in range(limit):
         line = self.lines[self.scrollRow+i][startCol:endCol]
         window.addStr(i, 0, line + ' '*(maxx-len(line)), window.color)
-      if self.highlightRe:
-        # Highlight keywords.
-        for i in range(limit):
-          line = self.lines[self.scrollRow+i][startCol:endCol]
-          for k in self.highlightRe.finditer(line):
-            for f in k.regs:
-              window.addStr(i, f[0], line[f[0]:f[1]], curses.color_pair(21))
       if 1:
         # Trivia: all English contractions except 'sup, 'tis and 'twas will
         # match this regex (with re.I):  [adegIlnotuwy]'[acdmlsrtv]
@@ -1213,6 +1200,21 @@ class TextBuffer(BackingTextBuffer):
           for k in re.finditer(app.selectable.kReComments, line):
             for f in k.regs:
               window.addStr(i, f[0], line[f[0]:f[1]], curses.color_pair(2))
+      if self.highlightRe:
+        # Highlight keywords.
+        for i in range(limit):
+          line = self.lines[self.scrollRow+i][startCol:endCol]
+          for k in self.highlightRe.finditer(line):
+            for f in k.regs:
+              window.addStr(i, f[0], line[f[0]:f[1]], curses.color_pair(21))
+      self.drawOverlays(window)
+
+  def drawOverlays(self, window):
+    if 1: #self.scrollRow != self.scrollToRow:
+      maxy, maxx = window.cursorWindow.getmaxyx()
+      startCol = self.scrollCol
+      endCol = self.scrollCol+maxx
+      limit = min(max(len(self.lines)-self.scrollRow, 0), maxy)
       if 1:
         # Highlight brackets.
         for i in range(limit):
