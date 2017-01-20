@@ -46,7 +46,7 @@ class Parser:
       elif offset < gl[index].begin:
         high = index
       else:
-        return gl[index]
+        return gl[index], gl[index+1].begin-offset
 
   def parse(self, data, grammar):
     app.log.parser('grammar', grammar['name'])

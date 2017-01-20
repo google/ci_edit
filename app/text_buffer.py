@@ -2,7 +2,7 @@
 # Use of this source code is governed by an Apache-style license that can be
 # found in the LICENSE file.
 
-import app.log
+import app.log #test comment
 import app.selectable
 import app.parser
 import app.prefs
@@ -28,6 +28,7 @@ class Mutator(app.selectable.Selectable):
     self.findBackRe = None
     self.fullPath = ''
     self.cursorGrammar = None
+    self.parser = None
     self.relativePath = ''
     self.scrollRow = 0
     self.scrollToRow = 0
@@ -41,19 +42,28 @@ class Mutator(app.selectable.Selectable):
     self.lines.append(msg)
     self.cursorRow += 1
 
-  def getCursorOffset(self):
+  def getCursorOffset(self, row, col):
     """inefficent test hack. wip on parser"""
     offset = 0
-    for i in range(self.cursorRow):
+    for i in range(row):
       offset += len(self.lines[i])
-    return offset + self.cursorRow + self.cursorCol
+    return offset + row + col
 
   def cursorGrammarName(self):
     """inefficent test hack. wip on parser"""
-    self.cursorGrammar = self.parser.grammarFromOffset(self.getCursorOffset())
+    self.cursorGrammar = self.parser.grammarFromOffset(self.getCursorOffset(
+        self.cursorRow, self.cursorCol))[0]
     if self.cursorGrammar is None:
       return 'None'
     return self.cursorGrammar.grammar.get('name', 'unknown')
+
+  def cursorGrammarRemaining(self):
+    """inefficent test hack. wip on parser"""
+    remaining = self.parser.grammarFromOffset(self.getCursorOffset(
+        self.cursorRow, self.cursorCol))[1]
+    if remaining is None:
+      return -1
+    return remaining
 
   def isDirty(self):
     """Whether the buffer contains non-trival changes since the last save."""
@@ -694,6 +704,8 @@ class BackingTextBuffer(Mutator):
       self.parser.parse(
           self.data,
           app.prefs.getGrammar(fileExtension))
+    else:
+      self.parser = None
 
   def fileWrite(self):
     try:
@@ -1125,6 +1137,42 @@ class TextBuffer(BackingTextBuffer):
     self.scrollCol += cols
 
   def draw(self, window):
+    maxy, maxx = window.cursorWindow.getmaxyx()
+
+    self.scrollToCursor(window)
+
+    startCol = self.scrollCol
+    endCol = self.scrollCol+maxx
+
+    if self.parser:
+      # Highlight grammar.
+      limit = min(max(len(self.lines)-self.scrollRow, 0), maxy)
+      for i in range(limit):
+        k = startCol
+        while k < endCol:
+          grammar, remaining = self.parser.grammarFromOffset(
+              self.getCursorOffset(self.scrollRow+i, k))
+          lastCol = min(endCol, k+remaining)
+          line = self.lines[self.scrollRow+i][k:lastCol]
+          length = len(line)
+          color = curses.color_pair(0)
+          if grammar.grammar['name'] == 'pound_comment':
+            color = curses.color_pair(2)
+          elif grammar.grammar['name'] != 'py':
+            color = curses.color_pair(1)
+          if length:
+            window.addStr(i, k-self.scrollCol, line, color)
+            window.addStr(i, k-self.scrollCol, line[0], curses.color_pair(96))
+            k += length
+          else:
+            window.addStr(i, k-self.scrollCol+length, ' '*(maxx-k-length),
+                curses.color_pair(2))
+            window.addStr(i, k-self.scrollCol, ' ', curses.color_pair(97+64))
+            break
+    else:
+      self.xdraw(window)
+
+  def xdraw(self, window):
     if 1: #self.scrollRow != self.scrollToRow:
       maxy, maxx = window.cursorWindow.getmaxyx()
 
