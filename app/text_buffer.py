@@ -26,6 +26,7 @@ class Mutator(app.selectable.Selectable):
     self.debugRedo = False
     self.findRe = None
     self.findBackRe = None
+    self.fileExtension = ''
     self.fullPath = ''
     self.cursorGrammar = None
     self.parser = None
@@ -51,6 +52,8 @@ class Mutator(app.selectable.Selectable):
 
   def cursorGrammarName(self):
     """inefficent test hack. wip on parser"""
+    if not self.parser:
+      return 'no parser'
     self.cursorGrammar = self.parser.grammarFromOffset(self.getCursorOffset(
         self.cursorRow, self.cursorCol))[0]
     if self.cursorGrammar is None:
@@ -59,6 +62,8 @@ class Mutator(app.selectable.Selectable):
 
   def cursorGrammarRemaining(self):
     """inefficent test hack. wip on parser"""
+    if not self.parser:
+      return -2
     remaining = self.parser.grammarFromOffset(self.getCursorOffset(
         self.cursorRow, self.cursorCol))[1]
     if remaining is None:
@@ -697,12 +702,9 @@ class BackingTextBuffer(Mutator):
       file.close()
     else:
       self.data = ""
-    fileExtension = os.path.splitext(fullPath)[1]
+    self.fileExtension = os.path.splitext(fullPath)[1]
     if self.data:
-      self.parser = app.parser.Parser()
-      self.parser.parse(
-          self.data,
-          app.prefs.getGrammar(fileExtension))
+      self.parseGrammars()
     else:
       self.parser = None
 
@@ -1000,6 +1002,15 @@ class BackingTextBuffer(Mutator):
   def noOp(self, ignored):
     pass
 
+  def parseGrammars(self):
+    if not self.parser:
+      self.parser = app.parser.Parser()
+    self.data = ('\n').join(self.lines)
+    self.lines = self.data.split('\n')
+    self.parser.parse(
+        self.data,
+        app.prefs.getGrammar(self.fileExtension))
+
   def doSelectionMode(self, mode):
     if self.selectionMode != mode:
       self.redoAddChange(('m', (0, 0, 0, 0, 0,
@@ -1125,6 +1136,7 @@ class TextBuffer(BackingTextBuffer):
     self.scrollCol += cols
 
   def draw(self, window):
+    self.parseGrammars()
     maxy, maxx = window.cursorWindow.getmaxyx()
 
     self.scrollToCursor(window)
@@ -1133,6 +1145,7 @@ class TextBuffer(BackingTextBuffer):
     endCol = self.scrollCol+maxx
 
     if self.parser:
+      defaultColor = curses.color_pair(0)
       # Highlight grammar.
       limit = min(max(len(self.lines)-self.scrollRow, 0), maxy)
       for i in range(limit):
@@ -1143,23 +1156,22 @@ class TextBuffer(BackingTextBuffer):
           lastCol = min(endCol, k+remaining)
           line = self.lines[self.scrollRow+i][k:lastCol]
           length = len(line)
-          color = curses.color_pair(0)
-          if node.grammar['name'] == 'pound_comment':
-            color = curses.color_pair(2)
-          elif node.grammar['name'] != 'py':
-            color = curses.color_pair(5)
+          #color = curses.color_pair(app.prefs.prefs['colors'].get(node.grammar['name'], 0))
+          color = node.grammar.get('color', defaultColor)
           if length:
             col = k-self.scrollCol
             window.addStr(i, col, line, color)
             # Highlight keywords.
+            #keywordsColor = curses.color_pair(app.prefs.prefs['colors'].get('keywords', 0))
+            keywordsColor = node.grammar.get('keywordsColor', defaultColor)
             for found in node.grammar['keywordsRe'].finditer(line):
               for f in found.regs:
-                window.addStr(i, col+f[0], line[f[0]:f[1]], curses.color_pair(21))
+                window.addStr(i, col+f[0], line[f[0]:f[1]], keywordsColor)
             #window.addStr(i, k-self.scrollCol, line[0], curses.color_pair(96))
             k += length
           else:
             window.addStr(i, k-self.scrollCol+length, ' '*(maxx-k-length),
-                curses.color_pair(2))
+                color)
             #window.addStr(i, k-self.scrollCol, ' ', curses.color_pair(97+64))
             break
       self.drawOverlays(window)
