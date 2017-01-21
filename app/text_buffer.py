@@ -1156,23 +1156,19 @@ class TextBuffer(BackingTextBuffer):
           lastCol = min(endCol, k+remaining)
           line = self.lines[self.scrollRow+i][k:lastCol]
           length = len(line)
-          #color = curses.color_pair(app.prefs.prefs['colors'].get(node.grammar['name'], 0))
           color = node.grammar.get('color', defaultColor)
           if length:
             col = k-self.scrollCol
             window.addStr(i, col, line, color)
             # Highlight keywords.
-            #keywordsColor = curses.color_pair(app.prefs.prefs['colors'].get('keywords', 0))
             keywordsColor = node.grammar.get('keywordsColor', defaultColor)
             for found in node.grammar['keywordsRe'].finditer(line):
-              for f in found.regs:
-                window.addStr(i, col+f[0], line[f[0]:f[1]], keywordsColor)
-            #window.addStr(i, k-self.scrollCol, line[0], curses.color_pair(96))
+              f = found.regs[0]
+              window.addStr(i, col+f[0], line[f[0]:f[1]], keywordsColor)
             k += length
           else:
             window.addStr(i, k-self.scrollCol+length, ' '*(maxx-k-length),
                 color)
-            #window.addStr(i, k-self.scrollCol, ' ', curses.color_pair(97+64))
             break
       self.drawOverlays(window)
     else:
