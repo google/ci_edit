@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import app.log
+import curses
 import re
 import sys
 import time
@@ -64,9 +65,29 @@ numberTest('+0.2e-15', (0, 8))
 numberTest('02factor', None)
 numberTest('02f', (0, 3))
 
+commentColorIndex = 5
+defaultColorIndex = 0
+keywordsColorIndex = 21
+stringColorIndex = 2
 
 # These prefs are not fully working.
 prefs = {
+  'colors': {
+    'default': defaultColorIndex,
+    'text': defaultColorIndex,
+    'keywords': keywordsColorIndex,
+    'c': defaultColorIndex,
+    'cpp_block_comment': commentColorIndex,
+    'cpp_line_comment': commentColorIndex,
+    'c_preprocessor': 1,
+    'c_string1': stringColorIndex,
+    'c_string2': stringColorIndex,
+    'html_block_comment': commentColorIndex,
+    'pound_comment': commentColorIndex,
+    'py_string1': stringColorIndex,
+    'py_string2': stringColorIndex,
+    'quoted_string2': stringColorIndex,
+  },
   'filetype': {
     'bash': {
       'ext': ['.bash', '.sh'],
@@ -111,9 +132,9 @@ prefs = {
   'grammar': {
     # A grammar is
     # 'grammar_name': {
-    #   'begin': None or string,
+    #   'begin': None or regex,
     #   'continued': None or string, Prefixed used when continuing to another line,
-    #   'end': None or string,
+    #   'end': None or regex,
     #   'escape': None or string,
     #   'indent': None or string,
     #   'keywords': None or list of string,
@@ -371,8 +392,15 @@ if 0:
   for k,v in filetypes.items():
     app.log.info('  ', k, ':', v)
 
+def init():
+  for k,v in prefs['grammar'].items():
+    # Colors.
+    v['color'] = curses.color_pair(prefs['colors'].get(k, defaultColorIndex))
+    v['keywordsColor'] = curses.color_pair(prefs['colors'].get(k+'_keyword_color', keywordsColorIndex))
+  app.log.info('prefs init')
+
 def getGrammar(fileExtension):
-  filetype = extensions.get(fileExtension)
+  filetype = extensions.get(fileExtension, 'text')
   return grammars.get(filetype)
 
 app.log.startup('prefs.py import time', time.time() - importStartTime)

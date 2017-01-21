@@ -6,6 +6,7 @@
 import app.buffer_manager
 import app.curses_util
 import app.log
+import app.prefs
 import app.text_buffer
 import app.window
 import os
@@ -297,6 +298,7 @@ class CiProgram:
       app.log.chanEnable('error', True)
     app.log.chanEnable('parser', logParser)
     app.log.chanEnable('startup', logStartup)
+    app.prefs.init()
 
   def quit(self):
     """Determine whether it's ok to quit. quitNow() will be called if it
