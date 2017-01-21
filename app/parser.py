@@ -38,7 +38,7 @@ class Parser:
   def grammarFromOffset(self, offset):
     gl = self.grammarList
     low = 0
-    high = len(gl)
+    high = len(gl)-1
     while True:
       index = (high+low)/2
       if offset >= gl[index+1].begin:
