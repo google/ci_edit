@@ -23,8 +23,8 @@ class ParserNode:
     self.begin = None
 
   def debugLog(self, out, indent, data):
-    out('%sParserNode %16s %4d %s' % (indent, self.grammar.get('name', 'None'), self.begin,
-        repr(data[self.begin:self.begin+15])[1:-1]))
+    out('%sParserNode %16s %4d %s' % (indent, self.grammar.get('name', 'None'),
+        self.begin, repr(data[self.begin:self.begin+15])[1:-1]))
 
 
 class Parser:
