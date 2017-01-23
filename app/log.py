@@ -22,7 +22,7 @@ def parseLines(channel, *args):
     args = [""]
   msg = str(args[0])
   if 1:
-    msg = "%10s %10s: %s"%(channel, inspect.stack()[2][3], msg)
+    msg = "%10s %10s: %s"%(channel, inspect.stack()[3][3], msg)
   prior = msg
   for i in args[1:]:
     if not len(prior) or prior[-1] != '\n':

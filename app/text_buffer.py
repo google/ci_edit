@@ -37,6 +37,7 @@ class Mutator(app.selectable.Selectable):
     self.redoChain = []
     self.redoIndex = 0
     self.savedAtRedoIndex = 0
+    self.shouldReparse = False
 
   def addLine(self, msg):
     """Direct manipulator for logging to a read-only buffer."""
@@ -86,6 +87,8 @@ class Mutator(app.selectable.Selectable):
       change = self.redoChain[self.redoIndex]
       if self.debugRedo:
         app.log.info('redo', self.redoIndex, repr(change))
+      if change[0] != 'm':
+        self.shouldReparse = True
       self.redoIndex += 1
       if change[0] == 'b':
         line = self.lines[self.cursorRow]
@@ -119,6 +122,10 @@ class Mutator(app.selectable.Selectable):
         self.markerEndRow += change[1][7]
         self.markerEndCol += change[1][8]
         self.selectionMode += change[1][9]
+        assert self.cursorRow >= 0
+        assert self.cursorCol >= 0
+        assert self.scrollRow >= 0
+        assert self.scrollCol >= 0
       elif change[0] == 'n':
         # Redo split lines.
         line = self.lines[self.cursorRow]
@@ -211,6 +218,8 @@ class Mutator(app.selectable.Selectable):
     if self.redoIndex > 0:
       self.redoIndex -= 1
       change = self.redoChain[self.redoIndex]
+      if change[0] != 'm':
+        self.shouldReparse = True
       if self.debugRedo:
         app.log.info('undo', self.redoIndex, repr(change))
       if change[0] == 'b':
@@ -248,6 +257,10 @@ class Mutator(app.selectable.Selectable):
         self.markerEndRow -= change[1][7]
         self.markerEndCol -= change[1][8]
         self.selectionMode -= change[1][9]
+        assert self.cursorRow >= 0
+        assert self.cursorCol >= 0
+        assert self.scrollRow >= 0
+        assert self.scrollCol >= 0
         return True
       elif change[0] == 'n':
         # Undo split lines.
@@ -1003,6 +1016,7 @@ class BackingTextBuffer(Mutator):
     pass
 
   def parseGrammars(self):
+    app.log.info('')
     if not self.parser:
       self.parser = app.parser.Parser()
     self.data = ('\n').join(self.lines)
@@ -1136,7 +1150,9 @@ class TextBuffer(BackingTextBuffer):
     self.scrollCol += cols
 
   def draw(self, window):
-    self.parseGrammars()
+    if self.shouldReparse:
+      self.parseGrammars()
+      self.shouldReparse = False
     maxy, maxx = window.cursorWindow.getmaxyx()
 
     self.scrollToCursor(window)
