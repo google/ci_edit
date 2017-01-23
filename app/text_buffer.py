@@ -860,8 +860,8 @@ class BackingTextBuffer(Mutator):
       self.indentLines()
     elif self.selectionMode == app.selectable.kSelectionAll:
       self.cursorMoveAndMark(len(self.lines)-1-self.cursorRow, -self.cursorCol,
-          -self.goalCol,
-          -self.markerRow, -self.markerCol, app.selectable.kSelectionLine-self.selectionMode)
+          -self.goalCol, -self.markerRow, -self.markerCol,
+          app.selectable.kSelectionLine-self.selectionMode)
       self.redo()
       self.indentLines()
     else:
@@ -1016,7 +1016,6 @@ class BackingTextBuffer(Mutator):
     pass
 
   def parseGrammars(self):
-    app.log.info('')
     if not self.parser:
       self.parser = app.parser.Parser()
     self.data = ('\n').join(self.lines)
