@@ -65,16 +65,29 @@ class CiProgram:
 
   def commandLoop(self, window):
     app.log.debug('commandLoop', window)
+    self.refresh()
+    waitTime = 0.010
+    shouldRefresh = True
     while not self.exiting and not self.changeTo:
-      window.controller.onChange()
-      self.refresh()
-      window.textBuffer.setMessage()
-      ch = window.cursorWindow.getch()
-      if ch == -1:
-        app.log.debug('getch() returned -1')
-        #self.quit()
-      self.ch = ch
-      window.controller.doCommand(ch)
+      cmdList = []
+      mouseEvents = []
+      nextUpdate = time.time() + waitTime
+      while time.time() < nextUpdate:
+        ch = window.cursorWindow.getch()
+        if ch != curses.ERR:
+          self.ch = ch
+          if ch == curses.KEY_MOUSE:
+            mouseEvents.append((curses.getmouse(), time.time()))
+          cmdList.append(ch)
+      if len(cmdList):
+        for cmd in cmdList:
+          if ch == curses.KEY_MOUSE:
+            self.handleMouse(mouseEvents[0])
+            mouseEvents = mouseEvents[1:]
+          window.controller.doCommand(cmd)
+        window.controller.onChange()
+        self.refresh()
+        window.textBuffer.setMessage()
 
   def startup(self):
     """A second init-like function. Called after command line arguments are
@@ -190,11 +203,12 @@ class CiProgram:
     y, x = self.priorClickRowCol
     return y-1 <= row <= y+1 and x-1 <= col <= x+1
 
-  def handleMouse(self):
+  def handleMouse(self, info):
     """Mouse handling is a special case. The getch() curses function will
     signal the existence of a mouse event, but the event must be fetched and
     parsed separately."""
-    (id, mousex, mousey, mousez, bstate) = curses.getmouse()
+    (id, mousex, mousey, mousez, bstate) = info[0]
+    eventTime = info[1]
     rapidClickTimeout = .5
     for i in reversed(self.zOrder):
       if i.contains(mousey, mousex):
@@ -202,14 +216,14 @@ class CiProgram:
         mousex -= i.left
         #app.log.info('bstate', app.curses_util.mouseButtonName(bstate))
         if bstate & curses.BUTTON1_RELEASED:
-          if self.priorClick + rapidClickTimeout <= time.time():
+          if self.priorClick + rapidClickTimeout <= eventTime:
             i.mouseRelease(mousey, mousex, bstate&curses.BUTTON_SHIFT,
                 bstate&curses.BUTTON_CTRL, bstate&curses.BUTTON_ALT)
         elif bstate & curses.BUTTON1_PRESSED:
-          if (self.priorClick + rapidClickTimeout > time.time() and
+          if (self.priorClick + rapidClickTimeout > eventTime and
               self.clickedNearby(mousey, mousex)):
             self.clicks += 1
-            self.priorClick = time.time()
+            self.priorClick = eventTime
             if self.clicks == 2:
               i.mouseDoubleClick(mousey, mousex, bstate&curses.BUTTON_SHIFT,
                   bstate&curses.BUTTON_CTRL, bstate&curses.BUTTON_ALT)
@@ -219,7 +233,7 @@ class CiProgram:
               self.clicks = 1
           else:
             self.clicks = 1
-            self.priorClick = time.time()
+            self.priorClick = eventTime
             self.priorClickRowCol = (mousey, mousex)
             i.mouseClick(mousey, mousex, bstate&curses.BUTTON_SHIFT,
                 bstate&curses.BUTTON_CTRL, bstate&curses.BUTTON_ALT)
