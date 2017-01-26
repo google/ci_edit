@@ -62,9 +62,14 @@ class Parser:
     app.log.startup('parsing took', totalTime)
 
   def buildGrammarList(self):
+    leash = 3000
     cursor = 0
     grammarStack = [self.grammarList[-1].grammar]
     while len(grammarStack):
+      if not leash:
+        app.log.error('grammar caught in a loop')
+        return
+      leash -= 1
       subdata = self.data[cursor:]
       found = grammarStack[-1].get('matchRe').search(subdata)
       if not found:
@@ -79,8 +84,12 @@ class Parser:
           break
       assert index >= 0
       reg = found.regs[index+1]
-      child = ParserNode()
       if index == 0:
+        # Found escaped value.
+        cursor += reg[1]
+        continue
+      child = ParserNode()
+      if index == 1:
         # Found end of current grammar section (an 'end').
         grammarStack.pop()
         child.grammar = grammarStack[-1]

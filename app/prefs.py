@@ -1,6 +1,13 @@
 # Copyright 2016 The ci_edit Authors. All rights reserved.
 # Use of this source code is governed by an Apache-style license that can be
 # found in the LICENSE file.
+'a\\' #sdfasf
+'a\\\\' #sdfasf
+'a\02112s\0a\01b\012cfd23323saf\nsfas\w\\aaa\adf\bfsdf\'d\\\'sdff' #sdfasf
+"a\\" #sdfasf
+"a\\\\" #sdfasf
+"asfdsaf\nsfas\w\\aaa\adf\bfsdf\"d\\\"sadff" #sdfasf
+"""asd\nsadfsadf""" #fasdfdfafd
 
 import app.log
 import curses
@@ -23,9 +30,9 @@ __common_keywords = [
 ]
 
 __c_keywords = __common_keywords + [
-  'case', 'const', 'double',
-  'signed', 'sizeof', 'static', 'struct', 'switch',
-  'typedef', 'unsigned',
+  'case', 'const',
+  'sizeof', 'static', 'struct', 'switch',
+  'typedef',
 ]
 
 __c_primitive_types = [
@@ -33,6 +40,10 @@ __c_primitive_types = [
   'int8_t', 'int16_t', 'int32_t', 'int64_t',
   'uint8_t', 'uint16_t', 'uint32_t', 'uint64_t',
   'void', 'wchar_t',
+]
+
+__special_string_escapes = [
+  r'\\\\', r'\\b', r'\\f', r'\\n', r'\\r', r'\\t', r'\\v', r'\\0[0-7]{0,3}',
 ]
 
 __common_numbers = [
@@ -68,6 +79,7 @@ numberTest('02f', (0, 3))
 commentColorIndex = 5
 defaultColorIndex = 0
 keywordsColorIndex = 21
+specialsColorIndex = 253
 stringColorIndex = 2
 
 # These prefs are not fully working.
@@ -76,12 +88,14 @@ prefs = {
     'default': defaultColorIndex,
     'text': defaultColorIndex,
     'keywords': keywordsColorIndex,
+    'specials': specialsColorIndex,
     'c': defaultColorIndex,
     'cpp_block_comment': commentColorIndex,
     'cpp_line_comment': commentColorIndex,
     'c_preprocessor': 1,
     'c_string1': stringColorIndex,
     'c_string2': stringColorIndex,
+    'doc_block_comment': commentColorIndex,
     'html_block_comment': commentColorIndex,
     'pound_comment': commentColorIndex,
     'py_string1': stringColorIndex,
@@ -135,7 +149,7 @@ prefs = {
     #   'begin': None or regex,
     #   'continued': None or string, Prefixed used when continuing to another line,
     #   'end': None or regex,
-    #   'escape': None or string,
+    #   'escaped': None or regex,
     #   'indent': None or string,
     #   'keywords': None or list of string,
     #   'single_line': Boolean, Whether entire grammar must be on a single line,
@@ -143,7 +157,6 @@ prefs = {
     #   'contains': other grammars that may be contained within this grammar.
     # }
     'bash': {
-      'escape': '\\',
       'indent': '  ',
       'keywords': [
         'break', 'case', 'continue', 'do', 'done', 'exit', 'fi', 'if', 'for',
@@ -195,7 +208,7 @@ prefs = {
     'c_preprocessor': {
       'begin': '#',
       'end': r'\n',
-      'escape': r'\\\n',
+      'escaped': r'\\\n',
       'indent': '  ',
       'keywords': [
         '#\s*?define', '#\s*?defined', '#\s*?elif', '#\s*?endif',
@@ -206,22 +219,18 @@ prefs = {
     },
     'c_string1': {
       'begin': "'(?!'')",
-      'end': "'",
-      'escape': '\\',
+      'end': r"'",
+      'escaped': r'\\.',
       'indent': '  ',
-      'keywords': [
-        r'\b', r'\f', r'\n', r'\r', r'\t', r'\v', r'\0..',
-      ],
+      'special': __special_string_escapes + [r"\\'"],
       'single_line': True,
     },
     'c_string2': {
       'begin': '"(?!"")',
-      'end': '"',
-      'escape': '\\',
+      'end': r'"',
+      'escaped': r'\\.',
       'indent': '  ',
-      'keywords': [
-        r'\b', r'\f', r'\n', r'\r', r'\t', r'\v', r'\0..',
-      ],
+      'special': __special_string_escapes + [r'\\"'],
       'single_line': True,
     },
     'css': {
@@ -231,18 +240,30 @@ prefs = {
       'keywords': [],
       'contains': ['cpp_block_comment'],
     },
+    'doc_block_comment': {
+      'begin': r'/\*\*',
+      'continued': ' * ',
+      'end': r'\*/',
+      'indent': '  ',
+      'keywords': [],
+      'special': [
+        r'@param\b', r'@private\b', r'@protected\b', r'@type\b', r'@typedef\b',
+        r'@return\b', r'\bNOTE:', r'TODO\([^)]+\)',
+      ],
+      'types': ['Array', 'boolean', 'string', 'Object'],
+      'nestable': False,
+    },
     'html': {
       'indent': '  ',
       'keywords': [
-        'a', 'b', 'body', 'button', 'div', 'head', 'html', 'img', 'input',
-        'select', 'span',
+        'body', 'button', 'div', 'head', 'html', 'img', 'input',
+        'script', 'select', 'span', 'style',
       ],
-      'contains': ['c_string1', 'c_string2', 'css', 'html_block_comment', 'js'],
+      'special': [r'&.{1,5}?;',],
+      'contains': [
+        'quoted_string1', 'quoted_string2', 'css', 'html_block_comment', 'js',
+      ],
     },
-    #'hex_number': {
-    #  'begin': '0x',
-    #  'end': '[^0-9a-fA-F]',
-    #},
     'html_block_comment': {
       'begin': '<!--',
       'end': '-->',
@@ -266,38 +287,32 @@ prefs = {
         'false', 'for', 'function', 'if', 'return',
         'switch', 'this', 'true', 'while',
       ],
-      'contains': ['c_string1', 'c_string2', 'cpp_block_comment',
+      'contains': ['c_string1', 'c_string2', 'doc_block_comment', 'cpp_block_comment',
           'cpp_line_comment'],
     },
     'md': {
       'indent': '  ',
       'keywords': [],
     },
-    #'number': {
-    #  'begin': '[1-9]',
-    #  'end': '[^0-9]',
-    #},
-    #'octal_number': {
-    #  'begin': '0',
-    #  'end': '[^0-7]',
-    #},
     'py': {
-      'escape': '\\',
       'indent': '  ',
       'keywords': __common_keywords + [
         'and', 'as', 'assert', 'class',
         'def', 'dict', 'elif', 'except',
-        'False', 'from', 'function',
+        'False', 'from',
         'global', 'import', 'in', 'is', 'len', 'list',
         'None', 'not',
         'or', 'pass',
         'raise', 'range',
         'self',
         'True', 'try', 'tuple',
-        'until', 'yeild',
+        'until', 'with', 'yeild',
       ],
       'namespaces': [
         'os\.', 'os\.path\.', 'sys\.', 'traceback\.', 're\.',
+      ],
+      'special': [
+        #r'(?<!\w)__.*?__(?!\w)',
       ],
       'types': [
         'Exception',
@@ -324,11 +339,11 @@ prefs = {
       'indent': '  ',
       'keywords': [],
     },
-    #'quoted_string1': {
-    #  # This is not a programming string, there are no escape chars.
-    #  'begin': "'",
-    #  'end': "'",
-    #},
+    'quoted_string1': {
+      # This is not a programming string, there are no escape chars.
+      'begin': "'",
+      'end': "'",
+    },
     'quoted_string2': {
       # This is not a programming string, there are no escape chars.
       'begin': '"',
@@ -336,8 +351,7 @@ prefs = {
     },
     'text': {
       'indent': '  ',
-      'keywords': [],
-      'contains': ['quoted_string2'],
+      'contains': ['quoted_string1', 'quoted_string2'],
     },
   },
 }
@@ -352,10 +366,18 @@ for k,v in prefs['grammar'].items():
 # Compile regexes for each grammar.
 for k,v in prefs['grammar'].items():
   # keywords re.
-  v['keywordsRe'] = re.compile(joinReWordList(v.get('keywords', [])))
+  v['keywordsRe'] = re.compile(joinReWordList(v.get('keywords', []) + v.get('types', [])))
+  v['specialsRe'] = re.compile(joinReList(v.get('special', [])))
   # contains and end re.
   matchGrammars = []
   markers = []
+  if v.get('escaped'):
+    markers.append(v['escaped'])
+    matchGrammars.append(v)
+  else:
+    # Add a non-matchable placeholder.
+    markers.append('^\\b$')
+    matchGrammars.append(None)
   if v.get('end'):
     markers.append(v['end'])
     matchGrammars.append(v)
@@ -397,6 +419,7 @@ def init():
     # Colors.
     v['color'] = curses.color_pair(prefs['colors'].get(k, defaultColorIndex))
     v['keywordsColor'] = curses.color_pair(prefs['colors'].get(k+'_keyword_color', keywordsColorIndex))
+    v['specialsColor'] = curses.color_pair(prefs['colors'].get(k+'_special_color', specialsColorIndex))
   app.log.info('prefs init')
 
 def getGrammar(fileExtension):

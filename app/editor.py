@@ -238,13 +238,14 @@ class InteractiveGoto(app.controller.Controller):
     self.changeToHostWindow()
 
   def gotoTop(self):
+    app.log.info(self.document)
     self.cursorMoveTo(1, 0)
     self.changeToHostWindow()
 
   def cursorMoveTo(self, row, col):
     textBuffer = self.document.textBuffer
     cursorRow = min(max(row - 1, 0), len(textBuffer.lines)-1)
-    #app.log.info('cursorMoveTo row', row, cursorRow)
+    app.log.info('cursorMoveTo row', row, cursorRow)
     textBuffer.cursorMove(cursorRow-textBuffer.cursorRow,
         col-textBuffer.cursorCol,
         col-textBuffer.goalCol)

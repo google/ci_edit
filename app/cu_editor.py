@@ -23,7 +23,6 @@ def initCommandSet(editText, textBuffer):
     CTRL_H: textBuffer.backspace,
 
     CTRL_Q: editText.maybeChangeToQuit,
-    CTRL_P: editText.host.quitNow, ##########################
     CTRL_S: textBuffer.fileWrite,
     CTRL_V: textBuffer.editPaste,
     CTRL_X: textBuffer.editCut,

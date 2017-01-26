@@ -1180,6 +1180,11 @@ class TextBuffer(BackingTextBuffer):
             for found in node.grammar['keywordsRe'].finditer(line):
               f = found.regs[0]
               window.addStr(i, col+f[0], line[f[0]:f[1]], keywordsColor)
+            # Highlight specials.
+            keywordsColor = node.grammar.get('specialsColor', defaultColor)
+            for found in node.grammar['specialsRe'].finditer(line):
+              f = found.regs[0]
+              window.addStr(i, col+f[0], line[f[0]:f[1]], keywordsColor)
             k += length
           else:
             window.addStr(i, k-self.scrollCol+length, ' '*(maxx-k-length),
