@@ -4,6 +4,7 @@
 # found in the LICENSE file.
 
 import inspect
+import os
 import sys
 import traceback
 
@@ -22,7 +23,9 @@ def parseLines(channel, *args):
     args = [""]
   msg = str(args[0])
   if 1:
-    msg = "%10s %10s: %s"%(channel, inspect.stack()[3][3], msg)
+    frame = inspect.stack()[3]
+    msg = "%s %s %s %s: %s"%(channel, os.path.split(frame[1])[1],
+        frame[2], frame[3], msg)
   prior = msg
   for i in args[1:]:
     if not len(prior) or prior[-1] != '\n':
