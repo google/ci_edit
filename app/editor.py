@@ -189,7 +189,7 @@ class InteractiveFind(app.controller.Controller):
     self.findCmd = self.document.textBuffer.findPrior
 
   def focus(self):
-    app.log.info('InteractiveFind focus()')
+    app.log.info('InteractiveFind')
     self.findCmd = self.document.textBuffer.find
     selection = self.document.textBuffer.getSelectedText()
     if selection:
@@ -198,13 +198,13 @@ class InteractiveFind(app.controller.Controller):
       app.log.info(selection)
       self.textBuffer.insert(selection)
     self.textBuffer.selectionAll()
-    app.log.info('find tb', self.textBuffer.cursorCol)
+    self.onChange()
 
   def info(self):
     app.log.info('InteractiveFind command set')
 
   def onChange(self):
-    app.log.info('InteractiveFind.onChange')
+    app.log.info('InteractiveFind')
     searchFor = self.textBuffer.lines[0]
     try:
       self.findCmd(searchFor)
