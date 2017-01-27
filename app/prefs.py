@@ -1,13 +1,6 @@
 # Copyright 2016 The ci_edit Authors. All rights reserved.
 # Use of this source code is governed by an Apache-style license that can be
 # found in the LICENSE file.
-'a\\' #sdfasf
-'a\\\\' #sdfasf
-'a\02112s\0a\01b\012cfd23323saf\nsfas\w\\aaa\adf\bfsdf\'d\\\'sdff' #sdfasf
-"a\\" #sdfasf
-"a\\\\" #sdfasf
-"asfdsaf\nsfas\w\\aaa\adf\bfsdf\"d\\\"sadff" #sdfasf
-"""asd\nsadfsadf""" #fasdfdfafd
 
 import app.log
 import curses
@@ -195,7 +188,9 @@ prefs = {
       'end': r'\*/',
       'indent': '  ',
       'keywords': [],
-      'nestable': False,
+      'special': [
+        r'\bNOTE:', r'TODO\([^)]+\)',
+      ],
     },
     'cpp_line_comment': {
       'begin': '//',
@@ -203,7 +198,9 @@ prefs = {
       'end': r'(?<!\\)\n',
       'indent': '  ',
       'keywords': [],
-      'nestable': False,
+      'special': [
+        r'\bNOTE:', r'TODO\([^)]+\)',
+      ],
     },
     'c_preprocessor': {
       'begin': '#',
@@ -251,7 +248,6 @@ prefs = {
         r'@return\b', r'\bNOTE:', r'TODO\([^)]+\)',
       ],
       'types': ['Array', 'boolean', 'string', 'Object'],
-      'nestable': False,
     },
     'html': {
       'indent': '  ',
@@ -287,8 +283,10 @@ prefs = {
         'false', 'for', 'function', 'if', 'return',
         'switch', 'this', 'true', 'while',
       ],
-      'contains': ['c_string1', 'c_string2', 'doc_block_comment', 'cpp_block_comment',
-          'cpp_line_comment'],
+      'contains': [
+        'c_string1', 'c_string2', 'doc_block_comment', 'cpp_block_comment',
+        'cpp_line_comment'
+      ],
     },
     'md': {
       'indent': '  ',
@@ -326,6 +324,9 @@ prefs = {
       'end': r'\n',
       'indent': '  ',
       'keywords': [],
+      'special': [
+        r'\bNOTE:', r'TODO\([^)]+\)',
+      ],
     },
     'py_string1': {
       'begin': "'''",
@@ -366,7 +367,8 @@ for k,v in prefs['grammar'].items():
 # Compile regexes for each grammar.
 for k,v in prefs['grammar'].items():
   # keywords re.
-  v['keywordsRe'] = re.compile(joinReWordList(v.get('keywords', []) + v.get('types', [])))
+  v['keywordsRe'] = re.compile(
+      joinReWordList(v.get('keywords', []) + v.get('types', [])))
   v['specialsRe'] = re.compile(joinReList(v.get('special', [])))
   # contains and end re.
   matchGrammars = []
