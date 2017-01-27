@@ -61,7 +61,6 @@ class CiProgram:
         app.log.detail("color", i, ": ", curses.color_content(i))
     self.showPalette = 0
     self.shiftPalette()
-
     self.zOrder = []
 
   def commandLoop(self):
@@ -83,10 +82,10 @@ class CiProgram:
       if len(cmdList):
         for cmd in cmdList:
           window.controller.doCommand(cmd)
+          window.controller.onChange()
           if ch == curses.KEY_MOUSE:
             self.handleMouse(mouseEvents[0])
             mouseEvents = mouseEvents[1:]
-          window.controller.onChange()
           if self.changeTo:
             window.unfocus()
             window = self.changeTo
