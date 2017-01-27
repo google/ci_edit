@@ -230,22 +230,26 @@ class InteractiveGoto(app.controller.Controller):
     app.log.info('InteractiveGoto command set')
 
   def gotoBottom(self):
-    self.cursorMoveTo(len(self.document.textBuffer.lines), 0)
+    app.log.info()
+    self.textBuffer.selectionAll()
+    self.textBuffer.insert(str(len(self.document.textBuffer.lines)))
     self.changeToHostWindow()
 
   def gotoHalfway(self):
-    self.cursorMoveTo(len(self.document.textBuffer.lines)/2+1, 0)
+    self.textBuffer.selectionAll()
+    self.textBuffer.insert(str(len(self.document.textBuffer.lines)/2+1))
     self.changeToHostWindow()
 
   def gotoTop(self):
     app.log.info(self.document)
-    self.cursorMoveTo(1, 0)
+    self.textBuffer.selectionAll()
+    self.textBuffer.insert("0")
     self.changeToHostWindow()
 
   def cursorMoveTo(self, row, col):
     textBuffer = self.document.textBuffer
     cursorRow = min(max(row - 1, 0), len(textBuffer.lines)-1)
-    app.log.info('cursorMoveTo row', row, cursorRow)
+    #app.log.info('cursorMoveTo row', row, cursorRow)
     textBuffer.cursorMove(cursorRow-textBuffer.cursorRow,
         col-textBuffer.cursorCol,
         col-textBuffer.goalCol)
@@ -254,6 +258,7 @@ class InteractiveGoto(app.controller.Controller):
     textBuffer.redo()
 
   def onChange(self):
+    app.log.info()
     gotoLine = 0
     try: line = self.textBuffer.lines[0]
     except: pass
