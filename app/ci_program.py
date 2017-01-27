@@ -29,6 +29,7 @@ class CiProgram:
   the main loop. The CiProgram is intended as a singleton."""
   def __init__(self, stdscr):
     self.bufferManager = app.buffer_manager.BufferManager()
+    self.changeTo = None
     self.exiting = False
     self.modeStack = []
     self.priorClick = 0
@@ -63,15 +64,15 @@ class CiProgram:
 
     self.zOrder = []
 
-  def commandLoop(self, window):
-    app.log.debug('commandLoop', window)
-    self.refresh()
-    waitTime = 0.010
-    shouldRefresh = True
-    while not self.exiting and not self.changeTo:
+  def commandLoop(self):
+    window = self.inputWindow
+    window.focus()
+    while not self.exiting:
+      self.refresh()
+      window.textBuffer.setMessage()
       cmdList = []
       mouseEvents = []
-      nextUpdate = time.time() + waitTime
+      nextUpdate = time.time() + 0.010  # Wait time.
       while time.time() < nextUpdate:
         ch = window.cursorWindow.getch()
         if ch != curses.ERR:
@@ -85,9 +86,14 @@ class CiProgram:
           if ch == curses.KEY_MOUSE:
             self.handleMouse(mouseEvents[0])
             mouseEvents = mouseEvents[1:]
-        window.controller.onChange()
-        self.refresh()
-        window.textBuffer.setMessage()
+          window.controller.onChange()
+          if self.changeTo:
+            window.unfocus()
+            window = self.changeTo
+            self.changeTo = None
+            window.refresh()
+            window.focus()
+            window.controller.onChange()
 
   def startup(self):
     """A second init-like function. Called after command line arguments are
@@ -336,14 +342,7 @@ class CiProgram:
   def run(self):
     self.parseArgs()
     self.startup()
-    self.changeTo = self.inputWindow
-    while not self.exiting:
-        win = self.changeTo
-        self.changeTo = None
-        win.refresh()
-        win.focus()
-        self.commandLoop(win)
-        win.unfocus()
+    self.commandLoop()
 
   def shiftPalette(self):
     """Test different palette options. Each call to shiftPalette will change the

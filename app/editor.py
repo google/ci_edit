@@ -198,7 +198,6 @@ class InteractiveFind(app.controller.Controller):
       app.log.info(selection)
       self.textBuffer.insert(selection)
     self.textBuffer.selectionAll()
-    self.onChange()
 
   def info(self):
     app.log.info('InteractiveFind command set')
