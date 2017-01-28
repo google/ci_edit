@@ -62,13 +62,13 @@ class Parser:
     app.log.startup('parsing took', totalTime)
 
   def buildGrammarList(self):
-    leash = 3000
+    leash = 30000
     cursor = 0
     grammarStack = [self.grammarList[-1].grammar]
     while len(grammarStack):
       if not leash:
-        app.log.error('grammar caught in a loop')
-        return
+        app.log.error('grammar likely caught in a loop')
+        break
       leash -= 1
       subdata = self.data[cursor:]
       found = grammarStack[-1].get('matchRe').search(subdata)
