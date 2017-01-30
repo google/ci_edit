@@ -677,16 +677,21 @@ class BackingTextBuffer(Mutator):
       self.lines = []
       self.file.close()
 
-  def fileFilter(self, data):
+  def dataToLines(self):
     def parse(line):
       return "\xfe%02x"%ord(line.groups()[0])
-    self.data = data
     self.lines = self.data.split('\r\n')
     if len(self.lines) == 1:
       self.lines = self.data.split('\n')
     if len(self.lines) == 1:
       self.lines = self.data.split('\r')
     self.lines = [re.sub('([\0-\x1f\x7f-\xff])', parse, i) for i in self.lines]
+
+  def fileFilter(self, data):
+    def parse(line):
+      return "\xfe%02x"%ord(line.groups()[0])
+    self.data = data
+    self.dataToLines()
     self.savedAtRedoIndex = self.redoIndex
 
   def fileLoad(self, path):
@@ -721,18 +726,20 @@ class BackingTextBuffer(Mutator):
     else:
       self.parser = None
 
+  def linesToData(self):
+    def encode(line):
+      return chr(int(line.groups()[0], 16))
+    #assert re.sub('\xfe([0-9a-fA-F][0-9a-fA-F])', encode, "\xfe00") == "\x00"
+    self.lines = [
+      re.sub('\xfe([0-9a-fA-F][0-9a-fA-F])', encode, i) for i in self.lines]
+    self.data = '\n'.join(self.lines)
+
   def fileWrite(self):
     try:
       try:
-        file = open(self.fullPath, 'w+')
         self.stripTrailingWhiteSpace()
-        def encode(line):
-          return chr(int(line.groups()[0], 16))
-        assert re.sub('\xfe([0-9a-fA-F][0-9a-fA-F])', encode,
-            "\xfe00") == "\x00"
-        self.lines = [re.sub('\xfe([0-9a-fA-F][0-9a-fA-F])', encode, i)
-            for i in self.lines]
-        self.data = '\n'.join(self.lines)
+        self.linesToData()
+        file = open(self.fullPath, 'w+')
         file.seek(0)
         file.truncate()
         file.write(self.data)
@@ -1018,7 +1025,8 @@ class BackingTextBuffer(Mutator):
   def parseGrammars(self):
     if not self.parser:
       self.parser = app.parser.Parser()
-    self.data = ('\n').join(self.lines)
+    self.linesToData()
+    self.dataToLines()
     self.lines = self.data.split('\n')
     self.parser.parse(
         self.data,
