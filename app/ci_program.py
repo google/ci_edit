@@ -118,7 +118,7 @@ class CiProgram:
     if self.showLogWindow:
       inputWidth = min(80, cols)
       debugWidth = max(cols-inputWidth-1, 0)
-      debugRows = 15
+      debugRows = 20
       self.debugWindow.reshape(debugRows, debugWidth, 0,
           inputWidth+1)
       self.logWindow.reshape(rows-debugRows, debugWidth, debugRows,
@@ -180,11 +180,12 @@ class CiProgram:
           len(textBuffer.redoChain)),
         self.debugWindow.color+100)
     lenChain = textBuffer.redoIndex
-    for i in range(textBuffer.redoIndex-3, textBuffer.redoIndex):
+    for i in range(textBuffer.redoIndex-5, textBuffer.redoIndex):
       text = i >= 0 and textBuffer.redoChain[i] or ''
       self.debugWindow.writeLine(text, 101)
-    for i in range(textBuffer.redoIndex, textBuffer.redoIndex+2):
-      text = i < len(textBuffer.redoChain) and textBuffer.redoChain[i] or ''
+    for i in range(textBuffer.redoIndex, textBuffer.redoIndex+4):
+      text = (i < len(textBuffer.redoChain) and
+          textBuffer.redoChain[i] or '')
       self.debugWindow.writeLine(text, 1)
     # Refresh the display.
     self.debugWindow.cursorWindow.refresh()
