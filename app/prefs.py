@@ -86,11 +86,15 @@ prefs = {
     'cpp_block_comment': commentColorIndex,
     'cpp_line_comment': commentColorIndex,
     'c_preprocessor': 1,
+    'c_raw_string1': stringColorIndex,
+    'c_raw_string2': stringColorIndex,
     'c_string1': stringColorIndex,
     'c_string2': stringColorIndex,
     'doc_block_comment': commentColorIndex,
     'html_block_comment': commentColorIndex,
     'pound_comment': commentColorIndex,
+    'py_raw_string1': stringColorIndex,
+    'py_raw_string2': stringColorIndex,
     'py_string1': stringColorIndex,
     'py_string2': stringColorIndex,
     'quoted_string2': stringColorIndex,
@@ -214,6 +218,20 @@ prefs = {
       ],
       #'contains': ['file_path_quoted', 'file_path_bracketed'],
     },
+    'c_raw_string1': {
+      'begin': "[uU]?[rR]'",
+      'end': "'",
+      'escaped': r"\\.",
+      'indent': '  ',
+      'single_line': True,
+    },
+    'c_raw_string2': {
+      'begin': '[uU]?[rR]"',
+      'end': '"',
+      'escaped': r'\\.',
+      'indent': '  ',
+      'single_line': True,
+    },
     'c_string1': {
       'begin': "'(?!'')",
       'end': r"'",
@@ -315,8 +333,11 @@ prefs = {
       'types': [
         'Exception',
       ],
-      'contains': ['c_string1', 'c_string2',
-          'pound_comment', 'py_string1', 'py_string2'],
+      'contains': [
+        'c_raw_string1', 'c_raw_string2', 'c_string1', 'c_string2',
+        'pound_comment', 'py_raw_string1', 'py_raw_string2', 'py_string1',
+        'py_string2'
+      ],
     },
     'pound_comment': {
       'begin': '#',
@@ -328,17 +349,33 @@ prefs = {
         r'\bNOTE:', r'TODO\([^)]+\)',
       ],
     },
-    'py_string1': {
-      'begin': "'''",
-      'end': r"(?<!\\)'''",
+    'py_raw_string1': {
+      'begin': "[uU]?[rR]'''",
+      'end': "'''",
+      'escaped': r"\\'",
       'indent': '  ',
-      'keywords': [],
+      #'special': [r"\''?'?$"],
+    },
+    'py_raw_string2': {
+      'begin': '[uU]?[rR]"""',
+      'end': '"""',
+      'escaped': r'\\"',
+      'indent': '  ',
+      #'special': [r'\\"'],
+    },
+    'py_string1': {
+      'begin': "[uU]?'''",
+      'end': "'''",
+      'escaped': r'\\.',
+      'indent': '  ',
+      'special': __special_string_escapes + [r"\\'"],
     },
     'py_string2': {
-      'begin': '"""',
-      'end': r'(?<!\\)"""',
+      'begin': '[uU]?"""',
+      'end': '"""',
+      'escaped': r'\\.',
       'indent': '  ',
-      'keywords': [],
+      'special': __special_string_escapes + [r'\\"'],
     },
     'quoted_string1': {
       # This is not a programming string, there are no escape chars.
