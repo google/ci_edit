@@ -89,17 +89,19 @@ class Selectable(BaseLineBuffer):
 
   def getSelectedText(self):
     upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
-    return self.getText(upperRow, upperCol, lowerRow, lowerCol)
+    return self.getText(upperRow, upperCol, lowerRow, lowerCol,
+        self.selectionMode)
 
-  def getText(self, upperRow, upperCol, lowerRow, lowerCol):
+  def getText(self, upperRow, upperCol, lowerRow, lowerCol,
+      selectionMode=kSelectionCharacter):
     lines = []
-    if self.selectionMode == kSelectionAll:
+    if selectionMode == kSelectionAll:
       lines = self.lines[:]
-    elif self.selectionMode == kSelectionBlock:
+    elif selectionMode == kSelectionBlock:
       for i in range(upperRow, lowerRow+1):
         lines.append(self.lines[i][upperCol:lowerCol])
-    elif (self.selectionMode == kSelectionCharacter or
-        self.selectionMode == kSelectionWord):
+    elif (selectionMode == kSelectionCharacter or
+        selectionMode == kSelectionWord):
       if upperRow == lowerRow:
         lines.append(self.lines[upperRow][upperCol:lowerCol])
       else:
@@ -110,7 +112,7 @@ class Selectable(BaseLineBuffer):
             lines.append(self.lines[i][:lowerCol])
           else:
             lines.append(self.lines[i])
-    elif self.selectionMode == kSelectionLine:
+    elif selectionMode == kSelectionLine:
       for i in range(upperRow, lowerRow+1):
         lines.append(self.lines[i])
     return tuple(lines)
