@@ -99,6 +99,8 @@ class Mutator(app.selectable.Selectable):
         line = self.lines[self.cursorRow]
         x = self.cursorCol
         self.lines[self.cursorRow] = line[:x] + line[x+len(change[1]):]
+      elif change[0] == 'dr':  # Redo delete range.
+        self.doDelete(*change[1])
       elif change[0] == 'ds':  # Redo delete selection.
         self.doDeleteSelection()
       elif change[0] == 'i':
@@ -231,6 +233,9 @@ class Mutator(app.selectable.Selectable):
         line = self.lines[self.cursorRow]
         x = self.cursorCol
         self.lines[self.cursorRow] = line[:x] + change[1] + line[x:]
+      elif change[0] == 'dr':  # Undo delete range.
+        app.log.detail('undo dr', change[1])
+        self.insertLinesAt(change[1][0], change[1][1], change[2])
       elif change[0] == 'ds':  # Undo delete selection.
         app.log.detail('undo ds', change[1])
         self.insertLines(change[1])
@@ -333,6 +338,35 @@ class BackingTextBuffer(Mutator):
         self.redoAddChange(('ds', text))
         self.redo()
       self.selectionNone()
+
+  def performDeleteRange(self, upperRow, upperCol, lowerRow, lowerCol):
+    app.log.info(upperRow, upperCol, lowerRow, lowerCol)
+    if upperRow == self.cursorRow == lowerRow:
+      app.log.info()
+      if upperCol < self.cursorCol:
+        app.log.info()
+        col = upperCol - self.cursorCol
+        if lowerCol <= self.cursorCol:
+          col = upperCol - lowerCol
+        app.log.info(col)
+        self.cursorMove(0, col, self.cursorCol+col-self.goalCol)
+        self.redo()
+    elif upperRow <= self.cursorRow < lowerRow:
+      app.log.info()
+      self.cursorMove(upperRow-self.cursorRow, upperCol-self.cursorCol,
+          upperCol-self.goalCol)
+      self.redo()
+    elif self.cursorRow == lowerRow:
+      app.log.info()
+      col = upperCol - lowerCol
+      self.cursorMove(upperRow-self.cursorRow, col, col-self.goalCol)
+      self.redo()
+    if 1:
+      self.redoAddChange((
+        'dr',
+        (upperRow, upperCol, lowerRow, lowerCol),
+        self.getText(upperRow, upperCol, lowerRow, lowerCol)))
+      self.redo()
 
   def backspace(self):
     app.log.info('backspace', self.cursorRow > self.markerRow)
