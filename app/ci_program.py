@@ -83,7 +83,7 @@ class CiProgram:
         for cmd in cmdList:
           window.controller.doCommand(cmd)
           window.controller.onChange()
-          if ch == curses.KEY_MOUSE:
+          if cmd == curses.KEY_MOUSE:
             self.handleMouse(mouseEvents[0])
             mouseEvents = mouseEvents[1:]
           if self.changeTo:
