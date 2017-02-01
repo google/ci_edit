@@ -8,6 +8,7 @@ import re
 
 kReBrackets = re.compile('[[\]{}()]')
 kReComments = re.compile('(?:#|//).*$|/\*.*?\*/|<!--.*?-->')
+kReEndSpaces = re.compile(r'\s+$')
 kReNumbers = re.compile('0x[0-9a-fA-F]+|\d+')
 kReStrings = re.compile(
     r"(\"\"\".*?(?<!\\)\"\"\")|('''.*?(?<!\\)''')|(\".*?(?<!\\)\")|('.*?(?<!\\)')")

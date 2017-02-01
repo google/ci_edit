@@ -1320,6 +1320,14 @@ class TextBuffer(BackingTextBuffer):
           for k in re.finditer(app.selectable.kReNumbers, line):
             for f in k.regs:
               window.addStr(i, f[0], line[f[0]:f[1]], curses.color_pair(31))
+      if 1:
+        # Highlight space ending lines.
+        for i in range(limit):
+          line = self.lines[self.scrollRow+i][startCol:endCol]
+          for k in app.selectable.kReEndSpaces.finditer(line):
+            for f in k.regs:
+              window.addStr(i, f[0], line[f[0]:f[1]],
+                  curses.color_pair(180))
       lengthLimit = self.lineLimitIndicator
       if endCol >= lengthLimit:
         # Highlight long lines.
