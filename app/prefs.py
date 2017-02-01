@@ -1,7 +1,7 @@
 # Copyright 2016 The ci_edit Authors. All rights reserved.
 # Use of this source code is governed by an Apache-style license that can be
 # found in the LICENSE file.
-
+'\n asdfds'
 import app.log
 import curses
 import re
@@ -10,6 +10,14 @@ import time
 import traceback
 
 importStartTime = time.time()
+
+commentColorIndex = 2
+defaultColorIndex = 0
+foundColorIndex = 32
+keywordsColorIndex = 21
+selectedColor = 64 # Active find is a selection.
+specialsColorIndex = 224
+stringColorIndex = 5
 
 def joinReList(reList):
   return r"("+r")|(".join(reList)+r")"
@@ -68,12 +76,6 @@ numberTest('2.a', (0, 1))
 numberTest('+0.2e-15', (0, 8))
 numberTest('02factor', None)
 numberTest('02f', (0, 3))
-
-commentColorIndex = 5
-defaultColorIndex = 0
-keywordsColorIndex = 21
-specialsColorIndex = 253
-stringColorIndex = 2
 
 # These prefs are not fully working.
 prefs = {
@@ -457,8 +459,10 @@ def init():
   for k,v in prefs['grammar'].items():
     # Colors.
     v['color'] = curses.color_pair(prefs['colors'].get(k, defaultColorIndex))
-    v['keywordsColor'] = curses.color_pair(prefs['colors'].get(k+'_keyword_color', keywordsColorIndex))
-    v['specialsColor'] = curses.color_pair(prefs['colors'].get(k+'_special_color', specialsColorIndex))
+    v['keywordsColor'] = curses.color_pair(
+        prefs['colors'].get(k+'_keyword_color', keywordsColorIndex))
+    v['specialsColor'] = curses.color_pair(
+        prefs['colors'].get(k+'_special_color', specialsColorIndex))
   app.log.info('prefs init')
 
 def getGrammar(fileExtension):

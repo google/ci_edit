@@ -1384,7 +1384,8 @@ class TextBuffer(BackingTextBuffer):
           for k in self.findRe.finditer(line):
             f = k.regs[0]
             #for f in k.regs[1:]:
-            window.addStr(i, f[0], line[f[0]:f[1]], curses.color_pair(32))
+            window.addStr(i, f[0], line[f[0]:f[1]],
+                curses.color_pair(app.prefs.foundColorIndex))
       if limit and self.selectionMode != app.selectable.kSelectionNone:
         # Highlight selected text.
         upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()

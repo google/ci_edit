@@ -424,7 +424,7 @@ class InputWindow(Window):
     self.showFooter = footer
     self.showLineNumbers = lineNumbers
     self.color = curses.color_pair(0)
-    self.colorSelected = curses.color_pair(228)
+    self.colorSelected = curses.color_pair(app.prefs.selectedColor)
     self.controller = app.controller.MainController(self)
     self.controller.add(app.cu_editor.CuaPlusEdit(prg, self))
     if 1:
