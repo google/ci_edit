@@ -122,10 +122,10 @@ class Mutator(app.selectable.Selectable):
         self.markerEndRow += change[1][7]
         self.markerEndCol += change[1][8]
         self.selectionMode += change[1][9]
-        assert self.cursorRow >= 0
-        assert self.cursorCol >= 0
-        assert self.scrollRow >= 0
-        assert self.scrollCol >= 0
+        assert self.cursorRow >= 0, self.cursorRow
+        assert self.cursorCol >= 0, self.cursorCol
+        assert self.scrollRow >= 0, self.scrollRow
+        assert self.scrollCol >= 0, self.scrollCol
       elif change[0] == 'n':
         # Redo split lines.
         line = self.lines[self.cursorRow]
