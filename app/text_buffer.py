@@ -755,6 +755,7 @@ class BackingTextBuffer(Mutator):
     self.fileExtension = os.path.splitext(fullPath)[1]
     if self.data:
       self.parseGrammars()
+      self.dataToLines()
     else:
       self.parser = None
 
@@ -1055,10 +1056,10 @@ class BackingTextBuffer(Mutator):
     pass
 
   def parseGrammars(self):
+    # Reset the self.data to get recent changes in self.lines.
+    self.linesToData()
     if not self.parser:
       self.parser = app.parser.Parser()
-    self.linesToData()
-    self.dataToLines()
     self.parser.parse(
         self.data,
         app.prefs.getGrammar(self.fileExtension))
