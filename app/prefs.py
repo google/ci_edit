@@ -1,7 +1,7 @@
 # Copyright 2016 The ci_edit Authors. All rights reserved.
 # Use of this source code is governed by an Apache-style license that can be
 # found in the LICENSE file.
-'\n asdfds'
+
 import app.log
 import curses
 import re
@@ -59,12 +59,12 @@ numbersRe = re.compile(joinReList(__common_numbers))
 def numberTest(str, expectRegs):
   sre = numbersRe.search(str)
   if sre:
-    app.log.startup('%16s %16s %-16s %s ' % (str, expectRegs, sre.regs[0], sre.groups()))
+    app.log.startup('%16s %16s %-16s %s ' % (
+        str, expectRegs, sre.regs[0], sre.groups()))
   else:
     app.log.startup('%16s %16s %-16s ' % (str, expectRegs, sre))
 
 
-app.log.startup('asdf', numbersRe.pattern)
 numberTest('.', None)
 numberTest('2', (0, 1))
 numberTest(' 2 ', (1, 2))
@@ -146,7 +146,8 @@ prefs = {
     # A grammar is
     # 'grammar_name': {
     #   'begin': None or regex,
-    #   'continued': None or string, Prefixed used when continuing to another line,
+    #   'continued': None or string,
+    #       Prefixed used when continuing to another line,
     #   'end': None or regex,
     #   'escaped': None or regex,
     #   'indent': None or string,
@@ -417,14 +418,14 @@ for k,v in prefs['grammar'].items():
     matchGrammars.append(v)
   else:
     # Add a non-matchable placeholder.
-    markers.append('^\\b$')
+    markers.append(r'^\b$')
     matchGrammars.append(None)
   if v.get('end'):
     markers.append(v['end'])
     matchGrammars.append(v)
   else:
     # Add a non-matchable placeholder.
-    markers.append('^\\b$')
+    markers.append(r'^\b$')
     matchGrammars.append(None)
   for grammarName in v.get('contains', []):
     g = grammars.get(grammarName, None)
