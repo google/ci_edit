@@ -714,16 +714,14 @@ class BackingTextBuffer(Mutator):
   def dataToLines(self):
     def parse(line):
       return "\xfe%02x"%ord(line.groups()[0])
-    self.lines = self.data.split('\r\n')
-    if len(self.lines) == 1:
-      self.lines = self.data.split('\n')
-    if len(self.lines) == 1:
-      self.lines = self.data.split('\r')
-    self.lines = [re.sub('([\0-\x1f\x7f-\xff])', parse, i) for i in self.lines]
+    lines = self.data.split('\r\n')
+    if len(lines) == 1:
+      lines = self.data.split('\n')
+    if len(lines) == 1:
+      lines = self.data.split('\r')
+    self.lines = [re.sub('([\0-\x1f\x7f-\xff])', parse, i) for i in lines]
 
   def fileFilter(self, data):
-    def parse(line):
-      return "\xfe%02x"%ord(line.groups()[0])
     self.data = data
     self.dataToLines()
     self.savedAtRedoIndex = self.redoIndex
@@ -764,9 +762,9 @@ class BackingTextBuffer(Mutator):
     def encode(line):
       return chr(int(line.groups()[0], 16))
     #assert re.sub('\xfe([0-9a-fA-F][0-9a-fA-F])', encode, "\xfe00") == "\x00"
-    self.lines = [
+    lines = [
       re.sub('\xfe([0-9a-fA-F][0-9a-fA-F])', encode, i) for i in self.lines]
-    self.data = '\n'.join(self.lines)
+    self.data = '\n'.join(lines)
 
   def fileWrite(self):
     try:
@@ -1061,7 +1059,6 @@ class BackingTextBuffer(Mutator):
       self.parser = app.parser.Parser()
     self.linesToData()
     self.dataToLines()
-    self.lines = self.data.split('\n')
     self.parser.parse(
         self.data,
         app.prefs.getGrammar(self.fileExtension))
