@@ -145,42 +145,46 @@ class Selectable(BaseLineBuffer):
       del self.lines[upperRow:lowerRow+1]
 
   def insertLines(self, lines):
+    self.insertLinesAt(self.cursorRow, self.cursorCol, lines,
+        self.selectionMode)
+
+  def insertLinesAt(self, row, col, lines, selectionMode=kSelectionNone):
     if len(lines) == 0:
       return
     lines = list(lines)
-    if self.selectionMode == kSelectionAll:
+    if selectionMode == kSelectionAll:
       self.lines = lines
       return
     lines.reverse()
-    if (self.selectionMode == kSelectionNone or
-        self.selectionMode == kSelectionCharacter or
-        self.selectionMode == kSelectionWord):
-      firstLine = self.lines[self.cursorRow]
+    if (selectionMode == kSelectionNone or
+        selectionMode == kSelectionCharacter or
+        selectionMode == kSelectionWord):
+      firstLine = self.lines[row]
       if len(lines) == 1:
-        self.lines[self.cursorRow] = (firstLine[:self.cursorCol] + lines[0] +
-            firstLine[self.cursorCol:])
+        self.lines[row] = (firstLine[:col] + lines[0] +
+            firstLine[col:])
       else:
-        self.lines[self.cursorRow] = (firstLine[:self.cursorCol] +
+        self.lines[row] = (firstLine[:col] +
             lines[-1])
-        row = self.cursorRow + 1
-        self.lines.insert(row,
-            lines[0] + firstLine[self.cursorCol:])
+        currentRow = row + 1
+        self.lines.insert(currentRow,
+            lines[0] + firstLine[col:])
         for line in lines[1:-1]:
-          self.lines.insert(row, line)
-    elif self.selectionMode == kSelectionBlock:
+          self.lines.insert(currentRow, line)
+    elif selectionMode == kSelectionBlock:
       for line in lines:
-        self.lines[self.cursorRow] = (
-            self.lines[self.cursorRow][:self.cursorCol] + line +
-            self.lines[self.cursorRow][self.cursorCol:])
-    elif self.selectionMode == kSelectionLine:
-      app.log.detail('insertLines', self.cursorRow, len(lines))
-      if (self.cursorRow == len(self.lines)-1 and
+        self.lines[row] = (
+            self.lines[row][:col] + line +
+            self.lines[row][col:])
+    elif selectionMode == kSelectionLine:
+      app.log.detail('insertLines', row, len(lines))
+      if (row == len(self.lines)-1 and
           len(self.lines[-1]) == 0):
         self.lines = self.lines[:-1]
       for line in lines:
-        self.lines.insert(self.cursorRow, line)
+        self.lines.insert(row, line)
     else:
-      app.log.info('selection mode not recognized', self.selectionMode)
+      app.log.info('selection mode not recognized', selectionMode)
 
   def __extendWords(self, upperRow, upperCol, lowerRow, lowerCol):
     """Extends and existing selection to the nearest word boundaries. The cursor
