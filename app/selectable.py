@@ -119,11 +119,15 @@ class Selectable(BaseLineBuffer):
 
   def doDeleteSelection(self):
     upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
+    self.doDelete(upperRow, upperCol, lowerRow, lowerCol)
+
+  def doDelete(self, upperRow, upperCol, lowerRow, lowerCol):
     if self.selectionMode == kSelectionBlock:
       for i in range(upperRow, lowerRow+1):
         line = self.lines[i]
         self.lines[i] = line[:upperCol] + line[lowerCol:]
-    elif (self.selectionMode == kSelectionAll or
+    elif (self.selectionMode == kSelectionNone or
+        self.selectionMode == kSelectionAll or
         self.selectionMode == kSelectionCharacter or
         self.selectionMode == kSelectionWord):
       if upperRow == lowerRow and len(self.lines) > 1:
