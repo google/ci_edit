@@ -1281,13 +1281,14 @@ class TextBuffer(BackingTextBuffer):
   def drawOverlays(self, window):
     if 1: #self.scrollRow != self.scrollToRow:
       maxy, maxx = window.cursorWindow.getmaxyx()
+      startRow = self.scrollRow
       startCol = self.scrollCol
       endCol = self.scrollCol+maxx
-      limit = min(max(len(self.lines)-self.scrollRow, 0), maxy)
+      limit = min(max(len(self.lines)-startRow, 0), maxy)
       if 1:
         # Highlight brackets.
         for i in range(limit):
-          line = self.lines[self.scrollRow+i][startCol:endCol]
+          line = self.lines[startRow+i][startCol:endCol]
           for k in re.finditer(app.selectable.kReBrackets, line):
             for f in k.regs:
               window.addStr(i, f[0], line[f[0]:f[1]], curses.color_pair(6))
@@ -1298,7 +1299,7 @@ class TextBuffer(BackingTextBuffer):
           ch = self.lines[self.cursorRow][self.cursorCol]
           def searchBack(closeCh, openCh):
             count = -1
-            for row in range(self.cursorRow, self.scrollRow, -1):
+            for row in range(self.cursorRow, startRow, -1):
               line = self.lines[row]
               if row == self.cursorRow:
                 line = line[:self.cursorCol]
@@ -1311,13 +1312,13 @@ class TextBuffer(BackingTextBuffer):
                   count -= 1
                 if count == 0:
                   if i.start()+self.cursorCol-self.scrollCol < maxx:
-                    window.addStr(row-self.scrollRow, i.start(), openCh,
+                    window.addStr(row-startRow, i.start(), openCh,
                         curses.color_pair(201))
                   return
           def searchForward(openCh, closeCh):
             count = 1
             colOffset = self.cursorCol+1
-            for row in range(self.cursorRow, self.scrollRow+maxy):
+            for row in range(self.cursorRow, startRow+maxy):
               if row != self.cursorRow:
                 colOffset = 0
               line = self.lines[row][colOffset:]
@@ -1328,7 +1329,7 @@ class TextBuffer(BackingTextBuffer):
                   count -= 1
                 if count == 0:
                   if i.start()+self.cursorCol-self.scrollCol < maxx:
-                    window.addStr(row-self.scrollRow, colOffset+i.start(),
+                    window.addStr(row-startRow, colOffset+i.start(),
                         closeCh, curses.color_pair(201))
                   return
           matcher = {
@@ -1342,30 +1343,34 @@ class TextBuffer(BackingTextBuffer):
           look = matcher.get(ch)
           if look:
             look[1](ch, look[0])
-            window.addStr(self.cursorRow-self.scrollRow,
+            window.addStr(self.cursorRow-startRow,
                 self.cursorCol-self.scrollCol,
                 self.lines[self.cursorRow][self.cursorCol],
                 curses.color_pair(201))
       if 1:
         # Highlight numbers.
         for i in range(limit):
-          line = self.lines[self.scrollRow+i][startCol:endCol]
+          line = self.lines[startRow+i][startCol:endCol]
           for k in re.finditer(app.selectable.kReNumbers, line):
             for f in k.regs:
               window.addStr(i, f[0], line[f[0]:f[1]], curses.color_pair(31))
       if 1:
         # Highlight space ending lines.
         for i in range(limit):
-          line = self.lines[self.scrollRow+i][startCol:endCol]
+          line = self.lines[startCol+i][startCol:endCol]
+          offset = 0
+          if startRow + i == self.cursorRow:
+            offset = self.cursorCol-startCol
+            line = line[offset:]
           for k in app.selectable.kReEndSpaces.finditer(line):
             for f in k.regs:
-              window.addStr(i, f[0], line[f[0]:f[1]],
+              window.addStr(i, offset+f[0], line[f[0]:f[1]],
                   curses.color_pair(180))
       lengthLimit = self.lineLimitIndicator
       if endCol >= lengthLimit:
         # Highlight long lines.
         for i in range(limit):
-          line = self.lines[self.scrollRow+i]
+          line = self.lines[startRow+i]
           if len(line) < lengthLimit or startCol > lengthLimit:
             continue
           length = min(endCol, len(line)-lengthLimit)
@@ -1374,7 +1379,7 @@ class TextBuffer(BackingTextBuffer):
       if self.findRe is not None:
         # Highlight find.
         for i in range(limit):
-          line = self.lines[self.scrollRow+i][startCol:endCol]
+          line = self.lines[startRow+i][startCol:endCol]
           for k in self.findRe.finditer(line):
             f = k.regs[0]
             #for f in k.regs[1:]:
@@ -1384,19 +1389,19 @@ class TextBuffer(BackingTextBuffer):
         upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
         selStartCol = max(upperCol - startCol, 0)
         selEndCol = min(lowerCol - startCol, maxx)
-        start = max(0, min(upperRow-self.scrollRow, maxy))
-        end = max(0, min(lowerRow-self.scrollRow, maxy))
+        start = max(0, min(upperRow-startRow, maxy))
+        end = max(0, min(lowerRow-startRow, maxy))
         if self.selectionMode == app.selectable.kSelectionBlock:
           for i in range(start, end+1):
-            line = self.lines[self.scrollRow+i][selStartCol:selEndCol]
+            line = self.lines[startRow+i][selStartCol:selEndCol]
             window.addStr(i, selStartCol, line, window.colorSelected)
         elif (self.selectionMode == app.selectable.kSelectionAll or
             self.selectionMode == app.selectable.kSelectionCharacter or
             self.selectionMode == app.selectable.kSelectionWord):
           # Go one row past the selection or to the last line.
-          for i in range(start, min(end+1, len(self.lines)-self.scrollRow)):
-            line = self.lines[self.scrollRow+i][startCol:endCol]
-            if len(line) == len(self.lines[self.scrollRow+i]):
+          for i in range(start, min(end+1, len(self.lines)-startRow)):
+            line = self.lines[startRow+i][startCol:endCol]
+            if len(line) == len(self.lines[startRow+i]):
               line += " "  # Maybe do: "\\n".
             if i == end and i == start:
               window.addStr(i, selStartCol,
@@ -1410,7 +1415,7 @@ class TextBuffer(BackingTextBuffer):
               window.addStr(i, 0, line, window.colorSelected)
         elif self.selectionMode == app.selectable.kSelectionLine:
           for i in range(start, end+1):
-            line = self.lines[self.scrollRow+i][selStartCol:maxx]
+            line = self.lines[startRow+i][selStartCol:maxx]
             window.addStr(i, selStartCol,
                 line+' '*(maxx-len(line)), window.colorSelected)
       for i in range(limit, maxy):
