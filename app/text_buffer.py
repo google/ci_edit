@@ -1124,7 +1124,9 @@ class BackingTextBuffer(Mutator):
 
   def stripTrailingWhiteSpace(self):
     for i in range(len(self.lines)):
-      self.lines[i] = self.lines[i].rstrip()
+      for found in app.selectable.kReEndSpaces.finditer(self.lines[i]):
+        app.log.debug(i, found.regs)
+        self.performDeleteRange(i, found.regs[0][0], i, found.regs[0][1])
 
   def unindent(self):
     if self.selectionMode == app.selectable.kSelectionAll:
