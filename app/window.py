@@ -420,7 +420,6 @@ class TopInfo(StaticWindow):
     self.host = host
 
   def refresh(self):
-    self.blank()
     tb = self.host.textBuffer
     if len(tb.lines) and tb.scrollRow > 0:
       # Start on the top, visible line.
@@ -447,7 +446,9 @@ class TopInfo(StaticWindow):
         lineCursor -= 1
       lines.reverse()
       for i,line in enumerate(lines):
-        self.addStr(i, 0, line, self.color)
+        self.addStr(i, 0, line+' '*(self.cols-len(line)), self.color)
+      for i in range(len(lines), self.rows):
+        self.addStr(i, 0, ' '*self.cols, self.color)
       self.cursorWindow.refresh()
 
 
@@ -457,7 +458,7 @@ class InputWindow(Window):
     assert(prg)
     Window.__init__(self, prg)
     self.prg = prg
-    self.showHeader = header
+    self.showHeader = False #header
     self.showFooter = footer
     self.showLineNumbers = lineNumbers
     self.color = curses.color_pair(0)
@@ -539,7 +540,7 @@ class InputWindow(Window):
 
   def reshape(self, rows, cols, top, left):
     app.log.detail('reshape', rows, cols, top, left)
-    topInfoRows = 5
+    topInfoRows = 4
     lineNumbersCols = 7
 
     if self.showHeader:
