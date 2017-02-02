@@ -35,7 +35,7 @@ class StaticWindow:
   def blank(self):
     """Clear the window."""
     for i in range(self.rows):
-      self.addStr(0, i, ' '*self.cols, self.color)
+      self.addStr(i, 0, ' '*self.cols, self.color)
     self.cursorWindow.refresh()
 
   def contains(self, row, col):
