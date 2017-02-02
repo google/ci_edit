@@ -421,7 +421,9 @@ class TopInfo(StaticWindow):
 
   def refresh(self):
     tb = self.host.textBuffer
-    if len(tb.lines) and tb.scrollRow > 0:
+    if tb.scrollRow == 0:
+      self.blank()
+    elif len(tb.lines):
       # Start on the top, visible line.
       lineCursor = tb.scrollRow
       line = ""
