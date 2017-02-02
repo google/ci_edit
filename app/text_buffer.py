@@ -734,7 +734,7 @@ class BackingTextBuffer(Mutator):
     file = None
     try:
       file = open(fullPath, 'r+')
-      self.setMessage('Opened exiting file')
+      self.setMessage('Opened existing file')
     except:
       try:
         # Create a new file.
