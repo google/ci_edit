@@ -461,8 +461,12 @@ class InputWindow(Window):
     Window.__init__(self, prg)
     self.prg = prg
     self.showHeader = False #header
-    self.showFooter = footer
-    self.showLineNumbers = lineNumbers
+    self.showFooter = True #footer
+    self.useInteractiveFind = True
+    self.showLineNumbers = True #lineNumbers
+    self.showMessageLine = True
+    self.showRightColumn = True
+    self.showTopInfo = True
     self.color = curses.color_pair(0)
     self.colorSelected = curses.color_pair(app.prefs.selectedColor)
     self.controller = app.controller.MainController(self)
@@ -497,36 +501,49 @@ class InputWindow(Window):
       self.interactiveGoto.colorSelected = curses.color_pair(87)
       self.interactiveGoto.setParent(self, 0)
       self.interactiveGoto.hide()
-    if header:
+    if 1 or self.showHeader:
       self.headerLine = HeaderLine(self, self)
       self.headerLine.color = curses.color_pair(168)
       self.headerLine.colorSelected = curses.color_pair(47)
       self.headerLine.setParent(self, 0)
-    if 1:
+      if not self.showHeader:
+        self.headerLine.hide()
+    if 1 or self.showTopInfo:
       self.topInfo = TopInfo(self, self)
       self.topInfo.color = curses.color_pair(168)
       self.topInfo.colorSelected = curses.color_pair(47)
       self.topInfo.setParent(self, 0)
-    if footer:
+      if not self.showTopInfo:
+        self.topInfo.hide()
+    if 1 or self.showFooter:
       self.statusLine = StatusLine(self, self)
       self.statusLine.color = curses.color_pair(168)
       self.statusLine.colorSelected = curses.color_pair(47)
       self.statusLine.setParent(self, 0)
-    if lineNumbers:
+      if not self.showFooter:
+        self.statusLine.hide()
+    if 1 or self.showLineNumbers:
       self.leftColumn = LineNumbers(self, self)
       self.leftColumn.color = curses.color_pair(211)
       self.leftColumn.colorSelected = curses.color_pair(146)
       self.leftColumn.setParent(self, 0)
-    if 1:
+      if not self.showLineNumbers:
+        self.leftColumn.hide()
+    if 1 or self.showRightColumn:
       self.rightColumn = StaticWindow(self)
+      self.rightColumn.name = 'Right'
       self.rightColumn.color = curses.color_pair(18)
       self.rightColumn.colorSelected = curses.color_pair(105)
       self.rightColumn.setParent(self, 0)
-    if True:
+      if not self.showRightColumn:
+        self.rightColumn.hide()
+    if 1 or self.showMessageLine:
       self.messageLine = MessageLine(self, self)
       self.messageLine.color = curses.color_pair(3)
       self.messageLine.colorSelected = curses.color_pair(87)
       self.messageLine.setParent(self, 0)
+      if not self.showMessageLine:
+        self.messageLine.hide()
 
     if 1:
       if self.prg.cliFiles:
@@ -544,35 +561,35 @@ class InputWindow(Window):
     app.log.detail('reshape', rows, cols, top, left)
     topInfoRows = 4
     lineNumbersCols = 7
+    bottomRows = 1  # Not including status line.
 
     if self.showHeader:
       self.headerLine.reshape(1, cols, top, left)
       rows -= 1
       top += 1
-    self.topInfo.reshape(topInfoRows, cols-lineNumbersCols, top,
-        left+lineNumbersCols)
-    rows -= topInfoRows
-    top += topInfoRows
+    if self.showTopInfo:
+      self.topInfo.reshape(topInfoRows, cols-lineNumbersCols, top,
+          left+lineNumbersCols)
+      rows -= topInfoRows
+      top += topInfoRows
     self.interactiveOpen.reshape(1, cols, top+rows-1, left)
     self.interactiveQuit.reshape(1, cols, top+rows-1, left)
     self.interactiveSaveAs.reshape(1, cols, top+rows-1, left)
-    self.messageLine.reshape(1, cols, top+rows-1, left)
+    if self.showMessageLine:
+      self.messageLine.reshape(bottomRows, cols, top+rows-bottomRows, left)
+    if self.useInteractiveFind:
+      self.interactiveFind.reshape(bottomRows, cols,
+          top+rows-bottomRows, left)
     if 1:
-      findReplaceHeight = 1
-      topOfFind = top+rows-findReplaceHeight
-      self.interactiveFind.reshape(findReplaceHeight, cols,
-          topOfFind, left)
-    if 1:
-      topOfGoto = top+rows-findReplaceHeight
-      self.interactiveGoto.reshape(1, cols, topOfGoto, left)
+      self.interactiveGoto.reshape(bottomRows, cols, top+rows-bottomRows, left)
     if self.showFooter:
-      self.statusLine.reshape(1, cols, top+rows-2, left)
-      rows -= 2
+      self.statusLine.reshape(1, cols, top+rows-bottomRows-1, left)
+      rows -= bottomRows+1
     if self.showLineNumbers:
       self.leftColumn.reshape(rows, lineNumbersCols, top, left)
       cols -= lineNumbersCols
       left += lineNumbersCols
-    if 1:
+    if self.showRightColumn:
       self.rightColumn.reshape(rows, 1, top, left+cols-1)
       cols -= 1
     Window.reshape(self, rows, cols, top, left)
@@ -596,7 +613,7 @@ class InputWindow(Window):
     self.rightColumn.cursorWindow.refresh()
 
   def focus(self):
-    self.messageLine.show()
+    #self.messageLine.show()
     Window.focus(self)
 
   def quitNow(self):
@@ -619,8 +636,8 @@ class InputWindow(Window):
     self.statusLine.cursorWindow.addstr(0, 0, ".")
     self.statusLine.refresh()
     app.log.debug('message line unfocus')
-    self.messageLine.blank()
-    self.messageLine.hide()
+    #self.messageLine.blank()
+    #self.messageLine.hide()
     Window.unfocus(self)
 
 
