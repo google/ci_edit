@@ -414,6 +414,43 @@ class StatusLine(StaticWindow):
       self.cursorWindow.refresh()
 
 
+class TopInfo(StaticWindow):
+  def __init__(self, parent, host):
+    StaticWindow.__init__(self, parent)
+    self.host = host
+
+  def refresh(self):
+    self.blank()
+    tb = self.host.textBuffer
+    if len(tb.lines) and tb.scrollRow > 0:
+      # Start on the top, visible line.
+      lineCursor = tb.scrollRow
+      line = ""
+      while len(line) == 0 and lineCursor > 0:
+        line = tb.lines[lineCursor]
+        lineCursor -= 1
+      if len(line) == 0:
+        return
+      indent = 0
+      while line[indent] == ' ':
+        indent += 1
+      lines = []
+      while indent and lineCursor > 0:
+        line = tb.lines[lineCursor]
+        if len(line):
+          z = 0
+          while line[z] == ' ':
+            z += 1
+          if z < indent:
+            indent = z
+            lines.append(line)
+        lineCursor -= 1
+      lines.reverse()
+      for i,line in enumerate(lines):
+        self.addStr(i, 0, line, self.color)
+      self.cursorWindow.refresh()
+
+
 class InputWindow(Window):
   """This is the main content window. Often the largest pane displayed."""
   def __init__(self, prg, rows, cols, top, left, header, footer, lineNumbers):
@@ -462,6 +499,11 @@ class InputWindow(Window):
       self.headerLine.color = curses.color_pair(168)
       self.headerLine.colorSelected = curses.color_pair(47)
       self.headerLine.setParent(self, 0)
+    if 1:
+      self.topInfo = TopInfo(self, self)
+      self.topInfo.color = curses.color_pair(168)
+      self.topInfo.colorSelected = curses.color_pair(47)
+      self.topInfo.setParent(self, 0)
     if footer:
       self.statusLine = StatusLine(self, self)
       self.statusLine.color = curses.color_pair(168)
@@ -483,27 +525,31 @@ class InputWindow(Window):
       self.messageLine.colorSelected = curses.color_pair(87)
       self.messageLine.setParent(self, 0)
 
-    if header:
+    if 1:
       if self.prg.cliFiles:
         path = self.prg.cliFiles[0]['path']
-        #self.headerLine.setFileName(path)
         self.setTextBuffer(
             self.prg.bufferManager.loadTextBuffer(path))
       elif self.prg.readStdin:
-        #self.headerLine.setFileName("stdin")
         self.setTextBuffer(self.prg.bufferManager.readStdin())
       else:
         scratchPath = "~/ci_scratch"
-        #self.headerLine.setFileName(scratchPath)
         self.setTextBuffer(self.prg.bufferManager.loadTextBuffer(scratchPath))
     self.reshape(rows, cols, top, left)
 
   def reshape(self, rows, cols, top, left):
     app.log.detail('reshape', rows, cols, top, left)
+    topInfoRows = 5
+    lineNumbersCols = 7
+
     if self.showHeader:
       self.headerLine.reshape(1, cols, top, left)
       rows -= 1
       top += 1
+    self.topInfo.reshape(topInfoRows, cols-lineNumbersCols, top,
+        left+lineNumbersCols)
+    rows -= topInfoRows
+    top += topInfoRows
     self.interactiveOpen.reshape(1, cols, top+rows-1, left)
     self.interactiveQuit.reshape(1, cols, top+rows-1, left)
     self.interactiveSaveAs.reshape(1, cols, top+rows-1, left)
@@ -520,9 +566,9 @@ class InputWindow(Window):
       self.statusLine.reshape(1, cols, top+rows-2, left)
       rows -= 2
     if self.showLineNumbers:
-      self.leftColumn.reshape(rows, 7, top, left)
-      cols -= 7
-      left += 7
+      self.leftColumn.reshape(rows, lineNumbersCols, top, left)
+      cols -= lineNumbersCols
+      left += lineNumbersCols
     if 1:
       self.rightColumn.reshape(rows, 1, top, left+cols-1)
       cols -= 1
