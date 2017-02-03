@@ -423,6 +423,9 @@ class TopInfo(StaticWindow):
     tb = self.host.textBuffer
     if tb.scrollRow == 0:
       self.blank()
+      line = self.host.textBuffer.fullPath
+      self.addStr(0, 0, line+' '*(self.cols-len(line)), self.color)
+      self.cursorWindow.refresh()
     elif len(tb.lines):
       # Start on the top, visible line.
       lineCursor = tb.scrollRow
