@@ -613,7 +613,7 @@ class InputWindow(Window):
     self.rightColumn.cursorWindow.refresh()
 
   def focus(self):
-    #self.messageLine.show()
+    self.messageLine.show()
     Window.focus(self)
 
   def quitNow(self):
@@ -637,7 +637,7 @@ class InputWindow(Window):
     self.statusLine.refresh()
     app.log.debug('message line unfocus')
     #self.messageLine.blank()
-    #self.messageLine.hide()
+    self.messageLine.hide()
     Window.unfocus(self)
 
 
