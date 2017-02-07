@@ -428,21 +428,20 @@ class TopInfo(StaticWindow):
     StaticWindow.__init__(self, parent)
     self.host = host
     self.borrowedRows = 0
+    self.lines = []
+    self.mode = 5
 
-  def refresh(self):
-    tb = self.host.textBuffer
+  def onChange(self):
+    if self.mode == 0:
+      return
     if self.borrowedRows:
       self.host.resizeTopBy(-self.borrowedRows)
       self.host.leftColumn.resizeTopBy(-self.borrowedRows)
       self.host.rightColumn.resizeTopBy(-self.borrowedRows)
       self.borrowedRows = 0
-    if tb.scrollRow == 0:
-      self.borrowedRows = 1
-      self.resizeTo(self.borrowedRows, self.cols)
-      line = self.host.textBuffer.fullPath
-      self.addStr(0, 0, line+' '*(self.cols-len(line)), self.color)
-      self.cursorWindow.refresh()
-    elif len(tb.lines):
+    tb = self.host.textBuffer
+    lines = []
+    if len(tb.lines):
       lineCursor = tb.scrollRow
       line = ""
       while len(line) == 0 and lineCursor > 0:
@@ -466,8 +465,6 @@ class TopInfo(StaticWindow):
           lineCursor += 1
         else:
           break
-      lines = []
-      debug = ' %d %d'%(tb.scrollRow,lineCursor)
       while indent and lineCursor > 0:
         line = tb.lines[lineCursor]
         if len(line):
@@ -478,36 +475,37 @@ class TopInfo(StaticWindow):
             indent = z
             lines.append(line)
         lineCursor -= 1
-      lines.reverse()
-      self.borrowedRows = len(lines)
+    lines.append(self.host.textBuffer.fullPath)
+    self.lines = lines
+    if 1 or self.borrowedRows != self.rows:
+      self.borrowedRows = len(self.lines)
+      if self.mode > 0:
+        self.borrowedRows = self.mode
       self.resizeTo(self.borrowedRows, self.cols)
-      for i,line in enumerate(lines):
-        line += debug
-        self.addStr(i, 0, line+' '*(self.cols-len(line)), self.color)
-      #for i in range(len(lines), self.rows):
-      #  self.addStr(i, 0, ' '*self.cols, self.color)
-      self.cursorWindow.refresh()
-      if 0:
-        moveCursor = 0
-        if self.host.textBuffer.cursorRow == self.host.textBuffer.scrollRow:
-          moveCursor = 1
-        self.host.textBuffer.cursorMoveScroll(moveCursor, 0, 0, 1, 0)
-        self.host.textBuffer.redo()
-    host = self.host
-    self.host.resizeTopBy(self.borrowedRows)
-    self.host.leftColumn.resizeTopBy(self.borrowedRows)
-    self.host.rightColumn.resizeTopBy(self.borrowedRows)
-    outside = host.textBuffer.cursorRow - host.textBuffer.scrollRow - host.rows
-    app.log.info(
-        host.textBuffer.cursorRow,
-        host.textBuffer.scrollRow,
-        host.rows,
-        outside)
-    if outside >= 0:
+      host = self.host
+      self.host.resizeTopBy(self.borrowedRows)
+      self.host.leftColumn.resizeTopBy(self.borrowedRows)
+      self.host.rightColumn.resizeTopBy(self.borrowedRows)
+      outside = host.textBuffer.cursorRow - host.textBuffer.scrollRow - host.rows
       outside += 1
-      app.log.info()
-      host.textBuffer.cursorMoveScroll(0, 0, 0, outside, 0)
-      host.textBuffer.redo()
+      app.log.info(
+          host.textBuffer.cursorRow,
+          host.textBuffer.scrollRow,
+          host.rows,
+          outside)
+      if outside > 0:
+        app.log.info()
+        host.textBuffer.cursorMoveScroll(0, 0, 0, outside, 0)
+        host.textBuffer.redo()
+
+  def refresh(self):
+    lines = self.lines
+    lines.reverse()
+    for i,line in enumerate(lines):
+      self.addStr(i, 0, line+' '*(self.cols-len(line)), self.color)
+    for i in range(len(lines), self.rows):
+      self.addStr(i, 0, ' '*self.cols, self.color)
+    self.cursorWindow.refresh()
 
 
 class InputWindow(Window):
@@ -571,7 +569,7 @@ class InputWindow(Window):
       self.topInfo.setParent(self, 0)
       if not self.showTopInfo:
         self.topInfo.hide()
-      self.topInfo.hide()
+      #self.topInfo.hide()
     if 1 or self.showFooter:
       self.statusLine = StatusLine(self, self)
       self.statusLine.color = curses.color_pair(168)
@@ -677,7 +675,7 @@ class InputWindow(Window):
     self.prg.quitNow()
 
   def refresh(self):
-    self.topInfo.refresh()
+    self.topInfo.onChange()
     Window.refresh(self)
     self.drawRightEdge()
     self.cursorWindow.refresh()
