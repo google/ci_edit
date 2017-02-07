@@ -466,21 +466,22 @@ class TopInfo(StaticWindow):
       #for i in range(len(lines), self.rows):
       #  self.addStr(i, 0, ' '*self.cols, self.color)
       self.cursorWindow.refresh()
-    host = self.host
-    self.host.resizeTopBy(self.borrowedRows)
-    self.host.leftColumn.resizeTopBy(self.borrowedRows)
-    self.host.rightColumn.resizeTopBy(self.borrowedRows)
-    outside = host.textBuffer.cursorRow - host.textBuffer.scrollRow - host.rows
-    outside += 1
-    app.log.info(
-        host.textBuffer.cursorRow,
-        host.textBuffer.scrollRow,
-        host.rows,
-        outside)
-    if outside > 0:
-      app.log.info()
-      host.textBuffer.cursorMoveScroll(0, 0, 0, outside, 0)
-      host.textBuffer.redo()
+    if 0:
+      host = self.host
+      self.host.resizeTopBy(self.borrowedRows)
+      self.host.leftColumn.resizeTopBy(self.borrowedRows)
+      self.host.rightColumn.resizeTopBy(self.borrowedRows)
+      outside = host.textBuffer.cursorRow - host.textBuffer.scrollRow - host.rows
+      outside += 1
+      app.log.info(
+          host.textBuffer.cursorRow,
+          host.textBuffer.scrollRow,
+          host.rows,
+          outside)
+      if outside > 0:
+        app.log.info()
+        host.textBuffer.cursorMoveScroll(0, 0, 0, outside, 0)
+        host.textBuffer.redo()
 
 
 class InputWindow(Window):
