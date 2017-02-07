@@ -122,6 +122,15 @@ class StaticWindow:
       return
     self.cursorWindow.resize(self.rows, self.cols)
 
+  def resizeTopBy(self, rows):
+    app.log.detail('resizeTopBy', rows, repr(self))
+    self.top += rows
+    self.rows -= rows
+    if self.rows <= 0:
+      return
+    self.cursorWindow.resize(self.rows, self.cols)
+    self.cursorWindow.mvwin(self.top, self.left)
+
   def setParent(self, parent, layerIndex):
     if self.parent:
       try: self.parent.zOrder.remove(self)
