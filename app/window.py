@@ -427,16 +427,22 @@ class TopInfo(StaticWindow):
   def __init__(self, parent, host):
     StaticWindow.__init__(self, parent)
     self.host = host
+    self.borrowedRows = 0
 
   def refresh(self):
     tb = self.host.textBuffer
+    if self.borrowedRows:
+      self.host.resizeTopBy(-self.borrowedRows)
+      self.host.leftColumn.resizeTopBy(-self.borrowedRows)
+      self.host.rightColumn.resizeTopBy(-self.borrowedRows)
+      self.borrowedRows = 0
     if tb.scrollRow == 0:
-      self.blank()
+      self.borrowedRows = 1
+      self.resizeTo(self.borrowedRows, self.cols)
       line = self.host.textBuffer.fullPath
       self.addStr(0, 0, line+' '*(self.cols-len(line)), self.color)
       self.cursorWindow.refresh()
     elif len(tb.lines):
-      # Start on the top, visible line.
       lineCursor = tb.scrollRow
       line = ""
       while len(line) == 0 and lineCursor > 0:
@@ -447,7 +453,21 @@ class TopInfo(StaticWindow):
       indent = 0
       while line[indent] == ' ':
         indent += 1
+      lineCursor += 1
+      while lineCursor < len(tb.lines):
+        line = tb.lines[lineCursor]
+        if not len(line):
+          continue
+        z = 0
+        while line[z] == ' ':
+          z += 1
+        if z > indent:
+          indent = z
+          lineCursor += 1
+        else:
+          break
       lines = []
+      debug = ' %d %d'%(tb.scrollRow,lineCursor)
       while indent and lineCursor > 0:
         line = tb.lines[lineCursor]
         if len(line):
@@ -459,25 +479,32 @@ class TopInfo(StaticWindow):
             lines.append(line)
         lineCursor -= 1
       lines.reverse()
-      for i,line in enumerate(lines):
-        self.addStr(i, 0, line+' '*(self.cols-len(line)), self.color)
       self.borrowedRows = len(lines)
       self.resizeTo(self.borrowedRows, self.cols)
+      for i,line in enumerate(lines):
+        line += debug
+        self.addStr(i, 0, line+' '*(self.cols-len(line)), self.color)
       #for i in range(len(lines), self.rows):
       #  self.addStr(i, 0, ' '*self.cols, self.color)
       self.cursorWindow.refresh()
+      if 0:
+        moveCursor = 0
+        if self.host.textBuffer.cursorRow == self.host.textBuffer.scrollRow:
+          moveCursor = 1
+        self.host.textBuffer.cursorMoveScroll(moveCursor, 0, 0, 1, 0)
+        self.host.textBuffer.redo()
     host = self.host
     self.host.resizeTopBy(self.borrowedRows)
     self.host.leftColumn.resizeTopBy(self.borrowedRows)
     self.host.rightColumn.resizeTopBy(self.borrowedRows)
     outside = host.textBuffer.cursorRow - host.textBuffer.scrollRow - host.rows
-    outside += 1
     app.log.info(
         host.textBuffer.cursorRow,
         host.textBuffer.scrollRow,
         host.rows,
         outside)
-    if outside > 0:
+    if outside >= 0:
+      outside += 1
       app.log.info()
       host.textBuffer.cursorMoveScroll(0, 0, 0, outside, 0)
       host.textBuffer.redo()
@@ -544,6 +571,7 @@ class InputWindow(Window):
       self.topInfo.setParent(self, 0)
       if not self.showTopInfo:
         self.topInfo.hide()
+      self.topInfo.hide()
     if 1 or self.showFooter:
       self.statusLine = StatusLine(self, self)
       self.statusLine.color = curses.color_pair(168)
@@ -588,7 +616,7 @@ class InputWindow(Window):
 
   def reshape(self, rows, cols, top, left):
     app.log.detail('reshape', rows, cols, top, left)
-    topInfoRows = 4
+    topInfoRows = 0
     lineNumbersCols = 7
     bottomRows = 1  # Not including status line.
 
@@ -649,6 +677,7 @@ class InputWindow(Window):
     self.prg.quitNow()
 
   def refresh(self):
+    self.topInfo.refresh()
     Window.refresh(self)
     self.drawRightEdge()
     self.cursorWindow.refresh()
