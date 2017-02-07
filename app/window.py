@@ -452,21 +452,38 @@ class TopInfo(StaticWindow):
       lines.reverse()
       for i,line in enumerate(lines):
         self.addStr(i, 0, line+' '*(self.cols-len(line)), self.color)
-      for i in range(len(lines), self.rows):
-        self.addStr(i, 0, ' '*self.cols, self.color)
+      self.borrowedRows = len(lines)
+      self.resizeTo(self.borrowedRows, self.cols)
+      #for i in range(len(lines), self.rows):
+      #  self.addStr(i, 0, ' '*self.cols, self.color)
       self.cursorWindow.refresh()
+    host = self.host
+    self.host.resizeTopBy(self.borrowedRows)
+    self.host.leftColumn.resizeTopBy(self.borrowedRows)
+    self.host.rightColumn.resizeTopBy(self.borrowedRows)
+    outside = host.textBuffer.cursorRow - host.textBuffer.scrollRow - host.rows
+    outside += 1
+    app.log.info(
+        host.textBuffer.cursorRow,
+        host.textBuffer.scrollRow,
+        host.rows,
+        outside)
+    if outside > 0:
+      app.log.info()
+      host.textBuffer.cursorMoveScroll(0, 0, 0, outside, 0)
+      host.textBuffer.redo()
 
 
 class InputWindow(Window):
   """This is the main content window. Often the largest pane displayed."""
-  def __init__(self, prg, rows, cols, top, left, header, footer, lineNumbers):
+  def __init__(self, prg, rows, cols, top, left):
     assert(prg)
     Window.__init__(self, prg)
     self.prg = prg
-    self.showHeader = False #header
-    self.showFooter = True #footer
+    self.showHeader = False
+    self.showFooter = True
     self.useInteractiveFind = True
-    self.showLineNumbers = True #lineNumbers
+    self.showLineNumbers = True
     self.showMessageLine = True
     self.showRightColumn = True
     self.showTopInfo = True
