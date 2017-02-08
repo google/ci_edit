@@ -43,6 +43,13 @@ __c_primitive_types = [
   'void', 'wchar_t',
 ]
 
+# Trivia: all English contractions except 'sup, 'tis and 'twas will
+# match this regex (with re.I):  [adegIlnotuwy]'[acdmlsrtv]
+# The prefix part of that is used in the expression below to identify
+# English contractions.
+__english_contraction = \
+    r"(\"(\\\"|[^\"])*?\")|(?<![adegIlnotuwy])('(\\\'|[^'])*?')"
+
 __special_string_escapes = [
   r'\\\\', r'\\b', r'\\f', r'\\n', r'\\r', r'\\t', r'\\v', r'\\0[0-7]{0,3}',
 ]
