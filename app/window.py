@@ -429,7 +429,7 @@ class TopInfo(StaticWindow):
     self.host = host
     self.borrowedRows = 0
     self.lines = []
-    self.mode = -1
+    self.mode = 2
 
   def onChange(self):
     if self.mode == 0:
@@ -475,7 +475,6 @@ class TopInfo(StaticWindow):
     if self.mode > 0:
       infoRows = self.mode
     if self.borrowedRows != infoRows:
-      app.log.debug(self.borrowedRows, infoRows, self.rows)
       self.host.resizeTopBy(infoRows-self.borrowedRows)
       self.host.leftColumn.resizeTopBy(infoRows-self.borrowedRows)
       self.host.rightColumn.resizeTopBy(infoRows-self.borrowedRows)
