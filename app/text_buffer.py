@@ -1239,49 +1239,6 @@ class TextBuffer(BackingTextBuffer):
     else:
       self.xdraw(window)
 
-  def xdraw(self, window):
-    if 1: #self.scrollRow != self.scrollToRow:
-      maxy, maxx = window.cursorWindow.getmaxyx()
-
-      self.scrollToCursor(window)
-
-      startCol = self.scrollCol
-      endCol = self.scrollCol+maxx
-
-      # Draw to screen.
-      limit = min(max(len(self.lines)-self.scrollRow, 0), maxy)
-      for i in range(limit):
-        line = self.lines[self.scrollRow+i][startCol:endCol]
-        window.addStr(i, 0, line + ' '*(maxx-len(line)), window.color)
-      if 1:
-        # Trivia: all English contractions except 'sup, 'tis and 'twas will
-        # match this regex (with re.I):  [adegIlnotuwy]'[acdmlsrtv]
-        # The prefix part of that is used in the expression below to identify
-        # English contractions.
-        # r"(\"(\\\"|[^\"])*?\")|(?<![adegIlnotuwy])('(\\\'|[^'])*?')",
-
-        # Highlight strings.
-        for i in range(limit):
-          line = self.lines[self.scrollRow+i][startCol:endCol]
-          for k in re.finditer(app.selectable.kReStrings, line):
-            for f in k.regs:
-              window.addStr(i, f[0], line[f[0]:f[1]], curses.color_pair(5))
-      if 1:
-        # Highlight comments.
-        for i in range(limit):
-          line = self.lines[self.scrollRow+i][startCol:endCol]
-          for k in re.finditer(app.selectable.kReComments, line):
-            for f in k.regs:
-              window.addStr(i, f[0], line[f[0]:f[1]], curses.color_pair(2))
-      if self.highlightRe:
-        # Highlight keywords.
-        for i in range(limit):
-          line = self.lines[self.scrollRow+i][startCol:endCol]
-          for k in self.highlightRe.finditer(line):
-            for f in k.regs:
-              window.addStr(i, f[0], line[f[0]:f[1]], curses.color_pair(21))
-      self.drawOverlays(window)
-
   def drawOverlays(self, window):
     if 1: #self.scrollRow != self.scrollToRow:
       maxy, maxx = window.cursorWindow.getmaxyx()
