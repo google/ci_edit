@@ -429,7 +429,7 @@ class TopInfo(StaticWindow):
     self.host = host
     self.borrowedRows = 0
     self.lines = []
-    self.mode = 2
+    self.mode = -1
 
   def onChange(self):
     if self.mode == 0:
@@ -471,15 +471,11 @@ class TopInfo(StaticWindow):
           lineCursor -= 1
     lines.append(self.host.textBuffer.fullPath)
     self.lines = lines
-    infoRows = len(self.lines) + 1
+    infoRows = len(self.lines)
     if self.mode > 0:
       infoRows = self.mode
-    app.log.debug(self.borrowedRows, infoRows, self.rows)
     if self.borrowedRows != infoRows:
       app.log.debug(self.borrowedRows, infoRows, self.rows)
-      #self.host.resizeTopBy(-self.borrowedRows)
-      #self.host.leftColumn.resizeTopBy(-self.borrowedRows)
-      #self.host.rightColumn.resizeTopBy(-self.borrowedRows)
       self.host.resizeTopBy(infoRows-self.borrowedRows)
       self.host.leftColumn.resizeTopBy(infoRows-self.borrowedRows)
       self.host.rightColumn.resizeTopBy(infoRows-self.borrowedRows)
