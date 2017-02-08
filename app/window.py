@@ -429,9 +429,10 @@ class TopInfo(StaticWindow):
     self.host = host
     self.borrowedRows = 0
     self.lines = []
-    self.mode = 5
+    self.mode = 1
 
   def onChange(self):
+    app.log.debug(' top info change')
     if self.mode == 0:
       return
     if self.borrowedRows:
@@ -447,38 +448,37 @@ class TopInfo(StaticWindow):
       while len(line) == 0 and lineCursor > 0:
         line = tb.lines[lineCursor]
         lineCursor -= 1
-      if len(line) == 0:
-        return
-      indent = 0
-      while line[indent] == ' ':
-        indent += 1
-      lineCursor += 1
-      while lineCursor < len(tb.lines):
-        line = tb.lines[lineCursor]
-        if not len(line):
-          continue
-        z = 0
-        while line[z] == ' ':
-          z += 1
-        if z > indent:
-          indent = z
-          lineCursor += 1
-        else:
-          break
-      while indent and lineCursor > 0:
-        line = tb.lines[lineCursor]
-        if len(line):
+      if len(line):
+        indent = 0
+        while line[indent] == ' ':
+          indent += 1
+        lineCursor += 1
+        while lineCursor < len(tb.lines):
+          line = tb.lines[lineCursor]
+          if not len(line):
+            continue
           z = 0
           while line[z] == ' ':
             z += 1
-          if z < indent:
+          if z > indent:
             indent = z
-            lines.append(line)
-        lineCursor -= 1
+            lineCursor += 1
+          else:
+            break
+        while indent and lineCursor > 0:
+          line = tb.lines[lineCursor]
+          if len(line):
+            z = 0
+            while line[z] == ' ':
+              z += 1
+            if z < indent:
+              indent = z
+              lines.append(line)
+          lineCursor -= 1
     lines.append(self.host.textBuffer.fullPath)
     self.lines = lines
     if 1 or self.borrowedRows != self.rows:
-      self.borrowedRows = len(self.lines)
+      self.borrowedRows = len(self.lines) + 1
       if self.mode > 0:
         self.borrowedRows = self.mode
       self.resizeTo(self.borrowedRows, self.cols)
