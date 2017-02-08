@@ -18,12 +18,11 @@ def getLines():
   global screenLog
   return screenLog
 
-def parseLines(channel, *args):
+def parseLines(frame, channel, *args):
   if not len(args):
     args = [""]
   msg = str(args[0])
   if 1:
-    frame = inspect.stack()[3]
     msg = "%s %s %s %s: %s"%(channel, os.path.split(frame[1])[1],
         frame[2], frame[3], msg)
   prior = msg
@@ -47,7 +46,7 @@ def chanEnable(channel, isEnabled):
 def chan(channel, *args):
   global enabledChannels, fullLog, screenLog
   if channel in enabledChannels:
-    lines = parseLines(channel, *args)
+    lines = parseLines(inspect.stack()[2], channel, *args)
     screenLog += lines
     fullLog += lines
 
@@ -63,19 +62,19 @@ def startup(*args):
 def debug(*args):
   global enabledChannels, fullLog, screenLog
   if 'debug' in enabledChannels:
-    lines = parseLines('debug_@@@', *args)
+    lines = parseLines(inspect.stack()[1], 'debug_@@@', *args)
     screenLog += lines
     fullLog += lines
 
 def detail(*args):
   global enabledChannels, fullLog, screenLog
   if 'detail' in enabledChannels:
-    lines = parseLines('detail', *args)
+    lines = parseLines(inspect.stack()[1], 'detail', *args)
     fullLog += lines
 
 def error(*args):
   global fullLog, screenLog
-  lines = parseLines('error', *args)
+  lines = parseLines(inspect.stack()[1], 'error', *args)
   fullLog += lines
 
 def wrapper(func, shouldWrite=True):
