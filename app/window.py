@@ -429,17 +429,11 @@ class TopInfo(StaticWindow):
     self.host = host
     self.borrowedRows = 0
     self.lines = []
-    self.mode = 1
+    self.mode = 2
 
   def onChange(self):
-    app.log.debug(' top info change')
     if self.mode == 0:
       return
-    if self.borrowedRows:
-      self.host.resizeTopBy(-self.borrowedRows)
-      self.host.leftColumn.resizeTopBy(-self.borrowedRows)
-      self.host.rightColumn.resizeTopBy(-self.borrowedRows)
-      self.borrowedRows = 0
     tb = self.host.textBuffer
     lines = []
     if len(tb.lines):
@@ -477,26 +471,20 @@ class TopInfo(StaticWindow):
           lineCursor -= 1
     lines.append(self.host.textBuffer.fullPath)
     self.lines = lines
-    if 1 or self.borrowedRows != self.rows:
-      self.borrowedRows = len(self.lines) + 1
-      if self.mode > 0:
-        self.borrowedRows = self.mode
-      self.resizeTo(self.borrowedRows, self.cols)
-      host = self.host
-      self.host.resizeTopBy(self.borrowedRows)
-      self.host.leftColumn.resizeTopBy(self.borrowedRows)
-      self.host.rightColumn.resizeTopBy(self.borrowedRows)
-      outside = host.textBuffer.cursorRow - host.textBuffer.scrollRow - host.rows
-      outside += 1
-      app.log.info(
-          host.textBuffer.cursorRow,
-          host.textBuffer.scrollRow,
-          host.rows,
-          outside)
-      if outside > 0:
-        app.log.info()
-        host.textBuffer.cursorMoveScroll(0, 0, 0, outside, 0)
-        host.textBuffer.redo()
+    infoRows = len(self.lines) + 1
+    if self.mode > 0:
+      infoRows = self.mode
+    app.log.debug(self.borrowedRows, infoRows, self.rows)
+    if self.borrowedRows != infoRows:
+      app.log.debug(self.borrowedRows, infoRows, self.rows)
+      #self.host.resizeTopBy(-self.borrowedRows)
+      #self.host.leftColumn.resizeTopBy(-self.borrowedRows)
+      #self.host.rightColumn.resizeTopBy(-self.borrowedRows)
+      self.host.resizeTopBy(infoRows-self.borrowedRows)
+      self.host.leftColumn.resizeTopBy(infoRows-self.borrowedRows)
+      self.host.rightColumn.resizeTopBy(infoRows-self.borrowedRows)
+      self.resizeTo(infoRows, self.cols)
+      self.borrowedRows = infoRows
 
   def refresh(self):
     lines = self.lines
