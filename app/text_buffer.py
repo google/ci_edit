@@ -8,6 +8,7 @@ import app.parser
 import app.prefs
 import third_party.pyperclip as clipboard
 import curses.ascii
+import difflib
 import os
 import re
 import sys
@@ -113,6 +114,20 @@ class Mutator(app.selectable.Selectable):
         # Join lines.
         self.lines[self.cursorRow] += self.lines[self.cursorRow+1]
         del self.lines[self.cursorRow+1]
+      elif change[0] == 'ld':
+        lines = []
+        index = 0
+        for ii in change[1]:
+          if type(ii) is type(0):
+            for line in self.lines[index:index+ii]:
+              lines.append(line)
+            index += ii
+          elif ii[0] == '+':
+            lines.append(ii[2:])
+          elif ii[0] == '-':
+            index += 1
+        app.log.info('ld', self.lines == lines)
+        self.lines = lines
       elif change[0] == 'm':
         self.cursorRow += change[1][0]
         self.cursorCol += change[1][1]
@@ -250,6 +265,20 @@ class Mutator(app.selectable.Selectable):
         line = self.lines[self.cursorRow]
         self.lines.insert(self.cursorRow+1, line[self.cursorCol:])
         self.lines[self.cursorRow] = line[:self.cursorCol]
+      elif change[0] == 'ld':  # Undo line diff.
+        app.log.info('ld')
+        lines = []
+        index = 0
+        for ii in change[1]:
+          if type(ii) is type(0):
+            for line in self.lines[index:index+ii]:
+              lines.append(line)
+            index += ii
+          elif ii[0] == '+':
+            index += 1
+          elif ii[0] == '-':
+            lines.append(ii[2:])
+        self.lines = lines
       elif change[0] == 'm':
         app.log.detail('undo move');
         self.cursorRow -= change[1][0]
@@ -714,15 +743,18 @@ class BackingTextBuffer(Mutator):
       self.lines = []
       self.file.close()
 
-  def dataToLines(self):
+  def doDataToLines(self, data):
     def parse(line):
       return "\xfe%02x"%ord(line.groups()[0])
-    lines = self.data.split('\r\n')
+    lines = data.split('\r\n')
     if len(lines) == 1:
-      lines = self.data.split('\n')
+      lines = data.split('\n')
     if len(lines) == 1:
-      lines = self.data.split('\r')
-    self.lines = [re.sub('([\0-\x1f\x7f-\xff])', parse, i) for i in lines]
+      lines = data.split('\r')
+    return [re.sub('([\0-\x1f\x7f-\xff])', parse, i) for i in lines]
+
+  def dataToLines(self):
+    self.lines = self.doDataToLines(self.data)
 
   def fileFilter(self, data):
     self.data = data
@@ -821,6 +853,40 @@ class BackingTextBuffer(Mutator):
     self.findRe = re.compile('()'+searchFor)
     self.findBackRe = re.compile('(.*)'+searchFor)
     self.findCurrentPattern(direction)
+
+  def findReplace(self, cmd):
+    splitCmd = cmd.split('/', 1)
+    if len(splitCmd) < 2:
+      self.setMessage('An exchange needs a / separator')
+      return
+    find, replace = splitCmd
+    oldLines = self.lines
+    self.linesToData()
+    data = re.sub(find, replace, self.data)
+    diff = difflib.ndiff(self.lines, self.doDataToLines(data))
+    mdiff = []
+    counter = 0
+    for i in diff:
+      if i[0] != ' ':
+        if counter:
+          mdiff.append(counter)
+          counter = 0
+        if i[0] in ['+', '-']:
+          mdiff.append(i)
+      else:
+        counter += 1
+    if counter:
+      mdiff.append(counter)
+    if len(mdiff) == 1 and type(mdiff[0]) is type(0):
+      # Nothing was changed. The only entry is a 'skip these lines'
+      self.setMessage('No matches found')
+      return
+    mdiff = tuple(mdiff)
+    if 0:
+      for i in mdiff:
+        app.log.info(i)
+    self.redoAddChange(('ld', mdiff))
+    self.redo()
 
   def findCurrentPattern(self, direction):
     localRe = self.findRe

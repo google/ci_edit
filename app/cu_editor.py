@@ -60,6 +60,7 @@ class InteractiveFind(app.editor.InteractiveFind):
       curses.KEY_F1: self.info,
       curses.KEY_F3: self.saveEventChangeToHostWindow,
       KEY_SHIFT_F3: self.saveEventChangeToHostWindow,
+      CTRL_E: self.findReplace,
       CTRL_F: self.findNext,
       CTRL_G: self.findNext,
       CTRL_J: self.changeToHostWindow,

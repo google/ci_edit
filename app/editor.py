@@ -188,6 +188,9 @@ class InteractiveFind(app.controller.Controller):
   def findPrior(self):
     self.findCmd = self.document.textBuffer.findPrior
 
+  def findReplace(self):
+    self.findCmd = self.document.textBuffer.findReplace
+
   def focus(self):
     app.log.info('InteractiveFind')
     self.findCmd = self.document.textBuffer.find
