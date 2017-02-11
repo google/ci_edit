@@ -66,24 +66,20 @@ class CiProgram:
   def commandLoop(self):
     window = self.inputWindow
     window.focus()
-    checkRate = time.time()
     window.cursorWindow.timeout(10)
     while not self.exiting:
-      if time.time() > checkRate + 0.02:
-        app.log.debug('loop took', time.time()-checkRate)
       self.refresh()
       window.textBuffer.setMessage()
       cmdList = []
       mouseEvents = []
       while not len(cmdList):
-        for i in range(5):
+        for i in range(1):
           ch = window.cursorWindow.getch()
           if ch != curses.ERR:
             self.ch = ch
             if ch == curses.KEY_MOUSE:
               mouseEvents.append((curses.getmouse(), time.time()))
             cmdList.append(ch)
-      app.log.info(len(cmdList))
       if len(cmdList):
         for cmd in cmdList:
           window.controller.doCommand(cmd)
