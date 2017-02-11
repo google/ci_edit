@@ -26,6 +26,7 @@ class StaticWindow:
     self.writeLineRow = 0
     self.cursorWindow = curses.newwin(1, 1)
     self.cursorWindow.leaveok(1)  # Don't update cursor position.
+    self.cursorWindow.timeout(10)
 
   def addStr(self, row, col, text, colorPair):
     """Overwrite text a row, column with text."""

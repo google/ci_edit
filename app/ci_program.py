@@ -66,14 +66,13 @@ class CiProgram:
   def commandLoop(self):
     window = self.inputWindow
     window.focus()
-    window.cursorWindow.timeout(10)
     while not self.exiting:
       self.refresh()
       window.textBuffer.setMessage()
       cmdList = []
       mouseEvents = []
       while not len(cmdList):
-        for i in range(1):
+        for i in range(5):
           ch = window.cursorWindow.getch()
           if ch != curses.ERR:
             self.ch = ch
