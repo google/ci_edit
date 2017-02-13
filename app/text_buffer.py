@@ -855,11 +855,14 @@ class BackingTextBuffer(Mutator):
     self.findCurrentPattern(direction)
 
   def findReplace(self, cmd):
-    splitCmd = cmd.split('/', 1)
-    if len(splitCmd) < 2:
-      self.setMessage('An exchange needs a / separator')
+    if not len(cmd):
       return
-    find, replace = splitCmd
+    separator = cmd[0]
+    splitCmd = cmd.split(separator, 3)
+    if len(splitCmd) < 4:
+      self.setMessage('An exchange needs three '+separator+' separators')
+      return
+    start, find, replace, end = splitCmd
     oldLines = self.lines
     self.linesToData()
     data = re.sub(find, replace, self.data)
