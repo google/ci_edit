@@ -854,6 +854,31 @@ class BackingTextBuffer(Mutator):
     self.findBackRe = re.compile('(.*)'+searchFor)
     self.findCurrentPattern(direction)
 
+  def findReplaceFlags(self, tokens):
+    """Map letters in |tokens| to re flags."""
+    flags = 0
+    if 'i' in tokens:
+      flags |= re.IGNORECASE
+    if 'l' in tokens:
+      # Affects \w, \W, \b, \B.
+      flags |= re.LOCALE
+    if 'm' in tokens:
+      # Affects ^, $.
+      flags |= re.MULTILINE
+    if 's' in tokens:
+      # Affects ..
+      flags |= re.DOTALL
+    if 'x' in tokens:
+      # Affects whitespace and # comments.
+      flags |= re.VERBOSE
+    if 'u' in tokens:
+      # Affects \w, \W, \b, \B.
+      flags |= re.UNICODE
+    tokens = re.sub('[ilmsxu]', '', tokens)
+    if len(tokens):
+      self.setMessage('unknown regex flags '+tokens)
+    return flags
+
   def findReplace(self, cmd):
     if not len(cmd):
       return
@@ -863,9 +888,10 @@ class BackingTextBuffer(Mutator):
       self.setMessage('An exchange needs three '+separator+' separators')
       return
     start, find, replace, end = splitCmd
+    flags = self.findReplaceFlags(end)
     oldLines = self.lines
     self.linesToData()
-    data = re.sub(find, replace, self.data)
+    data = re.sub(find, replace, self.data, flags=flags)
     diff = difflib.ndiff(self.lines, self.doDataToLines(data))
     mdiff = []
     counter = 0
