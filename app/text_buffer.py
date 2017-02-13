@@ -874,9 +874,10 @@ class BackingTextBuffer(Mutator):
     if 'u' in tokens:
       # Affects \w, \W, \b, \B.
       flags |= re.UNICODE
-    tokens = re.sub('[ilmsxu]', '', tokens)
-    if len(tokens):
-      self.setMessage('unknown regex flags '+tokens)
+    if 0:
+      tokens = re.sub('[ilmsxu]', '', tokens)
+      if len(tokens):
+        self.setMessage('unknown regex flags '+tokens)
     return flags
 
   def findReplace(self, cmd):
