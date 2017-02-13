@@ -332,11 +332,13 @@ class CiProgram:
 
   def refresh(self):
     """Repaint stacked windows, furthest to nearest."""
+    curses.curs_set(0)
     if self.showLogWindow:
       self.logWindow.refresh()
     for i,k in enumerate(self.zOrder):
       #app.log.info("[[%d]] %r"%(i, k))
       k.refresh()
+    curses.curs_set(1)
 
   def run(self):
     self.parseArgs()
