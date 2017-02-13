@@ -21,6 +21,8 @@ def runTests(stopOnFailure=False):
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     if stopOnFailure and result.failures:
       break;
+  if result.failures:
+    return -1
 
 if __name__ == '__main__':
   app.log.info("starting unit tests")
