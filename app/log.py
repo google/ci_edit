@@ -80,9 +80,10 @@ def error(*args):
 def wrapper(func, shouldWrite=True):
   global shouldWritePrintLog
   shouldWritePrintLog = shouldWrite
+  r = -1
   try:
     try:
-      func()
+      r = func()
     except BaseException, e:
       shouldWritePrintLog = True
       errorType, value, tb = sys.exc_info()
@@ -91,6 +92,7 @@ def wrapper(func, shouldWrite=True):
         error(i[:-1])
   finally:
     flush()
+  return r
 
 def flush():
   global fullLog
