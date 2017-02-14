@@ -856,7 +856,7 @@ class BackingTextBuffer(Mutator):
 
   def findReplaceFlags(self, tokens):
     """Map letters in |tokens| to re flags."""
-    flags = 0
+    flags = re.MULTILINE
     if 'i' in tokens:
       flags |= re.IGNORECASE
     if 'l' in tokens:
