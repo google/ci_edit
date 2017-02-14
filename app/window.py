@@ -34,7 +34,10 @@ class StaticWindow:
     except curses.error: pass
 
   def paint(self, row, col, count, colorPair):
-    """Paint text a row, column with colorPair."""
+    """Paint text a row, column with colorPair.
+      fyi, I thought this may be faster than using addStr to paint over the text
+      with a different colorPair. It looks like there isn't a significant
+      performance difference between chgat and addstr."""
     self.cursorWindow.chgat(row, col, count, colorPair)
 
   def blank(self):
