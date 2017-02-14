@@ -104,17 +104,16 @@ class Mutator(app.selectable.Selectable):
         self.doDelete(*change[1])
       elif change[0] == 'ds':  # Redo delete selection.
         self.doDeleteSelection()
-      elif change[0] == 'i':
+      elif change[0] == 'i':  # Redo insert.
         line = self.lines[self.cursorRow]
         x = self.cursorCol
         self.lines[self.cursorRow] = line[:x] + change[1] + line[x:]
         self.cursorCol += len(change[1])
         self.goalCol = self.cursorCol
-      elif change[0] == 'j':
-        # Join lines.
+      elif change[0] == 'j':  # Redo join lines.
         self.lines[self.cursorRow] += self.lines[self.cursorRow+1]
         del self.lines[self.cursorRow+1]
-      elif change[0] == 'ld':
+      elif change[0] == 'ld':  # Redo line diff.
         lines = []
         index = 0
         for ii in change[1]:
@@ -128,7 +127,7 @@ class Mutator(app.selectable.Selectable):
             index += 1
         app.log.info('ld', self.lines == lines)
         self.lines = lines
-      elif change[0] == 'm':
+      elif change[0] == 'm':  # Redo move
         self.cursorRow += change[1][0]
         self.cursorCol += change[1][1]
         self.goalCol += change[1][2]
@@ -160,14 +159,14 @@ class Mutator(app.selectable.Selectable):
           line = self.lines[i]
           x = self.cursorCol
           self.lines[self.cursorRow] = line[:x] + line[x+len(change[1]):]
-      elif change[0] == 'vd':
+      elif change[0] == 'vd':  # Redo vertical delete.
         upperRow = min(self.markerRow, self.cursorRow)
         lowerRow = max(self.markerRow, self.cursorRow)
         x = self.cursorCol
         for i in range(upperRow, lowerRow+1):
           line = self.lines[i]
           self.lines[i] = line[:x] + line[x+len(change[1]):]
-      elif change[0] == 'vi':  # Redo
+      elif change[0] == 'vi':  # Redo vertical insert.
         text = change[1]
         col = self.cursorCol
         row = min(self.markerRow, self.cursorRow)
@@ -1418,7 +1417,7 @@ class TextBuffer(BackingTextBuffer):
       if 1:
         # Highlight space ending lines.
         for i in range(limit):
-          line = self.lines[startCol+i][startCol:endCol]
+          line = self.lines[startRow+i][startCol:endCol]
           offset = 0
           if startRow + i == self.cursorRow:
             offset = self.cursorCol-startCol

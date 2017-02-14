@@ -197,6 +197,7 @@ class InteractiveFind(app.controller.Controller):
     selection = self.document.textBuffer.getSelectedText()
     if selection:
       self.textBuffer.selectionAll()
+      # Make a single regex line.
       selection = "\\n".join(selection)
       app.log.info(selection)
       self.textBuffer.insert(selection)
