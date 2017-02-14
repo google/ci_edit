@@ -33,6 +33,10 @@ class StaticWindow:
     try: self.cursorWindow.addstr(row, col, text, colorPair)
     except curses.error: pass
 
+  def paint(self, row, col, count, colorPair):
+    """Paint text a row, column with colorPair."""
+    self.cursorWindow.chgat(row, col, count, colorPair)
+
   def blank(self):
     """Clear the window."""
     for i in range(self.rows):

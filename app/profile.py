@@ -25,9 +25,8 @@ def highestDelta(key, start):
 
 def runningDelta(key, start):
   delta = time.time() - start
-  profiles[key] = profiles.get(key, 0)*.9
-  if delta > profiles[key]:
-    profiles[key] = delta
+  bleed = 0.501
+  profiles[key] = delta*bleed+profiles.get(key, delta)*(1-bleed)
 
 def results():
   return "one\ntwo\nthree"
