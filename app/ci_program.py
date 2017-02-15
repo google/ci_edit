@@ -11,6 +11,7 @@ import app.text_buffer
 import app.window
 import os
 import sys
+import cPickle as pickle
 import curses
 import time
 import traceback
@@ -340,10 +341,47 @@ class CiProgram:
       k.refresh()
     curses.curs_set(1)
 
+  def makeHomeDirs(self):
+    try:
+      homePath = os.path.expanduser('~/.ci_edit')
+      if not os.path.isdir(homePath):
+        os.makedirs(homePath)
+      self.dirBackups = os.path.join(homePath, 'backups')
+      if not os.path.isdir(self.dirBackups):
+        os.makedirs(self.dirBackups)
+      self.dirPrefs = os.path.join(homePath, 'prefs')
+      if not os.path.isdir(self.dirPrefs):
+        os.makedirs(self.dirPrefs)
+      self.historyPath = os.path.join(homePath, 'history.dat')
+    except Exception, e:
+      app.log.error('exception in makeHomeDirs')
+
+  def loadUserPrefs(self):
+    try:
+      self.makeHomeDirs()
+      if os.path.isfile(self.historyPath):
+        with open(self.historyPath, "rb") as file:
+          self.history = pickle.load(file)
+      else:
+        self.history = {}
+    except Exception, e:
+      app.log.error('exception in loadUserPrefs')
+      self.history = {}
+
+  def saveUserPrefs(self):
+    try:
+      self.makeHomeDirs()
+      with open(self.historyPath, "wb") as file:
+        pickle.dump(self.history, file)
+    except Exception, e:
+      app.log.error('exception in saveUserPrefs')
+
   def run(self):
     self.parseArgs()
+    self.loadUserPrefs()
     self.startup()
     self.commandLoop()
+    self.saveUserPrefs()
 
   def shiftPalette(self):
     """Test different palette options. Each call to shiftPalette will change the
