@@ -23,8 +23,7 @@ def set(keyPath, value):
   for i in keyPath[:-1]:
     cursor = cursor.setdefault(i, {})
   cursor[keyPath[-1]] = value
-  app.log.debug(keyPath, value)
-  assert get(keyPath) == value
+  #assert get(keyPath) == value
 
 def loadUserHistory():
   global data, path
@@ -40,7 +39,6 @@ def loadUserHistory():
 
 def saveUserHistory():
   global data, path
-  app.log.debug(data)
   try:
     with open(path, "wb") as file:
       pickle.dump(data, file)

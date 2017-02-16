@@ -458,7 +458,6 @@ class BackingTextBuffer(Mutator):
 
   def cursorMoveAndMark(self, rowDelta, colDelta, goalColDelta, markRowDelta,
       markColDelta, selectionModeDelta):
-    app.log.debug(rowDelta)
     maxy, maxx = self.view.cursorWindow.getmaxyx()
     scrollRows = 0
     if self.scrollRow > self.cursorRow+rowDelta:
@@ -832,13 +831,10 @@ class BackingTextBuffer(Mutator):
     scrollRow = self.scrollRow
     scrollCol = self.scrollCol
     maxy, maxx = self.view.cursorWindow.getmaxyx()
-    app.log.debug('---- sr ', self.scrollRow, 'sc', self.scrollCol, 'n',lineNumber, 's',start, maxy, maxx)
     if not (self.scrollRow < lineNumber <= self.scrollRow + maxy):
       scrollRow = max(lineNumber-10, 0)
-      app.log.debug('---b ', scrollRow)
     if not (self.scrollCol < start <= self.scrollCol + maxx):
       scrollCol = max(start-10, 0)
-      app.log.debug('---c ', scrollCol)
     self.doSelectionMode(app.selectable.kSelectionNone)
     self.cursorMoveScroll(
         lineNumber-self.cursorRow,
@@ -850,7 +846,6 @@ class BackingTextBuffer(Mutator):
     self.doSelectionMode(mode)
     self.cursorMove(0, -length, -length)
     self.redo()
-    app.log.debug('----z ', self.scrollRow, 'sc', self.scrollCol, 'n',lineNumber, 's',start, maxy, maxx)
 
   def find(self, searchFor, direction=0):
     """direction is -1 for findPrior, 0 for at cursor, 1 for findNext."""
@@ -1091,7 +1086,6 @@ class BackingTextBuffer(Mutator):
             markerCol = 1
           elif self.cursorCol < self.markerCol and col >= self.markerCol:
             markerCol = -1
-          app.log.debug('markerCol', markerCol)
         else:
           if (row < self.cursorRow and
               self.cursorCol > self.markerCol):
@@ -1235,7 +1229,6 @@ class BackingTextBuffer(Mutator):
   def stripTrailingWhiteSpace(self):
     for i in range(len(self.lines)):
       for found in app.selectable.kReEndSpaces.finditer(self.lines[i]):
-        app.log.debug(i, found.regs)
         self.performDeleteRange(i, found.regs[0][0], i, found.regs[0][1])
 
   def unindent(self):

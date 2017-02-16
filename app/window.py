@@ -601,11 +601,9 @@ class InputWindow(Window):
       else:
         scratchPath = "~/ci_scratch"
         self.setTextBuffer(self.prg.bufferManager.loadTextBuffer(scratchPath))
-    #self.reshape(rows, cols, top, left)
 
   def reshape(self, rows, cols, top, left):
     app.log.detail('reshape', rows, cols, top, left)
-    app.log.stack()
     topInfoRows = 0
     lineNumbersCols = 7
     bottomRows = 1  # Not including status line.
@@ -641,7 +639,6 @@ class InputWindow(Window):
       cols -= 1
     Window.reshape(self, rows, cols, top, left)
 
-    app.log.debug('reshape', rows, cols, top, left, self)
     if 1:
       tb = self.textBuffer
       cursor = app.history.get(['files', tb.fullPath, 'cursor'], (0, 0))
@@ -694,8 +691,6 @@ class InputWindow(Window):
   def unfocus(self):
     self.statusLine.cursorWindow.addstr(0, 0, ".")
     self.statusLine.refresh()
-    app.log.debug('message line unfocus')
-    #self.messageLine.blank()
     self.messageLine.hide()
     Window.unfocus(self)
 
