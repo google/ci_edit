@@ -356,36 +356,17 @@ class CiProgram:
       self.dirPrefs = os.path.join(homePath, 'prefs')
       if not os.path.isdir(self.dirPrefs):
         os.makedirs(self.dirPrefs)
-      self.historyPath = os.path.join(homePath, 'history.dat')
+      app.history.path = historyPath = os.path.join(homePath, app.history.path)
     except Exception, e:
       app.log.error('exception in makeHomeDirs')
 
-  def loadUserPrefs(self):
-    try:
-      self.makeHomeDirs()
-      if os.path.isfile(self.historyPath):
-        with open(self.historyPath, "rb") as file:
-          self.history = pickle.load(file)
-      else:
-        self.history = {}
-    except Exception, e:
-      app.log.error('exception in loadUserPrefs')
-      self.history = {}
-
-  def saveUserPrefs(self):
-    try:
-      self.makeHomeDirs()
-      with open(self.historyPath, "wb") as file:
-        pickle.dump(self.history, file)
-    except Exception, e:
-      app.log.error('exception in saveUserPrefs')
-
   def run(self):
     self.parseArgs()
-    self.loadUserPrefs()
+    self.makeHomeDirs()
+    app.history.loadUserHistory()
     self.startup()
     self.commandLoop()
-    self.saveUserPrefs()
+    app.history.saveUserHistory()
 
   def shiftPalette(self):
     """Test different palette options. Each call to shiftPalette will change the

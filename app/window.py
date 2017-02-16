@@ -601,10 +601,11 @@ class InputWindow(Window):
       else:
         scratchPath = "~/ci_scratch"
         self.setTextBuffer(self.prg.bufferManager.loadTextBuffer(scratchPath))
-    self.reshape(rows, cols, top, left)
+    #self.reshape(rows, cols, top, left)
 
   def reshape(self, rows, cols, top, left):
     app.log.detail('reshape', rows, cols, top, left)
+    app.log.stack()
     topInfoRows = 0
     lineNumbersCols = 7
     bottomRows = 1  # Not including status line.
@@ -639,6 +640,17 @@ class InputWindow(Window):
       self.rightColumn.reshape(rows, 1, top, left+cols-1)
       cols -= 1
     Window.reshape(self, rows, cols, top, left)
+
+    app.log.debug('reshape', rows, cols, top, left, self)
+    if 1:
+      tb = self.textBuffer
+      cursor = app.history.get(['files', tb.fullPath, 'cursor'], (0, 0))
+      if not len(tb.lines):
+        row = col = 0
+      else:
+        row = max(0, min(cursor[0], len(tb.lines)-1))
+        col = max(0, min(cursor[1], len(tb.lines[row])))
+      tb.selectText(row, col, 0, app.selectable.kSelectionNone)
 
   def changeFocusTo(self, changeTo):
     self.prg.changeTo = changeTo

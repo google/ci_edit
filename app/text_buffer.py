@@ -829,20 +829,28 @@ class BackingTextBuffer(Mutator):
       app.log.info('except had exception')
 
   def selectText(self, lineNumber, start, length, mode):
-    scrollTo = self.scrollRow
+    scrollRow = self.scrollRow
+    scrollCol = self.scrollCol
     maxy, maxx = self.view.cursorWindow.getmaxyx()
+    app.log.debug('---- sr ', self.scrollRow, 'sc', self.scrollCol, 'n',lineNumber, 's',start, maxy, maxx)
     if not (self.scrollRow < lineNumber <= self.scrollRow + maxy):
-      scrollTo = max(lineNumber-10, 0)
+      scrollRow = max(lineNumber-10, 0)
+      app.log.debug('---b ', scrollRow)
+    if not (self.scrollCol < start <= self.scrollCol + maxx):
+      scrollCol = max(start-10, 0)
+      app.log.debug('---c ', scrollCol)
     self.doSelectionMode(app.selectable.kSelectionNone)
     self.cursorMoveScroll(
         lineNumber-self.cursorRow,
         start+length-self.cursorCol,
         start+length-self.goalCol,
-        scrollTo-self.scrollRow, 0)
+        scrollRow-self.scrollRow,
+        scrollCol-self.scrollCol)
     self.redo()
     self.doSelectionMode(mode)
     self.cursorMove(0, -length, -length)
     self.redo()
+    app.log.debug('----z ', self.scrollRow, 'sc', self.scrollCol, 'n',lineNumber, 's',start, maxy, maxx)
 
   def find(self, searchFor, direction=0):
     """direction is -1 for findPrior, 0 for at cursor, 1 for findNext."""

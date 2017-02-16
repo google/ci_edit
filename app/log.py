@@ -49,6 +49,14 @@ def chan(channel, *args):
     screenLog += lines
     fullLog += lines
 
+def stack():
+  global enabledChannels, fullLog, screenLog
+  stack = inspect.stack()[1:]
+  stack.reverse()
+  for i,frame in enumerate(stack):
+    fullLog += ["stack %2d %14s %4s %s" % (i, os.path.split(frame[1])[1],
+        frame[2], frame[3])]
+
 def info(*args):
   chan('info', *args)
 
