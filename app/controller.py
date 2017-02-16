@@ -56,7 +56,10 @@ class Controller:
 
   def maybeChangeToQuit(self):
     app.log.debug()
-    if not self.host.textBuffer.isDirty():
+    tb = self.host.textBuffer
+    app.history.set(['files', tb.fullPath, 'cursor'],
+        (tb.cursorRow, tb.cursorCol))
+    if not tb.isDirty():
       self.host.quitNow()
     self.host.changeFocusTo(self.host.interactiveQuit)
 

@@ -5,6 +5,7 @@
 
 import app.buffer_manager
 import app.curses_util
+import app.history
 import app.log
 import app.prefs
 import app.text_buffer

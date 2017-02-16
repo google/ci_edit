@@ -3,9 +3,11 @@
 # found in the LICENSE file.
 
 import app.log
+import app.history
 import app.text_buffer
 import os
 import sys
+import time
 
 
 class BufferManager:
@@ -15,6 +17,7 @@ class BufferManager:
 
   def loadTextBuffer(self, path):
     expandedPath = os.path.abspath(os.path.expanduser(os.path.expandvars(path)))
+    app.history.set(['files', expandedPath, 'adate'], time.time())
     textBuffer = self.buffers.get(path, None)
     app.log.info('X textBuffer', repr(textBuffer));
     if not textBuffer:

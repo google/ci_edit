@@ -42,7 +42,6 @@ def chanEnable(channel, isEnabled):
   else:
     enabledChannels.pop(channel, None)
 
-
 def chan(channel, *args):
   global enabledChannels, fullLog, screenLog
   if channel in enabledChannels:

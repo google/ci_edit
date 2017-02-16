@@ -3,9 +3,10 @@
 # found in the LICENSE file.
 
 import app.log
-import app.selectable
+import app.history
 import app.parser
 import app.prefs
+import app.selectable
 import third_party.pyperclip as clipboard
 import curses.ascii
 import difflib
@@ -802,6 +803,8 @@ class BackingTextBuffer(Mutator):
     self.data = '\n'.join(lines)
 
   def fileWrite(self):
+    app.history.set(
+        ['files', self.fullPath, 'cursor'], (self.cursorRow, self.cursorCol))
     try:
       try:
         self.stripTrailingWhiteSpace()
