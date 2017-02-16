@@ -283,6 +283,7 @@ class CiProgram:
     self.readStdin = False
     takeAll = False
     logInfo = False
+    logDebug = False
     logParser = False
     logStartup = False
     for i in sys.argv[1:]:
@@ -291,6 +292,7 @@ class CiProgram:
         self.showLogWindow = self.showLogWindow or i == '--log'
         logInfo = logInfo or i == '--logDetail'
         logInfo = logInfo or i == '--p'
+        logDebug = logDebug or i == '--d'
         logParser = logParser or i == '--parser'
         logStartup = logStartup or i == '--startup'
         if i == '--version':
@@ -317,6 +319,7 @@ class CiProgram:
       app.log.chanEnable('debug', True)
       app.log.chanEnable('detail', True)
       app.log.chanEnable('error', True)
+    app.log.chanEnable('debug', logDebug)
     app.log.chanEnable('parser', logParser)
     app.log.chanEnable('startup', logStartup)
     app.prefs.init()
