@@ -311,6 +311,8 @@ prefs = {
         'arguments', 'break', 'case', 'continue',
         'false', 'for', 'function', 'if', 'return',
         'switch', 'this', 'true', 'while',
+
+        'setTimeout', 'requestCallback', 'console',
       ],
       'contains': [
         'c_string1', 'c_string2', 'doc_block_comment', 'cpp_block_comment',
