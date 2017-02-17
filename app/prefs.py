@@ -31,13 +31,14 @@ __common_keywords = [
 ]
 
 __c_keywords = __common_keywords + [
-  'case', 'const',
+  'case', 'const', 'default',
   'sizeof', 'static', 'struct', 'switch',
   'typedef',
 ]
 
 __c_primitive_types = [
-  'char', 'double', 'float', 'int', 'long', 'signed', 'short', 'unsigned',
+  'bool', 'char', 'double', 'float', 'int', 'long', 'signed', 'short',
+  'unsigned',
   'int8_t', 'int16_t', 'int32_t', 'int64_t',
   'uint8_t', 'uint16_t', 'uint32_t', 'uint64_t',
   'void', 'wchar_t',
@@ -184,10 +185,10 @@ prefs = {
     'cpp': {
       'indent': '  ',
       'keywords': __c_keywords + [
-        'auto', 'catch', 'class', 'constexpr',
+        'auto', 'catch', 'class', 'constexpr', 'false',
         'namespace', 'nullptr',
         'private', 'protected', 'public',
-        'template', 'this', 'throw', 'typename',
+        'template', 'this', 'throw', 'true', 'typename',
       ],
       'namespaces': [
         '::', 'std::',
