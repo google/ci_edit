@@ -28,10 +28,11 @@ def userMessage(*args):
 
 class CiProgram:
   """This is the main editor program. It holds top level information and runs
-  the main loop. The CiProgram is intended as a singleton."""
+  the main loop. The CiProgram is intended as a singleton.
+  In some aspects, the program acts as a top level window, even though it's not
+  exactly a window."""
   def __init__(self, stdscr):
     self.bufferManager = app.buffer_manager.BufferManager()
-    self.changeTo = None
     self.exiting = False
     self.modeStack = []
     self.priorClick = 0
@@ -68,6 +69,7 @@ class CiProgram:
   def commandLoop(self):
     window = self.inputWindow
     window.focus()
+    self.focusedWindow = window
     while not self.exiting:
       self.refresh()
       window.textBuffer.setMessage()
@@ -88,13 +90,14 @@ class CiProgram:
           if cmd == curses.KEY_MOUSE:
             self.handleMouse(mouseEvents[0])
             mouseEvents = mouseEvents[1:]
-          if self.changeTo:
-            window.unfocus()
-            window = self.changeTo
-            self.changeTo = None
-            window.refresh()
-            window.focus()
-            window.controller.onChange()
+          window = self.focusedWindow
+
+  def changeFocusTo(self, changeTo):
+    self.focusedWindow.unfocus()
+    self.focusedWindow = changeTo
+    self.focusedWindow.refresh()
+    self.focusedWindow.focus()
+    self.focusedWindow.controller.onChange()
 
   def startup(self):
     """A second init-like function. Called after command line arguments are
@@ -160,6 +163,8 @@ class CiProgram:
         self.debugWindow.color)
     self.debugWindow.writeLine("win %r"%(win,),
         self.debugWindow.color)
+    self.debugWindow.writeLine("win %r"%(self.focusedWindow,),
+        self.debugWindow.color)
     self.debugWindow.writeLine("tb %r"%(textBuffer,),
         self.debugWindow.color)
     try:
@@ -217,10 +222,18 @@ class CiProgram:
     (id, mousex, mousey, mousez, bstate) = info[0]
     eventTime = info[1]
     rapidClickTimeout = .5
-    for i in reversed(self.zOrder):
-      if i.contains(mousey, mousex):
+    def findWindow(parent, mousey, mousex):
+      for window in reversed(parent.zOrder):
+        if window.contains(mousey, mousex):
+          return findWindow(window, mousey, mousex)
+      return parent
+    i = findWindow(self, mousey, mousex)
+    if i != self:
+        if self.focusedWindow != i and i.isFocusable:
+          i.changeFocusTo(i)
         mousey -= i.top
         mousex -= i.left
+        app.log.info("\n",i)
         #app.log.info('bstate', app.curses_util.mouseButtonName(bstate))
         if bstate & curses.BUTTON1_RELEASED:
           if self.priorClick + rapidClickTimeout <= eventTime:

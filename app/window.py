@@ -19,6 +19,7 @@ class StaticWindow:
     self.zOrder = []
     self.color = 0
     self.colorSelected = 1
+    self.isFocusable = False
     self.top = 0
     self.left = 0
     self.rows = 1
@@ -32,6 +33,9 @@ class StaticWindow:
     """Overwrite text a row, column with text."""
     try: self.cursorWindow.addstr(row, col, text, colorPair)
     except curses.error: pass
+
+  def changeFocusTo(self, changeTo):
+    self.parent.changeFocusTo(changeTo)
 
   def paint(self, row, col, count, colorPair):
     """Paint text a row, column with colorPair.
@@ -171,6 +175,7 @@ class Window(StaticWindow):
     self.controller = controller
     self.cursorWindow.keypad(1)
     self.hasFocus = False
+    self.isFocusable = True
     self.textBuffer = None
 
   def focus(self):
@@ -648,9 +653,6 @@ class InputWindow(Window):
         row = max(0, min(cursor[0], len(tb.lines)-1))
         col = max(0, min(cursor[1], len(tb.lines[row])))
       tb.selectText(row, col, 0, app.selectable.kSelectionNone)
-
-  def changeFocusTo(self, changeTo):
-    self.prg.changeTo = changeTo
 
   def drawRightEdge(self):
     """Draw makers to indicate text extending past the right edge of the

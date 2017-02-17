@@ -67,7 +67,6 @@ class InteractiveFind(app.editor.InteractiveFind):
       CTRL_R: self.findPrior,
       CTRL_S: self.saveDocument,
       curses.KEY_DOWN: self.findNext,
-      curses.KEY_MOUSE: self.changeToHostWindow,
       curses.KEY_UP: self.findPrior,
     })
     self.commandSet = commandSet
@@ -89,7 +88,6 @@ class InteractiveGoto(app.editor.InteractiveGoto):
       curses.KEY_F1: self.info,
       CTRL_J: self.changeToHostWindow,
       CTRL_S: self.saveDocument,
-      curses.KEY_MOUSE: self.changeToHostWindow,
       ord('b'): self.gotoBottom,
       ord('h'): self.gotoHalfway,
       ord('t'): self.gotoTop,
@@ -154,7 +152,6 @@ class CuaEdit(app.controller.Controller):
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
       curses.ascii.ESC: textBuffer.selectionNone,
-      #curses.KEY_MOUSE: self.prg.handleMouse,
       curses.KEY_RESIZE: self.prg.handleScreenResize,
 
       curses.KEY_F1: self.info,
