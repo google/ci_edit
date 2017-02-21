@@ -46,6 +46,7 @@ class InteractiveOpener(app.controller.Controller):
 
   def focus(self):
     app.log.info('InteractiveOpener.focus')
+    self.priorPath = self.host.textBuffer.fullPath
     self.commandDefault = self.textBuffer.insertPrintable
     # Create a new text buffer to display dir listing.
     self.host.setTextBuffer(text_buffer.TextBuffer())
@@ -54,11 +55,12 @@ class InteractiveOpener(app.controller.Controller):
     app.log.info('InteractiveOpener command set')
 
   def createOrOpen(self):
-    expandedPath = os.path.abspath(os.path.expanduser(self.textBuffer.lines[0]))
-    app.log.info('createOrOpen', expandedPath)
-    if not os.path.isdir(expandedPath):
-      self.host.setTextBuffer(
-          self.prg.bufferManager.loadTextBuffer(expandedPath))
+    if 0:
+      expandedPath = os.path.abspath(os.path.expanduser(self.textBuffer.lines[0]))
+      app.log.info('createOrOpen\n\n', expandedPath)
+      if not os.path.isdir(expandedPath):
+        self.host.setTextBuffer(
+            self.prg.bufferManager.loadTextBuffer(expandedPath))
     self.changeToHostWindow()
 
   def maybeSlash(self, expandedPath):
@@ -127,7 +129,7 @@ class InteractiveOpener(app.controller.Controller):
     self.textBuffer.cursorCol = len(path)
     self.textBuffer.goalCol = self.textBuffer.cursorCol
 
-  def onChange(self):
+  def oldAutoOpenOnChange(self):
     path = os.path.expanduser(os.path.expandvars(self.textBuffer.lines[0]))
     dirPath, fileName = os.path.split(path)
     dirPath = dirPath or '.'
@@ -146,6 +148,42 @@ class InteractiveOpener(app.controller.Controller):
     else:
       self.host.textBuffer.lines = [
           os.path.abspath(os.path.expanduser(dirPath))+": not found"]
+
+  def onChange(self):
+    return
+    path = os.path.expanduser(os.path.expandvars(self.textBuffer.lines[0]))
+    dirPath, fileName = os.path.split(path)
+    dirPath = dirPath or '.'
+    app.log.info('O.onChange', dirPath, fileName)
+    if os.path.isdir(dirPath):
+      lines = []
+      for i in os.listdir(dirPath):
+        lines.append(i)
+      self.host.textBuffer.selectionAll()
+      clip = tuple([
+          os.path.abspath(os.path.expanduser(dirPath))+":"] + lines)
+      self.host.textBuffer.redoAddChange(('v', clip))
+      self.host.textBuffer.redo()
+      self.host.textBuffer.selectionNone()
+      # self.host.textBuffer.lines = [
+      #     os.path.abspath(os.path.expanduser(dirPath))+":"] + lines
+    else:
+      pass
+      #self.host.textBuffer.lines = [
+      #    os.path.abspath(os.path.expanduser(dirPath))+": not found"]
+
+  def unfocus(self):
+    expandedPath = os.path.abspath(os.path.expanduser(self.textBuffer.lines[0]))
+    if os.path.isdir(expandedPath):
+      app.log.info('dir\n\n', expandedPath)
+      self.host.setTextBuffer(
+          self.prg.bufferManager.loadTextBuffer(self.priorPath))
+    else:
+      app.log.info('non-dir\n\n', expandedPath)
+      app.log.info('non-dir\n\n',
+          self.prg.bufferManager.loadTextBuffer(expandedPath).lines[0])
+      self.host.setTextBuffer(
+          self.prg.bufferManager.loadTextBuffer(expandedPath))
 
 
 class InteractiveQuit(app.controller.Controller):
