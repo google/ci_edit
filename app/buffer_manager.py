@@ -32,15 +32,16 @@ class BufferManager:
         app.log.info('creating a new file at\n ', expandedPath)
         textBuffer.fileLoad(expandedPath)
     self.buffers[expandedPath] = textBuffer
-    for i,k in self.buffers.items():
-      app.log.info('  ', i)
-      app.log.info('    ', k)
-      #app.log.info('    ', repr(k.lines))
-      #app.log.info('    ', len(k.lines) and k.lines[0])
-    app.log.info(' loadTextBuffer')
-    app.log.info(expandedPath)
-    app.log.info(' loadTextBuffer')
-    app.log.info(repr(textBuffer))
+    if 0:  # logging.
+      for i,k in self.buffers.items():
+        app.log.info('  ', i)
+        app.log.info('    ', k)
+        #app.log.info('    ', repr(k.lines))
+        #app.log.info('    ', len(k.lines) and k.lines[0])
+      app.log.info(' loadTextBuffer')
+      app.log.info(expandedPath)
+      app.log.info(' loadTextBuffer')
+      app.log.info(repr(textBuffer))
     return textBuffer
 
   def readStdin(self):
