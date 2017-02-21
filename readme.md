@@ -1,6 +1,6 @@
 ## The ci text editor
 
-Heh, well yes, I do think the world needs another text editor.
+The world does need another text editor.
 
 There are other fine curses based editors. I found that I was often trying to
 tweak them to get just what I wanted. Almost as often, some dark piece of those
@@ -25,6 +25,8 @@ Features of ci
 - brace matching
 - mouse support
 - pipe to editor
+- nested grammars
+- resume at last edit position
 
 Future features (todo)
 
@@ -38,9 +40,7 @@ Future features (todo)
 - auto reload of modified files
 - trace file
 - jump to opposing brace
-- nested grammars
 - saved undo/redo
-- resume at last edit position
 - a lot more...
 
 Copyright 2016 The ci_edit Authors. All rights reserved.
