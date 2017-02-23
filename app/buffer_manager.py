@@ -20,7 +20,6 @@ class BufferManager:
     textBuffer = app.text_buffer.TextBuffer()
     textBuffer.lines = [""]
     textBuffer.savedAtRedoIndex = 0
-    textBuffer.file = None
     self.ramBuffers.append(textBuffer)
     return textBuffer
 
@@ -62,13 +61,10 @@ class BufferManager:
     newFd = os.dup(stdinFd)
     newStdin = open("/dev/tty")
     os.dup2(newStdin.fileno(), stdinFd)
-    fileInput = os.fdopen(newFd, "r")
     # Create a text buffer to read from alternate stream.
     textBuffer = self.newTextBuffer()
-    textBuffer.file = fileInput
-    textBuffer.fileFilter(fileInput.read())
-    textBuffer.file.close()
-    textBuffer.file = None
+    with os.fdopen(newFd, "r") as fileInput:
+      textBuffer.fileFilter(fileInput.read())
     app.log.info('finished reading from stdin')
     return textBuffer
 

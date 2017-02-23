@@ -730,18 +730,6 @@ class BackingTextBuffer(Mutator):
     else:
       app.log.info('clipList empty')
 
-  def fileClose(self):
-    app.log.info('fileClose')
-    assert False
-    if not self.file.closed:
-      self.fileWrite()
-      # todo handle error writing
-      self.data = ""
-      self.fullPath = ""
-      self.relativePath = ""
-      self.lines = []
-      self.file.close()
-
   def doDataToLines(self, data):
     def parse(line):
       return "\xfe%02x"%ord(line.groups()[0])

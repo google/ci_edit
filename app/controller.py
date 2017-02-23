@@ -66,7 +66,7 @@ class Controller:
   def maybeChangeToSaveAs(self):
     app.log.debug()
     tb = self.host.textBuffer
-    if tb.file:
+    if tb.fullPath:
       tb.fileWrite()
       return
     self.changeToSaveAs()
