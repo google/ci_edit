@@ -5,6 +5,7 @@
 
 import app.buffer_manager
 import app.curses_util
+import app.help
 import app.history
 import app.log
 import app.prefs
@@ -308,15 +309,12 @@ class CiProgram:
         logDebug = logDebug or i == '--d'
         logParser = logParser or i == '--parser'
         logStartup = logStartup or i == '--startup'
+        if i == '--help':
+          userMessage(app.help.docs['command line'])
+          self.quitNow()
+          return
         if i == '--version':
-          dirPath = os.path.split(os.path.abspath(os.path.dirname(
-              app.log.__file__)))[0]
-          userMessage(
-              'Version: b1\n'
-              'See LICENSE for license information\n'
-              'See readme.md for an introduction\n'
-              'Both files may be found in "'+dirPath+'"\n'
-              'Please send feedback and bug reports to dschuyler@')
+          userMessage(app.help.docs['version'])
           self.quitNow()
           return
         if i == '--':
