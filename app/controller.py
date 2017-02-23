@@ -63,6 +63,14 @@ class Controller:
       self.host.quitNow()
     self.host.changeFocusTo(self.host.interactiveQuit)
 
+  def maybeChangeToSaveAs(self):
+    app.log.debug()
+    tb = self.host.textBuffer
+    if tb.file:
+      tb.fileWrite()
+      return
+    self.changeToSaveAs()
+
   def onChange(self):
     pass
 

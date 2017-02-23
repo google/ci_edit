@@ -605,8 +605,7 @@ class InputWindow(Window):
       elif self.prg.readStdin:
         self.setTextBuffer(self.prg.bufferManager.readStdin())
       else:
-        scratchPath = "~/ci_scratch"
-        self.setTextBuffer(self.prg.bufferManager.loadTextBuffer(scratchPath))
+        self.setTextBuffer(self.prg.bufferManager.newTextBuffer())
 
   def reshape(self, rows, cols, top, left):
     app.log.detail('reshape', rows, cols, top, left)

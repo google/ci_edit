@@ -788,7 +788,7 @@ class BackingTextBuffer(Mutator):
       file.close()
     else:
       self.data = ""
-    self.fileExtension = os.path.splitext(fullPath)[1]
+    self.fileExtension = os.path.splitext(self.fullPath)[1]
     if self.data:
       self.parseGrammars()
       self.dataToLines()
