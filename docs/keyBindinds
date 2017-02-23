@@ -1,0 +1,34 @@
+
+Within the main text window:
+
+  ctrl+a       Select all
+  ctrl+c       Copy
+  ctrl+f       Find
+  ctrl+g       Go to line
+  ctrl+q       Quit (exit editor)
+  ctrl+r       Reverse find
+  ctrl+s       Save file
+  ctrl+v       Paste
+  ctrl+x       Cut
+  ctrl+y       Redo
+  ctrl+z       Undo
+
+Within the Find prompt:
+
+  Text commands (such as cut and paste)
+  opperate on the prompt text rather
+  than the main window.
+
+  return       Exit Find
+  esc          Exit Find
+  ctrl+a       Select all
+  ctrl+c       Copy
+  ctrl+f       Find next
+  ctrl+g       Find next
+  ctrl+q       Quit (exit editor)
+  ctrl+r       Reverse find
+  ctrl+s       Save file
+  ctrl+v       Paste
+  ctrl+x       Cut
+  ctrl+y       Redo
+  ctrl+z       Undo
