@@ -139,6 +139,27 @@ class InteractiveQuit(app.editor.InteractiveQuit):
     self.host.quitNow()
 
 
+class InteractiveSaveAs(app.editor.InteractiveSaveAs):
+  """Ask about unsaved files."""
+  def __init__(self, host, textBuffer):
+    app.editor.InteractiveSaveAs.__init__(self, host, textBuffer)
+    self.document = host
+    commandSet = initCommandSet(self, textBuffer)
+    commandSet.update({
+      curses.KEY_F1: self.info,
+      CTRL_J: self.saveAs,
+    })
+    self.commandSet = commandSet
+    self.commandDefault = self.changeToHostWindow
+
+  def saveAs(self):
+    app.log.info('saveAs')
+    self.document.textBuffer.setFilePath(self.textBuffer.lines[0])
+    # Preload the message with an error that should be overwritten.
+    self.document.textBuffer.setMessage('Error saving file')
+    self.document.textBuffer.fileWrite()
+
+
 class CuaEdit(app.controller.Controller):
   """Keyboard mappings for CUA. CUA is the Cut/Copy/Paste paradigm."""
   def __init__(self, prg, host):

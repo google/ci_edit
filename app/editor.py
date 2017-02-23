@@ -199,9 +199,8 @@ class InteractiveQuit(app.controller.Controller):
 
 class InteractiveSaveAs(app.controller.Controller):
   """Save buffer under specified file name."""
-  def __init__(self, prg, host, textBuffer):
-    app.controller.Controller.__init__(self, host, 'opener')
-    self.prg = prg
+  def __init__(self, host, textBuffer):
+    app.controller.Controller.__init__(self, host, 'saveAs')
     self.textBuffer = textBuffer
     self.textBuffer.lines = [""]
 

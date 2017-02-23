@@ -323,10 +323,12 @@ class InteractiveQuit(LabeledLine):
 
 
 class InteractiveSaveAs(LabeledLine):
-  def __init__(self, prg, host):
-    LabeledLine.__init__(self, host, "save as: ")
-    #self.controller = app.cu_editor.InteractiveSaveAs(prg, host,
-    #    self.textBuffer)
+  def __init__(self, parent, host):
+    LabeledLine.__init__(self, parent, "save as: ")
+    self.host = host
+    self.setTextBuffer(app.text_buffer.TextBuffer())
+    self.controller = app.cu_editor.InteractiveSaveAs(host,
+        self.textBuffer)
 
 
 class LineNumbers(StaticWindow):
@@ -520,24 +522,13 @@ class InputWindow(Window):
     self.colorSelected = curses.color_pair(app.prefs.selectedColor)
     self.controller = app.controller.MainController(self)
     self.controller.add(app.cu_editor.CuaPlusEdit(prg, self))
-    if 1:
-      self.interactiveOpen = InteractiveOpener(prg, self)
-      self.interactiveOpen.color = curses.color_pair(0)
-      self.interactiveOpen.colorSelected = curses.color_pair(87)
-      self.interactiveOpen.setParent(self, 0)
-      self.interactiveOpen.hide()
-    if 1:
-      self.interactiveSaveAs = InteractiveSaveAs(prg, self)
-      self.interactiveSaveAs.color = curses.color_pair(0)
-      self.interactiveSaveAs.colorSelected = curses.color_pair(87)
-      self.interactiveSaveAs.setParent(self, 0)
-      self.interactiveSaveAs.hide()
-    if 1:
-      self.interactiveQuit = InteractiveQuit(prg, self)
-      self.interactiveQuit.color = curses.color_pair(0)
-      self.interactiveQuit.colorSelected = curses.color_pair(87)
-      self.interactiveQuit.setParent(self, 0)
-      self.interactiveQuit.hide()
+    if 1 or self.showHeader:
+      self.headerLine = HeaderLine(self, self)
+      self.headerLine.color = curses.color_pair(168)
+      self.headerLine.colorSelected = curses.color_pair(47)
+      self.headerLine.setParent(self, 0)
+      if not self.showHeader:
+        self.headerLine.hide()
     if 1:
       self.interactiveFind = InteractiveFind(self)
       self.interactiveFind.color = curses.color_pair(0)
@@ -550,13 +541,24 @@ class InputWindow(Window):
       self.interactiveGoto.colorSelected = curses.color_pair(87)
       self.interactiveGoto.setParent(self, 0)
       self.interactiveGoto.hide()
-    if 1 or self.showHeader:
-      self.headerLine = HeaderLine(self, self)
-      self.headerLine.color = curses.color_pair(168)
-      self.headerLine.colorSelected = curses.color_pair(47)
-      self.headerLine.setParent(self, 0)
-      if not self.showHeader:
-        self.headerLine.hide()
+    if 1:
+      self.interactiveOpen = InteractiveOpener(prg, self)
+      self.interactiveOpen.color = curses.color_pair(0)
+      self.interactiveOpen.colorSelected = curses.color_pair(87)
+      self.interactiveOpen.setParent(self, 0)
+      self.interactiveOpen.hide()
+    if 1:
+      self.interactiveQuit = InteractiveQuit(prg, self)
+      self.interactiveQuit.color = curses.color_pair(0)
+      self.interactiveQuit.colorSelected = curses.color_pair(87)
+      self.interactiveQuit.setParent(self, 0)
+      self.interactiveQuit.hide()
+    if 1:
+      self.interactiveSaveAs = InteractiveSaveAs(prg, self)
+      self.interactiveSaveAs.color = curses.color_pair(0)
+      self.interactiveSaveAs.colorSelected = curses.color_pair(87)
+      self.interactiveSaveAs.setParent(self, 0)
+      self.interactiveSaveAs.hide()
     if 1 or self.showTopInfo:
       self.topInfo = TopInfo(self, self)
       self.topInfo.color = curses.color_pair(168)
