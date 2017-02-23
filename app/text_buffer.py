@@ -1256,6 +1256,21 @@ class BackingTextBuffer(Mutator):
     self.redoAddChange(('vd', ('  ')))
     self.redo()
 
+  def updateScrollPosition(self):
+    """Move the selected view rectangle so that the cursor is visible."""
+    maxy, maxx = self.view.cursorWindow.getmaxyx()
+    rows = 0
+    if self.scrollRow > self.cursorRow:
+      rows = self.cursorRow - self.scrollRow
+    elif self.cursorRow >= self.scrollRow+maxy:
+      rows = self.cursorRow - (self.scrollRow+maxy-1)
+    cols = 0
+    if self.scrollCol > self.cursorCol:
+      cols = self.cursorCol - self.scrollCol
+    elif self.cursorCol >= self.scrollCol+maxx:
+      cols = self.cursorCol - (self.scrollCol+maxx-1)
+    self.cursorMoveScroll(0, 0, 0, rows-self.scrollRow, cols-self.scrollCol)
+    self.redo()
 
 
 class TextBuffer(BackingTextBuffer):
@@ -1276,8 +1291,8 @@ class TextBuffer(BackingTextBuffer):
           self.scrollRow, self.cursorRow, self)
     elif self.cursorRow >= self.scrollRow+maxy:
       rows = self.cursorRow - (self.scrollRow+maxy-1)
-      app.log.error('BBB self.cursorRow >= self.scrollRow+maxy',
-          self.cursorRow, self.scrollRow, maxy, self)
+      app.log.error('BBB self.cursorRow >= self.scrollRow+maxy cRow',
+          self.cursorRow, 'sRow', self.scrollRow, 'maxy', maxy, self)
     cols = 0
     if self.scrollCol > self.cursorCol:
       cols = self.cursorCol - self.scrollCol
