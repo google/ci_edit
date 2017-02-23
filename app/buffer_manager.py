@@ -21,8 +21,6 @@ class BufferManager:
     textBuffer.lines = [""]
     textBuffer.savedAtRedoIndex = 0
     textBuffer.file = None
-    #textBuffer.fullPath = None
-    #textBuffer.relativePath = None
     self.ramBuffers.append(textBuffer)
     return textBuffer
 
@@ -68,7 +66,7 @@ class BufferManager:
     # Create a text buffer to read from alternate stream.
     textBuffer = self.newTextBuffer()
     textBuffer.file = fileInput
-    textBuffer.fileFilter()
+    textBuffer.fileFilter(fileInput.read())
     textBuffer.file.close()
     textBuffer.file = None
     app.log.info('finished reading from stdin')
