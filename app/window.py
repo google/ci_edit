@@ -5,6 +5,7 @@
 import app.controller
 import app.cu_editor
 import app.editor
+import app.history
 import app.text_buffer
 import sys
 import curses
@@ -489,8 +490,6 @@ class TopInfo(StaticWindow):
       infoRows = self.mode
     if self.borrowedRows != infoRows:
       self.host.resizeTopBy(infoRows-self.borrowedRows)
-      self.host.leftColumn.resizeTopBy(infoRows-self.borrowedRows)
-      self.host.rightColumn.resizeTopBy(infoRows-self.borrowedRows)
       self.resizeTo(infoRows, self.cols)
       self.borrowedRows = infoRows
 
@@ -653,6 +652,12 @@ class InputWindow(Window):
         row = max(0, min(cursor[0], len(tb.lines)-1))
         col = max(0, min(cursor[1], len(tb.lines[row])))
       tb.selectText(row, col, 0, app.selectable.kSelectionNone)
+
+  def resizeTopBy(self, rowDelta):
+    Window.resizeTopBy(self, rowDelta)
+    self.leftColumn.resizeTopBy(rowDelta)
+    self.rightColumn.resizeTopBy(rowDelta)
+    self.textBuffer.updateScrollPosition()
 
   def drawRightEdge(self):
     """Draw makers to indicate text extending past the right edge of the

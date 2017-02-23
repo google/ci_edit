@@ -1269,7 +1269,7 @@ class BackingTextBuffer(Mutator):
       cols = self.cursorCol - self.scrollCol
     elif self.cursorCol >= self.scrollCol+maxx:
       cols = self.cursorCol - (self.scrollCol+maxx-1)
-    self.cursorMoveScroll(0, 0, 0, rows-self.scrollRow, cols-self.scrollCol)
+    self.cursorMoveScroll(0, 0, 0, rows, cols)
     self.redo()
 
 
