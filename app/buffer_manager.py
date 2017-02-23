@@ -14,6 +14,17 @@ class BufferManager:
   """Manage a set of text buffers. Some text buffers may be hidden."""
   def __init__(self):
     self.buffers = {}
+    self.ramBuffers = []
+
+  def newTextBuffer(self):
+    textBuffer = app.text_buffer.TextBuffer()
+    textBuffer.lines = [""]
+    textBuffer.savedAtRedoIndex = 0
+    textBuffer.file = None
+    #textBuffer.fullPath = None
+    #textBuffer.relativePath = None
+    self.ramBuffers.append(textBuffer)
+    return textBuffer
 
   def loadTextBuffer(self, path):
     expandedPath = os.path.abspath(os.path.expanduser(os.path.expandvars(path)))
@@ -55,16 +66,12 @@ class BufferManager:
     os.dup2(newStdin.fileno(), stdinFd)
     fileInput = os.fdopen(newFd, "r")
     # Create a text buffer to read from alternate stream.
-    textBuffer = app.text_bufer.TextBuffer()
-    textBuffer.lines = [""]
-    textBuffer.savedAtRedoIndex = 0
+    textBuffer = self.newTextBuffer()
     textBuffer.file = fileInput
     textBuffer.fileFilter()
     textBuffer.file.close()
     textBuffer.file = None
     app.log.info('finished reading from stdin')
-    self.fullPath = None
-    self.relativePath = None
     return textBuffer
 
   def fileClose(self, path):
