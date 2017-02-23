@@ -35,11 +35,11 @@ class Controller:
     self.host.changeFocusTo(self.host.interactiveGoto)
 
   def changeToQuit(self):
-    app.log.debug('changeToQuit')
+    app.log.debug()
     self.host.changeFocusTo(self.host.interactiveQuit)
 
   def changeToSaveAs(self):
-    app.log.debug('changeToSaveAs')
+    app.log.debug()
     self.host.changeFocusTo(self.host.interactiveSaveAs)
 
   def doCommand(self, ch):
