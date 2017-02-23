@@ -760,12 +760,15 @@ class BackingTextBuffer(Mutator):
     self.dataToLines()
     self.savedAtRedoIndex = self.redoIndex
 
+  def setFilePath(self, path):
+    self.fullPath = os.path.expandvars(os.path.expanduser(path))
+
   def fileLoad(self, path):
     app.log.info('fileLoad', path)
-    fullPath = os.path.expandvars(os.path.expanduser(path))
+    self.setFilePath(path)
     file = None
     try:
-      file = open(fullPath, 'r+')
+      file = open(self.fullPath, 'r+')
       self.setMessage('Opened existing file')
     except:
       try:
@@ -773,10 +776,9 @@ class BackingTextBuffer(Mutator):
         self.savedAtRedoIndex = -1
         self.setMessage('Creating new file')
       except:
-        app.log.info('error opening file', fullPath)
-        self.setMessage('error opening file', fullPath)
+        app.log.info('error opening file', self.fullPath)
+        self.setMessage('error opening file', self.fullPath)
         return
-    self.fullPath = fullPath
     self.relativePath = os.path.relpath(path, os.getcwd())
     app.log.info('fullPath', self.fullPath)
     app.log.info('cwd', os.getcwd())
