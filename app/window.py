@@ -2,6 +2,7 @@
 # Use of this source code is governed by an Apache-style license that can be
 # found in the LICENSE file.
 
+import app.buffer_manager
 import app.controller
 import app.cu_editor
 import app.editor
@@ -589,11 +590,11 @@ class InputWindow(Window):
       if self.prg.cliFiles:
         path = self.prg.cliFiles[0]['path']
         self.setTextBuffer(
-            self.prg.bufferManager.loadTextBuffer(path))
+            app.buffer_manager.buffers.loadTextBuffer(path))
       elif self.prg.readStdin:
-        self.setTextBuffer(self.prg.bufferManager.readStdin())
+        self.setTextBuffer(app.buffer_manager.buffers.readStdin())
       else:
-        self.setTextBuffer(self.prg.bufferManager.newTextBuffer())
+        self.setTextBuffer(app.buffer_manager.buffers.newTextBuffer())
 
   def reshape(self, rows, cols, top, left):
     """Change self and sub-windows to fit within the given rectangle."""

@@ -5,6 +5,7 @@
 """Key bindings for the ciEditor."""
 
 from app.curses_util import *
+import app.buffer_manager
 import app.controller
 import curses
 import curses.ascii
@@ -40,7 +41,6 @@ class InteractiveOpener(app.controller.Controller):
   """Open a file to edit."""
   def __init__(self, prg, host, textBuffer):
     app.controller.Controller.__init__(self, host, 'opener')
-    self.prg = prg
     self.textBuffer = textBuffer
     self.textBuffer.lines = [""]
 
@@ -60,7 +60,7 @@ class InteractiveOpener(app.controller.Controller):
       app.log.info('createOrOpen\n\n', expandedPath)
       if not os.path.isdir(expandedPath):
         self.host.setTextBuffer(
-            self.prg.bufferManager.loadTextBuffer(expandedPath))
+            app.buffer_manager.buffers.loadTextBuffer(expandedPath))
     self.changeToHostWindow()
 
   def maybeSlash(self, expandedPath):
@@ -140,7 +140,7 @@ class InteractiveOpener(app.controller.Controller):
         if i.startswith(fileName):
           lines.append(i)
       if len(lines) == 1 and os.path.isfile(os.path.join(dirPath, fileName)):
-        self.host.setTextBuffer(self.prg.bufferManager.loadTextBuffer(
+        self.host.setTextBuffer(app.buffer_manager.buffers.loadTextBuffer(
             os.path.join(dirPath, fileName)))
       else:
         self.host.textBuffer.lines = [
@@ -181,35 +181,9 @@ class InteractiveOpener(app.controller.Controller):
     else:
       app.log.info('non-dir\n\n', expandedPath)
       app.log.info('non-dir\n\n',
-          self.prg.bufferManager.loadTextBuffer(expandedPath).lines[0])
+          app.buffer_manager.buffers.loadTextBuffer(expandedPath).lines[0])
       self.host.setTextBuffer(
-          self.prg.bufferManager.loadTextBuffer(expandedPath))
-
-
-class InteractiveQuit(app.controller.Controller):
-  """Prompt user about unsaved changes."""
-  def __init__(self, host, textBuffer):
-    app.controller.Controller.__init__(self, host, 'unsavedChanges')
-    self.textBuffer = textBuffer
-    self.textBuffer.lines = [""] #####################
-
-  def info(self):
-    app.log.info('InteractiveQuit command set')
-
-
-class InteractiveSaveAs(app.controller.Controller):
-  """Save buffer under specified file name."""
-  def __init__(self, host, textBuffer):
-    app.controller.Controller.__init__(self, host, 'saveAs')
-    self.textBuffer = textBuffer
-    self.textBuffer.lines = [""]
-
-  def focus(self):
-    app.log.info('InteractiveSaveAs.focus')
-    self.commandDefault = self.textBuffer.insertPrintable
-
-  def info(self):
-    app.log.info('InteractiveSaveAs command set')
+          app.buffer_manager.buffers.loadTextBuffer(expandedPath))
 
 
 class InteractiveFind(app.controller.Controller):
@@ -304,3 +278,29 @@ class InteractiveGoto(app.controller.Controller):
     except: pass
     gotoLine, gotoCol = (line.split(',') + ['0', '0'])[:2]
     self.cursorMoveTo(parseInt(gotoLine), parseInt(gotoCol))
+
+
+class InteractiveQuit(app.controller.Controller):
+  """Prompt user about unsaved changes."""
+  def __init__(self, host, textBuffer):
+    app.controller.Controller.__init__(self, host, 'unsavedChanges')
+    self.textBuffer = textBuffer
+    self.textBuffer.lines = [""] #####################
+
+  def info(self):
+    app.log.info('InteractiveQuit command set')
+
+
+class InteractiveSaveAs(app.controller.Controller):
+  """Save buffer under specified file name."""
+  def __init__(self, host, textBuffer):
+    app.controller.Controller.__init__(self, host, 'saveAs')
+    self.textBuffer = textBuffer
+    self.textBuffer.lines = [""]
+
+  def focus(self):
+    app.log.info('InteractiveSaveAs.focus')
+    self.commandDefault = self.textBuffer.insertPrintable
+
+  def info(self):
+    app.log.info('InteractiveSaveAs command set')

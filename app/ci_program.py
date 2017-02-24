@@ -3,7 +3,6 @@
 # Use of this source code is governed by an Apache-style license that can be
 # found in the LICENSE file.
 
-import app.buffer_manager
 import app.curses_util
 import app.help
 import app.history
@@ -33,7 +32,6 @@ class CiProgram:
   In some aspects, the program acts as a top level window, even though it's not
   exactly a window."""
   def __init__(self, stdscr):
-    self.bufferManager = app.buffer_manager.BufferManager()
     self.exiting = False
     self.modeStack = []
     self.priorClick = 0
