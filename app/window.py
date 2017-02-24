@@ -234,8 +234,8 @@ class Window(StaticWindow):
 
 
 class HeaderLine(StaticWindow):
-  def __init__(self, parent, host):
-    StaticWindow.__init__(self, parent)
+  def __init__(self, host):
+    StaticWindow.__init__(self, host)
     self.host = host
     self.textLine = None
 
@@ -290,8 +290,8 @@ class InteractiveFind(LabeledLine):
 
 
 class InteractiveGoto(LabeledLine):
-  def __init__(self, parent, host):
-    LabeledLine.__init__(self, parent, "goto: ")
+  def __init__(self, host):
+    LabeledLine.__init__(self, host, "goto: ")
     self.controller = app.cu_editor.InteractiveGoto(host,
         self.textBuffer)
 
@@ -312,15 +312,15 @@ class InteractiveQuit(LabeledLine):
 
 
 class InteractiveSaveAs(LabeledLine):
-  def __init__(self, parent, host):
-    LabeledLine.__init__(self, parent, "save as: ")
+  def __init__(self, host):
+    LabeledLine.__init__(self, host, "save as: ")
     self.controller = app.cu_editor.InteractiveSaveAs(host,
         self.textBuffer)
 
 
 class LineNumbers(StaticWindow):
-  def __init__(self, parent, host):
-    StaticWindow.__init__(self, parent)
+  def __init__(self, host):
+    StaticWindow.__init__(self, host)
     self.host = host
 
   def drawLineNumbers(self):
@@ -361,8 +361,8 @@ class LogWindow(StaticWindow):
 class MessageLine(StaticWindow):
   """The message line appears at the bottom of the screen. It shows
        messages to the user, such as error messages."""
-  def __init__(self, parent, host):
-    StaticWindow.__init__(self, parent)
+  def __init__(self, host):
+    StaticWindow.__init__(self, host)
     self.host = host
     self.renderedMessage = None
 
@@ -386,8 +386,8 @@ class MessageLine(StaticWindow):
 class StatusLine(StaticWindow):
   """The status line appears at the bottom of the screen. It shows the current
   line and column the cursor is on."""
-  def __init__(self, parent, host):
-    StaticWindow.__init__(self, parent)
+  def __init__(self, host):
+    StaticWindow.__init__(self, host)
     self.host = host
 
   def refresh(self):
@@ -427,8 +427,8 @@ class StatusLine(StaticWindow):
 
 
 class TopInfo(StaticWindow):
-  def __init__(self, parent, host):
-    StaticWindow.__init__(self, parent)
+  def __init__(self, host):
+    StaticWindow.__init__(self, host)
     self.host = host
     self.borrowedRows = 0
     self.lines = []
@@ -511,7 +511,7 @@ class InputWindow(Window):
     self.controller = app.controller.MainController(self)
     self.controller.add(app.cu_editor.CuaPlusEdit(prg, self))
     if 1:
-      self.headerLine = HeaderLine(self, self)
+      self.headerLine = HeaderLine(self)
       self.headerLine.color = curses.color_pair(168)
       self.headerLine.colorSelected = curses.color_pair(47)
       self.headerLine.setParent(self, 0)
@@ -524,7 +524,7 @@ class InputWindow(Window):
       self.interactiveFind.setParent(self, 0)
       self.interactiveFind.hide()
     if 1:
-      self.interactiveGoto = InteractiveGoto(prg, self)
+      self.interactiveGoto = InteractiveGoto(self)
       self.interactiveGoto.color = curses.color_pair(0)
       self.interactiveGoto.colorSelected = curses.color_pair(87)
       self.interactiveGoto.setParent(self, 0)
@@ -542,27 +542,27 @@ class InputWindow(Window):
       self.interactiveQuit.setParent(self, 0)
       self.interactiveQuit.hide()
     if 1:
-      self.interactiveSaveAs = InteractiveSaveAs(prg, self)
+      self.interactiveSaveAs = InteractiveSaveAs(self)
       self.interactiveSaveAs.color = curses.color_pair(0)
       self.interactiveSaveAs.colorSelected = curses.color_pair(87)
       self.interactiveSaveAs.setParent(self, 0)
       self.interactiveSaveAs.hide()
     if 1:
-      self.topInfo = TopInfo(self, self)
+      self.topInfo = TopInfo(self)
       self.topInfo.color = curses.color_pair(168)
       self.topInfo.colorSelected = curses.color_pair(47)
       self.topInfo.setParent(self, 0)
       if not self.showTopInfo:
         self.topInfo.hide()
     if 1:
-      self.statusLine = StatusLine(self, self)
+      self.statusLine = StatusLine(self)
       self.statusLine.color = curses.color_pair(168)
       self.statusLine.colorSelected = curses.color_pair(47)
       self.statusLine.setParent(self, 0)
       if not self.showFooter:
         self.statusLine.hide()
     if 1:
-      self.leftColumn = LineNumbers(self, self)
+      self.leftColumn = LineNumbers(self)
       self.leftColumn.color = curses.color_pair(211)
       self.leftColumn.colorSelected = curses.color_pair(146)
       self.leftColumn.setParent(self, 0)
@@ -577,7 +577,7 @@ class InputWindow(Window):
       if not self.showRightColumn:
         self.rightColumn.hide()
     if 1:
-      self.messageLine = MessageLine(self, self)
+      self.messageLine = MessageLine(self)
       self.messageLine.color = curses.color_pair(3)
       self.messageLine.colorSelected = curses.color_pair(87)
       self.messageLine.setParent(self, 0)
