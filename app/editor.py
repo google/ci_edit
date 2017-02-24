@@ -298,9 +298,5 @@ class InteractiveSaveAs(app.controller.Controller):
     self.textBuffer = textBuffer
     self.textBuffer.lines = [""]
 
-  def focus(self):
-    app.log.info('InteractiveSaveAs.focus')
-    self.commandDefault = self.textBuffer.insertPrintable
-
   def info(self):
     app.log.info('InteractiveSaveAs command set')

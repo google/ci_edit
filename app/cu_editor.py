@@ -146,18 +146,26 @@ class InteractiveSaveAs(app.editor.InteractiveSaveAs):
     self.document = host
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
+      curses.ascii.ESC: self.changeToHostWindow,
       curses.KEY_F1: self.info,
       CTRL_J: self.saveAs,
     })
     self.commandSet = commandSet
-    self.commandDefault = self.changeToHostWindow
+    self.commandDefault = self.textBuffer.insertPrintable
 
   def saveAs(self):
     app.log.info('saveAs')
+    name = self.textBuffer.lines[0]
+    if not len(name):
+      self.document.textBuffer.setMessage(
+          'File not saved (file name was empty).')
+      self.changeToHostWindow()
+      return
     self.document.textBuffer.setFilePath(self.textBuffer.lines[0])
     # Preload the message with an error that should be overwritten.
     self.document.textBuffer.setMessage('Error saving file')
     self.document.textBuffer.fileWrite()
+    self.changeToHostWindow()
 
 
 class CuaEdit(app.controller.Controller):
