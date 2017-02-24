@@ -20,6 +20,8 @@ class BufferManager:
     for buffer in self.buffers.values():
       if buffer.isDirty():
         return buffer
+    if len(self.ramBuffers):
+      return self.ramBuffers[0]
     return None
 
   def newTextBuffer(self):
@@ -29,23 +31,20 @@ class BufferManager:
     self.ramBuffers.append(textBuffer)
     return textBuffer
 
-  def loadTextBuffer(self, path):
-    expandedPath = os.path.abspath(os.path.expanduser(os.path.expandvars(path)))
-    app.history.set(['files', expandedPath, 'adate'], time.time())
-    textBuffer = self.buffers.get(path, None)
+  def loadTextBuffer(self, relPath):
+    fullPath = os.path.abspath(os.path.expanduser(os.path.expandvars(relPath)))
+    app.history.set(['files', fullPath, 'adate'], time.time())
+    textBuffer = self.buffers.get(fullPath, None)
     app.log.info('X textBuffer', repr(textBuffer));
     if not textBuffer:
-      app.log.info(' loadTextBuffer new')
-      textBuffer = app.text_buffer.TextBuffer()
-      if os.path.isfile(expandedPath):
-        textBuffer.fileLoad(expandedPath)
-      elif os.path.isdir(expandedPath):
-        app.log.info('Tried to open directory as a file', expandedPath)
+      if os.path.isdir(fullPath):
+        app.log.info('Tried to open directory as a file', fullPath)
         return
-      else:
-        app.log.info('creating a new file at\n ', expandedPath)
-        textBuffer.fileLoad(expandedPath)
-    self.buffers[expandedPath] = textBuffer
+      if not os.path.isfile(fullPath):
+        app.log.info('creating a new file at\n ', fullPath)
+      textBuffer = app.text_buffer.TextBuffer()
+      self.renameBuffer(textBuffer, fullPath)
+      textBuffer.fileLoad()
     if 0:  # logging.
       for i,k in self.buffers.items():
         app.log.info('  ', i)
@@ -53,7 +52,7 @@ class BufferManager:
         #app.log.info('    ', repr(k.lines))
         #app.log.info('    ', len(k.lines) and k.lines[0])
       app.log.info(' loadTextBuffer')
-      app.log.info(expandedPath)
+      app.log.info(fullPath)
       app.log.info(' loadTextBuffer')
       app.log.info(repr(textBuffer))
     return textBuffer
@@ -73,6 +72,18 @@ class BufferManager:
       textBuffer.fileFilter(fileInput.read())
     app.log.info('finished reading from stdin')
     return textBuffer
+
+  def renameBuffer(self, buffer, fullPath):
+    try:
+      index = self.ramBuffers.index(buffer)
+      del self.ramBuffers[index]
+    except ValueError:
+      try:
+        del self.buffers[buffer.fullPath]
+      except KeyError:
+        pass
+    buffer.fullPath = fullPath
+    self.buffers[fullPath] = buffer
 
   def fileClose(self, path):
     pass

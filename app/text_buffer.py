@@ -2,6 +2,7 @@
 # Use of this source code is governed by an Apache-style license that can be
 # found in the LICENSE file.
 
+import app.buffer_manager
 import app.log
 import app.history
 import app.parser
@@ -749,11 +750,10 @@ class BackingTextBuffer(Mutator):
     self.savedAtRedoIndex = self.redoIndex
 
   def setFilePath(self, path):
-    self.fullPath = os.path.expandvars(os.path.expanduser(path))
+    app.buffer_manager.buffers.renameBuffer(self, path)
 
-  def fileLoad(self, path):
-    app.log.info('fileLoad', path)
-    self.setFilePath(path)
+  def fileLoad(self):
+    app.log.info('fileLoad', self.fullPath)
     file = None
     try:
       file = open(self.fullPath, 'r+')
@@ -767,7 +767,7 @@ class BackingTextBuffer(Mutator):
         app.log.info('error opening file', self.fullPath)
         self.setMessage('error opening file', self.fullPath)
         return
-    self.relativePath = os.path.relpath(path, os.getcwd())
+    self.relativePath = os.path.relpath(self.fullPath, os.getcwd())
     app.log.info('fullPath', self.fullPath)
     app.log.info('cwd', os.getcwd())
     app.log.info('relativePath', self.relativePath)
