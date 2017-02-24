@@ -98,8 +98,8 @@ class InteractiveGoto(app.editor.InteractiveGoto):
 
 class InteractiveOpener(app.editor.InteractiveOpener):
   """Open a file to edit."""
-  def __init__(self, prg, host, textBuffer):
-    app.editor.InteractiveOpener.__init__(self, prg, host, textBuffer)
+  def __init__(self, host, textBuffer):
+    app.editor.InteractiveOpener.__init__(self, host, textBuffer)
     self.document = host
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({

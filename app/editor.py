@@ -39,7 +39,7 @@ def test_parseInt():
 
 class InteractiveOpener(app.controller.Controller):
   """Open a file to edit."""
-  def __init__(self, prg, host, textBuffer):
+  def __init__(self, host, textBuffer):
     app.controller.Controller.__init__(self, host, 'opener')
     self.textBuffer = textBuffer
     self.textBuffer.lines = [""]
@@ -177,7 +177,7 @@ class InteractiveOpener(app.controller.Controller):
     if os.path.isdir(expandedPath):
       app.log.info('dir\n\n', expandedPath)
       self.host.setTextBuffer(
-          self.prg.bufferManager.loadTextBuffer(self.priorPath))
+          app.buffer_manager.buffers.loadTextBuffer(self.priorPath))
     else:
       app.log.info('non-dir\n\n', expandedPath)
       app.log.info('non-dir\n\n',

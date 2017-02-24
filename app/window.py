@@ -231,7 +231,6 @@ class Window(StaticWindow):
     self.hasFocus = False
     self.cursorWindow.leaveok(1)  # Don't update cursor position.
     self.controller.unfocus()
-    #assert(self.prg.exiting or self.prg.changeTo)
 
 
 class HeaderLine(StaticWindow):
@@ -258,8 +257,8 @@ class FileListPanel(Window):
 
 
 class LabeledLine(Window):
-  def __init__(self, parent, label):
-    Window.__init__(self, parent)
+  def __init__(self, parent, label, controller=None):
+    Window.__init__(self, parent, controller)
     self.host = parent
     self.setTextBuffer(app.text_buffer.TextBuffer())
     self.label = label
@@ -298,16 +297,15 @@ class InteractiveGoto(LabeledLine):
 
 
 class InteractiveOpener(LabeledLine):
-  def __init__(self, prg, host):
+  def __init__(self, host):
     LabeledLine.__init__(self, host, "file: ")
     self.fileListing = app.text_buffer.TextBuffer()
-    self.controller = app.cu_editor.InteractiveOpener(prg, host,
-        self.textBuffer)
+    self.controller = app.cu_editor.InteractiveOpener(host, self.textBuffer)
 
 
 class InteractiveQuit(LabeledLine):
-  def __init__(self, parent, host):
-    LabeledLine.__init__(self, parent,
+  def __init__(self, host):
+    LabeledLine.__init__(self, host,
         "Save changes? (yes, no, or cancel): ")
     self.controller = app.cu_editor.InteractiveQuit(host,
         self.textBuffer)
@@ -532,13 +530,13 @@ class InputWindow(Window):
       self.interactiveGoto.setParent(self, 0)
       self.interactiveGoto.hide()
     if 1:
-      self.interactiveOpen = InteractiveOpener(prg, self)
+      self.interactiveOpen = InteractiveOpener(self)
       self.interactiveOpen.color = curses.color_pair(0)
       self.interactiveOpen.colorSelected = curses.color_pair(87)
       self.interactiveOpen.setParent(self, 0)
       self.interactiveOpen.hide()
     if 1:
-      self.interactiveQuit = InteractiveQuit(prg, self)
+      self.interactiveQuit = InteractiveQuit(self)
       self.interactiveQuit.color = curses.color_pair(0)
       self.interactiveQuit.colorSelected = curses.color_pair(87)
       self.interactiveQuit.setParent(self, 0)
