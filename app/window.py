@@ -259,8 +259,10 @@ class FileListPanel(Window):
 class LabeledLine(Window):
   def __init__(self, parent, label):
     Window.__init__(self, parent)
+    self.host = parent
+    self.setTextBuffer(app.text_buffer.TextBuffer())
     self.label = label
-    self.leftColumn = StaticWindow(parent)
+    self.leftColumn = StaticWindow(self)
 
   def refresh(self):
     self.leftColumn.addStr(0, 0, self.label, self.color)
@@ -283,8 +285,6 @@ class LabeledLine(Window):
 class InteractiveFind(LabeledLine):
   def __init__(self, host):
     LabeledLine.__init__(self, host, "find: ")
-    self.host = host
-    self.setTextBuffer(app.text_buffer.TextBuffer())
     self.controller = app.cu_editor.InteractiveFind(host,
         self.textBuffer)
 
@@ -292,22 +292,14 @@ class InteractiveFind(LabeledLine):
 class InteractiveGoto(LabeledLine):
   def __init__(self, parent, host):
     LabeledLine.__init__(self, parent, "goto: ")
-    self.host = host
-    self.setTextBuffer(app.text_buffer.TextBuffer())
     self.controller = app.cu_editor.InteractiveGoto(host,
         self.textBuffer)
-    self.leftColumn = StaticWindow(parent)
 
 
 class InteractiveOpener(LabeledLine):
   def __init__(self, prg, host):
-    """|host| is used as parent and host."""
     LabeledLine.__init__(self, host, "file: ")
-    self.host = host
-    self.setTextBuffer(app.text_buffer.TextBuffer())
     self.fileListing = app.text_buffer.TextBuffer()
-    #self.fileListing.fullPath = self.host.textBuffer.fullPath
-    #self.host.setTextBuffer(self.fileListing)
     self.controller = app.cu_editor.InteractiveOpener(prg, host,
         self.textBuffer)
 
@@ -316,8 +308,6 @@ class InteractiveQuit(LabeledLine):
   def __init__(self, parent, host):
     LabeledLine.__init__(self, parent,
         "Save changes? (yes, no, or cancel): ")
-    self.host = host
-    self.setTextBuffer(app.text_buffer.TextBuffer())
     self.controller = app.cu_editor.InteractiveQuit(host,
         self.textBuffer)
 
@@ -325,8 +315,6 @@ class InteractiveQuit(LabeledLine):
 class InteractiveSaveAs(LabeledLine):
   def __init__(self, parent, host):
     LabeledLine.__init__(self, parent, "save as: ")
-    self.host = host
-    self.setTextBuffer(app.text_buffer.TextBuffer())
     self.controller = app.cu_editor.InteractiveSaveAs(host,
         self.textBuffer)
 
@@ -496,6 +484,7 @@ class TopInfo(StaticWindow):
       self.borrowedRows = infoRows
 
   def refresh(self):
+    """Render the context information at the top of the window."""
     lines = self.lines
     lines.reverse()
     for i,line in enumerate(lines):
@@ -522,7 +511,7 @@ class InputWindow(Window):
     self.colorSelected = curses.color_pair(app.prefs.selectedColor)
     self.controller = app.controller.MainController(self)
     self.controller.add(app.cu_editor.CuaPlusEdit(prg, self))
-    if 1 or self.showHeader:
+    if 1:
       self.headerLine = HeaderLine(self, self)
       self.headerLine.color = curses.color_pair(168)
       self.headerLine.colorSelected = curses.color_pair(47)
@@ -559,29 +548,28 @@ class InputWindow(Window):
       self.interactiveSaveAs.colorSelected = curses.color_pair(87)
       self.interactiveSaveAs.setParent(self, 0)
       self.interactiveSaveAs.hide()
-    if 1 or self.showTopInfo:
+    if 1:
       self.topInfo = TopInfo(self, self)
       self.topInfo.color = curses.color_pair(168)
       self.topInfo.colorSelected = curses.color_pair(47)
       self.topInfo.setParent(self, 0)
       if not self.showTopInfo:
         self.topInfo.hide()
-      #self.topInfo.hide()
-    if 1 or self.showFooter:
+    if 1:
       self.statusLine = StatusLine(self, self)
       self.statusLine.color = curses.color_pair(168)
       self.statusLine.colorSelected = curses.color_pair(47)
       self.statusLine.setParent(self, 0)
       if not self.showFooter:
         self.statusLine.hide()
-    if 1 or self.showLineNumbers:
+    if 1:
       self.leftColumn = LineNumbers(self, self)
       self.leftColumn.color = curses.color_pair(211)
       self.leftColumn.colorSelected = curses.color_pair(146)
       self.leftColumn.setParent(self, 0)
       if not self.showLineNumbers:
         self.leftColumn.hide()
-    if 1 or self.showRightColumn:
+    if 1:
       self.rightColumn = StaticWindow(self)
       self.rightColumn.name = 'Right'
       self.rightColumn.color = curses.color_pair(18)
@@ -589,7 +577,7 @@ class InputWindow(Window):
       self.rightColumn.setParent(self, 0)
       if not self.showRightColumn:
         self.rightColumn.hide()
-    if 1 or self.showMessageLine:
+    if 1:
       self.messageLine = MessageLine(self, self)
       self.messageLine.color = curses.color_pair(3)
       self.messageLine.colorSelected = curses.color_pair(87)
@@ -608,8 +596,8 @@ class InputWindow(Window):
         self.setTextBuffer(self.prg.bufferManager.newTextBuffer())
 
   def reshape(self, rows, cols, top, left):
+    """Change self and sub-windows to fit within the given rectangle."""
     app.log.detail('reshape', rows, cols, top, left)
-    topInfoRows = 0
     lineNumbersCols = 7
     bottomRows = 1  # Not including status line.
 
@@ -618,10 +606,8 @@ class InputWindow(Window):
       rows -= 1
       top += 1
     if self.showTopInfo:
-      self.topInfo.reshape(topInfoRows, cols-lineNumbersCols, top,
+      self.topInfo.reshape(0, cols-lineNumbersCols, top,
           left+lineNumbersCols)
-      rows -= topInfoRows
-      top += topInfoRows
     self.interactiveOpen.reshape(1, cols, top+rows-1, left)
     self.interactiveQuit.reshape(1, cols, top+rows-1, left)
     self.interactiveSaveAs.reshape(1, cols, top+rows-1, left)
