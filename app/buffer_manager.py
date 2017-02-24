@@ -16,6 +16,12 @@ class BufferManager:
     self.buffers = {}
     self.ramBuffers = []
 
+  def getUnsavedBuffer(self):
+    for buffer in self.buffers.values():
+      if buffer.isDirty():
+        return buffer
+    return None
+
   def newTextBuffer(self):
     textBuffer = app.text_buffer.TextBuffer()
     textBuffer.lines = [""]

@@ -60,7 +60,11 @@ class Controller:
     app.history.set(['files', tb.fullPath, 'cursor'],
         (tb.cursorRow, tb.cursorCol))
     if not tb.isDirty():
-      self.host.quitNow()
+      buffer = app.buffer_manager.buffers.getUnsavedBuffer()
+      if not buffer:
+        self.host.quitNow()
+        return
+      self.host.setTextBuffer(buffer)
     self.host.changeFocusTo(self.host.interactiveQuit)
 
   def maybeChangeToSaveAs(self):
