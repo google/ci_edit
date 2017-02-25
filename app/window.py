@@ -257,6 +257,8 @@ class FileListPanel(Window):
 
 
 class LabeledLine(Window):
+  """A single line with a label. This is akin to a line prompt or gui modal
+      dialog. It's used for things like 'find' and 'goto line'."""
   def __init__(self, parent, label, controller=None):
     Window.__init__(self, parent, controller)
     self.host = parent
