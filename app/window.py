@@ -509,6 +509,10 @@ class InputWindow(Window):
       self.interactiveSaveAs = LabeledLine(self, "save as: ")
       self.interactiveSaveAs.setController(app.cu_editor.InteractiveSaveAs)
     if 1:
+      self.confirmOverwrite = LabeledLine(self,
+          "Overwrite exiting file? (yes or no): ")
+      self.confirmOverwrite.setController(app.cu_editor.ConfirmOverwrite)
+    if 1:
       self.topInfo = TopInfo(self)
       self.topInfo.color = curses.color_pair(168)
       self.topInfo.colorSelected = curses.color_pair(47)

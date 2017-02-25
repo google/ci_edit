@@ -49,6 +49,28 @@ def initCommandSet(editText, textBuffer):
   }
 
 
+class ConfirmOverwrite(app.controller.Controller):
+  """Ask writing over an existing file."""
+  def __init__(self, host, textBuffer):
+    app.controller.Controller.__init__(self, host, textBuffer)
+    self.textBuffer = textBuffer
+    self.document = host
+    commandSet = initCommandSet(self, textBuffer)
+    commandSet.update({
+      #curses.KEY_F1: self.info,
+      ord('y'): self.overwriteFile,
+    })
+    self.commandSet = commandSet
+    self.commandDefault = self.changeToHostWindow
+
+  def overwriteFile(self):
+    app.log.info()
+    # Preload the message with an error that should be overwritten.
+    self.document.textBuffer.setMessage('Error saving file')
+    self.document.textBuffer.fileWrite()
+    self.changeToHostWindow()
+
+
 class InteractiveFind(app.editor.InteractiveFind):
   """Find text within the current document."""
   def __init__(self, host, textBuffer):
@@ -114,14 +136,15 @@ class InteractiveOpener(app.editor.InteractiveOpener):
     self.commandDefault = self.textBuffer.insertPrintable
 
 
-class InteractiveQuit(app.editor.InteractiveQuit):
+class InteractiveQuit(app.controller.Controller):
   """Ask about unsaved changes."""
   def __init__(self, host, textBuffer):
-    app.editor.InteractiveQuit.__init__(self, host, textBuffer)
+    app.controller.Controller.__init__(self, host, textBuffer)
+    self.textBuffer = textBuffer
     self.document = host
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
-      curses.KEY_F1: self.info,
+      #curses.KEY_F1: self.info,
       ord('n'): host.quitNow,
       ord('y'): self.saveAndQuit,
     })
@@ -139,15 +162,16 @@ class InteractiveQuit(app.editor.InteractiveQuit):
     self.host.quitNow()
 
 
-class InteractiveSaveAs(app.editor.InteractiveSaveAs):
+class InteractiveSaveAs(app.controller.Controller):
   """Ask about unsaved files."""
   def __init__(self, host, textBuffer):
-    app.editor.InteractiveSaveAs.__init__(self, host, textBuffer)
+    app.controller.Controller.__init__(self, host, textBuffer)
+    self.textBuffer = textBuffer
     self.document = host
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
       curses.ascii.ESC: self.changeToHostWindow,
-      curses.KEY_F1: self.info,
+      #curses.KEY_F1: self.info,
       CTRL_J: self.saveAs,
     })
     self.commandSet = commandSet

@@ -278,25 +278,3 @@ class InteractiveGoto(app.controller.Controller):
     except: pass
     gotoLine, gotoCol = (line.split(',') + ['0', '0'])[:2]
     self.cursorMoveTo(parseInt(gotoLine), parseInt(gotoCol))
-
-
-class InteractiveQuit(app.controller.Controller):
-  """Prompt user about unsaved changes."""
-  def __init__(self, host, textBuffer):
-    app.controller.Controller.__init__(self, host, 'unsavedChanges')
-    self.textBuffer = textBuffer
-    self.textBuffer.lines = [""] #####################
-
-  def info(self):
-    app.log.info('InteractiveQuit command set')
-
-
-class InteractiveSaveAs(app.controller.Controller):
-  """Save buffer under specified file name."""
-  def __init__(self, host, textBuffer):
-    app.controller.Controller.__init__(self, host, 'saveAs')
-    self.textBuffer = textBuffer
-    self.textBuffer.lines = [""]
-
-  def info(self):
-    app.log.info('InteractiveSaveAs command set')
