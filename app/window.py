@@ -265,6 +265,8 @@ class LabeledLine(Window):
     self.setTextBuffer(app.text_buffer.TextBuffer())
     self.label = label
     self.leftColumn = StaticWindow(self)
+    self.color = curses.color_pair(0)
+    self.colorSelected = curses.color_pair(87)
 
   def refresh(self):
     self.leftColumn.addStr(0, 0, self.label, self.color)
@@ -493,39 +495,19 @@ class InputWindow(Window):
     if 1:
       self.interactiveFind = LabeledLine(self, 'find: ')
       self.interactiveFind.setController(app.cu_editor.InteractiveFind)
-      self.interactiveFind.color = curses.color_pair(0)
-      self.interactiveFind.colorSelected = curses.color_pair(87)
-      self.interactiveFind.setParent(self, 0)
-      self.interactiveFind.hide()
     if 1:
       self.interactiveGoto = LabeledLine(self, 'goto: ')
       self.interactiveGoto.setController(app.cu_editor.InteractiveGoto)
-      self.interactiveGoto.color = curses.color_pair(0)
-      self.interactiveGoto.colorSelected = curses.color_pair(87)
-      self.interactiveGoto.setParent(self, 0)
-      self.interactiveGoto.hide()
     if 1:
       self.interactiveOpen = LabeledLine(self, 'open: ')
       self.interactiveOpen.setController(app.cu_editor.InteractiveOpener)
-      self.interactiveOpen.color = curses.color_pair(0)
-      self.interactiveOpen.colorSelected = curses.color_pair(87)
-      self.interactiveOpen.setParent(self, 0)
-      self.interactiveOpen.hide()
     if 1:
       self.interactiveQuit = LabeledLine(self,
           "Save changes? (yes, no, or cancel): ")
       self.interactiveQuit.setController(app.cu_editor.InteractiveQuit)
-      self.interactiveQuit.color = curses.color_pair(0)
-      self.interactiveQuit.colorSelected = curses.color_pair(87)
-      self.interactiveQuit.setParent(self, 0)
-      self.interactiveQuit.hide()
     if 1:
       self.interactiveSaveAs = LabeledLine(self, "save as: ")
       self.interactiveSaveAs.setController(app.cu_editor.InteractiveSaveAs)
-      self.interactiveSaveAs.color = curses.color_pair(0)
-      self.interactiveSaveAs.colorSelected = curses.color_pair(87)
-      self.interactiveSaveAs.setParent(self, 0)
-      self.interactiveSaveAs.hide()
     if 1:
       self.topInfo = TopInfo(self)
       self.topInfo.color = curses.color_pair(168)
