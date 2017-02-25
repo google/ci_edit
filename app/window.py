@@ -274,48 +274,19 @@ class LabeledLine(Window):
     Window.reshape(self, rows, cols-labelWidth, top, left+labelWidth)
     self.leftColumn.reshape(rows, labelWidth, top, left)
 
+  def setController(self, controllerClass):
+    self.controller = controllerClass(self.host, self.textBuffer)
+
+  def setLabel(self, label):
+    self.label = label
+    self.reshape(self.rows, self.cols, self.top, self.left)
+
   def unfocus(self):
     self.blank()
     self.hide()
     self.leftColumn.blank()
     self.leftColumn.hide()
     Window.unfocus(self)
-
-
-class InteractiveFind(LabeledLine):
-  def __init__(self, host):
-    LabeledLine.__init__(self, host, "find: ")
-    self.controller = app.cu_editor.InteractiveFind(host,
-        self.textBuffer)
-
-
-class InteractiveGoto(LabeledLine):
-  def __init__(self, host):
-    LabeledLine.__init__(self, host, "goto: ")
-    self.controller = app.cu_editor.InteractiveGoto(host,
-        self.textBuffer)
-
-
-class InteractiveOpener(LabeledLine):
-  def __init__(self, host):
-    LabeledLine.__init__(self, host, "file: ")
-    self.fileListing = app.text_buffer.TextBuffer()
-    self.controller = app.cu_editor.InteractiveOpener(host, self.textBuffer)
-
-
-class InteractiveQuit(LabeledLine):
-  def __init__(self, host):
-    LabeledLine.__init__(self, host,
-        "Save changes? (yes, no, or cancel): ")
-    self.controller = app.cu_editor.InteractiveQuit(host,
-        self.textBuffer)
-
-
-class InteractiveSaveAs(LabeledLine):
-  def __init__(self, host):
-    LabeledLine.__init__(self, host, "save as: ")
-    self.controller = app.cu_editor.InteractiveSaveAs(host,
-        self.textBuffer)
 
 
 class LineNumbers(StaticWindow):
@@ -518,31 +489,37 @@ class InputWindow(Window):
       if not self.showHeader:
         self.headerLine.hide()
     if 1:
-      self.interactiveFind = InteractiveFind(self)
+      self.interactiveFind = LabeledLine(self, 'find: ')
+      self.interactiveFind.setController(app.cu_editor.InteractiveFind)
       self.interactiveFind.color = curses.color_pair(0)
       self.interactiveFind.colorSelected = curses.color_pair(87)
       self.interactiveFind.setParent(self, 0)
       self.interactiveFind.hide()
     if 1:
-      self.interactiveGoto = InteractiveGoto(self)
+      self.interactiveGoto = LabeledLine(self, 'goto: ')
+      self.interactiveGoto.setController(app.cu_editor.InteractiveGoto)
       self.interactiveGoto.color = curses.color_pair(0)
       self.interactiveGoto.colorSelected = curses.color_pair(87)
       self.interactiveGoto.setParent(self, 0)
       self.interactiveGoto.hide()
     if 1:
-      self.interactiveOpen = InteractiveOpener(self)
+      self.interactiveOpen = LabeledLine(self, 'open: ')
+      self.interactiveOpen.setController(app.cu_editor.InteractiveOpener)
       self.interactiveOpen.color = curses.color_pair(0)
       self.interactiveOpen.colorSelected = curses.color_pair(87)
       self.interactiveOpen.setParent(self, 0)
       self.interactiveOpen.hide()
     if 1:
-      self.interactiveQuit = InteractiveQuit(self)
+      self.interactiveQuit = LabeledLine(self,
+          "Save changes? (yes, no, or cancel): ")
+      self.interactiveQuit.setController(app.cu_editor.InteractiveQuit)
       self.interactiveQuit.color = curses.color_pair(0)
       self.interactiveQuit.colorSelected = curses.color_pair(87)
       self.interactiveQuit.setParent(self, 0)
       self.interactiveQuit.hide()
     if 1:
-      self.interactiveSaveAs = InteractiveSaveAs(self)
+      self.interactiveSaveAs = LabeledLine(self, "save as: ")
+      self.interactiveSaveAs.setController(app.cu_editor.InteractiveSaveAs)
       self.interactiveSaveAs.color = curses.color_pair(0)
       self.interactiveSaveAs.colorSelected = curses.color_pair(87)
       self.interactiveSaveAs.setParent(self, 0)
