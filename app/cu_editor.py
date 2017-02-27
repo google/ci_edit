@@ -57,7 +57,6 @@ class ConfirmOverwrite(app.controller.Controller):
     self.document = host
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
-      #curses.KEY_F1: self.info,
       ord('y'): self.overwriteFile,
     })
     self.commandSet = commandSet

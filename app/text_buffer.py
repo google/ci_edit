@@ -84,6 +84,18 @@ class Mutator(app.selectable.Selectable):
           self.redoChain[self.redoIndex-1][0] == 'm'))
     return not clean
 
+  def isSafeToWrite(self):
+    s1 = os.stat(self.fullPath)
+    s2 = self.fileStat
+    return (s1.st_mode == s2.st_mode and
+        s1.st_ino == s2.st_ino and
+        s1.st_dev == s2.st_dev and
+        s1.st_uid == s2.st_uid and
+        s1.st_gid == s2.st_gid and
+        s1.st_size == s2.st_size and
+        s1.st_mtime == s2.st_mtime and
+        s1.st_ctime == s2.st_ctime)
+
   def redo(self):
     """Replay the next action on the redoChain."""
     if self.redoIndex < len(self.redoChain):
@@ -758,6 +770,7 @@ class BackingTextBuffer(Mutator):
     try:
       file = open(self.fullPath, 'r+')
       self.setMessage('Opened existing file')
+      self.fileStat = os.stat(self.fullPath)
     except:
       try:
         # Create a new file.
@@ -803,6 +816,7 @@ class BackingTextBuffer(Mutator):
         file.truncate()
         file.write(self.data)
         file.close()
+        self.fileStat = os.stat(self.fullPath)
         self.setMessage('File saved')
         self.savedAtRedoIndex = self.redoIndex
       except Exception as e:

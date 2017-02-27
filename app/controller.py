@@ -34,6 +34,10 @@ class Controller:
   def changeToGoto(self):
     self.host.changeFocusTo(self.host.interactiveGoto)
 
+  def changeToConfirmOverwrite(self):
+    app.log.debug()
+    self.host.changeFocusTo(self.host.confirmOverwrite)
+
   def changeToQuit(self):
     app.log.debug()
     self.host.changeFocusTo(self.host.interactiveQuit)
@@ -54,6 +58,15 @@ class Controller:
     app.log.info('base controller focus()')
     pass
 
+  def maybeChangeToConfirmOverwrite(self):
+    """Ask whether the file should be overwritten."""
+    app.log.debug()
+    tb = self.host.textBuffer
+    if tb.isSafeToWrite():
+      tb.fileWrite()
+      return
+    self.changeToConfirmOverwrite()
+
   def maybeChangeToQuit(self):
     app.log.debug()
     tb = self.host.textBuffer
@@ -71,7 +84,7 @@ class Controller:
     app.log.debug()
     tb = self.host.textBuffer
     if tb.fullPath:
-      tb.fileWrite()
+      self.maybeChangeToConfirmOverwrite()
       return
     self.changeToSaveAs()
 
@@ -79,7 +92,7 @@ class Controller:
     pass
 
   def saveDocument(self):
-    app.log.info('saveDocument', self.document)
+    app.log.info(self.document)
     if self.document and self.document.textBuffer:
       self.document.textBuffer.fileWrite()
 

@@ -572,6 +572,7 @@ class InputWindow(Window):
     if self.showTopInfo:
       self.topInfo.reshape(0, cols-lineNumbersCols, top,
           left+lineNumbersCols)
+    self.confirmOverwrite.reshape(1, cols, top+rows-1, left)
     self.interactiveOpen.reshape(1, cols, top+rows-1, left)
     self.interactiveQuit.reshape(1, cols, top+rows-1, left)
     self.interactiveSaveAs.reshape(1, cols, top+rows-1, left)
