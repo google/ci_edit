@@ -152,6 +152,10 @@ class Mutator(app.selectable.Selectable):
         app.log.info('ld', self.lines == lines)
         self.lines = lines
       elif change[0] == 'm':  # Redo move
+        assert self.cursorRow+change[1][0] >= 0, "%s %s"%(self.cursorRow, change[1][0])
+        assert self.cursorCol+change[1][1] >= 0, "%s %s"%(self.cursorCol, change[1][1])
+        assert self.scrollRow+change[1][3] >= 0, "%s %s"%(self.scrollRow, change[1][3])
+        assert self.scrollCol+change[1][4] >= 0, "%s %s"%(self.scrollCol, change[1][4])
         self.cursorRow += change[1][0]
         self.cursorCol += change[1][1]
         self.goalCol += change[1][2]
@@ -162,10 +166,6 @@ class Mutator(app.selectable.Selectable):
         self.markerEndRow += change[1][7]
         self.markerEndCol += change[1][8]
         self.selectionMode += change[1][9]
-        assert self.cursorRow >= 0, self.cursorRow
-        assert self.cursorCol >= 0, self.cursorCol
-        assert self.scrollRow >= 0, self.scrollRow
-        assert self.scrollCol >= 0, self.scrollCol
       elif change[0] == 'n':
         # Redo split lines.
         line = self.lines[self.cursorRow]
