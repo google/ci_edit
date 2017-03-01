@@ -675,7 +675,7 @@ class BackingTextBuffer(Mutator):
 
   def cursorScrollToMiddle(self):
     maxy, maxx = self.view.cursorWindow.getmaxyx()
-    rowDelta = min(len(self.lines)-maxy,
+    rowDelta = min(max(0, len(self.lines)-maxy),
                    max(0, self.cursorRow-maxy/2))-self.scrollRow
     self.cursorMoveScroll(0, 0, 0, rowDelta, 0)
 

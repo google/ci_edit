@@ -273,7 +273,7 @@ class InteractiveGoto(app.controller.Controller):
 
   def onChange(self):
     app.log.info()
-    gotoLine = 0
+    line = ''
     try: line = self.textBuffer.lines[0]
     except: pass
     gotoLine, gotoCol = (line.split(',') + ['0', '0'])[:2]
