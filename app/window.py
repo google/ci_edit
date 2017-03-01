@@ -421,17 +421,13 @@ class TopInfo(StaticWindow):
         line = tb.lines[lineCursor]
         lineCursor -= 1
       if len(line):
-        indent = 0
-        while line[indent] == ' ':
-          indent += 1
+        indent = len(line) - len(line.lstrip(' '))
         lineCursor += 1
         while lineCursor < len(tb.lines):
           line = tb.lines[lineCursor]
           if not len(line):
             continue
-          z = 0
-          while line[z] == ' ':
-            z += 1
+          z = len(line) - len(line.lstrip(' '))
           if z > indent:
             indent = z
             lineCursor += 1
@@ -440,9 +436,7 @@ class TopInfo(StaticWindow):
         while indent and lineCursor > 0:
           line = tb.lines[lineCursor]
           if len(line):
-            z = 0
-            while line[z] == ' ':
-              z += 1
+            z = len(line) - len(line.lstrip(' '))
             if z < indent:
               indent = z
               lines.append(line)
