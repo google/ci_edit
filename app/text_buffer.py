@@ -87,6 +87,14 @@ class Mutator(app.selectable.Selectable):
   def isSafeToWrite(self):
     s1 = os.stat(self.fullPath)
     s2 = self.fileStat
+    app.log.info('st_mode', s1.st_mode, s2.st_mode)
+    app.log.info('st_ino', s1.st_ino, s2.st_ino)
+    app.log.info('st_dev', s1.st_dev, s2.st_dev)
+    app.log.info('st_uid', s1.st_uid, s2.st_uid)
+    app.log.info('st_gid', s1.st_gid, s2.st_gid)
+    app.log.info('st_size', s1.st_size, s2.st_size)
+    app.log.info('st_mtime', s1.st_mtime, s2.st_mtime)
+    app.log.info('st_ctime', s1.st_ctime, s2.st_ctime)
     return (s1.st_mode == s2.st_mode and
         s1.st_ino == s2.st_ino and
         s1.st_dev == s2.st_dev and
@@ -201,7 +209,7 @@ class Mutator(app.selectable.Selectable):
         change."""
     if self.debugRedo:
       app.log.info('redoAddChange', change)
-    # When the redoChain is trimmed we lose the saved at.
+    # When the redoChain is trimmed we may lose the saved at.
     if self.redoIndex < self.savedAtRedoIndex:
       self.savedAtRedoIndex = -1
     self.redoChain = self.redoChain[:self.redoIndex]
