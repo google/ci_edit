@@ -782,7 +782,6 @@ class BackingTextBuffer(Mutator):
     except:
       try:
         # Create a new file.
-        self.savedAtRedoIndex = -1
         self.setMessage('Creating new file')
       except:
         app.log.info('error opening file', self.fullPath)

@@ -18,6 +18,12 @@ class Controller:
     self.commandSet = None
     self.name = name
 
+  def changeToConfirmClose(self):
+    self.host.changeFocusTo(self.host.confirmClose)
+
+  def changeToConfirmOverwrite(self):
+    self.host.changeFocusTo(self.host.confirmOverwrite)
+
   def changeToHostWindow(self, ignored=1):
     self.host.changeFocusTo(self.host)
 
@@ -34,16 +40,10 @@ class Controller:
   def changeToGoto(self):
     self.host.changeFocusTo(self.host.interactiveGoto)
 
-  def changeToConfirmOverwrite(self):
-    app.log.debug()
-    self.host.changeFocusTo(self.host.confirmOverwrite)
-
   def changeToQuit(self):
-    app.log.debug()
     self.host.changeFocusTo(self.host.interactiveQuit)
 
   def changeToSaveAs(self):
-    app.log.debug()
     self.host.changeFocusTo(self.host.interactiveSaveAs)
 
   def doCommand(self, ch):
@@ -58,16 +58,30 @@ class Controller:
     app.log.info('base controller focus()')
     pass
 
-  def maybeChangeToConfirmOverwrite(self):
+  def closeOrConfirmClose(self):
+    """If the file is clean, close it. If it is dirty, prompt the user
+        about whether to lose unsaved changes."""
+    tb = self.host.textBuffer
+    if not tb.isDirty():
+      app.buffer_manager.buffers.closeTextBuffer(tb)
+      buffer = app.buffer_manager.buffers.getUnsavedBuffer()
+      if not buffer:
+        buffer = app.buffer_manager.buffers.newTextBuffer()
+      self.host.setTextBuffer(buffer)
+      return
+    self.changeToConfirmClose()
+
+  def writeOrConfirmOverwrite(self):
     """Ask whether the file should be overwritten."""
     app.log.debug()
     tb = self.host.textBuffer
     if tb.isSafeToWrite():
       tb.fileWrite()
+      self.changeToHostWindow()
       return
     self.changeToConfirmOverwrite()
 
-  def maybeChangeToQuit(self):
+  def quitOrSwitchToUnsaved(self):
     app.log.debug()
     tb = self.host.textBuffer
     app.history.set(['files', tb.fullPath, 'cursor'],
@@ -78,13 +92,14 @@ class Controller:
         self.host.quitNow()
         return
       self.host.setTextBuffer(buffer)
-    self.host.changeFocusTo(self.host.interactiveQuit)
+    self.host.textBuffer.setMessage(
+        'This file is not saved. Please save or close this file.')
 
-  def maybeChangeToSaveAs(self):
+  def saveOrChangeToSaveAs(self):
     app.log.debug()
     tb = self.host.textBuffer
     if tb.fullPath:
-      self.maybeChangeToConfirmOverwrite()
+      self.writeOrConfirmOverwrite()
       return
     self.changeToSaveAs()
 

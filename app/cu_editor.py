@@ -22,9 +22,10 @@ def initCommandSet(editText, textBuffer):
 
     CTRL_H: textBuffer.backspace,
 
-    CTRL_Q: editText.maybeChangeToQuit,
-    CTRL_S: editText.maybeChangeToSaveAs,
+    CTRL_Q: editText.quitOrSwitchToUnsaved,
+    CTRL_S: editText.saveOrChangeToSaveAs,
     CTRL_V: textBuffer.editPaste,
+    CTRL_W: editText.closeOrConfirmClose, #seeasdf
     CTRL_X: textBuffer.editCut,
     CTRL_Y: textBuffer.redo,
     CTRL_Z: textBuffer.undo,
@@ -165,20 +166,10 @@ class InteractiveQuit(app.controller.Controller):
     commandSet.update({
       #curses.KEY_F1: self.info,
       ord('n'): host.quitNow,
-      ord('y'): self.saveAndQuit,
+      ord('y'): self.writeOrConfirmOverwrite,
     })
     self.commandSet = commandSet
     self.commandDefault = self.changeToHostWindow
-
-  def saveAndQuit(self):
-    app.log.info('saveAndQuit')
-    # Preload the message with an error that should be overwritten.
-    self.document.textBuffer.setMessage('Error saving file')
-    self.document.textBuffer.fileWrite()
-    # check for write error.
-    if self.document.textBuffer.message[0] != 'File saved':
-      return
-    self.host.quitNow()
 
 
 class InteractiveSaveAs(app.controller.Controller):

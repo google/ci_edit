@@ -493,6 +493,14 @@ class InputWindow(Window):
       if not self.showHeader:
         self.headerLine.hide()
     if 1:
+      self.confirmClose = LabeledLine(self,
+          "Close unsaved file? (yes or no): ")
+      self.confirmClose.setController(app.cu_editor.ConfirmClose)
+    if 1:
+      self.confirmOverwrite = LabeledLine(self,
+          "Overwrite exiting file? (yes or no): ")
+      self.confirmOverwrite.setController(app.cu_editor.ConfirmOverwrite)
+    if 1:
       self.interactiveFind = LabeledLine(self, 'find: ')
       self.interactiveFind.setController(app.cu_editor.InteractiveFind)
     if 1:
@@ -508,10 +516,6 @@ class InputWindow(Window):
     if 1:
       self.interactiveSaveAs = LabeledLine(self, "save as: ")
       self.interactiveSaveAs.setController(app.cu_editor.InteractiveSaveAs)
-    if 1:
-      self.confirmOverwrite = LabeledLine(self,
-          "Overwrite exiting file? (yes or no): ")
-      self.confirmOverwrite.setController(app.cu_editor.ConfirmOverwrite)
     if 1:
       self.topInfo = TopInfo(self)
       self.topInfo.color = curses.color_pair(168)
@@ -572,6 +576,7 @@ class InputWindow(Window):
     if self.showTopInfo:
       self.topInfo.reshape(0, cols-lineNumbersCols, top,
           left+lineNumbersCols)
+    self.confirmClose.reshape(1, cols, top+rows-1, left)
     self.confirmOverwrite.reshape(1, cols, top+rows-1, left)
     self.interactiveOpen.reshape(1, cols, top+rows-1, left)
     self.interactiveQuit.reshape(1, cols, top+rows-1, left)
