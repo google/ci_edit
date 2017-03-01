@@ -49,8 +49,28 @@ def initCommandSet(editText, textBuffer):
   }
 
 
+class ConfirmClose(app.controller.Controller):
+  """Ask about closing a file with unsaved changes."""
+  def __init__(self, host, textBuffer):
+    app.controller.Controller.__init__(self, host, textBuffer)
+    self.textBuffer = textBuffer
+    self.document = host
+    commandSet = initCommandSet(self, textBuffer)
+    commandSet.update({
+      ord('y'): self.closeFile,
+    })
+    self.commandSet = commandSet
+    self.commandDefault = self.changeToHostWindow
+
+  def closeFile(self):
+    app.log.info()
+    app.buffer_manager.buffers.closeTextBuffer(self.host.textBuffer)
+    self.host.setTextBuffer(app.buffer_manager.buffers.newTextBuffer())
+    self.changeToHostWindow()
+
+
 class ConfirmOverwrite(app.controller.Controller):
-  """Ask writing over an existing file."""
+  """Ask about writing over an existing file."""
   def __init__(self, host, textBuffer):
     app.controller.Controller.__init__(self, host, textBuffer)
     self.textBuffer = textBuffer
