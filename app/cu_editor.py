@@ -107,7 +107,7 @@ class InteractiveFind(app.editor.InteractiveFind):
       CTRL_G: self.findNext,
       CTRL_J: self.changeToHostWindow,
       CTRL_R: self.findPrior,
-      CTRL_S: self.saveDocument,
+      CTRL_S: self.writeOrConfirmOverwrite,
       curses.KEY_DOWN: self.findNext,
       curses.KEY_UP: self.findPrior,
     })
@@ -129,7 +129,7 @@ class InteractiveGoto(app.editor.InteractiveGoto):
       curses.ascii.ESC: self.changeToHostWindow,
       curses.KEY_F1: self.info,
       CTRL_J: self.changeToHostWindow,
-      CTRL_S: self.saveDocument,
+      CTRL_S: self.writeOrConfirmOverwrite,
       ord('b'): self.gotoBottom,
       ord('h'): self.gotoHalfway,
       ord('t'): self.gotoTop,
