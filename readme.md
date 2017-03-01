@@ -27,12 +27,12 @@ Features of ci
 - pipe to editor
 - nested grammars
 - resume at last edit position
+- search and replace
 
 Future features (todo)
 
 - bookmarks
 - find in files
-- search and replace
 - spell check
 - user customizable keywords
 - user customizable color scheme

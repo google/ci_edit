@@ -1,34 +1,42 @@
 
-Within the main text window:
-
-  ctrl+a       Select all
-  ctrl+c       Copy
-  ctrl+f       Find
-  ctrl+g       Go to line
-  ctrl+q       Quit (exit editor)
-  ctrl+r       Reverse find
-  ctrl+s       Save file
-  ctrl+v       Paste
-  ctrl+x       Cut
-  ctrl+y       Redo
-  ctrl+z       Undo
-
-Within the Find prompt:
+Common keyboard shortcuts:
 
   Text commands (such as cut and paste)
-  opperate on the prompt text rather
-  than the main window.
+  opperate on the text where the cursor is
+  located text rather than the main window.
 
-  return       Exit Find
-  esc          Exit Find
   ctrl+a       Select all
   ctrl+c       Copy
-  ctrl+f       Find next
-  ctrl+g       Find next
   ctrl+q       Quit (exit editor)
-  ctrl+r       Reverse find
+  crtl+w       Close buffer
   ctrl+s       Save file
   ctrl+v       Paste
   ctrl+x       Cut
   ctrl+y       Redo
   ctrl+z       Undo
+  esc          Return to the main window
+
+
+Within the main text window:
+
+  ctrl+f       Find
+  ctrl+g       Go to line
+  ctrl+r       Reverse find
+
+
+Within Find:
+
+  return       Return to main window
+  esc          Return to main window
+  ctrl+f       Find next
+  ctrl+g       Find next
+  ctrl+r       Reverse find
+
+
+Within Goto:
+
+  return       Go to the line,column specified
+  esc          Return to main window
+  t            Jump to top of buffer
+  h            Jump to halfway point of buffer
+  b            Jump to bottom of buffer
