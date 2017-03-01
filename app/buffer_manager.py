@@ -16,12 +16,18 @@ class BufferManager:
     self.buffers = {}
     self.ramBuffers = []
 
+  def closeTextBuffer(self, textBuffer):
+    """Warning this will throw away the buffer. Please be sure the user is
+        ok with this before calling."""
+    self.untrackBuffer_(textBuffer)
+
   def getUnsavedBuffer(self):
     for buffer in self.buffers.values():
       if buffer.isDirty():
         return buffer
-    if len(self.ramBuffers):
-      return self.ramBuffers[0]
+    for buffer in self.ramBuffers:
+      if buffer.isDirty():
+        return buffer
     return None
 
   def newTextBuffer(self):
@@ -73,7 +79,8 @@ class BufferManager:
     app.log.info('finished reading from stdin')
     return textBuffer
 
-  def renameBuffer(self, buffer, fullPath):
+  def untrackBuffer_(self, buffer):
+    app.log.debug(buffer.fullPath)
     try:
       index = self.ramBuffers.index(buffer)
       del self.ramBuffers[index]
@@ -82,6 +89,9 @@ class BufferManager:
         del self.buffers[buffer.fullPath]
       except KeyError:
         pass
+
+  def renameBuffer(self, buffer, fullPath):
+    self.untrackBuffer_(buffer)
     buffer.fullPath = fullPath
     self.buffers[fullPath] = buffer
 
