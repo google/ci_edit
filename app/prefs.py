@@ -18,6 +18,7 @@ keywordsColorIndex = 21
 selectedColor = 64 # Active find is a selection.
 specialsColorIndex = 224
 stringColorIndex = 5
+outsideOfBufferColorIndex = 128
 
 def joinReList(reList):
   return r"("+r")|(".join(reList)+r")"

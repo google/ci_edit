@@ -1371,7 +1371,7 @@ class TextBuffer(BackingTextBuffer):
     self.drawOverlays(window)
 
   def drawOverlays(self, window):
-    if 1: #self.scrollRow != self.scrollToRow:
+    if 1:
       maxy, maxx = window.cursorWindow.getmaxyx()
       startRow = self.scrollRow
       startCol = self.scrollCol
@@ -1511,5 +1511,7 @@ class TextBuffer(BackingTextBuffer):
             line = self.lines[startRow+i][selStartCol:maxx]
             window.addStr(i, selStartCol,
                 line+' '*(maxx-len(line)), window.colorSelected)
+      # Blank screen past the end of the buffer.
+      color = curses.color_pair(app.prefs.outsideOfBufferColorIndex)
       for i in range(limit, maxy):
-        window.addStr(i, 0, ' '*maxx, window.color)
+        window.addStr(i, 0, ' '*maxx, color)

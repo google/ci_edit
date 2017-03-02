@@ -305,8 +305,9 @@ class LineNumbers(StaticWindow):
     for i in range(limit):
       self.addStr(i, 0,
           ' %5d  '%(textBuffer.scrollRow+i+1), self.color)
+    color = curses.color_pair(app.prefs.outsideOfBufferColorIndex)
     for i in range(limit, maxy):
-      self.addStr(i, 0, '       ', 0)
+      self.addStr(i, 0, '       ', color)
     if 1:
       cursorAt = textBuffer.cursorRow-textBuffer.scrollRow
       self.addStr(cursorAt, 1,
@@ -621,8 +622,9 @@ class InputWindow(Window):
           i+self.textBuffer.scrollRow])-self.textBuffer.scrollCol > maxx:
         color = self.rightColumn.colorSelected
       self.rightColumn.addStr(i, 0, ' ', color)
+    color = curses.color_pair(app.prefs.outsideOfBufferColorIndex)
     for i in range(limit, maxy):
-      self.rightColumn.addStr(i, 0, ' ', self.leftColumn.color)
+      self.rightColumn.addStr(i, 0, ' ', color)
     self.rightColumn.cursorWindow.refresh()
 
   def focus(self):
