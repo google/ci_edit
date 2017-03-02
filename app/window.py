@@ -128,6 +128,13 @@ class StaticWindow:
     except:
       app.log.detail('resize failed', self.rows, self.cols)
 
+  def resizeBottomBy(self, rows):
+    app.log.detail('resizeTopBy', rows, repr(self))
+    self.rows += rows
+    if self.rows <= 0:
+      return
+    self.cursorWindow.resize(self.rows, self.cols)
+
   def resizeBy(self, rows, cols):
     app.log.detail('resizeBy', rows, cols, repr(self))
     self.rows += rows
@@ -533,6 +540,12 @@ class InputWindow(Window):
       if not self.showLineNumbers:
         self.leftColumn.hide()
     if 1:
+      self.logoCorner = StaticWindow(self)
+      self.logoCorner.name = 'Logo'
+      self.logoCorner.color = curses.color_pair(168)
+      self.logoCorner.colorSelected = curses.color_pair(146)
+      self.logoCorner.setParent(self, 0)
+    if 1:
       self.rightColumn = StaticWindow(self)
       self.rightColumn.name = 'Right'
       self.rightColumn.color = curses.color_pair(18)
@@ -593,6 +606,8 @@ class InputWindow(Window):
     if self.showRightColumn:
       self.rightColumn.reshape(rows, 1, top, left+cols-1)
       cols -= 1
+    # The top, left of the main window is the rows, cols of the logo corner.
+    self.logoCorner.reshape(top, left, 0, 0)
     Window.reshape(self, rows, cols, top, left)
 
     if 1:
@@ -608,8 +623,18 @@ class InputWindow(Window):
   def resizeTopBy(self, rowDelta):
     Window.resizeTopBy(self, rowDelta)
     self.leftColumn.resizeTopBy(rowDelta)
+    self.logoCorner.resizeBottomBy(rowDelta)
     self.rightColumn.resizeTopBy(rowDelta)
     self.textBuffer.updateScrollPosition()
+
+  def drawLogoCorner(self):
+    """."""
+    maxy, maxx = self.logoCorner.cursorWindow.getmaxyx()
+    color = self.logoCorner.color
+    for i in range(maxy):
+      self.logoCorner.addStr(i, 0, ' '*maxx, color)
+    self.logoCorner.addStr(0, 1, 'ci', color)
+    self.logoCorner.refresh()
 
   def drawRightEdge(self):
     """Draw makers to indicate text extending past the right edge of the
@@ -637,6 +662,7 @@ class InputWindow(Window):
   def refresh(self):
     self.topInfo.onChange()
     Window.refresh(self)
+    self.drawLogoCorner()
     self.drawRightEdge()
     self.cursorWindow.refresh()
 
