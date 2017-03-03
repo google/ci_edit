@@ -412,10 +412,11 @@ class StatusLine(StaticWindow):
     if tb.message:
       statusLine = tb.message[0]
       tb.setMessage()
-    if tb.isDirty():
-      statusLine += ' * '
-    else:
-      statusLine += ' . '
+    if 0:
+      if tb.isDirty():
+        statusLine += ' * '
+      else:
+        statusLine += ' . '
     # Percentages.
     rowPercentage = 0
     colPercentage = 0
@@ -481,7 +482,13 @@ class TopInfo(StaticWindow):
               indent = z
               lines.append(line)
           lineCursor -= 1
-    lines.append(self.host.textBuffer.fullPath)
+    pathLine = self.host.textBuffer.fullPath
+    if 1:
+      if tb.isDirty():
+        pathLine += ' * '
+      else:
+        pathLine += ' . '
+    lines.append(pathLine)
     self.lines = lines
     infoRows = len(self.lines)
     if self.mode > 0:
@@ -512,7 +519,7 @@ class InputWindow(Window):
     self.showFooter = True
     self.useInteractiveFind = True
     self.showLineNumbers = True
-    self.showMessageLine = True
+    self.showMessageLine = False
     self.showRightColumn = True
     self.showTopInfo = True
     self.color = curses.color_pair(0)
