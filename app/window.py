@@ -68,19 +68,19 @@ class StaticWindow:
     try: self.parent.zOrder.remove(self)
     except ValueError: app.log.detail(repr(self)+'not found in zOrder')
 
-  def mouseClick(self, row, col, shift, ctrl, alt):
+  def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
     pass
 
-  def mouseDoubleClick(self, row, col, shift, ctrl, alt):
+  def mouseDoubleClick(self, paneRow, paneCol, shift, ctrl, alt):
     pass
 
-  def mouseMoved(self, row, col, shift, ctrl, alt):
+  def mouseMoved(self, paneRow, paneCol, shift, ctrl, alt):
     pass
 
-  def mouseRelease(self, row, col, shift, ctrl, alt):
+  def mouseRelease(self, paneRow, paneCol, shift, ctrl, alt):
     pass
 
-  def mouseTripleClick(self, row, col, shift, ctrl, alt):
+  def mouseTripleClick(self, paneRow, paneCol, shift, ctrl, alt):
     pass
 
   def mouseWheelDown(self, shift, ctrl, alt):
@@ -196,20 +196,20 @@ class Window(StaticWindow):
     self.cursorWindow.leaveok(0)  # Do update cursor position.
     self.controller.focus()
 
-  def mouseClick(self, row, col, shift, ctrl, alt):
-    self.textBuffer.mouseClick(row, col, shift, ctrl, alt)
+  def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
+    self.textBuffer.mouseClick(paneRow, paneCol, shift, ctrl, alt)
 
-  def mouseDoubleClick(self, row, col, shift, ctrl, alt):
-    self.textBuffer.mouseDoubleClick(row, col, shift, ctrl, alt)
+  def mouseDoubleClick(self, paneRow, paneCol, shift, ctrl, alt):
+    self.textBuffer.mouseDoubleClick(paneRow, paneCol, shift, ctrl, alt)
 
-  def mouseMoved(self, row, col, shift, ctrl, alt):
-    self.textBuffer.mouseMoved(row, col, shift, ctrl, alt)
+  def mouseMoved(self, paneRow, paneCol, shift, ctrl, alt):
+    self.textBuffer.mouseMoved(paneRow, paneCol, shift, ctrl, alt)
 
-  def mouseRelease(self, row, col, shift, ctrl, alt):
-    self.textBuffer.mouseRelease(row, col, shift, ctrl, alt)
+  def mouseRelease(self, paneRow, paneCol, shift, ctrl, alt):
+    self.textBuffer.mouseRelease(paneRow, paneCol, shift, ctrl, alt)
 
-  def mouseTripleClick(self, row, col, shift, ctrl, alt):
-    self.textBuffer.mouseTripleClick(row, col, shift, ctrl, alt)
+  def mouseTripleClick(self, paneRow, paneCol, shift, ctrl, alt):
+    self.textBuffer.mouseTripleClick(paneRow, paneCol, shift, ctrl, alt)
 
   def mouseWheelDown(self, shift, ctrl, alt):
     self.textBuffer.mouseWheelDown(shift, ctrl, alt)
