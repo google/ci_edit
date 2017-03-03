@@ -407,38 +407,38 @@ class StatusLine(StaticWindow):
 
   def refresh(self):
     maxy, maxx = self.cursorWindow.getmaxyx()
-    if False and self.parent.zOrder[-1] is self:
-      Window.refresh(self)
+    tb = self.host.textBuffer
+    statusLine = ''
+    if tb.message:
+      statusLine = tb.message[0]
+      tb.setMessage()
+    if tb.isDirty():
+      statusLine += ' * '
     else:
-      tb = self.host.textBuffer
-      statusLine = self.host.textBuffer.relativePath
-      if tb.isDirty():
-        statusLine += ' * '
+      statusLine += ' . '
+    # Percentages.
+    rowPercentage = 0
+    colPercentage = 0
+    lineCount = len(tb.lines)
+    if lineCount:
+      rowPercentage = tb.cursorRow*100/lineCount
+      if tb.cursorRow >= lineCount - 1:
+         rowPercentage = 100
+      charCount = len(tb.lines[tb.cursorRow])
+      if (tb.cursorCol < charCount):
+        colPercentage = tb.cursorCol*100/charCount
       else:
-        statusLine += ' . '
-      # Percentages.
-      rowPercentage = 0
-      colPercentage = 0
-      lineCount = len(tb.lines)
-      if lineCount:
-        rowPercentage = tb.cursorRow*100/lineCount
-        if tb.cursorRow >= lineCount - 1:
-           rowPercentage = 100
-        charCount = len(tb.lines[tb.cursorRow])
-        if (tb.cursorCol < charCount):
-          colPercentage = tb.cursorCol*100/charCount
-        else:
-          colPercentage = 100
-      # Format.
-      rightSide = '%s | %s | %4d,%2d | %3d%%,%3d%%'%(
-          tb.cursorGrammarName(),
-          tb.selectionModeName(),
-          tb.cursorRow+1, tb.cursorCol+1,
-          rowPercentage,
-          colPercentage)
-      statusLine += ' '*(maxx-len(statusLine)-len(rightSide)) + rightSide
-      self.addStr(0, 0, statusLine, self.color)
-      self.cursorWindow.refresh()
+        colPercentage = 100
+    # Format.
+    rightSide = '%s | %s | %4d,%2d | %3d%%,%3d%%'%(
+        tb.cursorGrammarName(),
+        tb.selectionModeName(),
+        tb.cursorRow+1, tb.cursorCol+1,
+        rowPercentage,
+        colPercentage)
+    statusLine += ' '*(maxx-len(statusLine)-len(rightSide)) + rightSide
+    self.addStr(0, 0, statusLine, self.color)
+    self.cursorWindow.refresh()
 
 
 class TopInfo(StaticWindow):

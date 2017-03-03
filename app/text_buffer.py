@@ -977,7 +977,7 @@ class BackingTextBuffer(Mutator):
         self.selectText(i, start, end-start, app.selectable.kSelectionCharacter)
         return
     # Warp around to the start of the file.
-    app.log.info('find hit end of file')
+    self.setMessage('Find wrapped around.')
     if direction >= 0:
       theRange = range(self.cursorRow)
     else:

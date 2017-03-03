@@ -71,7 +71,6 @@ class CiProgram:
     self.focusedWindow = window
     while not self.exiting:
       self.refresh()
-      window.textBuffer.setMessage()
       cmdList = []
       mouseEvents = []
       while not len(cmdList):
