@@ -1062,33 +1062,34 @@ class BackingTextBuffer(Mutator):
         self.cursorCol-self.markerCol, 0, 0, 0)))
     self.redo()
 
-  def mouseClick(self, row, col, shift, ctrl, alt):
+  def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
     if shift:
-      app.log.info(' shift click', row, col, shift, ctrl, alt)
+      app.log.info(' shift click', paneRow, paneCol, shift, ctrl, alt)
       if self.selectionMode == app.selectable.kSelectionNone:
         self.selectionCharacter()
-      self.mouseRelease(row, col, shift, ctrl, alt)
+      self.mouseRelease(paneRow, paneCol, shift, ctrl, alt)
     else:
-      app.log.info(' click', row, col, shift, ctrl, alt)
+      app.log.info(' click', paneRow, paneCol, shift, ctrl, alt)
       self.selectionNone()
-      self.mouseRelease(row, col, shift, ctrl, alt)
+      self.mouseRelease(paneRow, paneCol, shift, ctrl, alt)
 
-  def mouseDoubleClick(self, row, col, shift, ctrl, alt):
-    app.log.info('double click', row, col)
-    if len(self.lines[self.scrollRow + row]):
-      self.selectWordAt(self.scrollRow + row, self.scrollCol + col)
+  def mouseDoubleClick(self, paneRow, paneCol, shift, ctrl, alt):
+    app.log.info('double click', paneRow, paneCol)
+    row = self.scrollRow + paneRow
+    if row < len(self.lines) and len(self.lines[row]):
+      self.selectWordAt(row, self.scrollCol + paneCol)
 
-  def mouseMoved(self, row, col, shift, ctrl, alt):
-    app.log.info(' mouseMoved', row, col, shift, ctrl, alt)
-    self.mouseClick(row, col, True, ctrl, alt)
+  def mouseMoved(self, paneRow, paneCol, shift, ctrl, alt):
+    app.log.info(' mouseMoved', paneRow, paneCol, shift, ctrl, alt)
+    self.mouseClick(paneRow, paneCol, True, ctrl, alt)
 
-  def mouseRelease(self, row, col, shift, ctrl, alt):
-    app.log.info(' mouse release', row, col)
+  def mouseRelease(self, paneRow, paneCol, shift, ctrl, alt):
+    app.log.info(' mouse release', paneRow, paneCol)
     if not self.lines:
       return
-    row = max(0, min(self.scrollRow + row, len(self.lines) - 1))
-    inLine = col < len(self.lines[row])
-    col = max(0, min(self.scrollCol + col, len(self.lines[row])))
+    row = max(0, min(self.scrollRow + paneRow, len(self.lines) - 1))
+    inLine = paneCol < len(self.lines[row])
+    col = max(0, min(self.scrollCol + paneCol, len(self.lines[row])))
     # Adjust the marker column delta when the cursor and marker positions
     # cross over each other.
     markerCol = 0
