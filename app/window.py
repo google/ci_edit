@@ -321,6 +321,38 @@ class LineNumbers(StaticWindow):
           '%5d'%(textBuffer.cursorRow+1), self.colorSelected)
     self.cursorWindow.refresh()
 
+  def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
+    app.log.info(paneRow, paneCol, shift)
+    tb = self.host.textBuffer
+    if shift:
+      if tb.selectionMode == app.selectable.kSelectionNone:
+        tb.selectionLine()
+      self.mouseRelease(paneRow, paneCol, shift, ctrl, alt)
+    else:
+      tb.selectionLine()
+      self.mouseRelease(paneRow, paneCol, shift, ctrl, alt)
+
+  def mouseDoubleClick(self, paneRow, paneCol, shift, ctrl, alt):
+    self.host.textBuffer.selectionAll()
+
+  def mouseMoved(self, paneRow, paneCol, shift, ctrl, alt):
+    app.log.info(paneRow, paneCol, shift)
+    self.host.textBuffer.mouseClick(paneRow, paneCol, True, ctrl, alt)
+
+  def mouseRelease(self, paneRow, paneCol, shift, ctrl, alt):
+    app.log.info(paneRow, paneCol, shift)
+    tb = self.host.textBuffer
+    tb.selectLineAt(tb.scrollRow + paneRow)
+
+  def mouseTripleClick(self, paneRow, paneCol, shift, ctrl, alt):
+    pass
+
+  def mouseWheelDown(self, shift, ctrl, alt):
+    self.host.mouseWheelDown(shift, ctrl, alt)
+
+  def mouseWheelUp(self, shift, ctrl, alt):
+    self.host.mouseWheelUp(shift, ctrl, alt)
+
   def refresh(self):
     self.drawLineNumbers()
 
