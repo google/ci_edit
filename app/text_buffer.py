@@ -1210,6 +1210,8 @@ class BackingTextBuffer(Mutator):
     self.doSelectionMode(app.selectable.kSelectionWord)
 
   def selectLineAt(self, row):
+    if row >= len(self.lines):
+      return
     self.selectionNone()
     self.cursorMove(row-self.cursorRow, 0, 0)
     self.redo()
