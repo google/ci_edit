@@ -298,7 +298,8 @@ prefs = {
     'java': {
       'indent': '  ',
       'keywords': __common_keywords + [
-        'case', 'false',
+        'case', 'class', 'default', 'false',
+        'interface',
         'switch', 'this', 'true',
       ],
       'contains': ['c_string1', 'c_string2', 'cpp_block_comment',
@@ -309,11 +310,12 @@ prefs = {
       'end': '</script>',
       'indent': '  ',
       'keywords': [
-        'arguments', 'break', 'case', 'continue',
+        'arguments', 'break', 'case', 'continue', 'default',
         'false', 'for', 'function', 'if', 'return',
         'switch', 'this', 'true', 'while',
-
-        'setTimeout', 'requestCallback', 'console',
+      ],
+      'special': [
+        '\bsetTimeout\b', '\brequestCallback\b', '\bconsole\b', '\bwindow\b',
       ],
       'contains': [
         'c_string1', 'c_string2', 'doc_block_comment', 'cpp_block_comment',
