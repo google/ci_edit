@@ -264,7 +264,11 @@ prefs = {
       'begin': '<style',
       'end': '</style>',
       'indent': '  ',
-      'keywords': [],
+      'keywords': [
+        'background-color', 'border', 'color', 'cursor', 'font-size', 'height',
+        'margin', 'min-height', 'min-width', 'var', 'width',
+      ],
+      'special': ['#[\w-]',],
       'contains': ['cpp_block_comment'],
     },
     'doc_block_comment': {
@@ -310,9 +314,9 @@ prefs = {
       'end': '</script>',
       'indent': '  ',
       'keywords': [
-        'arguments', 'break', 'case', 'continue', 'default',
-        'false', 'for', 'function', 'if', 'return',
-        'switch', 'this', 'true', 'while',
+        'arguments', 'break', 'case', 'continue', 'default', 'else',
+        'false', 'for', 'function', 'if', 'let', 'return',
+        'switch', 'this', 'true', 'var', 'while',
       ],
       'special': [
         '\bsetTimeout\b', '\brequestCallback\b', '\bconsole\b', '\bwindow\b',
