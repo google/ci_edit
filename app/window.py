@@ -383,9 +383,7 @@ class MessageLine(StaticWindow):
 
   def refresh(self):
     tb = self.host.textBuffer
-    #maxy, maxx = self.cursorWindow.getmaxyx()
     if not tb or self.renderedMessage is tb.message:
-      #self.writeLine('<no text buffer>', 0)
       return
     app.log.debug('update message line\n',self.renderedMessage, '\n',
       tb.message)
