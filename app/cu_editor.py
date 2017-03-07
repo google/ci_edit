@@ -79,17 +79,10 @@ class ConfirmOverwrite(app.controller.Controller):
     self.document = host
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
-      ord('y'): self.overwriteFile,
+      ord('y'): self.overwriteHostFile,
     })
     self.commandSet = commandSet
     self.commandDefault = self.changeToHostWindow
-
-  def overwriteFile(self):
-    app.log.info()
-    # Preload the message with an error that should be overwritten.
-    self.document.textBuffer.setMessage('Error saving file')
-    self.document.textBuffer.fileWrite()
-    self.changeToHostWindow()
 
 
 class InteractiveFind(app.editor.InteractiveFind):

@@ -82,6 +82,19 @@ class Controller:
       return
     self.changeToConfirmClose()
 
+  def overwriteHostFile(self):
+    """Close the current file and switch to another or creat an empty file."""
+    # Preload the message with an error that should be overwritten.
+    #######self.host.textBuffer.setMessage('Error saving file')
+    self.host.textBuffer.fileWrite()
+    if self.host.userIntent == 'quit':
+      self.quitOrSwitchToConfirmQuit()
+      return
+    elif self.host.userIntent == 'close':
+      self.host.userIntent = 'edit'
+      self.closeHostFile()
+    self.changeToHostWindow()
+
   def writeOrConfirmOverwrite(self):
     """Ask whether the file should be overwritten."""
     app.log.debug()
@@ -111,8 +124,6 @@ class Controller:
         return
       self.host.setTextBuffer(tb)
     self.changeToConfirmQuit()
-    #self.host.textBuffer.setMessage(
-    #    'This file is not saved. Please save or close this file.')
 
   def saveOrChangeToSaveAs(self):
     app.log.debug()
@@ -124,11 +135,6 @@ class Controller:
 
   def onChange(self):
     pass
-
-  def saveDocument(self):
-    app.log.info(self.document)
-    if self.document and self.document.textBuffer:
-      self.document.textBuffer.fileWrite()
 
   def saveEventChangeToHostWindow(self, ignored=1):
     curses.ungetch(self.savedCh)
