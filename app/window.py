@@ -526,6 +526,8 @@ class InputWindow(Window):
     self.colorSelected = curses.color_pair(app.prefs.selectedColor)
     self.controller = app.controller.MainController(self)
     self.controller.add(app.cu_editor.CuaPlusEdit(prg, self))
+    # What does the user appear to want: edit, quit, or something else?
+    self.userIntent = 'edit'
     if 1:
       self.headerLine = HeaderLine(self)
       self.headerLine.color = curses.color_pair(168)
@@ -535,7 +537,7 @@ class InputWindow(Window):
         self.headerLine.hide()
     if 1:
       self.confirmClose = LabeledLine(self,
-          "Close unsaved file? (yes or no): ")
+          "Save changes? (yes, no, or cancel): ")
       self.confirmClose.setController(app.cu_editor.ConfirmClose)
     if 1:
       self.confirmOverwrite = LabeledLine(self,

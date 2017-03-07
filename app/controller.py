@@ -24,6 +24,9 @@ class Controller:
   def changeToConfirmOverwrite(self):
     self.host.changeFocusTo(self.host.confirmOverwrite)
 
+  def changeToConfirmQuit(self):
+    self.host.changeFocusTo(self.host.interactiveQuit)
+
   def changeToHostWindow(self, ignored=1):
     self.host.changeFocusTo(self.host)
 
@@ -58,16 +61,24 @@ class Controller:
     app.log.info('base controller focus()')
     pass
 
+  def closeHostFile(self):
+    """Close the current file and switch to another or creat an empty file."""
+    app.buffer_manager.buffers.closeTextBuffer(self.host.textBuffer)
+    tb = app.buffer_manager.buffers.getUnsavedBuffer()
+    if not tb:
+      pass #tb = app.buffer_manager.buffers.getNextBuffer()
+      if not tb:
+        tb = app.buffer_manager.buffers.newTextBuffer()
+    self.host.setTextBuffer(tb)
+
   def closeOrConfirmClose(self):
     """If the file is clean, close it. If it is dirty, prompt the user
         about whether to lose unsaved changes."""
+    if self.host.userIntent == 'edit':
+      self.host.userIntent = 'close'
     tb = self.host.textBuffer
     if not tb.isDirty():
-      app.buffer_manager.buffers.closeTextBuffer(tb)
-      buffer = app.buffer_manager.buffers.getUnsavedBuffer()
-      if not buffer:
-        buffer = app.buffer_manager.buffers.newTextBuffer()
-      self.host.setTextBuffer(buffer)
+      self.closeHostFile()
       return
     self.changeToConfirmClose()
 
@@ -77,23 +88,31 @@ class Controller:
     tb = self.host.textBuffer
     if tb.isSafeToWrite():
       tb.fileWrite()
+      if self.host.userIntent == 'quit':
+        self.quitOrSwitchToConfirmQuit()
+        return
+      elif self.host.userIntent == 'close':
+        self.host.userIntent = 'edit'
+        self.closeHostFile()
       self.changeToHostWindow()
       return
     self.changeToConfirmOverwrite()
 
-  def quitOrSwitchToUnsaved(self):
+  def quitOrSwitchToConfirmQuit(self):
     app.log.debug()
     tb = self.host.textBuffer
+    self.host.userIntent = 'quit'
     app.history.set(['files', tb.fullPath, 'cursor'],
         (tb.cursorRow, tb.cursorCol))
     if not tb.isDirty():
-      buffer = app.buffer_manager.buffers.getUnsavedBuffer()
-      if not buffer:
+      tb = app.buffer_manager.buffers.getUnsavedBuffer()
+      if not tb:
         self.host.quitNow()
         return
-      self.host.setTextBuffer(buffer)
-    self.host.textBuffer.setMessage(
-        'This file is not saved. Please save or close this file.')
+      self.host.setTextBuffer(tb)
+    self.changeToConfirmQuit()
+    #self.host.textBuffer.setMessage(
+    #    'This file is not saved. Please save or close this file.')
 
   def saveOrChangeToSaveAs(self):
     app.log.debug()

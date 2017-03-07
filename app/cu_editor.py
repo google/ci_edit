@@ -22,10 +22,10 @@ def initCommandSet(editText, textBuffer):
 
     CTRL_H: textBuffer.backspace,
 
-    CTRL_Q: editText.quitOrSwitchToUnsaved,
+    CTRL_Q: editText.quitOrSwitchToConfirmQuit,
     CTRL_S: editText.saveOrChangeToSaveAs,
     CTRL_V: textBuffer.editPaste,
-    CTRL_W: editText.closeOrConfirmClose, #seeasdf
+    CTRL_W: editText.closeOrConfirmClose,
     CTRL_X: textBuffer.editCut,
     CTRL_Y: textBuffer.redo,
     CTRL_Z: textBuffer.undo,
@@ -58,7 +58,8 @@ class ConfirmClose(app.controller.Controller):
     self.document = host
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
-      ord('y'): self.closeFile,
+      ord('n'): self.closeFile,
+      ord('y'): self.writeOrConfirmOverwrite,
     })
     self.commandSet = commandSet
     self.commandDefault = self.changeToHostWindow
