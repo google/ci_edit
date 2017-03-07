@@ -84,8 +84,6 @@ class Controller:
 
   def overwriteHostFile(self):
     """Close the current file and switch to another or creat an empty file."""
-    # Preload the message with an error that should be overwritten.
-    #######self.host.textBuffer.setMessage('Error saving file')
     self.host.textBuffer.fileWrite()
     if self.host.userIntent == 'quit':
       self.quitOrSwitchToConfirmQuit()

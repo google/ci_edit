@@ -816,6 +816,8 @@ class BackingTextBuffer(Mutator):
   def fileWrite(self):
     app.history.set(
         ['files', self.fullPath, 'cursor'], (self.cursorRow, self.cursorCol))
+    # Preload the message with an error that should be overwritten.
+    self.setMessage('Error saving file')
     try:
       try:
         self.stripTrailingWhiteSpace()
