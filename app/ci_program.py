@@ -76,6 +76,20 @@ class CiProgram:
       while not len(cmdList):
         for i in range(5):
           ch = window.cursorWindow.getch()
+          # TODO(dschuyler): Parse escape sequences.
+          if ch == 27:
+            end = time.time()+0.01
+            n = window.cursorWindow.getch()
+            while time.time() < end:
+              n = window.cursorWindow.getch()
+              if n == 91:
+                app.log.info('discarding', n)
+                count = 5
+                while count:
+                  k = window.cursorWindow.getch()
+                  app.log.info('discarding', k)
+                  --count
+                break
           if ch != curses.ERR:
             self.ch = ch
             if ch == curses.KEY_MOUSE:
@@ -409,7 +423,7 @@ def wrapped_ci(stdscr):
 def run_ci():
   try:
     # Reduce the delay waiting for escape sequences.
-    os.environ.setdefault('ESCDELAY', '25')
+    os.environ.setdefault('ESCDELAY', '1')
     curses.wrapper(wrapped_ci)
   finally:
     app.log.flush()
