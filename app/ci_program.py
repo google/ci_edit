@@ -408,6 +408,8 @@ def wrapped_ci(stdscr):
 
 def run_ci():
   try:
+    # Reduce the delay waiting for escape sequences.
+    os.environ.setdefault('ESCDELAY', '25')
     curses.wrapper(wrapped_ci)
   finally:
     app.log.flush()
