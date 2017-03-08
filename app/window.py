@@ -601,14 +601,14 @@ class InputWindow(Window):
         self.messageLine.hide()
 
     if 1:
-      if self.prg.cliFiles:
-        path = self.prg.cliFiles[0]['path']
-        self.setTextBuffer(
-            app.buffer_manager.buffers.loadTextBuffer(path))
-      elif self.prg.readStdin:
-        self.setTextBuffer(app.buffer_manager.buffers.readStdin())
-      else:
-        self.setTextBuffer(app.buffer_manager.buffers.newTextBuffer())
+      for f in self.prg.cliFiles:
+        app.buffer_manager.buffers.loadTextBuffer(f['path'])
+      if self.prg.readStdin:
+        app.buffer_manager.buffers.readStdin()
+      tb = app.buffer_manager.buffers.topBuffer()
+      if not tb:
+        tb = app.buffer_manager.buffers.newTextBuffer()
+      self.setTextBuffer(tb)
 
   def reshape(self, rows, cols, top, left):
     """Change self and sub-windows to fit within the given rectangle."""

@@ -13,8 +13,10 @@ import time
 class BufferManager:
   """Manage a set of text buffers. Some text buffers may be hidden."""
   def __init__(self):
-    self.buffers = {}
-    self.ramBuffers = []
+    # Using a dictionary lookup for buffers accelerates finding buffers by key
+    # (the file path), but that's not the common use. Maintaining an ordered
+    # list turns out to be more valuable.
+    self.buffers = []
 
   def closeTextBuffer(self, textBuffer):
     """Warning this will throw away the buffer. Please be sure the user is
@@ -22,10 +24,7 @@ class BufferManager:
     self.untrackBuffer_(textBuffer)
 
   def getUnsavedBuffer(self):
-    for buffer in self.buffers.values():
-      if buffer.isDirty():
-        return buffer
-    for buffer in self.ramBuffers:
+    for buffer in self.buffers:
       if buffer.isDirty():
         return buffer
     return None
@@ -34,14 +33,35 @@ class BufferManager:
     textBuffer = app.text_buffer.TextBuffer()
     textBuffer.lines = [""]
     textBuffer.savedAtRedoIndex = 0
-    self.ramBuffers.append(textBuffer)
+    self.buffers.append(textBuffer)
+    app.log.info(textBuffer)
+    self.debugLog()
     return textBuffer
+
+  def nextBuffer(self):
+    app.log.info()
+    self.debugLog()
+    if len(self.buffers):
+      return self.buffers[0]
+    return None
+
+  def topBuffer(self):
+    app.log.info()
+    self.debugLog()
+    if len(self.buffers):
+      return self.buffers[0]
+    return None
 
   def loadTextBuffer(self, relPath):
     fullPath = os.path.abspath(os.path.expanduser(os.path.expandvars(relPath)))
+    app.log.info(fullPath)
     app.history.set(['files', fullPath, 'adate'], time.time())
-    textBuffer = self.buffers.get(fullPath, None)
-    app.log.info('X textBuffer', repr(textBuffer));
+    textBuffer = None
+    for i in self.buffers:
+      if i.fullPath == fullPath:
+        textBuffer = i
+        break
+    app.log.info('Searched for textBuffer', repr(textBuffer));
     if not textBuffer:
       if os.path.isdir(fullPath):
         app.log.info('Tried to open directory as a file', fullPath)
@@ -51,17 +71,16 @@ class BufferManager:
       textBuffer = app.text_buffer.TextBuffer()
       self.renameBuffer(textBuffer, fullPath)
       textBuffer.fileLoad()
-    if 0:  # logging.
-      for i,k in self.buffers.items():
-        app.log.info('  ', i)
-        app.log.info('    ', k)
-        #app.log.info('    ', repr(k.lines))
-        #app.log.info('    ', len(k.lines) and k.lines[0])
-      app.log.info(' loadTextBuffer')
-      app.log.info(fullPath)
-      app.log.info(' loadTextBuffer')
-      app.log.info(repr(textBuffer))
+      self.buffers.append(textBuffer)
+    self.debugLog()
     return textBuffer
+
+  def debugLog(self):
+    bufferList = ''
+    for i in self.buffers:
+      bufferList += '\n  '+repr(i.fullPath)
+      bufferList += '\n    '+repr(i)
+    app.log.info('BufferManager'+bufferList)
 
   def readStdin(self):
     app.log.info('reading from stdin')
@@ -81,19 +100,12 @@ class BufferManager:
 
   def untrackBuffer_(self, buffer):
     app.log.debug(buffer.fullPath)
-    try:
-      index = self.ramBuffers.index(buffer)
-      del self.ramBuffers[index]
-    except ValueError:
-      try:
-        del self.buffers[buffer.fullPath]
-      except KeyError:
-        pass
+    self.buffers.remove(buffer)
 
   def renameBuffer(self, buffer, fullPath):
-    self.untrackBuffer_(buffer)
+    # TODO(dschuyler): this can be phased out. It was from a time when the
+    # buffer manager needed to know if a path changed.
     buffer.fullPath = fullPath
-    self.buffers[fullPath] = buffer
 
   def fileClose(self, path):
     pass

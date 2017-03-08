@@ -66,7 +66,7 @@ class Controller:
     app.buffer_manager.buffers.closeTextBuffer(self.host.textBuffer)
     tb = app.buffer_manager.buffers.getUnsavedBuffer()
     if not tb:
-      pass #tb = app.buffer_manager.buffers.getNextBuffer()
+      tb = app.buffer_manager.buffers.nextBuffer()
       if not tb:
         tb = app.buffer_manager.buffers.newTextBuffer()
     self.host.setTextBuffer(tb)
