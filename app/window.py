@@ -509,7 +509,7 @@ class TopInfo(StaticWindow):
 
 class InputWindow(Window):
   """This is the main content window. Often the largest pane displayed."""
-  def __init__(self, prg, rows, cols, top, left):
+  def __init__(self, prg):
     assert(prg)
     Window.__init__(self, prg)
     self.prg = prg

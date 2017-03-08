@@ -110,7 +110,7 @@ class CiProgram:
       self.logWindow = None
       self.paletteWindow = None
     self.paletteWindow = app.window.PaletteWindow(self)
-    self.inputWindow = app.window.InputWindow(self, 10, 10, 0, 0)
+    self.inputWindow = app.window.InputWindow(self)
     self.layout()
 
   def layout(self):
