@@ -544,7 +544,7 @@ class BackingTextBuffer(Mutator):
         if segment.start() < pos <= segment.end():
           pos = segment.start()
           break
-      self.cursorMove(0, pos-self.cursorCol, pos-self.cursorCol - self.goalCol)
+      self.cursorMove(0, pos-self.cursorCol, pos-self.goalCol)
       self.redo()
     elif self.cursorRow > 0:
       self.cursorMove(-1, len(self.lines[self.cursorRow-1]),
@@ -561,7 +561,7 @@ class BackingTextBuffer(Mutator):
         if segment.start() <= pos < segment.end():
           pos = segment.end()
           break
-      self.cursorMove(0, pos-self.cursorCol, pos-self.cursorCol - self.goalCol)
+      self.cursorMove(0, pos-self.cursorCol, pos-self.goalCol)
       self.redo()
     elif self.cursorRow+1 < len(self.lines):
       self.cursorMove(1, -len(self.lines[self.cursorRow]),
