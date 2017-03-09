@@ -536,11 +536,23 @@ class BackingTextBuffer(Mutator):
         self.cursorMove(-1, lineLen - self.cursorCol, 0)
         self.redo()
 
+  def cursorMoveSubwordLeft(self):
+    self.doCursorMoveLeftTo(app.selectable.kReSubwordBoundary)
+
+  def cursorMoveSubwordRight(self):
+    self.doCursorMoveRightTo(app.selectable.kReSubwordBoundary)
+
   def cursorMoveWordLeft(self):
+    self.doCursorMoveLeftTo(app.selectable.kReWordBoundary)
+
+  def cursorMoveWordRight(self):
+    self.doCursorMoveRightTo(app.selectable.kReWordBoundary)
+
+  def doCursorMoveLeftTo(self, boundary):
     if self.cursorCol > 0:
       line = self.lines[self.cursorRow]
       pos = self.cursorCol
-      for segment in re.finditer(app.selectable.kReWordBoundary, line):
+      for segment in re.finditer(boundary, line):
         if segment.start() < pos <= segment.end():
           pos = segment.start()
           break
@@ -551,13 +563,13 @@ class BackingTextBuffer(Mutator):
           self.cursorCol - self.goalCol)
       self.redo()
 
-  def cursorMoveWordRight(self):
+  def doCursorMoveRightTo(self, boundary):
     if not self.lines:
       return
     if self.cursorCol < len(self.lines[self.cursorRow]):
       line = self.lines[self.cursorRow]
       pos = self.cursorCol
-      for segment in re.finditer(app.selectable.kReWordBoundary, line):
+      for segment in re.finditer(boundary, line):
         if segment.start() <= pos < segment.end():
           pos = segment.end()
           break
@@ -602,12 +614,23 @@ class BackingTextBuffer(Mutator):
       self.selectionCharacter()
     self.cursorMoveRight()
 
-  def cursorSelectWordLeft(self):
-    app.log.info('cursorSelectWordLeft')
+  def cursorSelectSubwordLeft(self):
     if self.selectionMode == app.selectable.kSelectionNone:
       self.selectionCharacter()
-    if self.cursorRow == self.markerRow and self.cursorCol == self.markerCol:
-      app.log.info('They match')
+    self.cursorMoveSubwordLeft()
+    self.cursorMoveAndMark(*self.extendSelection())
+    self.redo()
+
+  def cursorSelectSubwordRight(self):
+    if self.selectionMode == app.selectable.kSelectionNone:
+      self.selectionCharacter()
+    self.cursorMoveSubwordRight()
+    self.cursorMoveAndMark(*self.extendSelection())
+    self.redo()
+
+  def cursorSelectWordLeft(self):
+    if self.selectionMode == app.selectable.kSelectionNone:
+      self.selectionCharacter()
     self.cursorMoveWordLeft()
     self.cursorMoveAndMark(*self.extendSelection())
     self.redo()
