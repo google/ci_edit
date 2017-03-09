@@ -748,7 +748,7 @@ class BackingTextBuffer(Mutator):
       if self.selectionMode == app.selectable.kSelectionLine:
         text = text + ('',)
       if clipboard.copy:
-        clipboard.copy("\n".join(text))
+        clipboard.copy("\n".join(self.linesDisplayableToBin(text)))
 
   def editCut(self):
     self.editCopy()
@@ -760,7 +760,7 @@ class BackingTextBuffer(Mutator):
       if self.selectionMode != app.selectable.kSelectionNone:
         self.performDelete()
       if osClip:
-        clip = tuple(osClip.split("\n"))
+        clip = tuple(self.linesBinToDisplayable(osClip.split("\n")))
       else:
         clip = self.clipList[-1]
       self.redoAddChange(('v', clip))
@@ -776,6 +776,17 @@ class BackingTextBuffer(Mutator):
     else:
       app.log.info('clipList empty')
 
+  def linesDisplayableToBin(self, lines):
+    def encode(line):
+      return chr(int(line.groups()[0], 16))
+    return [
+      re.sub('\x01([0-9a-fA-F][0-9a-fA-F])', encode, i) for i in lines]
+
+  def linesBinToDisplayable(self, lines):
+    def parse(line):
+      return "\x01%02x"%ord(line.groups()[0])
+    return [re.sub('([\0-\x1f\x7f-\xff])', parse, i) for i in lines]
+
   def doDataToLines(self, data):
     def parse(line):
       return "\xfe%02x"%ord(line.groups()[0])
@@ -784,7 +795,7 @@ class BackingTextBuffer(Mutator):
       lines = data.split('\n')
     if len(lines) == 1:
       lines = data.split('\r')
-    return [re.sub('([\0-\x1f\x7f-\xff])', parse, i) for i in lines]
+    return self.linesBinToDisplayable(lines)
 
   def dataToLines(self):
     self.lines = self.doDataToLines(self.data)
@@ -829,12 +840,7 @@ class BackingTextBuffer(Mutator):
       self.parser = None
 
   def linesToData(self):
-    def encode(line):
-      return chr(int(line.groups()[0], 16))
-    #assert re.sub('\xfe([0-9a-fA-F][0-9a-fA-F])', encode, "\xfe00") == "\x00"
-    lines = [
-      re.sub('\xfe([0-9a-fA-F][0-9a-fA-F])', encode, i) for i in self.lines]
-    self.data = '\n'.join(lines)
+    self.data = '\n'.join(self.linesDisplayableToBin(self.lines))
 
   def fileWrite(self):
     app.history.set(
