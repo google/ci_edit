@@ -12,10 +12,10 @@ kReEndSpaces = re.compile(r'\s+$')
 kReNumbers = re.compile('0x[0-9a-fA-F]+|\d+')
 kReStrings = re.compile(
     r"(\"\"\".*?(?<!\\)\"\"\")|('''.*?(?<!\\)''')|(\".*?(?<!\\)\")|('.*?(?<!\\)')")
-kReSubwordBoundary = re.compile('(?:[A-Z]+[a-z-]+)|(?:_-)')
-kReSubwordBoundary = re.compile(
+kReSubwordBoundaryFwd = re.compile(
     '(?:[_-]?[A-Z][a-z-]+)|(?:[_-]?[A-Z]+(?![a-z]))|(?:[_-]?[a-z]+)|(?:\W+)')
-# RoooooASDFeeeeeRRRoooRoooRoo_FDSFDS_ASDFSD eeee_eeeee_eee
+kReSubwordBoundaryRvr = re.compile(
+    '(?:[A-Z][a-z-]+[_-]?)|(?:[A-Z]+(?![a-z])[_-]?)|(?:[a-z]+[_-]?)|(?:\W+)')
 kReWordBoundary = re.compile('(?:\w+)|(?:\W+)')
 
 
