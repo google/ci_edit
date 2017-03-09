@@ -18,17 +18,6 @@ import time
 import traceback
 
 
-def lookupSequence(sequence):
-  """Convert a sequence from getch into a key code."""
-  if len(sequence) == 0:
-    return 27
-  fakeKeys = {
-    (91, 49, 59, 57, 67): app.curses_util.KEY_ALT_RIGHT,
-    (91, 49, 59, 57, 68): app.curses_util.KEY_ALT_LEFT,
-  }
-  return fakeKeys.get(sequence, None)
-
-
 userConsoleMessage = None
 def userMessage(*args):
   global userConsoleMessage
@@ -95,9 +84,9 @@ class CiProgram:
               keySequence.append(n)
               n = window.cursorWindow.getch()
             app.log.info('sequence\n', keySequence)
-            ch = lookupSequence(tuple(keySequence))
-            if ch is None:
-              continue
+            ch = tuple(keySequence)
+            if not ch:
+              ch = 27
           if ch != curses.ERR:
             self.ch = ch
             if ch == curses.KEY_MOUSE:
