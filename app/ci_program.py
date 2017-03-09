@@ -82,9 +82,10 @@ class CiProgram:
             while n != curses.ERR:
               keySequence.append(n)
               n = window.cursorWindow.getch()
-            app.log.info('sequence\n', keySequence)
+            # app.log.info('sequence\n', keySequence)
             ch = tuple(keySequence)
             if not ch:
+              # The sequence was empty, just forward the esc.
               ch = curses.ascii.ESC
           if ch != curses.ERR:
             self.ch = ch
