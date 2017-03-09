@@ -18,6 +18,17 @@ import time
 import traceback
 
 
+def lookupSequence(sequence):
+  """Convert a sequence from getch into a key code."""
+  if len(sequence) == 0:
+    return 27
+  fakeKeys = {
+    (91, 49, 59, 57, 67): app.curses_util.KEY_ALT_RIGHT,
+    (91, 49, 59, 57, 68): app.curses_util.KEY_ALT_LEFT,
+  }
+  return fakeKeys.get(sequence, None)
+
+
 userConsoleMessage = None
 def userMessage(*args):
   global userConsoleMessage
@@ -78,18 +89,15 @@ class CiProgram:
           ch = window.cursorWindow.getch()
           # TODO(dschuyler): Parse escape sequences.
           if ch == 27:
-            end = time.time()+0.01
+            keySequence = []
             n = window.cursorWindow.getch()
-            while time.time() < end:
+            while n != -1:
+              keySequence.append(n)
               n = window.cursorWindow.getch()
-              if n == 91:
-                app.log.info('discarding', n)
-                count = 5
-                while count:
-                  k = window.cursorWindow.getch()
-                  app.log.info('discarding', k)
-                  --count
-                break
+            app.log.info('sequence\n', keySequence)
+            ch = lookupSequence(tuple(keySequence))
+            if ch is None:
+              continue
           if ch != curses.ERR:
             self.ch = ch
             if ch == curses.KEY_MOUSE:

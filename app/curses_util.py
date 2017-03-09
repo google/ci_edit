@@ -44,8 +44,10 @@ KEY_ALT_A = 165
 KEY_ALT_B = 171
 KEY_ALT_C = 167
 KEY_ALT_S = 159
-KEY_ALT_LEFT = 68
-KEY_ALT_RIGHT = 67
+KEY_ALT_LEFT = 10000068  # Fake value
+KEY_ALT_RIGHT = 10000067  # Fake value
+KEY_ALT_SHIFT_LEFT = 10000069  # Fake value
+KEY_ALT_SHIFT_RIGHT = 10000070  # Fake value
 
 if sys.platform == 'darwin':
   KEY_CTRL_DOWN = 521

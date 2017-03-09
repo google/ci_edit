@@ -43,6 +43,11 @@ def initCommandSet(editText, textBuffer):
     curses.KEY_RIGHT: textBuffer.cursorRight,
     # curses.KEY_UP: textBuffer.cursorUp,
 
+    KEY_ALT_LEFT: textBuffer.cursorMoveWordLeft,
+    KEY_ALT_SHIFT_LEFT: textBuffer.cursorSelectWordLeft,
+    KEY_ALT_RIGHT: textBuffer.cursorMoveWordRight,
+    KEY_ALT_SHIFT_RIGHT: textBuffer.cursorSelectWordRight,
+
     KEY_CTRL_LEFT: textBuffer.cursorMoveWordLeft,
     KEY_CTRL_SHIFT_LEFT: textBuffer.cursorSelectWordLeft,
     KEY_CTRL_RIGHT: textBuffer.cursorMoveWordRight,
