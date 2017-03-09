@@ -76,17 +76,16 @@ class CiProgram:
       while not len(cmdList):
         for i in range(5):
           ch = window.cursorWindow.getch()
-          # TODO(dschuyler): Parse escape sequences.
-          if ch == 27:
+          if ch == curses.ascii.ESC:
             keySequence = []
             n = window.cursorWindow.getch()
-            while n != -1:
+            while n != curses.ERR:
               keySequence.append(n)
               n = window.cursorWindow.getch()
             app.log.info('sequence\n', keySequence)
             ch = tuple(keySequence)
             if not ch:
-              ch = 27
+              ch = curses.ascii.ESC
           if ch != curses.ERR:
             self.ch = ch
             if ch == curses.KEY_MOUSE:
