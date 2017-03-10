@@ -45,12 +45,12 @@ KEY_ALT_B = 171
 KEY_ALT_C = 167
 KEY_ALT_S = 159
 
-KEY_ALT_SHIFT_LEFT = (None,)  # unkown
-KEY_ALT_SHIFT_RIGHT = (None,)  # unkown
 
 if sys.platform == 'darwin':
   KEY_ALT_LEFT = (91, 49, 59, 57, 68)
   KEY_ALT_RIGHT = (91, 49, 59, 57, 67)
+  KEY_ALT_SHIFT_LEFT = (None,)  # unkown
+  KEY_ALT_SHIFT_RIGHT = (None,)  # unkown
   KEY_CTRL_DOWN = 521
   KEY_CTRL_SHIFT_DOWN = 522
   KEY_CTRL_LEFT = 541
@@ -60,8 +60,12 @@ if sys.platform == 'darwin':
   KEY_CTRL_UP = 562
   KEY_CTRL_SHIFT_UP = 563
 else:
-  KEY_ALT_LEFT = (98,)
-  KEY_ALT_RIGHT = (102,)
+  KEY_ALT_LEFT_SSH = (98,)  # Need a better way to sort this out.
+  KEY_ALT_RIGHT_SSH = (102,)  # ditto
+  KEY_ALT_LEFT = 542
+  KEY_ALT_RIGHT = 557
+  KEY_ALT_SHIFT_LEFT = 543
+  KEY_ALT_SHIFT_RIGHT = 558
   KEY_CTRL_DOWN = 524
   KEY_CTRL_SHIFT_DOWN = 525
   KEY_CTRL_LEFT = 544
