@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import curses
+import os
 import sys
 
 
@@ -60,8 +61,6 @@ if sys.platform == 'darwin':
   KEY_CTRL_UP = 562
   KEY_CTRL_SHIFT_UP = 563
 else:
-  KEY_ALT_LEFT_SSH = (98,)  # Need a better way to sort this out.
-  KEY_ALT_RIGHT_SSH = (102,)  # ditto
   KEY_ALT_LEFT = 542
   KEY_ALT_RIGHT = 557
   KEY_ALT_SHIFT_LEFT = 543
@@ -74,6 +73,10 @@ else:
   KEY_CTRL_SHIFT_RIGHT = 560
   KEY_CTRL_UP = 565
   KEY_CTRL_SHIFT_UP = 566
+
+if 'SSH_CLIENT' in os.environ:
+  KEY_ALT_LEFT = (98,)  # Need a better way to sort this out.
+  KEY_ALT_RIGHT = (102,)  # ditto
 
 KEY_SHIFT_DOWN = 336
 KEY_SHIFT_F1 = 277
