@@ -664,8 +664,9 @@ class BackingTextBuffer(Mutator):
     maxy, maxx = self.view.cursorWindow.getmaxyx()
     cursorRowDelta = maxy
     scrollDelta = maxy
-    if self.cursorRow + 2*maxy >= len(self.lines):
+    if self.cursorRow + maxy >= len(self.lines):
       cursorRowDelta = len(self.lines)-self.cursorRow-1
+    if self.scrollRow + 2*maxy >= len(self.lines):
       scrollDelta = len(self.lines)-maxy-self.scrollRow
     self.cursorMoveScroll(cursorRowDelta,
         self.cursorColDelta(self.cursorRow+cursorRowDelta), 0, scrollDelta, 0)
@@ -677,8 +678,9 @@ class BackingTextBuffer(Mutator):
     maxy, maxx = self.view.cursorWindow.getmaxyx()
     cursorRowDelta = -maxy
     scrollDelta = -maxy
-    if self.cursorRow < 2*maxy:
+    if self.cursorRow < maxy:
       cursorRowDelta = -self.cursorRow
+    if self.scrollRow + scrollDelta < 0:
       scrollDelta = -self.scrollRow
     self.cursorMoveScroll(cursorRowDelta,
         self.cursorColDelta(self.cursorRow+cursorRowDelta), 0, scrollDelta, 0)
