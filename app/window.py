@@ -144,7 +144,6 @@ class StaticWindow:
     self.cursorWindow.resize(self.rows, self.cols)
 
   def resizeTopBy(self, rows):
-    app.log.detail('resizeTopBy', rows, repr(self))
     self.top += rows
     self.rows -= rows
     if self.rows <= 0:
@@ -382,6 +381,9 @@ class MessageLine(StaticWindow):
     self.renderedMessage = None
 
   def refresh(self):
+    self.blank()
+    return
+    # TODO(dschuyler): clean this up
     tb = self.host.textBuffer
     if not tb or self.renderedMessage is tb.message:
       return
@@ -506,6 +508,10 @@ class TopInfo(StaticWindow):
       self.addStr(i, 0, ' '*self.cols, self.color)
     self.cursorWindow.refresh()
 
+  def reshape(self, rows, cols, top, left):
+    self.borrowedRows = 0
+    StaticWindow.reshape(self, rows, cols, top, left)
+
 
 class InputWindow(Window):
   """This is the main content window. Often the largest pane displayed."""
@@ -517,7 +523,7 @@ class InputWindow(Window):
     self.showFooter = True
     self.useInteractiveFind = True
     self.showLineNumbers = True
-    self.showMessageLine = False
+    self.showMessageLine = True
     self.showRightColumn = True
     self.showTopInfo = True
     self.color = curses.color_pair(0)

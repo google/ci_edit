@@ -214,7 +214,6 @@ class CuaEdit(app.controller.Controller):
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
       curses.ascii.ESC: textBuffer.selectionNone,
-      curses.KEY_RESIZE: self.prg.handleScreenResize,
 
       curses.KEY_F1: self.info,
 

@@ -94,6 +94,14 @@ class CiProgram:
             cmdList.append(ch)
       if len(cmdList):
         for cmd in cmdList:
+          if cmd == curses.KEY_RESIZE:
+            rows, cols = app.curses_util.terminalSize()
+            curses.resizeterm(rows, cols)
+            self.layout()
+            window.controller.onChange()
+            self.refresh()
+            app.log.debug(self.stdscr.getmaxyx(), time.time())
+            continue
           window.controller.doCommand(cmd)
           window.controller.onChange()
           if cmd == curses.KEY_MOUSE:
@@ -166,6 +174,10 @@ class CiProgram:
         "y %2d x %2d maxy %d maxx %d baud %d color %d"
         %(y, x, maxy, maxx, curses.baudrate(), curses.can_change_color()),
             self.debugWindow.color)
+    scrRows, scrCols = self.stdscr.getmaxyx()
+    self.debugWindow.writeLine(
+        "scr rows %d cols %d"
+        %(scrRows, scrCols))
     self.debugWindow.writeLine(
         "ch %3s %s"
         %(self.ch, app.curses_util.cursesKeyName(self.ch)),
@@ -294,7 +306,7 @@ class CiProgram:
     app.log.info('click landed on screen')
 
   def handleScreenResize(self):
-    app.log.info('handleScreenResize')
+    app.log.debug('handleScreenResize -----------------------')
     self.layout()
 
   def parseArgs(self):
@@ -383,6 +395,7 @@ class CiProgram:
     self.parseArgs()
     self.makeHomeDirs()
     app.history.loadUserHistory()
+    app.curses_util.hackCursesFixes()
     self.startup()
     self.commandLoop()
     app.history.saveUserHistory()
@@ -424,6 +437,7 @@ def run_ci():
     curses.wrapper(wrapped_ci)
   finally:
     app.log.flush()
+    app.log.writeToFile('~/.ci_edit/recentLog')
   global userConsoleMessage
   if userConsoleMessage:
     print userConsoleMessage

@@ -101,6 +101,11 @@ def wrapper(func, shouldWrite=True):
     flush()
   return r
 
+def writeToFile(path):
+  fullPath = os.path.expanduser(os.path.expandvars(path))
+  with open(fullPath, 'w+') as out:
+    out.write("\n".join(fullLog)+"\n")
+
 def flush():
   global fullLog
   if shouldWritePrintLog:

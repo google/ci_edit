@@ -3,8 +3,12 @@
 # found in the LICENSE file.
 
 import curses
+import fcntl
 import os
+import signal
+import struct
 import sys
+import termios
 
 
 CTRL_AT = 0x00
@@ -148,3 +152,17 @@ def cursesKeyName(keyCode):
   except:
     pass
   return 'unknown'
+
+# This should be provide by something built in and apparently it is in Python 3.
+# In Python 2 it's done by hand.
+def terminalSize():
+  h, w = struct.unpack(
+      'HHHH',
+      fcntl.ioctl(0, termios.TIOCGWINSZ,
+      struct.pack('HHHH', 0, 0, 0, 0)))[:2]
+  return h, w
+
+def hackCursesFixes():
+  def windowChangedHandler(signum, frame):
+    curses.ungetch(curses.KEY_RESIZE)
+  signal.signal(signal.SIGWINCH, windowChangedHandler)
