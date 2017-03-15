@@ -750,7 +750,7 @@ class BackingTextBuffer(Mutator):
       if self.selectionMode == app.selectable.kSelectionLine:
         text = text + ('',)
       if clipboard.copy:
-        clipboard.copy("\n".join(self.linesDisplayableToBin(text)))
+        clipboard.copy(self.doLinesToData(text))
 
   def editCut(self):
     self.editCopy()
@@ -762,7 +762,7 @@ class BackingTextBuffer(Mutator):
       if self.selectionMode != app.selectable.kSelectionNone:
         self.performDelete()
       if osClip:
-        clip = tuple(self.linesBinToDisplayable(osClip.split("\n")))
+        clip = tuple(self.doDataToLines(osClip))
       else:
         clip = self.clipList[-1]
       self.redoAddChange(('v', clip))
@@ -778,26 +778,21 @@ class BackingTextBuffer(Mutator):
     else:
       app.log.info('clipList empty')
 
-  def linesDisplayableToBin(self, lines):
+  def doLinesToData(self, data):
     def encode(line):
       return chr(int(line.groups()[0], 16))
-    return [
-      re.sub('\x01([0-9a-fA-F][0-9a-fA-F])', encode, i) for i in lines]
-
-  def linesBinToDisplayable(self, lines):
-    def parse(line):
-      return "\x01%02x"%ord(line.groups()[0])
-    return [re.sub('([\0-\x1f\x7f-\xff])', parse, i) for i in lines]
+    return re.sub('\x01([0-9a-fA-F][0-9a-fA-F])', encode, "\n".join(data))
 
   def doDataToLines(self, data):
-    def parse(line):
-      return "\xfe%02x"%ord(line.groups()[0])
-    lines = data.split('\r\n')
-    if len(lines) == 1:
-      lines = data.split('\n')
-    if len(lines) == 1:
-      lines = data.split('\r')
-    return self.linesBinToDisplayable(lines)
+    # Performance: in a 1000 line test it appears fastest to do some simple
+    # .replace() calls to minimize the number of calls to parse().
+    data = data.replace('\r\n', '\n')
+    data = data.replace('\r', '\n')
+    data = data.replace('\t', ' '*8)
+    def parse(sre):
+      return "\x01%02x"%ord(sre.groups()[0])
+    data = re.sub('([\0-\x09\x0b-\x1f\x7f-\xff])', parse, data)
+    return data.split('\n')
 
   def dataToLines(self):
     self.lines = self.doDataToLines(self.data)
@@ -842,7 +837,7 @@ class BackingTextBuffer(Mutator):
       self.parser = None
 
   def linesToData(self):
-    self.data = '\n'.join(self.linesDisplayableToBin(self.lines))
+    self.data = self.doLinesToData(self.lines)
 
   def fileWrite(self):
     app.history.set(
