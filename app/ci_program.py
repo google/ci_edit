@@ -69,8 +69,14 @@ class CiProgram:
     window = self.inputWindow
     window.focus()
     self.focusedWindow = window
+    self.mainLoopTime = 0
+    self.mainLoopTimePeak = 0
+    start = time.time()
     while not self.exiting:
       self.refresh()
+      self.mainLoopTime = time.time()-start
+      if self.mainLoopTime > self.mainLoopTimePeak:
+        self.mainLoopTimePeak = self.mainLoopTime
       cmdList = []
       mouseEvents = []
       while not len(cmdList):
@@ -92,6 +98,7 @@ class CiProgram:
             if ch == curses.KEY_MOUSE:
               mouseEvents.append((curses.getmouse(), time.time()))
             cmdList.append(ch)
+      start = time.time()
       if len(cmdList):
         for cmd in cmdList:
           if cmd == curses.KEY_RESIZE:
@@ -121,7 +128,7 @@ class CiProgram:
     parsed."""
     if self.showLogWindow:
       self.debugWindow = app.window.StaticWindow(self)
-      self.zOrder += [self.debugWindow]
+      #self.zOrder += [self.debugWindow]
       self.logWindow = app.window.LogWindow(self)
       #self.zOrder += [self.logWindow]
     else:
@@ -176,8 +183,8 @@ class CiProgram:
             self.debugWindow.color)
     scrRows, scrCols = self.stdscr.getmaxyx()
     self.debugWindow.writeLine(
-        "scr rows %d cols %d"
-        %(scrRows, scrCols))
+        "scr rows %d cols %d mlt %f/%f"
+        %(scrRows, scrCols, self.mainLoopTime, self.mainLoopTimePeak))
     self.debugWindow.writeLine(
         "ch %3s %s"
         %(self.ch, app.curses_util.cursesKeyName(self.ch)),
