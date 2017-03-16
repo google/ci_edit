@@ -1180,8 +1180,7 @@ class BackingTextBuffer(Mutator):
       cursorDelta = self.scrollRow + maxy - 2 - self.cursorRow
     self.scrollRow -= 1
     self.cursorMoveScroll(cursorDelta,
-        self.cursorColDelta(self.cursorRow+cursorDelta), 0, 0, #-1,
-        0)
+        self.cursorColDelta(self.cursorRow+cursorDelta), 0, 0, 0)
     self.redo()
 
   def mouseWheelUp(self, shift, ctrl, alt):
@@ -1195,8 +1194,7 @@ class BackingTextBuffer(Mutator):
       cursorDelta = self.scrollRow-self.cursorRow + 1
     self.scrollRow += 1
     self.cursorMoveScroll(cursorDelta,
-        self.cursorColDelta(self.cursorRow+cursorDelta), 0, 0, #1,
-        0)
+        self.cursorColDelta(self.cursorRow+cursorDelta), 0, 0, 0)
     self.redo()
 
   def nextSelectionMode(self):
