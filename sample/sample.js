@@ -11,9 +11,11 @@ namespace is not a keyword
 // line comment @param
 <!-- not a comment -->
 
+a = b / c;
 
 function foo() {
   if or while or switch
+  bar(/r\ne\/gex"/, 'thing')
 }
 
 'sadfsds\nsadf' //
