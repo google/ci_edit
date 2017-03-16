@@ -705,6 +705,7 @@ class InputWindow(Window):
     self.prg.quitNow()
 
   def refresh(self):
+    self.textBuffer.updateScrollPosition()
     self.topInfo.onChange()
     Window.refresh(self)
     self.drawLogoCorner()

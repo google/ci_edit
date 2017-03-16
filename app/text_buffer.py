@@ -154,13 +154,11 @@ class Mutator(app.selectable.Selectable):
       elif change[0] == 'm':  # Redo move
         assert self.cursorRow+change[1][0] >= 0, "%s %s"%(self.cursorRow, change[1][0])
         assert self.cursorCol+change[1][1] >= 0, "%s %s"%(self.cursorCol, change[1][1])
-        assert self.scrollRow+change[1][3] >= 0, "%s %s"%(self.scrollRow, change[1][3])
-        assert self.scrollCol+change[1][4] >= 0, "%s %s"%(self.scrollCol, change[1][4])
         self.cursorRow += change[1][0]
         self.cursorCol += change[1][1]
         self.goalCol += change[1][2]
-        self.scrollRow += change[1][3]
-        self.scrollCol += change[1][4]
+        #self.scrollRow += change[1][3]
+        #self.scrollCol += change[1][4]
         self.markerRow += change[1][5]
         self.markerCol += change[1][6]
         self.markerEndRow += change[1][7]
@@ -307,8 +305,8 @@ class Mutator(app.selectable.Selectable):
         self.cursorRow -= change[1][0]
         self.cursorCol -= change[1][1]
         self.goalCol -= change[1][2]
-        self.scrollRow -= change[1][3]
-        self.scrollCol -= change[1][4]
+        #self.scrollRow -= change[1][3]
+        #self.scrollCol -= change[1][4]
         self.markerRow -= change[1][5]
         self.markerCol -= change[1][6]
         self.markerEndRow -= change[1][7]
@@ -316,8 +314,6 @@ class Mutator(app.selectable.Selectable):
         self.selectionMode -= change[1][9]
         assert self.cursorRow >= 0
         assert self.cursorCol >= 0
-        assert self.scrollRow >= 0
-        assert self.scrollCol >= 0
         return True
       elif change[0] == 'n':
         # Undo split lines.
@@ -492,14 +488,19 @@ class BackingTextBuffer(Mutator):
       scrollCols = self.cursorCol+colDelta - self.scrollCol
     elif self.cursorCol+colDelta >= self.scrollCol+maxx:
       scrollCols = self.cursorCol+colDelta - (self.scrollCol+maxx-1)
+    self.scrollRow += scrollRows
+    self.scrollCol += scrollCols
     self.redoAddChange(('m', (rowDelta, colDelta, goalColDelta,
-        scrollRows, scrollCols,
+        0, 0,
         markRowDelta, markColDelta, 0, 0, selectionModeDelta)))
 
   def cursorMoveScroll(self, rowDelta, colDelta, goalColDelta,
       scrollRowDelta, scrollColDelta):
-    self.redoAddChange(('m', (rowDelta, colDelta, goalColDelta, scrollRowDelta,
-        scrollColDelta,0,0, 0, 0,0)))
+    self.scrollRow += scrollRowDelta
+    self.scrollCol += scrollColDelta
+    self.redoAddChange(('m', (rowDelta, colDelta, goalColDelta,
+        0, 0,
+        0,0, 0, 0,0)))
 
   def cursorMoveDown(self):
     if self.cursorRow+1 < len(self.lines):
@@ -668,8 +669,9 @@ class BackingTextBuffer(Mutator):
       cursorRowDelta = len(self.lines)-self.cursorRow-1
     if self.scrollRow + 2*maxy >= len(self.lines):
       scrollDelta = len(self.lines)-maxy-self.scrollRow
+    self.scrollRow += scrollDelta
     self.cursorMoveScroll(cursorRowDelta,
-        self.cursorColDelta(self.cursorRow+cursorRowDelta), 0, scrollDelta, 0)
+        self.cursorColDelta(self.cursorRow+cursorRowDelta), 0, 0, 0)
     self.redo()
 
   def cursorPageUp(self):
@@ -682,8 +684,9 @@ class BackingTextBuffer(Mutator):
       cursorRowDelta = -self.cursorRow
     if self.scrollRow + scrollDelta < 0:
       scrollDelta = -self.scrollRow
+    self.scrollRow += scrollDelta
     self.cursorMoveScroll(cursorRowDelta,
-        self.cursorColDelta(self.cursorRow+cursorRowDelta), 0, scrollDelta, 0)
+        self.cursorColDelta(self.cursorRow+cursorRowDelta), 0, 0, 0)
     self.redo()
 
   def cursorScrollTo(self, goalRow, window):
@@ -877,12 +880,13 @@ class BackingTextBuffer(Mutator):
     if not (self.scrollCol < start <= self.scrollCol + maxx):
       scrollCol = max(start-10, 0)
     self.doSelectionMode(app.selectable.kSelectionNone)
+    self.scrollRow = scrollRow
+    self.scrollCol = scrollCol
     self.cursorMoveScroll(
         lineNumber-self.cursorRow,
         start+length-self.cursorCol,
         start+length-self.goalCol,
-        scrollRow-self.scrollRow,
-        scrollCol-self.scrollCol)
+        0, 0)
     self.redo()
     self.doSelectionMode(mode)
     self.cursorMove(0, -length, -length)
@@ -1174,8 +1178,10 @@ class BackingTextBuffer(Mutator):
     cursorDelta = 0
     if self.cursorRow >= self.scrollRow + maxy - 2:
       cursorDelta = self.scrollRow + maxy - 2 - self.cursorRow
+    self.scrollRow -= 1
     self.cursorMoveScroll(cursorDelta,
-        self.cursorColDelta(self.cursorRow+cursorDelta), 0, -1, 0)
+        self.cursorColDelta(self.cursorRow+cursorDelta), 0, 0, #-1,
+        0)
     self.redo()
 
   def mouseWheelUp(self, shift, ctrl, alt):
@@ -1187,8 +1193,10 @@ class BackingTextBuffer(Mutator):
     cursorDelta = 0
     if self.cursorRow <= self.scrollRow + 1:
       cursorDelta = self.scrollRow-self.cursorRow + 1
+    self.scrollRow += 1
     self.cursorMoveScroll(cursorDelta,
-        self.cursorColDelta(self.cursorRow+cursorDelta), 0, 1, 0)
+        self.cursorColDelta(self.cursorRow+cursorDelta), 0, 0, #1,
+        0)
     self.redo()
 
   def nextSelectionMode(self):
@@ -1306,18 +1314,14 @@ class BackingTextBuffer(Mutator):
   def updateScrollPosition(self):
     """Move the selected view rectangle so that the cursor is visible."""
     maxy, maxx = self.view.cursorWindow.getmaxyx()
-    rows = 0
     if self.scrollRow > self.cursorRow:
-      rows = self.cursorRow - self.scrollRow
+      self.scrollRow = self.cursorRow
     elif self.cursorRow >= self.scrollRow+maxy:
-      rows = self.cursorRow - (self.scrollRow+maxy-1)
-    cols = 0
+      self.scrollRow = self.cursorRow - (maxy-1)
     if self.scrollCol > self.cursorCol:
-      cols = self.cursorCol - self.scrollCol
+      self.scrollCol = self.cursorCol
     elif self.cursorCol >= self.scrollCol+maxx:
-      cols = self.cursorCol - (self.scrollCol+maxx-1)
-    self.cursorMoveScroll(0, 0, 0, rows, cols)
-    self.redo()
+      self.scrollCol = self.cursorCol - (maxx-1)
 
 
 class TextBuffer(BackingTextBuffer):
