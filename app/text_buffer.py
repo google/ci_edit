@@ -1327,7 +1327,7 @@ class TextBuffer(BackingTextBuffer):
     self.lineLimitIndicator = sys.maxint
     self.highlightRe = None
 
-  def scrollToCursor(self, window):
+  def checkScrollToCursor(self, window):
     """Move the selected view rectangle so that the cursor is visible."""
     maxy, maxx = window.cursorWindow.getmaxyx()
     #     self.cursorRow >= self.scrollRow+maxy 1 0
@@ -1360,7 +1360,7 @@ class TextBuffer(BackingTextBuffer):
       self.shouldReparse = False
     maxy, maxx = window.cursorWindow.getmaxyx()
 
-    self.scrollToCursor(window)
+    self.checkScrollToCursor(window)
 
     startCol = self.scrollCol
     endCol = self.scrollCol+maxx
