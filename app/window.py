@@ -328,7 +328,7 @@ class LineNumbers(StaticWindow):
         tb.selectionLine()
       self.mouseRelease(paneRow, paneCol, shift, ctrl, alt)
     else:
-      tb.selectionLine()
+      tb.selectionNone()
       self.mouseRelease(paneRow, paneCol, shift, ctrl, alt)
 
   def mouseDoubleClick(self, paneRow, paneCol, shift, ctrl, alt):

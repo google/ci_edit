@@ -1246,7 +1246,6 @@ class BackingTextBuffer(Mutator):
   def selectLineAt(self, row):
     if row >= len(self.lines):
       return
-    self.selectionNone()
     self.cursorMove(row-self.cursorRow, 0, 0)
     self.redo()
     self.selectionLine()
