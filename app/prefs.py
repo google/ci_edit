@@ -324,7 +324,7 @@ prefs = {
       ],
       'contains': [
         'c_string1', 'c_string2', 'doc_block_comment', 'cpp_block_comment',
-        'cpp_line_comment',
+        'cpp_line_comment', 'regex_string',
       ],
     },
     'md': {
@@ -332,7 +332,7 @@ prefs = {
       'keywords': [],
     },
     'regex_string': {
-      'begin': r"/(?![/\*\\]).*(?!/)",
+      'begin': r"(?!(?<=[\w/*\s]))\s*/(?![/*])",
       'end': "/",
       'escaped': r'\\.',
       'indent': '  ',
