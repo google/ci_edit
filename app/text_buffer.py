@@ -8,6 +8,7 @@ import app.history
 import app.parser
 import app.prefs
 import app.selectable
+import app.spelling
 import third_party.pyperclip as clipboard
 import curses.ascii
 import difflib
@@ -1503,6 +1504,19 @@ class TextBuffer(BackingTextBuffer):
           length = min(endCol, len(line)-lengthLimit)
           window.addStr(i, lengthLimit-startCol, line[lengthLimit:endCol],
               curses.color_pair(96))
+      if 1:
+        # Highlight spelling errors
+        colors = [131, 231]
+        color = 0
+        for i in range(limit):
+          line = self.lines[startRow+i][startCol:endCol]
+          for k in re.finditer(app.selectable.kReSubwords, line):
+            for f in k.regs:
+              word = line[f[0]:f[1]]
+              if not app.spelling.isCorrect(word):
+                window.addStr(i, f[0], word,
+                    curses.color_pair(colors[color%2]))
+                color += 1
       if self.findRe is not None:
         # Highlight find.
         for i in range(limit):
