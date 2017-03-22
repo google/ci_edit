@@ -8,6 +8,7 @@ import os
 dictionaryPath = 'app/dictionary.en-US.words'
 
 words = set()
+grammarWords = {}
 
 if os.path.isfile(dictionaryPath):
   with open(dictionaryPath, 'r') as f:
@@ -20,7 +21,9 @@ if os.path.isfile(dictionaryPath):
 else:
   app.log.error('dictionary not found', dictionaryPath)
 
-def isCorrect(word):
+def isCorrect(word, grammarName):
   if len(word) <= 1:
     return True
-  return word.lower() in words
+  if word.lower() in words:
+    return True
+  return word in grammarWords.get(grammarName, set())

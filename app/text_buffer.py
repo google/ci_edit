@@ -1393,6 +1393,23 @@ class TextBuffer(BackingTextBuffer):
             for found in node.grammar['specialsRe'].finditer(line):
               f = found.regs[0]
               window.addStr(i, col+f[0], line[f[0]:f[1]], keywordsColor)
+
+            if 1:
+              # Highlight spelling errors
+              colors = [131, 231]
+              color = 0
+              for found in re.finditer(app.selectable.kReSubwords, line):
+                for reg in found.regs:
+                  word = line[reg[0]:reg[1]]
+                  if not app.spelling.isCorrect(word, node.grammar.get(
+                      'name', 'unknown')):
+                    window.addStr(i, col+reg[0], word,
+                        curses.color_pair(colors[color%2]))
+                    color += 1
+
+
+
+
             k += length
           else:
             window.addStr(i, k-self.scrollCol+length, ' '*(maxx-k-length),
@@ -1504,19 +1521,6 @@ class TextBuffer(BackingTextBuffer):
           length = min(endCol, len(line)-lengthLimit)
           window.addStr(i, lengthLimit-startCol, line[lengthLimit:endCol],
               curses.color_pair(96))
-      if 1:
-        # Highlight spelling errors
-        colors = [131, 231]
-        color = 0
-        for i in range(limit):
-          line = self.lines[startRow+i][startCol:endCol]
-          for k in re.finditer(app.selectable.kReSubwords, line):
-            for f in k.regs:
-              word = line[f[0]:f[1]]
-              if not app.spelling.isCorrect(word):
-                window.addStr(i, f[0], word,
-                    curses.color_pair(colors[color%2]))
-                color += 1
       if self.findRe is not None:
         # Highlight find.
         for i in range(limit):

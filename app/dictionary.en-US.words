@@ -130,7 +130,6 @@ anyone
 anything
 anyway
 apostrophe
-app
 appear
 appearance
 appeared
@@ -263,6 +262,7 @@ bind
 binding
 bit
 blame
+blank
 bloat
 blocking
 blown
@@ -279,7 +279,11 @@ boundaries
 boundary
 box
 boxes
+brace
+braces
 bracket
+bracketed
+brackets
 branch
 branches
 brave
@@ -290,6 +294,7 @@ brill
 broad
 brown
 browser
+buffer
 bug
 bugs
 build
@@ -301,8 +306,6 @@ but
 button
 buy
 by
-c
-ca
 cache
 caching
 cafeteria
@@ -337,6 +340,7 @@ catch
 categories
 categorized
 category
+cat
 cats
 cause
 caused
@@ -570,6 +574,7 @@ crossed
 curious
 current
 currently
+cursor
 damned
 data
 database
@@ -714,7 +719,10 @@ double
 down
 download
 downloading
+draw
 drawbacks
+drawing
+drawn
 driven
 drivers
 due
@@ -952,6 +960,7 @@ former
 forms
 formula
 fortunate
+forward
 found
 foundation
 four
@@ -1074,8 +1083,10 @@ hierarchy
 high
 higher
 highest
+highlight
 highlighted
 highlighters
+highlights
 highly
 him
 his
@@ -1165,6 +1176,7 @@ indexing
 indicate
 indicated
 indicates
+indicator
 indicating
 indication
 indirect
@@ -1264,7 +1276,12 @@ keep
 keeping
 kept
 kernel
+key
+keyed
+keys
 keyboard
+keyword
+kwywords
 kind
 kinds
 kiss
@@ -1346,9 +1363,14 @@ lives
 living
 load
 loaded
+loading
 loads
 local
 located
+lock
+locked
+locker
+locking
 log
 logged
 logic
@@ -1548,6 +1570,7 @@ night
 ninth
 no
 nobody
+node
 noise
 nominal
 non
@@ -2024,6 +2047,7 @@ role
 roman
 root
 roots
+row
 ruby
 rule
 rules
@@ -2053,6 +2077,7 @@ screenshot
 script
 scripting
 scripts
+scroll
 sea
 search
 searched
@@ -2186,6 +2211,7 @@ space
 spare
 speakers
 special
+specials
 specialist
 specialized
 specific
