@@ -1393,7 +1393,6 @@ class TextBuffer(BackingTextBuffer):
             for found in node.grammar['specialsRe'].finditer(line):
               f = found.regs[0]
               window.addStr(i, col+f[0], line[f[0]:f[1]], keywordsColor)
-
             if 1:
               # Highlight spelling errors
               colors = [131, 231]
@@ -1406,10 +1405,6 @@ class TextBuffer(BackingTextBuffer):
                     window.addStr(i, col+reg[0], word,
                         curses.color_pair(colors[color%2]))
                     color += 1
-
-
-
-
             k += length
           else:
             window.addStr(i, k-self.scrollCol+length, ' '*(maxx-k-length),
