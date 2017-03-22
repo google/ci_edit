@@ -13,7 +13,7 @@ kReNumbers = re.compile('0x[0-9a-fA-F]+|\d+')
 kReStrings = re.compile(
     r"(\"\"\".*?(?<!\\)\"\"\")|('''.*?(?<!\\)''')|(\".*?(?<!\\)\")|('.*?(?<!\\)')")
 kReSubwords = re.compile(
-    '(?:[A-Z][a-z-]+)|(?:[A-Z]+(?![a-z]))|(?:[a-z]+)')
+    '(?:[A-Z][a-z]+)|(?:[A-Z]+(?![a-z]))|(?:[a-z]+)')
 kReSubwordBoundaryFwd = re.compile(
     '(?:[_-]?[A-Z][a-z-]+)|(?:[_-]?[A-Z]+(?![a-z]))|(?:[_-]?[a-z]+)|(?:\W+)')
 kReSubwordBoundaryRvr = re.compile(
