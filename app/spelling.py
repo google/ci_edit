@@ -25,7 +25,7 @@ words = grammarWords.get('en-US', set())
 def isCorrect(word, grammarName):
   if len(word) <= 1:
     return True
-  if word.lower() in words:
+  if word in words or word.lower() in words:
     return True
   if grammarName not in grammarWords:
     app.log.info(grammarName)
