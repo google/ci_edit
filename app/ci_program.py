@@ -102,8 +102,9 @@ class CiProgram:
       if len(cmdList):
         for cmd in cmdList:
           if cmd == curses.KEY_RESIZE:
-            rows, cols = app.curses_util.terminalSize()
-            curses.resizeterm(rows, cols)
+            if sys.platform == 'darwin':
+              rows, cols = app.curses_util.terminalSize()
+              curses.resizeterm(rows, cols)
             self.layout()
             window.controller.onChange()
             self.refresh()
