@@ -5,6 +5,7 @@
 import app.log
 import glob
 import os
+import re
 
 dictionaryPath = 'app/dictionary.en-US.words'
 
@@ -27,6 +28,9 @@ def isCorrect(word, grammarName):
     return True
   if word in words or word.lower() in words:
     return True
+  if re.sub('^sub', '', word.lower()) in words:
+    return True
+  app.log.info(grammarName, word)
   if grammarName not in grammarWords:
-    app.log.info(grammarName)
-  return word in grammarWords.get(grammarName, set())
+    app.log.info(grammarName, word)
+  return word.lower() in grammarWords.get(grammarName, set())
