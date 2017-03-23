@@ -1380,8 +1380,8 @@ class TextBuffer(BackingTextBuffer):
           line = self.lines[self.scrollRow+i][k:lastCol]
           length = len(line)
           color = node.grammar.get('color', defaultColor)
+          col = k-self.scrollCol
           if length:
-            col = k-self.scrollCol
             window.addStr(i, col, line, color)
             if 1:
               # Highlight spelling errors
@@ -1407,8 +1407,7 @@ class TextBuffer(BackingTextBuffer):
               window.addStr(i, col+f[0], line[f[0]:f[1]], keywordsColor)
             k += length
           else:
-            window.addStr(i, k-self.scrollCol+length, ' '*(maxx-k-length),
-                color)
+            window.addStr(i, col, ' '*(maxx-col), color)
             break
     else:
       # Draw to screen.
