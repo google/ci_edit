@@ -162,7 +162,7 @@ class CiProgram:
       return
     textBuffer = win.textBuffer
     y, x = win.cursorWindow.getyx()
-    maxy, maxx = win.cursorWindow.getmaxyx()
+    maxRow, maxCol = win.cursorWindow.getmaxyx()
     self.debugWindow.writeLineRow = 0
     self.debugWindow.writeLine(
         "   cRow %3d    cCol %2d goalCol %2d"
@@ -179,8 +179,8 @@ class CiProgram:
             len(textBuffer.lines)),
         self.debugWindow.color)
     self.debugWindow.writeLine(
-        "y %2d x %2d maxy %d maxx %d baud %d color %d"
-        %(y, x, maxy, maxx, curses.baudrate(), curses.can_change_color()),
+        "y %2d x %2d maxRow %d maxCol %d baud %d color %d"
+        %(y, x, maxRow, maxCol, curses.baudrate(), curses.can_change_color()),
             self.debugWindow.color)
     scrRows, scrCols = self.stdscr.getmaxyx()
     self.debugWindow.writeLine(

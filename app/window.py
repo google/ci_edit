@@ -305,14 +305,14 @@ class LineNumbers(StaticWindow):
     self.host = host
 
   def drawLineNumbers(self):
-    maxy, maxx = self.cursorWindow.getmaxyx()
+    maxRow, maxCol = self.cursorWindow.getmaxyx()
     textBuffer = self.host.textBuffer
-    limit = min(maxy, len(textBuffer.lines)-textBuffer.scrollRow)
+    limit = min(maxRow, len(textBuffer.lines)-textBuffer.scrollRow)
     for i in range(limit):
       self.addStr(i, 0,
           ' %5d  '%(textBuffer.scrollRow+i+1), self.color)
     color = curses.color_pair(app.prefs.outsideOfBufferColorIndex)
-    for i in range(limit, maxy):
+    for i in range(limit, maxRow):
       self.addStr(i, 0, '       ', color)
     if 1:
       cursorAt = textBuffer.cursorRow-textBuffer.scrollRow
@@ -366,9 +366,9 @@ class LogWindow(StaticWindow):
   def refresh(self):
     self.refreshCounter += 1
     app.log.info(" "*20, self.refreshCounter, "- screen refresh -")
-    maxy, maxx = self.cursorWindow.getmaxyx()
+    maxRow, maxCol = self.cursorWindow.getmaxyx()
     self.writeLineRow = 0
-    for i in self.lines[-maxy:]:
+    for i in self.lines[-maxRow:]:
       self.writeLine(i);
     StaticWindow.refresh(self)
 
@@ -407,7 +407,7 @@ class StatusLine(StaticWindow):
     self.host = host
 
   def refresh(self):
-    maxy, maxx = self.cursorWindow.getmaxyx()
+    maxRow, maxCol = self.cursorWindow.getmaxyx()
     tb = self.host.textBuffer
     statusLine = ''
     if tb.message:
@@ -438,7 +438,7 @@ class StatusLine(StaticWindow):
         tb.cursorRow+1, tb.cursorCol+1,
         rowPercentage,
         colPercentage)
-    statusLine += ' '*(maxx-len(statusLine)-len(rightSide)) + rightSide
+    statusLine += ' '*(maxCol-len(statusLine)-len(rightSide)) + rightSide
     self.addStr(0, 0, statusLine, self.color)
     self.cursorWindow.refresh()
 
@@ -675,26 +675,26 @@ class InputWindow(Window):
 
   def drawLogoCorner(self):
     """."""
-    maxy, maxx = self.logoCorner.cursorWindow.getmaxyx()
+    maxRow, maxCol = self.logoCorner.cursorWindow.getmaxyx()
     color = self.logoCorner.color
-    for i in range(maxy):
-      self.logoCorner.addStr(i, 0, ' '*maxx, color)
+    for i in range(maxRow):
+      self.logoCorner.addStr(i, 0, ' '*maxCol, color)
     self.logoCorner.addStr(0, 1, 'ci', color)
     self.logoCorner.refresh()
 
   def drawRightEdge(self):
     """Draw makers to indicate text extending past the right edge of the
     window."""
-    maxy, maxx = self.cursorWindow.getmaxyx()
-    limit = min(maxy, len(self.textBuffer.lines)-self.textBuffer.scrollRow)
+    maxRow, maxCol = self.cursorWindow.getmaxyx()
+    limit = min(maxRow, len(self.textBuffer.lines)-self.textBuffer.scrollRow)
     for i in range(limit):
       color = self.rightColumn.color
       if len(self.textBuffer.lines[
-          i+self.textBuffer.scrollRow])-self.textBuffer.scrollCol > maxx:
+          i+self.textBuffer.scrollRow])-self.textBuffer.scrollCol > maxCol:
         color = self.rightColumn.colorSelected
       self.rightColumn.addStr(i, 0, ' ', color)
     color = curses.color_pair(app.prefs.outsideOfBufferColorIndex)
-    for i in range(limit, maxy):
+    for i in range(limit, maxRow):
       self.rightColumn.addStr(i, 0, ' ', color)
     self.rightColumn.cursorWindow.refresh()
 
