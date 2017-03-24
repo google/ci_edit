@@ -30,3 +30,4 @@ len
 del
 init
 getcwd
+goto

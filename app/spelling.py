@@ -32,12 +32,10 @@ def isCorrect(word, grammarName):
     return True
   if re.sub('^sub', '', word.lower()) in words:
     return True
-  app.log.info(grammarName, word)
-  if grammarName not in grammarWords:
-    app.log.info(grammarName, word)
   if word.lower() in grammarWords.get(grammarName, set()):
     return True
   if len(re.sub('[A-Z]+', '', word)) == 0:
     # All upper case.
     return True
+  app.log.info(grammarName, word)
   return False
