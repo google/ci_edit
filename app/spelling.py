@@ -35,4 +35,9 @@ def isCorrect(word, grammarName):
   app.log.info(grammarName, word)
   if grammarName not in grammarWords:
     app.log.info(grammarName, word)
-  return word.lower() in grammarWords.get(grammarName, set())
+  if word.lower() in grammarWords.get(grammarName, set()):
+    return True
+  if len(re.sub('[A-Z]+', '', word)) == 0:
+    # All upper case.
+    return True
+  return False
