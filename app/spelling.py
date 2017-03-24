@@ -7,13 +7,15 @@ import glob
 import os
 import re
 
-dictionaryPath = 'app/dictionary.en-US.words'
+
+pathPrefix = os.path.join(
+    os.path.dirname(__file__), 'dictionary.')
 
 grammarWords = {}
 
-for path in glob.iglob('app/dictionary.*.words'):
+for path in glob.iglob(pathPrefix+'*.words'):
   if os.path.isfile(path):
-    grammarName = path[len('app/dictionary.'):-len('.words')]
+    grammarName = path[len(pathPrefix):-len('.words')]
     with open(path, 'r') as f:
       lines = f.readlines()
       index = 0
