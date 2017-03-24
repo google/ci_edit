@@ -330,6 +330,7 @@ class LineNumbers(StaticWindow):
     else:
       tb.selectionNone()
       self.mouseRelease(paneRow, paneCol, shift, ctrl, alt)
+    self.host.changeFocusTo(self.host)
 
   def mouseDoubleClick(self, paneRow, paneCol, shift, ctrl, alt):
     self.host.textBuffer.selectionAll()
