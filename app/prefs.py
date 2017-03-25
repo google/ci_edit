@@ -33,7 +33,7 @@ __common_keywords = [
 
 __c_keywords = __common_keywords + [
   'case', 'const', 'default', 'do',
-  'sizeof', 'static', 'struct', 'switch',
+  'goto', 'sizeof', 'static', 'struct', 'switch',
   'typedef',
 ]
 
@@ -331,13 +331,8 @@ prefs = {
       'indent': '  ',
       'keywords': [],
     },
-    'regex_string': {
-      'begin': r"(?!(?<=[\w/*\s]))\s*/(?![/*])",
-      'end': "/",
-      'escaped': r'\\.',
-      'indent': '  ',
-      'special': __special_string_escapes + [r"\\/"],
-      'single_line': True,
+    'none': {
+      'spelling': False,
     },
     'py': {
       'indent': '  ',
@@ -416,6 +411,14 @@ prefs = {
       'begin': '"',
       'end': '"',
     },
+    'regex_string': {
+      'begin': r"(?!(?<=[\w/*\s]))\s*/(?![/*])",
+      'end': "/",
+      'escaped': r'\\.',
+      'indent': '  ',
+      'special': __special_string_escapes + [r"\\/"],
+      'single_line': True,
+    },
     'text': {
       'indent': '  ',
       'contains': ['quoted_string1', 'quoted_string2'],
@@ -493,6 +496,8 @@ def init():
   app.log.info('prefs init')
 
 def getGrammar(fileExtension):
+  if fileExtension is None:
+    return grammars.get('none')
   filetype = extensions.get(fileExtension, 'text')
   return grammars.get(filetype)
 
