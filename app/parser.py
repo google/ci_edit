@@ -74,7 +74,7 @@ class Parser:
       found = grammarStack[-1].get('matchRe').search(subdata)
       if not found:
         grammarStack.pop()
-        # todo(dschuyler): mark parent grammars as unteminated (if they expect
+        # todo(dschuyler): mark parent grammars as unterminated (if they expect
         # be terminated. e.g. unmatched string quote or xml tag.
         break
       index = -1

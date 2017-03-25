@@ -31,3 +31,4 @@ del
 init
 getcwd
 goto
+ctrl
