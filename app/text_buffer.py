@@ -372,6 +372,7 @@ class BackingTextBuffer(Mutator):
     Mutator.__init__(self)
     self.view = None
     self.clipList = []
+    self.rootGrammar = app.prefs.getGrammar(None)
 
   def setView(self, view):
     self.view = view
@@ -834,6 +835,7 @@ class BackingTextBuffer(Mutator):
     else:
       self.data = ""
     self.fileExtension = os.path.splitext(self.fullPath)[1]
+    self.rootGrammar = app.prefs.getGrammar(self.fileExtension)
     if self.data:
       self.parseGrammars()
       self.dataToLines()
@@ -1212,9 +1214,7 @@ class BackingTextBuffer(Mutator):
     self.linesToData()
     if not self.parser:
       self.parser = app.parser.Parser()
-    self.parser.parse(
-        self.data,
-        app.prefs.getGrammar(self.fileExtension))
+    self.parser.parse(self.data, self.rootGrammar)
 
   def doSelectionMode(self, mode):
     if self.selectionMode != mode:
@@ -1383,7 +1383,7 @@ class TextBuffer(BackingTextBuffer):
           col = k-self.scrollCol
           if length:
             window.addStr(i, col, line, color)
-            if 1:
+            if node.grammar.get('spelling', True):
               # Highlight spelling errors
               colors = [131, 231]
               color = 0
