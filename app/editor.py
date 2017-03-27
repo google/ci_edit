@@ -151,26 +151,27 @@ class InteractiveOpener(app.controller.Controller):
 
   def onChange(self):
     return
-    path = os.path.expanduser(os.path.expandvars(self.textBuffer.lines[0]))
-    dirPath, fileName = os.path.split(path)
-    dirPath = dirPath or '.'
-    app.log.info('O.onChange', dirPath, fileName)
+    path = os.path.abspath(os.path.expanduser(os.path.expandvars(
+        self.textBuffer.lines[0])))
+    dirPath = path or '.'
+    fileName = ''
+    if not os.path.isdir(path):
+      dirPath, fileName = os.path.split(path)
+    app.log.info('O.onChange\n', path, '\n', dirPath, fileName)
     if os.path.isdir(dirPath):
       lines = []
       for i in os.listdir(dirPath):
+        if os.path.isdir(i):
+          i += '/'
         lines.append(i)
-      self.host.textBuffer.selectionAll()
-      clip = tuple([
-          os.path.abspath(os.path.expanduser(dirPath))+":"] + lines)
-      self.host.textBuffer.redoAddChange(('v', clip))
-      self.host.textBuffer.redo()
-      self.host.textBuffer.selectionNone()
-      # self.host.textBuffer.lines = [
-      #     os.path.abspath(os.path.expanduser(dirPath))+":"] + lines
+      clip = tuple([dirPath+":"] + lines)
     else:
-      pass
-      #self.host.textBuffer.lines = [
-      #    os.path.abspath(os.path.expanduser(dirPath))+": not found"]
+      clip = tuple([dirPath+": not found"])
+    app.log.info(clip)
+    self.host.textBuffer.selectionAll()
+    self.host.textBuffer.redoAddChange(('v', clip))
+    self.host.textBuffer.redo()
+    self.host.textBuffer.selectionNone()
 
   def unfocus(self):
     expandedPath = os.path.abspath(os.path.expanduser(self.textBuffer.lines[0]))
