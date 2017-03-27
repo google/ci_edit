@@ -169,6 +169,9 @@ class CiProgram:
         %(textBuffer.cursorRow, textBuffer.cursorCol,
             textBuffer.goalCol), self.debugWindow.color)
     self.debugWindow.writeLine(
+        "   pRow %3d    pCol %2d"
+        %(textBuffer.penRow, textBuffer.penCol), self.debugWindow.color)
+    self.debugWindow.writeLine(
         " mkrRow %3d  mkrCol %2d sm %d"
         %(textBuffer.markerRow, textBuffer.markerCol,
             textBuffer.selectionMode),

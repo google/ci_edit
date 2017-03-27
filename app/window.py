@@ -218,6 +218,8 @@ class Window(StaticWindow):
 
   def refresh(self):
     StaticWindow.refresh(self)
+    self.textBuffer.cursorRow = self.textBuffer.penRow
+    self.textBuffer.cursorCol = self.textBuffer.penCol
     self.textBuffer.draw(self)
     if self.hasFocus:
       self.parent.debugDraw(self)

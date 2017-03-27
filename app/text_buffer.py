@@ -453,7 +453,7 @@ class BackingTextBuffer(Mutator):
         self.redoAddChange(('i', ' '*indent));
         self.redo()
 
-  def cursorColDelta(self, toRow):
+  def penColDelta(self, toRow):
     if toRow >= len(self.lines):
       return
     lineLen = len(self.lines[toRow])
@@ -486,10 +486,10 @@ class BackingTextBuffer(Mutator):
     elif self.penRow+rowDelta >= self.scrollRow+maxRow:
       scrollRows = self.penRow+rowDelta - (self.scrollRow+maxRow-1)
     scrollCols = 0
-    if self.scrollCol > self.cursorCol+colDelta:
-      scrollCols = self.cursorCol+colDelta - self.scrollCol
-    elif self.cursorCol+colDelta >= self.scrollCol+maxCol:
-      scrollCols = self.cursorCol+colDelta - (self.scrollCol+maxCol-1)
+    if self.scrollCol > self.penCol+colDelta:
+      scrollCols = self.penCol+colDelta - self.scrollCol
+    elif self.penCol+colDelta >= self.scrollCol+maxCol:
+      scrollCols = self.penCol+colDelta - (self.scrollCol+maxCol-1)
     self.scrollRow += scrollRows
     self.scrollCol += scrollCols
     self.redoAddChange(('m', (rowDelta, colDelta, goalColDelta,
@@ -510,7 +510,7 @@ class BackingTextBuffer(Mutator):
 
   def cursorMoveDown(self):
     if self.penRow+1 < len(self.lines):
-      self.cursorMove(1, self.cursorColDelta(self.penRow+1), 0)
+      self.cursorMove(1, self.penColDelta(self.penRow+1), 0)
       self.redo()
 
   def cursorMoveLeft(self):
@@ -669,30 +669,30 @@ class BackingTextBuffer(Mutator):
     if self.penRow == len(self.lines):
       return
     maxRow, maxCol = self.view.cursorWindow.getmaxyx()
-    cursorRowDelta = maxRow
+    penRowDelta = maxRow
     scrollDelta = maxRow
-    if self.cursorRow + maxRow >= len(self.lines):
-      cursorRowDelta = len(self.lines)-self.cursorRow-1
+    if self.penRow + maxRow >= len(self.lines):
+      penRowDelta = len(self.lines)-self.penRow-1
     if self.scrollRow + 2*maxRow >= len(self.lines):
       scrollDelta = len(self.lines)-maxRow-self.scrollRow
     self.scrollRow += scrollDelta
     self.cursorMoveScroll(penRowDelta,
-        self.cursorColDelta(self.penRow+penRowDelta), 0, 0, 0)
+        self.penColDelta(self.penRow+penRowDelta), 0, 0, 0)
     self.redo()
 
   def cursorPageUp(self):
     if self.penRow == 0:
       return
     maxRow, maxCol = self.view.cursorWindow.getmaxyx()
-    cursorRowDelta = -maxRow
+    penRowDelta = -maxRow
     scrollDelta = -maxRow
-    if self.cursorRow < maxRow:
-      cursorRowDelta = -self.cursorRow
+    if self.penRow < maxRow:
+      penRowDelta = -self.penRow
     if self.scrollRow + scrollDelta < 0:
       scrollDelta = -self.scrollRow
     self.scrollRow += scrollDelta
     self.cursorMoveScroll(penRowDelta,
-        self.cursorColDelta(self.penRow+penRowDelta), 0, 0, 0)
+        self.penColDelta(self.penRow+penRowDelta), 0, 0, 0)
     self.redo()
 
   def cursorScrollTo(self, goalRow, window):
@@ -702,7 +702,7 @@ class BackingTextBuffer(Mutator):
     elif goalRow < 0:
       goalRow = len(self.lines)+goalRow-maxRow+1
     #scrollTo = min(min(goalRow, len(self.lines)-1), len(self.lines)-maxRow-1)
-    # self.cursorMoveScroll(scrollTo-self.cursorRow, -self.cursorCol, 0,
+    # self.cursorMoveScroll(scrollTo-self.penRow, -self.penCol, 0,
     #     scrollTo-self.scrollRow, -self.scrollCol)
     # self.redo()
     self.penRow = self.scrollRow = goalRow #hack
@@ -710,7 +710,7 @@ class BackingTextBuffer(Mutator):
   def cursorScrollToMiddle(self):
     maxRow, maxCol = self.view.cursorWindow.getmaxyx()
     rowDelta = min(max(0, len(self.lines)-maxRow),
-                   max(0, self.cursorRow-maxRow/2))-self.scrollRow
+                   max(0, self.penRow-maxRow/2))-self.scrollRow
     self.cursorMoveScroll(0, 0, 0, rowDelta, 0)
 
   def cursorStartOfLine(self):
@@ -1172,7 +1172,7 @@ class BackingTextBuffer(Mutator):
     self.selectLineAt(self.scrollRow + paneRow)
 
   def scrollWindow(self, rows, cols):
-    self.cursorMoveScroll(rows, self.cursorColDelta(self.penRow-rows),
+    self.cursorMoveScroll(rows, self.penColDelta(self.penRow-rows),
         0, -1, 0)
     self.redo()
 
@@ -1183,11 +1183,11 @@ class BackingTextBuffer(Mutator):
       return
     maxRow, maxCol = self.view.cursorWindow.getmaxyx()
     cursorDelta = 0
-    if self.cursorRow >= self.scrollRow + maxRow - 2:
-      cursorDelta = self.scrollRow + maxRow - 2 - self.cursorRow
+    if self.penRow >= self.scrollRow + maxRow - 2:
+      cursorDelta = self.scrollRow + maxRow - 2 - self.penRow
     self.scrollRow -= 1
     self.cursorMoveScroll(penDelta,
-        self.cursorColDelta(self.penRow+penDelta), 0, 0, 0)
+        self.penColDelta(self.penRow+penDelta), 0, 0, 0)
     self.redo()
 
   def mouseWheelUp(self, shift, ctrl, alt):
@@ -1201,7 +1201,7 @@ class BackingTextBuffer(Mutator):
       penDelta = self.scrollRow-self.penRow + 1
     self.scrollRow += 1
     self.cursorMoveScroll(penDelta,
-        self.cursorColDelta(self.penRow+penDelta), 0, 0, 0)
+        self.penColDelta(self.penRow+penDelta), 0, 0, 0)
     self.redo()
 
   def nextSelectionMode(self):
@@ -1316,14 +1316,14 @@ class BackingTextBuffer(Mutator):
   def updateScrollPosition(self):
     """Move the selected view rectangle so that the cursor is visible."""
     maxRow, maxCol = self.view.cursorWindow.getmaxyx()
-    if self.scrollRow > self.cursorRow:
-      self.scrollRow = self.cursorRow
-    elif self.cursorRow >= self.scrollRow+maxRow:
-      self.scrollRow = self.cursorRow - (maxRow-1)
-    if self.scrollCol > self.cursorCol:
-      self.scrollCol = self.cursorCol
-    elif self.cursorCol >= self.scrollCol+maxCol:
-      self.scrollCol = self.cursorCol - (maxCol-1)
+    if self.scrollRow > self.penRow:
+      self.scrollRow = self.penRow
+    elif self.penRow >= self.scrollRow+maxRow:
+      self.scrollRow = self.penRow - (maxRow-1)
+    if self.scrollCol > self.penCol:
+      self.scrollCol = self.penCol
+    elif self.penCol >= self.scrollCol+maxCol:
+      self.scrollCol = self.penCol - (maxCol-1)
 
 
 class TextBuffer(BackingTextBuffer):
@@ -1336,25 +1336,25 @@ class TextBuffer(BackingTextBuffer):
   def checkScrollToCursor(self, window):
     """Move the selected view rectangle so that the cursor is visible."""
     maxRow, maxCol = window.cursorWindow.getmaxyx()
-    #     self.cursorRow >= self.scrollRow+maxRow 1 0
+    #     self.penRow >= self.scrollRow+maxRow 1 0
     rows = 0
-    if self.scrollRow > self.cursorRow:
-      rows = self.cursorRow - self.scrollRow
-      app.log.error('AAA self.scrollRow > self.cursorRow',
-          self.scrollRow, self.cursorRow, self)
-    elif self.cursorRow >= self.scrollRow+maxRow:
-      rows = self.cursorRow - (self.scrollRow+maxRow-1)
-      app.log.error('BBB self.cursorRow >= self.scrollRow+maxRow cRow',
-          self.cursorRow, 'sRow', self.scrollRow, 'maxRow', maxRow, self)
+    if self.scrollRow > self.penRow:
+      rows = self.penRow - self.scrollRow
+      app.log.error('AAA self.scrollRow > self.penRow',
+          self.scrollRow, self.penRow, self)
+    elif self.penRow >= self.scrollRow+maxRow:
+      rows = self.penRow - (self.scrollRow+maxRow-1)
+      app.log.error('BBB self.penRow >= self.scrollRow+maxRow cRow',
+          self.penRow, 'sRow', self.scrollRow, 'maxRow', maxRow, self)
     cols = 0
-    if self.scrollCol > self.cursorCol:
-      cols = self.cursorCol - self.scrollCol
-      app.log.error('CCC self.scrollCol > self.cursorCol',
-          self.scrollCol, self.cursorCol, self)
-    elif self.cursorCol >= self.scrollCol+maxCol:
-      cols = self.cursorCol - (self.scrollCol+maxCol-1)
-      app.log.error('DDD self.cursorCol >= self.scrollCol+maxCol',
-          self.cursorCol, self.scrollCol, maxCol, self)
+    if self.scrollCol > self.penCol:
+      cols = self.penCol - self.scrollCol
+      app.log.error('CCC self.scrollCol > self.penCol',
+          self.scrollCol, self.penCol, self)
+    elif self.penCol >= self.scrollCol+maxCol:
+      cols = self.penCol - (self.scrollCol+maxCol-1)
+      app.log.error('DDD self.penCol >= self.scrollCol+maxCol',
+          self.penCol, self.scrollCol, maxCol, self)
     assert not rows
     assert not cols
     self.scrollRow += rows
@@ -1366,7 +1366,7 @@ class TextBuffer(BackingTextBuffer):
       self.shouldReparse = False
     maxRow, maxCol = window.cursorWindow.getmaxyx()
 
-    self.checkScrollToPen(window)
+    self.checkScrollToCursor(window)
 
     startCol = self.scrollCol
     endCol = self.scrollCol+maxCol
@@ -1460,7 +1460,7 @@ class TextBuffer(BackingTextBuffer):
                   return
           def searchForward(openCh, closeCh):
             count = 1
-            colOffset = self.cursorCol+1
+            colOffset = self.penCol+1
             for row in range(self.penRow, startRow+maxRow):
               if row != self.penRow:
                 colOffset = 0
