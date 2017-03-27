@@ -27,13 +27,13 @@ def joinReWordList(reList):
   return r"(\b"+r"\b)|(\b".join(reList)+r"\b)"
 
 __common_keywords = [
-  'break', 'continue', 'do', 'else',
+  'break', 'continue', 'else',
   'for', 'if', 'return', 'while',
 ]
 
 __c_keywords = __common_keywords + [
-  'case', 'const', 'default',
-  'sizeof', 'static', 'struct', 'switch',
+  'case', 'const', 'default', 'do',
+  'goto', 'sizeof', 'static', 'struct', 'switch',
   'typedef',
 ]
 
@@ -101,6 +101,7 @@ prefs = {
     'c_raw_string2': stringColorIndex,
     'c_string1': stringColorIndex,
     'c_string2': stringColorIndex,
+    'regex_string': stringColorIndex,
     'doc_block_comment': commentColorIndex,
     'html_block_comment': commentColorIndex,
     'pound_comment': commentColorIndex,
@@ -308,7 +309,7 @@ prefs = {
     'java': {
       'indent': '  ',
       'keywords': __common_keywords + [
-        'case', 'class', 'default', 'false',
+        'case', 'class', 'default', 'do', 'false',
         'interface',
         'switch', 'this', 'true',
       ],
@@ -329,12 +330,15 @@ prefs = {
       ],
       'contains': [
         'c_string1', 'c_string2', 'doc_block_comment', 'cpp_block_comment',
-        'cpp_line_comment'
+        'cpp_line_comment', 'regex_string',
       ],
     },
     'md': {
       'indent': '  ',
       'keywords': [],
+    },
+    'none': {
+      'spelling': False,
     },
     'py': {
       'indent': '  ',
@@ -413,6 +417,14 @@ prefs = {
       'begin': '"',
       'end': '"',
     },
+    'regex_string': {
+      'begin': r"(?!(?<=[\w/*\s]))\s*/(?![/*])",
+      'end': "/",
+      'escaped': r'\\.',
+      'indent': '  ',
+      'special': __special_string_escapes + [r"\\/"],
+      'single_line': True,
+    },
     'text': {
       'indent': '  ',
       'contains': ['quoted_string1', 'quoted_string2'],
@@ -490,6 +502,8 @@ def init():
   app.log.info('prefs init')
 
 def getGrammar(fileExtension):
+  if fileExtension is None:
+    return grammars.get('none')
   filetype = extensions.get(fileExtension, 'text')
   return grammars.get(filetype)
 

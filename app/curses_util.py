@@ -163,6 +163,7 @@ def terminalSize():
   return h, w
 
 def hackCursesFixes():
-  def windowChangedHandler(signum, frame):
-    curses.ungetch(curses.KEY_RESIZE)
-  signal.signal(signal.SIGWINCH, windowChangedHandler)
+  if sys.platform == 'darwin':
+    def windowChangedHandler(signum, frame):
+      curses.ungetch(curses.KEY_RESIZE)
+    signal.signal(signal.SIGWINCH, windowChangedHandler)

@@ -1,0 +1,34 @@
+# Copyright 2017 The ci_edit Authors. All rights reserved.
+# Use of this source code is governed by an Apache-style license that can be
+# found in the LICENSE file.
+
+# This is a list of non-English words that are commonly found in Python source
+# files.
+isfile
+isdir
+readlines
+os
+sys
+min
+max
+len
+def
+regs
+str
+app
+iglob
+finditer
+re
+regex
+col
+sel
+getmaxyx
+en
+app
+cols
+len
+del
+init
+getcwd
+goto
+ctrl
