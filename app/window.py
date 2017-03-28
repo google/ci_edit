@@ -26,6 +26,8 @@ class StaticWindow:
     self.left = 0
     self.rows = 1
     self.cols = 1
+    self.scrollRow = 0
+    self.scrollCol = 0
     self.writeLineRow = 0
     self.cursorWindow = curses.newwin(1, 1)
     self.cursorWindow.leaveok(1)  # Don't update cursor position.
@@ -182,6 +184,8 @@ class Window(StaticWindow):
     StaticWindow.__init__(self, parent)
     self.controller = controller
     self.cursorWindow.keypad(1)
+    self.cursorRow = 0
+    self.cursorCol = 0
     self.hasFocus = False
     self.isFocusable = True
     self.textBuffer = None
@@ -217,6 +221,8 @@ class Window(StaticWindow):
     self.textBuffer.mouseWheelUp(shift, ctrl, alt)
 
   def refresh(self):
+    self.cursorRow = self.textBuffer.penRow
+    self.cursorCol = self.textBuffer.penCol
     self.textBuffer.cursorRow = self.textBuffer.penRow
     self.textBuffer.cursorCol = self.textBuffer.penCol
     StaticWindow.refresh(self)
@@ -225,8 +231,8 @@ class Window(StaticWindow):
       self.parent.debugDraw(self)
       try:
         self.cursorWindow.move(
-            self.textBuffer.cursorRow - self.textBuffer.scrollRow,
-            self.textBuffer.cursorCol - self.textBuffer.scrollCol)
+            self.cursorRow - self.scrollRow,
+            self.cursorCol - self.scrollCol)
       except curses.error:
         pass
 
@@ -309,17 +315,17 @@ class LineNumbers(StaticWindow):
   def drawLineNumbers(self):
     maxRow, maxCol = self.cursorWindow.getmaxyx()
     textBuffer = self.host.textBuffer
-    limit = min(maxRow, len(textBuffer.lines)-textBuffer.scrollRow)
+    limit = min(maxRow, len(textBuffer.lines)-self.host.scrollRow)
     for i in range(limit):
       self.addStr(i, 0,
-          ' %5d  '%(textBuffer.scrollRow+i+1), self.color)
+          ' %5d  '%(self.host.scrollRow+i+1), self.color)
     color = curses.color_pair(app.prefs.outsideOfBufferColorIndex)
     for i in range(limit, maxRow):
       self.addStr(i, 0, '       ', color)
     if 1:
-      cursorAt = textBuffer.cursorRow-textBuffer.scrollRow
+      cursorAt = self.host.cursorRow-self.host.scrollRow
       self.addStr(cursorAt, 1,
-          '%5d'%(textBuffer.cursorRow+1), self.colorSelected)
+          '%5d'%(self.host.cursorRow+1), self.colorSelected)
     self.cursorWindow.refresh()
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
@@ -344,7 +350,7 @@ class LineNumbers(StaticWindow):
   def mouseRelease(self, paneRow, paneCol, shift, ctrl, alt):
     app.log.info(paneRow, paneCol, shift)
     tb = self.host.textBuffer
-    tb.selectLineAt(tb.scrollRow + paneRow)
+    tb.selectLineAt(self.host.scrollRow + paneRow)
 
   def mouseTripleClick(self, paneRow, paneCol, shift, ctrl, alt):
     pass
@@ -425,19 +431,19 @@ class StatusLine(StaticWindow):
     colPercentage = 0
     lineCount = len(tb.lines)
     if lineCount:
-      rowPercentage = tb.cursorRow*100/lineCount
-      if tb.cursorRow >= lineCount - 1:
+      rowPercentage = self.host.cursorRow*100/lineCount
+      if self.host.cursorRow >= lineCount - 1:
          rowPercentage = 100
-      charCount = len(tb.lines[tb.cursorRow])
-      if (tb.cursorCol < charCount):
-        colPercentage = tb.cursorCol*100/charCount
+      charCount = len(tb.lines[self.host.cursorRow])
+      if (self.host.cursorCol < charCount):
+        colPercentage = self.host.cursorCol*100/charCount
       else:
         colPercentage = 100
     # Format.
     rightSide = '%s | %s | %4d,%2d | %3d%%,%3d%%'%(
         tb.cursorGrammarName(),
         tb.selectionModeName(),
-        tb.cursorRow+1, tb.cursorCol+1,
+        self.host.cursorRow+1, self.host.cursorCol+1,
         rowPercentage,
         colPercentage)
     statusLine += ' '*(maxCol-len(statusLine)-len(rightSide)) + rightSide
@@ -459,7 +465,7 @@ class TopInfo(StaticWindow):
     tb = self.host.textBuffer
     lines = []
     if len(tb.lines):
-      lineCursor = tb.scrollRow
+      lineCursor = self.host.scrollRow
       line = ""
       while len(line) == 0 and lineCursor > 0:
         line = tb.lines[lineCursor]
@@ -688,11 +694,11 @@ class InputWindow(Window):
     """Draw makers to indicate text extending past the right edge of the
     window."""
     maxRow, maxCol = self.cursorWindow.getmaxyx()
-    limit = min(maxRow, len(self.textBuffer.lines)-self.textBuffer.scrollRow)
+    limit = min(maxRow, len(self.textBuffer.lines)-self.scrollRow)
     for i in range(limit):
       color = self.rightColumn.color
       if len(self.textBuffer.lines[
-          i+self.textBuffer.scrollRow])-self.textBuffer.scrollCol > maxCol:
+          i+self.scrollRow])-self.scrollCol > maxCol:
         color = self.rightColumn.colorSelected
       self.rightColumn.addStr(i, 0, ' ', color)
     color = curses.color_pair(app.prefs.outsideOfBufferColorIndex)

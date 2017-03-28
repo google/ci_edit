@@ -68,15 +68,15 @@ class BaseLineBuffer:
 class Selectable(BaseLineBuffer):
   def __init__(self):
     BaseLineBuffer.__init__(self)
-    self.cursorRow = 0
-    self.cursorCol = 0
+    #self.cursorRow = 0
+    #self.cursorCol = 0
     self.goalCol = 0
     self.penRow = 0
     self.penCol = 0
     self.markerRow = 0
     self.markerCol = 0
-    self.markerEndRow = 0
-    self.markerEndCol = 0
+    #self.markerEndRow = 0
+    #self.markerEndCol = 0
     self.selectionMode = kSelectionNone
 
   def debug(self):
