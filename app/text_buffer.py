@@ -35,9 +35,7 @@ class Mutator(app.selectable.Selectable):
     self.penGrammar = None
     self.parser = None
     self.relativePath = ''
-    #self.scrollRow = 0
     self.scrollToRow = 0
-    #self.scrollCol = 0
     self.redoChain = []
     self.redoIndex = 0
     self.savedAtRedoIndex = 0
@@ -158,13 +156,9 @@ class Mutator(app.selectable.Selectable):
         self.penRow += change[1][0]
         self.penCol += change[1][1]
         self.goalCol += change[1][2]
-        #self.scrollRow += change[1][3]
-        #self.scrollCol += change[1][4]
-        self.markerRow += change[1][5]
-        self.markerCol += change[1][6]
-        #self.markerEndRow += change[1][7]
-        #self.markerEndCol += change[1][8]
-        self.selectionMode += change[1][9]
+        self.markerRow += change[1][3]
+        self.markerCol += change[1][4]
+        self.selectionMode += change[1][5]
       elif change[0] == 'n':
         # Redo split lines.
         line = self.lines[self.penRow]
@@ -233,9 +227,9 @@ class Mutator(app.selectable.Selectable):
     if 1:
       # Eliminate no-op entries
       noOpInstructions = set([
-        ('m', (0,0,0,0,0,0,0,0,0,0)),
+        ('m', (0,0,0,0,0,0,)),
       ])
-      assert ('m', (0,0,0,0,0,0,0,0,0,0)) in noOpInstructions
+      assert ('m', (0,0,0,0,0,0)) in noOpInstructions
       if change in noOpInstructions:
         return
       #app.log.info('opti', change)
@@ -306,13 +300,9 @@ class Mutator(app.selectable.Selectable):
         self.penRow -= change[1][0]
         self.penCol -= change[1][1]
         self.goalCol -= change[1][2]
-        #self.scrollRow -= change[1][3]
-        #self.scrollCol -= change[1][4]
-        self.markerRow -= change[1][5]
-        self.markerCol -= change[1][6]
-        #self.markerEndRow -= change[1][7]
-        #self.markerEndCol -= change[1][8]
-        self.selectionMode -= change[1][9]
+        self.markerRow -= change[1][3]
+        self.markerCol -= change[1][4]
+        self.selectionMode -= change[1][5]
         assert self.penRow >= 0
         assert self.penCol >= 0
         return True
@@ -424,7 +414,7 @@ class BackingTextBuffer(Mutator):
       self.performDelete()
     elif self.penCol == 0:
       if self.penRow > 0:
-        self.penLeft()
+        self.cursorLeft()
         self.joinLines()
     else:
       line = self.lines[self.penRow]
@@ -493,8 +483,7 @@ class BackingTextBuffer(Mutator):
     self.view.scrollRow += scrollRows
     self.view.scrollCol += scrollCols
     self.redoAddChange(('m', (rowDelta, colDelta, goalColDelta,
-        0, 0,
-        markRowDelta, markColDelta, 0, 0, selectionModeDelta)))
+        markRowDelta, markColDelta, selectionModeDelta)))
 
   def cursorMoveScroll(self, rowDelta, colDelta, goalColDelta,
       scrollRowDelta, scrollColDelta):
@@ -505,8 +494,7 @@ class BackingTextBuffer(Mutator):
     self.view.scrollRow += scrollRowDelta
     self.view.scrollCol += scrollColDelta
     self.redoAddChange(('m', (rowDelta, colDelta, goalColDelta,
-        0, 0,
-        0,0, 0, 0,0)))
+        0,0, 0)))
 
   def cursorMoveDown(self):
     if self.penRow+1 < len(self.lines):
@@ -1097,8 +1085,8 @@ class BackingTextBuffer(Mutator):
     self.redo()
 
   def markerPlace(self):
-    self.redoAddChange(('m', (0, 0, 0, 0, 0, self.penRow-self.markerRow,
-        self.penCol-self.markerCol, 0, 0, 0)))
+    self.redoAddChange(('m', (0, 0, 0, self.penRow-self.markerRow,
+        self.penCol-self.markerCol, 0)))
     self.redo()
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
@@ -1222,9 +1210,9 @@ class BackingTextBuffer(Mutator):
 
   def doSelectionMode(self, mode):
     if self.selectionMode != mode:
-      self.redoAddChange(('m', (0, 0, 0, 0, 0,
+      self.redoAddChange(('m', (0, 0, 0,
           self.penRow-self.markerRow,
-          self.penCol-self.markerCol, 0, 0,
+          self.penCol-self.markerCol,
           mode-self.selectionMode)))
       self.redo()
 
