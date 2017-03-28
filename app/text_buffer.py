@@ -453,7 +453,7 @@ class BackingTextBuffer(Mutator):
         self.redoAddChange(('i', ' '*indent));
         self.redo()
 
-  def penColDelta(self, toRow):
+  def cursorColDelta(self, toRow):
     if toRow >= len(self.lines):
       return
     lineLen = len(self.lines[toRow])
@@ -510,7 +510,7 @@ class BackingTextBuffer(Mutator):
 
   def cursorMoveDown(self):
     if self.penRow+1 < len(self.lines):
-      self.cursorMove(1, self.penColDelta(self.penRow+1), 0)
+      self.cursorMove(1, self.cursorColDelta(self.penRow+1), 0)
       self.redo()
 
   def cursorMoveLeft(self):
@@ -677,7 +677,7 @@ class BackingTextBuffer(Mutator):
       scrollDelta = len(self.lines)-maxRow-self.scrollRow
     self.scrollRow += scrollDelta
     self.cursorMoveScroll(penRowDelta,
-        self.penColDelta(self.penRow+penRowDelta), 0, 0, 0)
+        self.cursorColDelta(self.penRow+penRowDelta), 0, 0, 0)
     self.redo()
 
   def cursorPageUp(self):
@@ -692,7 +692,7 @@ class BackingTextBuffer(Mutator):
       scrollDelta = -self.scrollRow
     self.scrollRow += scrollDelta
     self.cursorMoveScroll(penRowDelta,
-        self.penColDelta(self.penRow+penRowDelta), 0, 0, 0)
+        self.cursorColDelta(self.penRow+penRowDelta), 0, 0, 0)
     self.redo()
 
   def cursorScrollTo(self, goalRow, window):
@@ -1172,7 +1172,7 @@ class BackingTextBuffer(Mutator):
     self.selectLineAt(self.scrollRow + paneRow)
 
   def scrollWindow(self, rows, cols):
-    self.cursorMoveScroll(rows, self.penColDelta(self.penRow-rows),
+    self.cursorMoveScroll(rows, self.cursorColDelta(self.penRow-rows),
         0, -1, 0)
     self.redo()
 
@@ -1186,8 +1186,8 @@ class BackingTextBuffer(Mutator):
     if self.penRow >= self.scrollRow + maxRow - 2:
       cursorDelta = self.scrollRow + maxRow - 2 - self.penRow
     self.scrollRow -= 1
-    self.cursorMoveScroll(penDelta,
-        self.penColDelta(self.penRow+penDelta), 0, 0, 0)
+    self.cursorMoveScroll(cursorDelta,
+        self.cursorColDelta(self.penRow+cursorDelta), 0, 0, 0)
     self.redo()
 
   def mouseWheelUp(self, shift, ctrl, alt):
@@ -1196,12 +1196,12 @@ class BackingTextBuffer(Mutator):
     maxRow, maxCol = self.view.cursorWindow.getmaxyx()
     if self.scrollRow+maxRow >= len(self.lines):
       return
-    penDelta = 0
+    cursorDelta = 0
     if self.penRow <= self.scrollRow + 1:
-      penDelta = self.scrollRow-self.penRow + 1
+      cursorDelta = self.scrollRow-self.penRow + 1
     self.scrollRow += 1
-    self.cursorMoveScroll(penDelta,
-        self.penColDelta(self.penRow+penDelta), 0, 0, 0)
+    self.cursorMoveScroll(cursorDelta,
+        self.cursorColDelta(self.penRow+cursorDelta), 0, 0, 0)
     self.redo()
 
   def nextSelectionMode(self):
