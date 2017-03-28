@@ -217,9 +217,9 @@ class Window(StaticWindow):
     self.textBuffer.mouseWheelUp(shift, ctrl, alt)
 
   def refresh(self):
-    StaticWindow.refresh(self)
     self.textBuffer.cursorRow = self.textBuffer.penRow
     self.textBuffer.cursorCol = self.textBuffer.penCol
+    StaticWindow.refresh(self)
     self.textBuffer.draw(self)
     if self.hasFocus:
       self.parent.debugDraw(self)
