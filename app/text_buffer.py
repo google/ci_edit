@@ -49,14 +49,14 @@ class Mutator(app.selectable.Selectable):
     self.penRow += 1
 
   def getPenOffset(self, row, col):
-    """inefficent test hack. wip on parser"""
+    """inefficient test hack. wip on parser"""
     offset = 0
     for i in range(row):
       offset += len(self.lines[i])
     return offset + row + col
 
   def cursorGrammarName(self):
-    """inefficent test hack. wip on parser"""
+    """inefficient test hack. wip on parser"""
     if not self.parser:
       return 'no parser'
     self.penGrammar = self.parser.grammarFromOffset(self.getPenOffset(
@@ -66,7 +66,7 @@ class Mutator(app.selectable.Selectable):
     return self.penGrammar.grammar.get('name', 'unknown')
 
   def cursorGrammarRemaining(self):
-    """inefficent test hack. wip on parser"""
+    """inefficient test hack. wip on parser"""
     if not self.parser:
       return -2
     remaining = self.parser.grammarFromOffset(self.getPenOffset(
@@ -76,7 +76,7 @@ class Mutator(app.selectable.Selectable):
     return remaining
 
   def isDirty(self):
-    """Whether the buffer contains non-trival changes since the last save."""
+    """Whether the buffer contains non-trivial changes since the last save."""
     clean = self.savedAtRedoIndex >= 0 and (
         self.savedAtRedoIndex == self.redoIndex or
         (self.redoIndex + 1 == self.savedAtRedoIndex and
