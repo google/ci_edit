@@ -68,28 +68,30 @@ class BaseLineBuffer:
 class Selectable(BaseLineBuffer):
   def __init__(self):
     BaseLineBuffer.__init__(self)
-    self.cursorRow = 0
-    self.cursorCol = 0
+    #self.cursorRow = 0
+    #self.cursorCol = 0
     self.goalCol = 0
+    self.penRow = 0
+    self.penCol = 0
     self.markerRow = 0
     self.markerCol = 0
-    self.markerEndRow = 0
-    self.markerEndCol = 0
+    #self.markerEndRow = 0
+    #self.markerEndCol = 0
     self.selectionMode = kSelectionNone
 
   def debug(self):
-    return "(Selectable: line count %d, cursor %d,%d, marker %d,%d, mode %s)"%(
-        len(self.lines), self.cursorRow, self.cursorCol, self.markerRow,
+    return "(Selectable: line count %d, pen %d,%d, marker %d,%d, mode %s)"%(
+        len(self.lines), self.penRow, self.penCol, self.markerRow,
         self.markerCol, self.selectionModeName())
 
   def selection(self):
-    return (self.cursorRow, self.cursorCol, self.markerRow, self.markerCol)
+    return (self.penRow, self.penCol, self.markerRow, self.markerCol)
 
   def selectionModeName(self):
     return kSelectionModeNames[self.selectionMode]
 
   def setSelection(self, other):
-    (self.cursorRow, self.cursorCol, self.markerRow, self.markerCol,
+    (self.penRow, self.penCol, self.markerRow, self.markerCol,
         self.markerEndRow, self.markerEndCol,
         self.selectionMode) = other
 
@@ -155,7 +157,7 @@ class Selectable(BaseLineBuffer):
       del self.lines[upperRow:lowerRow+1]
 
   def insertLines(self, lines):
-    self.insertLinesAt(self.cursorRow, self.cursorCol, lines,
+    self.insertLinesAt(self.penRow, self.penCol, lines,
         self.selectionMode)
 
   def insertLinesAt(self, row, col, lines, selectionMode=kSelectionNone):
@@ -197,7 +199,7 @@ class Selectable(BaseLineBuffer):
       app.log.info('selection mode not recognized', selectionMode)
 
   def __extendWords(self, upperRow, upperCol, lowerRow, lowerCol):
-    """Extends and existing selection to the nearest word boundaries. The cursor
+    """Extends and existing selection to the nearest word boundaries. The pen
         and marker will be extended away from each other. The extension may
         occur in one, both, or neither direction."""
     line = self.lines[upperRow]
@@ -218,74 +220,74 @@ class Selectable(BaseLineBuffer):
           -self.markerCol, 0)
     elif self.selectionMode == kSelectionAll:
       if len(self.lines):
-        return (len(self.lines)-1-self.cursorRow,
-            len(self.lines[-1])-self.cursorCol,
+        return (len(self.lines)-1-self.penRow,
+            len(self.lines[-1])-self.penCol,
             len(self.lines[-1])-self.goalCol,
             -self.markerRow, -self.markerCol, 0)
     elif self.selectionMode == kSelectionLine:
-      return (0, -self.cursorCol, -self.goalCol,
+      return (0, -self.penCol, -self.goalCol,
           0, -self.markerCol, 0)
     elif self.selectionMode == kSelectionWord:
-      if self.cursorRow > self.markerRow or (
-          self.cursorRow == self.markerRow and
-          self.cursorCol > self.markerCol):
+      if self.penRow > self.markerRow or (
+          self.penRow == self.markerRow and
+          self.penCol > self.markerCol):
         upperCol, lowerCol = self.__extendWords(self.markerRow,
-            self.markerCol, self.cursorRow, self.cursorCol)
+            self.markerCol, self.penRow, self.penCol)
         return (0,
-            lowerCol-self.cursorCol,
+            lowerCol-self.penCol,
             lowerCol-self.goalCol,
             0, upperCol-self.markerCol, 0)
       else:
-        upperCol, lowerCol = self.__extendWords(self.cursorRow,
-            self.cursorCol, self.markerRow, self.markerCol)
+        upperCol, lowerCol = self.__extendWords(self.penRow,
+            self.penCol, self.markerRow, self.markerCol)
         return (0,
-            upperCol-self.cursorCol,
+            upperCol-self.penCol,
             upperCol-self.goalCol,
             0, lowerCol-self.markerCol, 0)
     return (0, 0, 0, 0, 0, 0)
 
   def startAndEnd(self):
-    """Get the marker and cursor pair as the ealier of the two then the later
+    """Get the marker and pen pair as the ealier of the two then the later
     of the two. The result accounts for the current selection mode."""
     upperRow = 0
     upperCol = 0
     lowerRow = 0
     lowerCol = 0
     if self.selectionMode == kSelectionNone:
-      upperRow = self.cursorRow
-      upperCol = self.cursorCol
-      lowerRow = self.cursorRow
-      lowerCol = self.cursorCol
+      upperRow = self.penRow
+      upperCol = self.penCol
+      lowerRow = self.penRow
+      lowerCol = self.penCol
     elif self.selectionMode == kSelectionAll:
       upperRow = 0
       upperCol = 0
       lowerRow = len(self.lines)
       lowerCol = lowerRow and len(self.lines[-1])
     elif self.selectionMode == kSelectionBlock:
-      upperRow = min(self.markerRow, self.cursorRow)
-      upperCol = min(self.markerCol, self.cursorCol)
-      lowerRow = max(self.markerRow, self.cursorRow)
-      lowerCol = max(self.markerCol, self.cursorCol)
+      upperRow = min(self.markerRow, self.penRow)
+      upperCol = min(self.markerCol, self.penCol)
+      lowerRow = max(self.markerRow, self.penRow)
+      lowerCol = max(self.markerCol, self.penCol)
     elif self.selectionMode == kSelectionCharacter:
       upperRow = self.markerRow
       upperCol = self.markerCol
-      lowerRow = self.cursorRow
-      lowerCol = self.cursorCol
+      lowerRow = self.penRow
+      lowerCol = self.penCol
       if upperRow == lowerRow and upperCol > lowerCol:
         upperCol, lowerCol = lowerCol, upperCol
       elif upperRow > lowerRow:
         upperRow, lowerRow = lowerRow, upperRow
         upperCol, lowerCol = lowerCol, upperCol
     elif self.selectionMode == kSelectionLine:
-      upperRow = min(self.markerRow, self.cursorRow)
+      upperRow = min(self.markerRow, self.penRow)
       upperCol = 0
-      lowerRow = max(self.markerRow, self.cursorRow)
+      lowerRow = max(self.markerRow, self.penRow)
       lowerCol = 0
     elif self.selectionMode == kSelectionWord:
       upperRow = self.markerRow
       upperCol = self.markerCol
-      lowerRow = self.cursorRow
-      lowerCol = self.cursorCol
+      lowerRow = self.penRow
+      lowerCol = self.penCol
       if upperRow == lowerRow and upperCol > lowerCol:
         upperCol, lowerCol = lowerCol, upperCol
       elif upperRow > lowerRow:

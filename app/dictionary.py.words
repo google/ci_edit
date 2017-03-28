@@ -32,3 +32,12 @@ init
 getcwd
 goto
 ctrl
+traceback
+ascii
+mtime
+atime
+uid
+pid
+repr
+chr
+ord

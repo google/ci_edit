@@ -166,8 +166,11 @@ class CiProgram:
     self.debugWindow.writeLineRow = 0
     self.debugWindow.writeLine(
         "   cRow %3d    cCol %2d goalCol %2d"
-        %(textBuffer.cursorRow, textBuffer.cursorCol,
-            textBuffer.goalCol), self.debugWindow.color)
+        %(win.cursorRow, win.cursorCol, textBuffer.goalCol),
+        self.debugWindow.color)
+    self.debugWindow.writeLine(
+        "   pRow %3d    pCol %2d"
+        %(textBuffer.penRow, textBuffer.penCol), self.debugWindow.color)
     self.debugWindow.writeLine(
         " mkrRow %3d  mkrCol %2d sm %d"
         %(textBuffer.markerRow, textBuffer.markerCol,
@@ -175,8 +178,7 @@ class CiProgram:
         self.debugWindow.color)
     self.debugWindow.writeLine(
         "scrlRow %3d scrlCol %2d lines %3d"
-        %(textBuffer.scrollRow, textBuffer.scrollCol,
-            len(textBuffer.lines)),
+        %(win.scrollRow, win.scrollCol, len(textBuffer.lines)),
         self.debugWindow.color)
     self.debugWindow.writeLine(
         "y %2d x %2d maxRow %d maxCol %d baud %d color %d"

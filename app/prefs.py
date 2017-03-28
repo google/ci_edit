@@ -111,6 +111,12 @@ prefs = {
     'py_string2': stringColorIndex,
     'quoted_string2': stringColorIndex,
   },
+  'editor': {
+    'captureCursor': True,
+    'showLineNumbers': True,
+    'showStatusLine': True,
+    'showTopInfo': True,
+  },
   'filetype': {
     'bash': {
       'ext': ['.bash', '.sh'],
