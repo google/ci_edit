@@ -167,10 +167,10 @@ class Selectable(BaseLineBuffer):
     if selectionMode == kSelectionAll:
       self.lines = lines
       return
-    lines.reverse()
     if (selectionMode == kSelectionNone or
         selectionMode == kSelectionCharacter or
         selectionMode == kSelectionWord):
+      lines.reverse()
       firstLine = self.lines[row]
       if len(lines) == 1:
         self.lines[row] = (firstLine[:col] + lines[0] +
@@ -184,12 +184,13 @@ class Selectable(BaseLineBuffer):
         for line in lines[1:-1]:
           self.lines.insert(currentRow, line)
     elif selectionMode == kSelectionBlock:
-      for line in lines:
-        self.lines[row] = (
-            self.lines[row][:col] + line +
-            self.lines[row][col:])
+      for i, line in enumerate(lines):
+        self.lines[row+i] = (
+            self.lines[row+i][:col] + line +
+            self.lines[row+i][col:])
     elif selectionMode == kSelectionLine:
       app.log.detail('insertLines', row, len(lines))
+      lines.reverse()
       if (row == len(self.lines)-1 and
           len(self.lines[-1]) == 0):
         self.lines = self.lines[:-1]

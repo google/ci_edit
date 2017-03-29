@@ -1090,15 +1090,15 @@ class BackingTextBuffer(Mutator):
     self.redo()
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
-    if shift:
-      app.log.info(' shift click', paneRow, paneCol, shift, ctrl, alt)
+    if alt:
+      self.selectionBlock()
+    elif shift:
       if self.selectionMode == app.selectable.kSelectionNone:
         self.selectionCharacter()
-      self.mouseRelease(paneRow, paneCol, shift, ctrl, alt)
     else:
       app.log.info(' click', paneRow, paneCol, shift, ctrl, alt)
       self.selectionNone()
-      self.mouseRelease(paneRow, paneCol, shift, ctrl, alt)
+    self.mouseRelease(paneRow, paneCol, shift, ctrl, alt)
 
   def mouseDoubleClick(self, paneRow, paneCol, shift, ctrl, alt):
     app.log.info('double click', paneRow, paneCol)
