@@ -1090,13 +1090,12 @@ class BackingTextBuffer(Mutator):
     self.redo()
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
-    if alt:
-      self.selectionBlock()
-    elif shift:
-      if self.selectionMode == app.selectable.kSelectionNone:
+    if shift:
+      if alt:
+        self.selectionBlock()
+      elif self.selectionMode == app.selectable.kSelectionNone:
         self.selectionCharacter()
     else:
-      app.log.info(' click', paneRow, paneCol, shift, ctrl, alt)
       self.selectionNone()
     self.mouseRelease(paneRow, paneCol, shift, ctrl, alt)
 
