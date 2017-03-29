@@ -37,5 +37,5 @@ def isCorrect(word, grammarName):
   if len(re.sub('[A-Z]+', '', word)) == 0:
     # All upper case.
     return True
-  app.log.info(grammarName, word)
+  #app.log.info(grammarName, word)
   return False
