@@ -371,7 +371,16 @@ class BackingTextBuffer(Mutator):
     if self.selectionMode != app.selectable.kSelectionNone:
       text = self.getSelectedText()
       if text:
-        if (self.penRow > self.markerRow or
+        if self.selectionMode == app.selectable.kSelectionBlock:
+          upper = min(self.penRow, self.markerRow)
+          left = min(self.penCol, self.markerCol)
+          lower = max(self.penRow, self.markerRow)
+          right = max(self.penCol, self.markerCol)
+          self.cursorMoveAndMark(
+              upper-self.penRow, left-self.penCol, left-self.goalCol,
+              lower-self.markerRow, right-self.markerCol, 0)
+          self.redo()
+        elif (self.penRow > self.markerRow or
             (self.penRow == self.markerRow and
             self.penCol > self.markerCol)):
           self.swapPenAndMarker()
