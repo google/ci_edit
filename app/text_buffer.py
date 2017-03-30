@@ -1114,8 +1114,13 @@ class BackingTextBuffer(Mutator):
     if not self.lines:
       return
     row = max(0, min(self.view.scrollRow + paneRow, len(self.lines) - 1))
-    inLine = paneCol < len(self.lines[row])
-    col = max(0, min(self.view.scrollCol + paneCol, len(self.lines[row])))
+    col = max(0, self.view.scrollCol + paneCol)
+    if self.selectionMode == app.selectable.kSelectionBlock:
+      self.cursorMoveAndMark(0, 0, 0, row-self.markerRow, col-self.markerCol, 0)
+      self.redo()
+      return
+    # If not block selection, restrict col to the chars on the line.
+    col = min(col, len(self.lines[row]))
     # Adjust the marker column delta when the pen and marker positions
     # cross over each other.
     markerCol = 0
@@ -1142,6 +1147,7 @@ class BackingTextBuffer(Mutator):
     self.cursorMoveAndMark(row - self.penRow, col - self.penCol,
         col - self.goalCol, 0, markerCol, 0)
     self.redo()
+    inLine = paneCol < len(self.lines[row])
     if self.selectionMode == app.selectable.kSelectionLine:
       self.cursorMoveAndMark(*self.extendSelection())
       self.redo()
