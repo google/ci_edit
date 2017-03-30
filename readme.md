@@ -20,8 +20,8 @@ more users are happy users for a longer time.
 Features of ci
 
 - runs on nCurses
-  - This means that it can use used in the termial window just  like vim, emacs,
-    and pine.
+  - This means that it can use used in the terminal window just  like vim,
+    emacs, and pine.
 - cut/copy/paste
   - Using common GUI editor keyboard short-cuts: control-x, control-c, and
     control-v!
@@ -30,7 +30,7 @@ Features of ci
 - syntax highlighting
   - keywords an such are displayed in different colors.
 - nested grammars
-  - A source file being editted may start in one grammar such as HTML and
+  - A source file being edited may start in one grammar such as HTML and
     contain nested JavaScript. ci_edit will highlight each grammar for each
     separate language.
 - find within text

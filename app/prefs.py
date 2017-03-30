@@ -112,7 +112,7 @@ prefs = {
     'quoted_string2': stringColorIndex,
   },
   'editor': {
-    'captiveCursor': False,
+    'captiveCursor': True,
     'showLineNumbers': True,
     'showStatusLine': True,
     'showTopInfo': True,
