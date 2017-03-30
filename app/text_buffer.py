@@ -363,6 +363,7 @@ class BackingTextBuffer(Mutator):
     self.view = None
     self.clipList = []
     self.rootGrammar = app.prefs.getGrammar(None)
+    self.skipUpdateScroll = False
 
   def setView(self, view):
     self.view = view
@@ -1188,9 +1189,12 @@ class BackingTextBuffer(Mutator):
     if self.penRow >= self.view.scrollRow + maxRow - 2:
       cursorDelta = self.view.scrollRow + maxRow - 2 - self.penRow
     self.view.scrollRow -= 1
-    self.cursorMoveScroll(cursorDelta,
-        self.cursorColDelta(self.penRow+cursorDelta), 0, 0, 0)
-    self.redo()
+    if app.prefs.prefs['editor']['captiveCursor']:
+      self.cursorMoveScroll(cursorDelta,
+          self.cursorColDelta(self.penRow+cursorDelta), 0, 0, 0)
+      self.redo()
+    else:
+      self.skipUpdateScroll = True
 
   def mouseWheelUp(self, shift, ctrl, alt):
     if not shift:
@@ -1202,9 +1206,12 @@ class BackingTextBuffer(Mutator):
     if self.penRow <= self.view.scrollRow + 1:
       cursorDelta = self.view.scrollRow-self.penRow + 1
     self.view.scrollRow += 1
-    self.cursorMoveScroll(cursorDelta,
-        self.cursorColDelta(self.penRow+cursorDelta), 0, 0, 0)
-    self.redo()
+    if app.prefs.prefs['editor']['captiveCursor']:
+      self.cursorMoveScroll(cursorDelta,
+          self.cursorColDelta(self.penRow+cursorDelta), 0, 0, 0)
+      self.redo()
+    else:
+      self.skipUpdateScroll = True
 
   def nextSelectionMode(self):
     next = self.selectionMode + 1
@@ -1317,6 +1324,9 @@ class BackingTextBuffer(Mutator):
 
   def updateScrollPosition(self):
     """Move the selected view rectangle so that the cursor is visible."""
+    if self.skipUpdateScroll:
+      self.skipUpdateScroll = False
+      return
     maxRow, maxCol = self.view.cursorWindow.getmaxyx()
     if self.view.scrollRow > self.penRow:
       self.view.scrollRow = self.penRow
@@ -1368,7 +1378,8 @@ class TextBuffer(BackingTextBuffer):
       self.shouldReparse = False
     maxRow, maxCol = window.cursorWindow.getmaxyx()
 
-    self.checkScrollToCursor(window)
+    if app.prefs.prefs['editor']['captiveCursor']:
+      self.checkScrollToCursor(window)
 
     startCol = self.view.scrollCol
     endCol = self.view.scrollCol+maxCol
