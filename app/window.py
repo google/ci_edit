@@ -188,6 +188,7 @@ class Window(StaticWindow):
     self.cursorCol = 0
     self.hasFocus = False
     self.isFocusable = True
+    self.shouldShowCursor = True
     self.textBuffer = None
 
   def focus(self):
@@ -229,12 +230,15 @@ class Window(StaticWindow):
     self.textBuffer.draw(self)
     if self.hasFocus:
       self.parent.debugDraw(self)
-      try:
-        self.cursorWindow.move(
-            self.cursorRow - self.scrollRow,
-            self.cursorCol - self.scrollCol)
-      except curses.error:
-        pass
+      self.shouldShowCursor = (self.cursorRow >= self.scrollRow and
+          self.cursorRow < self.scrollRow+self.rows)
+      if self.shouldShowCursor:
+        try:
+          self.cursorWindow.move(
+              self.cursorRow - self.scrollRow,
+              self.cursorCol - self.scrollCol)
+        except curses.error:
+          pass
 
   def setTextBuffer(self, textBuffer):
     textBuffer.setView(self)

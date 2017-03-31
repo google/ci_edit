@@ -1183,6 +1183,8 @@ class BackingTextBuffer(Mutator):
     if not shift:
       self.selectionNone()
     if self.view.scrollRow == 0:
+      if not app.prefs.prefs['editor']['captiveCursor']:
+        self.skipUpdateScroll = True
       return
     maxRow, maxCol = self.view.cursorWindow.getmaxyx()
     cursorDelta = 0
@@ -1201,6 +1203,8 @@ class BackingTextBuffer(Mutator):
       self.selectionNone()
     maxRow, maxCol = self.view.cursorWindow.getmaxyx()
     if self.view.scrollRow+maxRow >= len(self.lines):
+      if not app.prefs.prefs['editor']['captiveCursor']:
+        self.skipUpdateScroll = True
       return
     cursorDelta = 0
     if self.penRow <= self.view.scrollRow + 1:

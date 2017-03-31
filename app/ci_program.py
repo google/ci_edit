@@ -397,7 +397,8 @@ class CiProgram:
     for i,k in enumerate(self.zOrder):
       #app.log.info("[[%d]] %r"%(i, k))
       k.refresh()
-    curses.curs_set(1)
+    if k.shouldShowCursor:
+      curses.curs_set(1)
 
   def makeHomeDirs(self):
     try:
