@@ -32,6 +32,7 @@ class CiProgram:
   In some aspects, the program acts as a top level window, even though it's not
   exactly a window."""
   def __init__(self, stdscr):
+    self.debugMouseEvent = (0, 0, 0, 0, 0)
     self.exiting = False
     self.modeStack = []
     self.priorClick = 0
@@ -97,7 +98,12 @@ class CiProgram:
           if ch != curses.ERR:
             self.ch = ch
             if ch == curses.KEY_MOUSE:
-              mouseEvents.append((curses.getmouse(), time.time()))
+              # On Ubuntu, Gnome terminal, curses.getmouse() may only be called
+              # once for each KEY_MOUSE. Subsequent calls will throw an
+              # exception.
+              self.debugMouseEvent = curses.getmouse()
+              mouseEvents.append((self.debugMouseEvent, time.time()))
+              #app.log.info('mouse event\n', mouseEvents[-1])
             cmdList.append(ch)
       start = time.time()
       if len(cmdList):
@@ -199,18 +205,14 @@ class CiProgram:
         self.debugWindow.color)
     self.debugWindow.writeLine("tb %r"%(textBuffer,),
         self.debugWindow.color)
-    try:
-      (id, mouseCol, mouseRow, mousez, bstate) = curses.getmouse()
-      self.debugWindow.writeLine(
-          "mouse id %d, mouseCol %d, mouseRow %d, mousez %d"
-          %(id, mouseCol, mouseRow, mousez), self.debugWindow.color)
-      self.debugWindow.writeLine(
-          "bstate %s %d"
-          %(app.curses_util.mouseButtonName(bstate), bstate),
-              self.debugWindow.color)
-    except curses.error:
-      self.debugWindow.writeLine("mouse is not available.",
-          self.debugWindow.color)
+    (id, mouseCol, mouseRow, mousez, bstate) = self.debugMouseEvent
+    self.debugWindow.writeLine(
+        "mouse id %d, mouseCol %d, mouseRow %d, mousez %d"
+        %(id, mouseCol, mouseRow, mousez), self.debugWindow.color)
+    self.debugWindow.writeLine(
+        "bstate %s %d"
+        %(app.curses_util.mouseButtonName(bstate), bstate),
+            self.debugWindow.color)
     # Display some of the redo chain.
     self.debugWindow.writeLine(
         "redoIndex %3d savedAt %3d depth %3d"
