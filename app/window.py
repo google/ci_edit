@@ -186,6 +186,7 @@ class Window(StaticWindow):
     self.cursorWindow.keypad(1)
     self.cursorRow = 0
     self.cursorCol = 0
+    self.hasCaptiveCursor = app.prefs.prefs['editor']['captiveCursor']
     self.hasFocus = False
     self.isFocusable = True
     self.shouldShowCursor = True

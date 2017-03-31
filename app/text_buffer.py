@@ -1183,7 +1183,7 @@ class BackingTextBuffer(Mutator):
     if not shift:
       self.selectionNone()
     if self.view.scrollRow == 0:
-      if not app.prefs.prefs['editor']['captiveCursor']:
+      if not self.view.hasCaptiveCursor:
         self.skipUpdateScroll = True
       return
     maxRow, maxCol = self.view.cursorWindow.getmaxyx()
@@ -1191,7 +1191,7 @@ class BackingTextBuffer(Mutator):
     if self.penRow >= self.view.scrollRow + maxRow - 2:
       cursorDelta = self.view.scrollRow + maxRow - 2 - self.penRow
     self.view.scrollRow -= 1
-    if app.prefs.prefs['editor']['captiveCursor']:
+    if self.view.hasCaptiveCursor:
       self.cursorMoveScroll(cursorDelta,
           self.cursorColDelta(self.penRow+cursorDelta), 0, 0, 0)
       self.redo()
@@ -1203,14 +1203,14 @@ class BackingTextBuffer(Mutator):
       self.selectionNone()
     maxRow, maxCol = self.view.cursorWindow.getmaxyx()
     if self.view.scrollRow+maxRow >= len(self.lines):
-      if not app.prefs.prefs['editor']['captiveCursor']:
+      if not self.view.hasCaptiveCursor:
         self.skipUpdateScroll = True
       return
     cursorDelta = 0
     if self.penRow <= self.view.scrollRow + 1:
       cursorDelta = self.view.scrollRow-self.penRow + 1
     self.view.scrollRow += 1
-    if app.prefs.prefs['editor']['captiveCursor']:
+    if self.view.hasCaptiveCursor:
       self.cursorMoveScroll(cursorDelta,
           self.cursorColDelta(self.penRow+cursorDelta), 0, 0, 0)
       self.redo()
@@ -1382,7 +1382,7 @@ class TextBuffer(BackingTextBuffer):
       self.shouldReparse = False
     maxRow, maxCol = window.cursorWindow.getmaxyx()
 
-    if app.prefs.prefs['editor']['captiveCursor']:
+    if self.view.hasCaptiveCursor:
       self.checkScrollToCursor(window)
 
     startCol = self.view.scrollCol
