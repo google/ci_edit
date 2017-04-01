@@ -117,7 +117,7 @@ prefs = {
     'showStatusLine': True,
     'showTopInfo': True,
   },
-  'filetype': {
+  'fileType': {
     'bash': {
       'ext': ['.bash', '.sh'],
       'grammar': 'bash',
@@ -293,7 +293,7 @@ prefs = {
     'html': {
       'indent': '  ',
       'keywords': [
-        'body', 'button', 'div', 'head', 'html', 'img', 'input',
+        'body', 'button', 'div', 'head', 'html', 'href', 'img', 'input',
         'script', 'select', 'span', 'style',
       ],
       'special': [r'&.{1,5}?;',],
@@ -352,7 +352,7 @@ prefs = {
         'raise', 'range',
         'self',
         'True', 'try', 'tuple',
-        'until', 'with', 'yeild',
+        'until', 'with', 'yield',
       ],
       'namespaces': [
         'os\.', 'os\.path\.', 'sys\.', 'traceback\.', 're\.',
@@ -478,17 +478,17 @@ for k,v in prefs['grammar'].items():
 re.purge()
 
 extensions = {}
-filetypes = {}
-for k,v in prefs['filetype'].items():
+fileTypes = {}
+for k,v in prefs['fileType'].items():
   for ext in v['ext']:
     extensions[ext] = v.get('grammar')
-  filetypes[k] = v
+  fileTypes[k] = v
 if 0:
   app.log.info('extensions')
   for k,v in extensions.items():
     app.log.info('  ', k, ':', v)
-  app.log.info('filetypes')
-  for k,v in filetypes.items():
+  app.log.info('fileTypes')
+  for k,v in fileTypes.items():
     app.log.info('  ', k, ':', v)
 
 def init():
@@ -504,8 +504,8 @@ def init():
 def getGrammar(fileExtension):
   if fileExtension is None:
     return grammars.get('none')
-  filetype = extensions.get(fileExtension, 'text')
-  return grammars.get(filetype)
+  fileType = extensions.get(fileExtension, 'text')
+  return grammars.get(fileType)
 
 app.log.startup('prefs.py import time', time.time() - importStartTime)
 
