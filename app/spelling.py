@@ -23,6 +23,7 @@ for path in glob.iglob(pathPrefix+'*.words'):
         index += 1
       grammarWords[grammarName] = set([w for l in lines for w in l.split()])
 words = grammarWords.get('en-US', set())
+words.update(grammarWords.get('coding', set()))
 
 
 def isCorrect(word, grammarName):
