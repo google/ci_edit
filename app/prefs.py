@@ -16,7 +16,7 @@ defaultColorIndex = 0
 foundColorIndex = 32
 keywordsColorIndex = 21
 selectedColor = 64 # Active find is a selection.
-specialsColorIndex = 224
+specialsColorIndex = 20
 stringColorIndex = 5
 outsideOfBufferColorIndex = 0
 

@@ -1,0 +1,65 @@
+# Copyright 2017 The ci_edit Authors. All rights reserved.
+# Use of this source code is governed by an Apache-style license that can be
+# found in the LICENSE file.
+
+# This is a list of non-English words that are commonly found in programming
+# source code files.
+bool
+boolean
+checkbox
+cntl
+cpp
+css
+ctrl
+cxx
+def
+dirname
+dropdown
+esc
+exe
+guid
+gz
+gzip
+hpp
+htm
+html
+hxx
+init
+intl
+ipsum
+json
+lorem
+jpeg
+jpg
+namespaces
+obj
+os
+pid
+png
+px
+py
+pyc
+pyo
+src
+std
+stderr
+stdin
+stdout
+sys
+tar
+tgz
+todo
+traceback
+tty
+typdef
+ubuntu
+uid
+undef
+unicode
+unix
+wip
+webkit
+whitespace
+xml
+xterm
+zyyy
