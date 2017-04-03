@@ -84,13 +84,15 @@ class CiProgram:
       while not len(cmdList):
         for i in range(5):
           ch = window.cursorWindow.getch()
+          #if ch != -1:
+          #  app.log.info('ch', ch)
           if ch == curses.ascii.ESC:
             keySequence = []
             n = window.cursorWindow.getch()
             while n != curses.ERR:
               keySequence.append(n)
               n = window.cursorWindow.getch()
-            # app.log.info('sequence\n', keySequence)
+            #app.log.info('sequence\n', keySequence)
             ch = tuple(keySequence)
             if not ch:
               # The sequence was empty, just forward the esc.
