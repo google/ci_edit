@@ -1229,6 +1229,10 @@ class BackingTextBuffer(Mutator):
   def noOp(self, ignored):
     pass
 
+  def normalize(self):
+    self.selectionNone()
+    self.findRe = None
+
   def parseGrammars(self):
     # Reset the self.data to get recent changes in self.lines.
     self.linesToData()

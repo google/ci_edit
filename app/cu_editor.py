@@ -228,7 +228,7 @@ class CuaEdit(app.controller.Controller):
     self.textBuffer = textBuffer
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
-      curses.ascii.ESC: textBuffer.selectionNone,
+      curses.ascii.ESC: textBuffer.normalize,
 
       curses.KEY_F1: self.info,
 
