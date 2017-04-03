@@ -571,6 +571,9 @@ class InputWindow(Window):
       self.interactiveOpen = LabeledLine(self, 'open: ')
       self.interactiveOpen.setController(app.cu_editor.InteractiveOpener)
     if 1:
+      self.interactivePrompt = LabeledLine(self, "e: ")
+      self.interactivePrompt.setController(app.cu_editor.InteractivePrompt)
+    if 1:
       self.interactiveQuit = LabeledLine(self,
           "Save changes? (yes, no, or cancel): ")
       self.interactiveQuit.setController(app.cu_editor.InteractiveQuit)
@@ -646,6 +649,7 @@ class InputWindow(Window):
     self.confirmClose.reshape(1, cols, top+rows-1, left)
     self.confirmOverwrite.reshape(1, cols, top+rows-1, left)
     self.interactiveOpen.reshape(1, cols, top+rows-1, left)
+    self.interactivePrompt.reshape(1, cols, top+rows-1, left)
     self.interactiveQuit.reshape(1, cols, top+rows-1, left)
     self.interactiveSaveAs.reshape(1, cols, top+rows-1, left)
     if self.showMessageLine:

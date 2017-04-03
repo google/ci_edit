@@ -279,3 +279,17 @@ class InteractiveGoto(app.controller.Controller):
     except: pass
     gotoLine, gotoCol = (line.split(',') + ['0', '0'])[:2]
     self.cursorMoveTo(parseInt(gotoLine), parseInt(gotoCol))
+
+
+class InteractivePrompt(app.controller.Controller):
+  """Extended commands prompt."""
+  def __init__(self, host, textBuffer):
+    app.controller.Controller.__init__(self, host, 'prompt')
+    self.textBuffer = textBuffer
+    self.textBuffer.lines = [""]
+
+  def cats(self):
+    self.host.textBuffer.editPasteLines(('cats',))
+
+  def info(self):
+    app.log.info('InteractivePrompt command set')

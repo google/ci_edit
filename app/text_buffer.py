@@ -765,13 +765,18 @@ class BackingTextBuffer(Mutator):
 
   def editPaste(self):
     osClip = clipboard.paste and clipboard.paste()
-    if len(self.clipList or osClip):
-      if self.selectionMode != app.selectable.kSelectionNone:
-        self.performDelete()
+    if len(self.clipList) or osClip:
       if osClip:
         clip = tuple(self.doDataToLines(osClip))
       else:
         clip = self.clipList[-1]
+      self.editPasteLines(clip)
+    else:
+      app.log.info('clipList empty')
+
+  def editPasteLines(self, clip):
+      if self.selectionMode != app.selectable.kSelectionNone:
+        self.performDelete()
       self.redoAddChange(('v', clip))
       self.redo()
       rowDelta = len(clip)-1
@@ -782,8 +787,6 @@ class BackingTextBuffer(Mutator):
       self.cursorMove(rowDelta, endCol-self.penCol,
           endCol-self.goalCol)
       self.redo()
-    else:
-      app.log.info('clipList empty')
 
   def doLinesToData(self, data):
     def encode(line):
