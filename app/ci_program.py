@@ -129,7 +129,7 @@ class CiProgram:
   def changeFocusTo(self, changeTo):
     self.focusedWindow.unfocus()
     self.focusedWindow = changeTo
-    self.focusedWindow.refresh()
+    #self.focusedWindow.refresh()
     self.focusedWindow.focus()
     self.focusedWindow.controller.onChange()
 
