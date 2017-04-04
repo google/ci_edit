@@ -300,14 +300,18 @@ class InteractivePrompt(app.controller.Controller):
       return
     if line[0] == '!':
       self.shellExecute(line[1:])
-      return
-    self.commands.get(line, self.unknownCommand)()
+    else:
+      self.commands.get(line, self.unknownCommand)()
     self.changeToHostWindow()
 
-  def shellExecute(self, line):
+  def shellExecute(self, commands):
     tb = self.host.textBuffer
+    lines = list(tb.getSelectedText())
     try:
-      output = subprocess.check_output(line.split())
+      process = subprocess.Popen(commands,
+          stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+          stderr=subprocess.STDOUT);
+      output = process.communicate('\n'.join(lines))[0];
     except:
       tb.setMessage('Error running shell command')
       return
