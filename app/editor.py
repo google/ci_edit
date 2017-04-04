@@ -11,6 +11,7 @@ import curses
 import curses.ascii
 import os
 import re
+import subprocess
 import text_buffer
 
 
@@ -288,7 +289,6 @@ class InteractivePrompt(app.controller.Controller):
     self.textBuffer = textBuffer
     self.textBuffer.lines = [""]
     self.commands = {
-      'cats': self.cats,
       'sort': self.sortSelectedLines,
     }
 
@@ -296,11 +296,25 @@ class InteractivePrompt(app.controller.Controller):
     line = ''
     try: line = self.textBuffer.lines[0]
     except: pass
+    if not len(line):
+      return
+    if line[0] == '!':
+      self.shellExecute(line[1:])
+      return
     self.commands.get(line, self.unknownCommand)()
     self.changeToHostWindow()
 
-  def cats(self):
-    self.host.textBuffer.editPasteLines(('cats',))
+  def shellExecute(self, line):
+    tb = self.host.textBuffer
+    try:
+      output = subprocess.check_output(line.split())
+    except:
+      tb.setMessage('Error running shell command')
+      return
+    output = tb.doDataToLines(output)
+    if tb.selectionMode == app.selectable.kSelectionLine:
+      output.append('')
+    tb.editPasteLines(tuple(output))
 
   def info(self):
     app.log.info('InteractivePrompt command set')
