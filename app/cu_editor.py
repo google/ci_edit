@@ -164,7 +164,7 @@ class InteractivePrompt(app.editor.InteractivePrompt):
     commandSet.update({
       curses.ascii.ESC: self.changeToHostWindow,
       curses.KEY_F1: self.info,
-      CTRL_J: self.cats,
+      CTRL_J: self.execute,
     })
     self.commandSet = commandSet
     self.commandDefault = self.textBuffer.insertPrintable

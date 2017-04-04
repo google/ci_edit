@@ -287,9 +287,35 @@ class InteractivePrompt(app.controller.Controller):
     app.controller.Controller.__init__(self, host, 'prompt')
     self.textBuffer = textBuffer
     self.textBuffer.lines = [""]
+    self.commands = {
+      'cats': self.cats,
+      'sort': self.sortSelectedLines,
+    }
+
+  def execute(self):
+    line = ''
+    try: line = self.textBuffer.lines[0]
+    except: pass
+    self.commands.get(line, self.unknownCommand)()
+    self.changeToHostWindow()
 
   def cats(self):
     self.host.textBuffer.editPasteLines(('cats',))
 
   def info(self):
     app.log.info('InteractivePrompt command set')
+
+  def sortSelectedLines(self):
+    tb = self.host.textBuffer
+    lines = list(tb.getSelectedText())
+    if not len(lines):
+      tb.setMessage('The sort command needs a selection.')
+      return
+    lines.sort()
+    tb.setMessage('Sorted %d lines'%(len(lines),))
+    if tb.selectionMode == app.selectable.kSelectionLine:
+      lines.append('')
+    tb.editPasteLines(tuple(lines))
+
+  def unknownCommand(self):
+    self.host.textBuffer.setMessage('Unknown command')
