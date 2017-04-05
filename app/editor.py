@@ -308,12 +308,23 @@ class InteractivePrompt(app.controller.Controller):
     tb = self.host.textBuffer
     lines = list(tb.getSelectedText())
     try:
-      process = subprocess.Popen(commands,
+      chain = re.split(r'\s*\|\s*', commands.strip())
+      process = subprocess.Popen(chain[-1].split(),
           stdin=subprocess.PIPE, stdout=subprocess.PIPE,
           stderr=subprocess.STDOUT);
-      output = process.communicate('\n'.join(lines))[0];
-    except:
-      tb.setMessage('Error running shell command')
+      if len(chain) == 1:
+        output = process.communicate('\n'.join(lines))[0]
+      else:
+        chain.reverse()
+        prior = process
+        for i in chain[1:]:
+          prior = subprocess.Popen(i.split(),
+              stdin=subprocess.PIPE, stdout=prior.stdin,
+              stderr=subprocess.STDOUT);
+        prior.communicate('\n'.join(lines))
+        output = process.communicate()[0]
+    except Exception, e:
+      tb.setMessage('Error running shell command\n', e)
       return
     output = tb.doDataToLines(output)
     if tb.selectionMode == app.selectable.kSelectionLine:
