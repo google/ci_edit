@@ -275,7 +275,7 @@ prefs = {
         'background-color', 'border', 'color', 'cursor', 'font-size', 'height',
         'margin', 'min-height', 'min-width', 'var', 'width',
       ],
-      'special': ['#[\w-]',],
+      'special': ['#[\w-]+',],
       'contains': ['cpp_block_comment'],
     },
     'doc_block_comment': {
