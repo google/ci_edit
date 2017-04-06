@@ -505,7 +505,7 @@ class TopInfo(StaticWindow):
         pathLine += ' * '
       else:
         pathLine += ' . '
-    lines.append(pathLine)
+    lines.append(pathLine[-self.cols:])
     self.lines = lines
     infoRows = len(self.lines)
     if self.mode > 0:
