@@ -272,10 +272,16 @@ prefs = {
       'end': '</style>',
       'indent': '  ',
       'keywords': [
-        'background-color', 'border', 'color', 'cursor', 'font-size', 'height',
-        'margin', 'min-height', 'min-width', 'var', 'width',
+        'absolute', 'attr', 'block', 'border-box', 'calc', 'center', 'default',
+        'ease', 'hidden',
+        'inherit', 'left', 'none',
+        'px', 'rgb', 'rgba', 'right', 'rotate[XYZ]?', 'scale[XYZ]?', 'solid',
+        'transform', 'translate[XYZ]?', 'transparent', 'var',
       ],
-      'special': ['#[\w-]+',],
+      'special': [
+        r'@apply\b', r'\d+deg\b', r'\d+em\b', r'\d+px\b',
+        r'\d+rem\b', r'[\w-]+:',
+      ],
       'contains': ['cpp_block_comment'],
     },
     'doc_block_comment': {
