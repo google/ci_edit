@@ -289,7 +289,9 @@ class InteractivePrompt(app.controller.Controller):
     self.textBuffer = textBuffer
     self.textBuffer.lines = [""]
     self.commands = {
+      'lower': self.lowerSelectedLines,
       'sort': self.sortSelectedLines,
+      'upper': self.upperSelectedLines,
     }
 
   def execute(self):
@@ -301,7 +303,16 @@ class InteractivePrompt(app.controller.Controller):
     if line[0] == '!':
       self.shellExecute(line[1:])
     else:
-      self.commands.get(line, self.unknownCommand)()
+      tb = self.host.textBuffer
+      lines = list(tb.getSelectedText())
+      if not len(lines):
+        tb.setMessage('The %s command needs a selection.'%(line,))
+        return
+      lines = self.commands.get(line, self.unknownCommand)(lines)
+      tb.setMessage('Changed %d lines'%(len(lines),))
+      if tb.selectionMode == app.selectable.kSelectionLine:
+        lines.append('')
+      tb.editPasteLines(tuple(lines))
     self.changeToHostWindow()
 
   def shellExecute(self, commands):
@@ -334,17 +345,16 @@ class InteractivePrompt(app.controller.Controller):
   def info(self):
     app.log.info('InteractivePrompt command set')
 
-  def sortSelectedLines(self):
-    tb = self.host.textBuffer
-    lines = list(tb.getSelectedText())
-    if not len(lines):
-      tb.setMessage('The sort command needs a selection.')
-      return
-    lines.sort()
-    tb.setMessage('Sorted %d lines'%(len(lines),))
-    if tb.selectionMode == app.selectable.kSelectionLine:
-      lines.append('')
-    tb.editPasteLines(tuple(lines))
+  def lowerSelectedLines(self, lines):
+    return [line.lower() for line in lines]
 
-  def unknownCommand(self):
+  def sortSelectedLines(self, lines):
+    lines.sort()
+    return lines
+
+  def upperSelectedLines(self, lines):
+    return [line.upper() for line in lines]
+
+  def unknownCommand(self, lines):
     self.host.textBuffer.setMessage('Unknown command')
+    return lines
