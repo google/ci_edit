@@ -446,11 +446,13 @@ class StatusLine(StaticWindow):
         colPercentage = 100
     # Format.
     rightSide = ''
+    if len(statusLine):
+      rightSide += ' |'
     if 0:
-      rightSide += '%s | %s'%(
+      rightSide += ' %s | %s |'%(
           tb.cursorGrammarName(),
           tb.selectionModeName())
-    rightSide += ' | %4d,%2d | %3d%%,%3d%%'%(
+    rightSide += ' %4d,%2d | %3d%%,%3d%%'%(
         self.host.cursorRow+1, self.host.cursorCol+1,
         rowPercentage,
         colPercentage)
