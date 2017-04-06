@@ -319,7 +319,10 @@ class InteractivePrompt(app.controller.Controller):
     tb = self.host.textBuffer
     lines = list(tb.getSelectedText())
     try:
-      chain = re.split(r'\s*\|\s*', commands.strip())
+      #chain = re.split(r'\s*\|\s*', commands.strip())
+      chaing = re.findall(
+          r'''\s*([^|]*"(?:\\"|[^"])*"|[^|]*'(?:\\'|[^'])*'|[^|]*)\s*\|?\s*''',
+          commands.strip())
       process = subprocess.Popen(chain[-1].split(),
           stdin=subprocess.PIPE, stdout=subprocess.PIPE,
           stderr=subprocess.STDOUT);
