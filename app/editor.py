@@ -15,6 +15,28 @@ import subprocess
 import text_buffer
 
 
+# Break up a command line into separate piped processes.
+kRePipeChain = re.compile(
+    r'''\s*([^|]*"(?:\\"|[^"])*"|[^|]*'(?:\\'|[^'])*'|[^|]*|\|\|)'''
+    r'''\s*\|?''')
+def functionTest(a, b):
+  assert a == b, "%r != %r"%(a, b)
+functionTest(kRePipeChain.findall('date'),
+    ['date', ''])
+functionTest(kRePipeChain.findall('date|wc'),
+    ['date', 'wc', ''])
+functionTest(kRePipeChain.findall('  date | wc  '),
+    ['date ', 'wc  ', ''])
+functionTest(kRePipeChain.findall('date|wc|sort'),
+    ['date', 'wc', 'sort', ''])
+functionTest(kRePipeChain.findall('date || wc | sort'),
+    ['date ', '', 'wc ', 'sort', ''])
+functionTest(kRePipeChain.findall('date "foo" || wc | sort'),
+    ['date "foo"', '', 'wc ', 'sort', ''])
+functionTest(kRePipeChain.findall('date "foo" "bar" || wc | sort'),
+    ['date "foo" "bar"', '', 'wc ', 'sort', ''])
+
+
 def parseInt(str):
   i = 0
   k = 0
@@ -289,10 +311,24 @@ class InteractivePrompt(app.controller.Controller):
     self.textBuffer = textBuffer
     self.textBuffer.lines = [""]
     self.commands = {
+      'build': self.buildCommand,
+      'format': self.formatCommand,
+      'make': self.makeCommand,
+    }
+    self.filters = {
       'lower': self.lowerSelectedLines,
       'sort': self.sortSelectedLines,
       'upper': self.upperSelectedLines,
     }
+
+  def buildCommand(self):
+    return 'building things'
+
+  def formatCommand(self):
+    return 'formatting text'
+
+  def makeCommand(self):
+    return 'making stuff'
 
   def execute(self):
     line = ''
@@ -300,15 +336,22 @@ class InteractivePrompt(app.controller.Controller):
     except: pass
     if not len(line):
       return
-    if line[0] == '!':
-      self.shellExecute(line[1:])
+    tb = self.host.textBuffer
+    command = self.commands.get(line)
+    if command:
+      command()
+    elif line[0] == '!':
+      output = self.shellExecute(line[1:])
+      output = tb.doDataToLines(output)
+      if tb.selectionMode == app.selectable.kSelectionLine:
+        output.append('')
+      tb.editPasteLines(tuple(output))
     else:
-      tb = self.host.textBuffer
       lines = list(tb.getSelectedText())
       if not len(lines):
         tb.setMessage('The %s command needs a selection.'%(line,))
         return
-      lines = self.commands.get(line, self.unknownCommand)(lines)
+      lines = self.filters.get(line, self.unknownCommand)(lines)
       tb.setMessage('Changed %d lines'%(len(lines),))
       if tb.selectionMode == app.selectable.kSelectionLine:
         lines.append('')
@@ -318,11 +361,10 @@ class InteractivePrompt(app.controller.Controller):
   def shellExecute(self, commands):
     tb = self.host.textBuffer
     lines = list(tb.getSelectedText())
+    #chain = re.split(r'\s*\|\s*', commands.strip())
+    chain = kRePipeChain.findall(commands.strip())[:-1]
+    app.log.info('chain', chain)
     try:
-      #chain = re.split(r'\s*\|\s*', commands.strip())
-      chaing = re.findall(
-          r'''\s*([^|]*"(?:\\"|[^"])*"|[^|]*'(?:\\'|[^'])*'|[^|]*)\s*\|?\s*''',
-          commands.strip())
       process = subprocess.Popen(chain[-1].split(),
           stdin=subprocess.PIPE, stdout=subprocess.PIPE,
           stderr=subprocess.STDOUT);
@@ -339,11 +381,8 @@ class InteractivePrompt(app.controller.Controller):
         output = process.communicate()[0]
     except Exception, e:
       tb.setMessage('Error running shell command\n', e)
-      return
-    output = tb.doDataToLines(output)
-    if tb.selectionMode == app.selectable.kSelectionLine:
-      output.append('')
-    tb.editPasteLines(tuple(output))
+      return ''
+    return output
 
   def info(self):
     app.log.info('InteractivePrompt command set')
