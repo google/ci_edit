@@ -341,7 +341,9 @@ class InteractivePrompt(app.controller.Controller):
     if command:
       command()
     elif line[0] == '!':
-      output = self.shellExecute(line[1:])
+      tb = self.host.textBuffer
+      input = '\n'.join(tb.getSelectedText())
+      output = self.shellExecute(line[1:], input)
       output = tb.doDataToLines(output)
       if tb.selectionMode == app.selectable.kSelectionLine:
         output.append('')
@@ -358,10 +360,7 @@ class InteractivePrompt(app.controller.Controller):
       tb.editPasteLines(tuple(lines))
     self.changeToHostWindow()
 
-  def shellExecute(self, commands):
-    tb = self.host.textBuffer
-    lines = list(tb.getSelectedText())
-    #chain = re.split(r'\s*\|\s*', commands.strip())
+  def shellExecute(self, commands, input):
     chain = kRePipeChain.findall(commands.strip())[:-1]
     app.log.info('chain', chain)
     try:
@@ -369,7 +368,7 @@ class InteractivePrompt(app.controller.Controller):
           stdin=subprocess.PIPE, stdout=subprocess.PIPE,
           stderr=subprocess.STDOUT);
       if len(chain) == 1:
-        output = process.communicate('\n'.join(lines))[0]
+        output = process.communicate(input)[0]
       else:
         chain.reverse()
         prior = process
@@ -377,7 +376,7 @@ class InteractivePrompt(app.controller.Controller):
           prior = subprocess.Popen(i.split(),
               stdin=subprocess.PIPE, stdout=prior.stdin,
               stderr=subprocess.STDOUT);
-        prior.communicate('\n'.join(lines))
+        prior.communicate(input)
         output = process.communicate()[0]
     except Exception, e:
       tb.setMessage('Error running shell command\n', e)
