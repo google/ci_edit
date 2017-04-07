@@ -14,12 +14,18 @@ namespace is not a keyword
 a = b/c;
 a = b  / c;
 
-a =  /.*/
+a =  /.*/;
 
 function foo() {
   if or while or switch
   bar(/\r\ne\/gex"/, 'thing')
 }
+
+  /sdfsdf/: /fefe/;
+
+  a = /sdfdf/;
+  foo(/eeef.*/, 4, /sdf/);
+
 // (?!(?<=[\w/*\s]))\s*/(?![/*])
 'sadfsds\nsadf' //
 "wfefw\\ \" safsf" //
