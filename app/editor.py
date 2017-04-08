@@ -15,26 +15,82 @@ import subprocess
 import text_buffer
 
 
+def functionTestEq(a, b):
+  assert a == b, "%r != %r"%(a, b)
+
+
+# Break up a command line into separate &&.
+kRePipeChain = re.compile(
+    r'''\s*(\|\|?|&&|"(?:\\"|[^"])*"|'(?:\\'|[^'])*'|[^\s|&]+)''')
+functionTestEq(kRePipeChain.findall('date'),
+    ['date'])
+functionTestEq(kRePipeChain.findall('d-a.te'),
+    ['d-a.te'])
+functionTestEq(kRePipeChain.findall('date | wc'),
+    ['date', '|', 'wc'])
+functionTestEq(kRePipeChain.findall('date|wc'),
+    ['date', '|', 'wc'])
+functionTestEq(kRePipeChain.findall('date && sort'),
+    ['date', '&&', 'sort'])
+functionTestEq(kRePipeChain.findall('date || sort'),
+    ['date', '||', 'sort'])
+functionTestEq(kRePipeChain.findall(''' date "a b" 'c d ' || sort '''),
+    ['date', '"a b"', "'c d '", '||', 'sort'])
+
+
+# Break up a command line into separate &&.
+#kRePipeChain = re.compile(
+#    r'''\s*(\|\|?|&&|"(?:\\"|[^"])*"|'(?:\\'|[^'])*'|[-.\w]+)''')
+functionTestEq(kRePipeChain.findall('date'),
+    ['date'])
+functionTestEq(kRePipeChain.findall('d-a.te'),
+    ['d-a.te'])
+functionTestEq(kRePipeChain.findall('date | wc'),
+    ['date', '|', 'wc'])
+functionTestEq(kRePipeChain.findall('date|wc'),
+    ['date', '|', 'wc'])
+functionTestEq(kRePipeChain.findall('date && sort'),
+    ['date', '&&', 'sort'])
+functionTestEq(kRePipeChain.findall('date || sort'),
+    ['date', '||', 'sort'])
+functionTestEq(kRePipeChain.findall(''' date "a b" 'c d ' || sort '''),
+    ['date', '"a b"', "'c d '", '||', 'sort'])
+
+
+# Break up a command line into separate &&.
+#kRePipeChain = re.compile(
+#    r'''\s*(\|\|?|&&|(?:"(?:\\"|[^"])*"|'(?:\\'|[^'])*'|\w+)+)''')
+functionTestEq(kRePipeChain.findall('date'),
+    ['date'])
+functionTestEq(kRePipeChain.findall('date|wc'),
+    ['date', '|', 'wc'])
+functionTestEq(kRePipeChain.findall('date && sort'),
+    ['date', '&&', 'sort'])
+functionTestEq(kRePipeChain.findall('date || sort'),
+    ['date', '||', 'sort'])
+functionTestEq(kRePipeChain.findall(''' date "a b" 'c d ' || sort '''),
+    ['date', '"a b"', "'c d '", '||', 'sort'])
+
 # Break up a command line into separate piped processes.
 kRePipeChain = re.compile(
-    r'''\s*([^|]*"(?:\\"|[^"])*"|[^|]*'(?:\\'|[^'])*'|[^|]*|\|\|)'''
+    r'''\s*(\|\||&&|[^|]*"(?:\\"|[^"])*"|[^|]*'(?:\\'|[^'])*'|[^|]*)'''
     r'''\s*\|?''')
-def functionTest(a, b):
-  assert a == b, "%r != %r"%(a, b)
-functionTest(kRePipeChain.findall('date'),
+functionTestEq(kRePipeChain.findall('date'),
     ['date', ''])
-functionTest(kRePipeChain.findall('date|wc'),
+functionTestEq(kRePipeChain.findall('date|wc'),
     ['date', 'wc', ''])
-functionTest(kRePipeChain.findall('  date | wc  '),
+functionTestEq(kRePipeChain.findall('  date | wc  '),
     ['date ', 'wc  ', ''])
-functionTest(kRePipeChain.findall('date|wc|sort'),
+functionTestEq(kRePipeChain.findall('date|wc|sort'),
     ['date', 'wc', 'sort', ''])
-functionTest(kRePipeChain.findall('date || wc | sort'),
+functionTestEq(kRePipeChain.findall('date || wc | sort'),
     ['date ', '', 'wc ', 'sort', ''])
-functionTest(kRePipeChain.findall('date "foo" || wc | sort'),
+functionTestEq(kRePipeChain.findall('date "foo" || wc | sort'),
     ['date "foo"', '', 'wc ', 'sort', ''])
-functionTest(kRePipeChain.findall('date "foo" "bar" || wc | sort'),
+functionTestEq(kRePipeChain.findall('date "foo" "bar" || wc | sort'),
     ['date "foo" "bar"', '', 'wc ', 'sort', ''])
+#functionTestEq(kRePipeChain.findall('date "foo" "bar" || wc && sort'),
+#    ['date "foo" "bar"', '', 'wc ', '&&', 'sort', ''])
 
 
 def parseInt(str):
