@@ -18,79 +18,65 @@ import text_buffer
 def functionTestEq(a, b):
   assert a == b, "%r != %r"%(a, b)
 
+if 1:
+  # Break up a command line, separate by |.
+  kRePipeChain = re.compile(
+      #r'''\|\|?|&&|((?:"(?:\\"|[^"])*"|'(?:\\'|[^'])*'|[^\s|&]+)+)''')
+      r'''((?:"(?:\\"|[^"])*"|'(?:\\'|[^'])*'|\|\||[^|]+)+)''')
+  functionTestEq(kRePipeChain.findall(''' date "a b" 'c d ' | sort '''),
+      [""" date "a b" 'c d ' """, ' sort '])
+  functionTestEq(kRePipeChain.findall('date'),
+      ['date'])
+  functionTestEq(kRePipeChain.findall('d-a.te'),
+      ['d-a.te'])
+  functionTestEq(kRePipeChain.findall('date | wc'),
+      ['date ', ' wc'])
+  functionTestEq(kRePipeChain.findall('date|wc'),
+      ['date', 'wc'])
+  functionTestEq(kRePipeChain.findall('date && sort'),
+      ['date && sort'])
+  functionTestEq(kRePipeChain.findall('date || sort'),
+      ['date || sort'])
+  functionTestEq(kRePipeChain.findall('''date "a b" 'c d ' || sort'''),
+      ["""date "a b" 'c d ' || sort"""])
 
-# Break up a command line into separate &&.
-kRePipeChain = re.compile(
+
+# Break up a command line, separate by &&.
+kReLogicChain = re.compile(
     r'''\s*(\|\|?|&&|"(?:\\"|[^"])*"|'(?:\\'|[^'])*'|[^\s|&]+)''')
-functionTestEq(kRePipeChain.findall('date'),
+functionTestEq(kReLogicChain.findall('date'),
     ['date'])
-functionTestEq(kRePipeChain.findall('d-a.te'),
+functionTestEq(kReLogicChain.findall('d-a.te'),
     ['d-a.te'])
-functionTestEq(kRePipeChain.findall('date | wc'),
+functionTestEq(kReLogicChain.findall('date | wc'),
     ['date', '|', 'wc'])
-functionTestEq(kRePipeChain.findall('date|wc'),
+functionTestEq(kReLogicChain.findall('date|wc'),
     ['date', '|', 'wc'])
-functionTestEq(kRePipeChain.findall('date && sort'),
+functionTestEq(kReLogicChain.findall('date && sort'),
     ['date', '&&', 'sort'])
-functionTestEq(kRePipeChain.findall('date || sort'),
+functionTestEq(kReLogicChain.findall('date || sort'),
     ['date', '||', 'sort'])
-functionTestEq(kRePipeChain.findall(''' date "a b" 'c d ' || sort '''),
+functionTestEq(kReLogicChain.findall(''' date "a b" 'c d ' || sort '''),
     ['date', '"a b"', "'c d '", '||', 'sort'])
 
 
-# Break up a command line into separate &&.
-#kRePipeChain = re.compile(
-#    r'''\s*(\|\|?|&&|"(?:\\"|[^"])*"|'(?:\\'|[^'])*'|[-.\w]+)''')
-functionTestEq(kRePipeChain.findall('date'),
+# Break up a command line, separate by &&.
+kReArgChain = re.compile(
+    r'''\s*(\|\|?|&&|"(?:\\"|[^"])*"|'(?:\\'|[^'])*'|[^\s|&]+)''')
+functionTestEq(kReArgChain.findall('date'),
     ['date'])
-functionTestEq(kRePipeChain.findall('d-a.te'),
+functionTestEq(kReArgChain.findall('d-a.te'),
     ['d-a.te'])
-functionTestEq(kRePipeChain.findall('date | wc'),
+functionTestEq(kReArgChain.findall('date | wc'),
     ['date', '|', 'wc'])
-functionTestEq(kRePipeChain.findall('date|wc'),
+functionTestEq(kReArgChain.findall('date|wc'),
     ['date', '|', 'wc'])
-functionTestEq(kRePipeChain.findall('date && sort'),
+functionTestEq(kReArgChain.findall('date && sort'),
     ['date', '&&', 'sort'])
-functionTestEq(kRePipeChain.findall('date || sort'),
+functionTestEq(kReArgChain.findall('date || sort'),
     ['date', '||', 'sort'])
-functionTestEq(kRePipeChain.findall(''' date "a b" 'c d ' || sort '''),
+functionTestEq(kReArgChain.findall(''' date "a b" 'c d ' || sort '''),
     ['date', '"a b"', "'c d '", '||', 'sort'])
-
-
-# Break up a command line into separate &&.
-#kRePipeChain = re.compile(
-#    r'''\s*(\|\|?|&&|(?:"(?:\\"|[^"])*"|'(?:\\'|[^'])*'|\w+)+)''')
-functionTestEq(kRePipeChain.findall('date'),
-    ['date'])
-functionTestEq(kRePipeChain.findall('date|wc'),
-    ['date', '|', 'wc'])
-functionTestEq(kRePipeChain.findall('date && sort'),
-    ['date', '&&', 'sort'])
-functionTestEq(kRePipeChain.findall('date || sort'),
-    ['date', '||', 'sort'])
-functionTestEq(kRePipeChain.findall(''' date "a b" 'c d ' || sort '''),
-    ['date', '"a b"', "'c d '", '||', 'sort'])
-
-# Break up a command line into separate piped processes.
-kRePipeChain = re.compile(
-    r'''\s*(\|\||&&|[^|]*"(?:\\"|[^"])*"|[^|]*'(?:\\'|[^'])*'|[^|]*)'''
-    r'''\s*\|?''')
-functionTestEq(kRePipeChain.findall('date'),
-    ['date', ''])
-functionTestEq(kRePipeChain.findall('date|wc'),
-    ['date', 'wc', ''])
-functionTestEq(kRePipeChain.findall('  date | wc  '),
-    ['date ', 'wc  ', ''])
-functionTestEq(kRePipeChain.findall('date|wc|sort'),
-    ['date', 'wc', 'sort', ''])
-functionTestEq(kRePipeChain.findall('date || wc | sort'),
-    ['date ', '', 'wc ', 'sort', ''])
-functionTestEq(kRePipeChain.findall('date "foo" || wc | sort'),
-    ['date "foo"', '', 'wc ', 'sort', ''])
-functionTestEq(kRePipeChain.findall('date "foo" "bar" || wc | sort'),
-    ['date "foo" "bar"', '', 'wc ', 'sort', ''])
-#functionTestEq(kRePipeChain.findall('date "foo" "bar" || wc && sort'),
-#    ['date "foo" "bar"', '', 'wc ', '&&', 'sort', ''])
 
 
 def parseInt(str):
@@ -417,10 +403,11 @@ class InteractivePrompt(app.controller.Controller):
     self.changeToHostWindow()
 
   def shellExecute(self, commands, input):
-    chain = kRePipeChain.findall(commands.strip())[:-1]
+    chain = kRePipeChain.findall(commands)
     app.log.info('chain', chain)
     try:
-      process = subprocess.Popen(chain[-1].split(),
+      app.log.info(kReArgChain.findall(chain[-1]))
+      process = subprocess.Popen(kReArgChain.findall(chain[-1]),
           stdin=subprocess.PIPE, stdout=subprocess.PIPE,
           stderr=subprocess.STDOUT);
       if len(chain) == 1:
@@ -429,13 +416,14 @@ class InteractivePrompt(app.controller.Controller):
         chain.reverse()
         prior = process
         for i in chain[1:]:
-          prior = subprocess.Popen(i.split(),
+          app.log.info(kReArgChain.findall(i))
+          prior = subprocess.Popen(kReArgChain.findall(i),
               stdin=subprocess.PIPE, stdout=prior.stdin,
               stderr=subprocess.STDOUT);
         prior.communicate(input)
         output = process.communicate()[0]
     except Exception, e:
-      tb.setMessage('Error running shell command\n', e)
+      self.host.textBuffer.setMessage('Error running shell command\n', e)
       return ''
     return output
 
