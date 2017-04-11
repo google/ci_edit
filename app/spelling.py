@@ -47,5 +47,14 @@ def isCorrect(word, grammarName):
   if len(re.sub('[A-Z]+', '', word)) == 0:
     # All upper case.
     return True
+
+  # TODO(dschuyler): This is an experiment. Considering a py specific word list
+  # instead.
+  if grammarName == 'py':
+    # Handle poor styling.
+    if len(re.sub('[a-z]+', '', word)) == 0:
+      for i in range(len(word), 0, -1):
+        if word[:i] in words and word[i:] in words:
+          return True
   #app.log.info(grammarName, word)
   return False

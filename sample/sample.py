@@ -17,9 +17,11 @@
 "a\\\\" # quadruple escape
 "filler\nsfas\w\\aaa\adf\bfsdf\"d\\\"sadff" # special values
 
-'''asd\nsadfsadf''' # triple single quotes
+'''asd\nsad'a"fsadf''' # triple single quotes
+r'''asd\nsad'a"fsadf''' # triple single quotes
 
-"""asd\nsadfsadf""" # triple double quotes
+"""asd\nsad'a"fsadf""" # triple double quotes
+r"""asd\nsad'a"fsadf""" # triple double quotes
 
 class Foo:
   def __init__(self, data):
