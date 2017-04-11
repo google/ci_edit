@@ -4,6 +4,10 @@
 
 # This is a list of non-English words that are commonly found in programming
 # source code files.
+arg
+argc
+args
+argv
 async
 attr
 bezier

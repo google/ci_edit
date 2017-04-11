@@ -56,27 +56,34 @@ functionTestEq(kReLogicChain.findall('date && sort'),
     ['date', '&&', 'sort'])
 functionTestEq(kReLogicChain.findall('date || sort'),
     ['date', '||', 'sort'])
-functionTestEq(kReLogicChain.findall(''' date "a b" 'c d ' || sort '''),
-    ['date', '"a b"', "'c d '", '||', 'sort'])
+functionTestEq(kReLogicChain.findall(''' date "a\\" b" 'c d ' || sort '''),
+    ['date', '"a\\" b"', "'c d '", '||', 'sort'])
 
 
-# Break up a command line, separate by &&.
+# Break up a command line, separate by \\s.
 kReArgChain = re.compile(
-    r'''\s*(\|\|?|&&|"(?:\\"|[^"])*"|'(?:\\'|[^'])*'|[^\s|&]+)''')
+    r'''\s*("(?:\\"|[^"])*"|'(?:\\'|[^'])*'|[^\s]+)''')
 functionTestEq(kReArgChain.findall('date'),
     ['date'])
 functionTestEq(kReArgChain.findall('d-a.te'),
     ['d-a.te'])
-functionTestEq(kReArgChain.findall('date | wc'),
-    ['date', '|', 'wc'])
-functionTestEq(kReArgChain.findall('date|wc'),
-    ['date', '|', 'wc'])
-functionTestEq(kReArgChain.findall('date && sort'),
-    ['date', '&&', 'sort'])
-functionTestEq(kReArgChain.findall('date || sort'),
-    ['date', '||', 'sort'])
-functionTestEq(kReArgChain.findall(''' date "a b" 'c d ' || sort '''),
-    ['date', '"a b"', "'c d '", '||', 'sort'])
+functionTestEq(kReArgChain.findall(
+    ''' date "a b" 'c d ' "a\\" b" 'c\\' d ' '''),
+    ['date', '"a b"', "'c d '", '"a\\" b"', "'c\\' d '"])
+
+
+# Unquote text.
+kReUnquote = re.compile(r'''(["'])([^\1]*)\1''')
+functionTestEq(kReUnquote.sub('\\2', 'date'),
+    'date')
+functionTestEq(kReUnquote.sub('\\2', '"date"'),
+    'date')
+functionTestEq(kReUnquote.sub('\\2', "'date'"),
+    'date')
+functionTestEq(kReUnquote.sub('\\2', "'da\\'te'"),
+    "da\\'te")
+functionTestEq(kReUnquote.sub('\\2', '"da\\"te"'),
+    'da\\"te')
 
 
 def parseInt(str):
@@ -379,19 +386,23 @@ class InteractivePrompt(app.controller.Controller):
     if not len(line):
       return
     tb = self.host.textBuffer
+    lines = list(tb.getSelectedText())
     command = self.commands.get(line)
     if command:
       command()
     elif line[0] == '!':
-      tb = self.host.textBuffer
-      input = '\n'.join(tb.getSelectedText())
-      output = self.shellExecute(line[1:], input)
+      output = self.shellExecute(line[1:], '\n'.join(lines))
+      output = tb.doDataToLines(output)
+      if tb.selectionMode == app.selectable.kSelectionLine:
+        output.append('')
+      tb.editPasteLines(tuple(output))
+    elif line[0] == '|':
+      output = self.pipeExecute(line[1:], '\n'.join(lines))
       output = tb.doDataToLines(output)
       if tb.selectionMode == app.selectable.kSelectionLine:
         output.append('')
       tb.editPasteLines(tuple(output))
     else:
-      lines = list(tb.getSelectedText())
       if not len(lines):
         tb.setMessage('The %s command needs a selection.'%(line,))
         return
@@ -403,6 +414,16 @@ class InteractivePrompt(app.controller.Controller):
     self.changeToHostWindow()
 
   def shellExecute(self, commands, input):
+    try:
+      process = subprocess.Popen(commands,
+          stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+          stderr=subprocess.STDOUT, shell=True);
+      return process.communicate(input)[0]
+    except Exception, e:
+      self.host.textBuffer.setMessage('Error running shell command\n', e)
+      return ''
+
+  def pipeExecute(self, commands, input):
     chain = kRePipeChain.findall(commands)
     app.log.info('chain', chain)
     try:
@@ -411,7 +432,7 @@ class InteractivePrompt(app.controller.Controller):
           stdin=subprocess.PIPE, stdout=subprocess.PIPE,
           stderr=subprocess.STDOUT);
       if len(chain) == 1:
-        output = process.communicate(input)[0]
+        return process.communicate(input)[0]
       else:
         chain.reverse()
         prior = process
@@ -421,11 +442,10 @@ class InteractivePrompt(app.controller.Controller):
               stdin=subprocess.PIPE, stdout=prior.stdin,
               stderr=subprocess.STDOUT);
         prior.communicate(input)
-        output = process.communicate()[0]
+        return process.communicate()[0]
     except Exception, e:
       self.host.textBuffer.setMessage('Error running shell command\n', e)
       return ''
-    return output
 
   def info(self):
     app.log.info('InteractivePrompt command set')
