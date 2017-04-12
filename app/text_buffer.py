@@ -946,11 +946,16 @@ class BackingTextBuffer(Mutator):
     if len(splitCmd) < 4:
       self.setMessage('An exchange needs three '+separator+' separators')
       return
-    start, find, replace, end = splitCmd
-    flags = self.findReplaceFlags(end)
-    oldLines = self.lines
+    start, find, replace, flags = splitCmd
     self.linesToData()
-    data = re.sub(find, replace, self.data, flags=flags)
+    data = self.findReplaceText(find, replace, flags, self.data)
+    self.applyDocumentUpdate(data)
+
+  def findReplaceText(self, find, replace, flags, input):
+    flags = self.findReplaceFlags(flags)
+    return re.sub(find, replace, input, flags=flags)
+
+  def applyDocumentUpdate(self, data):
     diff = difflib.ndiff(self.lines, self.doDataToLines(data))
     mdiff = []
     counter = 0

@@ -366,6 +366,7 @@ class InteractivePrompt(app.controller.Controller):
     }
     self.filters = {
       'lower': self.lowerSelectedLines,
+      's' : self.substituteText,
       'sort': self.sortSelectedLines,
       'upper': self.upperSelectedLines,
     }
@@ -380,33 +381,37 @@ class InteractivePrompt(app.controller.Controller):
     return 'making stuff'
 
   def execute(self):
-    line = ''
-    try: line = self.textBuffer.lines[0]
+    cmdLine = ''
+    try: cmdLine = self.textBuffer.lines[0]
     except: pass
-    if not len(line):
+    if not len(cmdLine):
       return
     tb = self.host.textBuffer
     lines = list(tb.getSelectedText())
-    command = self.commands.get(line)
+    command = self.commands.get(cmdLine)
+
+
+    data = self.host.textBuffer.doLinesToData(lines)
     if command:
       command()
-    elif line[0] == '!':
-      output = self.shellExecute(line[1:], '\n'.join(lines))
+    elif cmdLine[0] == '!':
+      output = self.shellExecute(cmdLine[1:], data)
       output = tb.doDataToLines(output)
       if tb.selectionMode == app.selectable.kSelectionLine:
         output.append('')
       tb.editPasteLines(tuple(output))
-    elif line[0] == '|':
-      output = self.pipeExecute(line[1:], '\n'.join(lines))
+    elif cmdLine[0] == '|':
+      output = self.pipeExecute(cmdLine[1:], data)
       output = tb.doDataToLines(output)
       if tb.selectionMode == app.selectable.kSelectionLine:
         output.append('')
       tb.editPasteLines(tuple(output))
     else:
+      cmd = re.split('\\W', cmdLine)[0]
+      app.log.info('cmd', cmd, ', cmdLine', cmdLine)
       if not len(lines):
-        tb.setMessage('The %s command needs a selection.'%(line,))
-        return
-      lines = self.filters.get(line, self.unknownCommand)(lines)
+        tb.setMessage('The %s command needs a selection.'%(cmd,))
+      lines = self.filters.get(cmd, self.unknownCommand)(cmdLine, lines)
       tb.setMessage('Changed %d lines'%(len(lines),))
       if tb.selectionMode == app.selectable.kSelectionLine:
         lines.append('')
@@ -450,16 +455,25 @@ class InteractivePrompt(app.controller.Controller):
   def info(self):
     app.log.info('InteractivePrompt command set')
 
-  def lowerSelectedLines(self, lines):
+  def lowerSelectedLines(self, cmdLine, lines):
     return [line.lower() for line in lines]
 
-  def sortSelectedLines(self, lines):
+  def sortSelectedLines(self, cmdLine, lines):
     lines.sort()
     return lines
 
-  def upperSelectedLines(self, lines):
+  def substituteText(self, cmdLine, lines):
+    if len(cmdLine) < 2:
+      return
+    separator = cmdLine[1]
+    a, find, replace, flags = cmdLine.split(separator, 3)
+    data = self.host.textBuffer.doLinesToData(lines)
+    output = self.host.textBuffer.findReplaceText(find, replace, flags, data)
+    return self.host.textBuffer.doDataToLines(output)
+
+  def upperSelectedLines(self, cmdLine, lines):
     return [line.upper() for line in lines]
 
-  def unknownCommand(self, lines):
+  def unknownCommand(self, cmdLine, lines):
     self.host.textBuffer.setMessage('Unknown command')
     return lines
