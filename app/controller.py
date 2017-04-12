@@ -43,6 +43,9 @@ class Controller:
   def changeToGoto(self):
     self.host.changeFocusTo(self.host.interactiveGoto)
 
+  def changeToPrompt(self):
+    self.host.changeFocusTo(self.host.interactivePrompt)
+
   def changeToQuit(self):
     self.host.changeFocusTo(self.host.interactiveQuit)
 

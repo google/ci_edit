@@ -8,21 +8,31 @@ import os
 import re
 
 
-pathPrefix = os.path.join(
-    os.path.dirname(__file__), 'dictionary.')
-
 grammarWords = {}
 
-for path in glob.iglob(pathPrefix+'*.words'):
-  if os.path.isfile(path):
-    grammarName = path[len(pathPrefix):-len('.words')]
-    with open(path, 'r') as f:
-      lines = f.readlines()
-      index = 0
-      while not len(lines[index]) or lines[index][0] == '#':
-        index += 1
-      grammarWords[grammarName] = set([w for l in lines for w in l.split()])
+def loadWords(dirPath):
+  global grammarWords
+  dirPath = os.path.join(dirPath, 'dictionary.')
+  for path in glob.iglob(dirPath+'*.words'):
+    if os.path.isfile(path):
+      grammarName = path[len(dirPath):-len('.words')]
+      with open(path, 'r') as f:
+        lines = f.readlines()
+        index = 0
+        while not len(lines[index]) or lines[index][0] == '#':
+          index += 1
+        # TODO(dschuyler): Word contractions are hacked by storing the
+        # components of the contraction. So didn, doesn, and isn are considered
+        # 'words'.
+        grammarWords[grammarName] = set([
+            p for l in lines for w in l.split() for p in w.split("'")])
+loadWords(os.path.dirname(__file__))
+loadWords(os.path.expanduser("~/.ci_edit/dictionaries"))
+
 words = grammarWords.get('en-US', set())
+words.update(grammarWords.get('coding', set()))
+words.update(grammarWords.get('contractions', set()))
+words.update(grammarWords.get('user', set()))
 
 
 def isCorrect(word, grammarName):
@@ -37,5 +47,14 @@ def isCorrect(word, grammarName):
   if len(re.sub('[A-Z]+', '', word)) == 0:
     # All upper case.
     return True
+
+  # TODO(dschuyler): This is an experiment. Considering a py specific word list
+  # instead.
+  if grammarName == 'py':
+    # Handle poor styling.
+    if len(re.sub('[a-z]+', '', word)) == 0:
+      for i in range(len(word), 0, -1):
+        if word[:i] in words and word[i:] in words:
+          return True
   #app.log.info(grammarName, word)
   return False

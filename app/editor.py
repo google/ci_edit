@@ -11,7 +11,79 @@ import curses
 import curses.ascii
 import os
 import re
+import subprocess
 import text_buffer
+
+
+def functionTestEq(a, b):
+  assert a == b, "%r != %r"%(a, b)
+
+if 1:
+  # Break up a command line, separate by |.
+  kRePipeChain = re.compile(
+      #r'''\|\|?|&&|((?:"(?:\\"|[^"])*"|'(?:\\'|[^'])*'|[^\s|&]+)+)''')
+      r'''((?:"(?:\\"|[^"])*"|'(?:\\'|[^'])*'|\|\||[^|]+)+)''')
+  functionTestEq(kRePipeChain.findall(''' date "a b" 'c d ' | sort '''),
+      [""" date "a b" 'c d ' """, ' sort '])
+  functionTestEq(kRePipeChain.findall('date'),
+      ['date'])
+  functionTestEq(kRePipeChain.findall('d-a.te'),
+      ['d-a.te'])
+  functionTestEq(kRePipeChain.findall('date | wc'),
+      ['date ', ' wc'])
+  functionTestEq(kRePipeChain.findall('date|wc'),
+      ['date', 'wc'])
+  functionTestEq(kRePipeChain.findall('date && sort'),
+      ['date && sort'])
+  functionTestEq(kRePipeChain.findall('date || sort'),
+      ['date || sort'])
+  functionTestEq(kRePipeChain.findall('''date "a b" 'c d ' || sort'''),
+      ["""date "a b" 'c d ' || sort"""])
+
+
+# Break up a command line, separate by &&.
+kReLogicChain = re.compile(
+    r'''\s*(\|\|?|&&|"(?:\\"|[^"])*"|'(?:\\'|[^'])*'|[^\s|&]+)''')
+functionTestEq(kReLogicChain.findall('date'),
+    ['date'])
+functionTestEq(kReLogicChain.findall('d-a.te'),
+    ['d-a.te'])
+functionTestEq(kReLogicChain.findall('date | wc'),
+    ['date', '|', 'wc'])
+functionTestEq(kReLogicChain.findall('date|wc'),
+    ['date', '|', 'wc'])
+functionTestEq(kReLogicChain.findall('date && sort'),
+    ['date', '&&', 'sort'])
+functionTestEq(kReLogicChain.findall('date || sort'),
+    ['date', '||', 'sort'])
+functionTestEq(kReLogicChain.findall(''' date "a\\" b" 'c d ' || sort '''),
+    ['date', '"a\\" b"', "'c d '", '||', 'sort'])
+
+
+# Break up a command line, separate by \\s.
+kReArgChain = re.compile(
+    r'''\s*("(?:\\"|[^"])*"|'(?:\\'|[^'])*'|[^\s]+)''')
+functionTestEq(kReArgChain.findall('date'),
+    ['date'])
+functionTestEq(kReArgChain.findall('d-a.te'),
+    ['d-a.te'])
+functionTestEq(kReArgChain.findall(
+    ''' date "a b" 'c d ' "a\\" b" 'c\\' d ' '''),
+    ['date', '"a b"', "'c d '", '"a\\" b"', "'c\\' d '"])
+
+
+# Unquote text.
+kReUnquote = re.compile(r'''(["'])([^\1]*)\1''')
+functionTestEq(kReUnquote.sub('\\2', 'date'),
+    'date')
+functionTestEq(kReUnquote.sub('\\2', '"date"'),
+    'date')
+functionTestEq(kReUnquote.sub('\\2', "'date'"),
+    'date')
+functionTestEq(kReUnquote.sub('\\2', "'da\\'te'"),
+    "da\\'te")
+functionTestEq(kReUnquote.sub('\\2', '"da\\"te"'),
+    'da\\"te')
 
 
 def parseInt(str):
@@ -279,3 +351,129 @@ class InteractiveGoto(app.controller.Controller):
     except: pass
     gotoLine, gotoCol = (line.split(',') + ['0', '0'])[:2]
     self.cursorMoveTo(parseInt(gotoLine), parseInt(gotoCol))
+
+
+class InteractivePrompt(app.controller.Controller):
+  """Extended commands prompt."""
+  def __init__(self, host, textBuffer):
+    app.controller.Controller.__init__(self, host, 'prompt')
+    self.textBuffer = textBuffer
+    self.textBuffer.lines = [""]
+    self.commands = {
+      'build': self.buildCommand,
+      'format': self.formatCommand,
+      'make': self.makeCommand,
+    }
+    self.filters = {
+      'lower': self.lowerSelectedLines,
+      's' : self.substituteText,
+      'sort': self.sortSelectedLines,
+      'sub' : self.substituteText,
+      'upper': self.upperSelectedLines,
+    }
+    self.subExecute = {
+      '!': self.shellExecute,
+      '|': self.pipeExecute,
+    }
+
+  def buildCommand(self):
+    return 'building things'
+
+  def formatCommand(self):
+    return 'formatting text'
+
+  def makeCommand(self):
+    return 'making stuff'
+
+  def execute(self):
+    cmdLine = ''
+    try: cmdLine = self.textBuffer.lines[0]
+    except: pass
+    if not len(cmdLine):
+      return
+    tb = self.host.textBuffer
+    lines = list(tb.getSelectedText())
+    command = self.commands.get(cmdLine)
+    if command:
+      command()
+    elif cmdLine[0] in ('!', '|'):
+      data = self.host.textBuffer.doLinesToData(lines)
+      output = self.subExecute.get(cmdLine[0], self.unknownCommand)(
+          cmdLine[1:], data)
+      output = tb.doDataToLines(output)
+      if tb.selectionMode == app.selectable.kSelectionLine:
+        output.append('')
+      tb.editPasteLines(tuple(output))
+    else:
+      cmd = re.split('\\W', cmdLine)[0]
+      cmdLine = cmdLine[len(cmd):]
+      if not len(lines):
+        tb.setMessage('The %s command needs a selection.'%(cmd,))
+      lines = self.filters.get(cmd, self.unknownCommand)(cmdLine, lines)
+      tb.setMessage('Changed %d lines'%(len(lines),))
+      if not len(lines):
+        lines.append('')
+      if tb.selectionMode == app.selectable.kSelectionLine:
+        lines.append('')
+      tb.editPasteLines(tuple(lines))
+    self.changeToHostWindow()
+
+  def shellExecute(self, commands, input):
+    try:
+      process = subprocess.Popen(commands,
+          stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+          stderr=subprocess.STDOUT, shell=True);
+      return process.communicate(input)[0]
+    except Exception, e:
+      self.host.textBuffer.setMessage('Error running shell command\n', e)
+      return ''
+
+  def pipeExecute(self, commands, input):
+    chain = kRePipeChain.findall(commands)
+    app.log.info('chain', chain)
+    try:
+      app.log.info(kReArgChain.findall(chain[-1]))
+      process = subprocess.Popen(kReArgChain.findall(chain[-1]),
+          stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+          stderr=subprocess.STDOUT);
+      if len(chain) == 1:
+        return process.communicate(input)[0]
+      else:
+        chain.reverse()
+        prior = process
+        for i in chain[1:]:
+          app.log.info(kReArgChain.findall(i))
+          prior = subprocess.Popen(kReArgChain.findall(i),
+              stdin=subprocess.PIPE, stdout=prior.stdin,
+              stderr=subprocess.STDOUT);
+        prior.communicate(input)
+        return process.communicate()[0]
+    except Exception, e:
+      self.host.textBuffer.setMessage('Error running shell command\n', e)
+      return ''
+
+  def info(self):
+    app.log.info('InteractivePrompt command set')
+
+  def lowerSelectedLines(self, cmdLine, lines):
+    return [line.lower() for line in lines]
+
+  def sortSelectedLines(self, cmdLine, lines):
+    lines.sort()
+    return lines
+
+  def substituteText(self, cmdLine, lines):
+    if len(cmdLine) < 2:
+      return
+    separator = cmdLine[0]
+    a, find, replace, flags = cmdLine.split(separator, 3)
+    data = self.host.textBuffer.doLinesToData(lines)
+    output = self.host.textBuffer.findReplaceText(find, replace, flags, data)
+    return self.host.textBuffer.doDataToLines(output)
+
+  def upperSelectedLines(self, cmdLine, lines):
+    return [line.upper() for line in lines]
+
+  def unknownCommand(self, cmdLine, lines):
+    self.host.textBuffer.setMessage('Unknown command')
+    return lines

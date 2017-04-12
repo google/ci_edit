@@ -186,8 +186,10 @@ class Window(StaticWindow):
     self.cursorWindow.keypad(1)
     self.cursorRow = 0
     self.cursorCol = 0
+    self.hasCaptiveCursor = app.prefs.prefs['editor']['captiveCursor']
     self.hasFocus = False
     self.isFocusable = True
+    self.shouldShowCursor = True
     self.textBuffer = None
 
   def focus(self):
@@ -229,12 +231,15 @@ class Window(StaticWindow):
     self.textBuffer.draw(self)
     if self.hasFocus:
       self.parent.debugDraw(self)
-      try:
-        self.cursorWindow.move(
-            self.cursorRow - self.scrollRow,
-            self.cursorCol - self.scrollCol)
-      except curses.error:
-        pass
+      self.shouldShowCursor = (self.cursorRow >= self.scrollRow and
+          self.cursorRow < self.scrollRow+self.rows)
+      if self.shouldShowCursor:
+        try:
+          self.cursorWindow.move(
+              self.cursorRow - self.scrollRow,
+              self.cursorCol - self.scrollCol)
+        except curses.error:
+          pass
 
   def setTextBuffer(self, textBuffer):
     textBuffer.setView(self)
@@ -245,29 +250,6 @@ class Window(StaticWindow):
     self.hasFocus = False
     self.cursorWindow.leaveok(1)  # Don't update cursor position.
     self.controller.unfocus()
-
-
-class HeaderLine(StaticWindow):
-  def __init__(self, host):
-    StaticWindow.__init__(self, host)
-    self.host = host
-    self.textLine = None
-
-  def refresh(self):
-    textLine = self.host.textBuffer.fullPath
-    if self.textLine == textLine:
-      return
-    self.textLine = textLine
-    self.blank()
-    self.addStr(0, 0, textLine, self.color)
-    self.cursorWindow.refresh()
-
-
-class FileListPanel(Window):
-  def __init__(self, parent):
-    Window.__init__(self, parent)
-    self.color = curses.color_pair(18)
-    self.colorSelected = curses.color_pair(3)
 
 
 class LabeledLine(Window):
@@ -440,9 +422,14 @@ class StatusLine(StaticWindow):
       else:
         colPercentage = 100
     # Format.
-    rightSide = '%s | %s | %4d,%2d | %3d%%,%3d%%'%(
-        tb.cursorGrammarName(),
-        tb.selectionModeName(),
+    rightSide = ''
+    if len(statusLine):
+      rightSide += ' |'
+    if 0:
+      rightSide += ' %s | %s |'%(
+          tb.cursorGrammarName(),
+          tb.selectionModeName())
+    rightSide += ' %4d,%2d | %3d%%,%3d%%'%(
         self.host.cursorRow+1, self.host.cursorCol+1,
         rowPercentage,
         colPercentage)
@@ -497,7 +484,7 @@ class TopInfo(StaticWindow):
         pathLine += ' * '
       else:
         pathLine += ' . '
-    lines.append(pathLine)
+    lines.append(pathLine[-self.cols:])
     self.lines = lines
     infoRows = len(self.lines)
     if self.mode > 0:
@@ -528,7 +515,6 @@ class InputWindow(Window):
     assert(prg)
     Window.__init__(self, prg)
     self.prg = prg
-    self.showHeader = False
     self.showFooter = True
     self.useInteractiveFind = True
     self.showLineNumbers = True
@@ -541,13 +527,6 @@ class InputWindow(Window):
     self.controller.add(app.cu_editor.CuaPlusEdit(prg, self))
     # What does the user appear to want: edit, quit, or something else?
     self.userIntent = 'edit'
-    if 1:
-      self.headerLine = HeaderLine(self)
-      self.headerLine.color = curses.color_pair(168)
-      self.headerLine.colorSelected = curses.color_pair(47)
-      self.headerLine.setParent(self, 0)
-      if not self.showHeader:
-        self.headerLine.hide()
     if 1:
       self.confirmClose = LabeledLine(self,
           "Save changes? (yes, no, or cancel): ")
@@ -565,6 +544,9 @@ class InputWindow(Window):
     if 1:
       self.interactiveOpen = LabeledLine(self, 'open: ')
       self.interactiveOpen.setController(app.cu_editor.InteractiveOpener)
+    if 1:
+      self.interactivePrompt = LabeledLine(self, "e: ")
+      self.interactivePrompt.setController(app.cu_editor.InteractivePrompt)
     if 1:
       self.interactiveQuit = LabeledLine(self,
           "Save changes? (yes, no, or cancel): ")
@@ -631,16 +613,13 @@ class InputWindow(Window):
     lineNumbersCols = 7
     bottomRows = 1  # Not including status line.
 
-    if self.showHeader:
-      self.headerLine.reshape(1, cols, top, left)
-      rows -= 1
-      top += 1
     if self.showTopInfo:
       self.topInfo.reshape(0, cols-lineNumbersCols, top,
           left+lineNumbersCols)
     self.confirmClose.reshape(1, cols, top+rows-1, left)
     self.confirmOverwrite.reshape(1, cols, top+rows-1, left)
     self.interactiveOpen.reshape(1, cols, top+rows-1, left)
+    self.interactivePrompt.reshape(1, cols, top+rows-1, left)
     self.interactiveQuit.reshape(1, cols, top+rows-1, left)
     self.interactiveSaveAs.reshape(1, cols, top+rows-1, left)
     if self.showMessageLine:
@@ -723,7 +702,6 @@ class InputWindow(Window):
 
   def setTextBuffer(self, textBuffer):
     app.log.info('setTextBuffer')
-    #self.headerLine.controller.setFileName(textBuffer.fullPath)
     textBuffer.lineLimitIndicator = 80
     self.controller.setTextBuffer(textBuffer)
     Window.setTextBuffer(self, textBuffer)

@@ -765,13 +765,18 @@ class BackingTextBuffer(Mutator):
 
   def editPaste(self):
     osClip = clipboard.paste and clipboard.paste()
-    if len(self.clipList or osClip):
-      if self.selectionMode != app.selectable.kSelectionNone:
-        self.performDelete()
+    if len(self.clipList) or osClip:
       if osClip:
         clip = tuple(self.doDataToLines(osClip))
       else:
         clip = self.clipList[-1]
+      self.editPasteLines(clip)
+    else:
+      app.log.info('clipList empty')
+
+  def editPasteLines(self, clip):
+      if self.selectionMode != app.selectable.kSelectionNone:
+        self.performDelete()
       self.redoAddChange(('v', clip))
       self.redo()
       rowDelta = len(clip)-1
@@ -782,8 +787,6 @@ class BackingTextBuffer(Mutator):
       self.cursorMove(rowDelta, endCol-self.penCol,
           endCol-self.goalCol)
       self.redo()
-    else:
-      app.log.info('clipList empty')
 
   def doLinesToData(self, data):
     def encode(line):
@@ -943,11 +946,16 @@ class BackingTextBuffer(Mutator):
     if len(splitCmd) < 4:
       self.setMessage('An exchange needs three '+separator+' separators')
       return
-    start, find, replace, end = splitCmd
-    flags = self.findReplaceFlags(end)
-    oldLines = self.lines
+    start, find, replace, flags = splitCmd
     self.linesToData()
-    data = re.sub(find, replace, self.data, flags=flags)
+    data = self.findReplaceText(find, replace, flags, self.data)
+    self.applyDocumentUpdate(data)
+
+  def findReplaceText(self, find, replace, flags, input):
+    flags = self.findReplaceFlags(flags)
+    return re.sub(find, replace, input, flags=flags)
+
+  def applyDocumentUpdate(self, data):
     diff = difflib.ndiff(self.lines, self.doDataToLines(data))
     mdiff = []
     counter = 0
@@ -1183,13 +1191,15 @@ class BackingTextBuffer(Mutator):
     if not shift:
       self.selectionNone()
     if self.view.scrollRow == 0:
+      if not self.view.hasCaptiveCursor:
+        self.skipUpdateScroll = True
       return
     maxRow, maxCol = self.view.cursorWindow.getmaxyx()
     cursorDelta = 0
     if self.penRow >= self.view.scrollRow + maxRow - 2:
       cursorDelta = self.view.scrollRow + maxRow - 2 - self.penRow
     self.view.scrollRow -= 1
-    if app.prefs.prefs['editor']['captiveCursor']:
+    if self.view.hasCaptiveCursor:
       self.cursorMoveScroll(cursorDelta,
           self.cursorColDelta(self.penRow+cursorDelta), 0, 0, 0)
       self.redo()
@@ -1201,12 +1211,14 @@ class BackingTextBuffer(Mutator):
       self.selectionNone()
     maxRow, maxCol = self.view.cursorWindow.getmaxyx()
     if self.view.scrollRow+maxRow >= len(self.lines):
+      if not self.view.hasCaptiveCursor:
+        self.skipUpdateScroll = True
       return
     cursorDelta = 0
     if self.penRow <= self.view.scrollRow + 1:
       cursorDelta = self.view.scrollRow-self.penRow + 1
     self.view.scrollRow += 1
-    if app.prefs.prefs['editor']['captiveCursor']:
+    if self.view.hasCaptiveCursor:
       self.cursorMoveScroll(cursorDelta,
           self.cursorColDelta(self.penRow+cursorDelta), 0, 0, 0)
       self.redo()
@@ -1221,6 +1233,10 @@ class BackingTextBuffer(Mutator):
 
   def noOp(self, ignored):
     pass
+
+  def normalize(self):
+    self.selectionNone()
+    self.findRe = None
 
   def parseGrammars(self):
     # Reset the self.data to get recent changes in self.lines.
@@ -1378,7 +1394,7 @@ class TextBuffer(BackingTextBuffer):
       self.shouldReparse = False
     maxRow, maxCol = window.cursorWindow.getmaxyx()
 
-    if app.prefs.prefs['editor']['captiveCursor']:
+    if self.view.hasCaptiveCursor:
       self.checkScrollToCursor(window)
 
     startCol = self.view.scrollCol
@@ -1402,13 +1418,13 @@ class TextBuffer(BackingTextBuffer):
             window.addStr(i, col, line, color)
             if node.grammar.get('spelling', True):
               # Highlight spelling errors
+              grammarName = node.grammar.get('name', 'unknown')
               colors = [131, 231]
               color = 0
               for found in re.finditer(app.selectable.kReSubwords, line):
                 for reg in found.regs:
                   word = line[reg[0]:reg[1]]
-                  if not app.spelling.isCorrect(word, node.grammar.get(
-                      'name', 'unknown')):
+                  if not app.spelling.isCorrect(word, grammarName):
                     window.addStr(i, col+reg[0], word,
                         curses.color_pair(colors[color%2]))
                     color += 1

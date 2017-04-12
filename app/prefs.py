@@ -16,7 +16,7 @@ defaultColorIndex = 0
 foundColorIndex = 32
 keywordsColorIndex = 21
 selectedColor = 64 # Active find is a selection.
-specialsColorIndex = 224
+specialsColorIndex = 20
 stringColorIndex = 5
 outsideOfBufferColorIndex = 0
 
@@ -112,12 +112,12 @@ prefs = {
     'quoted_string2': stringColorIndex,
   },
   'editor': {
-    'captiveCursor': True,
+    'captiveCursor': False,
     'showLineNumbers': True,
     'showStatusLine': True,
     'showTopInfo': True,
   },
-  'filetype': {
+  'fileType': {
     'bash': {
       'ext': ['.bash', '.sh'],
       'grammar': 'bash',
@@ -272,10 +272,16 @@ prefs = {
       'end': '</style>',
       'indent': '  ',
       'keywords': [
-        'background-color', 'border', 'color', 'cursor', 'font-size', 'height',
-        'margin', 'min-height', 'min-width', 'var', 'width',
+        'absolute', 'attr', 'block', 'border-box', 'calc', 'center', 'default',
+        'ease', 'hidden',
+        'inherit', 'left', 'none',
+        'px', 'rgb', 'rgba', 'right', 'rotate[XYZ]?', 'scale[XYZ]?', 'solid',
+        'transform', 'translate[XYZ]?', 'transparent', 'var',
       ],
-      'special': ['#[\w-]',],
+      'special': [
+        r'@apply\b', r'\d+deg\b', r'\d+em\b', r'\d+px\b',
+        r'\d+rem\b', r'[\w-]+:',
+      ],
       'contains': ['cpp_block_comment'],
     },
     'doc_block_comment': {
@@ -293,7 +299,7 @@ prefs = {
     'html': {
       'indent': '  ',
       'keywords': [
-        'body', 'button', 'div', 'head', 'html', 'img', 'input',
+        'body', 'button', 'div', 'head', 'html', 'href', 'img', 'input',
         'script', 'select', 'span', 'style',
       ],
       'special': [r'&.{1,5}?;',],
@@ -352,7 +358,7 @@ prefs = {
         'raise', 'range',
         'self',
         'True', 'try', 'tuple',
-        'until', 'with', 'yeild',
+        'until', 'with', 'yield',
       ],
       'namespaces': [
         'os\.', 'os\.path\.', 'sys\.', 'traceback\.', 're\.',
@@ -364,9 +370,10 @@ prefs = {
         'Exception',
       ],
       'contains': [
+        # This list is carefully ordered. Don't sort it.
+        'py_string1', 'py_string2', 'py_raw_string1', 'py_raw_string2',
         'c_raw_string1', 'c_raw_string2', 'c_string1', 'c_string2',
-        'pound_comment', 'py_raw_string1', 'py_raw_string2', 'py_string1',
-        'py_string2'
+        'pound_comment',
       ],
     },
     'pound_comment': {
@@ -418,7 +425,7 @@ prefs = {
       'end': '"',
     },
     'regex_string': {
-      'begin': r"(?!(?<=[\w/*\s]))\s*/(?![/*])",
+      'begin': r"(?<=[\n=:;([{,])(?:\s*)/(?![/*])",
       'end': "/",
       'escaped': r'\\.',
       'indent': '  ',
@@ -478,17 +485,17 @@ for k,v in prefs['grammar'].items():
 re.purge()
 
 extensions = {}
-filetypes = {}
-for k,v in prefs['filetype'].items():
+fileTypes = {}
+for k,v in prefs['fileType'].items():
   for ext in v['ext']:
     extensions[ext] = v.get('grammar')
-  filetypes[k] = v
+  fileTypes[k] = v
 if 0:
   app.log.info('extensions')
   for k,v in extensions.items():
     app.log.info('  ', k, ':', v)
-  app.log.info('filetypes')
-  for k,v in filetypes.items():
+  app.log.info('fileTypes')
+  for k,v in fileTypes.items():
     app.log.info('  ', k, ':', v)
 
 def init():
@@ -504,8 +511,8 @@ def init():
 def getGrammar(fileExtension):
   if fileExtension is None:
     return grammars.get('none')
-  filetype = extensions.get(fileExtension, 'text')
-  return grammars.get(filetype)
+  fileType = extensions.get(fileExtension, 'text')
+  return grammars.get(fileType)
 
 app.log.startup('prefs.py import time', time.time() - importStartTime)
 

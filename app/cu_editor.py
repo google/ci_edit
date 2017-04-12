@@ -155,6 +155,21 @@ class InteractiveOpener(app.editor.InteractiveOpener):
     self.commandDefault = self.textBuffer.insertPrintable
 
 
+class InteractivePrompt(app.editor.InteractivePrompt):
+  """Extended command prompt."""
+  def __init__(self, host, textBuffer):
+    app.editor.InteractivePrompt.__init__(self, host, textBuffer)
+    self.document = host
+    commandSet = initCommandSet(self, textBuffer)
+    commandSet.update({
+      curses.ascii.ESC: self.changeToHostWindow,
+      curses.KEY_F1: self.info,
+      CTRL_J: self.execute,
+    })
+    self.commandSet = commandSet
+    self.commandDefault = self.textBuffer.insertPrintable
+
+
 class InteractiveQuit(app.controller.Controller):
   """Ask about unsaved changes."""
   def __init__(self, host, textBuffer):
@@ -213,7 +228,7 @@ class CuaEdit(app.controller.Controller):
     self.textBuffer = textBuffer
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
-      curses.ascii.ESC: textBuffer.selectionNone,
+      curses.ascii.ESC: textBuffer.normalize,
 
       curses.KEY_F1: self.info,
 
@@ -269,7 +284,7 @@ class CuaPlusEdit(CuaEdit):
     CuaEdit.setTextBuffer(self, textBuffer)
     commandSet = self.commandSet.copy()
     commandSet.update({
-      CTRL_E: textBuffer.nextSelectionMode,
+      CTRL_E: self.changeToPrompt,
 
       curses.KEY_F3: textBuffer.findAgain,
       curses.KEY_F4: self.prg.paletteWindow.focus,

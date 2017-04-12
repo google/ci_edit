@@ -686,6 +686,7 @@ angstrom
 angular
 animal
 animals
+animatable
 animate
 animated
 animatedly
@@ -4057,6 +4058,9 @@ deb
 debate
 debian
 debit
+debounce
+debounced
+debouncer
 debt
 debug
 debugged
@@ -4149,6 +4153,7 @@ decreased
 decreases
 decreasing
 decreasingly
+decrement
 decremented
 decrements
 decrescendo
@@ -12395,6 +12400,7 @@ preponderance
 preposition
 prepositional
 prepositions
+preprocessor
 preps
 prerecorded
 prerequisite
@@ -13902,6 +13908,7 @@ responsibly
 responsive
 responsiveness
 rest
+restamp
 restart
 restarted
 restarting
@@ -15580,6 +15587,7 @@ spline
 splines
 split
 splits
+splitter
 splitting
 spoil
 spoiled
@@ -17624,6 +17632,9 @@ unifying
 unilateral
 unimplemented
 unimportant
+unindent
+unindented
+unindenting
 uninitialized
 uninstall
 uninstallable
@@ -17776,6 +17787,7 @@ unseen
 unsent
 unset
 unshakable
+unshift
 unsigned
 unsnap
 unsnapping
