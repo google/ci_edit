@@ -368,7 +368,12 @@ class InteractivePrompt(app.controller.Controller):
       'lower': self.lowerSelectedLines,
       's' : self.substituteText,
       'sort': self.sortSelectedLines,
+      'sub' : self.substituteText,
       'upper': self.upperSelectedLines,
+    }
+    self.subExecute = {
+      '!': self.shellExecute,
+      '|': self.pipeExecute,
     }
 
   def buildCommand(self):
@@ -389,26 +394,19 @@ class InteractivePrompt(app.controller.Controller):
     tb = self.host.textBuffer
     lines = list(tb.getSelectedText())
     command = self.commands.get(cmdLine)
-
-
-    data = self.host.textBuffer.doLinesToData(lines)
     if command:
       command()
-    elif cmdLine[0] == '!':
-      output = self.shellExecute(cmdLine[1:], data)
-      output = tb.doDataToLines(output)
-      if tb.selectionMode == app.selectable.kSelectionLine:
-        output.append('')
-      tb.editPasteLines(tuple(output))
-    elif cmdLine[0] == '|':
-      output = self.pipeExecute(cmdLine[1:], data)
+    elif cmdLine[0] in ('!', '|'):
+      data = self.host.textBuffer.doLinesToData(lines)
+      output = self.subExecute.get(cmdLine[0], self.unknownCommand)(
+          cmdLine[1:], data)
       output = tb.doDataToLines(output)
       if tb.selectionMode == app.selectable.kSelectionLine:
         output.append('')
       tb.editPasteLines(tuple(output))
     else:
       cmd = re.split('\\W', cmdLine)[0]
-      app.log.info('cmd', cmd, ', cmdLine', cmdLine)
+      cmdLine = cmdLine[len(cmd):]
       if not len(lines):
         tb.setMessage('The %s command needs a selection.'%(cmd,))
       lines = self.filters.get(cmd, self.unknownCommand)(cmdLine, lines)
@@ -465,7 +463,7 @@ class InteractivePrompt(app.controller.Controller):
   def substituteText(self, cmdLine, lines):
     if len(cmdLine) < 2:
       return
-    separator = cmdLine[1]
+    separator = cmdLine[0]
     a, find, replace, flags = cmdLine.split(separator, 3)
     data = self.host.textBuffer.doLinesToData(lines)
     output = self.host.textBuffer.findReplaceText(find, replace, flags, data)
