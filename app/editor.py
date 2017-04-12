@@ -411,6 +411,8 @@ class InteractivePrompt(app.controller.Controller):
         tb.setMessage('The %s command needs a selection.'%(cmd,))
       lines = self.filters.get(cmd, self.unknownCommand)(cmdLine, lines)
       tb.setMessage('Changed %d lines'%(len(lines),))
+      if not len(lines):
+        lines.append('')
       if tb.selectionMode == app.selectable.kSelectionLine:
         lines.append('')
       tb.editPasteLines(tuple(lines))
