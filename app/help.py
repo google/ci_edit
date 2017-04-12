@@ -81,5 +81,6 @@ Within the Goto line prompt:
   See readme.md for an introduction
   Both files may be found in "%s"
   Please send feedback and bug reports to dschuyler@
+  (Release build)
 """ % (dirPath,),
 }
