@@ -120,18 +120,17 @@ class CiProgram:
             app.log.debug(self.stdscr.getmaxyx(), time.time())
             continue
           window.controller.doCommand(cmd)
-          window.controller.onChange()
           if cmd == curses.KEY_MOUSE:
             self.handleMouse(mouseEvents[0])
             mouseEvents = mouseEvents[1:]
           window = self.focusedWindow
+          window.controller.onChange()
 
   def changeFocusTo(self, changeTo):
+    self.focusedWindow.controller.onChange()
     self.focusedWindow.unfocus()
     self.focusedWindow = changeTo
-    #self.focusedWindow.refresh()
     self.focusedWindow.focus()
-    self.focusedWindow.controller.onChange()
 
   def startup(self):
     """A second init-like function. Called after command line arguments are
