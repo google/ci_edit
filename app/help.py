@@ -23,8 +23,10 @@ Within the main text window:
 
   ctrl+a       Select all
   ctrl+c       Copy
-  ctrl+f       Find
-  ctrl+g       Go to line
+  ctrl+e       Execute prompt (e:)
+  ctrl+f       Find prompt
+  ctrl+g       Go to line prompt
+  ctrl+o       Open file prompt.
   ctrl+q       Quit (exit editor)
   ctrl+r       Reverse find
   ctrl+s       Save file
