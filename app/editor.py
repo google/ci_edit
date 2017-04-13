@@ -222,7 +222,6 @@ class InteractiveOpener(app.controller.Controller):
           os.path.abspath(os.path.expanduser(dirPath))+": not found"]
 
   def onChange(self):
-    return
     path = os.path.abspath(os.path.expanduser(os.path.expandvars(
         self.textBuffer.lines[0])))
     dirPath = path or '.'
@@ -236,14 +235,12 @@ class InteractiveOpener(app.controller.Controller):
         if os.path.isdir(i):
           i += '/'
         lines.append(i)
-      clip = tuple([dirPath+":"] + lines)
+      clip = [dirPath+":"] + lines
     else:
-      clip = tuple([dirPath+": not found"])
+      clip = [dirPath+": not found"]
     app.log.info(clip)
     self.host.textBuffer.selectionAll()
-    self.host.textBuffer.redoAddChange(('v', clip))
-    self.host.textBuffer.redo()
-    self.host.textBuffer.selectionNone()
+    self.host.textBuffer.editPasteLines(tuple(clip))
 
   def unfocus(self):
     expandedPath = os.path.abspath(os.path.expanduser(self.textBuffer.lines[0]))
