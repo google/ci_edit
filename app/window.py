@@ -51,6 +51,9 @@ class StaticWindow:
       performance difference between chgat and addstr."""
     self.cursorWindow.chgat(row, col, count, colorPair)
 
+  def presentModal(self, changeTo, pandRow, paneCol):
+    self.parent.presentModal(changeTo, pandRow, paneCol)
+
   def blank(self):
     """Clear the window."""
     for i in range(self.rows):
@@ -290,6 +293,34 @@ class LabeledLine(Window):
     self.leftColumn.blank()
     self.leftColumn.hide()
     Window.unfocus(self)
+
+
+class Menu(StaticWindow):
+  """"""
+  def __init__(self, prg, host):
+    StaticWindow.__init__(self, prg)
+    self.host = host
+    self.color = curses.color_pair(0)
+    self.colorSelected = curses.color_pair(87)
+    self.controller = None
+    self.lines = ['some menu']
+    self.shouldShowCursor = False
+
+  def openModal(self):
+    self.show()
+
+  def refresh(self):
+    maxRow, maxCol = self.cursorWindow.getmaxyx()
+    self.writeLineRow = 0
+    for i in self.lines[:maxRow]:
+      self.writeLine(i);
+    StaticWindow.refresh(self)
+
+  def setController(self, controllerClass):
+    self.controller = controllerClass(self.host, self.textBuffer)
+
+  def closeModal(self):
+    self.hide()
 
 
 class LineNumbers(StaticWindow):
@@ -538,6 +569,7 @@ class InputWindow(Window):
       self.confirmOverwrite = LabeledLine(self,
           "Overwrite exiting file? (yes or no): ")
       self.confirmOverwrite.setController(app.cu_editor.ConfirmOverwrite)
+    self.contextMenu = Menu(prg, self)
     if 1:
       self.interactiveFind = LabeledLine(self, 'find: ')
       self.interactiveFind.setController(app.cu_editor.InteractiveFind)
