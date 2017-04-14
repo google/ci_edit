@@ -41,6 +41,9 @@ class StaticWindow:
   def changeFocusTo(self, changeTo):
     self.parent.changeFocusTo(changeTo)
 
+  def normalize(self):
+    self.parent.normalize()
+
   def paint(self, row, col, count, colorPair):
     """Paint text a row, column with colorPair.
       fyi, I thought this may be faster than using addStr to paint over the text

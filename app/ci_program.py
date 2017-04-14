@@ -34,6 +34,7 @@ class CiProgram:
   def __init__(self, stdscr):
     self.debugMouseEvent = (0, 0, 0, 0, 0)
     self.exiting = False
+    self.modalUi = None
     self.modeStack = []
     self.priorClick = 0
     self.savedMouseWindow = None
@@ -131,6 +132,21 @@ class CiProgram:
     self.focusedWindow.unfocus()
     self.focusedWindow = changeTo
     self.focusedWindow.focus()
+
+  def normalize(self):
+    if self.modalUi is not None:
+      #self.modalUi.controller.onChange()
+      self.modalUi.closeModal()
+    self.modalUi = None
+
+  def presentModal(self, changeTo, top, left):
+    if self.modalUi is not None:
+      #self.modalUi.controller.onChange()
+      self.modalUi.closeModal()
+    app.log.info('\n', changeTo)
+    self.modalUi = changeTo
+    self.modalUi.moveTo(top, left)
+    self.modalUi.openModal()
 
   def startup(self):
     """A second init-like function. Called after command line arguments are
