@@ -134,19 +134,17 @@ class CiProgram:
     self.focusedWindow.focus()
 
   def normalize(self):
-    if self.modalUi is not None:
-      #self.modalUi.controller.onChange()
-      self.modalUi.closeModal()
-    self.modalUi = None
+    self.presentModal(None)
 
-  def presentModal(self, changeTo, top, left):
+  def presentModal(self, changeTo, top=0, left=0):
     if self.modalUi is not None:
       #self.modalUi.controller.onChange()
-      self.modalUi.closeModal()
+      self.modalUi.hide()
     app.log.info('\n', changeTo)
     self.modalUi = changeTo
-    self.modalUi.moveTo(top, left)
-    self.modalUi.openModal()
+    if self.modalUi is not None:
+      self.modalUi.moveSizeToFit(top, left)
+      self.modalUi.show()
 
   def startup(self):
     """A second init-like function. Called after command line arguments are

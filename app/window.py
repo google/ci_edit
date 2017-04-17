@@ -300,27 +300,40 @@ class Menu(StaticWindow):
   def __init__(self, prg, host):
     StaticWindow.__init__(self, prg)
     self.host = host
-    self.color = curses.color_pair(0)
-    self.colorSelected = curses.color_pair(87)
     self.controller = None
-    self.lines = ['some menu']
+    self.lines = []
+    self.commands = []
     self.shouldShowCursor = False
 
-  def openModal(self):
-    self.show()
+  def addItem(self, label, command):
+    self.lines.append(label)
+    self.commands.append(command)
+
+  def clear(self):
+    self.lines = []
+    self.commands = []
+
+  def moveSizeToFit(self, left, top):
+    self.clear()
+    self.addItem('some menu', None)
+    #self.addItem('sort', self.host.textBuffer.sortSelection)
+    self.addItem('cut', self.host.textBuffer.editCut)
+    self.addItem('paste', self.host.textBuffer.editPaste)
+    longest = 0
+    for i in self.lines:
+      if len(i) > longest:
+        longest = len(i)
+    self.reshape(len(self.lines), longest+2, left, top)
 
   def refresh(self):
     maxRow, maxCol = self.cursorWindow.getmaxyx()
     self.writeLineRow = 0
     for i in self.lines[:maxRow]:
-      self.writeLine(i);
+      self.writeLine(" "+i, 192);
     StaticWindow.refresh(self)
 
   def setController(self, controllerClass):
     self.controller = controllerClass(self.host, self.textBuffer)
-
-  def closeModal(self):
-    self.hide()
 
 
 class LineNumbers(StaticWindow):
@@ -346,6 +359,9 @@ class LineNumbers(StaticWindow):
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
     app.log.info(paneRow, paneCol, shift)
+    if ctrl:
+      app.log.info('click at', paneRow, paneCol)
+      return
     tb = self.host.textBuffer
     if shift:
       if tb.selectionMode == app.selectable.kSelectionNone:
