@@ -1108,6 +1108,11 @@ class BackingTextBuffer(Mutator):
     self.redo()
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
+    if 0:
+      if ctrl:
+        app.log.info('click at', paneRow, paneCol)
+        self.view.presentModal(self.view.contextMenu, paneRow, paneCol)
+        return
     if shift:
       if alt:
         self.selectionBlock()
