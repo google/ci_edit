@@ -120,6 +120,9 @@ class InteractiveOpener(app.controller.Controller):
     app.log.info('InteractiveOpener.focus')
     self.priorPath = self.host.textBuffer.fullPath
     self.commandDefault = self.textBuffer.insertPrintable
+    self.textBuffer.selectionAll()
+    self.textBuffer.editPasteLines(
+        (self.suggestFile(self.host.textBuffer.fullPath),))
     # Create a new text buffer to display dir listing.
     self.host.setTextBuffer(text_buffer.TextBuffer())
 
@@ -139,6 +142,19 @@ class InteractiveOpener(app.controller.Controller):
     if (self.textBuffer.lines[0] and self.textBuffer.lines[0][-1] != '/' and
         os.path.isdir(expandedPath)):
       self.textBuffer.insert('/')
+
+  def suggestFile(self, currentFile):
+    dirPath, fileName = os.path.split(currentFile)
+    suggestion = ''
+    file, ext = os.path.splitext(fileName)
+    for i in os.listdir(os.path.expandvars(os.path.expanduser(dirPath)) or '.'):
+      f, e = os.path.splitext(i)
+      if file == f and ext != e and e not in ('.pyc', '.pyo', '.o', '.obj',):
+        return os.path.join(dirPath, i)
+    tb = app.buffer_manager.buffers.recentBuffer()
+    if tb:
+      return tb.fullPath
+    return ''
 
   def tabCompleteFirst(self):
     """Find the first file that starts with the pattern."""
@@ -222,13 +238,13 @@ class InteractiveOpener(app.controller.Controller):
           os.path.abspath(os.path.expanduser(dirPath))+": not found"]
 
   def onChange(self):
-    path = os.path.abspath(os.path.expanduser(os.path.expandvars(
-        self.textBuffer.lines[0])))
+    input = self.textBuffer.lines[0]
+    path = os.path.abspath(os.path.expanduser(os.path.expandvars(input)))
     dirPath = path or '.'
     fileName = ''
-    if not os.path.isdir(path):
+    if len(input) == 0 or input[-1] != os.sep:
       dirPath, fileName = os.path.split(path)
-    app.log.info('O.onChange\n', path, '\n', dirPath, fileName)
+    app.log.info('\n\nO.onChange\n', path, '\n', dirPath, fileName)
     if os.path.isdir(dirPath):
       lines = []
       for i in os.listdir(dirPath):

@@ -398,6 +398,7 @@ class CiProgram:
   def quit(self):
     """Determine whether it's ok to quit. quitNow() will be called if it
         looks ok to quit."""
+    app.log.info('self.exiting = True')
     self.exiting = True
 
   def quitNow(self):

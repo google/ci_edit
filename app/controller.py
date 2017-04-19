@@ -121,6 +121,7 @@ class Controller:
     if not tb.isDirty():
       tb = app.buffer_manager.buffers.getUnsavedBuffer()
       if not tb:
+        app.buffer_manager.buffers.debugLog()
         self.host.quitNow()
         return
       self.host.setTextBuffer(tb)
