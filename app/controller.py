@@ -65,7 +65,7 @@ class Controller:
     pass
 
   def closeHostFile(self):
-    """Close the current file and switch to another or creat an empty file."""
+    """Close the current file and switch to another or create an empty file."""
     app.buffer_manager.buffers.closeTextBuffer(self.host.textBuffer)
     tb = app.buffer_manager.buffers.getUnsavedBuffer()
     if not tb:
@@ -86,7 +86,7 @@ class Controller:
     self.changeToConfirmClose()
 
   def overwriteHostFile(self):
-    """Close the current file and switch to another or creat an empty file."""
+    """Close the current file and switch to another or create an empty file."""
     self.host.textBuffer.fileWrite()
     if self.host.userIntent == 'quit':
       self.quitOrSwitchToConfirmQuit()
