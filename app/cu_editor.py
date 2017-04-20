@@ -155,6 +155,23 @@ class InteractiveOpener(app.editor.InteractiveOpener):
     self.commandDefault = self.textBuffer.insertPrintable
 
 
+class InteractivePrediction(app.editor.InteractivePrediction):
+  """Make a guess."""
+  def __init__(self, host, textBuffer):
+    app.editor.InteractivePrediction.__init__(self, host, textBuffer)
+    self.document = host
+    commandSet = initCommandSet(self, textBuffer)
+    commandSet.update({
+      curses.ascii.ESC: self.changeToHostWindow,
+      curses.KEY_F1: self.info,
+      CTRL_J: self.selectItem,
+      CTRL_P: self.priorItem,
+      CTRL_N: self.nextItem,
+    })
+    self.commandSet = commandSet
+    self.commandDefault = self.textBuffer.insertPrintable
+
+
 class InteractivePrompt(app.editor.InteractivePrompt):
   """Extended command prompt."""
   def __init__(self, host, textBuffer):
@@ -285,6 +302,7 @@ class CuaPlusEdit(CuaEdit):
     commandSet = self.commandSet.copy()
     commandSet.update({
       CTRL_E: self.changeToPrompt,
+      CTRL_P: self.changeToPrediction,
 
       curses.KEY_F3: textBuffer.findAgain,
       curses.KEY_F4: self.prg.paletteWindow.focus,

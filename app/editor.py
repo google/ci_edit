@@ -121,8 +121,7 @@ class InteractiveOpener(app.controller.Controller):
     self.priorPath = self.host.textBuffer.fullPath
     self.commandDefault = self.textBuffer.insertPrintable
     self.textBuffer.selectionAll()
-    self.textBuffer.editPasteLines(
-        (self.suggestFile(self.host.textBuffer.fullPath),))
+    self.textBuffer.editPasteLines((self.host.textBuffer.fullPath,))
     # Create a new text buffer to display dir listing.
     self.host.setTextBuffer(text_buffer.TextBuffer())
 
@@ -131,7 +130,8 @@ class InteractiveOpener(app.controller.Controller):
 
   def createOrOpen(self):
     if 0:
-      expandedPath = os.path.abspath(os.path.expanduser(self.textBuffer.lines[0]))
+      expandedPath = os.path.abspath(os.path.expanduser(
+          self.textBuffer.lines[0]))
       app.log.info('createOrOpen\n\n', expandedPath)
       if not os.path.isdir(expandedPath):
         self.host.setTextBuffer(
@@ -142,19 +142,6 @@ class InteractiveOpener(app.controller.Controller):
     if (self.textBuffer.lines[0] and self.textBuffer.lines[0][-1] != '/' and
         os.path.isdir(expandedPath)):
       self.textBuffer.insert('/')
-
-  def suggestFile(self, currentFile):
-    dirPath, fileName = os.path.split(currentFile)
-    suggestion = ''
-    file, ext = os.path.splitext(fileName)
-    for i in os.listdir(os.path.expandvars(os.path.expanduser(dirPath)) or '.'):
-      f, e = os.path.splitext(i)
-      if file == f and ext != e and e not in ('.pyc', '.pyo', '.o', '.obj',):
-        return os.path.join(dirPath, i)
-    tb = app.buffer_manager.buffers.recentBuffer()
-    if tb:
-      return tb.fullPath
-    return ''
 
   def tabCompleteFirst(self):
     """Find the first file that starts with the pattern."""
@@ -270,6 +257,76 @@ class InteractiveOpener(app.controller.Controller):
           app.buffer_manager.buffers.loadTextBuffer(expandedPath).lines[0])
       self.host.setTextBuffer(
           app.buffer_manager.buffers.loadTextBuffer(expandedPath))
+
+
+class InteractivePrediction(app.controller.Controller):
+  """Make a guess about what the user desires."""
+  def __init__(self, host, textBuffer):
+    app.controller.Controller.__init__(self, host, 'opener')
+    self.textBuffer = textBuffer
+    self.textBuffer.lines = [""]
+
+  def focus(self):
+    app.log.info('InteractivePrediction.focus')
+    self.commandDefault = self.textBuffer.insertPrintable
+    self.priorPath = self.host.textBuffer.fullPath
+    self.index = self.buildFileList(self.host.textBuffer.fullPath)
+    self.textBuffer.selectionAll()
+    #self.textBuffer.editPasteLines(
+    #    (self.suggestFile(self.host.textBuffer.fullPath),))
+    self.host.setTextBuffer(text_buffer.TextBuffer())
+
+  def info(self):
+    app.log.info('InteractivePrediction command set')
+
+  def buildFileList(self, currentFile):
+    self.items = []
+    for i in app.buffer_manager.buffers.buffers:
+      self.items.append(i.fullPath)
+    dirPath, fileName = os.path.split(currentFile)
+    file, ext = os.path.splitext(fileName)
+    # TODO(dschuyler): rework this ignore list.
+    ignoreExt = set(('.pyc', '.pyo', '.o', '.obj', '.tgz', '.zip', '.tar',))
+    for i in os.listdir(os.path.expandvars(os.path.expanduser(dirPath)) or '.'):
+      f, e = os.path.splitext(i)
+      if file == f and ext != e and e not in ignoreExt:
+        self.items.append(os.path.join(dirPath, i))
+    # Suggest item.
+    return (len(app.buffer_manager.buffers.buffers) - 2) % len(self.items)
+
+  def onChange(self):
+    input = self.textBuffer.lines[0]
+    clip = []
+    for i,item in enumerate(self.items):
+      selection = '-->' if i == self.index else '   '
+      post = ' <--' if i == self.index else ''
+      clip.append("%s %s%s"%(selection, item, post))
+    app.log.info(clip)
+    self.host.textBuffer.selectionAll()
+    self.host.textBuffer.editPasteLines(tuple(clip))
+
+  def nextItem(self):
+    self.index = (self.index + 1) % len(self.items)
+
+  def priorItem(self):
+    self.index = (self.index - 1) % len(self.items)
+
+  def selectItem(self):
+    self.changeToHostWindow()
+
+  def unfocus(self):
+    expandedPath = os.path.abspath(os.path.expanduser(self.items[self.index]))
+    if os.path.isdir(expandedPath):
+      app.log.info('dir\n\n', expandedPath)
+      self.host.setTextBuffer(
+          app.buffer_manager.buffers.loadTextBuffer(self.priorPath))
+    else:
+      app.log.info('non-dir\n\n', expandedPath)
+      app.log.info('non-dir\n\n',
+          app.buffer_manager.buffers.loadTextBuffer(expandedPath).lines[0])
+      self.host.setTextBuffer(
+          app.buffer_manager.buffers.loadTextBuffer(expandedPath))
+    self.items = None
 
 
 class InteractiveFind(app.controller.Controller):
