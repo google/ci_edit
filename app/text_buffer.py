@@ -547,6 +547,11 @@ class BackingTextBuffer(Mutator):
   def cursorMoveSubwordRight(self):
     self.doCursorMoveRightTo(app.selectable.kReSubwordBoundaryFwd)
 
+  def cursorMoveTo(self, row, col):
+    cursorRow = min(max(row, 0), len(self.lines)-1)
+    self.cursorMove(cursorRow-self.penRow, col-self.penCol, col-self.goalCol)
+    self.redo()
+
   def cursorMoveWordLeft(self):
     self.doCursorMoveLeftTo(app.selectable.kReWordBoundary)
 

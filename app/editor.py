@@ -267,6 +267,12 @@ class InteractivePrediction(app.controller.Controller):
     self.textBuffer = textBuffer
     self.textBuffer.lines = [""]
 
+  def cursorMoveTo(self, row, col):
+    textBuffer = self.document.textBuffer
+    textBuffer.cursorMoveTo(row, col)
+    textBuffer.cursorScrollToMiddle()
+    textBuffer.redo()
+
   def focus(self):
     app.log.info('InteractivePrediction.focus')
     self.commandDefault = self.textBuffer.insertPrintable
@@ -274,6 +280,7 @@ class InteractivePrediction(app.controller.Controller):
     self.index = self.buildFileList(self.host.textBuffer.fullPath)
     #self.textBuffer.selectionAll()
     self.host.setTextBuffer(text_buffer.TextBuffer())
+    self.host.textBuffer.rootGrammar = app.prefs.getGrammar('_pre')
 
   def info(self):
     app.log.info('InteractivePrediction command set')
@@ -303,6 +310,7 @@ class InteractivePrediction(app.controller.Controller):
     app.log.info(clip)
     self.host.textBuffer.selectionAll()
     self.host.textBuffer.editPasteLines(tuple(clip))
+    self.cursorMoveTo(self.index, 0)
 
   def nextItem(self):
     self.index = (self.index + 1) % len(self.items)
@@ -404,12 +412,7 @@ class InteractiveGoto(app.controller.Controller):
 
   def cursorMoveTo(self, row, col):
     textBuffer = self.document.textBuffer
-    cursorRow = min(max(row - 1, 0), len(textBuffer.lines)-1)
-    #app.log.info('cursorMoveTo row', row, cursorRow)
-    textBuffer.cursorMove(cursorRow-textBuffer.cursorRow,
-        col-textBuffer.cursorCol,
-        col-textBuffer.goalCol)
-    textBuffer.redo()
+    textBuffer.cursorMoveTo(row, col)
     textBuffer.cursorScrollToMiddle()
     textBuffer.redo()
 
@@ -419,7 +422,7 @@ class InteractiveGoto(app.controller.Controller):
     try: line = self.textBuffer.lines[0]
     except: pass
     gotoLine, gotoCol = (line.split(',') + ['0', '0'])[:2]
-    self.cursorMoveTo(parseInt(gotoLine), parseInt(gotoCol))
+    self.cursorMoveTo(parseInt(gotoLine)-1, parseInt(gotoCol))
 
 
 class InteractivePrompt(app.controller.Controller):

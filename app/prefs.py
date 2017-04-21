@@ -89,6 +89,7 @@ numberTest('02f', (0, 3))
 # These prefs are not fully working.
 prefs = {
   'colors': {
+    '_pre_selection': stringColorIndex,
     'default': defaultColorIndex,
     'text': defaultColorIndex,
     'keywords': keywordsColorIndex,
@@ -172,6 +173,15 @@ prefs = {
     #   'type': text or binary. default: text.
     #   'contains': other grammars that may be contained within this grammar.
     # }
+    '_pre': {
+      'contains': ['_pre_selection'],
+      'spelling': False,
+    },
+    '_pre_selection': {
+      'begin': r'-->',
+      'end': r'<--',
+      'spelling': False,
+    },
     'bash': {
       'indent': '  ',
       'keywords': [
