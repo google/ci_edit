@@ -117,7 +117,8 @@ class InteractiveOpener(app.controller.Controller):
     self.textBuffer.lines = [""]
 
   def focus(self):
-    app.log.info('InteractiveOpener.focus')
+    app.log.info('InteractiveOpener.focus\n',
+        self.host.textBuffer.fullPath)
     self.priorPath = self.host.textBuffer.fullPath
     self.commandDefault = self.textBuffer.insertPrintable
     self.textBuffer.selectionAll()
@@ -229,7 +230,7 @@ class InteractiveOpener(app.controller.Controller):
     path = os.path.abspath(os.path.expanduser(os.path.expandvars(input)))
     dirPath = path or '.'
     fileName = ''
-    if len(input) == 0 or input[-1] != os.sep:
+    if len(input) > 0 and input[-1] != os.sep:
       dirPath, fileName = os.path.split(path)
     app.log.info('\n\nO.onChange\n', path, '\n', dirPath, fileName)
     if os.path.isdir(dirPath):
@@ -271,9 +272,7 @@ class InteractivePrediction(app.controller.Controller):
     self.commandDefault = self.textBuffer.insertPrintable
     self.priorPath = self.host.textBuffer.fullPath
     self.index = self.buildFileList(self.host.textBuffer.fullPath)
-    self.textBuffer.selectionAll()
-    #self.textBuffer.editPasteLines(
-    #    (self.suggestFile(self.host.textBuffer.fullPath),))
+    #self.textBuffer.selectionAll()
     self.host.setTextBuffer(text_buffer.TextBuffer())
 
   def info(self):
