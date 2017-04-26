@@ -119,7 +119,7 @@ class InteractiveOpener(app.controller.Controller):
   def focus(self):
     app.log.info('InteractiveOpener.focus\n',
         self.host.textBuffer.fullPath)
-    self.priorPath = self.host.textBuffer.fullPath
+    self.priorTextBuffer = self.host.textBuffer
     self.commandDefault = self.textBuffer.insertPrintable
     self.textBuffer.selectionAll()
     self.textBuffer.editPasteLines((self.host.textBuffer.fullPath,))
@@ -251,7 +251,7 @@ class InteractiveOpener(app.controller.Controller):
     if os.path.isdir(expandedPath):
       app.log.info('dir\n\n', expandedPath)
       self.host.setTextBuffer(
-          app.buffer_manager.buffers.loadTextBuffer(self.priorPath))
+          app.buffer_manager.buffers.getValidTextBuffer(self.priorTextBuffer))
     else:
       app.log.info('non-dir\n\n', expandedPath)
       app.log.info('non-dir\n\n',
@@ -276,7 +276,7 @@ class InteractivePrediction(app.controller.Controller):
   def focus(self):
     app.log.info('InteractivePrediction.focus')
     self.commandDefault = self.textBuffer.insertPrintable
-    self.priorPath = self.host.textBuffer.fullPath
+    self.priorTextBuffer = self.host.textBuffer
     self.index = self.buildFileList(self.host.textBuffer.fullPath)
     #self.textBuffer.selectionAll()
     self.host.setTextBuffer(text_buffer.TextBuffer())
@@ -326,7 +326,7 @@ class InteractivePrediction(app.controller.Controller):
     if os.path.isdir(expandedPath):
       app.log.info('dir\n\n', expandedPath)
       self.host.setTextBuffer(
-          app.buffer_manager.buffers.loadTextBuffer(self.priorPath))
+          app.buffer_manager.buffers.getValidTextBuffer(self.priorTextBuffer))
     else:
       app.log.info('non-dir\n\n', expandedPath)
       app.log.info('non-dir\n\n',

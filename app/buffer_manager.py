@@ -59,6 +59,16 @@ class BufferManager:
       return self.buffers[0]
     return None
 
+  def getValidTextBuffer(self, textBuffer):
+    """If |textBuffer| is a managed buffer return it, otherwise create a new
+    buffer. Primarily used to determine if a held reference to a textBuffer is
+    still valid."""
+    if textBuffer in self.buffers:
+      return textBuffer
+    textBuffer = app.text_buffer.TextBuffer()
+    self.buffers.append(textBuffer)
+    return textBuffer
+
   def loadTextBuffer(self, relPath):
     fullPath = os.path.abspath(os.path.expanduser(os.path.expandvars(relPath)))
     app.log.info(fullPath)
