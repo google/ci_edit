@@ -168,6 +168,8 @@ class InteractivePrediction(app.editor.InteractivePrediction):
       CTRL_N: self.nextItem,
       CTRL_P: self.priorItem,
       CTRL_Q: self.saveEventChangeToHostWindow,
+      curses.KEY_DOWN: self.nextItem,
+      curses.KEY_UP: self.priorItem,
     })
     self.commandSet = commandSet
     self.commandDefault = self.textBuffer.insertPrintable
