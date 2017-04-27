@@ -34,6 +34,7 @@ class CiProgram:
   def __init__(self, stdscr):
     self.debugMouseEvent = (0, 0, 0, 0, 0)
     self.exiting = False
+    self.modalUi = None
     self.modeStack = []
     self.priorClick = 0
     self.savedMouseWindow = None
@@ -120,18 +121,30 @@ class CiProgram:
             app.log.debug(self.stdscr.getmaxyx(), time.time())
             continue
           window.controller.doCommand(cmd)
-          window.controller.onChange()
           if cmd == curses.KEY_MOUSE:
             self.handleMouse(mouseEvents[0])
             mouseEvents = mouseEvents[1:]
           window = self.focusedWindow
+          window.controller.onChange()
 
   def changeFocusTo(self, changeTo):
+    self.focusedWindow.controller.onChange()
     self.focusedWindow.unfocus()
     self.focusedWindow = changeTo
-    #self.focusedWindow.refresh()
     self.focusedWindow.focus()
-    self.focusedWindow.controller.onChange()
+
+  def normalize(self):
+    self.presentModal(None)
+
+  def presentModal(self, changeTo, top=0, left=0):
+    if self.modalUi is not None:
+      #self.modalUi.controller.onChange()
+      self.modalUi.hide()
+    app.log.info('\n', changeTo)
+    self.modalUi = changeTo
+    if self.modalUi is not None:
+      self.modalUi.moveSizeToFit(top, left)
+      self.modalUi.show()
 
   def startup(self):
     """A second init-like function. Called after command line arguments are
@@ -385,6 +398,7 @@ class CiProgram:
   def quit(self):
     """Determine whether it's ok to quit. quitNow() will be called if it
         looks ok to quit."""
+    app.log.info('self.exiting = True')
     self.exiting = True
 
   def quitNow(self):

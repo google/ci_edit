@@ -3,8 +3,13 @@
 # Use of this source code is governed by an Apache-style license that can be
 # found in the LICENSE file.
 
-import app.ci_program
+import sys
 
+if '--test' in sys.argv:
+  import unit_tests
+  if unit_tests.runTests(True) != 0:
+    sys.exit(-1)
 
 if __name__ == '__main__':
-    app.ci_program.run_ci()
+  import app.ci_program
+  app.ci_program.run_ci()

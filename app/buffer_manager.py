@@ -45,6 +45,13 @@ class BufferManager:
       return self.buffers[0]
     return None
 
+  def recentBuffer(self):
+    app.log.info()
+    self.debugLog()
+    if len(self.buffers) > 1:
+      return self.buffers[-2]
+    return None
+
   def topBuffer(self):
     app.log.info()
     self.debugLog()
@@ -52,14 +59,26 @@ class BufferManager:
       return self.buffers[0]
     return None
 
+  def getValidTextBuffer(self, textBuffer):
+    """If |textBuffer| is a managed buffer return it, otherwise create a new
+    buffer. Primarily used to determine if a held reference to a textBuffer is
+    still valid."""
+    if textBuffer in self.buffers:
+      return textBuffer
+    textBuffer = app.text_buffer.TextBuffer()
+    self.buffers.append(textBuffer)
+    return textBuffer
+
   def loadTextBuffer(self, relPath):
     fullPath = os.path.abspath(os.path.expanduser(os.path.expandvars(relPath)))
     app.log.info(fullPath)
     app.history.set(['files', fullPath, 'adate'], time.time())
     textBuffer = None
-    for i in self.buffers:
-      if i.fullPath == fullPath:
-        textBuffer = i
+    for i,tb in enumerate(self.buffers):
+      if tb.fullPath == fullPath:
+        textBuffer = tb
+        del self.buffers[i]
+        self.buffers.append(tb)
         break
     app.log.info('Searched for textBuffer', repr(textBuffer));
     if not textBuffer:
@@ -80,6 +99,7 @@ class BufferManager:
     for i in self.buffers:
       bufferList += '\n  '+repr(i.fullPath)
       bufferList += '\n    '+repr(i)
+      bufferList += '\n    dirty: '+str(i.isDirty())
     app.log.info('BufferManager'+bufferList)
 
   def readStdin(self):

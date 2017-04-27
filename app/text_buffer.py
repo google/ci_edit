@@ -547,6 +547,11 @@ class BackingTextBuffer(Mutator):
   def cursorMoveSubwordRight(self):
     self.doCursorMoveRightTo(app.selectable.kReSubwordBoundaryFwd)
 
+  def cursorMoveTo(self, row, col):
+    cursorRow = min(max(row, 0), len(self.lines)-1)
+    self.cursorMove(cursorRow-self.penRow, col-self.penCol, col-self.goalCol)
+    self.redo()
+
   def cursorMoveWordLeft(self):
     self.doCursorMoveLeftTo(app.selectable.kReWordBoundary)
 
@@ -1108,6 +1113,11 @@ class BackingTextBuffer(Mutator):
     self.redo()
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
+    if 0:
+      if ctrl:
+        app.log.info('click at', paneRow, paneCol)
+        self.view.presentModal(self.view.contextMenu, paneRow, paneCol)
+        return
     if shift:
       if alt:
         self.selectionBlock()
@@ -1237,6 +1247,7 @@ class BackingTextBuffer(Mutator):
   def normalize(self):
     self.selectionNone()
     self.findRe = None
+    self.view.normalize()
 
   def parseGrammars(self):
     # Reset the self.data to get recent changes in self.lines.

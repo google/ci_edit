@@ -43,6 +43,9 @@ class Controller:
   def changeToGoto(self):
     self.host.changeFocusTo(self.host.interactiveGoto)
 
+  def changeToPrediction(self):
+    self.host.changeFocusTo(self.host.interactivePrediction)
+
   def changeToPrompt(self):
     self.host.changeFocusTo(self.host.interactivePrompt)
 
@@ -65,7 +68,7 @@ class Controller:
     pass
 
   def closeHostFile(self):
-    """Close the current file and switch to another or creat an empty file."""
+    """Close the current file and switch to another or create an empty file."""
     app.buffer_manager.buffers.closeTextBuffer(self.host.textBuffer)
     tb = app.buffer_manager.buffers.getUnsavedBuffer()
     if not tb:
@@ -86,7 +89,7 @@ class Controller:
     self.changeToConfirmClose()
 
   def overwriteHostFile(self):
-    """Close the current file and switch to another or creat an empty file."""
+    """Close the current file and switch to another or create an empty file."""
     self.host.textBuffer.fileWrite()
     if self.host.userIntent == 'quit':
       self.quitOrSwitchToConfirmQuit()
@@ -121,6 +124,7 @@ class Controller:
     if not tb.isDirty():
       tb = app.buffer_manager.buffers.getUnsavedBuffer()
       if not tb:
+        app.buffer_manager.buffers.debugLog()
         self.host.quitNow()
         return
       self.host.setTextBuffer(tb)

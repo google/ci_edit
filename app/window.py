@@ -41,12 +41,18 @@ class StaticWindow:
   def changeFocusTo(self, changeTo):
     self.parent.changeFocusTo(changeTo)
 
+  def normalize(self):
+    self.parent.normalize()
+
   def paint(self, row, col, count, colorPair):
     """Paint text a row, column with colorPair.
       fyi, I thought this may be faster than using addStr to paint over the text
       with a different colorPair. It looks like there isn't a significant
       performance difference between chgat and addstr."""
     self.cursorWindow.chgat(row, col, count, colorPair)
+
+  def presentModal(self, changeTo, pandRow, paneCol):
+    self.parent.presentModal(changeTo, pandRow, paneCol)
 
   def blank(self):
     """Clear the window."""
@@ -114,7 +120,7 @@ class StaticWindow:
   def refresh(self):
     """Redraw window."""
     self.cursorWindow.refresh()
-    for child in reversed(self.zOrder):
+    for child in self.zOrder:
       child.refresh()
 
   def reshape(self, rows, cols, top, left):
@@ -177,20 +183,14 @@ class StaticWindow:
     self.writeLineRow += 1
 
 
-class Window(StaticWindow):
-  """A Window may have focus. A Window holds a TextBuffer and a
-    controller that operates on the TextBuffer."""
+class ActiveWindow(StaticWindow):
+  """An ActiveWindow may have focus and a controller."""
   def __init__(self, parent, controller=None):
     StaticWindow.__init__(self, parent)
     self.controller = controller
     self.cursorWindow.keypad(1)
-    self.cursorRow = 0
-    self.cursorCol = 0
-    self.hasCaptiveCursor = app.prefs.prefs['editor']['captiveCursor']
-    self.hasFocus = False
     self.isFocusable = True
-    self.shouldShowCursor = True
-    self.textBuffer = None
+    self.shouldShowCursor = False
 
   def focus(self):
     app.log.info('focus', self)
@@ -198,8 +198,29 @@ class Window(StaticWindow):
     try: self.parent.zOrder.remove(self)
     except ValueError: app.log.detail(repr(self)+'not found in zOrder')
     self.parent.zOrder.append(self)
-    self.cursorWindow.leaveok(0)  # Do update cursor position.
     self.controller.focus()
+
+  def unfocus(self):
+    app.log.info('unfocus', self)
+    self.hasFocus = False
+    self.controller.unfocus()
+
+
+class Window(ActiveWindow):
+  """A Window holds a TextBuffer and a controller that operates on the TextBuffer."""
+  def __init__(self, parent, controller=None):
+    ActiveWindow.__init__(self, parent)
+    self.cursorRow = 0
+    self.cursorCol = 0
+    self.hasCaptiveCursor = app.prefs.prefs['editor']['captiveCursor']
+    self.hasFocus = False
+    self.shouldShowCursor = True
+    self.textBuffer = None
+
+  def focus(self):
+    app.log.info('focus', self)
+    self.cursorWindow.leaveok(0)  # Do update cursor position.
+    ActiveWindow.focus(self)
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
     self.textBuffer.mouseClick(paneRow, paneCol, shift, ctrl, alt)
@@ -227,8 +248,8 @@ class Window(StaticWindow):
     self.cursorCol = self.textBuffer.penCol
     self.textBuffer.cursorRow = self.textBuffer.penRow
     self.textBuffer.cursorCol = self.textBuffer.penCol
-    StaticWindow.refresh(self)
     self.textBuffer.draw(self)
+    StaticWindow.refresh(self)
     if self.hasFocus:
       self.parent.debugDraw(self)
       self.shouldShowCursor = (self.cursorRow >= self.scrollRow and
@@ -247,9 +268,8 @@ class Window(StaticWindow):
 
   def unfocus(self):
     app.log.info('unfocus', self)
-    self.hasFocus = False
     self.cursorWindow.leaveok(1)  # Don't update cursor position.
-    self.controller.unfocus()
+    ActiveWindow.unfocus(self)
 
 
 class LabeledLine(Window):
@@ -289,6 +309,47 @@ class LabeledLine(Window):
     Window.unfocus(self)
 
 
+class Menu(StaticWindow):
+  """"""
+  def __init__(self, prg, host):
+    StaticWindow.__init__(self, prg)
+    self.host = host
+    self.controller = None
+    self.lines = []
+    self.commands = []
+    self.shouldShowCursor = False
+
+  def addItem(self, label, command):
+    self.lines.append(label)
+    self.commands.append(command)
+
+  def clear(self):
+    self.lines = []
+    self.commands = []
+
+  def moveSizeToFit(self, left, top):
+    self.clear()
+    self.addItem('some menu', None)
+    #self.addItem('sort', self.host.textBuffer.sortSelection)
+    self.addItem('cut', self.host.textBuffer.editCut)
+    self.addItem('paste', self.host.textBuffer.editPaste)
+    longest = 0
+    for i in self.lines:
+      if len(i) > longest:
+        longest = len(i)
+    self.reshape(len(self.lines), longest+2, left, top)
+
+  def refresh(self):
+    maxRow, maxCol = self.cursorWindow.getmaxyx()
+    self.writeLineRow = 0
+    for i in self.lines[:maxRow]:
+      self.writeLine(" "+i, 192);
+    StaticWindow.refresh(self)
+
+  def setController(self, controllerClass):
+    self.controller = controllerClass(self.host, self.textBuffer)
+
+
 class LineNumbers(StaticWindow):
   def __init__(self, host):
     StaticWindow.__init__(self, host)
@@ -312,6 +373,9 @@ class LineNumbers(StaticWindow):
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
     app.log.info(paneRow, paneCol, shift)
+    if ctrl:
+      app.log.info('click at', paneRow, paneCol)
+      return
     tb = self.host.textBuffer
     if shift:
       if tb.selectionMode == app.selectable.kSelectionNone:
@@ -535,6 +599,7 @@ class InputWindow(Window):
       self.confirmOverwrite = LabeledLine(self,
           "Overwrite exiting file? (yes or no): ")
       self.confirmOverwrite.setController(app.cu_editor.ConfirmOverwrite)
+    self.contextMenu = Menu(prg, self)
     if 1:
       self.interactiveFind = LabeledLine(self, 'find: ')
       self.interactiveFind.setController(app.cu_editor.InteractiveFind)
@@ -544,6 +609,10 @@ class InputWindow(Window):
     if 1:
       self.interactiveOpen = LabeledLine(self, 'open: ')
       self.interactiveOpen.setController(app.cu_editor.InteractiveOpener)
+    if 1:
+      self.interactivePrediction = LabeledLine(self, 'p: ')
+      self.interactivePrediction.setController(
+          app.cu_editor.InteractivePrediction)
     if 1:
       self.interactivePrompt = LabeledLine(self, "e: ")
       self.interactivePrompt.setController(app.cu_editor.InteractivePrompt)
@@ -619,6 +688,7 @@ class InputWindow(Window):
     self.confirmClose.reshape(1, cols, top+rows-1, left)
     self.confirmOverwrite.reshape(1, cols, top+rows-1, left)
     self.interactiveOpen.reshape(1, cols, top+rows-1, left)
+    self.interactivePrediction.reshape(1, cols, top+rows-1, left)
     self.interactivePrompt.reshape(1, cols, top+rows-1, left)
     self.interactiveQuit.reshape(1, cols, top+rows-1, left)
     self.interactiveSaveAs.reshape(1, cols, top+rows-1, left)
@@ -695,13 +765,14 @@ class InputWindow(Window):
   def refresh(self):
     self.textBuffer.updateScrollPosition()
     self.topInfo.onChange()
-    Window.refresh(self)
     self.drawLogoCorner()
     self.drawRightEdge()
-    self.cursorWindow.refresh()
+    Window.refresh(self)
 
   def setTextBuffer(self, textBuffer):
     app.log.info('setTextBuffer')
+    #self.normalize()
+    #restore positions and selections  +
     textBuffer.lineLimitIndicator = 80
     self.controller.setTextBuffer(textBuffer)
     Window.setTextBuffer(self, textBuffer)
@@ -714,27 +785,21 @@ class InputWindow(Window):
     Window.unfocus(self)
 
 
-class PaletteWindow(Window):
+class PaletteWindow(ActiveWindow):
   """A window with example foreground and background text colors."""
   def __init__(self, prg):
-    Window.__init__(self, prg)
+    ActiveWindow.__init__(self, prg)
     self.resizeTo(16, 16*5)
     self.moveTo(8, 8)
     self.controller = app.controller.MainController(self)
     self.controller.add(app.cu_editor.PaletteDialogController(
         prg, self))
-    textBuffer = app.text_buffer.TextBuffer()
-    self.controller.setTextBuffer(textBuffer)
-    Window.setTextBuffer(self, textBuffer)
 
-  def draw(self):
+  def refresh(self):
     width = 16
     rows = 16
     for i in range(width):
       for k in range(rows):
         self.addStr(k, i*5, ' %3d '%(i+k*width,), curses.color_pair(i+k*width))
     self.cursorWindow.refresh()
-
-  def refresh(self):
-    self.draw()
 
