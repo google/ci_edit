@@ -120,7 +120,7 @@ class StaticWindow:
   def refresh(self):
     """Redraw window."""
     self.cursorWindow.refresh()
-    for child in reversed(self.zOrder):
+    for child in self.zOrder:
       child.refresh()
 
   def reshape(self, rows, cols, top, left):

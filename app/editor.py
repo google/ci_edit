@@ -283,7 +283,6 @@ class InteractivePrediction(app.controller.Controller):
     self.commandDefault = self.textBuffer.insertPrintable
     self.priorTextBuffer = self.host.textBuffer
     self.index = self.buildFileList(self.host.textBuffer.fullPath)
-    #self.textBuffer.selectionAll()
     self.host.setTextBuffer(text_buffer.TextBuffer())
     self.host.textBuffer.rootGrammar = app.prefs.getGrammar('_pre')
 
