@@ -267,6 +267,11 @@ class InteractivePrediction(app.controller.Controller):
     self.textBuffer = textBuffer
     self.textBuffer.lines = [""]
 
+  def cancel(self):
+    self.items = [(self.priorTextBuffer, '')]
+    self.index = 0
+    self.changeToHostWindow()
+
   def cursorMoveTo(self, row, col):
     textBuffer = self.document.textBuffer
     textBuffer.cursorMoveTo(row, col)
@@ -288,7 +293,10 @@ class InteractivePrediction(app.controller.Controller):
   def buildFileList(self, currentFile):
     self.items = []
     for i in app.buffer_manager.buffers.buffers:
-      self.items.append(i.fullPath)
+      if i.fullPath:
+        self.items.append((i, i.fullPath))
+      else:
+        self.items.append((i, '<new file> %s'%(i.lines[0][:20],)))
     dirPath, fileName = os.path.split(currentFile)
     file, ext = os.path.splitext(fileName)
     # TODO(dschuyler): rework this ignore list.
@@ -296,7 +304,7 @@ class InteractivePrediction(app.controller.Controller):
     for i in os.listdir(os.path.expandvars(os.path.expanduser(dirPath)) or '.'):
       f, e = os.path.splitext(i)
       if file == f and ext != e and e not in ignoreExt:
-        self.items.append(os.path.join(dirPath, i))
+        self.items.append((None, os.path.join(dirPath, i)))
     # Suggest item.
     return (len(app.buffer_manager.buffers.buffers) - 2) % len(self.items)
 
@@ -306,7 +314,7 @@ class InteractivePrediction(app.controller.Controller):
     for i,item in enumerate(self.items):
       selection = '-->' if i == self.index else '   '
       post = ' <--' if i == self.index else ''
-      clip.append("%s %s%s"%(selection, item, post))
+      clip.append("%s %s%s"%(selection, item[1], post))
     app.log.info(clip)
     self.host.textBuffer.selectionAll()
     self.host.textBuffer.editPasteLines(tuple(clip))
@@ -322,12 +330,13 @@ class InteractivePrediction(app.controller.Controller):
     self.changeToHostWindow()
 
   def unfocus(self):
-    expandedPath = os.path.abspath(os.path.expanduser(self.items[self.index]))
-    if os.path.isdir(expandedPath):
-      app.log.info('dir\n\n', expandedPath)
+    textBuffer, fullPath = self.items[self.index]
+    app.log.info('textBuffer\n', textBuffer, '\n  fullPath\n', fullPath, '\n  index\n', self.index)
+    if textBuffer is not None:
       self.host.setTextBuffer(
-          app.buffer_manager.buffers.getValidTextBuffer(self.priorTextBuffer))
+          app.buffer_manager.buffers.getValidTextBuffer(textBuffer))
     else:
+      expandedPath = os.path.abspath(os.path.expanduser(fullPath))
       app.log.info('non-dir\n\n', expandedPath)
       app.log.info('non-dir\n\n',
           app.buffer_manager.buffers.loadTextBuffer(expandedPath).lines[0])

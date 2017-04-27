@@ -162,7 +162,7 @@ class InteractivePrediction(app.editor.InteractivePrediction):
     self.document = host
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
-      curses.ascii.ESC: self.changeToHostWindow,
+      curses.ascii.ESC: self.cancel,
       curses.KEY_F1: self.info,
       CTRL_J: self.selectItem,
       CTRL_N: self.nextItem,
