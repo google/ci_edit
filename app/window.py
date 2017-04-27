@@ -183,20 +183,14 @@ class StaticWindow:
     self.writeLineRow += 1
 
 
-class Window(StaticWindow):
-  """A Window may have focus. A Window holds a TextBuffer and a
-    controller that operates on the TextBuffer."""
+class ActiveWindow(StaticWindow):
+  """An ActiveWindow may have focus and a controller."""
   def __init__(self, parent, controller=None):
     StaticWindow.__init__(self, parent)
     self.controller = controller
     self.cursorWindow.keypad(1)
-    self.cursorRow = 0
-    self.cursorCol = 0
-    self.hasCaptiveCursor = app.prefs.prefs['editor']['captiveCursor']
-    self.hasFocus = False
     self.isFocusable = True
-    self.shouldShowCursor = True
-    self.textBuffer = None
+    self.shouldShowCursor = False
 
   def focus(self):
     app.log.info('focus', self)
@@ -204,8 +198,29 @@ class Window(StaticWindow):
     try: self.parent.zOrder.remove(self)
     except ValueError: app.log.detail(repr(self)+'not found in zOrder')
     self.parent.zOrder.append(self)
-    self.cursorWindow.leaveok(0)  # Do update cursor position.
     self.controller.focus()
+
+  def unfocus(self):
+    app.log.info('unfocus', self)
+    self.hasFocus = False
+    self.controller.unfocus()
+
+
+class Window(ActiveWindow):
+  """A Window holds a TextBuffer and a controller that operates on the TextBuffer."""
+  def __init__(self, parent, controller=None):
+    ActiveWindow.__init__(self, parent)
+    self.cursorRow = 0
+    self.cursorCol = 0
+    self.hasCaptiveCursor = app.prefs.prefs['editor']['captiveCursor']
+    self.hasFocus = False
+    self.shouldShowCursor = True
+    self.textBuffer = None
+
+  def focus(self):
+    app.log.info('focus', self)
+    self.cursorWindow.leaveok(0)  # Do update cursor position.
+    ActiveWindow.focus(self)
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
     self.textBuffer.mouseClick(paneRow, paneCol, shift, ctrl, alt)
@@ -233,8 +248,8 @@ class Window(StaticWindow):
     self.cursorCol = self.textBuffer.penCol
     self.textBuffer.cursorRow = self.textBuffer.penRow
     self.textBuffer.cursorCol = self.textBuffer.penCol
-    StaticWindow.refresh(self)
     self.textBuffer.draw(self)
+    StaticWindow.refresh(self)
     if self.hasFocus:
       self.parent.debugDraw(self)
       self.shouldShowCursor = (self.cursorRow >= self.scrollRow and
@@ -253,9 +268,8 @@ class Window(StaticWindow):
 
   def unfocus(self):
     app.log.info('unfocus', self)
-    self.hasFocus = False
     self.cursorWindow.leaveok(1)  # Don't update cursor position.
-    self.controller.unfocus()
+    ActiveWindow.unfocus(self)
 
 
 class LabeledLine(Window):
@@ -751,10 +765,9 @@ class InputWindow(Window):
   def refresh(self):
     self.textBuffer.updateScrollPosition()
     self.topInfo.onChange()
-    Window.refresh(self)
     self.drawLogoCorner()
     self.drawRightEdge()
-    self.cursorWindow.refresh()
+    Window.refresh(self)
 
   def setTextBuffer(self, textBuffer):
     app.log.info('setTextBuffer')
@@ -772,27 +785,21 @@ class InputWindow(Window):
     Window.unfocus(self)
 
 
-class PaletteWindow(Window):
+class PaletteWindow(ActiveWindow):
   """A window with example foreground and background text colors."""
   def __init__(self, prg):
-    Window.__init__(self, prg)
+    ActiveWindow.__init__(self, prg)
     self.resizeTo(16, 16*5)
     self.moveTo(8, 8)
     self.controller = app.controller.MainController(self)
     self.controller.add(app.cu_editor.PaletteDialogController(
         prg, self))
-    textBuffer = app.text_buffer.TextBuffer()
-    self.controller.setTextBuffer(textBuffer)
-    Window.setTextBuffer(self, textBuffer)
 
-  def draw(self):
+  def refresh(self):
     width = 16
     rows = 16
     for i in range(width):
       for k in range(rows):
         self.addStr(k, i*5, ' %3d '%(i+k*width,), curses.color_pair(i+k*width))
     self.cursorWindow.refresh()
-
-  def refresh(self):
-    self.draw()
 
