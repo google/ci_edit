@@ -78,7 +78,7 @@ Within the Goto line prompt:
 
   'version': \
 """
-  Version: b14
+  Version: b15
   See LICENSE for license information
   See readme.md for an introduction
   Both files may be found in "%s"
