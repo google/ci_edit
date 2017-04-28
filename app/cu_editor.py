@@ -150,6 +150,7 @@ class InteractiveOpener(app.editor.InteractiveOpener):
       CTRL_J: self.createOrOpen,
       CTRL_N: self.createOrOpen,
       CTRL_O: self.createOrOpen,
+      CTRL_Q: self.saveEventChangeToHostWindow,
     })
     self.commandSet = commandSet
     self.commandDefault = self.textBuffer.insertPrintable
