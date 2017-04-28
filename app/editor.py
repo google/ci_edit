@@ -116,6 +116,9 @@ class InteractiveOpener(app.controller.Controller):
     self.textBuffer = textBuffer
     self.textBuffer.lines = [""]
 
+  def createOrOpen(self):
+    self.changeToHostWindow()
+
   def focus(self):
     app.log.info('InteractiveOpener.focus\n',
         self.host.textBuffer.fullPath)
@@ -128,16 +131,6 @@ class InteractiveOpener(app.controller.Controller):
 
   def info(self):
     app.log.info('InteractiveOpener command set')
-
-  def createOrOpen(self):
-    if 0:
-      expandedPath = os.path.abspath(os.path.expanduser(
-          self.textBuffer.lines[0]))
-      app.log.info('createOrOpen\n\n', expandedPath)
-      if not os.path.isdir(expandedPath):
-        self.host.setTextBuffer(
-            app.buffer_manager.buffers.loadTextBuffer(expandedPath))
-    self.changeToHostWindow()
 
   def maybeSlash(self, expandedPath):
     if (self.textBuffer.lines[0] and self.textBuffer.lines[0][-1] != '/' and
@@ -199,11 +192,6 @@ class InteractiveOpener(app.controller.Controller):
     prefixLen = findCommonPrefixLength(len(fileName))
     self.textBuffer.insert(matches[0][len(fileName):prefixLen])
     self.onChange()
-
-  def setFileName(self, path):
-    self.textBuffer.lines = [path]
-    self.textBuffer.cursorCol = len(path)
-    self.textBuffer.goalCol = self.textBuffer.cursorCol
 
   def oldAutoOpenOnChange(self):
     path = os.path.expanduser(os.path.expandvars(self.textBuffer.lines[0]))
@@ -330,15 +318,11 @@ class InteractivePrediction(app.controller.Controller):
 
   def unfocus(self):
     textBuffer, fullPath = self.items[self.index]
-    app.log.info('textBuffer\n', textBuffer, '\n  fullPath\n', fullPath, '\n  index\n', self.index)
     if textBuffer is not None:
       self.host.setTextBuffer(
           app.buffer_manager.buffers.getValidTextBuffer(textBuffer))
     else:
       expandedPath = os.path.abspath(os.path.expanduser(fullPath))
-      app.log.info('non-dir\n\n', expandedPath)
-      app.log.info('non-dir\n\n',
-          app.buffer_manager.buffers.loadTextBuffer(expandedPath).lines[0])
       self.host.setTextBuffer(
           app.buffer_manager.buffers.loadTextBuffer(expandedPath))
     self.items = None
