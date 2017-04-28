@@ -425,10 +425,10 @@ class InteractivePrompt(app.controller.Controller):
     self.textBuffer.lines = [""]
     self.commands = {
       'build': self.buildCommand,
-      'format': self.formatCommand,
       'make': self.makeCommand,
     }
     self.filters = {
+      'format': self.formatCommand,
       'lower': self.lowerSelectedLines,
       's' : self.substituteText,
       'sort': self.sortSelectedLines,
@@ -447,8 +447,18 @@ class InteractivePrompt(app.controller.Controller):
     app.log.info('InteractivePrompt.focus')
     self.textBuffer.selectionAll()
 
-  def formatCommand(self):
-    return 'formatting text'
+  def formatCommand(self, cmdLine, lines):
+    formatter = {
+      #".js": app.format_javascript.format
+      #".py": app.format_python.format
+      #".html": app.format_html.format,
+    }
+    def noOp(data):
+      return data
+    file, ext = os.path.splitext(self.host.textBuffer.fullPath)
+    app.log.info(file, ext)
+    return self.host.textBuffer.doDataToLines(
+        formatter.get(ext, noOp)(self.host.textBuffer.doLinesToData(lines)))
 
   def makeCommand(self):
     return 'making stuff'
