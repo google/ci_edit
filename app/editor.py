@@ -443,6 +443,10 @@ class InteractivePrompt(app.controller.Controller):
   def buildCommand(self):
     return 'building things'
 
+  def focus(self):
+    app.log.info('InteractivePrompt.focus')
+    self.textBuffer.selectionAll()
+
   def formatCommand(self):
     return 'formatting text'
 
