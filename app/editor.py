@@ -280,10 +280,11 @@ class InteractivePrediction(app.controller.Controller):
   def buildFileList(self, currentFile):
     self.items = []
     for i in app.buffer_manager.buffers.buffers:
+      dirty = '*' if i.isDirty() else '.'
       if i.fullPath:
-        self.items.append((i, i.fullPath))
+        self.items.append((i, i.fullPath, dirty))
       else:
-        self.items.append((i, '<new file> %s'%(i.lines[0][:20],)))
+        self.items.append((i, '<new file> %s'%(i.lines[0][:20]), dirty))
     dirPath, fileName = os.path.split(currentFile)
     file, ext = os.path.splitext(fileName)
     # TODO(dschuyler): rework this ignore list.
@@ -291,7 +292,7 @@ class InteractivePrediction(app.controller.Controller):
     for i in os.listdir(os.path.expandvars(os.path.expanduser(dirPath)) or '.'):
       f, e = os.path.splitext(i)
       if file == f and ext != e and e not in ignoreExt:
-        self.items.append((None, os.path.join(dirPath, i)))
+        self.items.append((None, os.path.join(dirPath, i), ' '))
     # Suggest item.
     return (len(app.buffer_manager.buffers.buffers) - 2) % len(self.items)
 
@@ -301,7 +302,7 @@ class InteractivePrediction(app.controller.Controller):
     for i,item in enumerate(self.items):
       selection = '-->' if i == self.index else '   '
       post = ' <--' if i == self.index else ''
-      clip.append("%s %s%s"%(selection, item[1], post))
+      clip.append("%s %s %s%s"%(selection, item[1], item[2], post))
     app.log.info(clip)
     self.host.textBuffer.selectionAll()
     self.host.textBuffer.editPasteLines(tuple(clip))
@@ -317,7 +318,7 @@ class InteractivePrediction(app.controller.Controller):
     self.changeToHostWindow()
 
   def unfocus(self):
-    textBuffer, fullPath = self.items[self.index]
+    textBuffer, fullPath = self.items[self.index][:2]
     if textBuffer is not None:
       self.host.setTextBuffer(
           app.buffer_manager.buffers.getValidTextBuffer(textBuffer))
