@@ -917,6 +917,11 @@ class BackingTextBuffer(Mutator):
     self.findBackRe = re.compile('(.*)'+searchFor)
     self.findCurrentPattern(direction)
 
+  def findPlainText(self, text):
+    searchFor = re.escape(text)
+    self.findRe = re.compile('()'+searchFor)
+    self.findCurrentPattern(0)
+
   def findReplaceFlags(self, tokens):
     """Map letters in |tokens| to re flags."""
     flags = re.MULTILINE

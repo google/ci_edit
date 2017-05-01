@@ -233,6 +233,7 @@ class InteractiveOpener(app.controller.Controller):
     app.log.info(clip)
     self.host.textBuffer.selectionAll()
     self.host.textBuffer.editPasteLines(tuple(clip))
+    self.host.textBuffer.findPlainText(fileName)
 
   def unfocus(self):
     expandedPath = os.path.abspath(os.path.expanduser(self.textBuffer.lines[0]))
