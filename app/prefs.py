@@ -154,9 +154,17 @@ prefs = {
       'ext': ['.json', '.js'],
       'grammar': 'js',
     },
+    'md': {
+      'ext': ['.md'],
+        'grammar': 'md',
+    },
     'python': {
       'ext': ['.py'],
       'grammar': 'py',
+    },
+    'text': {
+      'ext': ['.txt', ''],
+        'grammar': 'text',
     },
   },
   'grammar': {
@@ -352,6 +360,8 @@ prefs = {
     'md': {
       'indent': '  ',
       'keywords': [],
+      'special': [r'\[[^]]+\]\([^)]+\)'],
+      'contains': ['quoted_string1', 'quoted_string2'],
     },
     'none': {
       'spelling': False,
