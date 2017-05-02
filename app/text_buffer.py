@@ -1435,15 +1435,14 @@ class TextBuffer(BackingTextBuffer):
             if node.grammar.get('spelling', True):
               # Highlight spelling errors
               grammarName = node.grammar.get('name', 'unknown')
-              colors = [131, 231]
-              color = 0
+              color = 9
               for found in re.finditer(app.selectable.kReSubwords, line):
                 for reg in found.regs:
                   word = line[reg[0]:reg[1]]
                   if not app.spelling.isCorrect(word, grammarName):
                     window.addStr(i, col+reg[0], word,
-                        curses.color_pair(colors[color%2]))
-                    color += 1
+                        curses.color_pair(color) | curses.A_BOLD |
+                        curses.A_REVERSE)
             # Highlight keywords.
             keywordsColor = node.grammar.get('keywordsColor', defaultColor)
             for found in node.grammar['keywordsRe'].finditer(line):
