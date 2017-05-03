@@ -521,7 +521,8 @@ if 0:
 def init():
   for k,v in prefs['grammar'].items():
     # Colors.
-    v['color'] = curses.color_pair(prefs['colors'].get(k, defaultColorIndex))
+    v['colorIndex'] = prefs['colors'].get(k, defaultColorIndex)
+    v['color'] = curses.color_pair(v['colorIndex'])
     v['keywordsColor'] = curses.color_pair(
         prefs['colors'].get(k+'_keyword_color', keywordsColorIndex))
     v['specialsColor'] = curses.color_pair(
