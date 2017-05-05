@@ -4,6 +4,12 @@
 
 # This is a list of non-English words that are commonly found in programming
 # source code files.
+eq
+fd
+ne
+le
+ge
+
 arg
 argc
 args
