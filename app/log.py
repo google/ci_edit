@@ -54,8 +54,10 @@ def stack():
   stack = inspect.stack()[1:]
   stack.reverse()
   for i,frame in enumerate(stack):
-    fullLog += ["stack %2d %14s %4s %s" % (i, os.path.split(frame[1])[1],
+    line = ["stack %2d %14s %4s %s" % (i, os.path.split(frame[1])[1],
         frame[2], frame[3])]
+    screenLog += line
+    fullLog += line
 
 def info(*args):
   chan('info', *args)
@@ -74,13 +76,13 @@ def debug(*args):
     fullLog += lines
 
 def detail(*args):
-  global enabledChannels, fullLog, screenLog
+  global enabledChannels, fullLog
   if 'detail' in enabledChannels:
     lines = parseLines(inspect.stack()[1], 'detail', *args)
     fullLog += lines
 
 def error(*args):
-  global fullLog, screenLog
+  global fullLog
   lines = parseLines(inspect.stack()[1], 'error', *args)
   fullLog += lines
 
