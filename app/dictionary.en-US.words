@@ -4,47 +4,7 @@
 
 # This word list is a fallback for times when an OS dictionary is not available.
 # It's not a full list of English words (not by a long way).
-
-# Case sensitive words.
-Alice
-Apache
-America
-Bob
-California
-Chris
-Christopher
-China
-Dan
-Dave
-David
-Demetrios
-England
-English
-Frank
-Fred
-Henry
-Katey
-Hector
-Ian
-Janelle
-Japan
-Japanese
-Jason
-Karl
-Kevin
-Lei
-Mary
-Mexico
-Michael
-Midge
-Rachel
-Richard
-Schuyler
-Steve
-Steven
-Tom
-Tommy
-# Lower case words.
+# Additional abbreviations, acronyms, and names are in dictionary.en-misc.words.
 a
 aah
 aardvark
@@ -4035,6 +3995,7 @@ dd
 dded
 dding
 dds
+de
 deactivate
 deactivated
 deactivates
@@ -4171,6 +4132,7 @@ deduct
 deducted
 deductible
 deduction
+deduped
 deed
 deem
 deemed
@@ -4520,9 +4482,9 @@ dial
 dialect
 dialing
 dialog
+dialogs
 dialogue
 dialogues
-dialogs
 diam
 diamante
 diameter
@@ -6486,6 +6448,7 @@ fob
 fobs
 focal
 focus
+focusable
 focused
 focuses
 focusing
@@ -6940,6 +6903,7 @@ geodetic
 geographic
 geographical
 geographically
+geolocation
 geom
 geometric
 geometrical
@@ -9046,6 +9010,7 @@ lab
 label
 labeled
 labeling
+labelled
 labels
 labor
 laboratories
@@ -10043,6 +10008,7 @@ merges
 merging
 meridian
 merit
+merits
 merriness
 mes
 mesa
@@ -12307,6 +12273,7 @@ prawn
 pray
 prayers
 praying
+pre
 preamble
 preambles
 prearranged
@@ -12386,6 +12353,7 @@ prejudiced
 prejudicial
 prelim
 preliminary
+preload
 prelude
 premature
 prematurely
@@ -14567,6 +14535,7 @@ scripted
 scripting
 scripts
 scroll
+scrollable
 scrolled
 scrolling
 scrolls
@@ -17601,6 +17570,7 @@ unexpired
 unexplained
 unfamiliar
 unfed
+unfiled
 unfilled
 unfiltered
 unfinished
@@ -17788,11 +17758,13 @@ unresolved
 unresponsive
 unresponsiveness
 unrestricted
+unretained
 unroll
 unrolled
 unrolling
 unsafe
 unsafely
+unsandboxed
 unsatisfied
 unsaved
 unscheduled
@@ -18855,4 +18827,3 @@ zooms
 zygote
 zygotes
 zymurgy
-
