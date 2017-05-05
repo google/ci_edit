@@ -193,7 +193,7 @@ class ActiveWindow(StaticWindow):
     self.shouldShowCursor = False
 
   def focus(self):
-    app.log.info('focus', self)
+    app.log.info(self)
     self.hasFocus = True
     try: self.parent.zOrder.remove(self)
     except ValueError: app.log.detail(repr(self)+'not found in zOrder')
@@ -201,7 +201,7 @@ class ActiveWindow(StaticWindow):
     self.controller.focus()
 
   def unfocus(self):
-    app.log.info('unfocus', self)
+    app.log.info(self)
     self.hasFocus = False
     self.controller.unfocus()
 
@@ -218,7 +218,6 @@ class Window(ActiveWindow):
     self.textBuffer = None
 
   def focus(self):
-    app.log.info('focus', self)
     self.cursorWindow.leaveok(0)  # Do update cursor position.
     ActiveWindow.focus(self)
 
@@ -267,7 +266,6 @@ class Window(ActiveWindow):
     self.textBuffer = textBuffer
 
   def unfocus(self):
-    app.log.info('unfocus', self)
     self.cursorWindow.leaveok(1)  # Don't update cursor position.
     ActiveWindow.unfocus(self)
 
@@ -419,11 +417,14 @@ class LogWindow(StaticWindow):
 
   def refresh(self):
     self.refreshCounter += 1
-    app.log.info(" "*20, self.refreshCounter, "- screen refresh -")
+    app.log.info(" "*10, self.refreshCounter, "- screen refresh -")
     maxRow, maxCol = self.cursorWindow.getmaxyx()
     self.writeLineRow = 0
     for i in self.lines[-maxRow:]:
-      self.writeLine(i);
+      color = 0
+      if i[-1] == '-':
+        color = 96
+      self.writeLine(i, color);
     StaticWindow.refresh(self)
 
 

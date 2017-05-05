@@ -31,7 +31,7 @@ class CiProgram:
   the main loop. The CiProgram is intended as a singleton.
   In some aspects, the program acts as a top level window, even though it's not
   exactly a window."""
-  def __init__(self, stdscr):
+  def __init__(self, cursesScreen):
     self.debugMouseEvent = (0, 0, 0, 0, 0)
     self.exiting = False
     self.modalUi = None
@@ -40,7 +40,7 @@ class CiProgram:
     self.savedMouseWindow = None
     self.savedMouseX = -1
     self.savedMouseY = -1
-    self.stdscr = stdscr
+    self.stdscr = cursesScreen
     self.ch = 0
     curses.mousemask(-1)
     curses.mouseinterval(0)
@@ -462,9 +462,9 @@ class CiProgram:
       for i in range(1, curses.COLORS):
         curses.init_pair(i, 16, i)
 
-def wrapped_ci(stdscr):
+def wrapped_ci(cursesScreen):
   try:
-    prg = CiProgram(stdscr)
+    prg = CiProgram(cursesScreen)
     prg.run()
   except Exception, e:
     errorType, value, tb = sys.exc_info()
