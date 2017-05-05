@@ -374,6 +374,7 @@ class LineNumbers(StaticWindow):
     if ctrl:
       app.log.info('click at', paneRow, paneCol)
       return
+    self.host.changeFocusTo(self.host)
     tb = self.host.textBuffer
     if shift:
       if tb.selectionMode == app.selectable.kSelectionNone:
@@ -382,7 +383,6 @@ class LineNumbers(StaticWindow):
     else:
       tb.selectionNone()
       self.mouseRelease(paneRow, paneCol, shift, ctrl, alt)
-    self.host.changeFocusTo(self.host)
 
   def mouseDoubleClick(self, paneRow, paneCol, shift, ctrl, alt):
     self.host.textBuffer.selectionAll()
