@@ -156,7 +156,7 @@ prefs = {
     },
     'md': {
       'ext': ['.md'],
-        'grammar': 'md',
+      'grammar': 'md',
     },
     'python': {
       'ext': ['.py'],

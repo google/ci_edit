@@ -9,6 +9,8 @@ fd
 ne
 le
 ge
+regex
+regexes
 
 arg
 argc
