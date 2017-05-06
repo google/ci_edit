@@ -45,13 +45,6 @@ class BufferManager:
       return self.buffers[0]
     return None
 
-  def recentBuffer(self):
-    app.log.info()
-    self.debugLog()
-    if len(self.buffers) > 1:
-      return self.buffers[-2]
-    return None
-
   def topBuffer(self):
     app.log.info()
     self.debugLog()
