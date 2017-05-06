@@ -64,6 +64,8 @@ class BufferManager:
     buffer. Primarily used to determine if a held reference to a textBuffer is
     still valid."""
     if textBuffer in self.buffers:
+      del self.buffers[self.buffers.index(textBuffer)]
+      self.buffers.append(textBuffer)
       return textBuffer
     textBuffer = app.text_buffer.TextBuffer()
     self.buffers.append(textBuffer)
