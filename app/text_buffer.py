@@ -967,28 +967,28 @@ class BackingTextBuffer(Mutator):
 
   def applyDocumentUpdate(self, data):
     diff = difflib.ndiff(self.lines, self.doDataToLines(data))
-    mdiff = []
+    ndiff = []
     counter = 0
     for i in diff:
       if i[0] != ' ':
         if counter:
-          mdiff.append(counter)
+          ndiff.append(counter)
           counter = 0
         if i[0] in ['+', '-']:
-          mdiff.append(i)
+          ndiff.append(i)
       else:
         counter += 1
     if counter:
-      mdiff.append(counter)
-    if len(mdiff) == 1 and type(mdiff[0]) is type(0):
+      ndiff.append(counter)
+    if len(ndiff) == 1 and type(ndiff[0]) is type(0):
       # Nothing was changed. The only entry is a 'skip these lines'
       self.setMessage('No matches found')
       return
-    mdiff = tuple(mdiff)
+    ndiff = tuple(ndiff)
     if 0:
-      for i in mdiff:
+      for i in ndiff:
         app.log.info(i)
-    self.redoAddChange(('ld', mdiff))
+    self.redoAddChange(('ld', ndiff))
     self.redo()
 
   def findCurrentPattern(self, direction):
