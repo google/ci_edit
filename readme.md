@@ -95,6 +95,8 @@ Future features (todo)
 - a lot more...
   - I have dreams for the future.
 
+This is not an official Google product.
+
 Copyright 2016 The ci_edit Authors. All rights reserved.
 Use of this source code is governed by an Apache-style license that can be
 found in the LICENSE file.
