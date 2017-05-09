@@ -1432,28 +1432,30 @@ class TextBuffer(BackingTextBuffer):
           col = k-self.view.scrollCol
           if length:
             window.addStr(i, col, line, color)
-            if node.grammar.get('spelling', True):
-              # Highlight spelling errors
-              grammarName = node.grammar.get('name', 'unknown')
-              color = 9
-              for found in re.finditer(app.selectable.kReSubwords, line):
-                for reg in found.regs:
-                  word = line[reg[0]:reg[1]]
-                  if not app.spelling.isCorrect(word, grammarName):
-                    window.addStr(i, col+reg[0], word,
-                        curses.color_pair(color) | curses.A_BOLD |
-                        curses.A_REVERSE)
-            # Highlight keywords.
-            keywordsColor = node.grammar.get('keywordsColor', defaultColor)
-            for found in node.grammar['keywordsRe'].finditer(line):
-              f = found.regs[0]
-              window.addStr(i, col+f[0], line[f[0]:f[1]], keywordsColor)
-            # Highlight specials.
-            keywordsColor = node.grammar.get('specialsColor', defaultColor)
-            for found in node.grammar['specialsRe'].finditer(line):
-              f = found.regs[0]
-              window.addStr(i, col+f[0], line[f[0]:f[1]], keywordsColor)
-            k += length
+            if 1:
+              if node.grammar.get('spelling', True):
+                # Highlight spelling errors
+                grammarName = node.grammar.get('name', 'unknown')
+                color = 9
+                for found in re.finditer(app.selectable.kReSubwords, line):
+                  for reg in found.regs:
+                    word = line[reg[0]:reg[1]]
+                    if not app.spelling.isCorrect(word, grammarName):
+                      window.addStr(i, col+reg[0], word,
+                          curses.color_pair(color) | curses.A_BOLD |
+                          curses.A_REVERSE)
+            if 1:
+              # Highlight keywords.
+              keywordsColor = node.grammar.get('keywordsColor', defaultColor)
+              for found in node.grammar['keywordsRe'].finditer(line):
+                f = found.regs[0]
+                window.addStr(i, col+f[0], line[f[0]:f[1]], keywordsColor)
+              # Highlight specials.
+              keywordsColor = node.grammar.get('specialsColor', defaultColor)
+              for found in node.grammar['specialsRe'].finditer(line):
+                f = found.regs[0]
+                window.addStr(i, col+f[0], line[f[0]:f[1]], keywordsColor)
+              k += length
           else:
             window.addStr(i, col, ' '*(maxCol-col), color)
             break
