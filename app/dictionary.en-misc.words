@@ -8,7 +8,7 @@ concat
 config
 
 
-# Acronyms
+# Acronyms (acronyms that match trademarks are not a challenge to said marks)
 afaik
 afk
 brb
@@ -21,9 +21,11 @@ html
 http
 iiuc
 io
+ltr
 nasa
 os
 ssl
+ttfn
 wip
 www
 xml
@@ -31,7 +33,7 @@ rtl
 usb
 
 
-# Names
+# Names (names that match trademarks are not a challenge to said marks)
 alice
 bezier
 bluetooth
@@ -40,8 +42,6 @@ boolean
 chen
 dan
 dave
-dbeam
-dschuyler
 euler
 google
 hector
