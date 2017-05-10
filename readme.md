@@ -1,6 +1,6 @@
 ### The ci_text editor
 
-The world does need another text editor.
+The world does need another text editor. (Or at least I think so).
 
 There are other fine curses based editors. I found that I was often trying to
 tweak them to get just what I wanted. Almost as often, some aspect of those
