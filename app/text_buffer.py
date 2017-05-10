@@ -1,6 +1,16 @@
-# Copyright 2016 The ci_edit Authors. All rights reserved.
-# Use of this source code is governed by an Apache-style license that can be
-# found in the LICENSE file.
+# Copyright 2016 Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import app.buffer_manager
 import app.log
@@ -917,6 +927,11 @@ class BackingTextBuffer(Mutator):
     self.findBackRe = re.compile('(.*)'+searchFor)
     self.findCurrentPattern(direction)
 
+  def findPlainText(self, text):
+    searchFor = re.escape(text)
+    self.findRe = re.compile('()'+searchFor)
+    self.findCurrentPattern(0)
+
   def findReplaceFlags(self, tokens):
     """Map letters in |tokens| to re flags."""
     flags = re.MULTILINE
@@ -962,28 +977,28 @@ class BackingTextBuffer(Mutator):
 
   def applyDocumentUpdate(self, data):
     diff = difflib.ndiff(self.lines, self.doDataToLines(data))
-    mdiff = []
+    ndiff = []
     counter = 0
     for i in diff:
       if i[0] != ' ':
         if counter:
-          mdiff.append(counter)
+          ndiff.append(counter)
           counter = 0
         if i[0] in ['+', '-']:
-          mdiff.append(i)
+          ndiff.append(i)
       else:
         counter += 1
     if counter:
-      mdiff.append(counter)
-    if len(mdiff) == 1 and type(mdiff[0]) is type(0):
+      ndiff.append(counter)
+    if len(ndiff) == 1 and type(ndiff[0]) is type(0):
       # Nothing was changed. The only entry is a 'skip these lines'
       self.setMessage('No matches found')
       return
-    mdiff = tuple(mdiff)
+    ndiff = tuple(ndiff)
     if 0:
-      for i in mdiff:
+      for i in ndiff:
         app.log.info(i)
-    self.redoAddChange(('ld', mdiff))
+    self.redoAddChange(('ld', ndiff))
     self.redo()
 
   def findCurrentPattern(self, direction):
@@ -1414,8 +1429,8 @@ class TextBuffer(BackingTextBuffer):
     if self.parser:
       defaultColor = curses.color_pair(0)
       # Highlight grammar.
-      limit = min(max(len(self.lines)-self.view.scrollRow, 0), maxRow)
-      for i in range(limit):
+      rowLimit = min(max(len(self.lines)-self.view.scrollRow, 0), maxRow)
+      for i in range(rowLimit):
         k = startCol
         while k < endCol:
           node, remaining = self.parser.grammarFromOffset(
@@ -1427,36 +1442,37 @@ class TextBuffer(BackingTextBuffer):
           col = k-self.view.scrollCol
           if length:
             window.addStr(i, col, line, color)
-            if node.grammar.get('spelling', True):
-              # Highlight spelling errors
-              grammarName = node.grammar.get('name', 'unknown')
-              colors = [131, 231]
-              color = 0
-              for found in re.finditer(app.selectable.kReSubwords, line):
-                for reg in found.regs:
-                  word = line[reg[0]:reg[1]]
-                  if not app.spelling.isCorrect(word, grammarName):
-                    window.addStr(i, col+reg[0], word,
-                        curses.color_pair(colors[color%2]))
-                    color += 1
-            # Highlight keywords.
-            keywordsColor = node.grammar.get('keywordsColor', defaultColor)
-            for found in node.grammar['keywordsRe'].finditer(line):
-              f = found.regs[0]
-              window.addStr(i, col+f[0], line[f[0]:f[1]], keywordsColor)
-            # Highlight specials.
-            keywordsColor = node.grammar.get('specialsColor', defaultColor)
-            for found in node.grammar['specialsRe'].finditer(line):
-              f = found.regs[0]
-              window.addStr(i, col+f[0], line[f[0]:f[1]], keywordsColor)
-            k += length
+            if 1:
+              if node.grammar.get('spelling', True):
+                # Highlight spelling errors
+                grammarName = node.grammar.get('name', 'unknown')
+                color = 9
+                for found in re.finditer(app.selectable.kReSubwords, line):
+                  for reg in found.regs:
+                    word = line[reg[0]:reg[1]]
+                    if not app.spelling.isCorrect(word, grammarName):
+                      window.addStr(i, col+reg[0], word,
+                          curses.color_pair(color) | curses.A_BOLD |
+                          curses.A_REVERSE)
+            if 1:
+              # Highlight keywords.
+              keywordsColor = node.grammar.get('keywordsColor', defaultColor)
+              for found in node.grammar['keywordsRe'].finditer(line):
+                f = found.regs[0]
+                window.addStr(i, col+f[0], line[f[0]:f[1]], keywordsColor)
+              # Highlight specials.
+              keywordsColor = node.grammar.get('specialsColor', defaultColor)
+              for found in node.grammar['specialsRe'].finditer(line):
+                f = found.regs[0]
+                window.addStr(i, col+f[0], line[f[0]:f[1]], keywordsColor)
+              k += length
           else:
             window.addStr(i, col, ' '*(maxCol-col), color)
             break
     else:
       # Draw to screen.
-      limit = min(max(len(self.lines)-self.view.scrollRow, 0), maxRow)
-      for i in range(limit):
+      rowLimit = min(max(len(self.lines)-self.view.scrollRow, 0), maxRow)
+      for i in range(rowLimit):
         line = self.lines[self.view.scrollRow+i][startCol:endCol]
         window.addStr(i, 0, line + ' '*(maxCol-len(line)), window.color)
     self.drawOverlays(window)
@@ -1467,10 +1483,10 @@ class TextBuffer(BackingTextBuffer):
       startRow = self.view.scrollRow
       startCol = self.view.scrollCol
       endCol = self.view.scrollCol+maxCol
-      limit = min(max(len(self.lines)-startRow, 0), maxRow)
+      rowLimit = min(max(len(self.lines)-startRow, 0), maxRow)
       if 1:
         # Highlight brackets.
-        for i in range(limit):
+        for i in range(rowLimit):
           line = self.lines[startRow+i][startCol:endCol]
           for k in re.finditer(app.selectable.kReBrackets, line):
             for f in k.regs:
@@ -1532,14 +1548,14 @@ class TextBuffer(BackingTextBuffer):
                 curses.color_pair(201))
       if 1:
         # Highlight numbers.
-        for i in range(limit):
+        for i in range(rowLimit):
           line = self.lines[startRow+i][startCol:endCol]
           for k in re.finditer(app.selectable.kReNumbers, line):
             for f in k.regs:
               window.addStr(i, f[0], line[f[0]:f[1]], curses.color_pair(31))
       if 1:
         # Highlight space ending lines.
-        for i in range(limit):
+        for i in range(rowLimit):
           line = self.lines[startRow+i][startCol:endCol]
           offset = 0
           if startRow + i == self.penRow:
@@ -1552,7 +1568,7 @@ class TextBuffer(BackingTextBuffer):
       lengthLimit = self.lineLimitIndicator
       if endCol >= lengthLimit:
         # Highlight long lines.
-        for i in range(limit):
+        for i in range(rowLimit):
           line = self.lines[startRow+i]
           if len(line) < lengthLimit or startCol > lengthLimit:
             continue
@@ -1561,14 +1577,14 @@ class TextBuffer(BackingTextBuffer):
               curses.color_pair(96))
       if self.findRe is not None:
         # Highlight find.
-        for i in range(limit):
+        for i in range(rowLimit):
           line = self.lines[startRow+i][startCol:endCol]
           for k in self.findRe.finditer(line):
             f = k.regs[0]
             #for f in k.regs[1:]:
             window.addStr(i, f[0], line[f[0]:f[1]],
                 curses.color_pair(app.prefs.foundColorIndex))
-      if limit and self.selectionMode != app.selectable.kSelectionNone:
+      if rowLimit and self.selectionMode != app.selectable.kSelectionNone:
         # Highlight selected text.
         upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
         selStartCol = max(upperCol - startCol, 0)
@@ -1604,5 +1620,5 @@ class TextBuffer(BackingTextBuffer):
                 line+' '*(maxCol-len(line)), window.colorSelected)
       # Blank screen past the end of the buffer.
       color = curses.color_pair(app.prefs.outsideOfBufferColorIndex)
-      for i in range(limit, maxRow):
+      for i in range(rowLimit, maxRow):
         window.addStr(i, 0, ' '*maxCol, color)

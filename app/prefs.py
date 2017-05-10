@@ -1,6 +1,16 @@
-# Copyright 2016 The ci_edit Authors. All rights reserved.
-# Use of this source code is governed by an Apache-style license that can be
-# found in the LICENSE file.
+# Copyright 2016 Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import app.log
 import curses
@@ -154,9 +164,17 @@ prefs = {
       'ext': ['.json', '.js'],
       'grammar': 'js',
     },
+    'md': {
+      'ext': ['.md'],
+      'grammar': 'md',
+    },
     'python': {
       'ext': ['.py'],
       'grammar': 'py',
+    },
+    'text': {
+      'ext': ['.txt', ''],
+        'grammar': 'text',
     },
   },
   'grammar': {
@@ -352,6 +370,8 @@ prefs = {
     'md': {
       'indent': '  ',
       'keywords': [],
+      'special': [r'\[[^]]+\]\([^)]+\)'],
+      'contains': ['quoted_string1', 'quoted_string2'],
     },
     'none': {
       'spelling': False,
@@ -511,7 +531,8 @@ if 0:
 def init():
   for k,v in prefs['grammar'].items():
     # Colors.
-    v['color'] = curses.color_pair(prefs['colors'].get(k, defaultColorIndex))
+    v['colorIndex'] = prefs['colors'].get(k, defaultColorIndex)
+    v['color'] = curses.color_pair(v['colorIndex'])
     v['keywordsColor'] = curses.color_pair(
         prefs['colors'].get(k+'_keyword_color', keywordsColorIndex))
     v['specialsColor'] = curses.color_pair(

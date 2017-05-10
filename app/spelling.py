@@ -1,6 +1,16 @@
-# Copyright 2017 The ci_edit Authors. All rights reserved.
-# Use of this source code is governed by an Apache-style license that can be
-# found in the LICENSE file.
+# Copyright 2017 Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import app.log
 import glob
@@ -30,6 +40,7 @@ loadWords(os.path.dirname(__file__))
 loadWords(os.path.expanduser("~/.ci_edit/dictionaries"))
 
 words = grammarWords.get('en-US', set())
+words.update(grammarWords.get('en-misc', set()))
 words.update(grammarWords.get('coding', set()))
 words.update(grammarWords.get('contractions', set()))
 words.update(grammarWords.get('user', set()))
@@ -47,14 +58,14 @@ def isCorrect(word, grammarName):
   if len(re.sub('[A-Z]+', '', word)) == 0:
     # All upper case.
     return True
-
-  # TODO(dschuyler): This is an experiment. Considering a py specific word list
-  # instead.
-  if grammarName == 'py':
-    # Handle poor styling.
-    if len(re.sub('[a-z]+', '', word)) == 0:
-      for i in range(len(word), 0, -1):
-        if word[:i] in words and word[i:] in words:
-          return True
+  if 0:
+    # TODO(dschuyler): This is an experiment. Considering a py specific word
+    # list instead.
+    if grammarName == 'py':
+      # Handle poor styling.
+      if len(re.sub('[a-z]+', '', word)) == 0:
+        for i in range(len(word), 0, -1):
+          if word[:i] in words and word[i:] in words:
+            return True
   #app.log.info(grammarName, word)
   return False

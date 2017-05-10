@@ -1,7 +1,16 @@
-#!/usr/bin/python
-# Copyright 2016 The ci_edit Authors. All rights reserved.
-# Use of this source code is governed by an Apache-style license that can be
-# found in the LICENSE file.
+# Copyright 2016 Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import app.curses_util
 import app.help
@@ -31,7 +40,7 @@ class CiProgram:
   the main loop. The CiProgram is intended as a singleton.
   In some aspects, the program acts as a top level window, even though it's not
   exactly a window."""
-  def __init__(self, stdscr):
+  def __init__(self, cursesScreen):
     self.debugMouseEvent = (0, 0, 0, 0, 0)
     self.exiting = False
     self.modalUi = None
@@ -40,7 +49,7 @@ class CiProgram:
     self.savedMouseWindow = None
     self.savedMouseX = -1
     self.savedMouseY = -1
-    self.stdscr = stdscr
+    self.stdscr = cursesScreen
     self.ch = 0
     curses.mousemask(-1)
     curses.mouseinterval(0)
@@ -462,9 +471,9 @@ class CiProgram:
       for i in range(1, curses.COLORS):
         curses.init_pair(i, 16, i)
 
-def wrapped_ci(stdscr):
+def wrapped_ci(cursesScreen):
   try:
-    prg = CiProgram(stdscr)
+    prg = CiProgram(cursesScreen)
     prg.run()
   except Exception, e:
     errorType, value, tb = sys.exc_info()

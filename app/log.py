@@ -1,7 +1,16 @@
-#!/usr/bin/python
-# Copyright 2016 The ci_edit Authors. All rights reserved.
-# Use of this source code is governed by an Apache-style license that can be
-# found in the LICENSE file.
+# Copyright 2016 Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import inspect
 import os
@@ -54,8 +63,10 @@ def stack():
   stack = inspect.stack()[1:]
   stack.reverse()
   for i,frame in enumerate(stack):
-    fullLog += ["stack %2d %14s %4s %s" % (i, os.path.split(frame[1])[1],
+    line = ["stack %2d %14s %4s %s" % (i, os.path.split(frame[1])[1],
         frame[2], frame[3])]
+    screenLog += line
+    fullLog += line
 
 def info(*args):
   chan('info', *args)
@@ -74,13 +85,13 @@ def debug(*args):
     fullLog += lines
 
 def detail(*args):
-  global enabledChannels, fullLog, screenLog
+  global enabledChannels, fullLog
   if 'detail' in enabledChannels:
     lines = parseLines(inspect.stack()[1], 'detail', *args)
     fullLog += lines
 
 def error(*args):
-  global fullLog, screenLog
+  global fullLog
   lines = parseLines(inspect.stack()[1], 'error', *args)
   fullLog += lines
 

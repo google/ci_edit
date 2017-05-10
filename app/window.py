@@ -1,6 +1,16 @@
-# Copyright 2016 The ci_edit Authors. All rights reserved.
-# Use of this source code is governed by an Apache-style license that can be
-# found in the LICENSE file.
+# Copyright 2016 Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import app.buffer_manager
 import app.controller
@@ -193,7 +203,7 @@ class ActiveWindow(StaticWindow):
     self.shouldShowCursor = False
 
   def focus(self):
-    app.log.info('focus', self)
+    app.log.info(self)
     self.hasFocus = True
     try: self.parent.zOrder.remove(self)
     except ValueError: app.log.detail(repr(self)+'not found in zOrder')
@@ -201,7 +211,7 @@ class ActiveWindow(StaticWindow):
     self.controller.focus()
 
   def unfocus(self):
-    app.log.info('unfocus', self)
+    app.log.info(self)
     self.hasFocus = False
     self.controller.unfocus()
 
@@ -218,7 +228,6 @@ class Window(ActiveWindow):
     self.textBuffer = None
 
   def focus(self):
-    app.log.info('focus', self)
     self.cursorWindow.leaveok(0)  # Do update cursor position.
     ActiveWindow.focus(self)
 
@@ -267,7 +276,6 @@ class Window(ActiveWindow):
     self.textBuffer = textBuffer
 
   def unfocus(self):
-    app.log.info('unfocus', self)
     self.cursorWindow.leaveok(1)  # Don't update cursor position.
     ActiveWindow.unfocus(self)
 
@@ -376,6 +384,7 @@ class LineNumbers(StaticWindow):
     if ctrl:
       app.log.info('click at', paneRow, paneCol)
       return
+    self.host.changeFocusTo(self.host)
     tb = self.host.textBuffer
     if shift:
       if tb.selectionMode == app.selectable.kSelectionNone:
@@ -384,7 +393,6 @@ class LineNumbers(StaticWindow):
     else:
       tb.selectionNone()
       self.mouseRelease(paneRow, paneCol, shift, ctrl, alt)
-    self.host.changeFocusTo(self.host)
 
   def mouseDoubleClick(self, paneRow, paneCol, shift, ctrl, alt):
     self.host.textBuffer.selectionAll()
@@ -419,11 +427,14 @@ class LogWindow(StaticWindow):
 
   def refresh(self):
     self.refreshCounter += 1
-    app.log.info(" "*20, self.refreshCounter, "- screen refresh -")
+    app.log.info(" "*10, self.refreshCounter, "- screen refresh -")
     maxRow, maxCol = self.cursorWindow.getmaxyx()
     self.writeLineRow = 0
     for i in self.lines[-maxRow:]:
-      self.writeLine(i);
+      color = 0
+      if i[-1] == '-':
+        color = 96
+      self.writeLine(i, color);
     StaticWindow.refresh(self)
 
 

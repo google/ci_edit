@@ -1,6 +1,16 @@
-# Copyright 2016 The ci_edit Authors. All rights reserved.
-# Use of this source code is governed by an Apache-style license that can be
-# found in the LICENSE file.
+# Copyright 2016 Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import app.log
 import app.history
@@ -45,13 +55,6 @@ class BufferManager:
       return self.buffers[0]
     return None
 
-  def recentBuffer(self):
-    app.log.info()
-    self.debugLog()
-    if len(self.buffers) > 1:
-      return self.buffers[-2]
-    return None
-
   def topBuffer(self):
     app.log.info()
     self.debugLog()
@@ -64,6 +67,8 @@ class BufferManager:
     buffer. Primarily used to determine if a held reference to a textBuffer is
     still valid."""
     if textBuffer in self.buffers:
+      del self.buffers[self.buffers.index(textBuffer)]
+      self.buffers.append(textBuffer)
       return textBuffer
     textBuffer = app.text_buffer.TextBuffer()
     self.buffers.append(textBuffer)

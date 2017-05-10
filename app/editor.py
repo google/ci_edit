@@ -1,6 +1,16 @@
-# Copyright 2016 The ci_edit Authors. All rights reserved.
-# Use of this source code is governed by an Apache-style license that can be
-# found in the LICENSE file.
+# Copyright 2016 Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 """Key bindings for the ciEditor."""
 
@@ -116,6 +126,9 @@ class InteractiveOpener(app.controller.Controller):
     self.textBuffer = textBuffer
     self.textBuffer.lines = [""]
 
+  def createOrOpen(self):
+    self.changeToHostWindow()
+
   def focus(self):
     app.log.info('InteractiveOpener.focus\n',
         self.host.textBuffer.fullPath)
@@ -128,16 +141,6 @@ class InteractiveOpener(app.controller.Controller):
 
   def info(self):
     app.log.info('InteractiveOpener command set')
-
-  def createOrOpen(self):
-    if 0:
-      expandedPath = os.path.abspath(os.path.expanduser(
-          self.textBuffer.lines[0]))
-      app.log.info('createOrOpen\n\n', expandedPath)
-      if not os.path.isdir(expandedPath):
-        self.host.setTextBuffer(
-            app.buffer_manager.buffers.loadTextBuffer(expandedPath))
-    self.changeToHostWindow()
 
   def maybeSlash(self, expandedPath):
     if (self.textBuffer.lines[0] and self.textBuffer.lines[0][-1] != '/' and
@@ -200,11 +203,6 @@ class InteractiveOpener(app.controller.Controller):
     self.textBuffer.insert(matches[0][len(fileName):prefixLen])
     self.onChange()
 
-  def setFileName(self, path):
-    self.textBuffer.lines = [path]
-    self.textBuffer.cursorCol = len(path)
-    self.textBuffer.goalCol = self.textBuffer.cursorCol
-
   def oldAutoOpenOnChange(self):
     path = os.path.expanduser(os.path.expandvars(self.textBuffer.lines[0]))
     dirPath, fileName = os.path.split(path)
@@ -245,6 +243,7 @@ class InteractiveOpener(app.controller.Controller):
     app.log.info(clip)
     self.host.textBuffer.selectionAll()
     self.host.textBuffer.editPasteLines(tuple(clip))
+    self.host.textBuffer.findPlainText(fileName)
 
   def unfocus(self):
     expandedPath = os.path.abspath(os.path.expanduser(self.textBuffer.lines[0]))
@@ -292,10 +291,11 @@ class InteractivePrediction(app.controller.Controller):
   def buildFileList(self, currentFile):
     self.items = []
     for i in app.buffer_manager.buffers.buffers:
+      dirty = '*' if i.isDirty() else '.'
       if i.fullPath:
-        self.items.append((i, i.fullPath))
+        self.items.append((i, i.fullPath, dirty))
       else:
-        self.items.append((i, '<new file> %s'%(i.lines[0][:20],)))
+        self.items.append((i, '<new file> %s'%(i.lines[0][:20]), dirty))
     dirPath, fileName = os.path.split(currentFile)
     file, ext = os.path.splitext(fileName)
     # TODO(dschuyler): rework this ignore list.
@@ -303,7 +303,7 @@ class InteractivePrediction(app.controller.Controller):
     for i in os.listdir(os.path.expandvars(os.path.expanduser(dirPath)) or '.'):
       f, e = os.path.splitext(i)
       if file == f and ext != e and e not in ignoreExt:
-        self.items.append((None, os.path.join(dirPath, i)))
+        self.items.append((None, os.path.join(dirPath, i), ' '))
     # Suggest item.
     return (len(app.buffer_manager.buffers.buffers) - 2) % len(self.items)
 
@@ -313,7 +313,7 @@ class InteractivePrediction(app.controller.Controller):
     for i,item in enumerate(self.items):
       selection = '-->' if i == self.index else '   '
       post = ' <--' if i == self.index else ''
-      clip.append("%s %s%s"%(selection, item[1], post))
+      clip.append("%s %s %s%s"%(selection, item[1], item[2], post))
     app.log.info(clip)
     self.host.textBuffer.selectionAll()
     self.host.textBuffer.editPasteLines(tuple(clip))
@@ -329,16 +329,12 @@ class InteractivePrediction(app.controller.Controller):
     self.changeToHostWindow()
 
   def unfocus(self):
-    textBuffer, fullPath = self.items[self.index]
-    app.log.info('textBuffer\n', textBuffer, '\n  fullPath\n', fullPath, '\n  index\n', self.index)
+    textBuffer, fullPath = self.items[self.index][:2]
     if textBuffer is not None:
       self.host.setTextBuffer(
           app.buffer_manager.buffers.getValidTextBuffer(textBuffer))
     else:
       expandedPath = os.path.abspath(os.path.expanduser(fullPath))
-      app.log.info('non-dir\n\n', expandedPath)
-      app.log.info('non-dir\n\n',
-          app.buffer_manager.buffers.loadTextBuffer(expandedPath).lines[0])
       self.host.setTextBuffer(
           app.buffer_manager.buffers.loadTextBuffer(expandedPath))
     self.items = None
@@ -441,10 +437,10 @@ class InteractivePrompt(app.controller.Controller):
     self.textBuffer.lines = [""]
     self.commands = {
       'build': self.buildCommand,
-      'format': self.formatCommand,
       'make': self.makeCommand,
     }
     self.filters = {
+      'format': self.formatCommand,
       'lower': self.lowerSelectedLines,
       's' : self.substituteText,
       'sort': self.sortSelectedLines,
@@ -459,8 +455,22 @@ class InteractivePrompt(app.controller.Controller):
   def buildCommand(self):
     return 'building things'
 
-  def formatCommand(self):
-    return 'formatting text'
+  def focus(self):
+    app.log.info('InteractivePrompt.focus')
+    self.textBuffer.selectionAll()
+
+  def formatCommand(self, cmdLine, lines):
+    formatter = {
+      #".js": app.format_javascript.format
+      #".py": app.format_python.format
+      #".html": app.format_html.format,
+    }
+    def noOp(data):
+      return data
+    file, ext = os.path.splitext(self.host.textBuffer.fullPath)
+    app.log.info(file, ext)
+    return self.host.textBuffer.doDataToLines(
+        formatter.get(ext, noOp)(self.host.textBuffer.doLinesToData(lines)))
 
   def makeCommand(self):
     return 'making stuff'
