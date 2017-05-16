@@ -1492,7 +1492,7 @@ class TextBuffer(BackingTextBuffer):
           ch = self.lines[self.penRow][self.penCol]
           def searchBack(closeCh, openCh):
             count = -1
-            for row in range(self.penRow, startRow, -1):
+            for row in range(self.penRow, -1, -1):
               line = self.lines[row]
               if row == self.penRow:
                 line = line[:self.penCol]
@@ -1511,7 +1511,7 @@ class TextBuffer(BackingTextBuffer):
           def searchForward(openCh, closeCh):
             count = 1
             colOffset = self.penCol+1
-            for row in range(self.penRow, startRow+maxRow):
+            for row in range(self.penRow, len(self.lines)):
               if row != self.penRow:
                 colOffset = 0
               line = self.lines[row][colOffset:]
