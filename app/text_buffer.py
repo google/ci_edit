@@ -13,13 +13,13 @@
 # limitations under the License.
 
 import app.buffer_manager
+import app.clipboard
 import app.log
 import app.history
 import app.parser
 import app.prefs
 import app.selectable
 import app.spelling
-import third_party.pyperclip as clipboard
 import curses.ascii
 import difflib
 import os
@@ -371,7 +371,6 @@ class BackingTextBuffer(Mutator):
   def __init__(self):
     Mutator.__init__(self)
     self.view = None
-    self.clipList = []
     self.rootGrammar = app.prefs.getGrammar(None)
     self.skipUpdateScroll = False
 
@@ -768,26 +767,21 @@ class BackingTextBuffer(Mutator):
   def editCopy(self):
     text = self.getSelectedText()
     if len(text):
-      self.clipList.append(text)
       if self.selectionMode == app.selectable.kSelectionLine:
         text = text + ('',)
-      if clipboard.copy:
-        clipboard.copy(self.doLinesToData(text))
+      data = self.doLinesToData(text)
+      app.clipboard.copy(data)
 
   def editCut(self):
     self.editCopy()
     self.performDelete()
 
   def editPaste(self):
-    osClip = clipboard.paste and clipboard.paste()
-    if len(self.clipList) or osClip:
-      if osClip:
-        clip = tuple(self.doDataToLines(osClip))
-      else:
-        clip = self.clipList[-1]
-      self.editPasteLines(clip)
+    data = app.clipboard.paste()
+    if data is not None:
+      self.editPasteLines(tuple(self.doDataToLines(data)))
     else:
-      app.log.info('clipList empty')
+      app.log.info('clipboard empty')
 
   def editPasteLines(self, clip):
       if self.selectionMode != app.selectable.kSelectionNone:
