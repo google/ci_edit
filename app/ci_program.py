@@ -218,10 +218,10 @@ class CiProgram:
         "y %2d x %2d maxRow %d maxCol %d baud %d color %d"
         %(y, x, maxRow, maxCol, curses.baudrate(), curses.can_change_color()),
             self.debugWindow.color)
-    scrRows, scrCols = self.stdscr.getmaxyx()
+    screenRows, screenCols = self.stdscr.getmaxyx()
     self.debugWindow.writeLine(
         "scr rows %d cols %d mlt %f/%f"
-        %(scrRows, scrCols, self.mainLoopTime, self.mainLoopTimePeak))
+        %(screenRows, screenCols, self.mainLoopTime, self.mainLoopTimePeak))
     self.debugWindow.writeLine(
         "ch %3s %s"
         %(self.ch, app.curses_util.cursesKeyName(self.ch)),
@@ -232,13 +232,13 @@ class CiProgram:
         self.debugWindow.color)
     self.debugWindow.writeLine("tb %r"%(textBuffer,),
         self.debugWindow.color)
-    (id, mouseCol, mouseRow, mousez, bstate) = self.debugMouseEvent
+    (id, mouseCol, mouseRow, mouseZ, bState) = self.debugMouseEvent
     self.debugWindow.writeLine(
-        "mouse id %d, mouseCol %d, mouseRow %d, mousez %d"
-        %(id, mouseCol, mouseRow, mousez), self.debugWindow.color)
+        "mouse id %d, mouseCol %d, mouseRow %d, mouseZ %d"
+        %(id, mouseCol, mouseRow, mouseZ), self.debugWindow.color)
     self.debugWindow.writeLine(
-        "bstate %s %d"
-        %(app.curses_util.mouseButtonName(bstate), bstate),
+        "bState %s %d"
+        %(app.curses_util.mouseButtonName(bState), bState),
             self.debugWindow.color)
     # Display some of the redo chain.
     self.debugWindow.writeLine(
@@ -280,7 +280,7 @@ class CiProgram:
     """Mouse handling is a special case. The getch() curses function will
     signal the existence of a mouse event, but the event must be fetched and
     parsed separately."""
-    (id, mouseCol, mouseRow, mousez, bstate) = info[0]
+    (id, mouseCol, mouseRow, mouseZ, bState) = info[0]
     eventTime = info[1]
     rapidClickTimeout = .5
     def findWindow(parent, mouseRow, mouseCol):
@@ -296,61 +296,61 @@ class CiProgram:
         mouseCol -= window.left
         app.log.info(mouseRow, mouseCol)
         app.log.info("\n",window)
-        #app.log.info('bstate', app.curses_util.mouseButtonName(bstate))
-        if bstate & curses.BUTTON1_RELEASED:
+        #app.log.info('bState', app.curses_util.mouseButtonName(bState))
+        if bState & curses.BUTTON1_RELEASED:
           if self.priorClick + rapidClickTimeout <= eventTime:
-            window.mouseRelease(mouseRow, mouseCol, bstate&curses.BUTTON_SHIFT,
-                bstate&curses.BUTTON_CTRL, bstate&curses.BUTTON_ALT)
-        elif bstate & curses.BUTTON1_PRESSED:
+            window.mouseRelease(mouseRow, mouseCol, bState&curses.BUTTON_SHIFT,
+                bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
+        elif bState & curses.BUTTON1_PRESSED:
           if (self.priorClick + rapidClickTimeout > eventTime and
               self.clickedNearby(mouseRow, mouseCol)):
             self.clicks += 1
             self.priorClick = eventTime
             if self.clicks == 2:
               window.mouseDoubleClick(mouseRow, mouseCol,
-                  bstate&curses.BUTTON_SHIFT, bstate&curses.BUTTON_CTRL,
-                  bstate&curses.BUTTON_ALT)
+                  bState&curses.BUTTON_SHIFT, bState&curses.BUTTON_CTRL,
+                  bState&curses.BUTTON_ALT)
             else:
               window.mouseTripleClick(mouseRow, mouseCol,
-                  bstate&curses.BUTTON_SHIFT, bstate&curses.BUTTON_CTRL,
-                  bstate&curses.BUTTON_ALT)
+                  bState&curses.BUTTON_SHIFT, bState&curses.BUTTON_CTRL,
+                  bState&curses.BUTTON_ALT)
               self.clicks = 1
           else:
             self.clicks = 1
             self.priorClick = eventTime
             self.priorClickRowCol = (mouseRow, mouseCol)
-            window.mouseClick(mouseRow, mouseCol, bstate&curses.BUTTON_SHIFT,
-                bstate&curses.BUTTON_CTRL, bstate&curses.BUTTON_ALT)
-        elif bstate & curses.BUTTON2_PRESSED:
-          window.mouseWheelUp(bstate&curses.BUTTON_SHIFT,
-              bstate&curses.BUTTON_CTRL, bstate&curses.BUTTON_ALT)
-        elif bstate & curses.BUTTON4_PRESSED:
+            window.mouseClick(mouseRow, mouseCol, bState&curses.BUTTON_SHIFT,
+                bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
+        elif bState & curses.BUTTON2_PRESSED:
+          window.mouseWheelUp(bState&curses.BUTTON_SHIFT,
+              bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
+        elif bState & curses.BUTTON4_PRESSED:
           if self.savedMouseX == mouseCol and self.savedMouseY == mouseRow:
-            window.mouseWheelDown(bstate&curses.BUTTON_SHIFT,
-                bstate&curses.BUTTON_CTRL, bstate&curses.BUTTON_ALT)
+            window.mouseWheelDown(bState&curses.BUTTON_SHIFT,
+                bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
           else:
             if self.savedMouseWindow and self.savedMouseWindow is not window:
               mouseRow += window.top - self.savedMouseWindow.top
               mouseCol += window.left - self.savedMouseWindow.left
               window = self.savedMouseWindow
-            window.mouseMoved(mouseRow, mouseCol, bstate&curses.BUTTON_SHIFT,
-                bstate&curses.BUTTON_CTRL, bstate&curses.BUTTON_ALT)
-        elif bstate & curses.REPORT_MOUSE_POSITION:
+            window.mouseMoved(mouseRow, mouseCol, bState&curses.BUTTON_SHIFT,
+                bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
+        elif bState & curses.REPORT_MOUSE_POSITION:
           #app.log.info('REPORT_MOUSE_POSITION')
           if self.savedMouseX == mouseCol and self.savedMouseY == mouseRow:
             # This is a hack for dtterm on Mac OS X.
-            window.mouseWheelUp(bstate&curses.BUTTON_SHIFT,
-                bstate&curses.BUTTON_CTRL, bstate&curses.BUTTON_ALT)
+            window.mouseWheelUp(bState&curses.BUTTON_SHIFT,
+                bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
           else:
             if self.savedMouseWindow and self.savedMouseWindow is not window:
               mouseRow += window.top - self.savedMouseWindow.top
               mouseCol += window.left - self.savedMouseWindow.left
               window = self.savedMouseWindow
-            window.mouseMoved(mouseRow, mouseCol, bstate&curses.BUTTON_SHIFT,
-                bstate&curses.BUTTON_CTRL, bstate&curses.BUTTON_ALT)
+            window.mouseMoved(mouseRow, mouseCol, bState&curses.BUTTON_SHIFT,
+                bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
         else:
-          app.log.info('got bstate', app.curses_util.mouseButtonName(bstate),
-              bstate)
+          app.log.info('got bState', app.curses_util.mouseButtonName(bState),
+              bState)
         self.savedMouseWindow = window
         self.savedMouseX = mouseCol
         self.savedMouseY = mouseRow
