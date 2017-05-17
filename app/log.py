@@ -42,16 +42,16 @@ def parseLines(frame, channel, *args):
     msg += prior
   return msg.split("\n")
 
-def chanEnable(channel, isEnabled):
+def channelEnable(channel, isEnabled):
   global enabledChannels, fullLog, shouldWritePrintLog
-  fullLog += ["%10s %10s: %s %r" % ('logging', 'chanEnable', channel, isEnabled)]
+  fullLog += ["%10s %10s: %s %r" % ('logging', 'channelEnable', channel, isEnabled)]
   if isEnabled:
     enabledChannels[channel] = isEnabled
     shouldWritePrintLog = True
   else:
     enabledChannels.pop(channel, None)
 
-def chan(channel, *args):
+def channel(channel, *args):
   global enabledChannels, fullLog, screenLog
   if channel in enabledChannels:
     lines = parseLines(inspect.stack()[2], channel, *args)
@@ -69,13 +69,13 @@ def stack():
     fullLog += line
 
 def info(*args):
-  chan('info', *args)
+  channel('info', *args)
 
 def parser(*args):
-  chan('parser', *args)
+  channel('parser', *args)
 
 def startup(*args):
-  chan('startup', *args)
+  channel('startup', *args)
 
 def debug(*args):
   global enabledChannels, fullLog, screenLog
@@ -95,17 +95,17 @@ def error(*args):
   lines = parseLines(inspect.stack()[1], 'error', *args)
   fullLog += lines
 
-def wrapper(func, shouldWrite=True):
+def wrapper(function, shouldWrite=True):
   global shouldWritePrintLog
   shouldWritePrintLog = shouldWrite
   r = -1
   try:
     try:
-      r = func()
+      r = function()
     except BaseException, e:
       shouldWritePrintLog = True
-      errorType, value, tb = sys.exc_info()
-      out = traceback.format_exception(errorType, value, tb)
+      errorType, value, tracebackInfo = sys.exc_info()
+      out = traceback.format_exception(errorType, value, tracebackInfo)
       for i in out:
         error(i[:-1])
   finally:

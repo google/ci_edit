@@ -400,13 +400,13 @@ class CiProgram:
       else:
         self.cliFiles.append({'path': i})
     if logInfo:
-      app.log.chanEnable('info', True)
-      app.log.chanEnable('debug', True)
-      app.log.chanEnable('detail', True)
-      app.log.chanEnable('error', True)
-    app.log.chanEnable('debug', logDebug)
-    app.log.chanEnable('parser', logParser)
-    app.log.chanEnable('startup', logStartup)
+      app.log.channelEnable('info', True)
+      app.log.channelEnable('debug', True)
+      app.log.channelEnable('detail', True)
+      app.log.channelEnable('error', True)
+    app.log.channelEnable('debug', logDebug)
+    app.log.channelEnable('parser', logParser)
+    app.log.channelEnable('startup', logStartup)
     app.prefs.init()
 
   def quit(self):
