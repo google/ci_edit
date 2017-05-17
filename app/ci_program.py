@@ -476,8 +476,8 @@ def wrapped_ci(cursesScreen):
     prg = CiProgram(cursesScreen)
     prg.run()
   except Exception, e:
-    errorType, value, tb = sys.exc_info()
-    out = traceback.format_exception(errorType, value, tb)
+    errorType, value, tracebackInfo = sys.exc_info()
+    out = traceback.format_exception(errorType, value, tracebackInfo)
     for i in out:
       app.log.error(i[:-1])
 
