@@ -19,10 +19,13 @@ import app.log
 import app.prefs
 import app.text_buffer
 import app.window
+import cProfile
 import os
+import pstats
 import sys
 import cPickle as pickle
 import curses
+import StringIO
 import time
 import traceback
 
@@ -363,6 +366,7 @@ class CiProgram:
     self.debugRedo = False
     self.showLogWindow = False
     self.cliFiles = []
+    self.profile = False
     self.readStdin = False
     takeAll = False
     logInfo = False
@@ -372,6 +376,7 @@ class CiProgram:
     for i in sys.argv[1:]:
       if not takeAll and i[:2] == '--':
         self.debugRedo = self.debugRedo or i == '--debugRedo'
+        self.profile = self.profile or i == '--profile'
         self.showLogWindow = self.showLogWindow or i == '--log'
         logInfo = logInfo or i == '--logDetail'
         logInfo = logInfo or i == '--p'
@@ -448,7 +453,17 @@ class CiProgram:
     app.history.loadUserHistory()
     app.curses_util.hackCursesFixes()
     self.startup()
-    self.commandLoop()
+    if self.profile:
+      profile = cProfile.Profile()
+      profile.enable()
+      self.commandLoop()
+      profile.disable()
+      output = StringIO.StringIO()
+      stats = pstats.Stats(profile, stream=output).sort_stats('cumulative')
+      stats.print_stats()
+      app.log.info(output.getvalue())
+    else:
+      self.commandLoop()
     app.history.saveUserHistory()
 
   def shiftPalette(self):
