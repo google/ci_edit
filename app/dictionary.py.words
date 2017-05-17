@@ -21,8 +21,11 @@ dirs
 elif
 en
 endswith
+environ
+exc
 expanduser
 finditer
+getch
 getcwd
 getmaxyx
 gid
@@ -34,6 +37,7 @@ isdir
 isfile
 isprint
 len
+makedirs
 max
 maxint
 min
@@ -54,6 +58,7 @@ repr
 repr
 sel
 sep
+setdefault
 splitext
 sre
 str
