@@ -2,11 +2,11 @@
 # Use of this source code is governed by an Apache-style license that can be
 # found in the LICENSE file.
 
-# This is a list of non-English words that are commonly found in Python source
-# files.
+# This is a list of non-English words that are in Python libraries.
 app
 ascii
 atime
+baudrate
 chr
 col
 cols
@@ -24,10 +24,14 @@ endswith
 environ
 exc
 expanduser
+expandvars
 finditer
 getch
 getcwd
 getmaxyx
+getmouse
+getvalue
+getyx
 gid
 goto
 iglob
@@ -48,6 +52,7 @@ ord
 os
 pid
 popen
+pstats
 pyperclip
 re
 readlines
@@ -55,7 +60,7 @@ regex
 regs
 relpath
 repr
-repr
+resizeterm
 sel
 sep
 setdefault
