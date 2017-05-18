@@ -102,7 +102,6 @@ class Parser:
     # An arbitrary limit to avoid run-away looping.
     leash = 10000
     cursor = 0
-    cursorRowStart = 0
     grammarStack = [self.grammarList[-1].grammar]
     while len(grammarStack):
       if not leash:
@@ -133,7 +132,6 @@ class Parser:
         child.grammar = grammarStack[-1]
         child.begin = cursor + reg[1]
         cursor = child.begin
-        cursorRowStart = child.begin
         self.grammarRowList.append([])
       elif index == 1:
         # Found end of current grammar section (an 'end').
@@ -142,7 +140,6 @@ class Parser:
         child.begin = cursor + reg[1]
         cursor = child.begin
         if subdata[reg[0]:reg[1]] == '\n':
-          cursorRowStart = child.begin
           self.grammarRowList.append([])
       else:
         # A new grammar within this grammar (a 'contains').
