@@ -51,7 +51,12 @@ class Parser:
     sentinel.grammar = {}
     sentinel.begin = sys.maxint
     sentinel.col = sys.maxint
-    app.log.info(len(self.grammarRowList))
+    if row >= len(self.grammarRowList):
+      # This file is too large. There's other ways to handle this, but for now
+      # let's leave the tail un-highlighted.
+      empty = ParserNode()
+      empty.grammar = {}
+      return empty, sys.maxint
     gl = self.grammarRowList[row] + [sentinel]
     offset = gl[0].begin + col
     low = 0
@@ -95,7 +100,7 @@ class Parser:
 
   def buildGrammarList(self):
     # An arbitrary limit to avoid run-away looping.
-    leash = 100000
+    leash = 10000
     cursor = 0
     cursorRowStart = 0
     grammarStack = [self.grammarList[-1].grammar]
