@@ -1459,12 +1459,14 @@ class TextBuffer(BackingTextBuffer):
             if 1:
               # Highlight keywords.
               keywordsColor = node.grammar.get('keywordsColor', defaultColor)
-              for found in node.grammar['keywordsRe'].finditer(line):
+              regex = node.grammar.get('keywordsRe', app.prefs.kReNonMatching)
+              for found in regex.finditer(line):
                 f = found.regs[0]
                 window.addStr(i, col+f[0], line[f[0]:f[1]], keywordsColor)
               # Highlight specials.
               keywordsColor = node.grammar.get('specialsColor', defaultColor)
-              for found in node.grammar['specialsRe'].finditer(line):
+              regex = node.grammar.get('specialsRe', app.prefs.kReNonMatching)
+              for found in regex.finditer(line):
                 f = found.regs[0]
                 window.addStr(i, col+f[0], line[f[0]:f[1]], keywordsColor)
               k += length

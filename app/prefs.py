@@ -30,6 +30,9 @@ specialsColorIndex = 20
 stringColorIndex = 5
 outsideOfBufferColorIndex = 0
 
+kNonMatchingRegex = r'^\b$'
+kReNonMatching = re.compile(kNonMatchingRegex)
+
 def joinReList(reList):
   return r"("+r")|(".join(reList)+r")"
 
@@ -490,14 +493,14 @@ for k,v in prefs['grammar'].items():
     matchGrammars.append(v)
   else:
     # Add a non-matchable placeholder.
-    markers.append(r'^\b$')
+    markers.append(kNonMatchingRegex)
     matchGrammars.append(None)
   if v.get('end'):
     markers.append(v['end'])
     matchGrammars.append(v)
   else:
     # Add a non-matchable placeholder.
-    markers.append(r'^\b$')
+    markers.append(kNonMatchingRegex)
     matchGrammars.append(None)
   for grammarName in v.get('contains', []):
     g = grammars.get(grammarName, None)
