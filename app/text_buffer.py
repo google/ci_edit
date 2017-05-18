@@ -25,6 +25,7 @@ import difflib
 import os
 import re
 import sys
+import time
 import traceback
 
 
@@ -44,6 +45,7 @@ class Mutator(app.selectable.Selectable):
     self.fullPath = ''
     self.penGrammar = None
     self.parser = None
+    self.parserTime = None
     self.relativePath = ''
     self.scrollToRow = 0
     self.redoChain = []
@@ -1263,7 +1265,9 @@ class BackingTextBuffer(Mutator):
     self.linesToData()
     if not self.parser:
       self.parser = app.parser.Parser()
+    start = time.time()
     self.parser.parse(self.data, self.rootGrammar)
+    self.parserTime = time.time() - start
 
   def doSelectionMode(self, mode):
     if self.selectionMode != mode:
@@ -1427,8 +1431,12 @@ class TextBuffer(BackingTextBuffer):
       for i in range(rowLimit):
         k = startCol
         while k < endCol:
-          node, remaining = self.parser.grammarFromOffset(
-              self.getPenOffset(self.view.scrollRow+i, k))
+          if 0:
+            node, remaining = self.parser.grammarFromOffset(
+                self.getPenOffset(self.view.scrollRow+i, k))
+          else:
+            node, remaining = self.parser.grammarFromRowCol(
+                self.view.scrollRow+i, k)
           lastCol = min(endCol, k+remaining)
           line = self.lines[self.view.scrollRow+i][k:lastCol]
           length = len(line)

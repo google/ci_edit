@@ -220,8 +220,8 @@ class CiProgram:
             self.debugWindow.color)
     screenRows, screenCols = self.stdscr.getmaxyx()
     self.debugWindow.writeLine(
-        "scr rows %d cols %d mlt %f/%f"
-        %(screenRows, screenCols, self.mainLoopTime, self.mainLoopTimePeak))
+        "scr rows %d cols %d mlt %f/%f pt %f"
+        %(screenRows, screenCols, self.mainLoopTime, self.mainLoopTimePeak, textBuffer.parserTime))
     self.debugWindow.writeLine(
         "ch %3s %s"
         %(self.ch, app.curses_util.cursesKeyName(self.ch)),

@@ -509,6 +509,8 @@ for k,v in prefs['grammar'].items():
       sys.exit(1)
     markers.append(g['begin'])
     matchGrammars.append(g)
+  markers.append(r'\n')
+  app.log.startup('makers', markers)
   v['matchRe'] = re.compile(joinReList(markers))
   v['matchGrammars'] = matchGrammars
 # Reset the re.cache for user regexes.

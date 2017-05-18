@@ -30,11 +30,13 @@ class ParserNode:
       grammar (maybe JavaScript, CSS, comment, or quoted string for example."""
   def __init__(self):
     self.grammar = None
-    self.begin = None
+    self.begin = None  # Offset from start of file.
+    self.col = None  # Offset from start of line.
+    self.note = ''
 
   def debugLog(self, out, indent, data):
-    out('%sParserNode %16s %4d %s' % (indent, self.grammar.get('name', 'None'),
-        self.begin, repr(data[self.begin:self.begin+15])[1:-1]))
+    out('%sParserNode %16s %4d %4d %s' % (indent, self.grammar.get('name', 'None'),
+        self.begin, self.col, repr(data[self.begin:self.begin+15])[1:-1]), self.note)
 
 
 class Parser:
@@ -43,7 +45,26 @@ class Parser:
     self.data = ""
     self.grammarPrefs = app.prefs.prefs['grammar']
     self.grammarList = []
+    self.grammarRowList = []
     app.log.parser('__init__')
+
+  def grammarFromRowCol(self, row, offset):
+    sentinel = ParserNode()
+    sentinel.grammar = {}
+    sentinel.begin = sys.maxint
+    sentinel.col = sys.maxint
+    app.log.info(len(self.grammarRowList))
+    gl = self.grammarRowList[row] + [sentinel]
+    low = 0
+    high = len(gl)-1
+    while True:
+      index = (high+low)/2
+      if offset >= gl[index+1].col:
+        low = index
+      elif offset < gl[index].col:
+        high = index
+      else:
+        return gl[index], gl[index+1].col-offset
 
   def grammarFromOffset(self, offset):
     gl = self.grammarList
@@ -64,7 +85,9 @@ class Parser:
     node = ParserNode()
     node.grammar = grammar
     node.begin = 0
+    node.col = 0
     self.grammarList = [node]
+    self.grammarRowList = [[node]]
     startTime = time.time()
     self.buildGrammarList()
     totalTime = time.time() - startTime
@@ -72,8 +95,10 @@ class Parser:
     app.log.startup('parsing took', totalTime)
 
   def buildGrammarList(self):
-    leash = 30000
+    # An arbitrary limit to avoid run-away looping.
+    leash = 100000
     cursor = 0
+    cursorRowStart = 0
     grammarStack = [self.grammarList[-1].grammar]
     while len(grammarStack):
       if not leash:
@@ -99,29 +124,58 @@ class Parser:
         cursor += reg[1]
         continue
       child = ParserNode()
-      if index == 1:
+      app.log.parser('-------------', index, len(found.groups()))
+      if index == len(found.groups()) - 1:
+        # Found new line.
+        child.grammar = grammarStack[-1]
+        child.begin = cursor + reg[1]
+        child.col = 0
+        cursor = child.begin
+        cursorRowStart = child.begin
+        self.grammarRowList.append([])
+      elif index == 1:
         # Found end of current grammar section (an 'end').
         grammarStack.pop()
         child.grammar = grammarStack[-1]
         child.begin = cursor + reg[1]
+        child.col = cursor + reg[1] - cursorRowStart
         cursor = child.begin
+        if subdata[reg[0]:reg[1]] == '\n':
+          child.col = 0
+          cursorRowStart = child.begin
+          self.grammarRowList.append([])
       else:
         # A new grammar within this grammar (a 'contains').
         child.grammar = grammarStack[-1].get('matchGrammars', [])[index]
         child.begin = cursor + reg[0]
+        child.col = cursor + reg[0] - cursorRowStart
         cursor += reg[1]
         grammarStack.append(child.grammar)
       if len(self.grammarList) and self.grammarList[-1].begin == child.begin:
+        child.note = 'replacing row %d' % (len(self.grammarRowList),)
         self.grammarList[-1] = child
+        self.grammarRowList[-1][-1] = child
       else:
+        child.note = 'appending row %d' % (len(self.grammarRowList),)
         self.grammarList.append(child)
+        self.grammarRowList[-1].append(child)
     sentinel = ParserNode()
     sentinel.grammar = {}
     sentinel.begin = sys.maxint
+    sentinel.col = sys.maxint
     self.grammarList.append(sentinel)
 
   def debugLog(self, out, data):
     out('parser debug:')
+    out('grammarList ----------------', len(self.grammarList))
     for node in self.grammarList:
       node.debugLog(out, '  ', data)
+    out('RowList ----------------', len(self.grammarRowList))
+    for i,rowList in enumerate(self.grammarRowList):
+      out('row', i+1)
+      for node in rowList:
+        if node is None:
+          out('a None')
+          continue
+        node.debugLog(out, '  ', data)
 
