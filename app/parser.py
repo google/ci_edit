@@ -31,12 +31,10 @@ class ParserNode:
   def __init__(self):
     self.grammar = None
     self.begin = None  # Offset from start of file.
-    self.col = None  # Offset from start of line.
-    self.note = ''
 
   def debugLog(self, out, indent, data):
-    out('%sParserNode %16s %4d %4d %s' % (indent, self.grammar.get('name', 'None'),
-        self.begin, self.col, repr(data[self.begin:self.begin+15])[1:-1]), self.note)
+    out('%sParserNode %16s %4d %s' % (indent, self.grammar.get('name', 'None'),
+        self.begin, repr(data[self.begin:self.begin+15])[1:-1]))
 
 
 class Parser:
@@ -48,23 +46,24 @@ class Parser:
     self.grammarRowList = []
     app.log.parser('__init__')
 
-  def grammarFromRowCol(self, row, offset):
+  def grammarFromRowCol(self, row, col):
     sentinel = ParserNode()
     sentinel.grammar = {}
     sentinel.begin = sys.maxint
     sentinel.col = sys.maxint
     app.log.info(len(self.grammarRowList))
     gl = self.grammarRowList[row] + [sentinel]
+    offset = gl[0].begin + col
     low = 0
     high = len(gl)-1
     while True:
       index = (high+low)/2
-      if offset >= gl[index+1].col:
+      if offset >= gl[index+1].begin:
         low = index
-      elif offset < gl[index].col:
+      elif offset < gl[index].begin:
         high = index
       else:
-        return gl[index], gl[index+1].col-offset
+        return gl[index], gl[index+1].begin-offset
 
   def grammarFromOffset(self, offset):
     gl = self.grammarList
@@ -85,7 +84,6 @@ class Parser:
     node = ParserNode()
     node.grammar = grammar
     node.begin = 0
-    node.col = 0
     self.grammarList = [node]
     self.grammarRowList = [[node]]
     startTime = time.time()
@@ -129,7 +127,6 @@ class Parser:
         # Found new line.
         child.grammar = grammarStack[-1]
         child.begin = cursor + reg[1]
-        child.col = 0
         cursor = child.begin
         cursorRowStart = child.begin
         self.grammarRowList.append([])
@@ -138,31 +135,25 @@ class Parser:
         grammarStack.pop()
         child.grammar = grammarStack[-1]
         child.begin = cursor + reg[1]
-        child.col = cursor + reg[1] - cursorRowStart
         cursor = child.begin
         if subdata[reg[0]:reg[1]] == '\n':
-          child.col = 0
           cursorRowStart = child.begin
           self.grammarRowList.append([])
       else:
         # A new grammar within this grammar (a 'contains').
         child.grammar = grammarStack[-1].get('matchGrammars', [])[index]
         child.begin = cursor + reg[0]
-        child.col = cursor + reg[0] - cursorRowStart
         cursor += reg[1]
         grammarStack.append(child.grammar)
       if len(self.grammarList) and self.grammarList[-1].begin == child.begin:
-        child.note = 'replacing row %d' % (len(self.grammarRowList),)
         self.grammarList[-1] = child
         self.grammarRowList[-1][-1] = child
       else:
-        child.note = 'appending row %d' % (len(self.grammarRowList),)
         self.grammarList.append(child)
         self.grammarRowList[-1].append(child)
     sentinel = ParserNode()
     sentinel.grammar = {}
     sentinel.begin = sys.maxint
-    sentinel.col = sys.maxint
     self.grammarList.append(sentinel)
 
   def debugLog(self, out, data):
