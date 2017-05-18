@@ -91,7 +91,8 @@ class Parser:
     startTime = time.time()
     self.buildGrammarList()
     totalTime = time.time() - startTime
-    self.debugLog(app.log.parser, data)
+    if app.log.enabledChannels.get('parser', False):
+      self.debugLog(app.log.parser, data)
     app.log.startup('parsing took', totalTime)
 
   def buildGrammarList(self):
@@ -124,7 +125,6 @@ class Parser:
         cursor += reg[1]
         continue
       child = ParserNode()
-      app.log.parser('-------------', index, len(found.groups()))
       if index == len(found.groups()) - 1:
         # Found new line.
         child.grammar = grammarStack[-1]
