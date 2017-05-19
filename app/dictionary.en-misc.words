@@ -1,11 +1,21 @@
 # Abbreviations
 blvd
+concat
+config
+dbg
+expr
+lang
 nd
 ok
 rd
 st
-concat
-config
+
+
+# Lorem ipsum
+adipiscing
+amet
+consectetur
+elit
 
 
 # Acronyms (acronyms that match trademarks are not a challenge to said marks)
@@ -37,6 +47,7 @@ usb
 alice
 america
 apache
+australian
 bezier
 bluetooth
 bob
@@ -46,6 +57,7 @@ chen
 china
 chris
 christopher
+chromebook
 dan
 darwin
 dave
@@ -56,6 +68,7 @@ english
 euler
 frank
 fred
+gmail
 google
 hector
 henry
@@ -64,6 +77,7 @@ janelle
 japan
 japanese
 jason
+joe
 justin
 karl
 katey
@@ -71,6 +85,7 @@ kevin
 lei
 linux
 lisa
+macosx
 mary
 mathew
 matt
@@ -89,6 +104,7 @@ steven
 tom
 tommy
 touchpad
+verisign
 
 
 # Chromium (May be specific to Chromium development)
@@ -97,35 +113,17 @@ browsertest
 codereview
 hotword
 newtabpage
+tryserver
 uma
 wildcard
 
 
 # Unfiled (todo)
 crx
-dbg
-describedby
 embedder
-endif
-expr
-flexbox
 foobarbaz
 gtest
-href
-keydown
-labelledby
-lang
-mailto
-nullptr
-popstate
-popups
-proto
-refptr
-rv
-tabindex
 teardown
-tryserver
-typedef
 typedeffed
 webcal
 webprefs
