@@ -30,7 +30,7 @@ class ParserNode:
       grammar (maybe JavaScript, CSS, comment, or quoted string for example."""
   def __init__(self):
     self.grammar = None
-    self.begin = None
+    self.begin = None  # Offset from start of file.
 
   def debugLog(self, out, indent, data):
     out('%sParserNode %16s %4d %s' % (indent, self.grammar.get('name', 'None'),
@@ -42,11 +42,23 @@ class Parser:
   def __init__(self):
     self.data = ""
     self.grammarPrefs = app.prefs.prefs['grammar']
-    self.grammarList = []
+    self.grammarRowList = []
     app.log.parser('__init__')
 
-  def grammarFromOffset(self, offset):
-    gl = self.grammarList
+  def grammarFromRowCol(self, row, col):
+    sentinel = ParserNode()
+    sentinel.grammar = {}
+    sentinel.begin = sys.maxint
+    sentinel.col = sys.maxint
+    if row >= len(self.grammarRowList):
+      # This file is too large. There's other ways to handle this, but for now
+      # let's leave the tail un-highlighted.
+      empty = ParserNode()
+      empty.grammar = {}
+      return empty, sys.maxint
+    gl = self.grammarRowList[row] + [sentinel]
+    offset = gl[0].begin + col
+    # Binary search to find the node for the column.
     low = 0
     high = len(gl)-1
     while True:
@@ -64,17 +76,19 @@ class Parser:
     node = ParserNode()
     node.grammar = grammar
     node.begin = 0
-    self.grammarList = [node]
+    self.grammarRowList = [[node]]
     startTime = time.time()
     self.buildGrammarList()
     totalTime = time.time() - startTime
-    self.debugLog(app.log.parser, data)
+    if app.log.enabledChannels.get('parser', False):
+      self.debugLog(app.log.parser, data)
     app.log.startup('parsing took', totalTime)
 
   def buildGrammarList(self):
-    leash = 30000
+    # An arbitrary limit to avoid run-away looping.
+    leash = 10000
     cursor = 0
-    grammarStack = [self.grammarList[-1].grammar]
+    grammarStack = [self.grammarRowList[0][-1].grammar]
     while len(grammarStack):
       if not leash:
         app.log.error('grammar likely caught in a loop')
@@ -99,29 +113,39 @@ class Parser:
         cursor += reg[1]
         continue
       child = ParserNode()
-      if index == 1:
+      if index == len(found.groups()) - 1:
+        # Found new line.
+        child.grammar = grammarStack[-1]
+        child.begin = cursor + reg[1]
+        cursor = child.begin
+        self.grammarRowList.append([])
+      elif index == 1:
         # Found end of current grammar section (an 'end').
         grammarStack.pop()
         child.grammar = grammarStack[-1]
         child.begin = cursor + reg[1]
         cursor = child.begin
+        if subdata[reg[0]:reg[1]] == '\n':
+          self.grammarRowList.append([])
       else:
         # A new grammar within this grammar (a 'contains').
         child.grammar = grammarStack[-1].get('matchGrammars', [])[index]
         child.begin = cursor + reg[0]
         cursor += reg[1]
         grammarStack.append(child.grammar)
-      if len(self.grammarList) and self.grammarList[-1].begin == child.begin:
-        self.grammarList[-1] = child
+      if len(self.grammarRowList[0]) and self.grammarRowList[0][-1].begin == child.begin:
+        self.grammarRowList[-1][-1] = child
       else:
-        self.grammarList.append(child)
-    sentinel = ParserNode()
-    sentinel.grammar = {}
-    sentinel.begin = sys.maxint
-    self.grammarList.append(sentinel)
+        self.grammarRowList[-1].append(child)
 
   def debugLog(self, out, data):
     out('parser debug:')
-    for node in self.grammarList:
-      node.debugLog(out, '  ', data)
+    out('RowList ----------------', len(self.grammarRowList))
+    for i,rowList in enumerate(self.grammarRowList):
+      out('row', i+1)
+      for node in rowList:
+        if node is None:
+          out('a None')
+          continue
+        node.debugLog(out, '  ', data)
 

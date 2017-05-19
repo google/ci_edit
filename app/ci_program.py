@@ -19,10 +19,13 @@ import app.log
 import app.prefs
 import app.text_buffer
 import app.window
+import cProfile
 import os
+import pstats
 import sys
 import cPickle as pickle
 import curses
+import StringIO
 import time
 import traceback
 
@@ -215,10 +218,10 @@ class CiProgram:
         "y %2d x %2d maxRow %d maxCol %d baud %d color %d"
         %(y, x, maxRow, maxCol, curses.baudrate(), curses.can_change_color()),
             self.debugWindow.color)
-    scrRows, scrCols = self.stdscr.getmaxyx()
+    screenRows, screenCols = self.stdscr.getmaxyx()
     self.debugWindow.writeLine(
-        "scr rows %d cols %d mlt %f/%f"
-        %(scrRows, scrCols, self.mainLoopTime, self.mainLoopTimePeak))
+        "scr rows %d cols %d mlt %f/%f pt %f"
+        %(screenRows, screenCols, self.mainLoopTime, self.mainLoopTimePeak, textBuffer.parserTime))
     self.debugWindow.writeLine(
         "ch %3s %s"
         %(self.ch, app.curses_util.cursesKeyName(self.ch)),
@@ -229,13 +232,13 @@ class CiProgram:
         self.debugWindow.color)
     self.debugWindow.writeLine("tb %r"%(textBuffer,),
         self.debugWindow.color)
-    (id, mouseCol, mouseRow, mousez, bstate) = self.debugMouseEvent
+    (id, mouseCol, mouseRow, mouseZ, bState) = self.debugMouseEvent
     self.debugWindow.writeLine(
-        "mouse id %d, mouseCol %d, mouseRow %d, mousez %d"
-        %(id, mouseCol, mouseRow, mousez), self.debugWindow.color)
+        "mouse id %d, mouseCol %d, mouseRow %d, mouseZ %d"
+        %(id, mouseCol, mouseRow, mouseZ), self.debugWindow.color)
     self.debugWindow.writeLine(
-        "bstate %s %d"
-        %(app.curses_util.mouseButtonName(bstate), bstate),
+        "bState %s %d"
+        %(app.curses_util.mouseButtonName(bState), bState),
             self.debugWindow.color)
     # Display some of the redo chain.
     self.debugWindow.writeLine(
@@ -277,7 +280,7 @@ class CiProgram:
     """Mouse handling is a special case. The getch() curses function will
     signal the existence of a mouse event, but the event must be fetched and
     parsed separately."""
-    (id, mouseCol, mouseRow, mousez, bstate) = info[0]
+    (id, mouseCol, mouseRow, mouseZ, bState) = info[0]
     eventTime = info[1]
     rapidClickTimeout = .5
     def findWindow(parent, mouseRow, mouseCol):
@@ -293,61 +296,61 @@ class CiProgram:
         mouseCol -= window.left
         app.log.info(mouseRow, mouseCol)
         app.log.info("\n",window)
-        #app.log.info('bstate', app.curses_util.mouseButtonName(bstate))
-        if bstate & curses.BUTTON1_RELEASED:
+        #app.log.info('bState', app.curses_util.mouseButtonName(bState))
+        if bState & curses.BUTTON1_RELEASED:
           if self.priorClick + rapidClickTimeout <= eventTime:
-            window.mouseRelease(mouseRow, mouseCol, bstate&curses.BUTTON_SHIFT,
-                bstate&curses.BUTTON_CTRL, bstate&curses.BUTTON_ALT)
-        elif bstate & curses.BUTTON1_PRESSED:
+            window.mouseRelease(mouseRow, mouseCol, bState&curses.BUTTON_SHIFT,
+                bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
+        elif bState & curses.BUTTON1_PRESSED:
           if (self.priorClick + rapidClickTimeout > eventTime and
               self.clickedNearby(mouseRow, mouseCol)):
             self.clicks += 1
             self.priorClick = eventTime
             if self.clicks == 2:
               window.mouseDoubleClick(mouseRow, mouseCol,
-                  bstate&curses.BUTTON_SHIFT, bstate&curses.BUTTON_CTRL,
-                  bstate&curses.BUTTON_ALT)
+                  bState&curses.BUTTON_SHIFT, bState&curses.BUTTON_CTRL,
+                  bState&curses.BUTTON_ALT)
             else:
               window.mouseTripleClick(mouseRow, mouseCol,
-                  bstate&curses.BUTTON_SHIFT, bstate&curses.BUTTON_CTRL,
-                  bstate&curses.BUTTON_ALT)
+                  bState&curses.BUTTON_SHIFT, bState&curses.BUTTON_CTRL,
+                  bState&curses.BUTTON_ALT)
               self.clicks = 1
           else:
             self.clicks = 1
             self.priorClick = eventTime
             self.priorClickRowCol = (mouseRow, mouseCol)
-            window.mouseClick(mouseRow, mouseCol, bstate&curses.BUTTON_SHIFT,
-                bstate&curses.BUTTON_CTRL, bstate&curses.BUTTON_ALT)
-        elif bstate & curses.BUTTON2_PRESSED:
-          window.mouseWheelUp(bstate&curses.BUTTON_SHIFT,
-              bstate&curses.BUTTON_CTRL, bstate&curses.BUTTON_ALT)
-        elif bstate & curses.BUTTON4_PRESSED:
+            window.mouseClick(mouseRow, mouseCol, bState&curses.BUTTON_SHIFT,
+                bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
+        elif bState & curses.BUTTON2_PRESSED:
+          window.mouseWheelUp(bState&curses.BUTTON_SHIFT,
+              bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
+        elif bState & curses.BUTTON4_PRESSED:
           if self.savedMouseX == mouseCol and self.savedMouseY == mouseRow:
-            window.mouseWheelDown(bstate&curses.BUTTON_SHIFT,
-                bstate&curses.BUTTON_CTRL, bstate&curses.BUTTON_ALT)
+            window.mouseWheelDown(bState&curses.BUTTON_SHIFT,
+                bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
           else:
             if self.savedMouseWindow and self.savedMouseWindow is not window:
               mouseRow += window.top - self.savedMouseWindow.top
               mouseCol += window.left - self.savedMouseWindow.left
               window = self.savedMouseWindow
-            window.mouseMoved(mouseRow, mouseCol, bstate&curses.BUTTON_SHIFT,
-                bstate&curses.BUTTON_CTRL, bstate&curses.BUTTON_ALT)
-        elif bstate & curses.REPORT_MOUSE_POSITION:
+            window.mouseMoved(mouseRow, mouseCol, bState&curses.BUTTON_SHIFT,
+                bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
+        elif bState & curses.REPORT_MOUSE_POSITION:
           #app.log.info('REPORT_MOUSE_POSITION')
           if self.savedMouseX == mouseCol and self.savedMouseY == mouseRow:
             # This is a hack for dtterm on Mac OS X.
-            window.mouseWheelUp(bstate&curses.BUTTON_SHIFT,
-                bstate&curses.BUTTON_CTRL, bstate&curses.BUTTON_ALT)
+            window.mouseWheelUp(bState&curses.BUTTON_SHIFT,
+                bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
           else:
             if self.savedMouseWindow and self.savedMouseWindow is not window:
               mouseRow += window.top - self.savedMouseWindow.top
               mouseCol += window.left - self.savedMouseWindow.left
               window = self.savedMouseWindow
-            window.mouseMoved(mouseRow, mouseCol, bstate&curses.BUTTON_SHIFT,
-                bstate&curses.BUTTON_CTRL, bstate&curses.BUTTON_ALT)
+            window.mouseMoved(mouseRow, mouseCol, bState&curses.BUTTON_SHIFT,
+                bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
         else:
-          app.log.info('got bstate', app.curses_util.mouseButtonName(bstate),
-              bstate)
+          app.log.info('got bState', app.curses_util.mouseButtonName(bState),
+              bState)
         self.savedMouseWindow = window
         self.savedMouseX = mouseCol
         self.savedMouseY = mouseRow
@@ -363,6 +366,7 @@ class CiProgram:
     self.debugRedo = False
     self.showLogWindow = False
     self.cliFiles = []
+    self.profile = False
     self.readStdin = False
     takeAll = False
     logInfo = False
@@ -372,6 +376,7 @@ class CiProgram:
     for i in sys.argv[1:]:
       if not takeAll and i[:2] == '--':
         self.debugRedo = self.debugRedo or i == '--debugRedo'
+        self.profile = self.profile or i == '--profile'
         self.showLogWindow = self.showLogWindow or i == '--log'
         logInfo = logInfo or i == '--logDetail'
         logInfo = logInfo or i == '--p'
@@ -395,13 +400,13 @@ class CiProgram:
       else:
         self.cliFiles.append({'path': i})
     if logInfo:
-      app.log.chanEnable('info', True)
-      app.log.chanEnable('debug', True)
-      app.log.chanEnable('detail', True)
-      app.log.chanEnable('error', True)
-    app.log.chanEnable('debug', logDebug)
-    app.log.chanEnable('parser', logParser)
-    app.log.chanEnable('startup', logStartup)
+      app.log.channelEnable('info', True)
+      app.log.channelEnable('debug', True)
+      app.log.channelEnable('detail', True)
+      app.log.channelEnable('error', True)
+    app.log.channelEnable('debug', logDebug)
+    app.log.channelEnable('parser', logParser)
+    app.log.channelEnable('startup', logStartup)
     app.prefs.init()
 
   def quit(self):
@@ -448,7 +453,17 @@ class CiProgram:
     app.history.loadUserHistory()
     app.curses_util.hackCursesFixes()
     self.startup()
-    self.commandLoop()
+    if self.profile:
+      profile = cProfile.Profile()
+      profile.enable()
+      self.commandLoop()
+      profile.disable()
+      output = StringIO.StringIO()
+      stats = pstats.Stats(profile, stream=output).sort_stats('cumulative')
+      stats.print_stats()
+      app.log.info(output.getvalue())
+    else:
+      self.commandLoop()
     app.history.saveUserHistory()
 
   def shiftPalette(self):
@@ -476,8 +491,8 @@ def wrapped_ci(cursesScreen):
     prg = CiProgram(cursesScreen)
     prg.run()
   except Exception, e:
-    errorType, value, tb = sys.exc_info()
-    out = traceback.format_exception(errorType, value, tb)
+    errorType, value, tracebackInfo = sys.exc_info()
+    out = traceback.format_exception(errorType, value, tracebackInfo)
     for i in out:
       app.log.error(i[:-1])
 

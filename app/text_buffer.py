@@ -13,18 +13,19 @@
 # limitations under the License.
 
 import app.buffer_manager
+import app.clipboard
 import app.log
 import app.history
 import app.parser
 import app.prefs
 import app.selectable
 import app.spelling
-import third_party.pyperclip as clipboard
 import curses.ascii
 import difflib
 import os
 import re
 import sys
+import time
 import traceback
 
 
@@ -44,6 +45,7 @@ class Mutator(app.selectable.Selectable):
     self.fullPath = ''
     self.penGrammar = None
     self.parser = None
+    self.parserTime = None
     self.relativePath = ''
     self.scrollToRow = 0
     self.redoChain = []
@@ -67,8 +69,8 @@ class Mutator(app.selectable.Selectable):
     """inefficient test hack. wip on parser"""
     if not self.parser:
       return 'no parser'
-    self.penGrammar = self.parser.grammarFromOffset(self.getPenOffset(
-        self.penRow, self.penCol))[0]
+    self.penGrammar = self.parser.grammarFromRowCol(
+        self.penRow, self.penCol)[0]
     if self.penGrammar is None:
       return 'None'
     return self.penGrammar.grammar.get('name', 'unknown')
@@ -77,8 +79,8 @@ class Mutator(app.selectable.Selectable):
     """inefficient test hack. wip on parser"""
     if not self.parser:
       return -2
-    remaining = self.parser.grammarFromOffset(self.getPenOffset(
-        self.penRow, self.penCol))[1]
+    remaining = self.parser.grammarFromRowCol(
+        self.penRow, self.penCol)[1]
     if remaining is None:
       return -1
     return remaining
@@ -371,7 +373,6 @@ class BackingTextBuffer(Mutator):
   def __init__(self):
     Mutator.__init__(self)
     self.view = None
-    self.clipList = []
     self.rootGrammar = app.prefs.getGrammar(None)
     self.skipUpdateScroll = False
 
@@ -768,26 +769,21 @@ class BackingTextBuffer(Mutator):
   def editCopy(self):
     text = self.getSelectedText()
     if len(text):
-      self.clipList.append(text)
       if self.selectionMode == app.selectable.kSelectionLine:
         text = text + ('',)
-      if clipboard.copy:
-        clipboard.copy(self.doLinesToData(text))
+      data = self.doLinesToData(text)
+      app.clipboard.copy(data)
 
   def editCut(self):
     self.editCopy()
     self.performDelete()
 
   def editPaste(self):
-    osClip = clipboard.paste and clipboard.paste()
-    if len(self.clipList) or osClip:
-      if osClip:
-        clip = tuple(self.doDataToLines(osClip))
-      else:
-        clip = self.clipList[-1]
-      self.editPasteLines(clip)
+    data = app.clipboard.paste()
+    if data is not None:
+      self.editPasteLines(tuple(self.doDataToLines(data)))
     else:
-      app.log.info('clipList empty')
+      app.log.info('clipboard empty')
 
   def editPasteLines(self, clip):
       if self.selectionMode != app.selectable.kSelectionNone:
@@ -1269,7 +1265,9 @@ class BackingTextBuffer(Mutator):
     self.linesToData()
     if not self.parser:
       self.parser = app.parser.Parser()
+    start = time.time()
     self.parser.parse(self.data, self.rootGrammar)
+    self.parserTime = time.time() - start
 
   def doSelectionMode(self, mode):
     if self.selectionMode != mode:
@@ -1433,8 +1431,8 @@ class TextBuffer(BackingTextBuffer):
       for i in range(rowLimit):
         k = startCol
         while k < endCol:
-          node, remaining = self.parser.grammarFromOffset(
-              self.getPenOffset(self.view.scrollRow+i, k))
+          node, remaining = self.parser.grammarFromRowCol(
+              self.view.scrollRow+i, k)
           lastCol = min(endCol, k+remaining)
           line = self.lines[self.view.scrollRow+i][k:lastCol]
           length = len(line)
@@ -1457,12 +1455,14 @@ class TextBuffer(BackingTextBuffer):
             if 1:
               # Highlight keywords.
               keywordsColor = node.grammar.get('keywordsColor', defaultColor)
-              for found in node.grammar['keywordsRe'].finditer(line):
+              regex = node.grammar.get('keywordsRe', app.prefs.kReNonMatching)
+              for found in regex.finditer(line):
                 f = found.regs[0]
                 window.addStr(i, col+f[0], line[f[0]:f[1]], keywordsColor)
               # Highlight specials.
               keywordsColor = node.grammar.get('specialsColor', defaultColor)
-              for found in node.grammar['specialsRe'].finditer(line):
+              regex = node.grammar.get('specialsRe', app.prefs.kReNonMatching)
+              for found in regex.finditer(line):
                 f = found.regs[0]
                 window.addStr(i, col+f[0], line[f[0]:f[1]], keywordsColor)
               k += length
@@ -1498,7 +1498,7 @@ class TextBuffer(BackingTextBuffer):
           ch = self.lines[self.penRow][self.penCol]
           def searchBack(closeCh, openCh):
             count = -1
-            for row in range(self.penRow, startRow, -1):
+            for row in range(self.penRow, -1, -1):
               line = self.lines[row]
               if row == self.penRow:
                 line = line[:self.penCol]
@@ -1517,7 +1517,7 @@ class TextBuffer(BackingTextBuffer):
           def searchForward(openCh, closeCh):
             count = 1
             colOffset = self.penCol+1
-            for row in range(self.penRow, startRow+maxRow):
+            for row in range(self.penRow, len(self.lines)):
               if row != self.penRow:
                 colOffset = 0
               line = self.lines[row][colOffset:]

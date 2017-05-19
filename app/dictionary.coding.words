@@ -1,6 +1,16 @@
-# Copyright 2017 The ci_edit Authors. All rights reserved.
-# Use of this source code is governed by an Apache-style license that can be
-# found in the LICENSE file.
+# Copyright 2016 Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 # This is a list of non-English words that are commonly found in programming
 # source code files.
@@ -34,11 +44,14 @@ dt
 dx
 edu
 emacs
+endif
 eq
 esc
+ethernet
 exe
 exec
 fd
+fi
 ftp
 gaia
 ge
@@ -56,6 +69,7 @@ hxx
 init
 intl
 ipsum
+ipv
 jpeg
 jpg
 json
@@ -71,21 +85,26 @@ msg
 na
 namespaces
 ne
+nullptr
 oauth
 obj
 pid
 png
+popups
 pos
 prev
 prg
+proto
 ptr
 px
 py
 pyc
 pyo
 rect
+refptr
 regex
 regexes
+rv
 signin
 skia
 src
@@ -97,6 +116,7 @@ stdout
 stylesheet
 svg
 sys
+sysex
 tar
 tgz
 todo
@@ -104,15 +124,20 @@ traceback
 tty
 txt
 typdef
+typedef
 ubuntu
 uid
 undef
 unicode
 unix
 utf
+vpn
+vpns
 webkit
 webview
 whitespace
+wi
+wifi
 xterm
 zterm
 zyyy

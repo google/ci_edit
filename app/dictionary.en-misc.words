@@ -1,11 +1,35 @@
+# Copyright 2016 Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 # Abbreviations
 blvd
+concat
+config
+dbg
+expr
+lang
 nd
 ok
 rd
 st
-concat
-config
+
+
+# Lorem ipsum
+adipiscing
+amet
+consectetur
+elit
 
 
 # Acronyms (acronyms that match trademarks are not a challenge to said marks)
@@ -35,23 +59,53 @@ usb
 
 # Names (names that match trademarks are not a challenge to said marks)
 alice
+america
+apache
+australian
 bezier
 bluetooth
 bob
 boolean
+california
 chen
+china
+chris
+christopher
+chromebook
 dan
+darwin
 dave
+david
+demetrios
+england
+english
 euler
+frank
+fred
+gmail
 google
 hector
+henry
+ian
+janelle
+japan
+japanese
+jason
+joe
 justin
+karl
+katey
+kevin
 lei
 linux
 lisa
+macosx
+mary
 mathew
 matt
+mexico
 michael
+midge
 omnibox
 rachel
 rebecca
@@ -59,46 +113,12 @@ richard
 ritch
 schuyler
 scott
+steve
 steven
+tom
+tommy
 touchpad
-Alice
-Apache
-America
-Bob
-California
-Chris
-Christopher
-China
-Dan
-Dave
-David
-Demetrios
-England
-English
-Frank
-Fred
-Henry
-Katey
-Hector
-Ian
-Janelle
-Japan
-Japanese
-Jason
-Karl
-Kevin
-Lei
-Mary
-Mexico
-Michael
-Midge
-Rachel
-Richard
-Schuyler
-Steve
-Steven
-Tom
-Tommy
+verisign
 
 
 # Chromium (May be specific to Chromium development)
@@ -107,35 +127,17 @@ browsertest
 codereview
 hotword
 newtabpage
+tryserver
 uma
 wildcard
 
 
 # Unfiled (todo)
 crx
-dbg
-describedby
 embedder
-endif
-expr
-flexbox
 foobarbaz
 gtest
-href
-keydown
-labelledby
-lang
-mailto
-nullptr
-popstate
-popups
-proto
-refptr
-rv
-tabindex
 teardown
-tryserver
-typedef
 typedeffed
 webcal
 webprefs
