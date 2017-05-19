@@ -166,8 +166,11 @@ class StaticWindow:
     self.rows -= rows
     if self.rows <= 0:
       return
-    self.cursorWindow.resize(self.rows, self.cols)
-    self.cursorWindow.mvwin(self.top, self.left)
+    try:
+      self.cursorWindow.resize(self.rows, self.cols)
+      self.cursorWindow.mvwin(self.top, self.left)
+    except:
+      app.log.error('window resize failed')
 
   def setParent(self, parent, layerIndex):
     if self.parent:
