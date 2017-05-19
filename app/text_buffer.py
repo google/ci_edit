@@ -69,8 +69,8 @@ class Mutator(app.selectable.Selectable):
     """inefficient test hack. wip on parser"""
     if not self.parser:
       return 'no parser'
-    self.penGrammar = self.parser.grammarFromOffset(self.getPenOffset(
-        self.penRow, self.penCol))[0]
+    self.penGrammar = self.parser.grammarFromRowCol(
+        self.penRow, self.penCol)[0]
     if self.penGrammar is None:
       return 'None'
     return self.penGrammar.grammar.get('name', 'unknown')
@@ -79,8 +79,8 @@ class Mutator(app.selectable.Selectable):
     """inefficient test hack. wip on parser"""
     if not self.parser:
       return -2
-    remaining = self.parser.grammarFromOffset(self.getPenOffset(
-        self.penRow, self.penCol))[1]
+    remaining = self.parser.grammarFromRowCol(
+        self.penRow, self.penCol)[1]
     if remaining is None:
       return -1
     return remaining
@@ -1431,12 +1431,8 @@ class TextBuffer(BackingTextBuffer):
       for i in range(rowLimit):
         k = startCol
         while k < endCol:
-          if 0:
-            node, remaining = self.parser.grammarFromOffset(
-                self.getPenOffset(self.view.scrollRow+i, k))
-          else:
-            node, remaining = self.parser.grammarFromRowCol(
-                self.view.scrollRow+i, k)
+          node, remaining = self.parser.grammarFromRowCol(
+              self.view.scrollRow+i, k)
           lastCol = min(endCol, k+remaining)
           line = self.lines[self.view.scrollRow+i][k:lastCol]
           length = len(line)

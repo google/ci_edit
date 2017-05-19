@@ -42,7 +42,6 @@ class Parser:
   def __init__(self):
     self.data = ""
     self.grammarPrefs = app.prefs.prefs['grammar']
-    self.grammarList = []
     self.grammarRowList = []
     app.log.parser('__init__')
 
@@ -59,19 +58,7 @@ class Parser:
       return empty, sys.maxint
     gl = self.grammarRowList[row] + [sentinel]
     offset = gl[0].begin + col
-    low = 0
-    high = len(gl)-1
-    while True:
-      index = (high+low)/2
-      if offset >= gl[index+1].begin:
-        low = index
-      elif offset < gl[index].begin:
-        high = index
-      else:
-        return gl[index], gl[index+1].begin-offset
-
-  def grammarFromOffset(self, offset):
-    gl = self.grammarList
+    # Binary search to find the node for the column.
     low = 0
     high = len(gl)-1
     while True:
@@ -89,7 +76,6 @@ class Parser:
     node = ParserNode()
     node.grammar = grammar
     node.begin = 0
-    self.grammarList = [node]
     self.grammarRowList = [[node]]
     startTime = time.time()
     self.buildGrammarList()
@@ -102,7 +88,7 @@ class Parser:
     # An arbitrary limit to avoid run-away looping.
     leash = 10000
     cursor = 0
-    grammarStack = [self.grammarList[-1].grammar]
+    grammarStack = [self.grammarRowList[0][-1].grammar]
     while len(grammarStack):
       if not leash:
         app.log.error('grammar likely caught in a loop')
@@ -147,22 +133,13 @@ class Parser:
         child.begin = cursor + reg[0]
         cursor += reg[1]
         grammarStack.append(child.grammar)
-      if len(self.grammarList) and self.grammarList[-1].begin == child.begin:
-        self.grammarList[-1] = child
+      if len(self.grammarRowList[0]) and self.grammarRowList[0][-1].begin == child.begin:
         self.grammarRowList[-1][-1] = child
       else:
-        self.grammarList.append(child)
         self.grammarRowList[-1].append(child)
-    sentinel = ParserNode()
-    sentinel.grammar = {}
-    sentinel.begin = sys.maxint
-    self.grammarList.append(sentinel)
 
   def debugLog(self, out, data):
     out('parser debug:')
-    out('grammarList ----------------', len(self.grammarList))
-    for node in self.grammarList:
-      node.debugLog(out, '  ', data)
     out('RowList ----------------', len(self.grammarRowList))
     for i,rowList in enumerate(self.grammarRowList):
       out('row', i+1)
