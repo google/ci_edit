@@ -49,6 +49,7 @@ ltr
 nasa
 os
 ssl
+tb
 ttfn
 wip
 www
@@ -127,6 +128,8 @@ browsertest
 codereview
 hotword
 newtabpage
+onc
+powerwash
 tryserver
 uma
 wildcard
