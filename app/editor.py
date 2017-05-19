@@ -310,10 +310,11 @@ class InteractivePrediction(app.controller.Controller):
   def onChange(self):
     input = self.textBuffer.lines[0]
     clip = []
+    limit = max(5, self.host.cols-10)
     for i,item in enumerate(self.items):
-      selection = '-->' if i == self.index else '   '
-      post = ' <--' if i == self.index else ''
-      clip.append("%s %s %s%s"%(selection, item[1], item[2], post))
+      prefix = '-->' if i == self.index else '   '
+      suffix = ' <--' if i == self.index else ''
+      clip.append("%s %s %s%s"%(prefix, item[1][-limit:], item[2], suffix))
     app.log.info(clip)
     self.host.textBuffer.selectionAll()
     self.host.textBuffer.editPasteLines(tuple(clip))
