@@ -14,10 +14,12 @@
 
 # This is a list of non-English words that are in Python libraries.
 abspath
+addstr
 app
 ascii
 atime
 baudrate
+chgat
 chr
 col
 cols
@@ -53,15 +55,19 @@ isdigit
 isdir
 isfile
 isprint
+leaveok
 len
 listdir
+lstrip
 makedirs
 max
 maxint
 min
 mtiem
 mtime
+mvwin
 ndiff
+newwin
 ord
 os
 pid
@@ -85,3 +91,4 @@ str
 sys
 traceback
 uid
+unittest
