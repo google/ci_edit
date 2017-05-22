@@ -92,7 +92,7 @@ class Mutator(app.selectable.Selectable):
         (self.redoIndex + 1 == self.savedAtRedoIndex and
           self.redoChain[self.redoIndex][0] == 'm') or
         (self.redoIndex - 1 == self.savedAtRedoIndex and
-          self.redoChain[self.redoIndex-1][0] == 'm'))
+          self.redoChain[self.redoIndex - 1][0] == 'm'))
     return not clean
 
   def isSafeToWrite(self):
@@ -130,11 +130,11 @@ class Mutator(app.selectable.Selectable):
         line = self.lines[self.penRow]
         self.penCol -= len(change[1])
         x = self.penCol
-        self.lines[self.penRow] = line[:x] + line[x+len(change[1]):]
+        self.lines[self.penRow] = line[:x] + line[x + len(change[1]):]
       elif change[0] == 'd':
         line = self.lines[self.penRow]
         x = self.penCol
-        self.lines[self.penRow] = line[:x] + line[x+len(change[1]):]
+        self.lines[self.penRow] = line[:x] + line[x + len(change[1]):]
       elif change[0] == 'dr':  # Redo delete range.
         self.doDelete(*change[1])
       elif change[0] == 'ds':  # Redo delete selection.
@@ -146,14 +146,14 @@ class Mutator(app.selectable.Selectable):
         self.penCol += len(change[1])
         self.goalCol = self.penCol
       elif change[0] == 'j':  # Redo join lines.
-        self.lines[self.penRow] += self.lines[self.penRow+1]
-        del self.lines[self.penRow+1]
+        self.lines[self.penRow] += self.lines[self.penRow + 1]
+        del self.lines[self.penRow + 1]
       elif change[0] == 'ld':  # Redo line diff.
         lines = []
         index = 0
         for ii in change[1]:
           if type(ii) is type(0):
-            for line in self.lines[index:index+ii]:
+            for line in self.lines[index:index + ii]:
               lines.append(line)
             index += ii
           elif ii[0] == '+':
@@ -163,8 +163,10 @@ class Mutator(app.selectable.Selectable):
         app.log.info('ld', self.lines == lines)
         self.lines = lines
       elif change[0] == 'm':  # Redo move
-        assert self.penRow+change[1][0] >= 0, "%s %s"%(self.penRow, change[1][0])
-        assert self.penCol+change[1][1] >= 0, "%s %s"%(self.penCol, change[1][1])
+        assert self.penRow + change[1][0] >= 0, "%s %s"%(
+            self.penRow, change[1][0])
+        assert self.penCol + change[1][1] >= 0, "%s %s"%(
+            self.penCol, change[1][1])
         self.penRow += change[1][0]
         self.penCol += change[1][1]
         self.goalCol += change[1][2]
@@ -174,34 +176,34 @@ class Mutator(app.selectable.Selectable):
       elif change[0] == 'n':
         # Redo split lines.
         line = self.lines[self.penRow]
-        self.lines.insert(self.penRow+1, line[self.penCol:])
+        self.lines.insert(self.penRow + 1, line[self.penCol:])
         self.lines[self.penRow] = line[:self.penCol]
         for i in range(max(change[1][0] - 1, 0)):
-          self.lines.insert(self.penRow+1, "")
+          self.lines.insert(self.penRow + 1, "")
       elif change[0] == 'v':  # Redo paste.
         self.insertLines(change[1])
       elif change[0] == 'vb':
         self.penCol -= len(change[1])
         row = min(self.markerRow, self.penRow)
         rowEnd = max(self.markerRow, self.penRow)
-        for i in range(row, rowEnd+1):
+        for i in range(row, rowEnd + 1):
           line = self.lines[i]
           x = self.penCol
-          self.lines[self.penRow] = line[:x] + line[x+len(change[1]):]
+          self.lines[self.penRow] = line[:x] + line[x + len(change[1]):]
       elif change[0] == 'vd':  # Redo vertical delete.
         upperRow = min(self.markerRow, self.penRow)
         lowerRow = max(self.markerRow, self.penRow)
         x = self.penCol
-        for i in range(upperRow, lowerRow+1):
+        for i in range(upperRow, lowerRow + 1):
           line = self.lines[i]
-          self.lines[i] = line[:x] + line[x+len(change[1]):]
+          self.lines[i] = line[:x] + line[x + len(change[1]):]
       elif change[0] == 'vi':  # Redo vertical insert.
         text = change[1]
         col = self.penCol
         row = min(self.markerRow, self.penRow)
         rowEnd = max(self.markerRow, self.penRow)
         app.log.info('do vi')
-        for i in range(row, rowEnd+1):
+        for i in range(row, rowEnd + 1):
           line = self.lines[i]
           self.lines[i] = line[:col] + text + line[col:]
       else:
@@ -286,12 +288,12 @@ class Mutator(app.selectable.Selectable):
         line = self.lines[self.penRow]
         x = self.penCol
         self.penCol -= len(change[1])
-        self.lines[self.penRow] = line[:x-len(change[1])] + line[x:]
+        self.lines[self.penRow] = line[:x - len(change[1])] + line[x:]
         self.goalCol = self.penCol
       elif change[0] == 'j':
         # Join lines.
         line = self.lines[self.penRow]
-        self.lines.insert(self.penRow+1, line[self.penCol:])
+        self.lines.insert(self.penRow + 1, line[self.penCol:])
         self.lines[self.penRow] = line[:self.penCol]
       elif change[0] == 'ld':  # Undo line diff.
         app.log.info('ld')
@@ -299,7 +301,7 @@ class Mutator(app.selectable.Selectable):
         index = 0
         for ii in change[1]:
           if type(ii) is type(0):
-            for line in self.lines[index:index+ii]:
+            for line in self.lines[index:index + ii]:
               lines.append(line)
             index += ii
           elif ii[0] == '+':
@@ -320,9 +322,9 @@ class Mutator(app.selectable.Selectable):
         return True
       elif change[0] == 'n':
         # Undo split lines.
-        self.lines[self.penRow] += self.lines[self.penRow+change[1][0]]
+        self.lines[self.penRow] += self.lines[self.penRow + change[1][0]]
         for i in range(change[1][0]):
-          del self.lines[self.penRow+1]
+          del self.lines[self.penRow + 1]
       elif change[0] == 'v':  # undo paste
         clip = change[1]
         row = self.penRow
@@ -331,16 +333,16 @@ class Mutator(app.selectable.Selectable):
         if len(clip) == 1:
           self.lines[row] = (
               self.lines[row][:col] +
-              self.lines[row][col+len(clip[0]):])
+              self.lines[row][col + len(clip[0]):])
         else:
           self.lines[row] = (self.lines[row][:col]+
-              self.lines[row+len(clip)-1][len(clip[-1]):])
+              self.lines[row + len(clip)-1][len(clip[-1]):])
           delLineCount = len(clip[1:-1])
-          del self.lines[row+1:row+1+delLineCount+1]
+          del self.lines[row + 1:row + 1 + delLineCount + 1]
       elif change[0] == 'vb':
         row = min(self.markerRow, self.penRow)
         endRow = max(self.markerRow, self.penRow)
-        for i in range(row, endRow+1):
+        for i in range(row, endRow + 1):
           line = self.lines[self.penRow]
           x = self.penCol
           self.lines[self.penRow] = line[:x] + change[1] + line[x:]
@@ -349,7 +351,7 @@ class Mutator(app.selectable.Selectable):
         upperRow = min(self.markerRow, self.penRow)
         lowerRow = max(self.markerRow, self.penRow)
         x = self.penCol
-        for i in range(upperRow, lowerRow+1):
+        for i in range(upperRow, lowerRow + 1):
           line = self.lines[i]
           self.lines[i] = line[:x] + change[1] + line[x:]
       elif change[0] == 'vi':  # Undo.
@@ -359,9 +361,9 @@ class Mutator(app.selectable.Selectable):
         endRow = max(self.markerRow, self.penRow)
         textLen = len(text)
         app.log.info('undo vi', textLen)
-        for i in range(row, endRow+1):
+        for i in range(row, endRow + 1):
           line = self.lines[i]
-          self.lines[i] = line[:col] + line[col+textLen:]
+          self.lines[i] = line[:col] + line[col + textLen:]
       else:
         app.log.info('ERROR: unknown undo.')
     return False
@@ -389,8 +391,8 @@ class BackingTextBuffer(Mutator):
           lower = max(self.penRow, self.markerRow)
           right = max(self.penCol, self.markerCol)
           self.cursorMoveAndMark(
-              upper-self.penRow, left-self.penCol, left-self.goalCol,
-              lower-self.markerRow, right-self.markerCol, 0)
+              upper - self.penRow, left - self.penCol, left - self.goalCol,
+              lower - self.markerRow, right - self.markerCol, 0)
           self.redo()
         elif (self.penRow > self.markerRow or
             (self.penRow == self.markerRow and
@@ -410,17 +412,17 @@ class BackingTextBuffer(Mutator):
         if lowerCol <= self.penCol:
           col = upperCol - lowerCol
         app.log.info(col)
-        self.cursorMove(0, col, self.penCol+col-self.goalCol)
+        self.cursorMove(0, col, self.penCol + col - self.goalCol)
         self.redo()
     elif upperRow <= self.penRow < lowerRow:
       app.log.info()
-      self.cursorMove(upperRow-self.penRow, upperCol-self.penCol,
-          upperCol-self.goalCol)
+      self.cursorMove(upperRow - self.penRow, upperCol - self.penCol,
+          upperCol - self.goalCol)
       self.redo()
     elif self.penRow == lowerRow:
       app.log.info()
       col = upperCol - lowerCol
-      self.cursorMove(upperRow-self.penRow, col, col-self.goalCol)
+      self.cursorMove(upperRow - self.penRow, col, col - self.goalCol)
       self.redo()
     if 1:
       self.redoAddChange((
@@ -439,7 +441,7 @@ class BackingTextBuffer(Mutator):
         self.joinLines()
     else:
       line = self.lines[self.penRow]
-      change = ('b', line[self.penCol-1:self.penCol])
+      change = ('b', line[self.penCol - 1:self.penCol])
       self.redoAddChange(change)
       self.redo()
 
@@ -450,7 +452,7 @@ class BackingTextBuffer(Mutator):
     self.cursorMove(1, -self.penCol, -self.goalCol)
     self.redo()
     if 1: # todo: if indent on CR
-      line = self.lines[self.penRow-1]
+      line = self.lines[self.penRow - 1]
       commonIndent = 2
       indent = 0
       while indent < len(line) and line[indent] == ' ':
@@ -492,15 +494,15 @@ class BackingTextBuffer(Mutator):
       markColDelta, selectionModeDelta):
     maxRow, maxCol = self.view.cursorWindow.getmaxyx()
     scrollRows = 0
-    if self.view.scrollRow > self.penRow+rowDelta:
-      scrollRows = self.penRow+rowDelta - self.view.scrollRow
-    elif self.penRow+rowDelta >= self.view.scrollRow+maxRow:
-      scrollRows = self.penRow+rowDelta - (self.view.scrollRow+maxRow-1)
+    if self.view.scrollRow > self.penRow + rowDelta:
+      scrollRows = self.penRow + rowDelta - self.view.scrollRow
+    elif self.penRow + rowDelta >= self.view.scrollRow + maxRow:
+      scrollRows = self.penRow + rowDelta - (self.view.scrollRow + maxRow - 1)
     scrollCols = 0
-    if self.view.scrollCol > self.penCol+colDelta:
-      scrollCols = self.penCol+colDelta - self.view.scrollCol
-    elif self.penCol+colDelta >= self.view.scrollCol+maxCol:
-      scrollCols = self.penCol+colDelta - (self.view.scrollCol+maxCol-1)
+    if self.view.scrollCol > self.penCol + colDelta:
+      scrollCols = self.penCol + colDelta - self.view.scrollCol
+    elif self.penCol + colDelta >= self.view.scrollCol + maxCol:
+      scrollCols = self.penCol + colDelta - (self.view.scrollCol + maxCol - 1)
     self.view.scrollRow += scrollRows
     self.view.scrollCol += scrollCols
     self.redoAddChange(('m', (rowDelta, colDelta, goalColDelta,
@@ -518,16 +520,16 @@ class BackingTextBuffer(Mutator):
         0,0, 0)))
 
   def cursorMoveDown(self):
-    if self.penRow+1 < len(self.lines):
-      self.cursorMove(1, self.cursorColDelta(self.penRow+1), 0)
+    if self.penRow + 1 < len(self.lines):
+      self.cursorMove(1, self.cursorColDelta(self.penRow + 1), 0)
       self.redo()
 
   def cursorMoveLeft(self):
     if self.penCol > 0:
-      self.cursorMove(0, -1, self.penCol-1 - self.goalCol)
+      self.cursorMove(0, -1, self.penCol - 1 - self.goalCol)
       self.redo()
     elif self.penRow > 0:
-      self.cursorMove(-1, len(self.lines[self.penRow-1]),
+      self.cursorMove(-1, len(self.lines[self.penRow - 1]),
           self.penCol - self.goalCol)
       self.redo()
 
@@ -535,16 +537,16 @@ class BackingTextBuffer(Mutator):
     if not self.lines:
       return
     if self.penCol < len(self.lines[self.penRow]):
-      self.cursorMove(0, 1, self.penCol+1 - self.goalCol)
+      self.cursorMove(0, 1, self.penCol + 1 - self.goalCol)
       self.redo()
-    elif self.penRow+1 < len(self.lines):
+    elif self.penRow + 1 < len(self.lines):
       self.cursorMove(1, -len(self.lines[self.penRow]),
           self.penCol - self.goalCol)
       self.redo()
 
   def cursorMoveUp(self):
     if self.penRow > 0:
-      lineLen = len(self.lines[self.penRow-1])
+      lineLen = len(self.lines[self.penRow - 1])
       if self.goalCol <= lineLen:
         self.cursorMove(-1, self.goalCol - self.penCol, 0)
         self.redo()
@@ -560,7 +562,8 @@ class BackingTextBuffer(Mutator):
 
   def cursorMoveTo(self, row, col):
     cursorRow = min(max(row, 0), len(self.lines)-1)
-    self.cursorMove(cursorRow-self.penRow, col-self.penCol, col-self.goalCol)
+    self.cursorMove(cursorRow - self.penRow, col - self.penCol,
+        col - self.goalCol)
     self.redo()
 
   def cursorMoveWordLeft(self):
@@ -577,10 +580,10 @@ class BackingTextBuffer(Mutator):
         if segment.start() < pos <= segment.end():
           pos = segment.start()
           break
-      self.cursorMove(0, pos-self.penCol, pos-self.goalCol)
+      self.cursorMove(0, pos - self.penCol, pos - self.goalCol)
       self.redo()
     elif self.penRow > 0:
-      self.cursorMove(-1, len(self.lines[self.penRow-1]),
+      self.cursorMove(-1, len(self.lines[self.penRow - 1]),
           self.penCol - self.goalCol)
       self.redo()
 
@@ -594,9 +597,9 @@ class BackingTextBuffer(Mutator):
         if segment.start() <= pos < segment.end():
           pos = segment.end()
           break
-      self.cursorMove(0, pos-self.penCol, pos-self.goalCol)
+      self.cursorMove(0, pos - self.penCol, pos - self.goalCol)
       self.redo()
-    elif self.penRow+1 < len(self.lines):
+    elif self.penRow + 1 < len(self.lines):
       self.cursorMove(1, -len(self.lines[self.penRow]),
           self.penCol - self.goalCol)
       self.redo()
@@ -624,7 +627,7 @@ class BackingTextBuffer(Mutator):
   def cursorSelectLineDown(self):
     """Set line selection and extend selection one row down."""
     self.selectionLine()
-    if self.lines and self.penRow+1 < len(self.lines):
+    if self.lines and self.penRow + 1 < len(self.lines):
       self.cursorMove(1, -self.penCol, -self.goalCol)
       self.redo()
       self.cursorMoveAndMark(*self.extendSelection())
@@ -676,7 +679,7 @@ class BackingTextBuffer(Mutator):
 
   def cursorEndOfLine(self):
     lineLen = len(self.lines[self.penRow])
-    self.cursorMove(0, lineLen-self.penCol, lineLen-self.goalCol)
+    self.cursorMove(0, lineLen - self.penCol, lineLen - self.goalCol)
     self.redo()
 
   def cursorPageDown(self):
@@ -686,12 +689,12 @@ class BackingTextBuffer(Mutator):
     penRowDelta = maxRow
     scrollDelta = maxRow
     if self.penRow + maxRow >= len(self.lines):
-      penRowDelta = len(self.lines)-self.penRow-1
+      penRowDelta = len(self.lines) - self.penRow - 1
     if self.view.scrollRow + 2*maxRow >= len(self.lines):
-      scrollDelta = len(self.lines)-maxRow-self.view.scrollRow
+      scrollDelta = len(self.lines) - maxRow - self.view.scrollRow
     self.view.scrollRow += scrollDelta
     self.cursorMoveScroll(penRowDelta,
-        self.cursorColDelta(self.penRow+penRowDelta), 0, 0, 0)
+        self.cursorColDelta(self.penRow + penRowDelta), 0, 0, 0)
     self.redo()
 
   def cursorPageUp(self):
@@ -706,7 +709,7 @@ class BackingTextBuffer(Mutator):
       scrollDelta = -self.view.scrollRow
     self.view.scrollRow += scrollDelta
     self.cursorMoveScroll(penRowDelta,
-        self.cursorColDelta(self.penRow+penRowDelta), 0, 0, 0)
+        self.cursorColDelta(self.penRow + penRowDelta), 0, 0, 0)
     self.redo()
 
   def cursorScrollTo(self, goalRow, window):
@@ -714,17 +717,17 @@ class BackingTextBuffer(Mutator):
     if len(self.lines) < maxRow:
       goalRow = 0
     elif goalRow < 0:
-      goalRow = len(self.lines)+goalRow-maxRow+1
-    #scrollTo = min(min(goalRow, len(self.lines)-1), len(self.lines)-maxRow-1)
-    # self.cursorMoveScroll(scrollTo-self.penRow, -self.penCol, 0,
-    #     scrollTo-self.view.scrollRow, -self.view.scrollCol)
+      goalRow = len(self.lines) + goalRow - maxRow + 1
+    #scrollTo = min(min(goalRow, len(self.lines) - 1), len(self.lines) - maxRow - 1)
+    # self.cursorMoveScroll(scrollTo - self.penRow, -self.penCol, 0,
+    #     scrollTo - self.view.scrollRow, -self.view.scrollCol)
     # self.redo()
     self.penRow = self.view.scrollRow = goalRow #hack
 
   def cursorScrollToMiddle(self):
     maxRow, maxCol = self.view.cursorWindow.getmaxyx()
     rowDelta = min(max(0, len(self.lines)-maxRow),
-                   max(0, self.penRow-maxRow/2))-self.view.scrollRow
+                   max(0, self.penRow - maxRow / 2))-self.view.scrollRow
     self.cursorMoveScroll(0, 0, 0, rowDelta, 0)
 
   def cursorStartOfLine(self):
@@ -742,7 +745,7 @@ class BackingTextBuffer(Mutator):
 
   def delCh(self):
     line = self.lines[self.penRow]
-    change = ('d', line[self.penCol:self.penCol+1])
+    change = ('d', line[self.penCol:self.penCol + 1])
     self.redoAddChange(change)
     self.redo()
 
@@ -751,7 +754,7 @@ class BackingTextBuffer(Mutator):
     if self.selectionMode != app.selectable.kSelectionNone:
       self.performDelete()
     elif self.penCol == len(self.lines[self.penRow]):
-      if self.penRow+1 < len(self.lines):
+      if self.penRow + 1 < len(self.lines):
         self.joinLines()
     else:
       self.delCh()
@@ -759,7 +762,7 @@ class BackingTextBuffer(Mutator):
   def deleteToEndOfLine(self):
     line = self.lines[self.penRow]
     if self.penCol == len(self.lines[self.penRow]):
-      if self.penRow+1 < len(self.lines):
+      if self.penRow + 1 < len(self.lines):
         self.joinLines()
     else:
       change = ('d', line[self.penCol:])
@@ -792,11 +795,11 @@ class BackingTextBuffer(Mutator):
       self.redo()
       rowDelta = len(clip)-1
       if rowDelta == 0:
-        endCol = self.penCol+len(clip[0])
+        endCol = self.penCol + len(clip[0])
       else:
         endCol = len(clip[-1])
-      self.cursorMove(rowDelta, endCol-self.penCol,
-          endCol-self.goalCol)
+      self.cursorMove(rowDelta, endCol - self.penCol,
+          endCol - self.goalCol)
       self.redo()
 
   def doLinesToData(self, data):
@@ -895,16 +898,16 @@ class BackingTextBuffer(Mutator):
     scrollCol = self.view.scrollCol
     maxRow, maxCol = self.view.cursorWindow.getmaxyx()
     if not (self.view.scrollRow < lineNumber <= self.view.scrollRow + maxRow):
-      scrollRow = max(lineNumber-10, 0)
+      scrollRow = max(lineNumber - 10, 0)
     if not (self.view.scrollCol < start <= self.view.scrollCol + maxCol):
-      scrollCol = max(start-10, 0)
+      scrollCol = max(start - 10, 0)
     self.doSelectionMode(app.selectable.kSelectionNone)
     self.view.scrollRow = scrollRow
     self.view.scrollCol = scrollCol
     self.cursorMoveScroll(
-        lineNumber-self.penRow,
-        start+length-self.penCol,
-        start+length-self.goalCol,
+        lineNumber - self.penRow,
+        start + length - self.penCol,
+        start + length - self.goalCol,
         0, 0)
     self.redo()
     self.doSelectionMode(mode)
@@ -960,7 +963,7 @@ class BackingTextBuffer(Mutator):
     separator = cmd[0]
     splitCmd = cmd.split(separator, 3)
     if len(splitCmd) < 4:
-      self.setMessage('An exchange needs three '+separator+' separators')
+      self.setMessage('An exchange needs three ' + separator + ' separators')
       return
     start, find, replace, flags = splitCmd
     self.linesToData()
@@ -1007,8 +1010,8 @@ class BackingTextBuffer(Mutator):
     # Current line.
     text = self.lines[self.penRow]
     if direction >= 0:
-      text = text[self.penCol+direction:]
-      offset = self.penCol+direction
+      text = text[self.penCol + direction:]
+      offset = self.penCol + direction
     else:
       text = text[:self.penCol]
       offset = 0
@@ -1018,14 +1021,14 @@ class BackingTextBuffer(Mutator):
       start = found.regs[1][1]
       end = found.regs[0][1]
       #app.log.info('found on line', self.penRow, start)
-      self.selectText(self.penRow, offset+start, end-start,
+      self.selectText(self.penRow, offset + start, end - start,
           app.selectable.kSelectionCharacter)
       return
     # To end of file.
     if direction >= 0:
-      theRange = range(self.penRow+1, len(self.lines))
+      theRange = range(self.penRow + 1, len(self.lines))
     else:
-      theRange = range(self.penRow-1, -1, -1)
+      theRange = range(self.penRow - 1, -1, -1)
     for i in theRange:
       found = localRe.search(self.lines[i])
       if found:
@@ -1035,7 +1038,7 @@ class BackingTextBuffer(Mutator):
           app.log.info('b found on line', i, repr(found))
         start = found.regs[1][1]
         end = found.regs[0][1]
-        self.selectText(i, start, end-start, app.selectable.kSelectionCharacter)
+        self.selectText(i, start, end - start, app.selectable.kSelectionCharacter)
         return
     # Warp around to the start of the file.
     self.setMessage('Find wrapped around.')
@@ -1049,7 +1052,7 @@ class BackingTextBuffer(Mutator):
         #app.log.info('c found on line', i, repr(found))
         start = found.regs[1][1]
         end = found.regs[0][1]
-        self.selectText(i, start, end-start, app.selectable.kSelectionCharacter)
+        self.selectText(i, start, end - start, app.selectable.kSelectionCharacter)
         return
     app.log.info('find not found')
     self.doSelectionMode(app.selectable.kSelectionNone)
@@ -1073,18 +1076,18 @@ class BackingTextBuffer(Mutator):
   def indent(self):
     if self.selectionMode == app.selectable.kSelectionNone:
       self.cursorMoveAndMark(0, -self.penCol, -self.goalCol,
-          self.penRow-self.markerRow, self.penCol-self.markerCol, 0)
+          self.penRow - self.markerRow, self.penCol - self.markerCol, 0)
       self.redo()
       self.indentLines()
     elif self.selectionMode == app.selectable.kSelectionAll:
-      self.cursorMoveAndMark(len(self.lines)-1-self.penRow, -self.penCol,
+      self.cursorMoveAndMark(len(self.lines) - 1 - self.penRow, -self.penCol,
           -self.goalCol, -self.markerRow, -self.markerCol,
-          app.selectable.kSelectionLine-self.selectionMode)
+          app.selectable.kSelectionLine - self.selectionMode)
       self.redo()
       self.indentLines()
     else:
       self.cursorMoveAndMark(0, -self.penCol, -self.goalCol,
-          0, -self.markerCol, app.selectable.kSelectionLine-self.selectionMode)
+          0, -self.markerCol, app.selectable.kSelectionLine - self.selectionMode)
       self.redo()
       self.indentLines()
 
@@ -1119,8 +1122,8 @@ class BackingTextBuffer(Mutator):
     self.redo()
 
   def markerPlace(self):
-    self.redoAddChange(('m', (0, 0, 0, self.penRow-self.markerRow,
-        self.penCol-self.markerCol, 0)))
+    self.redoAddChange(('m', (0, 0, 0, self.penRow - self.markerRow,
+        self.penCol - self.markerCol, 0)))
     self.redo()
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
@@ -1155,7 +1158,7 @@ class BackingTextBuffer(Mutator):
     row = max(0, min(self.view.scrollRow + paneRow, len(self.lines) - 1))
     col = max(0, self.view.scrollCol + paneCol)
     if self.selectionMode == app.selectable.kSelectionBlock:
-      self.cursorMoveAndMark(0, 0, 0, row-self.markerRow, col-self.markerCol, 0)
+      self.cursorMoveAndMark(0, 0, 0, row - self.markerRow, col - self.markerCol, 0)
       self.redo()
       return
     # If not block selection, restrict col to the chars on the line.
@@ -1204,7 +1207,7 @@ class BackingTextBuffer(Mutator):
     self.selectLineAt(self.view.scrollRow + paneRow)
 
   def scrollWindow(self, rows, cols):
-    self.cursorMoveScroll(rows, self.cursorColDelta(self.penRow-rows),
+    self.cursorMoveScroll(rows, self.cursorColDelta(self.penRow - rows),
         0, -1, 0)
     self.redo()
 
@@ -1222,7 +1225,7 @@ class BackingTextBuffer(Mutator):
     self.view.scrollRow -= 1
     if self.view.hasCaptiveCursor:
       self.cursorMoveScroll(cursorDelta,
-          self.cursorColDelta(self.penRow+cursorDelta), 0, 0, 0)
+          self.cursorColDelta(self.penRow + cursorDelta), 0, 0, 0)
       self.redo()
     else:
       self.skipUpdateScroll = True
@@ -1231,17 +1234,17 @@ class BackingTextBuffer(Mutator):
     if not shift:
       self.selectionNone()
     maxRow, maxCol = self.view.cursorWindow.getmaxyx()
-    if self.view.scrollRow+maxRow >= len(self.lines):
+    if self.view.scrollRow + maxRow >= len(self.lines):
       if not self.view.hasCaptiveCursor:
         self.skipUpdateScroll = True
       return
     cursorDelta = 0
     if self.penRow <= self.view.scrollRow + 1:
-      cursorDelta = self.view.scrollRow-self.penRow + 1
+      cursorDelta = self.view.scrollRow - self.penRow + 1
     self.view.scrollRow += 1
     if self.view.hasCaptiveCursor:
       self.cursorMoveScroll(cursorDelta,
-          self.cursorColDelta(self.penRow+cursorDelta), 0, 0, 0)
+          self.cursorColDelta(self.penRow + cursorDelta), 0, 0, 0)
       self.redo()
     else:
       self.skipUpdateScroll = True
@@ -1272,9 +1275,9 @@ class BackingTextBuffer(Mutator):
   def doSelectionMode(self, mode):
     if self.selectionMode != mode:
       self.redoAddChange(('m', (0, 0, 0,
-          self.penRow-self.markerRow,
-          self.penCol-self.markerCol,
-          mode-self.selectionMode)))
+          self.penRow - self.markerRow,
+          self.penCol - self.markerCol,
+          mode - self.selectionMode)))
       self.redo()
 
   def selectionAll(self):
@@ -1300,7 +1303,7 @@ class BackingTextBuffer(Mutator):
   def selectLineAt(self, row):
     if row >= len(self.lines):
       return
-    self.cursorMove(row-self.penRow, 0, 0)
+    self.cursorMove(row - self.penRow, 0, 0)
     self.redo()
     self.selectionLine()
     self.cursorMoveAndMark(*self.extendSelection())
@@ -1321,11 +1324,11 @@ class BackingTextBuffer(Mutator):
 
   def swapPenAndMarker(self):
     app.log.info('swapPenAndMarker')
-    self.cursorMoveAndMark(self.markerRow-self.penRow,
-        self.markerCol-self.penCol,
-        self.markerCol-self.goalCol,
-        self.penRow-self.markerRow,
-        self.penCol-self.markerCol, 0)
+    self.cursorMoveAndMark(self.markerRow - self.penRow,
+        self.markerCol - self.penCol,
+        self.markerCol - self.goalCol,
+        self.penRow - self.markerRow,
+        self.penCol - self.markerCol, 0)
     self.redo()
 
   def test(self):
@@ -1339,14 +1342,14 @@ class BackingTextBuffer(Mutator):
 
   def unindent(self):
     if self.selectionMode == app.selectable.kSelectionAll:
-      self.cursorMoveAndMark(len(self.lines)-1-self.penRow, -self.penCol,
+      self.cursorMoveAndMark(len(self.lines) - 1 - self.penRow, -self.penCol,
           -self.goalCol,
-          -self.markerRow, -self.markerCol, kSelectionLine-self.selectionMode)
+          -self.markerRow, -self.markerCol, kSelectionLine - self.selectionMode)
       self.redo()
       self.unindentLines()
     else:
       self.cursorMoveAndMark(0, -self.penCol, -self.goalCol,
-          0, -self.markerCol, app.selectable.kSelectionLine-self.selectionMode)
+          0, -self.markerCol, app.selectable.kSelectionLine - self.selectionMode)
       self.redo()
       self.unindentLines()
 
@@ -1354,7 +1357,7 @@ class BackingTextBuffer(Mutator):
     upperRow = min(self.markerRow, self.penRow)
     lowerRow = max(self.markerRow, self.penRow)
     app.log.info('unindentLines', upperRow, lowerRow)
-    for line in self.lines[upperRow:lowerRow+1]:
+    for line in self.lines[upperRow:lowerRow + 1]:
       if ((len(line) == 1 and line[:1] != ' ') or
           (len(line) >= 2 and line[:2] != '  ')):
         # Handle multi-delete.
@@ -1370,12 +1373,12 @@ class BackingTextBuffer(Mutator):
     maxRow, maxCol = self.view.cursorWindow.getmaxyx()
     if self.view.scrollRow > self.penRow:
       self.view.scrollRow = self.penRow
-    elif self.penRow >= self.view.scrollRow+maxRow:
-      self.view.scrollRow = self.penRow - (maxRow-1)
+    elif self.penRow >= self.view.scrollRow + maxRow:
+      self.view.scrollRow = self.penRow - (maxRow - 1)
     if self.view.scrollCol > self.penCol:
       self.view.scrollCol = self.penCol
-    elif self.penCol >= self.view.scrollCol+maxCol:
-      self.view.scrollCol = self.penCol - (maxCol-1)
+    elif self.penCol >= self.view.scrollCol + maxCol:
+      self.view.scrollCol = self.penCol - (maxCol - 1)
 
 
 class TextBuffer(BackingTextBuffer):
@@ -1388,24 +1391,24 @@ class TextBuffer(BackingTextBuffer):
   def checkScrollToCursor(self, window):
     """Move the selected view rectangle so that the cursor is visible."""
     maxRow, maxCol = window.cursorWindow.getmaxyx()
-    #     self.penRow >= self.view.scrollRow+maxRow 1 0
+    #     self.penRow >= self.view.scrollRow + maxRow 1 0
     rows = 0
     if self.view.scrollRow > self.penRow:
       rows = self.penRow - self.view.scrollRow
       app.log.error('AAA self.view.scrollRow > self.penRow',
           self.view.scrollRow, self.penRow, self)
-    elif self.penRow >= self.view.scrollRow+maxRow:
-      rows = self.penRow - (self.view.scrollRow+maxRow-1)
-      app.log.error('BBB self.penRow >= self.view.scrollRow+maxRow cRow',
+    elif self.penRow >= self.view.scrollRow + maxRow:
+      rows = self.penRow - (self.view.scrollRow + maxRow - 1)
+      app.log.error('BBB self.penRow >= self.view.scrollRow + maxRow cRow',
           self.penRow, 'sRow', self.view.scrollRow, 'maxRow', maxRow, self)
     cols = 0
     if self.view.scrollCol > self.penCol:
       cols = self.penCol - self.view.scrollCol
       app.log.error('CCC self.view.scrollCol > self.penCol',
           self.view.scrollCol, self.penCol, self)
-    elif self.penCol >= self.view.scrollCol+maxCol:
-      cols = self.penCol - (self.view.scrollCol+maxCol-1)
-      app.log.error('DDD self.penCol >= self.scrollCol+maxCol',
+    elif self.penCol >= self.view.scrollCol + maxCol:
+      cols = self.penCol - (self.view.scrollCol + maxCol - 1)
+      app.log.error('DDD self.penCol >= self.scrollCol + maxCol',
           self.penCol, self.view.scrollCol, maxCol, self)
     assert not rows
     assert not cols
@@ -1422,7 +1425,7 @@ class TextBuffer(BackingTextBuffer):
       self.checkScrollToCursor(window)
 
     startCol = self.view.scrollCol
-    endCol = self.view.scrollCol+maxCol
+    endCol = self.view.scrollCol + maxCol
 
     if self.parser:
       defaultColor = curses.color_pair(0)
@@ -1432,12 +1435,12 @@ class TextBuffer(BackingTextBuffer):
         k = startCol
         while k < endCol:
           node, remaining = self.parser.grammarFromRowCol(
-              self.view.scrollRow+i, k)
-          lastCol = min(endCol, k+remaining)
-          line = self.lines[self.view.scrollRow+i][k:lastCol]
+              self.view.scrollRow + i, k)
+          lastCol = min(endCol, k + remaining)
+          line = self.lines[self.view.scrollRow + i][k:lastCol]
           length = len(line)
           color = node.grammar.get('color', defaultColor)
-          col = k-self.view.scrollCol
+          col = k - self.view.scrollCol
           if length:
             window.addStr(i, col, line, color)
             if 1:
@@ -1449,7 +1452,7 @@ class TextBuffer(BackingTextBuffer):
                   for reg in found.regs:
                     word = line[reg[0]:reg[1]]
                     if not app.spelling.isCorrect(word, grammarName):
-                      window.addStr(i, col+reg[0], word,
+                      window.addStr(i, col + reg[0], word,
                           curses.color_pair(color) | curses.A_BOLD |
                           curses.A_REVERSE)
             if 1:
@@ -1458,23 +1461,23 @@ class TextBuffer(BackingTextBuffer):
               regex = node.grammar.get('keywordsRe', app.prefs.kReNonMatching)
               for found in regex.finditer(line):
                 f = found.regs[0]
-                window.addStr(i, col+f[0], line[f[0]:f[1]], keywordsColor)
+                window.addStr(i, col + f[0], line[f[0]:f[1]], keywordsColor)
               # Highlight specials.
               keywordsColor = node.grammar.get('specialsColor', defaultColor)
               regex = node.grammar.get('specialsRe', app.prefs.kReNonMatching)
               for found in regex.finditer(line):
                 f = found.regs[0]
-                window.addStr(i, col+f[0], line[f[0]:f[1]], keywordsColor)
+                window.addStr(i, col + f[0], line[f[0]:f[1]], keywordsColor)
               k += length
           else:
-            window.addStr(i, col, ' '*(maxCol-col), color)
+            window.addStr(i, col, ' ' * (maxCol - col), color)
             break
     else:
       # Draw to screen.
       rowLimit = min(max(len(self.lines)-self.view.scrollRow, 0), maxRow)
       for i in range(rowLimit):
-        line = self.lines[self.view.scrollRow+i][startCol:endCol]
-        window.addStr(i, 0, line + ' '*(maxCol-len(line)), window.color)
+        line = self.lines[self.view.scrollRow + i][startCol:endCol]
+        window.addStr(i, 0, line + ' ' * (maxCol - len(line)), window.color)
     self.drawOverlays(window)
 
   def drawOverlays(self, window):
@@ -1482,12 +1485,12 @@ class TextBuffer(BackingTextBuffer):
       maxRow, maxCol = window.cursorWindow.getmaxyx()
       startRow = self.view.scrollRow
       startCol = self.view.scrollCol
-      endCol = self.view.scrollCol+maxCol
+      endCol = self.view.scrollCol + maxCol
       rowLimit = min(max(len(self.lines)-startRow, 0), maxRow)
       if 1:
         # Highlight brackets.
         for i in range(rowLimit):
-          line = self.lines[startRow+i][startCol:endCol]
+          line = self.lines[startRow + i][startCol:endCol]
           for k in re.finditer(app.selectable.kReBrackets, line):
             for f in k.regs:
               window.addStr(i, f[0], line[f[0]:f[1]], curses.color_pair(6))
@@ -1503,32 +1506,32 @@ class TextBuffer(BackingTextBuffer):
               if row == self.penRow:
                 line = line[:self.penCol]
               found = [i for i in
-                  re.finditer("(\\"+openCh+")|(\\"+closeCh+")", line)]
+                  re.finditer("(\\" + openCh + ")|(\\" + closeCh + ")", line)]
               for i in reversed(found):
                 if i.group() == openCh:
                   count += 1
                 else:
                   count -= 1
                 if count == 0:
-                  if i.start()+self.penCol-self.view.scrollCol < maxCol:
-                    window.addStr(row-startRow, i.start(), openCh,
+                  if i.start() + self.penCol - self.view.scrollCol < maxCol:
+                    window.addStr(row - startRow, i.start(), openCh,
                         curses.color_pair(201))
                   return
           def searchForward(openCh, closeCh):
             count = 1
-            colOffset = self.penCol+1
+            colOffset = self.penCol + 1
             for row in range(self.penRow, len(self.lines)):
               if row != self.penRow:
                 colOffset = 0
               line = self.lines[row][colOffset:]
-              for i in re.finditer("(\\"+openCh+")|(\\"+closeCh+")", line):
+              for i in re.finditer("(\\" + openCh + ")|(\\" + closeCh + ")", line):
                 if i.group() == openCh:
                   count += 1
                 else:
                   count -= 1
                 if count == 0:
-                  if i.start()+self.penCol-self.view.scrollCol < maxCol:
-                    window.addStr(row-startRow, colOffset+i.start(),
+                  if i.start() + self.penCol - self.view.scrollCol < maxCol:
+                    window.addStr(row - startRow, colOffset + i.start(),
                         closeCh, curses.color_pair(201))
                   return
           matcher = {
@@ -1542,43 +1545,43 @@ class TextBuffer(BackingTextBuffer):
           look = matcher.get(ch)
           if look:
             look[1](ch, look[0])
-            window.addStr(self.penRow-startRow,
-                self.penCol-self.view.scrollCol,
+            window.addStr(self.penRow - startRow,
+                self.penCol - self.view.scrollCol,
                 self.lines[self.penRow][self.penCol],
                 curses.color_pair(201))
       if 1:
         # Highlight numbers.
         for i in range(rowLimit):
-          line = self.lines[startRow+i][startCol:endCol]
+          line = self.lines[startRow + i][startCol:endCol]
           for k in re.finditer(app.selectable.kReNumbers, line):
             for f in k.regs:
               window.addStr(i, f[0], line[f[0]:f[1]], curses.color_pair(31))
       if 1:
         # Highlight space ending lines.
         for i in range(rowLimit):
-          line = self.lines[startRow+i][startCol:endCol]
+          line = self.lines[startRow + i][startCol:endCol]
           offset = 0
           if startRow + i == self.penRow:
-            offset = self.penCol-startCol
+            offset = self.penCol - startCol
             line = line[offset:]
           for k in app.selectable.kReEndSpaces.finditer(line):
             for f in k.regs:
-              window.addStr(i, offset+f[0], line[f[0]:f[1]],
+              window.addStr(i, offset + f[0], line[f[0]:f[1]],
                   curses.color_pair(180))
       lengthLimit = self.lineLimitIndicator
       if endCol >= lengthLimit:
         # Highlight long lines.
         for i in range(rowLimit):
-          line = self.lines[startRow+i]
+          line = self.lines[startRow + i]
           if len(line) < lengthLimit or startCol > lengthLimit:
             continue
-          length = min(endCol, len(line)-lengthLimit)
-          window.addStr(i, lengthLimit-startCol, line[lengthLimit:endCol],
+          length = min(endCol, len(line) - lengthLimit)
+          window.addStr(i, lengthLimit - startCol, line[lengthLimit:endCol],
               curses.color_pair(96))
       if self.findRe is not None:
         # Highlight find.
         for i in range(rowLimit):
-          line = self.lines[startRow+i][startCol:endCol]
+          line = self.lines[startRow + i][startCol:endCol]
           for k in self.findRe.finditer(line):
             f = k.regs[0]
             #for f in k.regs[1:]:
@@ -1589,19 +1592,19 @@ class TextBuffer(BackingTextBuffer):
         upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
         selStartCol = max(upperCol - startCol, 0)
         selEndCol = min(lowerCol - startCol, maxCol)
-        start = max(0, min(upperRow-startRow, maxRow))
-        end = max(0, min(lowerRow-startRow, maxRow))
+        start = max(0, min(upperRow - startRow, maxRow))
+        end = max(0, min(lowerRow - startRow, maxRow))
         if self.selectionMode == app.selectable.kSelectionBlock:
-          for i in range(start, end+1):
-            line = self.lines[startRow+i][selStartCol:selEndCol]
+          for i in range(start, end + 1):
+            line = self.lines[startRow + i][selStartCol:selEndCol]
             window.addStr(i, selStartCol, line, window.colorSelected)
         elif (self.selectionMode == app.selectable.kSelectionAll or
             self.selectionMode == app.selectable.kSelectionCharacter or
             self.selectionMode == app.selectable.kSelectionWord):
           # Go one row past the selection or to the last line.
-          for i in range(start, min(end+1, len(self.lines)-startRow)):
-            line = self.lines[startRow+i][startCol:endCol]
-            if len(line) == len(self.lines[startRow+i]):
+          for i in range(start, min(end + 1, len(self.lines)-startRow)):
+            line = self.lines[startRow + i][startCol:endCol]
+            if len(line) == len(self.lines[startRow + i]):
               line += " "  # Maybe do: "\\n".
             if i == end and i == start:
               window.addStr(i, selStartCol,
@@ -1614,10 +1617,10 @@ class TextBuffer(BackingTextBuffer):
             else:
               window.addStr(i, 0, line, window.colorSelected)
         elif self.selectionMode == app.selectable.kSelectionLine:
-          for i in range(start, end+1):
-            line = self.lines[startRow+i][selStartCol:maxCol]
+          for i in range(start, end + 1):
+            line = self.lines[startRow + i][selStartCol:maxCol]
             window.addStr(i, selStartCol,
-                line+' '*(maxCol-len(line)), window.colorSelected)
+                line + ' ' * (maxCol - len(line)), window.colorSelected)
       # Blank screen past the end of the buffer.
       color = curses.color_pair(app.prefs.outsideOfBufferColorIndex)
       for i in range(rowLimit, maxRow):

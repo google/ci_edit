@@ -72,7 +72,7 @@ class CiProgram:
       for i in range(0, curses.COLORS):
         app.log.detail("color", i, ": ", curses.color_content(i))
       for i in range(16, curses.COLORS):
-        curses.init_color(i, 500, 500, i*787%1000)
+        curses.init_color(i, 500, 500, i * 787 % 1000)
       app.log.detail("color_content, after:")
       for i in range(0, curses.COLORS):
         app.log.detail("color", i, ": ", curses.color_content(i))
@@ -180,12 +180,12 @@ class CiProgram:
     #app.log.detail('layout', rows, cols)
     if self.showLogWindow:
       inputWidth = min(80, cols)
-      debugWidth = max(cols-inputWidth-1, 0)
+      debugWidth = max(cols - inputWidth - 1, 0)
       debugRows = 20
       self.debugWindow.reshape(debugRows, debugWidth, 0,
-          inputWidth+1)
-      self.logWindow.reshape(rows-debugRows, debugWidth, debugRows,
-          inputWidth+1)
+          inputWidth + 1)
+      self.logWindow.reshape(rows - debugRows, debugWidth, debugRows,
+          inputWidth + 1)
     else:
       inputWidth = cols
     self.inputWindow.reshape(rows, inputWidth, 0, 0)
@@ -245,12 +245,12 @@ class CiProgram:
         "redoIndex %3d savedAt %3d depth %3d"
         %(textBuffer.redoIndex, textBuffer.savedAtRedoIndex,
           len(textBuffer.redoChain)),
-        self.debugWindow.color+100)
+        self.debugWindow.color + 100)
     lenChain = textBuffer.redoIndex
-    for i in range(textBuffer.redoIndex-5, textBuffer.redoIndex):
+    for i in range(textBuffer.redoIndex - 5, textBuffer.redoIndex):
       text = i >= 0 and textBuffer.redoChain[i] or ''
       self.debugWindow.writeLine(text, 101)
-    for i in range(textBuffer.redoIndex, textBuffer.redoIndex+4):
+    for i in range(textBuffer.redoIndex, textBuffer.redoIndex + 4):
       text = (i < len(textBuffer.redoChain) and
           textBuffer.redoChain[i] or '')
       self.debugWindow.writeLine(text, 1)
@@ -262,7 +262,7 @@ class CiProgram:
     def recurse(list, indent):
       for i in list:
         app.log.info(indent, i)
-        recurse(i.zOrder, indent+'  ')
+        recurse(i.zOrder, indent + '  ')
     recurse(self.zOrder, '  ')
     app.log.info('top window', self.topWindow())
 
@@ -274,7 +274,7 @@ class CiProgram:
 
   def clickedNearby(self, row, col):
     y, x = self.priorClickRowCol
-    return y-1 <= row <= y+1 and x-1 <= col <= x+1
+    return y - 1 <= row <= y + 1 and x - 1 <= col <= x + 1
 
   def handleMouse(self, info):
     """Mouse handling is a special case. The getch() curses function will
@@ -469,7 +469,7 @@ class CiProgram:
   def shiftPalette(self):
     """Test different palette options. Each call to shiftPalette will change the
     palette to the next one in the ring of palettes."""
-    self.showPalette = (self.showPalette+1)%3
+    self.showPalette = (self.showPalette + 1) % 3
     if self.showPalette == 1:
       dark = [
         0,   1,   2,   3,    4,   5,  6,  7,   8,  9, 10, 11,   12, 13, 14,  15,
@@ -478,7 +478,7 @@ class CiProgram:
       #light = [-1, 230, 147, 221,   255, 254, 253, 14]
       light = [-1, 230, 14, 221,   255, 254, 253, 225]
       for i in range(1, curses.COLORS):
-        curses.init_pair(i, dark[i%len(dark)], light[i/32])
+        curses.init_pair(i, dark[i%len(dark)], light[i / 32])
     elif self.showPalette == 2:
       for i in range(1, curses.COLORS):
         curses.init_pair(i, i, 231)

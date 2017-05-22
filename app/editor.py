@@ -470,8 +470,9 @@ class InteractivePrompt(app.controller.Controller):
       return data
     file, ext = os.path.splitext(self.host.textBuffer.fullPath)
     app.log.info(file, ext)
-    return self.host.textBuffer.doDataToLines(
+    lines = self.host.textBuffer.doDataToLines(
         formatter.get(ext, noOp)(self.host.textBuffer.doLinesToData(lines)))
+    return lines, 'Changed %d lines'%(len(lines),)
 
   def makeCommand(self):
     return 'making stuff'
@@ -489,19 +490,21 @@ class InteractivePrompt(app.controller.Controller):
       command()
     elif cmdLine[0] in ('!', '|'):
       data = self.host.textBuffer.doLinesToData(lines)
-      output = self.subExecute.get(cmdLine[0], self.unknownCommand)(
+      output, message = self.subExecute.get(cmdLine[0], self.unknownCommand)(
           cmdLine[1:], data)
       output = tb.doDataToLines(output)
       if tb.selectionMode == app.selectable.kSelectionLine:
         output.append('')
       tb.editPasteLines(tuple(output))
+      tb.setMessage(message)
     else:
       cmd = re.split('\\W', cmdLine)[0]
       cmdLine = cmdLine[len(cmd):]
       if not len(lines):
         tb.setMessage('The %s command needs a selection.'%(cmd,))
-      lines = self.filters.get(cmd, self.unknownCommand)(cmdLine, lines)
-      tb.setMessage('Changed %d lines'%(len(lines),))
+      lines, message = self.filters.get(cmd, self.unknownCommand)(
+          cmdLine, lines)
+      tb.setMessage(message)
       if not len(lines):
         lines.append('')
       if tb.selectionMode == app.selectable.kSelectionLine:
@@ -514,10 +517,9 @@ class InteractivePrompt(app.controller.Controller):
       process = subprocess.Popen(commands,
           stdin=subprocess.PIPE, stdout=subprocess.PIPE,
           stderr=subprocess.STDOUT, shell=True);
-      return process.communicate(input)[0]
+      return process.communicate(input)[0], ''
     except Exception, e:
-      self.host.textBuffer.setMessage('Error running shell command\n', e)
-      return ''
+      return '', 'Error running shell command\n' + e
 
   def pipeExecute(self, commands, input):
     chain = kRePipeChain.findall(commands)
@@ -528,7 +530,7 @@ class InteractivePrompt(app.controller.Controller):
           stdin=subprocess.PIPE, stdout=subprocess.PIPE,
           stderr=subprocess.STDOUT);
       if len(chain) == 1:
-        return process.communicate(input)[0]
+        return process.communicate(input)[0], ''
       else:
         chain.reverse()
         prior = process
@@ -538,32 +540,36 @@ class InteractivePrompt(app.controller.Controller):
               stdin=subprocess.PIPE, stdout=prior.stdin,
               stderr=subprocess.STDOUT);
         prior.communicate(input)
-        return process.communicate()[0]
+        return process.communicate()[0], ''
     except Exception, e:
-      self.host.textBuffer.setMessage('Error running shell command\n', e)
-      return ''
+      return '', 'Error running shell command\n' + e
 
   def info(self):
     app.log.info('InteractivePrompt command set')
 
   def lowerSelectedLines(self, cmdLine, lines):
-    return [line.lower() for line in lines]
+    lines = [line.lower() for line in lines]
+    return lines, 'Changed %d lines'%(len(lines),)
 
   def sortSelectedLines(self, cmdLine, lines):
     lines.sort()
-    return lines
+    return lines, 'Changed %d lines'%(len(lines),)
 
   def substituteText(self, cmdLine, lines):
     if len(cmdLine) < 2:
       return
+    if not lines:
+      return [], 'No text was selected.'
     separator = cmdLine[0]
     a, find, replace, flags = cmdLine.split(separator, 3)
     data = self.host.textBuffer.doLinesToData(lines)
     output = self.host.textBuffer.findReplaceText(find, replace, flags, data)
-    return self.host.textBuffer.doDataToLines(output)
+    lines = self.host.textBuffer.doDataToLines(output)
+    return lines, 'Changed %d lines'%(len(lines),)
 
   def upperSelectedLines(self, cmdLine, lines):
-    return [line.upper() for line in lines]
+    lines = [line.upper() for line in lines]
+    return lines, 'Changed %d lines'%(len(lines),)
 
   def unknownCommand(self, cmdLine, lines):
     self.host.textBuffer.setMessage('Unknown command')

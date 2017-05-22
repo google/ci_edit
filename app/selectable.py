@@ -222,6 +222,8 @@ class Selectable(BaseLineBuffer):
     return upperCol, lowerCol
 
   def extendSelection(self):
+    """Get a tuple of:
+    (penRow, penCol, goalCol, markerRow, markerCol, selectionMode)"""
     if self.selectionMode == kSelectionNone:
       return (0, 0, 0, -self.markerRow,
           -self.markerCol, 0)
@@ -254,7 +256,7 @@ class Selectable(BaseLineBuffer):
     return (0, 0, 0, 0, 0, 0)
 
   def startAndEnd(self):
-    """Get the marker and pen pair as the ealier of the two then the later
+    """Get the marker and pen pair as the earlier of the two then the later
     of the two. The result accounts for the current selection mode."""
     upperRow = 0
     upperCol = 0

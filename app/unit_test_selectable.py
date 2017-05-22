@@ -29,46 +29,46 @@ class SelectableTestCases(unittest.TestCase):
 
   def test_selection_none(self):
     selectable = self.selectable
-    selectable.lines = ['onetwo', '', 'five']
+    selectable.lines = ['oneTwo', '', 'five']
     selectable.selectionMode = app.selectable.kSelectionNone
     self.assertEqual(selectable.extendSelection(), (0, 0, 0, 0, 0, 0))
-    selectable.cursorCol = 3
+    selectable.penCol = 3
     self.assertEqual(selectable.extendSelection(), (0, 0, 0, 0, 0, 0))
 
   def test_selection_all(self):
     selectable = self.selectable
-    selectable.lines = ['onetwo', '', 'five']
+    selectable.lines = ['oneTwo', '', 'five']
     selectable.selectionMode = app.selectable.kSelectionAll
     self.assertEqual(selectable.extendSelection(), (2, 4, 4, 0, 0, 0))
-    selectable.cursorCol = 3
+    selectable.penCol = 3
     self.assertEqual(selectable.extendSelection(), (2, 1, 4, 0, 0, 0))
 
   def test_selection_block(self):
     selectable = self.selectable
-    selectable.lines = ['onetwo', '', 'five']
+    selectable.lines = ['oneTwo', '', 'five']
     selectable.selectionMode = app.selectable.kSelectionBlock
     self.assertEqual(selectable.extendSelection(), (0, 0, 0, 0, 0, 0))
-    selectable.cursorCol = 3
+    selectable.penCol = 3
     self.assertEqual(selectable.extendSelection(), (0, 0, 0, 0, 0, 0))
 
   def test_selection_character(self):
     selectable = self.selectable
-    selectable.lines = ['onetwo', '', 'five']
+    selectable.lines = ['oneTwo', '', 'five']
     selectable.selectionMode = app.selectable.kSelectionCharacter
     self.assertEqual(selectable.extendSelection(), (0, 0, 0, 0, 0, 0))
-    selectable.cursorCol = 3
+    selectable.penCol = 3
     self.assertEqual(selectable.extendSelection(), (0, 0, 0, 0, 0, 0))
 
   def test_selection_line(self):
     selectable = self.selectable
     selectable.lines = ['one two', '', 'five']
-    selectable.cursorRow = 1
+    selectable.penRow = 1
     selectable.selectionMode = app.selectable.kSelectionLine
     app.log.debug('selectable', selectable.debug())
     app.log.debug('selectable.extendSelection', selectable.extendSelection())
     self.assertEqual(selectable.extendSelection(), (0, 0, 0, 0, 0, 0))
-    selectable.cursorRow = 3
-    selectable.cursorCol = 3
+    selectable.penRow = 3
+    selectable.penCol = 3
     selectable.markerRow = 1
     selectable.markerCol = 4
     self.assertEqual(selectable.extendSelection(), (0, -3, 0, 0, -4, 0))
@@ -77,11 +77,11 @@ class SelectableTestCases(unittest.TestCase):
     selectable = self.selectable
     selectable.lines = ['one two', 'Several test words.', 'five']
     selectable.selectionMode = app.selectable.kSelectionWord
-    selectable.cursorRow = 1
-    selectable.cursorCol = 2
+    selectable.penRow = 1
+    selectable.penCol = 2
     self.assertEqual(selectable.extendSelection(), (0, 5, 7, 0, 0, 0))
-    selectable.cursorRow = 1
-    selectable.cursorCol = 9
+    selectable.penRow = 1
+    selectable.penCol = 9
     selectable.markerCol = 2
     self.assertEqual(selectable.extendSelection(), (0, 3, 12, 0, -2, 0))
 
@@ -91,32 +91,32 @@ class SelectableTestCases(unittest.TestCase):
     selectable = self.selectable
     selectable.lines = ['one two', 'Several test words.', 'five']
     selectable.selectionMode = app.selectable.kSelectionNone
-    selectable.cursorCol = 1
+    selectable.penCol = 1
     selectable.doDeleteSelection()
     self.assertEqual(selectable.lines,
         ['one two', 'Several test words.', 'five'])
 
   def test_deletion_all(self):
     selectable = self.selectable
-    selectable.lines = ['onetwo', '', 'five']
+    selectable.lines = ['oneTwo', '', 'five']
     selectable.selectionMode = app.selectable.kSelectionAll
     self.assertEqual(selectable.extendSelection(), (2, 4, 4, 0, 0, 0))
-    selectable.cursorCol = 3
+    selectable.penCol = 3
     self.assertEqual(selectable.extendSelection(), (2, 1, 4, 0, 0, 0))
 
   def test_deletion_block(self):
     selectable = self.selectable
-    selectable.lines = ['onetwo', '', 'five']
+    selectable.lines = ['oneTwo', '', 'five']
     selectable.selectionMode = app.selectable.kSelectionBlock
     self.assertEqual(selectable.extendSelection(), (0, 0, 0, 0, 0, 0))
-    selectable.cursorCol = 3
+    selectable.penCol = 3
     self.assertEqual(selectable.extendSelection(), (0, 0, 0, 0, 0, 0))
 
   def test_deletion_character(self):
     selectable = self.selectable
     selectable.lines = ['one two', 'Several test words.', 'five']
     selectable.selectionMode = app.selectable.kSelectionCharacter
-    selectable.cursorCol = 1
+    selectable.penCol = 1
     selectable.doDeleteSelection()
     self.assertEqual(selectable.lines,
         ['ne two', 'Several test words.', 'five'])
@@ -124,8 +124,8 @@ class SelectableTestCases(unittest.TestCase):
     selectable.doDeleteSelection()
     self.assertEqual(selectable.lines,
         ['ntwo', 'Several test words.', 'five'])
-    selectable.cursorRow = 1
-    selectable.cursorCol = 1
+    selectable.penRow = 1
+    selectable.penCol = 1
     selectable.doDeleteSelection()
     self.assertEqual(selectable.lines,
         ['ntweveral test words.', 'five'])
@@ -133,13 +133,13 @@ class SelectableTestCases(unittest.TestCase):
   def test_deletion_line(self):
     selectable = self.selectable
     selectable.lines = ['one two', '', 'five']
-    selectable.cursorRow = 1
+    selectable.penRow = 1
     selectable.selectionMode = app.selectable.kSelectionLine
     app.log.debug('selectable', selectable.debug())
     app.log.debug('selectable.extendSelection', selectable.extendSelection())
     self.assertEqual(selectable.extendSelection(), (0, 0, 0, 0, 0, 0))
-    selectable.cursorRow = 3
-    selectable.cursorCol = 3
+    selectable.penRow = 3
+    selectable.penCol = 3
     selectable.markerRow = 1
     selectable.markerCol = 4
     self.assertEqual(selectable.extendSelection(), (0, -3, 0, 0, -4, 0))
@@ -148,11 +148,11 @@ class SelectableTestCases(unittest.TestCase):
     selectable = self.selectable
     selectable.lines = ['one two', 'Several test words.', 'five']
     selectable.selectionMode = app.selectable.kSelectionWord
-    selectable.cursorRow = 1
-    selectable.cursorCol = 2
+    selectable.penRow = 1
+    selectable.penCol = 2
     self.assertEqual(selectable.extendSelection(), (0, 5, 7, 0, 0, 0))
-    selectable.cursorRow = 1
-    selectable.cursorCol = 9
+    selectable.penRow = 1
+    selectable.penCol = 9
     selectable.markerCol = 2
     self.assertEqual(selectable.extendSelection(), (0, 3, 12, 0, -2, 0))
 
