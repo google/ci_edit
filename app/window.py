@@ -61,8 +61,8 @@ class StaticWindow:
       performance difference between chgat and addstr."""
     self.cursorWindow.chgat(row, col, count, colorPair)
 
-  def presentModal(self, changeTo, pandRow, paneCol):
-    self.parent.presentModal(changeTo, pandRow, paneCol)
+  def presentModal(self, changeTo, paneRow, paneCol):
+    self.parent.presentModal(changeTo, paneRow, paneCol)
 
   def blank(self):
     """Clear the window."""
@@ -220,7 +220,8 @@ class ActiveWindow(StaticWindow):
 
 
 class Window(ActiveWindow):
-  """A Window holds a TextBuffer and a controller that operates on the TextBuffer."""
+  """A Window holds a TextBuffer and a controller that operates on the
+  TextBuffer."""
   def __init__(self, parent, controller=None):
     ActiveWindow.__init__(self, parent)
     self.cursorRow = 0

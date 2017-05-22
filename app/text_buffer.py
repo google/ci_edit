@@ -562,7 +562,8 @@ class BackingTextBuffer(Mutator):
 
   def cursorMoveTo(self, row, col):
     cursorRow = min(max(row, 0), len(self.lines)-1)
-    self.cursorMove(cursorRow - self.penRow, col - self.penCol, col - self.goalCol)
+    self.cursorMove(cursorRow - self.penRow, col - self.penCol,
+        col - self.goalCol)
     self.redo()
 
   def cursorMoveWordLeft(self):

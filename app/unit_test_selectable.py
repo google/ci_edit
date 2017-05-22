@@ -29,7 +29,7 @@ class SelectableTestCases(unittest.TestCase):
 
   def test_selection_none(self):
     selectable = self.selectable
-    selectable.lines = ['onetwo', '', 'five']
+    selectable.lines = ['oneTwo', '', 'five']
     selectable.selectionMode = app.selectable.kSelectionNone
     self.assertEqual(selectable.extendSelection(), (0, 0, 0, 0, 0, 0))
     selectable.cursorCol = 3
@@ -37,7 +37,7 @@ class SelectableTestCases(unittest.TestCase):
 
   def test_selection_all(self):
     selectable = self.selectable
-    selectable.lines = ['onetwo', '', 'five']
+    selectable.lines = ['oneTwo', '', 'five']
     selectable.selectionMode = app.selectable.kSelectionAll
     self.assertEqual(selectable.extendSelection(), (2, 4, 4, 0, 0, 0))
     selectable.cursorCol = 3
@@ -45,7 +45,7 @@ class SelectableTestCases(unittest.TestCase):
 
   def test_selection_block(self):
     selectable = self.selectable
-    selectable.lines = ['onetwo', '', 'five']
+    selectable.lines = ['oneTwo', '', 'five']
     selectable.selectionMode = app.selectable.kSelectionBlock
     self.assertEqual(selectable.extendSelection(), (0, 0, 0, 0, 0, 0))
     selectable.cursorCol = 3
@@ -53,7 +53,7 @@ class SelectableTestCases(unittest.TestCase):
 
   def test_selection_character(self):
     selectable = self.selectable
-    selectable.lines = ['onetwo', '', 'five']
+    selectable.lines = ['oneTwo', '', 'five']
     selectable.selectionMode = app.selectable.kSelectionCharacter
     self.assertEqual(selectable.extendSelection(), (0, 0, 0, 0, 0, 0))
     selectable.cursorCol = 3
@@ -98,7 +98,7 @@ class SelectableTestCases(unittest.TestCase):
 
   def test_deletion_all(self):
     selectable = self.selectable
-    selectable.lines = ['onetwo', '', 'five']
+    selectable.lines = ['oneTwo', '', 'five']
     selectable.selectionMode = app.selectable.kSelectionAll
     self.assertEqual(selectable.extendSelection(), (2, 4, 4, 0, 0, 0))
     selectable.cursorCol = 3
@@ -106,7 +106,7 @@ class SelectableTestCases(unittest.TestCase):
 
   def test_deletion_block(self):
     selectable = self.selectable
-    selectable.lines = ['onetwo', '', 'five']
+    selectable.lines = ['oneTwo', '', 'five']
     selectable.selectionMode = app.selectable.kSelectionBlock
     self.assertEqual(selectable.extendSelection(), (0, 0, 0, 0, 0, 0))
     selectable.cursorCol = 3
