@@ -23,7 +23,7 @@ import unittest
 
 # Add new test cases here.
 tests = [
-  #app.unit_test_selectable.SelectableTestCases,
+  app.unit_test_selectable.SelectableTestCases,
   app.unit_test_parser.ParserTestCases,
   app.unit_test_prefs.PrefsTestCases,
   app.unit_test_text_buffer.MouseTestCases,
