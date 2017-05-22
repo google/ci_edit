@@ -20,6 +20,7 @@ if '--test' in sys.argv:
   import unit_tests
   if unit_tests.runTests(True) != 0:
     sys.exit(-1)
+  sys.exit(0)
 
 if __name__ == '__main__':
   import app.ci_program
