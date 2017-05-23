@@ -729,16 +729,6 @@ class InputWindow(Window):
     self.logoCorner.reshape(top, left, 0, 0)
     Window.reshape(self, rows, cols, top, left)
 
-    if 1:
-      tb = self.textBuffer
-      cursor = app.history.get(['files', tb.fullPath, 'cursor'], (0, 0))
-      if not len(tb.lines):
-        row = col = 0
-      else:
-        row = max(0, min(cursor[0], len(tb.lines)-1))
-        col = max(0, min(cursor[1], len(tb.lines[row])))
-      tb.selectText(row, col, 0, app.selectable.kSelectionNone)
-
   def resizeTopBy(self, rowDelta):
     Window.resizeTopBy(self, rowDelta)
     self.leftColumn.resizeTopBy(rowDelta)
@@ -793,6 +783,14 @@ class InputWindow(Window):
     self.controller.setTextBuffer(textBuffer)
     Window.setTextBuffer(self, textBuffer)
     self.textBuffer.debugRedo = self.prg.debugRedo
+    # Restore cursor position.
+    cursor = app.history.get(['files', textBuffer.fullPath, 'cursor'], (0, 0))
+    if not len(textBuffer.lines):
+      row = col = 0
+    else:
+      row = max(0, min(cursor[0], len(textBuffer.lines)-1))
+      col = max(0, min(cursor[1], len(textBuffer.lines[row])))
+    textBuffer.selectText(row, col, 0, app.selectable.kSelectionNone)
 
   def unfocus(self):
     self.statusLine.cursorWindow.addstr(0, 0, ".")

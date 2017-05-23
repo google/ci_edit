@@ -130,7 +130,7 @@ class Controller:
     tb = self.host.textBuffer
     self.host.userIntent = 'quit'
     app.history.set(['files', tb.fullPath, 'cursor'],
-        (tb.cursorRow, tb.cursorCol))
+        (self.host.cursorRow, self.host.cursorCol))
     if not tb.isDirty():
       tb = app.buffer_manager.buffers.getUnsavedBuffer()
       if not tb:
