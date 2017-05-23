@@ -226,6 +226,7 @@ class Window(ActiveWindow):
     ActiveWindow.__init__(self, parent)
     self.cursorRow = 0
     self.cursorCol = 0
+    self.goalCol = 0
     self.hasCaptiveCursor = app.prefs.prefs['editor']['captiveCursor']
     self.hasFocus = False
     self.shouldShowCursor = True

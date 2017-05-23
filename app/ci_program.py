@@ -200,7 +200,7 @@ class CiProgram:
     self.debugWindow.writeLineRow = 0
     self.debugWindow.writeLine(
         "   cRow %3d    cCol %2d goalCol %2d"
-        %(win.cursorRow, win.cursorCol, textBuffer.goalCol),
+        %(win.cursorRow, win.cursorCol, win.goalCol),
         self.debugWindow.color)
     self.debugWindow.writeLine(
         "   pRow %3d    pCol %2d"
