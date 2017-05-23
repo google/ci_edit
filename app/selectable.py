@@ -224,7 +224,7 @@ class Selectable(BaseLineBuffer):
     """Get a tuple of:
     (penRow, penCol, markerRow, markerCol, selectionMode)"""
     if self.selectionMode == kSelectionNone:
-      return (0, 0, 0, -self.markerRow,
+      return (0, 0, -self.markerRow,
           -self.markerCol, 0)
     elif self.selectionMode == kSelectionAll:
       if len(self.lines):
