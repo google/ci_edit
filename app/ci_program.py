@@ -173,6 +173,7 @@ class CiProgram:
     self.paletteWindow = app.window.PaletteWindow(self)
     self.inputWindow = app.window.InputWindow(self)
     self.layout()
+    self.inputWindow.startup()
 
   def layout(self):
     """Arrange the debug, log, and input windows."""
@@ -200,7 +201,7 @@ class CiProgram:
     self.debugWindow.writeLineRow = 0
     self.debugWindow.writeLine(
         "   cRow %3d    cCol %2d goalCol %2d"
-        %(win.cursorRow, win.cursorCol, textBuffer.goalCol),
+        %(win.cursorRow, win.cursorCol, win.goalCol),
         self.debugWindow.color)
     self.debugWindow.writeLine(
         "   pRow %3d    pCol %2d"

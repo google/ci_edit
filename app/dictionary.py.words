@@ -40,6 +40,7 @@ expanduser
 expandvars
 findall
 finditer
+fnmatch
 getch
 getcwd
 getmaxyx

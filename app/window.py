@@ -226,6 +226,7 @@ class Window(ActiveWindow):
     ActiveWindow.__init__(self, parent)
     self.cursorRow = 0
     self.cursorCol = 0
+    self.goalCol = 0
     self.hasCaptiveCursor = app.prefs.prefs['editor']['captiveCursor']
     self.hasFocus = False
     self.shouldShowCursor = True
@@ -681,15 +682,15 @@ class InputWindow(Window):
       if not self.showMessageLine:
         self.messageLine.hide()
 
-    if 1:
-      for f in self.prg.cliFiles:
-        app.buffer_manager.buffers.loadTextBuffer(f['path'])
-      if self.prg.readStdin:
-        app.buffer_manager.buffers.readStdin()
-      tb = app.buffer_manager.buffers.topBuffer()
-      if not tb:
-        tb = app.buffer_manager.buffers.newTextBuffer()
-      self.setTextBuffer(tb)
+  def startup(self):
+    for f in self.prg.cliFiles:
+      app.buffer_manager.buffers.loadTextBuffer(f['path'])
+    if self.prg.readStdin:
+      app.buffer_manager.buffers.readStdin()
+    tb = app.buffer_manager.buffers.topBuffer()
+    if not tb:
+      tb = app.buffer_manager.buffers.newTextBuffer()
+    self.setTextBuffer(tb)
 
   def reshape(self, rows, cols, top, left):
     """Change self and sub-windows to fit within the given rectangle."""
@@ -727,16 +728,6 @@ class InputWindow(Window):
     # The top, left of the main window is the rows, cols of the logo corner.
     self.logoCorner.reshape(top, left, 0, 0)
     Window.reshape(self, rows, cols, top, left)
-
-    if 1:
-      tb = self.textBuffer
-      cursor = app.history.get(['files', tb.fullPath, 'cursor'], (0, 0))
-      if not len(tb.lines):
-        row = col = 0
-      else:
-        row = max(0, min(cursor[0], len(tb.lines)-1))
-        col = max(0, min(cursor[1], len(tb.lines[row])))
-      tb.selectText(row, col, 0, app.selectable.kSelectionNone)
 
   def resizeTopBy(self, rowDelta):
     Window.resizeTopBy(self, rowDelta)
@@ -792,6 +783,14 @@ class InputWindow(Window):
     self.controller.setTextBuffer(textBuffer)
     Window.setTextBuffer(self, textBuffer)
     self.textBuffer.debugRedo = self.prg.debugRedo
+    # Restore cursor position.
+    cursor = app.history.get(['files', textBuffer.fullPath, 'cursor'], (0, 0))
+    if not len(textBuffer.lines):
+      row = col = 0
+    else:
+      row = max(0, min(cursor[0], len(textBuffer.lines)-1))
+      col = max(0, min(cursor[1], len(textBuffer.lines[row])))
+    textBuffer.selectText(row, col, 0, app.selectable.kSelectionNone)
 
   def unfocus(self):
     self.statusLine.cursorWindow.addstr(0, 0, ".")

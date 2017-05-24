@@ -78,7 +78,6 @@ class BaseLineBuffer:
 class Selectable(BaseLineBuffer):
   def __init__(self):
     BaseLineBuffer.__init__(self)
-    self.goalCol = 0
     self.penRow = 0
     self.penCol = 0
     self.markerRow = 0
@@ -223,19 +222,17 @@ class Selectable(BaseLineBuffer):
 
   def extendSelection(self):
     """Get a tuple of:
-    (penRow, penCol, goalCol, markerRow, markerCol, selectionMode)"""
+    (penRow, penCol, markerRow, markerCol, selectionMode)"""
     if self.selectionMode == kSelectionNone:
-      return (0, 0, 0, -self.markerRow,
+      return (0, 0, -self.markerRow,
           -self.markerCol, 0)
     elif self.selectionMode == kSelectionAll:
       if len(self.lines):
         return (len(self.lines)-1-self.penRow,
             len(self.lines[-1])-self.penCol,
-            len(self.lines[-1])-self.goalCol,
             -self.markerRow, -self.markerCol, 0)
     elif self.selectionMode == kSelectionLine:
-      return (0, -self.penCol, -self.goalCol,
-          0, -self.markerCol, 0)
+      return (0, -self.penCol, 0, -self.markerCol, 0)
     elif self.selectionMode == kSelectionWord:
       if self.penRow > self.markerRow or (
           self.penRow == self.markerRow and
@@ -244,16 +241,14 @@ class Selectable(BaseLineBuffer):
             self.markerCol, self.penRow, self.penCol)
         return (0,
             lowerCol-self.penCol,
-            lowerCol-self.goalCol,
             0, upperCol-self.markerCol, 0)
       else:
         upperCol, lowerCol = self.__extendWords(self.penRow,
             self.penCol, self.markerRow, self.markerCol)
         return (0,
             upperCol-self.penCol,
-            upperCol-self.goalCol,
             0, lowerCol-self.markerCol, 0)
-    return (0, 0, 0, 0, 0, 0)
+    return (0, 0, 0, 0, 0)
 
   def startAndEnd(self):
     """Get the marker and pen pair as the earlier of the two then the later
