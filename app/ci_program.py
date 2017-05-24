@@ -173,6 +173,7 @@ class CiProgram:
     self.paletteWindow = app.window.PaletteWindow(self)
     self.inputWindow = app.window.InputWindow(self)
     self.layout()
+    self.inputWindow.startup()
 
   def layout(self):
     """Arrange the debug, log, and input windows."""
