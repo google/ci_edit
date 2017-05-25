@@ -825,7 +825,7 @@ class BackingTextBuffer(Mutator):
     app.log.info('fileLoad', self.fullPath)
     file = None
     try:
-      file = open(self.fullPath, 'r+')
+      file = open(self.fullPath, 'r')
       self.setMessage('Opened existing file')
       self.fileStat = os.stat(self.fullPath)
     except:
