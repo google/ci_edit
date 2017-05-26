@@ -14,6 +14,7 @@
 
 # This is a list of non-English words that are commonly found in programming
 # source code files.
+adate
 alloc
 arg
 argc
@@ -21,6 +22,7 @@ args
 argv
 async
 attr
+attrs
 auth
 bool
 bugzilla
@@ -69,6 +71,7 @@ formatter
 ftp
 gaia
 ge
+getter
 gfx
 github
 goto
@@ -80,6 +83,7 @@ hpp
 htm
 https
 hxx
+ifndef
 img
 ini
 init
@@ -124,6 +128,7 @@ refptr
 regex
 regexes
 renderer
+runtime
 rv
 signin
 skia
@@ -140,6 +145,7 @@ stylesheet
 sudo
 svg
 svn
+syncable
 sys
 sysex
 tar
