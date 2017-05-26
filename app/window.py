@@ -437,7 +437,7 @@ class LogWindow(StaticWindow):
     self.writeLineRow = 0
     for i in self.lines[-maxRow:]:
       color = 0
-      if i[-1] == '-':
+      if len(i) and i[-1] == '-':
         color = 96
       self.writeLine(i, color);
     StaticWindow.refresh(self)
