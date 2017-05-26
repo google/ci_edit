@@ -44,7 +44,8 @@ def parseLines(frame, channel, *args):
 
 def channelEnable(channel, isEnabled):
   global enabledChannels, fullLog, shouldWritePrintLog
-  fullLog += ["%10s %10s: %s %r" % ('logging', 'channelEnable', channel, isEnabled)]
+  fullLog += ["%10s %10s: %s %r" % ('logging', 'channelEnable', channel,
+      isEnabled)]
   if isEnabled:
     enabledChannels[channel] = isEnabled
     shouldWritePrintLog = True
@@ -58,8 +59,17 @@ def channel(channel, *args):
     screenLog += lines
     fullLog += lines
 
+def caller(*args):
+  global fullLog, screenLog
+  caller = inspect.stack()[2]
+  msg = ("%s %s %s" % (
+      os.path.split(caller[1])[1], caller[2], caller[3]),) + args
+  lines = parseLines(inspect.stack()[1], "caller", *msg)
+  screenLog += lines
+  fullLog += lines
+
 def stack():
-  global enabledChannels, fullLog, screenLog
+  global fullLog, screenLog
   stack = inspect.stack()[1:]
   stack.reverse()
   for i,frame in enumerate(stack):

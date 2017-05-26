@@ -64,6 +64,7 @@ class BaseLineBuffer:
   def setMessage(self, *args, **dict):
     if not len(args):
       self.message = None
+      #app.log.caller()
       return
     msg = str(args[0])
     prior = msg
@@ -72,6 +73,7 @@ class BaseLineBuffer:
         msg += ' '
       prior = str(i)
       msg += prior
+    #app.log.caller("\n", msg)
     self.message = (repr(msg)[1:-1], dict.get('color', 0))
 
 
