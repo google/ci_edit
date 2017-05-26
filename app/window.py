@@ -598,7 +598,7 @@ class InputWindow(Window):
     self.showFooter = True
     self.useInteractiveFind = True
     self.showLineNumbers = True
-    self.showMessageLine = True
+    self.showMessageLine = False
     self.showRightColumn = True
     self.showTopInfo = True
     self.color = curses.color_pair(0)
@@ -674,7 +674,7 @@ class InputWindow(Window):
       self.rightColumn.setParent(self, 0)
       if not self.showRightColumn:
         self.rightColumn.hide()
-    if 1:
+    if self.showMessageLine:
       self.messageLine = MessageLine(self)
       self.messageLine.color = curses.color_pair(3)
       self.messageLine.colorSelected = curses.color_pair(87)
@@ -762,7 +762,8 @@ class InputWindow(Window):
     self.rightColumn.cursorWindow.refresh()
 
   def focus(self):
-    self.messageLine.show()
+    if self.showMessageLine:
+      self.messageLine.show()
     Window.focus(self)
 
   def quitNow(self):
@@ -793,9 +794,8 @@ class InputWindow(Window):
     textBuffer.selectText(row, col, 0, app.selectable.kSelectionNone)
 
   def unfocus(self):
-    self.statusLine.cursorWindow.addstr(0, 0, ".")
-    self.statusLine.refresh()
-    self.messageLine.hide()
+    if self.showMessageLine:
+      self.messageLine.hide()
     Window.unfocus(self)
 
 
