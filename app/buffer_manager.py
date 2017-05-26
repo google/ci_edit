@@ -77,7 +77,7 @@ class BufferManager:
   def loadTextBuffer(self, relPath):
     fullPath = os.path.abspath(os.path.expanduser(os.path.expandvars(relPath)))
     app.log.info(fullPath)
-    app.history.set(['files', fullPath, 'adate'], time.time())
+    app.history.set(('files', fullPath, 'adate'), time.time())
     textBuffer = None
     for i,tb in enumerate(self.buffers):
       if tb.fullPath == fullPath:
@@ -96,7 +96,8 @@ class BufferManager:
       self.renameBuffer(textBuffer, fullPath)
       textBuffer.fileLoad()
       self.buffers.append(textBuffer)
-    self.debugLog()
+    if 0:
+      self.debugLog()
     return textBuffer
 
   def debugLog(self):
