@@ -367,6 +367,7 @@ class CiProgram:
     self.debugRedo = False
     self.showLogWindow = False
     self.cliFiles = []
+    self.openToLine = None
     self.profile = False
     self.readStdin = False
     takeAll = False
@@ -375,6 +376,9 @@ class CiProgram:
     logParser = False
     logStartup = False
     for i in sys.argv[1:]:
+      if not takeAll and i[:1] == '+':
+        self.openToLine = int(i[1:])
+        continue
       if not takeAll and i[:2] == '--':
         self.debugRedo = self.debugRedo or i == '--debugRedo'
         self.profile = self.profile or i == '--profile'
