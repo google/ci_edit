@@ -47,7 +47,6 @@ class Mutator(app.selectable.Selectable):
     self.parser = None
     self.parserTime = .0
     self.relativePath = ''
-    self.scrollToRow = 0
     self.redoChain = []
     self.redoIndex = 0
     self.savedAtRedoIndex = 0
@@ -704,18 +703,6 @@ class BackingTextBuffer(Mutator):
     self.cursorMoveScroll(penRowDelta,
         self.cursorColDelta(self.penRow + penRowDelta), 0, 0)
     self.redo()
-
-  def cursorScrollTo(self, goalRow, window):
-    maxRow, maxCol = window.getmaxyx()
-    if len(self.lines) < maxRow:
-      goalRow = 0
-    elif goalRow < 0:
-      goalRow = len(self.lines) + goalRow - maxRow + 1
-    #scrollTo = min(min(goalRow, len(self.lines) - 1), len(self.lines) - maxRow - 1)
-    # self.cursorMoveScroll(scrollTo - self.penRow, -self.penCol,
-    #     scrollTo - self.view.scrollRow, -self.view.scrollCol)
-    # self.redo()
-    self.penRow = self.view.scrollRow = goalRow #hack
 
   def cursorScrollToMiddle(self):
     maxRow, maxCol = self.view.cursorWindow.getmaxyx()
