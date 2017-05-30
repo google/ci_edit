@@ -885,20 +885,22 @@ class BackingTextBuffer(Mutator):
     except:
       app.log.info('except had exception')
 
-  def selectText(self, lineNumber, start, length, mode):
+  def selectText(self, row, col, length, mode):
+    row = max(0, min(row, len(self.lines)-1))
+    col = max(0, min(col, len(self.lines[row])-1))
     scrollRow = self.view.scrollRow
     scrollCol = self.view.scrollCol
     maxRow, maxCol = self.view.cursorWindow.getmaxyx()
-    if not (self.view.scrollRow < lineNumber <= self.view.scrollRow + maxRow):
-      scrollRow = max(lineNumber - 10, 0)
-    if not (self.view.scrollCol < start <= self.view.scrollCol + maxCol):
-      scrollCol = max(start - 10, 0)
+    if not (self.view.scrollRow < row <= self.view.scrollRow + maxRow):
+      scrollRow = max(row - 10, 0)
+    if not (self.view.scrollCol < col <= self.view.scrollCol + maxCol):
+      scrollCol = max(col - 10, 0)
     self.doSelectionMode(app.selectable.kSelectionNone)
     self.view.scrollRow = scrollRow
     self.view.scrollCol = scrollCol
     self.cursorMoveScroll(
-        lineNumber - self.penRow,
-        start + length - self.penCol,
+        row - self.penRow,
+        col + length - self.penCol,
         0, 0)
     self.redo()
     self.doSelectionMode(mode)
@@ -1294,18 +1296,13 @@ class BackingTextBuffer(Mutator):
   def selectLineAt(self, row):
     if row >= len(self.lines):
       return
-    self.cursorMove(row - self.penRow, 0)
-    self.redo()
-    self.selectionLine()
-    self.cursorMoveAndMark(*self.extendSelection())
-    self.redo()
+    self.selectText(row, 0, 0, app.selectable.kSelectionLine)
 
   def selectWordAt(self, row, col):
-    row = max(0, min(row, len(self.lines)-1))
-    inLine = col < len(self.lines[row])
-    col = max(0, min(col, len(self.lines[row])-1))
+    """row and col may be from a mouse click and may not actually land in the
+        document text."""
     self.selectText(row, col, 0, app.selectable.kSelectionWord)
-    if inLine:
+    if col < len(self.lines[self.penRow]):
       self.cursorSelectWordRight()
 
   def splitLine(self):

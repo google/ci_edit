@@ -692,10 +692,8 @@ class InputWindow(Window):
       tb = app.buffer_manager.buffers.newTextBuffer()
     self.setTextBuffer(tb)
     if self.prg.openToLine is not None:
-      app.log.debug(self.textBuffer.penRow, self.prg.openToLine)
-      row = max(0, min(len(self.textBuffer.lines), self.prg.openToLine) - 1)
-      self.textBuffer.cursorMove(row - self.textBuffer.penRow, 0)
-      self.textBuffer.redo()
+      self.textBuffer.selectText(self.prg.openToLine - 1, 0, 0,
+          app.selectable.kSelectionNone)
 
   def reshape(self, rows, cols, top, left):
     """Change self and sub-windows to fit within the given rectangle."""
