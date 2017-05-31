@@ -80,6 +80,26 @@ functionTestEq(kReArgChain.findall('d-a.te'),
 functionTestEq(kReArgChain.findall(
     ''' date "a b" 'c d ' "a\\" b" 'c\\' d ' '''),
     ['date', '"a b"', "'c d '", '"a\\" b"', "'c\\' d '"])
+functionTestEq(kReArgChain.findall(
+    '''bm +'''),
+    ['bm', '+'])
+
+
+# Break up a command line, separate by \w (non-word chars will be separated).
+kReSplitCmdLine = re.compile(
+    r"""\s*("(?:\\"|[^"])*"|'(?:\\'|[^'])*'|\w+|[^\s]+)\s*""")
+functionTestEq(kReSplitCmdLine.findall(
+    '''bm ab'''),
+    ['bm', 'ab'])
+functionTestEq(kReSplitCmdLine.findall(
+    '''bm+'''),
+    ['bm', '+'])
+functionTestEq(kReSplitCmdLine.findall(
+    '''bm "one two"'''),
+    ['bm', '"one two"'])
+functionTestEq(kReSplitCmdLine.findall(
+    '''bm "o\\"ne two"'''),
+    ['bm', '"o\\"ne two"'])
 
 
 # Unquote text.
@@ -509,7 +529,7 @@ class InteractivePrompt(app.controller.Controller):
             lines.append('')
           tb.editPasteLines(tuple(lines))
       else:
-        command = self.commands.get(cmdLine, self.unknownCommand)
+        command = self.commands.get(cmd, self.unknownCommand)
         results, message = command(cmdLine, self.host)
         tb.setMessage(message)
     self.changeToHostWindow()
