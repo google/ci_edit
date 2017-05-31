@@ -453,8 +453,8 @@ class InteractivePrompt(app.controller.Controller):
       '|': self.pipeExecute,
     }
 
-  def buildCommand(self):
-    return 'building things'
+  def buildCommand(self, cmdLine, view):
+    return {}, 'building things'
 
   def focus(self):
     app.log.info('InteractivePrompt.focus')
@@ -474,8 +474,8 @@ class InteractivePrompt(app.controller.Controller):
         formatter.get(ext, noOp)(self.host.textBuffer.doLinesToData(lines)))
     return lines, 'Changed %d lines'%(len(lines),)
 
-  def makeCommand(self):
-    return 'making stuff'
+  def makeCommand(self, cmdLine, view):
+    return {}, 'making stuff'
 
   def execute(self):
     cmdLine = ''
@@ -485,12 +485,9 @@ class InteractivePrompt(app.controller.Controller):
       return
     tb = self.host.textBuffer
     lines = list(tb.getSelectedText())
-    command = self.commands.get(cmdLine)
-    if command:
-      command()
-    elif cmdLine[0] in ('!', '|'):
+    if cmdLine[0] in self.subExecute:
       data = self.host.textBuffer.doLinesToData(lines)
-      output, message = self.subExecute.get(cmdLine[0], self.unknownCommand)(
+      output, message = self.subExecute.get(cmdLine[0])(
           cmdLine[1:], data)
       output = tb.doDataToLines(output)
       if tb.selectionMode == app.selectable.kSelectionLine:
@@ -499,17 +496,22 @@ class InteractivePrompt(app.controller.Controller):
       tb.setMessage(message)
     else:
       cmd = re.split('\\W', cmdLine)[0]
-      cmdLine = cmdLine[len(cmd):]
-      if not len(lines):
-        tb.setMessage('The %s command needs a selection.'%(cmd,))
-      lines, message = self.filters.get(cmd, self.unknownCommand)(
-          cmdLine, lines)
-      tb.setMessage(message)
-      if not len(lines):
-        lines.append('')
-      if tb.selectionMode == app.selectable.kSelectionLine:
-        lines.append('')
-      tb.editPasteLines(tuple(lines))
+      filter = self.filters.get(cmd)
+      if filter:
+        if not len(lines):
+          tb.setMessage('The %s filter needs a selection.'%(cmd,))
+        else:
+          lines, message = filter(cmdLine, lines)
+          tb.setMessage(message)
+          if not len(lines):
+            lines.append('')
+          if tb.selectionMode == app.selectable.kSelectionLine:
+            lines.append('')
+          tb.editPasteLines(tuple(lines))
+      else:
+        command = self.commands.get(cmdLine, self.unknownCommand)
+        results, message = command(cmdLine, self.host)
+        tb.setMessage(message)
     self.changeToHostWindow()
 
   def shellExecute(self, commands, input):
@@ -571,6 +573,6 @@ class InteractivePrompt(app.controller.Controller):
     lines = [line.upper() for line in lines]
     return lines, 'Changed %d lines'%(len(lines),)
 
-  def unknownCommand(self, cmdLine, lines):
+  def unknownCommand(self, cmdLine, view):
     self.host.textBuffer.setMessage('Unknown command')
-    return lines
+    return {}, 'Unknown command %s' % (cmdLine,)
