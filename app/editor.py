@@ -457,6 +457,7 @@ class InteractivePrompt(app.controller.Controller):
     self.textBuffer = textBuffer
     self.textBuffer.lines = [""]
     self.commands = {
+      'bm': self.bookmarkCommand,
       'build': self.buildCommand,
       'make': self.makeCommand,
     }
@@ -472,6 +473,17 @@ class InteractivePrompt(app.controller.Controller):
       '!': self.shellExecute,
       '|': self.pipeExecute,
     }
+
+  def bookmarkCommand(self, cmdLine, view):
+    args = kReSplitCmdLine.findall(cmdLine)
+    if len(args) > 1 and args[1][0] == '-':
+      if self.host.textBuffer.bookmarkRemove():
+        return {}, 'Removed bookmark'
+      else:
+        return {}, 'No bookmarks'
+    else:
+      self.host.textBuffer.bookmarkAdd()
+      return {}, 'Added bookmark'
 
   def buildCommand(self, cmdLine, view):
     return {}, 'building things'

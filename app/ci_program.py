@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import app.bookmarks
 import app.curses_util
 import app.help
 import app.history
@@ -455,6 +456,7 @@ class CiProgram:
   def run(self):
     self.parseArgs()
     self.makeHomeDirs()
+    app.bookmarks.loadUserBookmarks()
     app.history.loadUserHistory()
     app.curses_util.hackCursesFixes()
     self.startup()
@@ -470,6 +472,7 @@ class CiProgram:
     else:
       self.commandLoop()
     app.history.saveUserHistory()
+    app.bookmarks.saveUserBookmarks()
 
   def shiftPalette(self):
     """Test different palette options. Each call to shiftPalette will change the

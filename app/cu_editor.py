@@ -318,9 +318,11 @@ class CuaPlusEdit(CuaEdit):
       CTRL_E: self.changeToPrompt,
       CTRL_P: self.changeToPrediction,
 
+      curses.KEY_F2: textBuffer.bookmarkNext,
       curses.KEY_F3: textBuffer.findAgain,
-      curses.KEY_F4: self.prg.paletteWindow.focus,
-      curses.KEY_F6: self.prg.shiftPalette,
+      #curses.KEY_F4: self.prg.paletteWindow.focus,
+      #curses.KEY_F6: self.prg.shiftPalette,
+      KEY_SHIFT_F2: textBuffer.bookmarkPrior,
       KEY_SHIFT_F3: textBuffer.findBack,
     })
     self.commandSet = commandSet

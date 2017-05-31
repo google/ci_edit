@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import app.bookmarks
 import app.buffer_manager
 import app.clipboard
 import app.log
@@ -426,6 +427,31 @@ class BackingTextBuffer(Mutator):
         (upperRow, upperCol, lowerRow, lowerCol),
         self.getText(upperRow, upperCol, lowerRow, lowerCol)))
       self.redo()
+
+  def bookmarkAdd(self):
+    app.bookmarks.add(self.fullPath, self.penRow, self.penCol, 0,
+        app.selectable.kSelectionNone)
+
+  def bookmarkGoto(self):
+    app.log.debug()
+    bookmark = app.bookmarks.get(self.view.bookmarkIndex)
+    if bookmark:
+      self.selectText(bookmark['row'], bookmark['col'], bookmark['length'],
+          bookmark['mode'])
+
+  def bookmarkNext(self):
+    app.log.debug()
+    self.view.bookmarkIndex += 1
+    self.bookmarkGoto()
+
+  def bookmarkPrior(self):
+    app.log.debug()
+    self.view.bookmarkIndex -= 1
+    self.bookmarkGoto()
+
+  def bookmarkRemove(self):
+    app.log.debug()
+    return app.bookmarks.remove(self.view.bookmarkIndex)
 
   def backspace(self):
     app.log.info('backspace', self.penRow > self.markerRow)

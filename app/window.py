@@ -594,6 +594,7 @@ class InputWindow(Window):
   def __init__(self, prg):
     assert(prg)
     Window.__init__(self, prg)
+    self.bookmarkIndex = 0
     self.prg = prg
     self.showFooter = True
     self.useInteractiveFind = True
