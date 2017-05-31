@@ -14,7 +14,7 @@
 
 """
   Track user history to provide features such as resuming editing at the same
-  cursor position after reloading a file; or a recient file list.
+  cursor position after reloading a file; or a recent file list.
 """
 import app.log
 import cPickle as pickle
@@ -47,7 +47,7 @@ def loadUserHistory():
     else:
       data = {}
   except Exception, e:
-    app.log.error('exception in loadUserPrefs')
+    app.log.error('exception')
     data = {}
 
 def saveUserHistory():
@@ -57,4 +57,4 @@ def saveUserHistory():
       pickle.dump(data, file)
     app.log.info('wrote pickle')
   except Exception, e:
-    app.log.error('exception in saveUserPrefs')
+    app.log.error('exception')
