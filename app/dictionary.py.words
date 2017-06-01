@@ -58,7 +58,9 @@ ino
 isdigit
 isdir
 isfile
+islower
 isprint
+isupper
 leaveok
 len
 listdir
