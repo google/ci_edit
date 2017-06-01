@@ -432,7 +432,7 @@ class LogWindow(StaticWindow):
 
   def refresh(self):
     self.refreshCounter += 1
-    app.log.info(" "*10, self.refreshCounter, "- screen refresh -")
+    app.log.meta(" "*10, self.refreshCounter, "- screen refresh -")
     maxRow, maxCol = self.cursorWindow.getmaxyx()
     self.writeLineRow = 0
     for i in self.lines[-maxRow:]:

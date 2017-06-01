@@ -283,6 +283,7 @@ class CiProgram:
     signal the existence of a mouse event, but the event must be fetched and
     parsed separately."""
     (id, mouseCol, mouseRow, mouseZ, bState) = info[0]
+    app.log.mouse()
     eventTime = info[1]
     rapidClickTimeout = .5
     def findWindow(parent, mouseRow, mouseCol):
@@ -296,10 +297,11 @@ class CiProgram:
           window.changeFocusTo(window)
         mouseRow -= window.top
         mouseCol -= window.left
-        app.log.info(mouseRow, mouseCol)
-        app.log.info("\n",window)
+        app.log.mouse(mouseRow, mouseCol)
+        app.log.mouse("\n",window)
         #app.log.info('bState', app.curses_util.mouseButtonName(bState))
         if bState & curses.BUTTON1_RELEASED:
+          app.log.mouse(bState, curses.BUTTON1_RELEASED)
           if self.priorClick + rapidClickTimeout <= eventTime:
             window.mouseRelease(mouseRow, mouseCol, bState&curses.BUTTON_SHIFT,
                 bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
@@ -338,7 +340,7 @@ class CiProgram:
             window.mouseMoved(mouseRow, mouseCol, bState&curses.BUTTON_SHIFT,
                 bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
         elif bState & curses.REPORT_MOUSE_POSITION:
-          #app.log.info('REPORT_MOUSE_POSITION')
+          #app.log.mouse('REPORT_MOUSE_POSITION')
           if self.savedMouseX == mouseCol and self.savedMouseY == mouseRow:
             # This is a hack for dtterm on Mac OS X.
             window.mouseWheelUp(bState&curses.BUTTON_SHIFT,
@@ -351,13 +353,13 @@ class CiProgram:
             window.mouseMoved(mouseRow, mouseCol, bState&curses.BUTTON_SHIFT,
                 bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
         else:
-          app.log.info('got bState', app.curses_util.mouseButtonName(bState),
+          app.log.mouse('got bState', app.curses_util.mouseButtonName(bState),
               bState)
         self.savedMouseWindow = window
         self.savedMouseX = mouseCol
         self.savedMouseY = mouseRow
         return
-    app.log.info('click landed on screen')
+    app.log.mouse('click landed on screen')
 
   def handleScreenResize(self):
     app.log.debug('handleScreenResize -----------------------')

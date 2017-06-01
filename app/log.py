@@ -20,7 +20,7 @@ import traceback
 
 screenLog = ["--- screen log ---"]
 fullLog = ["--- begin log ---"]
-enabledChannels = {'startup': True}
+enabledChannels = {'meta': True, 'mouse': True, 'startup': True}
 shouldWritePrintLog = False
 
 def getLines():
@@ -80,6 +80,13 @@ def stack():
 
 def info(*args):
   channel('info', *args)
+
+def meta(*args):
+  """Log information related to logging."""
+  channel('meta', *args)
+
+def mouse(*args):
+  channel('mouse', *args)
 
 def parser(*args):
   channel('parser', *args)
