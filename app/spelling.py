@@ -53,20 +53,28 @@ words.update(grammarWords.get('html', set()))
 def isCorrect(word, grammarName):
   if len(word) <= 1:
     return True
-  if word in words or word.lower() in words:
+  lowerWord = word.lower()
+  if word in words or lowerWord in words:
     return True
-  if re.sub('^sub', '', word.lower()) in words:
+  if lowerWord in grammarWords.get(grammarName, set()):
     return True
-  if word.lower() in grammarWords.get(grammarName, set()):
+  if lowerWord.startswith('sub') and lowerWord[3:] in words:
     return True
-  if len(re.sub('[A-Z]+', '', word)) == 0:
-    # All upper case.
+  if lowerWord.startswith('un') and lowerWord[2:] in words:
     return True
+  if 1:
+    if len(word) == 2 and word[1] == 's' and word[0].isupper():
+      # Upper case, with an 's' for plurality (e.g. PDFs).
+      return True
+  if 0:
+    if len(re.sub('[A-Z]', '', word)) == 0:
+      # All upper case.
+      return True
   if 0:
     # TODO(dschuyler): This is an experiment. Considering a py specific word
     # list instead.
     if grammarName == 'py':
-      # Handle poor styling.
+      # Handle run together (undelineated) words.
       if len(re.sub('[a-z]+', '', word)) == 0:
         for i in range(len(word), 0, -1):
           if word[:i] in words and word[i:] in words:
