@@ -39,11 +39,15 @@ def loadWords(dirPath):
 loadWords(os.path.dirname(__file__))
 loadWords(os.path.expanduser("~/.ci_edit/dictionaries"))
 
-words = grammarWords.get('en-US', set())
+words = grammarWords.get('en-us', set())
 words.update(grammarWords.get('en-misc', set()))
 words.update(grammarWords.get('coding', set()))
 words.update(grammarWords.get('contractions', set()))
 words.update(grammarWords.get('user', set()))
+# TODO(dschuyler): provide a UI to enable selected dictionaries.
+words.update(grammarWords.get('cpp', set()))
+words.update(grammarWords.get('en-gb', set()))
+words.update(grammarWords.get('html', set()))
 
 
 def isCorrect(word, grammarName):
