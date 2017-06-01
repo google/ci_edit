@@ -14,8 +14,35 @@
 
 # This is a list of non-English words that are commonly found in programming
 # source code files.
+a
+ab
+abc
+abcd
+abcde
+abcdef
+abcdefg
+abcdefgh
+abcdefghi
+abcdefghij
+abcdefghijk
+abcdefghijkl
+abcdefghijklm
+abcdefghijklmn
+abcdefghijklmno
+abcdefghijklmnop
+abcdefghijklmnopq
+abcdefghijklmnopqr
+abcdefghijklmnopqrs
+abcdefghijklmnopqrst
+abcdefghijklmnopqrstu
+abcdefghijklmnopqrstuv
+abcdefghijklmnopqrstuvw
+abcdefghijklmnopqrstuvwx
+abcdefghijklmnopqrstuvwxy
+abcdefghijklmnopqrstuvwxyz
 adate
 alloc
+apis
 arg
 argc
 args
@@ -24,6 +51,7 @@ async
 attr
 attrs
 auth
+baz
 bool
 bugzilla
 calc
@@ -43,9 +71,11 @@ ctrl
 cua
 cwd
 cxx
+dbus
 def
 del
 deps
+dhcp
 dirname
 dirs
 dropdown
@@ -60,12 +90,14 @@ eq
 errno
 esc
 ethernet
+eval
 exe
 exec
 fcntl
 fd
 fds
 fi
+filename
 fixme
 formatter
 ftp
@@ -87,6 +119,9 @@ ifndef
 img
 ini
 init
+inlined
+inlines
+inlining
 intl
 ip
 ipsum
@@ -98,6 +133,8 @@ keyframe
 keyframed
 keyframes
 le
+localhost
+loopback
 lorem
 mixin
 mixins
@@ -117,6 +154,8 @@ prev
 prg
 proto
 ptr
+ptrs
+pv
 px
 py
 pyc
@@ -154,6 +193,7 @@ throbber
 tk
 tkinter
 todo
+tolltip
 traceback
 tty
 txt
@@ -164,11 +204,13 @@ uid
 undef
 unicode
 unix
+unobserve
 utf
 vpn
 vpns
 webkit
 webview
+whitelist
 whitespace
 wi
 wifi

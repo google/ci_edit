@@ -15,15 +15,6 @@
 # This word list is a fallback for times when an OS dictionary is not available.
 # It's not a full list of English words (not by a long way).
 # Additional abbreviations, acronyms, and names are in dictionary.en-misc.words.
-decrypt
-draggable
-paddings
-unselectable
-geolocate
-overscan
-personalizes
-untrusted
-hotspot
 a
 aah
 aardvark
@@ -3899,6 +3890,7 @@ customer
 customers
 customizable
 customization
+customizations
 customize
 customized
 customizes
@@ -4145,6 +4137,7 @@ decrement
 decremented
 decrements
 decrescendo
+decrypt
 decryption
 dedicate
 dedicated
@@ -5031,6 +5024,7 @@ drafter
 drafting
 drafts
 drag
+draggable
 dragged
 dragging
 dragon
@@ -6926,6 +6920,7 @@ geodetic
 geographic
 geographical
 geographically
+geolocate
 geolocation
 geom
 geometric
@@ -7759,6 +7754,7 @@ hotkeys
 hotness
 hotpot
 hotpots
+hotspot
 hour
 hourglass
 houri
@@ -10329,6 +10325,7 @@ modulo
 modulus
 moi
 moire
+mojo
 mold
 molecule
 molehill
@@ -10610,6 +10607,7 @@ navigates
 navigating
 navigation
 navigational
+navigations
 navigator
 navy
 nay
@@ -11345,6 +11343,7 @@ overprint
 overproduce
 overridden
 override
+overriden
 overrides
 overriding
 overrode
@@ -11353,6 +11352,7 @@ overruled
 overrun
 overrunning
 overs
+overscan
 oversee
 overshadowed
 overshoot
@@ -11420,6 +11420,7 @@ pact
 pad
 padded
 padding
+paddings
 padlock
 padre
 padres
@@ -11449,6 +11450,7 @@ pairing
 pairings
 pairs
 pairwise
+pajamas
 pal
 palace
 palatable
@@ -11503,6 +11505,8 @@ parallelogram
 parallels
 param
 parameter
+parameterize
+parameterized
 parameters
 parametric
 paramount
@@ -11819,6 +11823,7 @@ personalities
 personality
 personalize
 personalized
+personalizes
 personalizing
 personally
 personals
@@ -14564,6 +14569,7 @@ scripts
 scroll
 scrollable
 scrolled
+scroller
 scrolling
 scrolls
 scrub
@@ -14754,6 +14760,7 @@ serialization
 serializations
 serialize
 serialized
+serializer
 serializes
 serializing
 serially
@@ -17527,6 +17534,7 @@ uncool
 uncorrelated
 uncountable
 uncovered
+uncreated
 unction
 undamaged
 undecided
@@ -17623,6 +17631,7 @@ unhanded
 unhappy
 unhardened
 unhelpful
+unhides
 unhook
 unhooked
 unhooking
@@ -17774,6 +17783,7 @@ unrecognizable
 unrecognized
 unrecorded
 unrecoverable
+unregister
 unregistered
 unrelated
 unreleased
@@ -17799,6 +17809,7 @@ unscheduled
 unscripted
 unsecured
 unseen
+unselectable
 unsent
 unset
 unshakable
@@ -17846,6 +17857,7 @@ untranslatable
 untranslated
 untreated
 untrimmed
+untrusted
 untrustworthy
 unusable
 unused
@@ -17974,6 +17986,7 @@ validates
 validating
 validation
 validations
+validator
 validity
 validly
 valley
@@ -18127,6 +18140,7 @@ viewer
 viewers
 viewing
 viewpoint
+viewport
 views
 vignette
 vignettes

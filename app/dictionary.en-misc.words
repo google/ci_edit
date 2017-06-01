@@ -50,6 +50,7 @@ gtk
 html
 http
 iiuc
+ime
 io
 kde
 ld
@@ -67,6 +68,7 @@ pdf
 rgb
 rgba
 rtl
+saml
 ssl
 tb
 tpm
@@ -83,11 +85,13 @@ xml
 alice
 america
 apache
+arial
 australian
 bezier
 bluetooth
 bob
 boolean
+british
 california
 chen
 china
@@ -104,15 +108,18 @@ dtterm
 england
 english
 euler
+facebook
 flashplayer
 frank
 fred
+gavin
 gmail
 google
+hebrew
 hector
+helvetica
 henry
 ian
-iconset
 janelle
 japan
 japanese
@@ -122,6 +129,7 @@ justin
 karl
 katey
 kevin
+latin
 lei
 linux
 lisa
@@ -134,6 +142,7 @@ mexico
 michael
 midge
 omnibox
+profont
 rachel
 rebecca
 richard
@@ -152,14 +161,26 @@ verisign
 # Chromium (May be specific to Chromium development)
 arraysize
 browsertest
+chromevox
 codereview
+cros
+darkconnect
+dsc
+gmock
 hotword
+jstemplate
 newtabpage
 onc
+oobe
 powerwash
+ppapi
+presubmit
+safebrowsing
 tryserver
 uma
+webstore
 wildcard
+xtb
 
 
 # Unfiled (todo)
