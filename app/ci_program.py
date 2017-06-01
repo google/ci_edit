@@ -292,74 +292,74 @@ class CiProgram:
           return findWindow(window, mouseRow, mouseCol)
       return parent
     window = findWindow(self, mouseRow, mouseCol)
-    if window != self:
-        if self.focusedWindow != window and window.isFocusable:
-          window.changeFocusTo(window)
-        mouseRow -= window.top
-        mouseCol -= window.left
-        app.log.mouse(mouseRow, mouseCol)
-        app.log.mouse("\n",window)
-        #app.log.info('bState', app.curses_util.mouseButtonName(bState))
-        if bState & curses.BUTTON1_RELEASED:
-          app.log.mouse(bState, curses.BUTTON1_RELEASED)
-          if self.priorClick + rapidClickTimeout <= eventTime:
-            window.mouseRelease(mouseRow, mouseCol, bState&curses.BUTTON_SHIFT,
-                bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
-        elif bState & curses.BUTTON1_PRESSED:
-          if (self.priorClick + rapidClickTimeout > eventTime and
-              self.clickedNearby(mouseRow, mouseCol)):
-            self.clicks += 1
-            self.priorClick = eventTime
-            if self.clicks == 2:
-              window.mouseDoubleClick(mouseRow, mouseCol,
-                  bState&curses.BUTTON_SHIFT, bState&curses.BUTTON_CTRL,
-                  bState&curses.BUTTON_ALT)
-            else:
-              window.mouseTripleClick(mouseRow, mouseCol,
-                  bState&curses.BUTTON_SHIFT, bState&curses.BUTTON_CTRL,
-                  bState&curses.BUTTON_ALT)
-              self.clicks = 1
-          else:
-            self.clicks = 1
-            self.priorClick = eventTime
-            self.priorClickRowCol = (mouseRow, mouseCol)
-            window.mouseClick(mouseRow, mouseCol, bState&curses.BUTTON_SHIFT,
-                bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
-        elif bState & curses.BUTTON2_PRESSED:
-          window.mouseWheelUp(bState&curses.BUTTON_SHIFT,
-              bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
-        elif bState & curses.BUTTON4_PRESSED:
-          if self.savedMouseX == mouseCol and self.savedMouseY == mouseRow:
-            window.mouseWheelDown(bState&curses.BUTTON_SHIFT,
-                bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
-          else:
-            if self.savedMouseWindow and self.savedMouseWindow is not window:
-              mouseRow += window.top - self.savedMouseWindow.top
-              mouseCol += window.left - self.savedMouseWindow.left
-              window = self.savedMouseWindow
-            window.mouseMoved(mouseRow, mouseCol, bState&curses.BUTTON_SHIFT,
-                bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
-        elif bState & curses.REPORT_MOUSE_POSITION:
-          #app.log.mouse('REPORT_MOUSE_POSITION')
-          if self.savedMouseX == mouseCol and self.savedMouseY == mouseRow:
-            # This is a hack for dtterm on Mac OS X.
-            window.mouseWheelUp(bState&curses.BUTTON_SHIFT,
-                bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
-          else:
-            if self.savedMouseWindow and self.savedMouseWindow is not window:
-              mouseRow += window.top - self.savedMouseWindow.top
-              mouseCol += window.left - self.savedMouseWindow.left
-              window = self.savedMouseWindow
-            window.mouseMoved(mouseRow, mouseCol, bState&curses.BUTTON_SHIFT,
-                bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
+    if window == self:
+      app.log.mouse('click landed on screen')
+      return
+    if self.focusedWindow != window and window.isFocusable:
+      window.changeFocusTo(window)
+    mouseRow -= window.top
+    mouseCol -= window.left
+    app.log.mouse(mouseRow, mouseCol)
+    app.log.mouse("\n",window)
+    #app.log.info('bState', app.curses_util.mouseButtonName(bState))
+    if bState & curses.BUTTON1_RELEASED:
+      app.log.mouse(bState, curses.BUTTON1_RELEASED)
+      if self.priorClick + rapidClickTimeout <= eventTime:
+        window.mouseRelease(mouseRow, mouseCol, bState&curses.BUTTON_SHIFT,
+            bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
+    elif bState & curses.BUTTON1_PRESSED:
+      if (self.priorClick + rapidClickTimeout > eventTime and
+          self.clickedNearby(mouseRow, mouseCol)):
+        self.clicks += 1
+        self.priorClick = eventTime
+        if self.clicks == 2:
+          window.mouseDoubleClick(mouseRow, mouseCol,
+              bState&curses.BUTTON_SHIFT, bState&curses.BUTTON_CTRL,
+              bState&curses.BUTTON_ALT)
         else:
-          app.log.mouse('got bState', app.curses_util.mouseButtonName(bState),
-              bState)
-        self.savedMouseWindow = window
-        self.savedMouseX = mouseCol
-        self.savedMouseY = mouseRow
-        return
-    app.log.mouse('click landed on screen')
+          window.mouseTripleClick(mouseRow, mouseCol,
+              bState&curses.BUTTON_SHIFT, bState&curses.BUTTON_CTRL,
+              bState&curses.BUTTON_ALT)
+          self.clicks = 1
+      else:
+        self.clicks = 1
+        self.priorClick = eventTime
+        self.priorClickRowCol = (mouseRow, mouseCol)
+        window.mouseClick(mouseRow, mouseCol, bState&curses.BUTTON_SHIFT,
+            bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
+    elif bState & curses.BUTTON2_PRESSED:
+      window.mouseWheelUp(bState&curses.BUTTON_SHIFT,
+          bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
+    elif bState & curses.BUTTON4_PRESSED:
+      if self.savedMouseX == mouseCol and self.savedMouseY == mouseRow:
+        window.mouseWheelDown(bState&curses.BUTTON_SHIFT,
+            bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
+      else:
+        if self.savedMouseWindow and self.savedMouseWindow is not window:
+          mouseRow += window.top - self.savedMouseWindow.top
+          mouseCol += window.left - self.savedMouseWindow.left
+          window = self.savedMouseWindow
+        window.mouseMoved(mouseRow, mouseCol, bState&curses.BUTTON_SHIFT,
+            bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
+    elif bState & curses.REPORT_MOUSE_POSITION:
+      #app.log.mouse('REPORT_MOUSE_POSITION')
+      if self.savedMouseX == mouseCol and self.savedMouseY == mouseRow:
+        # This is a hack for dtterm on Mac OS X.
+        window.mouseWheelUp(bState&curses.BUTTON_SHIFT,
+            bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
+      else:
+        if self.savedMouseWindow and self.savedMouseWindow is not window:
+          mouseRow += window.top - self.savedMouseWindow.top
+          mouseCol += window.left - self.savedMouseWindow.left
+          window = self.savedMouseWindow
+        window.mouseMoved(mouseRow, mouseCol, bState&curses.BUTTON_SHIFT,
+            bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
+    else:
+      app.log.mouse('got bState', app.curses_util.mouseButtonName(bState),
+          bState)
+    self.savedMouseWindow = window
+    self.savedMouseX = mouseCol
+    self.savedMouseY = mouseRow
 
   def handleScreenResize(self):
     app.log.debug('handleScreenResize -----------------------')
