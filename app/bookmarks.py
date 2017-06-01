@@ -17,7 +17,7 @@ import cPickle as pickle
 import os
 
 data = []
-path = "bookmarks.dat"
+path = None
 
 def get(index):
   global data
@@ -43,9 +43,10 @@ def remove(index):
   del data[index % len(data)]
   return True
 
-def loadUserBookmarks():
+def loadUserBookmarks(filePath):
   global data, path
   try:
+    path = filePath
     if os.path.isfile(path):
       with open(path, "rb") as file:
         data = pickle.load(file)
@@ -58,8 +59,9 @@ def loadUserBookmarks():
 def saveUserBookmarks():
   global data, path
   try:
-    with open(path, "wb") as file:
-      pickle.dump(data, file)
-    app.log.info('wrote pickle')
+    if path is not None:
+      with open(path, "wb") as file:
+        pickle.dump(data, file)
+      app.log.info('wrote pickle')
   except Exception, e:
     app.log.error('exception')

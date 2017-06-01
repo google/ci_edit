@@ -21,7 +21,7 @@ import cPickle as pickle
 import os
 
 data = {}
-path = "history.dat"
+path = None
 
 def get(keyPath, default=None):
   global data
@@ -38,9 +38,10 @@ def set(keyPath, value):
   cursor[keyPath[-1]] = value
   #assert get(keyPath) == value
 
-def loadUserHistory():
+def loadUserHistory(filePath):
   global data, path
   try:
+    path = filePath
     if os.path.isfile(path):
       with open(path, "rb") as file:
         data = pickle.load(file)
@@ -53,8 +54,9 @@ def loadUserHistory():
 def saveUserHistory():
   global data, path
   try:
-    with open(path, "wb") as file:
-      pickle.dump(data, file)
-    app.log.info('wrote pickle')
+    if path is not None:
+      with open(path, "wb") as file:
+        pickle.dump(data, file)
+      app.log.info('wrote pickle')
   except Exception, e:
     app.log.error('exception')

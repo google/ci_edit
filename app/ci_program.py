@@ -440,9 +440,8 @@ class CiProgram:
     if k.shouldShowCursor:
       curses.curs_set(1)
 
-  def makeHomeDirs(self):
+  def makeHomeDirs(self, homePath):
     try:
-      homePath = os.path.expanduser('~/.ci_edit')
       if not os.path.isdir(homePath):
         os.makedirs(homePath)
       self.dirBackups = os.path.join(homePath, 'backups')
@@ -451,15 +450,16 @@ class CiProgram:
       self.dirPrefs = os.path.join(homePath, 'prefs')
       if not os.path.isdir(self.dirPrefs):
         os.makedirs(self.dirPrefs)
-      app.history.path = historyPath = os.path.join(homePath, app.history.path)
+      app.history.path = os.path.join(homePath, app.history.path)
     except Exception, e:
       app.log.error('exception in makeHomeDirs')
 
   def run(self):
     self.parseArgs()
-    self.makeHomeDirs()
-    app.bookmarks.loadUserBookmarks()
-    app.history.loadUserHistory()
+    homePath = os.path.expanduser('~/.ci_edit')
+    self.makeHomeDirs(homePath)
+    app.bookmarks.loadUserBookmarks(os.path.join(homePath, 'bookmarks.dat'))
+    app.history.loadUserHistory(os.path.join(homePath, 'history.dat'))
     app.curses_util.hackCursesFixes()
     self.startup()
     if self.profile:
