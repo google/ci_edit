@@ -373,11 +373,7 @@ class CiProgram:
     self.openToLine = None
     self.profile = False
     self.readStdin = False
-    takeAll = False
-    logInfo = False
-    logDebug = False
-    logParser = False
-    logStartup = False
+    takeAll = False  # Take all args as file paths.
     for i in sys.argv[1:]:
       if not takeAll and i[:1] == '+':
         self.openToLine = int(i[1:])
@@ -386,35 +382,39 @@ class CiProgram:
         self.debugRedo = self.debugRedo or i == '--debugRedo'
         self.profile = self.profile or i == '--profile'
         self.showLogWindow = self.showLogWindow or i == '--log'
-        logInfo = logInfo or i == '--logDetail'
-        logInfo = logInfo or i == '--p'
-        logDebug = logDebug or i == '--d'
-        logParser = logParser or i == '--parser'
-        logStartup = logStartup or i == '--startup'
-        if i == '--help':
+        if i == '--d':
+          app.log.channelEnable('debug', True)
+        elif i == '--m':
+          app.log.channelEnable('mouse', True)
+        elif i == '--p':
+          app.log.channelEnable('info', True)
+          app.log.channelEnable('debug', True)
+          app.log.channelEnable('detail', True)
+          app.log.channelEnable('error', True)
+        elif i == '--parser':
+          app.log.channelEnable('parser', True)
+        elif i == '--startup':
+          app.log.channelEnable('startup', logStartup)
+        elif i == '--':
+          # All remaining args are file paths.
+          takeAll = True
+        elif i == '--help':
           userMessage(app.help.docs['command line'])
           self.quitNow()
           return
-        if i == '--version':
+        elif i == '--version':
           userMessage(app.help.docs['version'])
           self.quitNow()
           return
-        if i == '--':
-          # All remaining args are file paths.
-          takeAll = True
+        elif i.startswith('--'):
+          userMessage("unknown command line argument", i)
+          self.quitNow()
+          return
         continue
       if i == '-':
         self.readStdin = True
       else:
         self.cliFiles.append({'path': i})
-    if logInfo:
-      app.log.channelEnable('info', True)
-      app.log.channelEnable('debug', True)
-      app.log.channelEnable('detail', True)
-      app.log.channelEnable('error', True)
-    app.log.channelEnable('debug', logDebug)
-    app.log.channelEnable('parser', logParser)
-    app.log.channelEnable('startup', logStartup)
     app.prefs.init()
 
   def quit(self):
