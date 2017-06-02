@@ -77,9 +77,14 @@ class Controller:
     app.log.info('base controller focus()')
     pass
 
+  def exitConfirmationPrompt(self, ignore=1):
+    self.host.userIntent = 'edit'
+    self.changeToHostWindow()
+
   def closeHostFile(self):
     """Close the current file and switch to another or create an empty file."""
     app.buffer_manager.buffers.closeTextBuffer(self.host.textBuffer)
+    self.host.userIntent = 'edit'
     tb = app.buffer_manager.buffers.getUnsavedBuffer()
     if not tb:
       tb = app.buffer_manager.buffers.nextBuffer()
@@ -87,15 +92,21 @@ class Controller:
         tb = app.buffer_manager.buffers.newTextBuffer()
     self.host.setTextBuffer(tb)
 
+  def closeFile(self):
+    app.log.info()
+    app.buffer_manager.buffers.closeTextBuffer(self.host.textBuffer)
+    self.host.setTextBuffer(app.buffer_manager.buffers.newTextBuffer())
+    self.exitConfirmationPrompt()
+
   def closeOrConfirmClose(self):
     """If the file is clean, close it. If it is dirty, prompt the user
         about whether to lose unsaved changes."""
-    if self.host.userIntent == 'edit':
-      self.host.userIntent = 'close'
     tb = self.host.textBuffer
     if not tb.isDirty():
       self.closeHostFile()
       return
+    if self.host.userIntent == 'edit':
+      self.host.userIntent = 'close'
     self.changeToConfirmClose()
 
   def overwriteHostFile(self):
@@ -104,8 +115,7 @@ class Controller:
     if self.host.userIntent == 'quit':
       self.quitOrSwitchToConfirmQuit()
       return
-    elif self.host.userIntent == 'close':
-      self.host.userIntent = 'edit'
+    if self.host.userIntent == 'close':
       self.closeHostFile()
     self.changeToHostWindow()
 
@@ -113,17 +123,16 @@ class Controller:
     """Ask whether the file should be overwritten."""
     app.log.debug()
     tb = self.host.textBuffer
-    if tb.isSafeToWrite():
-      tb.fileWrite()
-      if self.host.userIntent == 'quit':
-        self.quitOrSwitchToConfirmQuit()
-        return
-      elif self.host.userIntent == 'close':
-        self.host.userIntent = 'edit'
-        self.closeHostFile()
-      self.changeToHostWindow()
+    if not tb.isSafeToWrite():
+      self.changeToConfirmOverwrite()
       return
-    self.changeToConfirmOverwrite()
+    tb.fileWrite()
+    if self.host.userIntent == 'quit':
+      self.quitOrSwitchToConfirmQuit()
+      return
+    if self.host.userIntent == 'close':
+      self.closeHostFile()
+    self.changeToHostWindow()
 
   def quitOrSwitchToConfirmQuit(self):
     app.log.debug()
@@ -131,14 +140,16 @@ class Controller:
     self.host.userIntent = 'quit'
     app.history.set(['files', tb.fullPath, 'cursor'],
         (self.host.cursorRow, self.host.cursorCol))
-    if not tb.isDirty():
-      tb = app.buffer_manager.buffers.getUnsavedBuffer()
-      if not tb:
-        app.buffer_manager.buffers.debugLog()
-        self.host.quitNow()
-        return
+    if tb.isDirty():
+      self.changeToConfirmQuit()
+      return
+    tb = app.buffer_manager.buffers.getUnsavedBuffer()
+    if tb:
       self.host.setTextBuffer(tb)
-    self.changeToConfirmQuit()
+      self.changeToConfirmQuit()
+      return
+    app.buffer_manager.buffers.debugLog()
+    self.host.quitNow()
 
   def saveOrChangeToSaveAs(self):
     app.log.debug()

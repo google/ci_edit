@@ -77,13 +77,7 @@ class ConfirmClose(app.controller.Controller):
       ord('y'): self.writeOrConfirmOverwrite,
     })
     self.commandSet = commandSet
-    self.commandDefault = self.changeToHostWindow
-
-  def closeFile(self):
-    app.log.info()
-    app.buffer_manager.buffers.closeTextBuffer(self.host.textBuffer)
-    self.host.setTextBuffer(app.buffer_manager.buffers.newTextBuffer())
-    self.changeToHostWindow()
+    self.commandDefault = self.exitConfirmationPrompt
 
 
 class ConfirmOverwrite(app.controller.Controller):
@@ -97,7 +91,7 @@ class ConfirmOverwrite(app.controller.Controller):
       ord('y'): self.overwriteHostFile,
     })
     self.commandSet = commandSet
-    self.commandDefault = self.changeToHostWindow
+    self.commandDefault = self.exitConfirmationPrompt
 
 
 class InteractiveFind(app.editor.InteractiveFind):
@@ -214,7 +208,7 @@ class InteractiveQuit(app.controller.Controller):
       ord('y'): self.writeOrConfirmOverwrite,
     })
     self.commandSet = commandSet
-    self.commandDefault = self.changeToHostWindow
+    self.commandDefault = self.exitConfirmationPrompt
 
 
 class InteractiveSaveAs(app.controller.Controller):

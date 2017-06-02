@@ -200,9 +200,12 @@ class CiProgram:
     y, x = win.cursorWindow.getyx()
     maxRow, maxCol = win.cursorWindow.getmaxyx()
     self.debugWindow.writeLineRow = 0
+    intent = "noIntent"
+    try: intent = win.userIntent
+    except: pass
     self.debugWindow.writeLine(
-        "   cRow %3d    cCol %2d goalCol %2d"
-        %(win.cursorRow, win.cursorCol, win.goalCol),
+        "   cRow %3d    cCol %2d goalCol %2d  %s"
+        %(win.cursorRow, win.cursorCol, win.goalCol, intent),
         self.debugWindow.color)
     self.debugWindow.writeLine(
         "   pRow %3d    pCol %2d"
