@@ -382,10 +382,13 @@ class CiProgram:
         self.openToLine = int(i[1:])
         continue
       if not takeAll and i[:2] == '--':
-        self.debugRedo = self.debugRedo or i == '--debugRedo'
-        self.profile = self.profile or i == '--profile'
-        self.showLogWindow = self.showLogWindow or i == '--log'
-        if i == '--d':
+        if i == '--debugRedo':
+          self.debugRedo = True
+        elif i == '--profile':
+          self.profile = True
+        elif i == '--log':
+          self.showLogWindow = True
+        elif i == '--d':
           app.log.channelEnable('debug', True)
         elif i == '--m':
           app.log.channelEnable('mouse', True)
