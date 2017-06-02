@@ -19,6 +19,7 @@ app
 ascii
 atime
 baudrate
+btab
 chgat
 chr
 col
@@ -74,10 +75,12 @@ mtime
 mvwin
 ndiff
 newwin
+npage
 ord
 os
 pid
 popen
+ppage
 pstats
 pyperclip
 re
@@ -90,11 +93,14 @@ resizeterm
 sel
 sep
 setdefault
+sleft
 splitext
 sre
+sright
 startswith
 str
 sys
 traceback
 uid
+ungetch
 unittest
