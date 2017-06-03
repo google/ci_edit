@@ -505,7 +505,7 @@ class StatusLine(StaticWindow):
     rightSide = ''
     if len(statusLine):
       rightSide += ' |'
-    if 0:
+    if self.host.prg.showLogWindow:
       rightSide += ' %s | %s |'%(
           tb.cursorGrammarName(),
           tb.selectionModeName())
