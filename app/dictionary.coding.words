@@ -57,6 +57,8 @@ bugzilla
 calc
 cfg
 cgi
+changelist
+changelog
 checkbox
 chr
 cli
@@ -86,6 +88,8 @@ edu
 emacs
 endif
 env
+eof
+eol
 eq
 errno
 esc
@@ -93,9 +97,11 @@ ethernet
 eval
 exe
 exec
+exts
 fcntl
 fd
 fds
+ff
 fi
 filename
 fixme
@@ -133,9 +139,12 @@ keyframe
 keyframed
 keyframes
 le
+lf
 localhost
 loopback
 lorem
+makefile
+makefiles
 mixin
 mixins
 mozilla
@@ -144,12 +153,15 @@ na
 namespaces
 ne
 nullptr
+num
 oauth
 obj
+objc
 pid
 png
 popups
 pos
+pragma
 prev
 prg
 proto
@@ -177,6 +189,7 @@ std
 stderr
 stdin
 stdout
+stl
 str
 struct
 stty

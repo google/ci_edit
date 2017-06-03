@@ -17,6 +17,7 @@ blvd
 concat
 config
 dbg
+dev
 expr
 lang
 nd
@@ -36,25 +37,33 @@ elit
 afaict
 afaik
 afk
+bmp
 brb
 brt
 bsd
 btw
+cpu
 cua
 drm
 eula
+fpu
 fyi
 gb
+gif
 gl
+gpu
 gtg
 gtk
 html
 http
+hud
+ico
 iiuc
 ime
 io
 kde
 ld
+lgtm
 ltr
 mit
 msdn
@@ -66,14 +75,21 @@ oobe
 os
 osx
 pdf
+qa
 rgb
 rgba
 rtl
 saml
+sgml
 ssl
 tb
+tbd
+tcp
+tif
 tpm
 ttfn
+ty
+udp
 un
 uri
 url
@@ -84,6 +100,7 @@ xml
 
 
 # Names (names that match trademarks are not a challenge to said marks)
+ada
 alice
 america
 apache
@@ -117,6 +134,7 @@ fred
 gavin
 gmail
 google
+grande
 hebrew
 hector
 helvetica
@@ -142,12 +160,14 @@ mathew
 matt
 mexico
 michael
+microsoft
 midge
 omnibox
 profont
 rachel
 rebecca
 richard
+rietveld
 ritch
 roboto
 schuyler
@@ -157,6 +177,7 @@ steven
 tom
 tommy
 touchpad
+venti
 verisign
 
 
@@ -165,18 +186,21 @@ arraysize
 browsertest
 chromevox
 codereview
+cpplint
 cros
 darkconnect
 dsc
 gmock
 hotword
 jstemplate
+nacl
 newtabpage
 onc
 oobe
 powerwash
 ppapi
 presubmit
+pylint
 safebrowsing
 tryserver
 uma
