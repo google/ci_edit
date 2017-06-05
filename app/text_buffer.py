@@ -1438,26 +1438,26 @@ class TextBuffer(BackingTextBuffer):
       self.drawRect(window, 0, split, rows, cols-split, 192)
 
   def drawRect(self, window, top, left, rows, cols, colorDelta):
-    startCol = self.view.scrollCol+left
-    endCol = self.view.scrollCol+left+cols
+    startCol = self.view.scrollCol + left
+    endCol = self.view.scrollCol + left + cols
 
     if self.parser:
-      defaultColor = curses.color_pair(0+colorDelta)
+      defaultColor = curses.color_pair(0 + colorDelta)
       # Highlight grammar.
       startRow = self.view.scrollRow+top
-      rowLimit = min(max(len(self.lines)-self.view.scrollRow, 0), rows)
+      rowLimit = min(max(len(self.lines) - self.view.scrollRow, 0), rows)
       for i in range(rowLimit):
         k = 0
         while k < endCol:
-          node, remaining = self.parser.grammarFromRowCol(startRow+i, k)
-          if k+remaining < startCol:
+          node, remaining = self.parser.grammarFromRowCol(startRow + i, k)
+          if k + remaining < startCol:
             k += remaining
             continue
-          line = self.lines[startRow+i][k:k+remaining]
+          line = self.lines[startRow + i][k:k + remaining]
           startFragment = max(k, startCol)
-          lastCol = min(endCol, k+remaining)
+          lastCol = min(endCol, k + remaining)
           endFragment = min(k+remaining, endCol)
-          length = min(endCol-k, len(line))
+          length = min(endCol - k, len(line))
           app.log.info('X', k, endCol, length, len(line), remaining, line)
           """
 info textbuffer.py 1440 drawRect: X 42 95 19 18 19 # Mispelllled word
@@ -1466,8 +1466,8 @@ info text_buffer.py 1440 drawRect: X 0 95 95 55 387                     if k < r
           """
           color = curses.color_pair(node.grammar.get(
               'colorIndex', app.prefs.defaultColorIndex)+colorDelta)
-          col = k-self.view.scrollCol+left
-          cats = max(left, k-self.view.scrollCol)
+          col = k - self.view.scrollCol + left
+          cats = max(left, k - self.view.scrollCol)
           dogs = 0 if cats > left else cats
           if length:
             window.addStr(i, cats, line[dogs:length], color)
@@ -1475,14 +1475,14 @@ info text_buffer.py 1440 drawRect: X 0 95 95 55 387                     if k < r
               if node.grammar.get('spelling', True):
                 # Highlight spelling errors
                 grammarName = node.grammar.get('name', 'unknown')
-                color = 9+colorDelta
+                color = 9 + colorDelta
                 for found in re.finditer(app.selectable.kReSubwords, line):
                   for reg in found.regs:  # Mispelllled word
                     if startCol < reg[1] and reg[0] < lastCol:
                       word = line[reg[0]:reg[1]]
                       if not app.spelling.isCorrect(word, grammarName):
                         wordFragment = line[reg[0]:min(length, reg[1])]
-                        window.addStr(i, k+reg[0], wordFragment,
+                        window.addStr(i, k + reg[0], wordFragment,
                             curses.color_pair(color) | curses.A_BOLD |
                             curses.A_REVERSE)
             if 0:
@@ -1493,7 +1493,7 @@ info text_buffer.py 1440 drawRect: X 0 95 95 55 387                     if k < r
                 reg = found.regs[0]
                 if startCol < reg[1] and reg[0] < lastCol:
                   wordFragment = line[reg[0]:min(length, reg[1])]
-                  window.addStr(i, col+reg[0], wordFragment, keywordsColor)
+                  window.addStr(i, col + reg[0], wordFragment, keywordsColor)
               # Highlight specials.
               keywordsColor = node.grammar.get('specialsColor', defaultColor)
               keywordsColor = curses.color_pair(app.prefs.specialsColorIndex+colorDelta)
@@ -1501,24 +1501,24 @@ info text_buffer.py 1440 drawRect: X 0 95 95 55 387                     if k < r
                 reg = found.regs[0]
                 if startCol < reg[1] and reg[0] < lastCol:
                   fragment = line[reg[0]:min(length, reg[1])]
-                  window.addStr(i, col+reg[0], fragment, keywordsColor)
+                  window.addStr(i, col + reg[0], fragment, keywordsColor)
             k += length
           else:
-            window.addStr(i, cats, ' '*(cols-cats+left), color)
+            window.addStr(i, cats, ' ' * (cols - cats + left), color)
             break
     else:
       # Draw to screen.
-      rowLimit = min(max(len(self.lines)-self.view.scrollRow, 0), rows)
+      rowLimit = min(max(len(self.lines) - self.view.scrollRow, 0), rows)
       for i in range(rowLimit):
-        line = self.lines[self.view.scrollRow+i][startCol:endCol]
-        window.addStr(i, 0, line + ' '*(cols-len(line)), window.color)
+        line = self.lines[self.view.scrollRow + i][startCol:endCol]
+        window.addStr(i, 0, line + ' ' * (cols - len(line)), window.color)
     #self.drawOverlays(window, top, left, rows, cols, colorDelta)
 
   def drawOverlays(self, window, top, left, maxRow, maxCol, colorDelta):
     if 1:
-      startRow = self.view.scrollRow+top
-      startCol = self.view.scrollCol+left
-      endCol = self.view.scrollCol+maxCol
+      startRow = self.view.scrollRow + top
+      startCol = self.view.scrollCol + left
+      endCol = self.view.scrollCol + maxCol
       rowLimit = min(max(len(self.lines)-startRow, 0), maxRow)
       if 1:
         # Highlight brackets.
@@ -1546,13 +1546,13 @@ info text_buffer.py 1440 drawRect: X 0 95 95 55 387                     if k < r
                 else:
                   count -= 1
                 if count == 0:
-                  if i.start()+self.penCol-self.view.scrollCol < maxCol:
-                    window.addStr(row-startRow, left+i.start(), openCh,
-                        curses.color_pair(201+colorDelta))
+                  if i.start() + self.penCol - self.view.scrollCol < maxCol:
+                    window.addStr(row - startRow, left + i.start(), openCh,
+                        curses.color_pair(201 + colorDelta))
                   return
           def searchForward(openCh, closeCh):
             count = 1
-            colOffset = left+self.penCol+1
+            colOffset = left+self.penCol + 1
             for row in range(self.penRow, startRow+maxRow):
               if row != self.penRow:
                 colOffset = 0
@@ -1563,9 +1563,9 @@ info text_buffer.py 1440 drawRect: X 0 95 95 55 387                     if k < r
                 else:
                   count -= 1
                 if count == 0:
-                  if i.start()+self.penCol-self.view.scrollCol < maxCol:
-                    window.addStr(row-startRow, colOffset+i.start(),
-                        closeCh, curses.color_pair(201+colorDelta))
+                  if i.start() + self.penCol - self.view.scrollCol < maxCol:
+                    window.addStr(row - startRow, colOffset + i.start(),
+                        closeCh, curses.color_pair(201 + colorDelta))
                   return
           matcher = {
             '(': (')', searchForward),
@@ -1588,7 +1588,7 @@ info text_buffer.py 1440 drawRect: X 0 95 95 55 387                     if k < r
           line = self.lines[startRow + i][startCol:endCol]
           for k in re.finditer(app.selectable.kReNumbers, line):
             for f in k.regs:
-              window.addStr(i, left+f[0], line[f[0]:f[1]], curses.color_pair(31+colorDelta))
+              window.addStr(i, left + f[0], line[f[0]:f[1]], curses.color_pair(31 + colorDelta))
       if 1:
         # Highlight space ending lines.
         for i in range(rowLimit):
@@ -1599,14 +1599,14 @@ info text_buffer.py 1440 drawRect: X 0 95 95 55 387                     if k < r
             line = line[offset:]
           for k in app.selectable.kReEndSpaces.finditer(line):
             for f in k.regs:
-              window.addStr(i, left+offset+f[0], line[f[0]:f[1]],
+              window.addStr(i, left + offset + f[0], line[f[0]:f[1]],
                   curses.color_pair(180+colorDelta))
       if 0:
         lengthLimit = self.lineLimitIndicator
         if endCol >= lengthLimit:
           # Highlight long lines.
           for i in range(rowLimit):
-            line = self.lines[startRow+i]
+            line = self.lines[startRow + i]
             if len(line) < lengthLimit or startCol > lengthLimit:
               continue
             length = min(endCol, len(line)-lengthLimit)
@@ -1636,12 +1636,12 @@ info text_buffer.py 1440 drawRect: X 0 95 95 55 387                     if k < r
             self.selectionMode == app.selectable.kSelectionCharacter or
             self.selectionMode == app.selectable.kSelectionWord):
           # Go one row past the selection or to the last line.
-          for i in range(start, min(end + 1, len(self.lines)-startRow)):
+          for i in range(start, min(end + 1, len(self.lines) - startRow)):
             line = self.lines[startRow + i][startCol:endCol]
             if len(line) == len(self.lines[startRow + i]):
               line += " "  # Maybe do: "\\n".
             if i == end and i == start:
-              window.addStr(i, left+selStartCol,
+              window.addStr(i, left + selStartCol,
                   line[selStartCol:selEndCol], window.colorSelected)
             elif i == end:
               window.addStr(i, left, line[:selEndCol], window.colorSelected)
@@ -1651,11 +1651,11 @@ info text_buffer.py 1440 drawRect: X 0 95 95 55 387                     if k < r
             else:
               window.addStr(i, left, line, window.colorSelected)
         elif self.selectionMode == app.selectable.kSelectionLine:
-          for i in range(start, end+1):
+          for i in range(start, end + 1):
             line = self.lines[startRow+i][selStartCol:maxCol]
             window.addStr(i, left+selStartCol,
                 line+' '*(maxCol-len(line)), window.colorSelected)
       # Blank screen past the end of the buffer.
       color = curses.color_pair(app.prefs.outsideOfBufferColorIndex+colorDelta)
       for i in range(rowLimit, maxRow):
-        window.addStr(i, left+0, ' '*maxCol, color)
+        window.addStr(i, left + 0, ' ' * maxCol, color)
