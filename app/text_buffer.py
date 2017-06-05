@@ -1442,7 +1442,7 @@ class TextBuffer(BackingTextBuffer):
     endCol = self.view.scrollCol + cols
 
     if self.parser:
-      defaultColor = curses.color_pair(0)
+      defaultColor = curses.color_pair(0 + colorDelta)
       # Highlight grammar.
       rowLimit = min(max(len(self.lines) - self.view.scrollRow, 0), rows)
       for i in range(rowLimit):
@@ -1467,11 +1467,11 @@ class TextBuffer(BackingTextBuffer):
                     word = line[reg[0]:reg[1]]
                     if not app.spelling.isCorrect(word, grammarName):
                       window.addStr(i, col + reg[0], word,
-                          curses.color_pair(color) | curses.A_BOLD |
+                          curses.color_pair(color + colorDelta) | curses.A_BOLD |
                           curses.A_REVERSE)
             if 1:
               # Highlight keywords.
-              keywordsColor = node.grammar.get('keywordsColor', defaultColor)
+              keywordsColor = curses.color_pair(app.prefs.keywordsColorIndex + colorDelta)
               regex = node.grammar.get('keywordsRe', app.prefs.kReNonMatching)
               for found in regex.finditer(line):
                 f = found.regs[0]
@@ -1528,7 +1528,7 @@ class TextBuffer(BackingTextBuffer):
                 if count == 0:
                   if i.start() + self.penCol - self.view.scrollCol < maxCol:
                     window.addStr(row - startRow, i.start(), openCh,
-                        curses.color_pair(201))
+                        curses.color_pair(201 + colorDelta))
                   return
           def searchForward(openCh, closeCh):
             count = 1
@@ -1545,7 +1545,7 @@ class TextBuffer(BackingTextBuffer):
                 if count == 0:
                   if i.start() + self.penCol - self.view.scrollCol < maxCol:
                     window.addStr(row - startRow, colOffset + i.start(),
-                        closeCh, curses.color_pair(201))
+                        closeCh, curses.color_pair(201 + colorDelta))
                   return
           matcher = {
             '(': (')', searchForward),
@@ -1561,14 +1561,14 @@ class TextBuffer(BackingTextBuffer):
             window.addStr(self.penRow - startRow,
                 self.penCol - self.view.scrollCol,
                 self.lines[self.penRow][self.penCol],
-                curses.color_pair(201))
+                curses.color_pair(201 + colorDelta))
       if 1:
         # Highlight numbers.
         for i in range(rowLimit):
           line = self.lines[startRow + i][startCol:endCol]
           for k in re.finditer(app.selectable.kReNumbers, line):
             for f in k.regs:
-              window.addStr(i, f[0], line[f[0]:f[1]], curses.color_pair(31))
+              window.addStr(i, f[0], line[f[0]:f[1]], curses.color_pair(31 + colorDelta))
       if 1:
         # Highlight space ending lines.
         for i in range(rowLimit):
@@ -1580,7 +1580,7 @@ class TextBuffer(BackingTextBuffer):
           for k in app.selectable.kReEndSpaces.finditer(line):
             for f in k.regs:
               window.addStr(i, offset + f[0], line[f[0]:f[1]],
-                  curses.color_pair(180))
+                  curses.color_pair(180 + colorDelta))
       if 1:
         lengthLimit = self.lineLimitIndicator
         if endCol >= lengthLimit:
@@ -1600,7 +1600,7 @@ class TextBuffer(BackingTextBuffer):
             f = k.regs[0]
             #for f in k.regs[1:]:
             window.addStr(i, f[0], line[f[0]:f[1]],
-                curses.color_pair(app.prefs.foundColorIndex))
+                curses.color_pair(app.prefs.foundColorIndex + colorDelta))
       if rowLimit and self.selectionMode != app.selectable.kSelectionNone:
         # Highlight selected text.
         upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
@@ -1636,6 +1636,6 @@ class TextBuffer(BackingTextBuffer):
             window.addStr(i, selStartCol,
                 line + ' ' * (maxCol - len(line)), window.colorSelected)
       # Blank screen past the end of the buffer.
-      color = curses.color_pair(app.prefs.outsideOfBufferColorIndex)
+      color = curses.color_pair(app.prefs.outsideOfBufferColorIndex + colorDelta)
       for i in range(rowLimit, maxRow):
         window.addStr(i, 0, ' ' * maxCol, color)
