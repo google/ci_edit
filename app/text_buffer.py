@@ -1427,18 +1427,24 @@ class TextBuffer(BackingTextBuffer):
     if self.shouldReparse:
       self.parseGrammars()
       self.shouldReparse = False
-    maxRow, maxCol = window.cursorWindow.getmaxyx()
-
     if self.view.hasCaptiveCursor:
       self.checkScrollToCursor(window)
+    rows, cols = window.cursorWindow.getmaxyx()
+    if 1:
+      self.drawRect(window, 0, 0, rows, cols, 0)
+    else:
+      split = 10
+      self.drawRect(window, 0, 0, rows, split, 0)
+      self.drawRect(window, 0, split, rows, cols-split, 192)
 
-    startCol = self.view.scrollCol
-    endCol = self.view.scrollCol + maxCol
+  def drawRect(self, window, top, left, rows, cols, colorDelta):
+    startCol = self.view.scrollCol + left
+    endCol = self.view.scrollCol + cols
 
     if self.parser:
       defaultColor = curses.color_pair(0)
       # Highlight grammar.
-      rowLimit = min(max(len(self.lines)-self.view.scrollRow, 0), maxRow)
+      rowLimit = min(max(len(self.lines)-self.view.scrollRow, 0), rows)
       for i in range(rowLimit):
         k = startCol
         while k < endCol:
@@ -1478,19 +1484,18 @@ class TextBuffer(BackingTextBuffer):
                 window.addStr(i, col + f[0], line[f[0]:f[1]], keywordsColor)
               k += length
           else:
-            window.addStr(i, col, ' ' * (maxCol - col), color)
+            window.addStr(i, col, ' ' * (cols - col), color)
             break
     else:
       # Draw to screen.
-      rowLimit = min(max(len(self.lines)-self.view.scrollRow, 0), maxRow)
+      rowLimit = min(max(len(self.lines)-self.view.scrollRow, 0), rows)
       for i in range(rowLimit):
         line = self.lines[self.view.scrollRow + i][startCol:endCol]
-        window.addStr(i, 0, line + ' ' * (maxCol - len(line)), window.color)
-    self.drawOverlays(window)
+        window.addStr(i, 0, line + ' ' * (cols - len(line)), window.color)
+    self.drawOverlays(window, top, left, rows, cols, colorDelta)
 
-  def drawOverlays(self, window):
+  def drawOverlays(self, window, top, left, maxRow, maxCol, colorDelta):
     if 1:
-      maxRow, maxCol = window.cursorWindow.getmaxyx()
       startRow = self.view.scrollRow
       startCol = self.view.scrollCol
       endCol = self.view.scrollCol + maxCol
@@ -1576,16 +1581,17 @@ class TextBuffer(BackingTextBuffer):
             for f in k.regs:
               window.addStr(i, offset + f[0], line[f[0]:f[1]],
                   curses.color_pair(180))
-      lengthLimit = self.lineLimitIndicator
-      if endCol >= lengthLimit:
-        # Highlight long lines.
-        for i in range(rowLimit):
-          line = self.lines[startRow + i]
-          if len(line) < lengthLimit or startCol > lengthLimit:
-            continue
-          length = min(endCol, len(line) - lengthLimit)
-          window.addStr(i, lengthLimit - startCol, line[lengthLimit:endCol],
-              curses.color_pair(96))
+      if 1:
+        lengthLimit = self.lineLimitIndicator
+        if endCol >= lengthLimit:
+          # Highlight long lines.
+          for i in range(rowLimit):
+            line = self.lines[startRow + i]
+            if len(line) < lengthLimit or startCol > lengthLimit:
+              continue
+            length = min(endCol, len(line) - lengthLimit)
+            window.addStr(i, lengthLimit - startCol, line[lengthLimit:endCol],
+                curses.color_pair(96))
       if self.findRe is not None:
         # Highlight find.
         for i in range(rowLimit):
