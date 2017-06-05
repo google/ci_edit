@@ -733,7 +733,7 @@ class BackingTextBuffer(Mutator):
   def cursorScrollToMiddle(self):
     maxRow, maxCol = self.view.cursorWindow.getmaxyx()
     rowDelta = min(max(0, len(self.lines)-maxRow),
-                   max(0, self.penRow - maxRow / 2))-self.view.scrollRow
+                   max(0, self.penRow - maxRow / 2)) - self.view.scrollRow
     self.cursorMoveScroll(0, 0, rowDelta, 0)
 
   def cursorStartOfLine(self):
@@ -1487,16 +1487,15 @@ info text_buffer.py 1440 drawRect: X 0 95 95 55 387                     if k < r
                             curses.A_REVERSE)
             if 0:
               # Highlight keywords.
-              keywordsColor = node.grammar.get('keywordsColor', defaultColor)
-              keywordsColor = curses.color_pair(app.prefs.keywordsColorIndex+colorDelta)
-              for found in node.grammar['keywordsRe'].finditer(line):
+              keywordsColor = curses.color_pair(app.prefs.keywordsColorIndex + colorDelta)
+              regex = node.grammar.get('keywordsRe', app.prefs.kReNonMatching)
+              for found in regex.finditer(line):
                 reg = found.regs[0]
                 if startCol < reg[1] and reg[0] < lastCol:
                   wordFragment = line[reg[0]:min(length, reg[1])]
                   window.addStr(i, col + reg[0], wordFragment, keywordsColor)
               # Highlight specials.
-              keywordsColor = node.grammar.get('specialsColor', defaultColor)
-              keywordsColor = curses.color_pair(app.prefs.specialsColorIndex+colorDelta)
+              keywordsColor = curses.color_pair(app.prefs.specialsColorIndex + colorDelta)
               for found in node.grammar['specialsRe'].finditer(line):
                 reg = found.regs[0]
                 if startCol < reg[1] and reg[0] < lastCol:
