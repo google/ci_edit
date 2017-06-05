@@ -733,7 +733,7 @@ class BackingTextBuffer(Mutator):
   def cursorScrollToMiddle(self):
     maxRow, maxCol = self.view.cursorWindow.getmaxyx()
     rowDelta = min(max(0, len(self.lines)-maxRow),
-                   max(0, self.penRow - maxRow / 2))-self.view.scrollRow
+                   max(0, self.penRow - maxRow / 2)) - self.view.scrollRow
     self.cursorMoveScroll(0, 0, rowDelta, 0)
 
   def cursorStartOfLine(self):
@@ -1444,7 +1444,7 @@ class TextBuffer(BackingTextBuffer):
     if self.parser:
       defaultColor = curses.color_pair(0)
       # Highlight grammar.
-      rowLimit = min(max(len(self.lines)-self.view.scrollRow, 0), rows)
+      rowLimit = min(max(len(self.lines) - self.view.scrollRow, 0), rows)
       for i in range(rowLimit):
         k = startCol
         while k < endCol:
@@ -1488,7 +1488,7 @@ class TextBuffer(BackingTextBuffer):
             break
     else:
       # Draw to screen.
-      rowLimit = min(max(len(self.lines)-self.view.scrollRow, 0), rows)
+      rowLimit = min(max(len(self.lines) - self.view.scrollRow, 0), rows)
       for i in range(rowLimit):
         line = self.lines[self.view.scrollRow + i][startCol:endCol]
         window.addStr(i, 0, line + ' ' * (cols - len(line)), window.color)
@@ -1499,7 +1499,7 @@ class TextBuffer(BackingTextBuffer):
       startRow = self.view.scrollRow
       startCol = self.view.scrollCol
       endCol = self.view.scrollCol + maxCol
-      rowLimit = min(max(len(self.lines)-startRow, 0), maxRow)
+      rowLimit = min(max(len(self.lines) - startRow, 0), maxRow)
       if 1:
         # Highlight brackets.
         for i in range(rowLimit):
@@ -1616,7 +1616,7 @@ class TextBuffer(BackingTextBuffer):
             self.selectionMode == app.selectable.kSelectionCharacter or
             self.selectionMode == app.selectable.kSelectionWord):
           # Go one row past the selection or to the last line.
-          for i in range(start, min(end + 1, len(self.lines)-startRow)):
+          for i in range(start, min(end + 1, len(self.lines) - startRow)):
             line = self.lines[startRow + i][startCol:endCol]
             if len(line) == len(self.lines[startRow + i]):
               line += " "  # Maybe do: "\\n".
@@ -1638,4 +1638,4 @@ class TextBuffer(BackingTextBuffer):
       # Blank screen past the end of the buffer.
       color = curses.color_pair(app.prefs.outsideOfBufferColorIndex)
       for i in range(rowLimit, maxRow):
-        window.addStr(i, 0, ' '*maxCol, color)
+        window.addStr(i, 0, ' ' * maxCol, color)
