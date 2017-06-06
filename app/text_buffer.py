@@ -1430,6 +1430,11 @@ class TextBuffer(BackingTextBuffer):
     if self.view.hasCaptiveCursor:
       self.checkScrollToCursor(window)
     rows, cols = window.cursorWindow.getmaxyx()
+
+    if 1:
+      for i in range(rows):
+        window.addStr(i, 0, '?' * cols, curses.color_pair(120))
+
     if 0:
       self.drawRect(window, 0, 0, rows, cols, 0)
     else:
@@ -1444,10 +1449,10 @@ class TextBuffer(BackingTextBuffer):
     if self.parser:
       defaultColor = curses.color_pair(0 + colorDelta)
       # Highlight grammar.
-      startRow = self.view.scrollRow+top
+      startRow = self.view.scrollRow + top
       rowLimit = min(max(len(self.lines) - self.view.scrollRow, 0), rows)
       for i in range(rowLimit):
-        k = 0
+        k = startCol
         while k < endCol:
           node, remaining = self.parser.grammarFromRowCol(startRow + i, k)
           if k + remaining < startCol:
@@ -1465,12 +1470,13 @@ info text_buffer.py 1440 drawRect: X 61 95 34 0 387
 info text_buffer.py 1440 drawRect: X 0 95 95 55 387                     if k < reg[1] and reg[0] < lastCol:
           """
           color = curses.color_pair(node.grammar.get(
-              'colorIndex', app.prefs.defaultColorIndex)+colorDelta)
+              'colorIndex', app.prefs.defaultColorIndex) + colorDelta)
           col = k - self.view.scrollCol + left
           cats = max(left, k - self.view.scrollCol)
           dogs = 0 if cats > left else cats
           if length:
             window.addStr(i, cats, line[dogs:length], color)
+            #window.addStr(i, cats, 'X', curses.color_pair(1))
             if 0:
               if node.grammar.get('spelling', True):
                 # Highlight spelling errors
