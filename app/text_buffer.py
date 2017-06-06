@@ -1494,6 +1494,7 @@ info text_buffer.py 1440 drawRect: X 0 95 95 55 387                     if k < r
                 if startCol < reg[1] and reg[0] < lastCol:
                   wordFragment = line[reg[0]:min(length, reg[1])]
                   window.addStr(i, col + reg[0], wordFragment, keywordsColor)
+            if 0:
               # Highlight specials.
               keywordsColor = curses.color_pair(app.prefs.specialsColorIndex + colorDelta)
               for found in node.grammar['specialsRe'].finditer(line):
