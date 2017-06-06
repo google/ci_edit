@@ -1474,15 +1474,16 @@ class TextBuffer(BackingTextBuffer):
               keywordsColor = curses.color_pair(app.prefs.keywordsColorIndex + colorDelta)
               regex = node.grammar.get('keywordsRe', app.prefs.kReNonMatching)
               for found in regex.finditer(line):
-                f = found.regs[0]
-                window.addStr(i, col + f[0], line[f[0]:f[1]], keywordsColor)
+                reg = found.regs[0]
+                window.addStr(i, col + reg[0], line[reg[0]:reg[1]], keywordsColor)
+            if 1:
               # Highlight specials.
               keywordsColor = node.grammar.get('specialsColor', defaultColor)
               regex = node.grammar.get('specialsRe', app.prefs.kReNonMatching)
               for found in regex.finditer(line):
-                f = found.regs[0]
-                window.addStr(i, col + f[0], line[f[0]:f[1]], keywordsColor)
-              k += length
+                reg = found.regs[0]
+                window.addStr(i, col + reg[0], line[reg[0]:reg[1]], keywordsColor)
+            k += length
           else:
             window.addStr(i, col, ' ' * (cols - col), color)
             break
@@ -1505,8 +1506,8 @@ class TextBuffer(BackingTextBuffer):
         for i in range(rowLimit):
           line = self.lines[startRow + i][startCol:endCol]
           for k in re.finditer(app.selectable.kReBrackets, line):
-            for f in k.regs:
-              window.addStr(i, f[0], line[f[0]:f[1]], curses.color_pair(6))
+            for reg in k.regs:
+              window.addStr(i, reg[0], line[reg[0]:reg[1]], curses.color_pair(6))
       if 1:
         # Match brackets.
         if (len(self.lines) > self.penRow and
@@ -1567,8 +1568,8 @@ class TextBuffer(BackingTextBuffer):
         for i in range(rowLimit):
           line = self.lines[startRow + i][startCol:endCol]
           for k in re.finditer(app.selectable.kReNumbers, line):
-            for f in k.regs:
-              window.addStr(i, f[0], line[f[0]:f[1]], curses.color_pair(31 + colorDelta))
+            for reg in k.regs:
+              window.addStr(i, reg[0], line[reg[0]:reg[1]], curses.color_pair(31 + colorDelta))
       if 1:
         # Highlight space ending lines.
         for i in range(rowLimit):
@@ -1578,8 +1579,8 @@ class TextBuffer(BackingTextBuffer):
             offset = self.penCol - startCol
             line = line[offset:]
           for k in app.selectable.kReEndSpaces.finditer(line):
-            for f in k.regs:
-              window.addStr(i, offset + f[0], line[f[0]:f[1]],
+            for reg in k.regs:
+              window.addStr(i, offset + reg[0], line[reg[0]:reg[1]],
                   curses.color_pair(180 + colorDelta))
       if 1:
         lengthLimit = self.lineLimitIndicator
@@ -1597,9 +1598,9 @@ class TextBuffer(BackingTextBuffer):
         for i in range(rowLimit):
           line = self.lines[startRow + i][startCol:endCol]
           for k in self.findRe.finditer(line):
-            f = k.regs[0]
-            #for f in k.regs[1:]:
-            window.addStr(i, f[0], line[f[0]:f[1]],
+            reg = k.regs[0]
+            #for ref in k.regs[1:]:
+            window.addStr(i, reg[0], line[reg[0]:reg[1]],
                 curses.color_pair(app.prefs.foundColorIndex + colorDelta))
       if rowLimit and self.selectionMode != app.selectable.kSelectionNone:
         # Highlight selected text.
