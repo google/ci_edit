@@ -1472,79 +1472,54 @@ class TextBuffer(BackingTextBuffer):
             k += length
             continue
           window.addStr(i, left + k - startCol, line[k:k + length], color)
+          subStart = k - preceding
+          subEnd = k + remaining
+          subLine = line[subStart:subEnd]
           if 1:
             if node.grammar.get('spelling', True):
               # Highlight spelling errors
               grammarName = node.grammar.get('name', 'unknown')
               color = 9 + colorDelta
-              subStart = k - preceding
-              for found in re.finditer(app.selectable.kReSubwords,
-                  line[subStart:k + remaining]):
-                for reg in found.regs:  # Mispelllled word
-                  if startCol < subStart + reg[1] and subStart + reg[0] < endCol:
-                    word = line[subStart + reg[0]:subStart + reg[1]]
-                    if not app.spelling.isCorrect(word, grammarName):
-                      offsetStart = subStart + reg[0]
-                      if startCol > offsetStart:
-                        offsetStart += startCol - offsetStart
-                      wordFragment = line[offsetStart:min(endCol, subStart + reg[1])]
-                      window.addStr(i, left + offsetStart - startCol, wordFragment,
-                          curses.color_pair(color) | curses.A_BOLD |
-                          curses.A_REVERSE)
+              for found in re.finditer(app.selectable.kReSubwords, subLine):
+                reg = found.regs[0]  # Mispelllled word
+                offsetStart = subStart + reg[0]
+                offsetEnd = subStart + reg[1]
+                if startCol < offsetEnd and offsetStart < endCol:
+                  word = line[offsetStart:offsetEnd]
+                  if not app.spelling.isCorrect(word, grammarName):
+                    if startCol > offsetStart:
+                      offsetStart += startCol - offsetStart
+                    wordFragment = line[offsetStart:min(endCol, offsetEnd)]
+                    window.addStr(i, left + offsetStart - startCol, wordFragment,
+                        curses.color_pair(color) | curses.A_BOLD |
+                        curses.A_REVERSE)
+          if 1:
+            # Highlight keywords.
+            keywordsColor = curses.color_pair(app.prefs.keywordsColorIndex + colorDelta)
+            regex = node.grammar.get('keywordsRe', app.prefs.kReNonMatching)
+            for found in regex.finditer(subLine):
+              reg = found.regs[0]
+              offsetStart = subStart + reg[0]
+              offsetEnd = subStart + reg[1]
+              if startCol < offsetEnd and offsetStart < endCol:
+                if startCol > offsetStart:
+                  offsetStart += startCol - offsetStart
+                wordFragment = line[offsetStart:min(endCol, offsetEnd)]
+                window.addStr(i, left + offsetStart - startCol, wordFragment, keywordsColor)
+          if 1:
+            # Highlight specials.
+            keywordsColor = curses.color_pair(app.prefs.specialsColorIndex + colorDelta)
+            regex = node.grammar.get('specialsRe', app.prefs.kReNonMatching)
+            for found in regex.finditer(subLine):
+              reg = found.regs[0]
+              offsetStart = subStart + reg[0]
+              offsetEnd = subStart + reg[1]
+              if startCol < offsetEnd and offsetStart < endCol:
+                if startCol > offsetStart:
+                  offsetStart += startCol - offsetStart
+                wordFragment = line[offsetStart:min(endCol, offsetEnd)]
+                window.addStr(i, left + offsetStart - startCol, wordFragment, keywordsColor)
           k += length
-          continue
-
-
-
-
-
-
-          startFragment = max(k, startCol)
-          lastCol = min(endCol, k + remaining)
-          endFragment = min(k + remaining, endCol)
-          app.log.info('X', k, endCol, length, len(line), remaining, line)
-          """
-info textbuffer.py 1440 drawRect: X 42 95 19 18 19 # Mispelllled word
-info text_buffer.py 1440 drawRect: X 61 95 34 0 387
-info text_buffer.py 1440 drawRect: X 0 95 95 55 387                     if k < reg[1] and reg[0] < lastCol:
-          """
-          col = k - self.view.scrollCol + left
-          dogs = 0 if cats > left else cats
-          if length:
-            window.addStr(i, cats, line[dogs:length], color)
-            #window.addStr(i, cats, 'X', curses.color_pair(1))
-            if 0:
-              if node.grammar.get('spelling', True):
-                # Highlight spelling errors
-                grammarName = node.grammar.get('name', 'unknown')
-                color = 9 + colorDelta
-                for found in re.finditer(app.selectable.kReSubwords, line):
-                  for reg in found.regs:  # Mispelllled word
-                    if startCol < reg[1] and reg[0] < lastCol:
-                      word = line[reg[0]:reg[1]]
-                      if not app.spelling.isCorrect(word, grammarName):
-                        wordFragment = line[reg[0]:min(length, reg[1])]
-                        window.addStr(i, k + reg[0], wordFragment,
-                            curses.color_pair(color) | curses.A_BOLD |
-                            curses.A_REVERSE)
-            if 0:
-              # Highlight keywords.
-              keywordsColor = curses.color_pair(app.prefs.keywordsColorIndex + colorDelta)
-              regex = node.grammar.get('keywordsRe', app.prefs.kReNonMatching)
-              for found in regex.finditer(line):
-                reg = found.regs[0]
-                if startCol < reg[1] and reg[0] < lastCol:
-                  wordFragment = line[reg[0]:min(length, reg[1])]
-                  window.addStr(i, col + reg[0], wordFragment, keywordsColor)
-            if 0:
-              # Highlight specials.
-              keywordsColor = curses.color_pair(app.prefs.specialsColorIndex + colorDelta)
-              for found in node.grammar['specialsRe'].finditer(line):
-                reg = found.regs[0]
-                if startCol < reg[1] and reg[0] < lastCol:
-                  fragment = line[reg[0]:min(length, reg[1])]
-                  window.addStr(i, col + reg[0], fragment, keywordsColor)
-            k += length
     else:
       # Draw to screen.
       rowLimit = min(max(len(self.lines) - self.view.scrollRow, 0), rows)
