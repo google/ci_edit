@@ -55,7 +55,7 @@ class Parser:
       # let's leave the tail un-highlighted.
       empty = ParserNode()
       empty.grammar = {}
-      return empty, sys.maxint
+      return empty, 0, sys.maxint
     gl = self.grammarRowList[row] + [sentinel]
     offset = gl[0].begin + col
     # Binary search to find the node for the column.
@@ -68,7 +68,7 @@ class Parser:
       elif offset < gl[index].begin:
         high = index
       else:
-        return gl[index], gl[index+1].begin-offset
+        return gl[index], offset - gl[index].begin, gl[index+1].begin-offset
 
   def parse(self, data, grammar):
     app.log.parser('grammar', grammar['name'])
@@ -115,6 +115,12 @@ class Parser:
       child = ParserNode()
       if index == len(found.groups()) - 1:
         # Found new line.
+        if 0:
+          remaining = ParserNode()
+          remaining.grammar = {}
+          remaining.begin = cursor + reg[0] + 1
+          self.grammarRowList[-1].append(remaining)
+
         child.grammar = grammarStack[-1]
         child.begin = cursor + reg[1]
         cursor = child.begin
@@ -126,6 +132,11 @@ class Parser:
         child.begin = cursor + reg[1]
         cursor = child.begin
         if subdata[reg[0]:reg[1]] == '\n':
+          if 0:
+            remaining = ParserNode()
+            remaining.grammar = {}
+            remaining.begin = cursor + reg[0] + 1
+            self.grammarRowList[-1].append(remaining)
           self.grammarRowList.append([])
       else:
         # A new grammar within this grammar (a 'contains').

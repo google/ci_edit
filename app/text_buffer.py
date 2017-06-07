@@ -1443,36 +1443,60 @@ class TextBuffer(BackingTextBuffer):
       self.drawRect(window, 0, split, rows, cols-split, 192)
 
   def drawRect(self, window, top, left, rows, cols, colorDelta):
+    startRow = self.view.scrollRow + top
     startCol = self.view.scrollCol + left
     endCol = self.view.scrollCol + left + cols
 
     if self.parser:
       defaultColor = curses.color_pair(0 + colorDelta)
       # Highlight grammar.
-      startRow = self.view.scrollRow + top
       rowLimit = min(max(len(self.lines) - self.view.scrollRow, 0), rows)
       for i in range(rowLimit):
         k = startCol
         while k < endCol:
-          node, remaining = self.parser.grammarFromRowCol(startRow + i, k)
-          if k + remaining < startCol:
-            k += remaining
+          node, preceding, remaining = self.parser.grammarFromRowCol(startRow + i, k)
+          line = self.lines[startRow + i]
+          assert remaining >= 0, remaining
+          length = min(endCol, min(len(line) - k, remaining))
+          length = min(endCol - k, min(len(line) - k, remaining))
+          color = curses.color_pair(node.grammar.get(
+              'colorIndex', app.prefs.defaultColorIndex) + colorDelta)
+          if length <= 0:
+            window.addStr(i, left + k - startCol, '~' * (endCol - k), color)
+            break
+
+          cats = max(left, k - self.view.scrollCol)
+          if 0:
+            window.addStr(i, cats, 'a' * (cols - cats + left), color)
+            k += length
             continue
-          line = self.lines[startRow + i][k:k + remaining]
+          #window.addStr(i, k, 'k', color)
+          assert length >= 0, length
+          assert length <= 130, length
+          assert length <= endCol, '%d %d'%(length,endCol)
+          #window.addStr(i, remaining/2, 'r', color)
+          #window.addStr(i, length, 'L', color)
+          #window.addStr(i, endCol-2, '%', color)
+          window.addStr(i, left + k - startCol, 'X' * (length), color)
+          window.addStr(i, left + k - startCol, line[k:k + length], color)
+          k += length
+          continue
+
+
+
+
+
+
           startFragment = max(k, startCol)
           lastCol = min(endCol, k + remaining)
-          endFragment = min(k+remaining, endCol)
-          length = min(endCol - k, len(line))
+          endFragment = min(k + remaining, endCol)
           app.log.info('X', k, endCol, length, len(line), remaining, line)
           """
 info textbuffer.py 1440 drawRect: X 42 95 19 18 19 # Mispelllled word
 info text_buffer.py 1440 drawRect: X 61 95 34 0 387
 info text_buffer.py 1440 drawRect: X 0 95 95 55 387                     if k < reg[1] and reg[0] < lastCol:
           """
-          color = curses.color_pair(node.grammar.get(
-              'colorIndex', app.prefs.defaultColorIndex) + colorDelta)
           col = k - self.view.scrollCol + left
-          cats = max(left, k - self.view.scrollCol)
           dogs = 0 if cats > left else cats
           if length:
             window.addStr(i, cats, line[dogs:length], color)
@@ -1509,9 +1533,6 @@ info text_buffer.py 1440 drawRect: X 0 95 95 55 387                     if k < r
                   fragment = line[reg[0]:min(length, reg[1])]
                   window.addStr(i, col + reg[0], fragment, keywordsColor)
             k += length
-          else:
-            window.addStr(i, cats, ' ' * (cols - cats + left), color)
-            break
     else:
       # Draw to screen.
       rowLimit = min(max(len(self.lines) - self.view.scrollRow, 0), rows)
