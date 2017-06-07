@@ -1431,14 +1431,14 @@ class TextBuffer(BackingTextBuffer):
       self.checkScrollToCursor(window)
     rows, cols = window.cursorWindow.getmaxyx()
 
-    if 1:
+    if 0:
       for i in range(rows):
         window.addStr(i, 0, '?' * cols, curses.color_pair(120))
 
     if 0:
       self.drawRect(window, 0, 0, rows, cols, 0)
     else:
-      split = 10
+      split = 80
       self.drawRect(window, 0, 0, rows, split, 0)
       self.drawRect(window, 0, split, rows, cols-split, 192)
 
@@ -1463,14 +1463,8 @@ class TextBuffer(BackingTextBuffer):
           color = curses.color_pair(node.grammar.get(
               'colorIndex', app.prefs.defaultColorIndex) + colorDelta)
           if length <= 0:
-            window.addStr(i, left + k - startCol, '~' * (endCol - k), color)
+            window.addStr(i, left + k - startCol, ' ' * (endCol - k), color)
             break
-
-          cats = max(left, k - self.view.scrollCol)
-          if 0:
-            window.addStr(i, cats, 'a' * (cols - cats + left), color)
-            k += length
-            continue
           window.addStr(i, left + k - startCol, line[k:k + length], color)
           subStart = k - preceding
           subEnd = k + remaining
@@ -1526,7 +1520,7 @@ class TextBuffer(BackingTextBuffer):
       for i in range(rowLimit):
         line = self.lines[self.view.scrollRow + i][startCol:endCol]
         window.addStr(i, 0, line + ' ' * (cols - len(line)), window.color)
-    #self.drawOverlays(window, top, left, rows, cols, colorDelta)
+    self.drawOverlays(window, top, left, rows, cols, colorDelta)
 
   def drawOverlays(self, window, top, left, maxRow, maxCol, colorDelta):
     if 1:
@@ -1603,7 +1597,7 @@ class TextBuffer(BackingTextBuffer):
           for k in re.finditer(app.selectable.kReNumbers, line):
             for f in k.regs:
               window.addStr(i, left + f[0], line[f[0]:f[1]], curses.color_pair(31 + colorDelta))
-      if 1:
+      if 0:
         # Highlight space ending lines.
         for i in range(rowLimit):
           line = self.lines[startRow + i][startCol:endCol]
