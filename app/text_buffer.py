@@ -1454,11 +1454,12 @@ class TextBuffer(BackingTextBuffer):
       for i in range(rowLimit):
         k = startCol
         while k < endCol:
-          node, preceding, remaining = self.parser.grammarFromRowCol(startRow + i, k)
+          node, preceding, remaining = self.parser.grammarFromRowCol(
+              startRow + i, k)
           line = self.lines[startRow + i]
           assert remaining >= 0, remaining
-          length = min(endCol, min(len(line) - k, remaining))
-          length = min(endCol - k, min(len(line) - k, remaining))
+          remaining = min(len(line) - k, remaining)
+          length = min(endCol - k, remaining)
           color = curses.color_pair(node.grammar.get(
               'colorIndex', app.prefs.defaultColorIndex) + colorDelta)
           if length <= 0:
@@ -1470,15 +1471,26 @@ class TextBuffer(BackingTextBuffer):
             window.addStr(i, cats, 'a' * (cols - cats + left), color)
             k += length
             continue
-          #window.addStr(i, k, 'k', color)
-          assert length >= 0, length
-          assert length <= 130, length
-          assert length <= endCol, '%d %d'%(length,endCol)
-          #window.addStr(i, remaining/2, 'r', color)
-          #window.addStr(i, length, 'L', color)
-          #window.addStr(i, endCol-2, '%', color)
-          window.addStr(i, left + k - startCol, 'X' * (length), color)
           window.addStr(i, left + k - startCol, line[k:k + length], color)
+          if 1:
+            if node.grammar.get('spelling', True):
+              # Highlight spelling errors
+              grammarName = node.grammar.get('name', 'unknown')
+              color = 9 + colorDelta
+              subStart = k - preceding
+              for found in re.finditer(app.selectable.kReSubwords,
+                  line[subStart:k + remaining]):
+                for reg in found.regs:  # Mispelllled word
+                  if startCol < subStart + reg[1] and subStart + reg[0] < endCol:
+                    word = line[subStart + reg[0]:subStart + reg[1]]
+                    if not app.spelling.isCorrect(word, grammarName):
+                      offsetStart = subStart + reg[0]
+                      if startCol > offsetStart:
+                        offsetStart += startCol - offsetStart
+                      wordFragment = line[offsetStart:min(endCol, subStart + reg[1])]
+                      window.addStr(i, left + offsetStart - startCol, wordFragment,
+                          curses.color_pair(color) | curses.A_BOLD |
+                          curses.A_REVERSE)
           k += length
           continue
 
