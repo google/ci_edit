@@ -1536,8 +1536,9 @@ class TextBuffer(BackingTextBuffer):
   def drawOverlays(self, window, top, left, maxRow, maxCol, colorDelta):
     if 1:
       startRow = self.view.scrollRow + top
+      endRow = self.view.scrollRow + top + maxRow
       startCol = self.view.scrollCol + left
-      endCol = self.view.scrollCol + maxCol
+      endCol = self.view.scrollCol + left + maxCol
       rowLimit = min(max(len(self.lines) - startRow, 0), maxRow)
       if 1:
         # Highlight brackets.
@@ -1646,40 +1647,41 @@ class TextBuffer(BackingTextBuffer):
       if rowLimit and self.selectionMode != app.selectable.kSelectionNone:
         # Highlight selected text.
         upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
-        selStartCol = max(upperCol, startCol)
-        selEndCol = min(lowerCol - startCol, maxCol)
-        start = max(0, min(upperRow - startRow, maxRow))
-        end = max(0, min(lowerRow - startRow, maxRow))
-        if self.selectionMode == app.selectable.kSelectionBlock:
-          for i in range(start, end + 1):
-            line = self.lines[startRow + i][selStartCol:selEndCol]
-            window.addStr(top + i, selStartCol, line, window.colorSelected)
-        elif (self.selectionMode == app.selectable.kSelectionAll or
-            self.selectionMode == app.selectable.kSelectionCharacter or
-            self.selectionMode == app.selectable.kSelectionWord):
-          # Go one row past the selection or to the last line.
-          for i in range(start, min(end + 1, len(self.lines) - startRow)):
-            line = self.lines[startRow + i][startCol:endCol]
-            if len(line) == len(self.lines[startRow + i]):
-              line += " "  # Maybe do: "\\n".
-            if i == end and i == start:
-              window.addStr(top + i, left + selStartCol,
-                  line[selStartCol:selEndCol], window.colorSelected)
-            elif i == end:
-              window.addStr(top + i, left, line[:selEndCol],
-                  window.colorSelected)
-            elif i == start:
-              window.addStr(top + i, left + selStartCol, line[selStartCol:],
-                  window.colorSelected)
-            else:
-              window.addStr(top + i, left, line, window.colorSelected)
-        elif self.selectionMode == app.selectable.kSelectionLine:
-          for i in range(start, end + 1):
-            line = self.lines[startRow + i][selStartCol:maxCol]
-            window.addStr(top + i, selStartCol,
-                line + ' ' * (maxCol - len(line)), window.colorSelected)
-        window.addStr(top + i, lowerCol, 'X',
-            curses.color_pair(1) | curses.A_REVERSE)
+        if startRow <= upperRow < endRow or startRow <= lowerRow < endRow:
+          selStartCol = max(upperCol, startCol)
+          selEndCol = min(lowerCol - startCol, maxCol)
+          start = max(0, min(upperRow - startRow, maxRow))
+          end = max(0, min(lowerRow - startRow, maxRow))
+          if self.selectionMode == app.selectable.kSelectionBlock:
+            for i in range(start, end + 1):
+              line = self.lines[startRow + i][selStartCol:selEndCol]
+              window.addStr(top + i, selStartCol, line, window.colorSelected)
+          elif (self.selectionMode == app.selectable.kSelectionAll or
+              self.selectionMode == app.selectable.kSelectionCharacter or
+              self.selectionMode == app.selectable.kSelectionWord):
+            # Go one row past the selection or to the last line.
+            for i in range(start, min(end + 1, len(self.lines) - startRow)):
+              line = self.lines[startRow + i][startCol:endCol]
+              if len(line) == len(self.lines[startRow + i]):
+                line += " "  # Maybe do: "\\n".
+              if i == end and i == start:
+                window.addStr(top + i, left + selStartCol,
+                    line[selStartCol:selEndCol], window.colorSelected)
+              elif i == end:
+                window.addStr(top + i, left, line[:selEndCol],
+                    window.colorSelected)
+              elif i == start:
+                window.addStr(top + i, left + selStartCol, line[selStartCol:],
+                    window.colorSelected)
+              else:
+                window.addStr(top + i, left, line, window.colorSelected)
+          elif self.selectionMode == app.selectable.kSelectionLine:
+            for i in range(start, end + 1):
+              line = self.lines[startRow + i][selStartCol:maxCol]
+              window.addStr(top + i, selStartCol,
+                  line + ' ' * (maxCol - len(line)), window.colorSelected)
+          window.addStr(top + i, lowerCol, 'X',
+              curses.color_pair(1) | curses.A_REVERSE)
       # Blank screen past the end of the buffer.
       color = curses.color_pair(
           app.prefs.outsideOfBufferColorIndex + colorDelta)
