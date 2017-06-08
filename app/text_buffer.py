@@ -1431,7 +1431,7 @@ class TextBuffer(BackingTextBuffer):
       self.checkScrollToCursor(window)
     rows, cols = window.cursorWindow.getmaxyx()
 
-    if 0:
+    if 1:
       for i in range(rows):
         window.addStr(i, 0, '?' * cols, curses.color_pair(120))
 
@@ -1451,7 +1451,7 @@ class TextBuffer(BackingTextBuffer):
     startCol = self.view.scrollCol + left
     endCol = self.view.scrollCol + left + cols
 
-    if self.parser:
+    if 0 and self.parser:
       defaultColor = curses.color_pair(0 + colorDelta)
       # Highlight grammar.
       rowLimit = min(max(len(self.lines) - startRow, 0), rows)
@@ -1647,7 +1647,8 @@ class TextBuffer(BackingTextBuffer):
       if rowLimit and self.selectionMode != app.selectable.kSelectionNone:
         # Highlight selected text.
         upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
-        if startRow <= upperRow < endRow or startRow <= lowerRow < endRow:
+        if (startRow <= upperRow < endRow or startRow <= lowerRow < endRow or
+            startCol <= upperCol < endCol or startCol <= lowerCol < endCol):
           selStartCol = max(upperCol, startCol)
           selEndCol = min(lowerCol - startCol, maxCol)
           start = max(0, min(upperRow - startRow, maxRow))

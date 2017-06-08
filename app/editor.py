@@ -594,7 +594,7 @@ class InteractivePrompt(app.controller.Controller):
       return
     if not lines:
       return [], 'No text was selected.'
-    separator = cmdLine[0]
+    separator = cmdLine[1]
     a, find, replace, flags = cmdLine.split(separator, 3)
     data = self.host.textBuffer.doLinesToData(lines)
     output = self.host.textBuffer.findReplaceText(find, replace, flags, data)
