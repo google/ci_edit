@@ -41,6 +41,8 @@ loadWords(os.path.expanduser("~/.ci_edit/dictionaries"))
 
 words = grammarWords.get('en-us', set())
 words.update(grammarWords.get('en-misc', set()))
+words.update(grammarWords.get('chromium', set()))
+words.update(grammarWords.get('name', set()))
 words.update(grammarWords.get('coding', set()))
 words.update(grammarWords.get('contractions', set()))
 words.update(grammarWords.get('user', set()))

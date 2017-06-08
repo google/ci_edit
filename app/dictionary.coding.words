@@ -47,6 +47,7 @@ arg
 argc
 args
 argv
+ascii
 async
 attr
 attrs
@@ -54,6 +55,7 @@ auth
 baz
 bool
 bugzilla
+bzip
 calc
 cfg
 cgi
@@ -78,6 +80,7 @@ def
 del
 deps
 dhcp
+directionality
 dirname
 dirs
 dropdown
@@ -121,6 +124,7 @@ hpp
 htm
 https
 hxx
+idr
 ifndef
 img
 ini
@@ -161,9 +165,11 @@ pid
 png
 popups
 pos
+posix
 pragma
 prev
 prg
+proc
 proto
 ptr
 ptrs
@@ -172,6 +178,7 @@ px
 py
 pyc
 pyo
+rar
 rb
 readme
 rect
@@ -179,6 +186,7 @@ refptr
 regex
 regexes
 renderer
+ro
 runtime
 rv
 signin
@@ -207,17 +215,20 @@ tk
 tkinter
 todo
 tolltip
+tooltip
 traceback
 tty
 txt
 typdef
 typedef
 ubuntu
+uchar
 uid
 undef
 unicode
 unix
 unobserve
+unparsable
 utf
 vpn
 vpns
@@ -227,6 +238,7 @@ whitelist
 whitespace
 wi
 wifi
+xss
 xterm
 xy
 xyz

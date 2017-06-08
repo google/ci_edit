@@ -1438,7 +1438,7 @@ class TextBuffer(BackingTextBuffer):
     if 0:
       self.drawRect(window, 0, 0, rows, cols, 0)
     else:
-      split = 80
+      split = 10
       self.drawRect(window, 0, 0, rows, split, 0)
       self.drawRect(window, 0, split, rows, cols-split, 192)
 
@@ -1527,7 +1527,7 @@ class TextBuffer(BackingTextBuffer):
       startRow = self.view.scrollRow + top
       startCol = self.view.scrollCol + left
       endCol = self.view.scrollCol + maxCol
-      rowLimit = min(max(len(self.lines)-startRow, 0), maxRow)
+      rowLimit = min(max(len(self.lines) - startRow, 0), maxRow)
       if 1:
         # Highlight brackets.
         for i in range(rowLimit):
@@ -1617,18 +1617,18 @@ class TextBuffer(BackingTextBuffer):
             line = self.lines[startRow + i]
             if len(line) < lengthLimit or startCol > lengthLimit:
               continue
-            length = min(endCol, len(line)-lengthLimit)
-            window.addStr(i, lengthLimit-startCol, line[lengthLimit:endCol],
-                curses.color_pair(96+colorDelta))
+            length = min(endCol, len(line) - lengthLimit)
+            window.addStr(i, lengthLimit - startCol, line[lengthLimit:endCol],
+                curses.color_pair(96 + colorDelta))
       if self.findRe is not None:
         # Highlight find.
         for i in range(rowLimit):
           line = self.lines[startRow + i][startCol:endCol]
           for k in self.findRe.finditer(line):
-            f = k.regs[0]
-            #for f in k.regs[1:]:
-            window.addStr(i, left+f[0], line[f[0]:f[1]],
-                curses.color_pair(app.prefs.foundColorIndex+colorDelta))
+            reg = k.regs[0]
+            #for ref in k.regs[1:]:
+            window.addStr(i, left + reg[0], line[reg[0]:reg[1]],
+                curses.color_pair(app.prefs.foundColorIndex + colorDelta))
       if rowLimit and self.selectionMode != app.selectable.kSelectionNone:
         # Highlight selected text.
         upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
@@ -1664,6 +1664,6 @@ class TextBuffer(BackingTextBuffer):
             window.addStr(i, left+selStartCol,
                 line+' '*(maxCol-len(line)), window.colorSelected)
       # Blank screen past the end of the buffer.
-      color = curses.color_pair(app.prefs.outsideOfBufferColorIndex+colorDelta)
+      color = curses.color_pair(app.prefs.outsideOfBufferColorIndex + colorDelta)
       for i in range(rowLimit, maxRow):
         window.addStr(i, left + 0, ' ' * maxCol, color)
