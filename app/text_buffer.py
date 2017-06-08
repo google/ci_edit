@@ -1438,9 +1438,12 @@ class TextBuffer(BackingTextBuffer):
     if 0:
       self.drawRect(window, 0, 0, rows, cols, 0)
     else:
-      split = 10
-      self.drawRect(window, 0, 0, rows, split, 0)
-      self.drawRect(window, 0, split, rows, cols-split, 192)
+      splitRow = rows / 2;
+      splitCol = 17
+      self.drawRect(window, 0, 0, splitRow, splitCol, 0)
+      self.drawRect(window, 0, splitCol, splitRow, cols-splitCol, 192)
+      self.drawRect(window, splitRow, 0, rows - splitRow, splitCol, 192)
+      self.drawRect(window, splitRow, splitCol, rows - splitRow, cols-splitCol, 0)
 
   def drawRect(self, window, top, left, rows, cols, colorDelta):
     startRow = self.view.scrollRow + top
@@ -1450,7 +1453,7 @@ class TextBuffer(BackingTextBuffer):
     if self.parser:
       defaultColor = curses.color_pair(0 + colorDelta)
       # Highlight grammar.
-      rowLimit = min(max(len(self.lines) - self.view.scrollRow, 0), rows)
+      rowLimit = min(max(len(self.lines) - startRow, 0), rows)
       for i in range(rowLimit):
         k = startCol
         while k < endCol:
@@ -1463,9 +1466,9 @@ class TextBuffer(BackingTextBuffer):
           color = curses.color_pair(node.grammar.get(
               'colorIndex', app.prefs.defaultColorIndex) + colorDelta)
           if length <= 0:
-            window.addStr(i, left + k - startCol, ' ' * (endCol - k), color)
+            window.addStr(top + i, left + k - startCol, ' ' * (endCol - k), color)
             break
-          window.addStr(i, left + k - startCol, line[k:k + length], color)
+          window.addStr(top + i, left + k - startCol, line[k:k + length], color)
           subStart = k - preceding
           subEnd = k + remaining
           subLine = line[subStart:subEnd]
@@ -1484,9 +1487,9 @@ class TextBuffer(BackingTextBuffer):
                     if startCol > offsetStart:
                       offsetStart += startCol - offsetStart
                     wordFragment = line[offsetStart:min(endCol, offsetEnd)]
-                    window.addStr(i, left + offsetStart - startCol, wordFragment,
+                    window.addStr(top + i, left + offsetStart - startCol, wordFragment,
                         curses.color_pair(color) | curses.A_BOLD |
-                        curses.A_REVERSE)
+                            curses.A_REVERSE)
           if 1:
             # Highlight keywords.
             keywordsColor = curses.color_pair(app.prefs.keywordsColorIndex + colorDelta)
@@ -1499,7 +1502,7 @@ class TextBuffer(BackingTextBuffer):
                 if startCol > offsetStart:
                   offsetStart += startCol - offsetStart
                 wordFragment = line[offsetStart:min(endCol, offsetEnd)]
-                window.addStr(i, left + offsetStart - startCol, wordFragment, keywordsColor)
+                window.addStr(top + i, left + offsetStart - startCol, wordFragment, keywordsColor)
           if 1:
             # Highlight specials.
             keywordsColor = curses.color_pair(app.prefs.specialsColorIndex + colorDelta)
@@ -1512,14 +1515,14 @@ class TextBuffer(BackingTextBuffer):
                 if startCol > offsetStart:
                   offsetStart += startCol - offsetStart
                 wordFragment = line[offsetStart:min(endCol, offsetEnd)]
-                window.addStr(i, left + offsetStart - startCol, wordFragment, keywordsColor)
+                window.addStr(top + i, left + offsetStart - startCol, wordFragment, keywordsColor)
           k += length
     else:
       # Draw to screen.
-      rowLimit = min(max(len(self.lines) - self.view.scrollRow, 0), rows)
+      rowLimit = min(max(len(self.lines) - startRow, 0), rows)
       for i in range(rowLimit):
-        line = self.lines[self.view.scrollRow + i][startCol:endCol]
-        window.addStr(i, 0, line + ' ' * (cols - len(line)), window.color)
+        line = self.lines[startRow + i][startCol:endCol]
+        window.addStr(top + i, left, line + ' ' * (cols - len(line)), window.color)
     self.drawOverlays(window, top, left, rows, cols, colorDelta)
 
   def drawOverlays(self, window, top, left, maxRow, maxCol, colorDelta):
@@ -1534,7 +1537,7 @@ class TextBuffer(BackingTextBuffer):
           line = self.lines[startRow + i][startCol:endCol]
           for k in re.finditer(app.selectable.kReBrackets, line):
             for f in k.regs:
-              window.addStr(i, left+f[0], line[f[0]:f[1]], curses.color_pair(6+colorDelta))
+              window.addStr(top + i, left+f[0], line[f[0]:f[1]], curses.color_pair(6+colorDelta))
       if 1:
         # Match brackets.
         if (len(self.lines) > self.penRow and
@@ -1555,7 +1558,7 @@ class TextBuffer(BackingTextBuffer):
                   count -= 1
                 if count == 0:
                   if i.start() + self.penCol - self.view.scrollCol < maxCol:
-                    window.addStr(row - startRow, left + i.start(), openCh,
+                    window.addStr(top + row - startRow, left + i.start(), openCh,
                         curses.color_pair(201 + colorDelta))
                   return
           def searchForward(openCh, closeCh):
@@ -1596,7 +1599,7 @@ class TextBuffer(BackingTextBuffer):
           line = self.lines[startRow + i][startCol:endCol]
           for k in re.finditer(app.selectable.kReNumbers, line):
             for f in k.regs:
-              window.addStr(i, left + f[0], line[f[0]:f[1]], curses.color_pair(31 + colorDelta))
+              window.addStr(top + i, left + f[0], line[f[0]:f[1]], curses.color_pair(31 + colorDelta))
       if 0:
         # Highlight space ending lines.
         for i in range(rowLimit):
@@ -1607,7 +1610,7 @@ class TextBuffer(BackingTextBuffer):
             line = line[offset:]
           for k in app.selectable.kReEndSpaces.finditer(line):
             for f in k.regs:
-              window.addStr(i, left + offset + f[0], line[f[0]:f[1]],
+              window.addStr(top + i, left + offset + f[0], line[f[0]:f[1]],
                   curses.color_pair(180+colorDelta))
       if 0:
         lengthLimit = self.lineLimitIndicator
@@ -1618,7 +1621,7 @@ class TextBuffer(BackingTextBuffer):
             if len(line) < lengthLimit or startCol > lengthLimit:
               continue
             length = min(endCol, len(line) - lengthLimit)
-            window.addStr(i, lengthLimit - startCol, line[lengthLimit:endCol],
+            window.addStr(top + i, lengthLimit - startCol, line[lengthLimit:endCol],
                 curses.color_pair(96 + colorDelta))
       if self.findRe is not None:
         # Highlight find.
@@ -1627,19 +1630,19 @@ class TextBuffer(BackingTextBuffer):
           for k in self.findRe.finditer(line):
             reg = k.regs[0]
             #for ref in k.regs[1:]:
-            window.addStr(i, left + reg[0], line[reg[0]:reg[1]],
+            window.addStr(top + i, left + reg[0], line[reg[0]:reg[1]],
                 curses.color_pair(app.prefs.foundColorIndex + colorDelta))
       if rowLimit and self.selectionMode != app.selectable.kSelectionNone:
         # Highlight selected text.
         upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
-        selStartCol = max(upperCol - startCol, 0)
+        selStartCol = max(upperCol, startCol)
         selEndCol = min(lowerCol - startCol, maxCol)
         start = max(0, min(upperRow - startRow, maxRow))
         end = max(0, min(lowerRow - startRow, maxRow))
         if self.selectionMode == app.selectable.kSelectionBlock:
           for i in range(start, end + 1):
             line = self.lines[startRow + i][selStartCol:selEndCol]
-            window.addStr(i, selStartCol, line, window.colorSelected)
+            window.addStr(top + i, selStartCol, line, window.colorSelected)
         elif (self.selectionMode == app.selectable.kSelectionAll or
             self.selectionMode == app.selectable.kSelectionCharacter or
             self.selectionMode == app.selectable.kSelectionWord):
@@ -1649,21 +1652,22 @@ class TextBuffer(BackingTextBuffer):
             if len(line) == len(self.lines[startRow + i]):
               line += " "  # Maybe do: "\\n".
             if i == end and i == start:
-              window.addStr(i, left + selStartCol,
+              window.addStr(top + i, left + selStartCol,
                   line[selStartCol:selEndCol], window.colorSelected)
             elif i == end:
-              window.addStr(i, left, line[:selEndCol], window.colorSelected)
+              window.addStr(top + i, left, line[:selEndCol], window.colorSelected)
             elif i == start:
-              window.addStr(i, selStartCol, line[selStartCol:],
+              window.addStr(top + i, left + selStartCol, line[selStartCol:],
                   window.colorSelected)
             else:
-              window.addStr(i, left, line, window.colorSelected)
+              window.addStr(top + i, left, line, window.colorSelected)
         elif self.selectionMode == app.selectable.kSelectionLine:
           for i in range(start, end + 1):
-            line = self.lines[startRow+i][selStartCol:maxCol]
-            window.addStr(i, left+selStartCol,
-                line+' '*(maxCol-len(line)), window.colorSelected)
+            line = self.lines[startRow + i][selStartCol:maxCol]
+            window.addStr(top + i, selStartCol,
+                line + ' ' * (maxCol - len(line)), window.colorSelected)
+        window.addStr(top + i, lowerCol, 'X', curses.color_pair(1) | curses.A_REVERSE)
       # Blank screen past the end of the buffer.
       color = curses.color_pair(app.prefs.outsideOfBufferColorIndex + colorDelta)
       for i in range(rowLimit, maxRow):
-        window.addStr(i, left + 0, ' ' * maxCol, color)
+        window.addStr(top + i, left, ' ' * maxCol, color)
