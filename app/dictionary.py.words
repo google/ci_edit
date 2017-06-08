@@ -33,6 +33,7 @@ del
 dev
 difflib
 dirs
+dotall
 dup
 elif
 en
@@ -55,6 +56,7 @@ getyx
 gid
 goto
 iglob
+ignorecase
 init
 ino
 isdigit
