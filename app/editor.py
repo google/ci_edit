@@ -510,40 +510,43 @@ class InteractivePrompt(app.controller.Controller):
     return {}, 'making stuff'
 
   def execute(self):
-    cmdLine = ''
-    try: cmdLine = self.textBuffer.lines[0]
-    except: pass
-    if not len(cmdLine):
-      return
-    tb = self.host.textBuffer
-    lines = list(tb.getSelectedText())
-    if cmdLine[0] in self.subExecute:
-      data = self.host.textBuffer.doLinesToData(lines)
-      output, message = self.subExecute.get(cmdLine[0])(
-          cmdLine[1:], data)
-      output = tb.doDataToLines(output)
-      if tb.selectionMode == app.selectable.kSelectionLine:
-        output.append('')
-      tb.editPasteLines(tuple(output))
-      tb.setMessage(message)
-    else:
-      cmd = re.split('\\W', cmdLine)[0]
-      filter = self.filters.get(cmd)
-      if filter:
-        if not len(lines):
-          tb.setMessage('The %s filter needs a selection.'%(cmd,))
-        else:
-          lines, message = filter(cmdLine, lines)
-          tb.setMessage(message)
-          if not len(lines):
-            lines.append('')
-          if tb.selectionMode == app.selectable.kSelectionLine:
-            lines.append('')
-          tb.editPasteLines(tuple(lines))
-      else:
-        command = self.commands.get(cmd, self.unknownCommand)
-        results, message = command(cmdLine, self.host)
+    try:
+      cmdLine = ''
+      try: cmdLine = self.textBuffer.lines[0]
+      except: pass
+      if not len(cmdLine):
+        return
+      tb = self.host.textBuffer
+      lines = list(tb.getSelectedText())
+      if cmdLine[0] in self.subExecute:
+        data = self.host.textBuffer.doLinesToData(lines)
+        output, message = self.subExecute.get(cmdLine[0])(
+            cmdLine[1:], data)
+        output = tb.doDataToLines(output)
+        if tb.selectionMode == app.selectable.kSelectionLine:
+          output.append('')
+        tb.editPasteLines(tuple(output))
         tb.setMessage(message)
+      else:
+        cmd = re.split('\\W', cmdLine)[0]
+        filter = self.filters.get(cmd)
+        if filter:
+          if not len(lines):
+            tb.setMessage('The %s filter needs a selection.'%(cmd,))
+          else:
+            lines, message = filter(cmdLine, lines)
+            tb.setMessage(message)
+            if not len(lines):
+              lines.append('')
+            if tb.selectionMode == app.selectable.kSelectionLine:
+              lines.append('')
+            tb.editPasteLines(tuple(lines))
+        else:
+          command = self.commands.get(cmd, self.unknownCommand)
+          results, message = command(cmdLine, self.host)
+          tb.setMessage(message)
+    except:
+      tb.setMessage('Execution threw an error.')
     self.changeToHostWindow()
 
   def shellExecute(self, commands, input):
@@ -591,11 +594,20 @@ class InteractivePrompt(app.controller.Controller):
 
   def substituteText(self, cmdLine, lines):
     if len(cmdLine) < 2:
-      return
+      return lines, '''tip: %s/foo/bar/ to replace 'foo' with 'bar'.''' % (
+          cmdLine,)
     if not lines:
-      return [], 'No text was selected.'
-    separator = cmdLine[0]
-    a, find, replace, flags = cmdLine.split(separator, 3)
+      return lines, 'No text was selected.'
+    sre = re.match('\w+(\W)', cmdLine)
+    if not sre:
+      return lines, '''Separator punctuation missing, example:''' \
+          ''' %s/foo/bar/''' % (cmdLine,)
+    separator = sre.groups()[0]
+    try:
+      a, find, replace, flags = cmdLine.split(separator, 3)
+    except:
+      return lines, '''Separator punctuation missing, there should be''' \
+          ''' three '%s'.''' % (separator,)
     data = self.host.textBuffer.doLinesToData(lines)
     output = self.host.textBuffer.findReplaceText(find, replace, flags, data)
     lines = self.host.textBuffer.doDataToLines(output)

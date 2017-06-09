@@ -21,3 +21,5 @@ printf
 rbegin
 refcounted
 std
+stddef
+stdint

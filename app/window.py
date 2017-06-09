@@ -444,26 +444,19 @@ class LogWindow(StaticWindow):
 
 
 class MessageLine(StaticWindow):
-  """The message line appears at the bottom of the screen. It shows
-       messages to the user, such as error messages."""
+  """The message line appears at the bottom of the screen."""
   def __init__(self, host):
     StaticWindow.__init__(self, host)
     self.host = host
+    self.message = None
+    self.colorIndex = 1
     self.renderedMessage = None
 
   def refresh(self):
-    self.blank()
-    return
-    # TODO(dschuyler): clean this up
-    tb = self.host.textBuffer
-    if not tb or self.renderedMessage is tb.message:
-      return
-    app.log.debug('update message line\n',self.renderedMessage, '\n',
-      tb.message)
-    self.renderedMessage = tb.message
-    self.writeLineRow = 0
-    if tb.message:
-      self.writeLine(tb.message[0], tb.message[1])
+    if self.message:
+      if self.message != self.renderedMessage:
+        self.writeLineRow = 0
+        self.writeLine(self.message[0], curses.color_pair(self.colorIndex))
     else:
       self.blank()
     self.cursorWindow.refresh()
@@ -505,7 +498,7 @@ class StatusLine(StaticWindow):
     rightSide = ''
     if len(statusLine):
       rightSide += ' |'
-    if 0:
+    if self.host.prg.showLogWindow:
       rightSide += ' %s | %s |'%(
           tb.cursorGrammarName(),
           tb.selectionModeName())
@@ -599,7 +592,7 @@ class InputWindow(Window):
     self.showFooter = True
     self.useInteractiveFind = True
     self.showLineNumbers = True
-    self.showMessageLine = False
+    self.showMessageLine = True
     self.showRightColumn = True
     self.showTopInfo = True
     self.color = curses.color_pair(0)
@@ -680,8 +673,6 @@ class InputWindow(Window):
       self.messageLine.color = curses.color_pair(3)
       self.messageLine.colorSelected = curses.color_pair(87)
       self.messageLine.setParent(self, 0)
-      if not self.showMessageLine:
-        self.messageLine.hide()
 
   def startup(self):
     for f in self.prg.cliFiles:
