@@ -51,7 +51,7 @@ Within the main text window:
 Within the Find prompt:
 
   Text commands (such as cut and paste)
-  opperate on the prompt text rather
+  operate on the prompt text rather
   than the main window.
 
   return       Exit Find
@@ -71,7 +71,7 @@ Within the Find prompt:
 Within the Goto line prompt:
 
   Text commands (such as cut and paste)
-  opperate on the prompt text rather
+  operate on the prompt text rather
   than the main window.
 
   b            Jump to bottom of document
