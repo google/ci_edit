@@ -1568,12 +1568,12 @@ class TextBuffer(BackingTextBuffer):
                   count -= 1
                 if count == 0:
                   if i.start() + self.penCol - self.view.scrollCol < maxCol:
-                    window.addStr(top + row - startRow, left + i.start(),
+                    window.addStr(top + row - startRow, i.start(),
                         openCh, curses.color_pair(201 + colorDelta))
                   return
           def searchForward(openCh, closeCh):
             count = 1
-            colOffset = left+self.penCol + 1
+            colOffset = self.penCol + 1
             for row in range(self.penRow, startRow+maxRow):
               if row != self.penRow:
                 colOffset = 0
@@ -1600,10 +1600,11 @@ class TextBuffer(BackingTextBuffer):
           look = matcher.get(ch)
           if look:
             look[1](ch, look[0])
-            window.addStr(self.penRow - startRow,
+            window.addStr(
+                self.penRow - startRow,
                 self.penCol - self.view.scrollCol,
                 self.lines[self.penRow][self.penCol],
-                curses.color_pair(201+colorDelta))
+                curses.color_pair(201 + colorDelta))
       if 1:
         # Highlight numbers.
         for i in range(rowLimit):
