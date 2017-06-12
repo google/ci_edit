@@ -1586,7 +1586,7 @@ class TextBuffer(BackingTextBuffer):
                   count -= 1
                 if count == 0:
                   if i.start() + self.penCol - self.view.scrollCol < maxCol:
-                    window.addStr(row - startRow, colOffset + i.start(),
+                    window.addStr(top + row - startRow, colOffset + i.start(),
                         closeCh, curses.color_pair(201 + colorDelta))
                   return
           matcher = {
@@ -1600,11 +1600,14 @@ class TextBuffer(BackingTextBuffer):
           look = matcher.get(ch)
           if look:
             look[1](ch, look[0])
-            window.addStr(
-                self.penRow - startRow,
-                self.penCol - self.view.scrollCol,
-                self.lines[self.penRow][self.penCol],
-                curses.color_pair(201 + colorDelta))
+            if 1:
+              # If the cursor is a block then this is covered by the cursor.
+              # Consider doing this only if the cursor is not a block.
+              window.addStr(
+                  top + self.penRow - startRow,
+                  self.penCol - self.view.scrollCol,
+                  self.lines[self.penRow][self.penCol],
+                  curses.color_pair(201 + colorDelta))
       if 1:
         # Highlight numbers.
         for i in range(rowLimit):
@@ -1613,10 +1616,10 @@ class TextBuffer(BackingTextBuffer):
             for f in k.regs:
               window.addStr(top + i, left + f[0], line[f[0]:f[1]],
                   curses.color_pair(31 + colorDelta))
-      if 0:
+      if 1:
         # Highlight space ending lines.
         for i in range(rowLimit):
-          line = self.lines[startRow + i][startCol:endCol]
+          line = self.lines[startRow + i][startCol:]
           offset = 0
           if startRow + i == self.penRow:
             offset = self.penCol - startCol
