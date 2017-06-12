@@ -1431,11 +1431,11 @@ class TextBuffer(BackingTextBuffer):
       self.checkScrollToCursor(window)
     rows, cols = window.cursorWindow.getmaxyx()
 
-    if 1:
+    if 0:
       for i in range(rows):
         window.addStr(i, 0, '?' * cols, curses.color_pair(120))
 
-    if 0:
+    if 1:
       self.drawRect(window, 0, 0, rows, cols, 0)
     else:
       splitRow = rows / 2;
@@ -1628,7 +1628,7 @@ class TextBuffer(BackingTextBuffer):
             for f in k.regs:
               window.addStr(top + i, left + offset + f[0], line[f[0]:f[1]],
                   curses.color_pair(180+colorDelta))
-      if 0:
+      if 1:
         lengthLimit = self.lineLimitIndicator
         if endCol >= lengthLimit:
           # Highlight long lines.
