@@ -32,6 +32,8 @@ def initCommandSet(editText, textBuffer):
 
     CTRL_H: textBuffer.backspace,
 
+    CTRL_L: textBuffer.selectCurrentLine,
+
     CTRL_Q: editText.quitOrSwitchToConfirmQuit,
     CTRL_S: editText.saveOrChangeToSaveAs,
     CTRL_V: textBuffer.editPaste,

@@ -1286,6 +1286,9 @@ class BackingTextBuffer(Mutator):
           mode - self.selectionMode)))
       self.redo()
 
+  def selectCurrentLine(self):
+    self.selectLineAt(self.penRow)
+
   def selectionAll(self):
     self.doSelectionMode(app.selectable.kSelectionAll)
     self.cursorMoveAndMark(*self.extendSelection())
