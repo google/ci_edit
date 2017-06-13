@@ -1287,7 +1287,15 @@ class BackingTextBuffer(Mutator):
       self.redo()
 
   def selectCurrentLine(self):
-    self.selectLineAt(self.penRow)
+    """
+      This function is used by the CTRL + L shortcut.
+      Using it multiple times will allow the user to select multiple lines.
+    """
+    if self.selectionMode != app.selectable.kSelectionLine:
+      self.selectLineAt(self.penRow)
+    else:
+      if self.penRow + 1 < len(self.lines):
+        self.selectLineAt(self.penRow + 1)
 
   def selectionAll(self):
     self.doSelectionMode(app.selectable.kSelectionAll)
