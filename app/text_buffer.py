@@ -1044,7 +1044,8 @@ class BackingTextBuffer(Mutator):
           app.log.info('b found on line', i, repr(found))
         start = found.regs[1][1]
         end = found.regs[0][1]
-        self.selectText(i, start, end - start, app.selectable.kSelectionCharacter)
+        self.selectText(i, start, end - start,
+            app.selectable.kSelectionCharacter)
         return
     # Warp around to the start of the file.
     self.setMessage('Find wrapped around.')
@@ -1058,7 +1059,8 @@ class BackingTextBuffer(Mutator):
         #app.log.info('c found on line', i, repr(found))
         start = found.regs[1][1]
         end = found.regs[0][1]
-        self.selectText(i, start, end - start, app.selectable.kSelectionCharacter)
+        self.selectText(i, start, end - start,
+            app.selectable.kSelectionCharacter)
         return
     app.log.info('find not found')
     self.doSelectionMode(app.selectable.kSelectionNone)
@@ -1092,8 +1094,8 @@ class BackingTextBuffer(Mutator):
       self.redo()
       self.indentLines()
     else:
-      self.cursorMoveAndMark(0, -self.penCol,
-          0, -self.markerCol, app.selectable.kSelectionLine - self.selectionMode)
+      self.cursorMoveAndMark(0, -self.penCol, 0, -self.markerCol,
+          app.selectable.kSelectionLine - self.selectionMode)
       self.redo()
       self.indentLines()
 
@@ -1164,7 +1166,8 @@ class BackingTextBuffer(Mutator):
     row = max(0, min(self.view.scrollRow + paneRow, len(self.lines) - 1))
     col = max(0, self.view.scrollCol + paneCol)
     if self.selectionMode == app.selectable.kSelectionBlock:
-      self.cursorMoveAndMark(0, 0, row - self.markerRow, col - self.markerCol, 0)
+      self.cursorMoveAndMark(0, 0, row - self.markerRow, col - self.markerCol,
+          0)
       self.redo()
       return
     # If not block selection, restrict col to the chars on the line.
@@ -1356,8 +1359,8 @@ class BackingTextBuffer(Mutator):
       self.redo()
       self.unindentLines()
     else:
-      self.cursorMoveAndMark(0, -self.penCol,
-          0, -self.markerCol, app.selectable.kSelectionLine - self.selectionMode)
+      self.cursorMoveAndMark(0, -self.penCol, 0, -self.markerCol,
+          app.selectable.kSelectionLine - self.selectionMode)
       self.redo()
       self.unindentLines()
 
@@ -1688,7 +1691,8 @@ class TextBuffer(BackingTextBuffer):
                   window.addStr(top + i, selStartCol, line[selStartCol:],
                       window.colorSelected)
                 else:
-                  window.addStr(top + i, left, line[left:], window.colorSelected)
+                  window.addStr(top + i, left, line[left:],
+                      window.colorSelected)
           elif self.selectionMode == app.selectable.kSelectionLine:
             if not (lowerRow < startRow or upperRow >= endRow):
               # There is an overlap.
