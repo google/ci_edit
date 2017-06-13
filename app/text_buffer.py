@@ -1633,7 +1633,7 @@ class TextBuffer(BackingTextBuffer):
             for f in k.regs:
               window.addStr(top + i, left + offset + f[0], line[f[0]:f[1]],
                   curses.color_pair(180+colorDelta))
-      if 1:
+      if 0:
         lengthLimit = self.lineLimitIndicator
         if endCol >= lengthLimit:
           # Highlight long lines.
@@ -1642,7 +1642,7 @@ class TextBuffer(BackingTextBuffer):
             if len(line) < lengthLimit or startCol > lengthLimit:
               continue
             length = min(endCol, len(line) - lengthLimit)
-            window.addStr(top + i, lengthLimit - startCol,
+            window.addStr(top + i, left + lengthLimit - startCol,
                 line[lengthLimit:endCol], curses.color_pair(96 + colorDelta))
       if self.findRe is not None:
         # Highlight find.
