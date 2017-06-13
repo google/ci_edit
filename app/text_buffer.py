@@ -1451,7 +1451,7 @@ class TextBuffer(BackingTextBuffer):
     startCol = self.view.scrollCol + left
     endCol = self.view.scrollCol + left + cols
 
-    if 0 and self.parser:
+    if self.parser:
       defaultColor = curses.color_pair(0 + colorDelta)
       # Highlight grammar.
       rowLimit = min(max(len(self.lines) - startRow, 0), rows)
@@ -1691,8 +1691,6 @@ class TextBuffer(BackingTextBuffer):
                 line = self.lines[startRow + i][selStartCol:maxCol]
                 window.addStr(top + i, selStartCol,
                     line + ' ' * (maxCol - len(line)), window.colorSelected)
-          window.addStr(top + i, lowerCol, 'X',
-              curses.color_pair(1) | curses.A_REVERSE)
       # Blank screen past the end of the buffer.
       color = curses.color_pair(
           app.prefs.outsideOfBufferColorIndex + colorDelta)
