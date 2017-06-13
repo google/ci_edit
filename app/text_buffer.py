@@ -1430,15 +1430,20 @@ class TextBuffer(BackingTextBuffer):
     if self.view.hasCaptiveCursor:
       self.checkScrollToCursor(window)
     rows, cols = window.cursorWindow.getmaxyx()
-
     if 0:
       for i in range(rows):
         window.addStr(i, 0, '?' * cols, curses.color_pair(120))
 
-    if 1:
+    if 0:
       self.drawRect(window, 0, 0, rows, cols, 0)
+    elif 1:
+      splitRow = rows
+      splitCol = min(cols, self.lineLimitIndicator)
+      self.drawRect(window, 0, 0, splitRow, splitCol, 0)
+      if splitCol < cols:
+        self.drawRect(window, 0, splitCol, splitRow, cols-splitCol, 32*4)
     else:
-      splitRow = rows / 2;
+      splitRow = rows / 2
       splitCol = 17
       self.drawRect(window, 0, 0, splitRow, splitCol, 0)
       self.drawRect(window, 0, splitCol, splitRow, cols-splitCol, 192)
