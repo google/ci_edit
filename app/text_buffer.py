@@ -1458,9 +1458,7 @@ class TextBuffer(BackingTextBuffer):
     startRow = self.view.scrollRow + top
     startCol = self.view.scrollCol + left
     endCol = self.view.scrollCol + left + cols
-
     if self.parser:
-      defaultColor = curses.color_pair(0 + colorDelta)
       # Highlight grammar.
       rowLimit = min(max(len(self.lines) - startRow, 0), rows)
       for i in range(rowLimit):
