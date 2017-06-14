@@ -409,9 +409,7 @@ class LineNumbers(StaticWindow):
   def mouseRelease(self, paneRow, paneCol, shift, ctrl, alt):
     app.log.info(paneRow, paneCol, shift)
     tb = self.host.textBuffer
-    selectedLine = self.host.scrollRow + paneRow
-    if selectedLine < len(tb.lines):
-      tb.selectLineAt(selectedLine)
+    tb.selectLineAt(self.host.scrollRow + paneRow)
 
   def mouseTripleClick(self, paneRow, paneCol, shift, ctrl, alt):
     pass
