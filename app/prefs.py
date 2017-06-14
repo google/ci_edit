@@ -22,7 +22,7 @@ import traceback
 importStartTime = time.time()
 
 commentColorIndex = 2
-defaultColorIndex = 0
+defaultColorIndex = 18
 foundColorIndex = 32
 keywordsColorIndex = 21
 selectedColor = 64 # Active find is a selection.
@@ -258,8 +258,7 @@ prefs = {
     },
     'c_preprocessor': {
       'begin': '#',
-      'end': r'\n',
-      'escaped': r'\\\n',
+      'end': r'(?<!\\)\n',
       'indent': '  ',
       'keywords': [
         '#\s*?define', '#\s*?defined', '#\s*?elif', '#\s*?endif',

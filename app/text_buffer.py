@@ -1449,29 +1449,27 @@ class TextBuffer(BackingTextBuffer):
         window.addStr(i, 0, '?' * cols, curses.color_pair(120))
 
     if 0:
-      self.drawRect(window, 0, 0, rows, cols, 0)
+      self.drawTextArea(window, 0, 0, rows, cols, 0)
     elif 1:
       splitRow = rows
       splitCol = min(cols, self.lineLimitIndicator)
-      self.drawRect(window, 0, 0, splitRow, splitCol, 0)
+      self.drawTextArea(window, 0, 0, splitRow, splitCol, 0)
       if splitCol < cols:
-        self.drawRect(window, 0, splitCol, splitRow, cols-splitCol, 32*4)
+        self.drawTextArea(window, 0, splitCol, splitRow, cols-splitCol, 32*4)
     else:
       splitRow = rows / 2
       splitCol = 17
-      self.drawRect(window, 0, 0, splitRow, splitCol, 0)
-      self.drawRect(window, 0, splitCol, splitRow, cols-splitCol, 192)
-      self.drawRect(window, splitRow, 0, rows - splitRow, splitCol, 192)
-      self.drawRect(window, splitRow, splitCol, rows - splitRow, cols-splitCol,
-          0)
+      self.drawTextArea(window, 0, 0, splitRow, splitCol, 0)
+      self.drawTextArea(window, 0, splitCol, splitRow, cols-splitCol, 192)
+      self.drawTextArea(window, splitRow, 0, rows - splitRow, splitCol, 192)
+      self.drawTextArea(window, splitRow, splitCol, rows - splitRow,
+          cols-splitCol, 0)
 
-  def drawRect(self, window, top, left, rows, cols, colorDelta):
+  def drawTextArea(self, window, top, left, rows, cols, colorDelta):
     startRow = self.view.scrollRow + top
     startCol = self.view.scrollCol + left
     endCol = self.view.scrollCol + left + cols
-
     if self.parser:
-      defaultColor = curses.color_pair(0 + colorDelta)
       # Highlight grammar.
       rowLimit = min(max(len(self.lines) - startRow, 0), rows)
       for i in range(rowLimit):

@@ -595,7 +595,7 @@ class InputWindow(Window):
     self.showMessageLine = True
     self.showRightColumn = True
     self.showTopInfo = True
-    self.color = curses.color_pair(0)
+    self.color = curses.color_pair(18)
     self.colorSelected = curses.color_pair(app.prefs.selectedColor)
     self.controller = app.controller.MainController(self)
     self.controller.add(app.cu_editor.CuaPlusEdit(prg, self))
