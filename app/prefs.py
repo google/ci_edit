@@ -258,8 +258,7 @@ prefs = {
     },
     'c_preprocessor': {
       'begin': '#',
-      'end': r'\n',
-      'escaped': r'\\\n',
+      'end': r'(?<!\\)\n',
       'indent': '  ',
       'keywords': [
         '#\s*?define', '#\s*?defined', '#\s*?elif', '#\s*?endif',

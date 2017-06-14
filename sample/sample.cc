@@ -22,6 +22,12 @@ a line continuation.
 
 namespace sample {
 
+#if defined(foo) && \
+    defined(bar)
+// a comment.
+#endif
+
+
 /**
  * A multi-line
  * comment.
