@@ -229,7 +229,7 @@ class CiProgram:
         %(screenRows, screenCols, self.mainLoopTime, self.mainLoopTimePeak, textBuffer.parserTime))
     self.debugWindow.writeLine(
         "ch %3s %s"
-        %(self.ch, app.curses_util.cursesKeyName(self.ch)),
+        %(self.ch, app.curses_util.cursesKeyName(self.ch) or 'UNKNOWN'),
         self.debugWindow.color)
     self.debugWindow.writeLine("win %r"%(win,),
         self.debugWindow.color)

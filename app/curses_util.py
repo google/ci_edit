@@ -19,7 +19,11 @@ import signal
 import struct
 import sys
 import termios
+import curses.ascii
 
+
+# Strings are found using the cursesKeyName() function.
+# Constants are found using the curses.getch() function.
 
 CTRL_AT = '^@' #0x00
 CTRL_SPACE = '^@' #0x00
@@ -54,6 +58,18 @@ CTRL_BACKSLASH = '^\\' #0x1c
 CTRL_CLOSE_BRACKET = '^]' #0x1d
 CTRL_CARROT = '^^' #0x1e
 CTRL_UNDERBAR = '^_' #0x1f
+
+KEY_ESCAPE = curses.ascii.ESC
+KEY_BACKSPACE1 = curses.ascii.BS # 8
+KEY_BACKSPACE2 = curses.ascii.DEL # 127. Must test some more since this should be for DELETE key.
+KEY_BACKSPACE3 = 127 #Used as insurance in case curses.ascii.DEL is not 127 for some reason.
+CTRL_BACKSPACE = 'KEY_BACKSPACE'
+KEY_DELETE = curses.KEY_DC
+KEY_HOME = curses.KEY_HOME
+KEY_END = curses.KEY_END
+KEY_PAGE_DOWN = curses.KEY_NPAGE
+KEY_PAGE_UP = curses.KEY_PPAGE
+KEY_BTAB = curses.KEY_BTAB
 
 KEY_ALT_A = 165
 KEY_ALT_B = 171
@@ -92,7 +108,16 @@ if 'SSH_CLIENT' in os.environ:
   KEY_ALT_LEFT = (98,)  # Need a better way to sort this out.
   KEY_ALT_RIGHT = (102,)  # ditto
 
-KEY_SHIFT_DOWN = 'KEY_SF' #336
+KEY_F1 = curses.KEY_F1
+KEY_F2 = curses.KEY_F2
+KEY_F3 = curses.KEY_F3
+KEY_F4 = curses.KEY_F4
+KEY_F5 = curses.KEY_F5
+KEY_F6 = curses.KEY_F6
+KEY_F7 = curses.KEY_F7
+KEY_F8 = curses.KEY_F8
+KEY_F9 = curses.KEY_F9
+KEY_F10 = curses.KEY_F10
 KEY_SHIFT_F1 = 'KEY_F(13)' #277
 KEY_SHIFT_F2 = 'KEY_F(14)' #278
 KEY_SHIFT_F3 = 'KEY_F(15)' #279
@@ -103,8 +128,15 @@ KEY_SHIFT_F7 = 'KEY_F(19)' #283
 KEY_SHIFT_F8 = 'KEY_F(20)' #284
 KEY_SHIFT_F9 = 'KEY_F(21)' #285
 KEY_SHIFT_F10 = 'KEY_F(22)' #286
-KEY_SHIFT_UP = 'KEY_SR' #337
 
+KEY_SHIFT_DOWN = 'KEY_SF' #336
+KEY_DOWN = curses.KEY_DOWN
+KEY_SHIFT_UP = 'KEY_SR' #337
+KEY_UP = curses.KEY_UP
+KEY_LEFT = curses.KEY_LEFT
+KEY_SHIFT_LEFT = curses.KEY_SLEFT
+KEY_RIGHT = curses.KEY_RIGHT
+KEY_SHIFT_RIGHT = curses.KEY_SRIGHT
 
 def mouseButtonName(bstate):
   """Curses debugging. Prints readable name for state of mouse buttons."""
@@ -161,7 +193,7 @@ def cursesKeyName(keyCode):
     return curses.keyname(keyCode)
   except:
     pass
-  return 'unknown'
+  return None
 
 # This should be provide by something built in and apparently it is in Python 3.
 # In Python 2 it's done by hand.

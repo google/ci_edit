@@ -66,8 +66,10 @@ class Controller:
     self.host.changeFocusTo(self.host.interactiveSaveAs)
 
   def doCommand(self, ch):
+    #Check the commandSet for the input with both its string and integer representation.
     self.savedCh = ch
-    cmd = self.commandSet.get(app.curses_util.cursesKeyName(ch))
+    keyName = app.curses_util.cursesKeyName(ch)
+    cmd = self.commandSet.get(app.curses_util.cursesKeyName(ch)) or self.commandSet.get(ch)
     if cmd:
       cmd()
     else:
