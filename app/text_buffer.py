@@ -1463,6 +1463,12 @@ class TextBuffer(BackingTextBuffer):
       self.drawTextArea(window, splitRow, 0, rows - splitRow, splitCol, 192)
       self.drawTextArea(window, splitRow, splitCol, rows - splitRow,
           cols-splitCol, 0)
+    if 1:
+      # Blank screen past the end of the buffer.
+      color = curses.color_pair(app.prefs.outsideOfBufferColorIndex)
+      endOfText = min(max(len(self.lines) - self.view.scrollRow, 0), rows)
+      for i in range(endOfText, rows):
+        window.addStr(i, 0, ' ' * cols, color)
 
   def drawTextArea(self, window, top, left, rows, cols, colorDelta):
     startRow = self.view.scrollRow + top
@@ -1708,8 +1714,3 @@ class TextBuffer(BackingTextBuffer):
                 line = self.lines[startRow + i][selStartCol:maxCol]
                 window.addStr(top + i, selStartCol,
                     line + ' ' * (maxCol - len(line)), window.colorSelected)
-      # Blank screen past the end of the buffer.
-      color = curses.color_pair(
-          app.prefs.outsideOfBufferColorIndex + colorDelta)
-      for i in range(rowLimit, maxRow):
-        window.addStr(top + i, left, ' ' * maxCol, color)
