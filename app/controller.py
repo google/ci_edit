@@ -67,7 +67,7 @@ class Controller:
 
   def doCommand(self, ch):
     self.savedCh = ch
-    cmd = self.commandSet.get(ch)
+    cmd = self.commandSet.get(app.curses_util.cursesKeyName(ch))
     if cmd:
       cmd()
     else:

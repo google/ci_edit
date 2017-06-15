@@ -21,39 +21,39 @@ import sys
 import termios
 
 
-CTRL_AT = 0x00
-CTRL_SPACE = 0x00
-CTRL_A = 0x01
-CTRL_B = 0x02
-CTRL_C = 0x03
-CTRL_D = 0x04
-CTRL_E = 0x05
-CTRL_F = 0x06
-CTRL_G = 0x07
-CTRL_H = 0x08
-CTRL_I = 0x09
-CTRL_J = 0x0a
-CTRL_K = 0x0b
-CTRL_L = 0x0c
-CTRL_M = 0x0d
-CTRL_N = 0x0e
-CTRL_O = 0x0f
-CTRL_P = 0x10
-CTRL_Q = 0x11
-CTRL_R = 0x12
-CTRL_S = 0x13
-CTRL_T = 0x14
-CTRL_U = 0x15
-CTRL_V = 0x16
-CTRL_W = 0x17
-CTRL_X = 0x18
-CTRL_Y = 0x19
-CTRL_Z = 0x1a
-CTRL_OPEN_BRACKET = 0x1b  # ^[
-CTRL_BACKSLASH = 0x1c  # ^\
-CTRL_CLOSE_BRACKET = 0x1d  # ^]
-CTRL_CARROT = 0x1e  # ^^
-CTRL_UNDERBAR = 0x1f  # ^_
+CTRL_AT = '^@' #0x00
+CTRL_SPACE = '^@' #0x00
+CTRL_A = '^A' #0x01
+CTRL_B = '^B' #0x02
+CTRL_C = '^C' #0x03
+CTRL_D = '^D' #0x04
+CTRL_E = '^E' #0x05
+CTRL_F = '^F' #0x06
+CTRL_G = '^G' #0x07
+CTRL_H = '^H' #0x08
+CTRL_I = '^I' #0x09
+CTRL_J = '^J' #0x0a
+CTRL_K = '^K' #0x0b
+CTRL_L = '^L' #0x0c
+CTRL_M = '^M' #0x0d
+CTRL_N = '^N' #0x0e
+CTRL_O = '^O' #0x0f
+CTRL_P = '^P' #0x10
+CTRL_Q = '^Q' #0x11
+CTRL_R = '^R' #0x12
+CTRL_S = '^S' #0x13
+CTRL_T = '^T' #0x14
+CTRL_U = '^U' #0x15
+CTRL_V = '^V' #0x16
+CTRL_W = '^W' #0x17
+CTRL_X = '^X' #0x18
+CTRL_Y = '^Y' #0x19
+CTRL_Z = '^Z' #0x1a
+CTRL_OPEN_BRACKET = '^[' #0x1b
+CTRL_BACKSLASH = '^\\' #0x1c
+CTRL_CLOSE_BRACKET = '^]' #0x1d
+CTRL_CARROT = '^^' #0x1e
+CTRL_UNDERBAR = '^_' #0x1f
 
 KEY_ALT_A = 165
 KEY_ALT_B = 171
@@ -75,35 +75,35 @@ if sys.platform == 'darwin':
   KEY_CTRL_UP = 562
   KEY_CTRL_SHIFT_UP = 563
 else:
-  KEY_ALT_LEFT = 542
-  KEY_ALT_RIGHT = 557
-  KEY_ALT_SHIFT_LEFT = 543
-  KEY_ALT_SHIFT_RIGHT = 558
-  KEY_CTRL_DOWN = 524
-  KEY_CTRL_SHIFT_DOWN = 525
-  KEY_CTRL_LEFT = 544
-  KEY_CTRL_SHIFT_LEFT = 545
-  KEY_CTRL_RIGHT = 559
-  KEY_CTRL_SHIFT_RIGHT = 560
-  KEY_CTRL_UP = 565
-  KEY_CTRL_SHIFT_UP = 566
+  KEY_ALT_LEFT = 'kLFT3' #542
+  KEY_ALT_RIGHT = 'kRIT3' #557
+  KEY_ALT_SHIFT_LEFT = 'kLFT4' #543
+  KEY_ALT_SHIFT_RIGHT = 'kRIT4' #558
+  KEY_CTRL_DOWN = 'kDN5' #524
+  KEY_CTRL_SHIFT_DOWN = 'kDN6' #525
+  KEY_CTRL_LEFT = 'kLFT5' #544
+  KEY_CTRL_SHIFT_LEFT = 'kLFT6' #545
+  KEY_CTRL_RIGHT = 'kRIT5' #559
+  KEY_CTRL_SHIFT_RIGHT = 'kRIT6' #560
+  KEY_CTRL_UP = 'kUP5' #565
+  KEY_CTRL_SHIFT_UP = 'kUP6' #566
 
 if 'SSH_CLIENT' in os.environ:
   KEY_ALT_LEFT = (98,)  # Need a better way to sort this out.
   KEY_ALT_RIGHT = (102,)  # ditto
 
-KEY_SHIFT_DOWN = 336
-KEY_SHIFT_F1 = 277
-KEY_SHIFT_F2 = 278
-KEY_SHIFT_F3 = 279
-KEY_SHIFT_F4 = 280
-KEY_SHIFT_F5 = 281
-KEY_SHIFT_F6 = 282
-KEY_SHIFT_F7 = 283
-KEY_SHIFT_F8 = 284
-KEY_SHIFT_F9 = 285
-KEY_SHIFT_F10 = 286
-KEY_SHIFT_UP = 337
+KEY_SHIFT_DOWN = 'KEY_SF' #336
+KEY_SHIFT_F1 = 'KEY_F(13)' #277
+KEY_SHIFT_F2 = 'KEY_F(14)' #278
+KEY_SHIFT_F3 = 'KEY_F(15)' #279
+KEY_SHIFT_F4 = 'KEY_F(16)' #280
+KEY_SHIFT_F5 = 'KEY_F(17)' #281
+KEY_SHIFT_F6 = 'KEY_F(18)' #282
+KEY_SHIFT_F7 = 'KEY_F(19)' #283
+KEY_SHIFT_F8 = 'KEY_F(20)' #284
+KEY_SHIFT_F9 = 'KEY_F(21)' #285
+KEY_SHIFT_F10 = 'KEY_F(22)' #286
+KEY_SHIFT_UP = 'KEY_SR' #337
 
 
 def mouseButtonName(bstate):
@@ -158,7 +158,7 @@ def mouseButtonName(bstate):
 
 def cursesKeyName(keyCode):
   try:
-    return curese.keyname(keyCode)
+    return curses.keyname(keyCode)
   except:
     pass
   return 'unknown'
