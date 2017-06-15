@@ -25,7 +25,8 @@ ci [args] [file...]
   -          Read from standard in.
   --         Treat remaining arguments as file names.
   --log      Show logging and debug info
-  --help     This help message.
+  --help     This help message and exit.
+  --test     Run unit tests and exit.
   --version  Print version information and exit.
 """,
 
@@ -39,7 +40,9 @@ Within the main text window:
   ctrl+e       Execute prompt (e:)
   ctrl+f       Find prompt
   ctrl+g       Go to line prompt
+  ctrl+l       Select current line (subsequent select next line)
   ctrl+o       Open file prompt.
+  ctrl+e       Prediction prompt (p:)
   ctrl+q       Quit (exit editor)
   ctrl+r       Reverse find
   ctrl+s       Save file
@@ -60,6 +63,7 @@ Within the Find prompt:
   ctrl+c       Copy
   ctrl+f       Find next
   ctrl+g       Find next
+  ctrl+l       Select whole line
   ctrl+q       Quit (exit editor)
   ctrl+r       Reverse find
   ctrl+s       Save file
@@ -81,6 +85,7 @@ Within the Goto line prompt:
   esc          Exit Goto
   ctrl+a       Select all
   ctrl+c       Copy
+  ctrl+l       Select whole line
   ctrl+q       Quit (exit editor)
   ctrl+s       Save file
   ctrl+v       Paste
