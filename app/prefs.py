@@ -28,7 +28,7 @@ keywordsColorIndex = 21
 selectedColor = 64 # Active find is a selection.
 specialsColorIndex = 20
 stringColorIndex = 5
-outsideOfBufferColorIndex = 0
+outsideOfBufferColorIndex = 128
 
 kNonMatchingRegex = r'^\b$'
 kReNonMatching = re.compile(kNonMatchingRegex)
