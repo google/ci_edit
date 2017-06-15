@@ -100,7 +100,7 @@ class CiProgram:
           ch = window.cursorWindow.getch()
           #if ch != -1:
           #  app.log.info('ch', ch)
-          if ch == curses.ascii.ESC:
+          if ch == app.curses_util.KEY_ESCAPE:
             keySequence = []
             n = window.cursorWindow.getch()
             while n != curses.ERR:
@@ -110,7 +110,7 @@ class CiProgram:
             ch = tuple(keySequence)
             if not ch:
               # The sequence was empty, just forward the esc.
-              ch = curses.ascii.ESC
+              ch = app.curses_util.KEY_ESCAPE
           if ch != curses.ERR:
             self.ch = ch
             if ch == curses.KEY_MOUSE:
