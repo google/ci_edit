@@ -1289,6 +1289,17 @@ class BackingTextBuffer(Mutator):
           mode - self.selectionMode)))
       self.redo()
 
+  def cursorSelectLine(self):
+    """
+      This function is used to select the line in which the cursor is in.
+      Consecutive calls to this function will select subsequent lines.
+    """
+    if self.selectionMode != app.selectable.kSelectionLine:
+      self.selectLineAt(self.penRow)
+    else:
+      if self.penRow + 1 < len(self.lines):
+        self.selectLineAt(self.penRow + 1)
+
   def selectionAll(self):
     self.doSelectionMode(app.selectable.kSelectionAll)
     self.cursorMoveAndMark(*self.extendSelection())
