@@ -1289,6 +1289,17 @@ class BackingTextBuffer(Mutator):
           mode - self.selectionMode)))
       self.redo()
 
+  def cursorSelectLine(self):
+    """
+      This function is used to select the line in which the cursor is in.
+      Consecutive calls to this function will select subsequent lines.
+    """
+    if self.selectionMode != app.selectable.kSelectionLine:
+      self.selectLineAt(self.penRow)
+    else:
+      if self.penRow + 1 < len(self.lines):
+        self.selectLineAt(self.penRow + 1)
+
   def selectionAll(self):
     self.doSelectionMode(app.selectable.kSelectionAll)
     self.cursorMoveAndMark(*self.extendSelection())
@@ -1310,18 +1321,17 @@ class BackingTextBuffer(Mutator):
     self.doSelectionMode(app.selectable.kSelectionWord)
 
   def selectLineAt(self, row):
-    if 1:
-      self.cursorMove(row - self.penRow, 0)
-      self.redo()
-      self.selectionLine()
-      self.cursorMoveAndMark(*self.extendSelection())
-      self.redo()
-    else:
-      # TODO(dschuyler): reverted to above to fix line selection in the line
-      # numbers column. To be investigated further.
-      if row >= len(self.lines):
-        return
-      self.selectText(row, 0, 0, app.selectable.kSelectionLine)
+    if row < len(self.lines):
+      if 1:
+        self.cursorMove(row - self.penRow, 0)
+        self.redo()
+        self.selectionLine()
+        self.cursorMoveAndMark(*self.extendSelection())
+        self.redo()
+      else:
+        # TODO(dschuyler): reverted to above to fix line selection in the line
+        # numbers column. To be investigated further.
+        self.selectText(row, 0, 0, app.selectable.kSelectionLine)
 
   def selectWordAt(self, row, col):
     """row and col may be from a mouse click and may not actually land in the
