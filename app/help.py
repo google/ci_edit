@@ -25,7 +25,8 @@ ci [args] [file...]
   -          Read from standard in.
   --         Treat remaining arguments as file names.
   --log      Show logging and debug info
-  --help     This help message.
+  --help     This help message and exit.
+  --test     Run unit tests and exit.
   --version  Print version information and exit.
 """,
 
@@ -39,7 +40,9 @@ Within the main text window:
   ctrl+e       Execute prompt (e:)
   ctrl+f       Find prompt
   ctrl+g       Go to line prompt
+  ctrl+l       Select current line (subsequent select next line)
   ctrl+o       Open file prompt.
+  ctrl+e       Prediction prompt (p:)
   ctrl+q       Quit (exit editor)
   ctrl+r       Reverse find
   ctrl+s       Save file
@@ -51,7 +54,7 @@ Within the main text window:
 Within the Find prompt:
 
   Text commands (such as cut and paste)
-  opperate on the prompt text rather
+  operate on the prompt text rather
   than the main window.
 
   return       Exit Find
@@ -60,6 +63,7 @@ Within the Find prompt:
   ctrl+c       Copy
   ctrl+f       Find next
   ctrl+g       Find next
+  ctrl+l       Select whole line
   ctrl+q       Quit (exit editor)
   ctrl+r       Reverse find
   ctrl+s       Save file
@@ -71,7 +75,7 @@ Within the Find prompt:
 Within the Goto line prompt:
 
   Text commands (such as cut and paste)
-  opperate on the prompt text rather
+  operate on the prompt text rather
   than the main window.
 
   b            Jump to bottom of document
@@ -81,6 +85,7 @@ Within the Goto line prompt:
   esc          Exit Goto
   ctrl+a       Select all
   ctrl+c       Copy
+  ctrl+l       Select whole line
   ctrl+q       Quit (exit editor)
   ctrl+s       Save file
   ctrl+v       Paste
@@ -91,7 +96,7 @@ Within the Goto line prompt:
 
   'version': \
 """
-  Version: b23
+  Version: b24
   See LICENSE for license information
   See readme.md for an introduction
   Both files may be found in "%s"

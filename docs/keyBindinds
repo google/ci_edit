@@ -2,11 +2,12 @@
 Common keyboard shortcuts:
 
   Text commands (such as cut and paste)
-  opperate on the text where the cursor is
+  operate on the text where the cursor is
   located text rather than the main window.
 
   ctrl+a       Select all
   ctrl+c       Copy
+  ctrl+l       Select current line (subsequent select next line)
   ctrl+q       Quit (exit editor)
   crtl+w       Close buffer
   ctrl+s       Save file
