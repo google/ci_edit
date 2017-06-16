@@ -492,7 +492,7 @@ class CiProgram:
         94, 134, 0, 240, 138,  21, 22, 23,  24, 25, 26, 27,   28, 29, 30,  57,
       ]
       #light = [-1, 230, 147, 221,   255, 254, 253, 14]
-      light = [15, 230, 14, 221,   255, 254, 253, 225]
+      light = [231, 230, 14, 221,   255, 254, 253, 225]
       for i in range(1, curses.COLORS):
         curses.init_pair(i, dark[i%len(dark)], light[i / 32])
     elif self.showPalette == 2:
