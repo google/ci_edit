@@ -20,6 +20,8 @@ autocorrect
 autofocus
 autosave
 br
+cellpadding
+cellspacing
 charset
 dataset
 defs
@@ -28,12 +30,14 @@ describedby
 doctype
 dragstart
 el
+enctype
 evenodd
 fieldset
 flexbox
 hd
 href
 iconset
+iframe
 inputmode
 isdir
 keydown
@@ -51,6 +55,7 @@ noink
 notranslate
 nowrap
 onclick
+onload
 pathname
 ph
 pollyfill

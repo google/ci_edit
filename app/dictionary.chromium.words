@@ -15,7 +15,9 @@
 
 # Chromium (May be specific to Chromium development)
 arraysize
+asan
 browsertest
+checkboxes
 chromevox
 codereview
 cpplint
@@ -32,6 +34,7 @@ gurl
 hotword
 jstemplate
 nacl
+nav
 newtabpage
 notreached
 onc
