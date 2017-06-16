@@ -1580,32 +1580,36 @@ class TextBuffer(BackingTextBuffer):
               line = line[:self.penCol]
             found = [i for i in
                 re.finditer("(\\" + openCh + ")|(\\" + closeCh + ")", line)]
-            for i in reversed(found):
-              if i.group() == openCh:
+            for match in reversed(found):
+              if match.group() == openCh:
                 count += 1
               else:
                 count -= 1
               if count == 0:
-                if i.start() + self.penCol - self.view.scrollCol < maxCol:
-                  window.addStr(top + row - startRow, i.start(),
+                textCol = match.start()
+                if not (textCol < startCol or textCol >= endCol):
+                  window.addStr(top + row - startRow,
+                      textCol - self.view.scrollCol,
                       openCh, curses.color_pair(201 + colorDelta))
                 return
         def searchForward(openCh, closeCh):
           count = 1
-          colOffset = self.penCol + 1
-          for row in range(self.penRow, startRow+maxRow):
+          textCol = self.penCol + 1
+          for row in range(self.penRow, startRow + maxRow):
             if row != self.penRow:
-              colOffset = 0
-            line = self.lines[row][colOffset:]
-            for i in re.finditer("(\\" + openCh + ")|(\\" + closeCh + ")",
+              textCol = 0
+            line = self.lines[row][textCol:]
+            for match in re.finditer("(\\" + openCh + ")|(\\" + closeCh + ")",
                 line):
-              if i.group() == openCh:
+              if match.group() == openCh:
                 count += 1
               else:
                 count -= 1
               if count == 0:
-                if i.start() + self.penCol - self.view.scrollCol < maxCol:
-                  window.addStr(top + row - startRow, colOffset + i.start(),
+                textCol += match.start()
+                if not (textCol < startCol or textCol >= endCol):
+                  window.addStr(top + row - startRow,
+                      textCol - self.view.scrollCol,
                       closeCh, curses.color_pair(201 + colorDelta))
                 return
         matcher = {
@@ -1619,14 +1623,11 @@ class TextBuffer(BackingTextBuffer):
         look = matcher.get(ch)
         if look:
           look[1](ch, look[0])
-          if 1:
-            # If the cursor is a block then this is covered by the cursor.
-            # Consider doing this only if the cursor is not a block.
-            window.addStr(
-                top + self.penRow - startRow,
-                self.penCol - self.view.scrollCol,
-                self.lines[self.penRow][self.penCol],
-                curses.color_pair(201 + colorDelta))
+          window.addStr(
+              top + self.penRow - startRow,
+              self.penCol - self.view.scrollCol,
+              self.lines[self.penRow][self.penCol],
+              curses.color_pair(201 + colorDelta))
     if 1:
       # Highlight numbers.
       for i in range(rowLimit):
