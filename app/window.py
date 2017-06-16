@@ -294,7 +294,7 @@ class LabeledLine(Window):
     self.setTextBuffer(app.text_buffer.TextBuffer())
     self.label = label
     self.leftColumn = StaticWindow(self)
-    self.color = curses.color_pair(0)
+    self.color = curses.color_pair(app.prefs.defaultColorIndex)
     self.colorSelected = curses.color_pair(87)
 
   def refresh(self):
@@ -595,7 +595,7 @@ class InputWindow(Window):
     self.showMessageLine = True
     self.showRightColumn = True
     self.showTopInfo = True
-    self.color = curses.color_pair(18)
+    self.color = curses.color_pair(app.prefs.defaultColorIndex)
     self.colorSelected = curses.color_pair(app.prefs.selectedColor)
     self.controller = app.controller.MainController(self)
     self.controller.add(app.cu_editor.CuaPlusEdit(prg, self))
@@ -663,7 +663,8 @@ class InputWindow(Window):
     if 1:
       self.rightColumn = StaticWindow(self)
       self.rightColumn.name = 'Right'
-      self.rightColumn.color = curses.color_pair(18)
+      self.rightColumn.color = curses.color_pair(
+          app.prefs.outsideOfBufferColorIndex)
       self.rightColumn.colorSelected = curses.color_pair(105)
       self.rightColumn.setParent(self, 0)
       if not self.showRightColumn:
