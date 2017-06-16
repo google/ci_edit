@@ -1450,7 +1450,6 @@ class TextBuffer(BackingTextBuffer):
     if 0:
       for i in range(rows):
         window.addStr(i, 0, '?' * cols, curses.color_pair(120))
-
     if 0:
       self.drawTextArea(window, 0, 0, rows, cols, 0)
     elif 1:
@@ -1467,12 +1466,11 @@ class TextBuffer(BackingTextBuffer):
       self.drawTextArea(window, splitRow, 0, rows - splitRow, splitCol, 192)
       self.drawTextArea(window, splitRow, splitCol, rows - splitRow,
           cols-splitCol, 0)
-    if 1:
-      # Blank screen past the end of the buffer.
-      color = curses.color_pair(app.prefs.outsideOfBufferColorIndex)
-      endOfText = min(max(len(self.lines) - self.view.scrollRow, 0), rows)
-      for i in range(endOfText, rows):
-        window.addStr(i, 0, ' ' * cols, color)
+    # Blank screen past the end of the buffer.
+    color = curses.color_pair(app.prefs.outsideOfBufferColorIndex)
+    endOfText = min(max(len(self.lines) - self.view.scrollRow, 0), rows)
+    for i in range(endOfText, rows):
+      window.addStr(i, 0, ' ' * cols, color)
 
   def drawTextArea(self, window, top, left, rows, cols, colorDelta):
     startRow = self.view.scrollRow + top
@@ -1560,161 +1558,161 @@ class TextBuffer(BackingTextBuffer):
     self.drawOverlays(window, top, left, rows, cols, colorDelta)
 
   def drawOverlays(self, window, top, left, maxRow, maxCol, colorDelta):
+    startRow = self.view.scrollRow + top
+    endRow = self.view.scrollRow + top + maxRow
+    startCol = self.view.scrollCol + left
+    endCol = self.view.scrollCol + left + maxCol
+    rowLimit = min(max(len(self.lines) - startRow, 0), maxRow)
     if 1:
-      startRow = self.view.scrollRow + top
-      endRow = self.view.scrollRow + top + maxRow
-      startCol = self.view.scrollCol + left
-      endCol = self.view.scrollCol + left + maxCol
-      rowLimit = min(max(len(self.lines) - startRow, 0), maxRow)
-      if 1:
-        # Highlight brackets.
+      # Highlight brackets.
+      for i in range(rowLimit):
+        line = self.lines[startRow + i][startCol:endCol]
+        for k in re.finditer(app.selectable.kReBrackets, line):
+          for f in k.regs:
+            window.addStr(top + i, left+f[0], line[f[0]:f[1]],
+                curses.color_pair(6 + colorDelta))
+    if 1:
+      # Match brackets.
+      if (len(self.lines) > self.penRow and
+          len(self.lines[self.penRow]) > self.penCol):
+        ch = self.lines[self.penRow][self.penCol]
+        def searchBack(closeCh, openCh):
+          count = -1
+          for row in range(self.penRow, -1, -1):
+            line = self.lines[row]
+            if row == self.penRow:
+              line = line[:self.penCol]
+            found = [i for i in
+                re.finditer("(\\" + openCh + ")|(\\" + closeCh + ")", line)]
+            for match in reversed(found):
+              if match.group() == openCh:
+                count += 1
+              else:
+                count -= 1
+              if count == 0:
+                textCol = match.start()
+                if not (textCol < startCol or textCol >= endCol):
+                  window.addStr(top + row - startRow,
+                      textCol - self.view.scrollCol,
+                      openCh, curses.color_pair(201 + colorDelta))
+                return
+        def searchForward(openCh, closeCh):
+          count = 1
+          textCol = self.penCol + 1
+          for row in range(self.penRow, startRow + maxRow):
+            if row != self.penRow:
+              textCol = 0
+            line = self.lines[row][textCol:]
+            for match in re.finditer("(\\" + openCh + ")|(\\" + closeCh + ")",
+                line):
+              if match.group() == openCh:
+                count += 1
+              else:
+                count -= 1
+              if count == 0:
+                textCol += match.start()
+                if not (textCol < startCol or textCol >= endCol):
+                  window.addStr(top + row - startRow,
+                      textCol - self.view.scrollCol,
+                      closeCh, curses.color_pair(201 + colorDelta))
+                return
+        matcher = {
+          '(': (')', searchForward),
+          '[': (']', searchForward),
+          '{': ('}', searchForward),
+          ')': ('(', searchBack),
+          ']': ('[', searchBack),
+          '}': ('{', searchBack),
+        }
+        look = matcher.get(ch)
+        if look:
+          look[1](ch, look[0])
+          window.addStr(
+              top + self.penRow - startRow,
+              self.penCol - self.view.scrollCol,
+              self.lines[self.penRow][self.penCol],
+              curses.color_pair(201 + colorDelta))
+    if 1:
+      # Highlight numbers.
+      for i in range(rowLimit):
+        line = self.lines[startRow + i][startCol:endCol]
+        for k in re.finditer(app.selectable.kReNumbers, line):
+          for f in k.regs:
+            window.addStr(top + i, left + f[0], line[f[0]:f[1]],
+                curses.color_pair(31 + colorDelta))
+    if 1:
+      # Highlight space ending lines.
+      for i in range(rowLimit):
+        line = self.lines[startRow + i][startCol:]
+        offset = 0
+        if startRow + i == self.penRow:
+          offset = self.penCol - startCol
+          line = line[offset:]
+        for k in app.selectable.kReEndSpaces.finditer(line):
+          for f in k.regs:
+            window.addStr(top + i, left + offset + f[0], line[f[0]:f[1]],
+                curses.color_pair(180+colorDelta))
+    if 0:
+      lengthLimit = self.lineLimitIndicator
+      if endCol >= lengthLimit:
+        # Highlight long lines.
         for i in range(rowLimit):
-          line = self.lines[startRow + i][startCol:endCol]
-          for k in re.finditer(app.selectable.kReBrackets, line):
-            for f in k.regs:
-              window.addStr(top + i, left+f[0], line[f[0]:f[1]],
-                  curses.color_pair(6 + colorDelta))
+          line = self.lines[startRow + i]
+          if len(line) < lengthLimit or startCol > lengthLimit:
+            continue
+          length = min(endCol, len(line) - lengthLimit)
+          window.addStr(top + i, left + lengthLimit - startCol,
+              line[lengthLimit:endCol], curses.color_pair(96 + colorDelta))
+    if self.findRe is not None:
+      # Highlight find.
+      for i in range(rowLimit):
+        line = self.lines[startRow + i][startCol:endCol]
+        for k in self.findRe.finditer(line):
+          reg = k.regs[0]
+          #for ref in k.regs[1:]:
+          window.addStr(top + i, left + reg[0], line[reg[0]:reg[1]],
+              curses.color_pair(app.prefs.foundColorIndex + colorDelta))
+    if rowLimit and self.selectionMode != app.selectable.kSelectionNone:
+      # Highlight selected text.
+      upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
       if 1:
-        # Match brackets.
-        if (len(self.lines) > self.penRow and
-            len(self.lines[self.penRow]) > self.penCol):
-          ch = self.lines[self.penRow][self.penCol]
-          def searchBack(closeCh, openCh):
-            count = -1
-            for row in range(self.penRow, -1, -1):
-              line = self.lines[row]
-              if row == self.penRow:
-                line = line[:self.penCol]
-              found = [i for i in
-                  re.finditer("(\\" + openCh + ")|(\\" + closeCh + ")", line)]
-              for i in reversed(found):
-                if i.group() == openCh:
-                  count += 1
-                else:
-                  count -= 1
-                if count == 0:
-                  if i.start() + self.penCol - self.view.scrollCol < maxCol:
-                    window.addStr(top + row - startRow, i.start(),
-                        openCh, curses.color_pair(201 + colorDelta))
-                  return
-          def searchForward(openCh, closeCh):
-            count = 1
-            colOffset = self.penCol + 1
-            for row in range(self.penRow, startRow+maxRow):
-              if row != self.penRow:
-                colOffset = 0
-              line = self.lines[row][colOffset:]
-              for i in re.finditer("(\\" + openCh + ")|(\\" + closeCh + ")",
-                  line):
-                if i.group() == openCh:
-                  count += 1
-                else:
-                  count -= 1
-                if count == 0:
-                  if i.start() + self.penCol - self.view.scrollCol < maxCol:
-                    window.addStr(top + row - startRow, colOffset + i.start(),
-                        closeCh, curses.color_pair(201 + colorDelta))
-                  return
-          matcher = {
-            '(': (')', searchForward),
-            '[': (']', searchForward),
-            '{': ('}', searchForward),
-            ')': ('(', searchBack),
-            ']': ('[', searchBack),
-            '}': ('{', searchBack),
-          }
-          look = matcher.get(ch)
-          if look:
-            look[1](ch, look[0])
-            if 1:
-              # If the cursor is a block then this is covered by the cursor.
-              # Consider doing this only if the cursor is not a block.
-              window.addStr(
-                  top + self.penRow - startRow,
-                  self.penCol - self.view.scrollCol,
-                  self.lines[self.penRow][self.penCol],
-                  curses.color_pair(201 + colorDelta))
-      if 1:
-        # Highlight numbers.
-        for i in range(rowLimit):
-          line = self.lines[startRow + i][startCol:endCol]
-          for k in re.finditer(app.selectable.kReNumbers, line):
-            for f in k.regs:
-              window.addStr(top + i, left + f[0], line[f[0]:f[1]],
-                  curses.color_pair(31 + colorDelta))
-      if 1:
-        # Highlight space ending lines.
-        for i in range(rowLimit):
-          line = self.lines[startRow + i][startCol:]
-          offset = 0
-          if startRow + i == self.penRow:
-            offset = self.penCol - startCol
-            line = line[offset:]
-          for k in app.selectable.kReEndSpaces.finditer(line):
-            for f in k.regs:
-              window.addStr(top + i, left + offset + f[0], line[f[0]:f[1]],
-                  curses.color_pair(180+colorDelta))
-      if 0:
-        lengthLimit = self.lineLimitIndicator
-        if endCol >= lengthLimit:
-          # Highlight long lines.
-          for i in range(rowLimit):
-            line = self.lines[startRow + i]
-            if len(line) < lengthLimit or startCol > lengthLimit:
-              continue
-            length = min(endCol, len(line) - lengthLimit)
-            window.addStr(top + i, left + lengthLimit - startCol,
-                line[lengthLimit:endCol], curses.color_pair(96 + colorDelta))
-      if self.findRe is not None:
-        # Highlight find.
-        for i in range(rowLimit):
-          line = self.lines[startRow + i][startCol:endCol]
-          for k in self.findRe.finditer(line):
-            reg = k.regs[0]
-            #for ref in k.regs[1:]:
-            window.addStr(top + i, left + reg[0], line[reg[0]:reg[1]],
-                curses.color_pair(app.prefs.foundColorIndex + colorDelta))
-      if rowLimit and self.selectionMode != app.selectable.kSelectionNone:
-        # Highlight selected text.
-        upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
-        if 1:
-          selStartCol = max(upperCol, startCol)
-          selEndCol = min(lowerCol, maxCol)
-          start = max(0, min(upperRow - startRow, maxRow))
-          end = max(0, min(lowerRow - startRow, maxRow))
-          if self.selectionMode == app.selectable.kSelectionBlock:
-            if not (lowerRow < startRow or upperRow >= endRow or
-                lowerCol < startCol or upperCol >= endCol):
-              # There is an overlap.
-              for i in range(start, end + 1):
-                line = self.lines[startRow + i][selStartCol:selEndCol]
-                window.addStr(top + i, selStartCol, line, window.colorSelected)
-          elif (self.selectionMode == app.selectable.kSelectionAll or
-              self.selectionMode == app.selectable.kSelectionCharacter or
-              self.selectionMode == app.selectable.kSelectionWord):
-            if not (lowerRow < startRow or upperRow >= endRow):
-              # There is an overlap.
-              # Go one row past the selection or to the last line.
-              for i in range(start, min(end + 1, len(self.lines) - startRow)):
-                line = self.lines[startRow + i]
-                if len(line) == len(self.lines[startRow + i]):
-                  line += " "  # Maybe do: "\\n".
-                if i == lowerRow - startRow and i == upperRow - startRow:
-                  window.addStr(top + i, selStartCol,
-                      line[selStartCol:selEndCol], window.colorSelected)
-                elif i == lowerRow - startRow:
-                  window.addStr(top + i, left, line[left:selEndCol],
-                      window.colorSelected)
-                elif i == upperRow - startRow:
-                  window.addStr(top + i, selStartCol, line[selStartCol:],
-                      window.colorSelected)
-                else:
-                  window.addStr(top + i, left, line[left:],
-                      window.colorSelected)
-          elif self.selectionMode == app.selectable.kSelectionLine:
-            if not (lowerRow < startRow or upperRow >= endRow):
-              # There is an overlap.
-              for i in range(start, end + 1):
-                line = self.lines[startRow + i][selStartCol:maxCol]
+        selStartCol = max(upperCol, startCol)
+        selEndCol = min(lowerCol, maxCol)
+        start = max(0, min(upperRow - startRow, maxRow))
+        end = max(0, min(lowerRow - startRow, maxRow))
+        if self.selectionMode == app.selectable.kSelectionBlock:
+          if not (lowerRow < startRow or upperRow >= endRow or
+              lowerCol < startCol or upperCol >= endCol):
+            # There is an overlap.
+            for i in range(start, end + 1):
+              line = self.lines[startRow + i][selStartCol:selEndCol]
+              window.addStr(top + i, selStartCol, line, window.colorSelected)
+        elif (self.selectionMode == app.selectable.kSelectionAll or
+            self.selectionMode == app.selectable.kSelectionCharacter or
+            self.selectionMode == app.selectable.kSelectionWord):
+          if not (lowerRow < startRow or upperRow >= endRow):
+            # There is an overlap.
+            # Go one row past the selection or to the last line.
+            for i in range(start, min(end + 1, len(self.lines) - startRow)):
+              line = self.lines[startRow + i]
+              if len(line) == len(self.lines[startRow + i]):
+                line += " "  # Maybe do: "\\n".
+              if i == lowerRow - startRow and i == upperRow - startRow:
                 window.addStr(top + i, selStartCol,
-                    line + ' ' * (maxCol - len(line)), window.colorSelected)
+                    line[selStartCol:selEndCol], window.colorSelected)
+              elif i == lowerRow - startRow:
+                window.addStr(top + i, left, line[left:selEndCol],
+                    window.colorSelected)
+              elif i == upperRow - startRow:
+                window.addStr(top + i, selStartCol, line[selStartCol:],
+                    window.colorSelected)
+              else:
+                window.addStr(top + i, left, line[left:],
+                    window.colorSelected)
+        elif self.selectionMode == app.selectable.kSelectionLine:
+          if not (lowerRow < startRow or upperRow >= endRow):
+            # There is an overlap.
+            for i in range(start, end + 1):
+              line = self.lines[startRow + i][selStartCol:maxCol]
+              window.addStr(top + i, selStartCol,
+                  line + ' ' * (maxCol - len(line)), window.colorSelected)

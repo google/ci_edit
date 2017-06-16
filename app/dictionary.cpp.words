@@ -17,6 +17,7 @@ memcmp
 memcpy
 memset
 multimap
+npos
 printf
 rbegin
 refcounted

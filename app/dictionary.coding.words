@@ -67,6 +67,7 @@ cli
 cmd
 cntl
 codeview
+configs
 constexpr
 cpp
 crtl
@@ -161,12 +162,19 @@ num
 oauth
 obj
 objc
+patcher
 pid
 png
 popups
 pos
 posix
 pragma
+precompilation
+precompile
+precompiled
+precompiling
+prefetch
+prerender
 prev
 prg
 proc
@@ -185,6 +193,7 @@ rect
 refptr
 regex
 regexes
+remoting
 renderer
 ro
 runtime
@@ -232,7 +241,9 @@ unparsable
 utf
 vpn
 vpns
+waitable
 webkit
+websocket
 webview
 whitelist
 whitespace
