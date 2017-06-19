@@ -158,7 +158,7 @@ def mouseButtonName(bstate):
 
 def cursesKeyName(keyCode):
   try:
-    return curese.keyname(keyCode)
+    return curses.keyname(keyCode)
   except:
     pass
   return 'unknown'
