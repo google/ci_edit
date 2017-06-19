@@ -501,9 +501,8 @@ class BackingTextBuffer(Mutator):
     self.cursorMoveDown()
 
   def cursorDownScroll(self):
-    #todo:
     self.selectionNone()
-    self.cursorMoveDown()
+    self.scrollDown()
 
   def cursorLeft(self):
     self.selectionNone()
@@ -749,9 +748,8 @@ class BackingTextBuffer(Mutator):
     self.cursorMoveUp()
 
   def cursorUpScroll(self):
-    #todo:
     self.selectionNone()
-    self.cursorMoveUp()
+    self.scrollUp()
 
   def delCh(self):
     line = self.lines[self.penRow]
@@ -1227,6 +1225,9 @@ class BackingTextBuffer(Mutator):
   def mouseWheelDown(self, shift, ctrl, alt):
     if not shift:
       self.selectionNone()
+    self.scrollUp()
+
+  def scrollUp(self):
     if self.view.scrollRow == 0:
       if not self.view.hasCaptiveCursor:
         self.skipUpdateScroll = True
@@ -1246,6 +1247,9 @@ class BackingTextBuffer(Mutator):
   def mouseWheelUp(self, shift, ctrl, alt):
     if not shift:
       self.selectionNone()
+    self.scrollDown()
+
+  def scrollDown(self):
     maxRow, maxCol = self.view.cursorWindow.getmaxyx()
     if self.view.scrollRow + maxRow >= len(self.lines):
       if not self.view.hasCaptiveCursor:
