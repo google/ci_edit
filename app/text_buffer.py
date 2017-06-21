@@ -117,6 +117,27 @@ class Mutator(app.selectable.Selectable):
         s1.st_mtime == s2.st_mtime and
         s1.st_ctime == s2.st_ctime)
 
+  def doMoveLines(self, begin, end, to):
+    lines = self.lines[begin:end]
+    del self.lines[begin:end]
+    count = end - begin
+    if begin < to:
+      assert end < to
+      assert self.penRow < to
+      to -= end - begin
+      self.penRow -= count
+      if self.selectionMode != app.selectable.kSelectionNone:
+        assert self.markerRow < to
+        self.markerRow -= count
+    else:
+      assert end > to
+      assert self.penRow >= to
+      self.penRow += count
+      if self.selectionMode != app.selectable.kSelectionNone:
+        assert self.markerRow >= to
+        self.markerRow += count
+    self.lines = self.lines[:to] + lines + self.lines[to:]
+
   def redo(self):
     """Replay the next action on the redoChain."""
     if self.redoIndex < len(self.redoChain):
@@ -172,6 +193,10 @@ class Mutator(app.selectable.Selectable):
         self.markerRow += change[1][2]
         self.markerCol += change[1][3]
         self.selectionMode += change[1][4]
+      elif change[0] == 'ml':
+        # Redo move lines
+        begin, end, to = change[1]
+        self.doMoveLines(begin, end, to)
       elif change[0] == 'n':
         # Redo split lines.
         line = self.lines[self.penRow]
@@ -318,6 +343,14 @@ class Mutator(app.selectable.Selectable):
         assert self.penRow >= 0
         assert self.penCol >= 0
         return True
+      elif change[0] == 'ml':
+        # Undo move lines
+        begin, end, to = change[1]
+        count = end - begin
+        if begin < to:
+          self.doMoveLines(to - 1, to + count - 1, begin + count - 1)
+        else:
+          self.doMoveLines(to, to + count, begin + count)
       elif change[0] == 'n':
         # Undo split lines.
         self.lines[self.penRow] += self.lines[self.penRow + change[1][0]]
@@ -631,10 +664,15 @@ class BackingTextBuffer(Mutator):
     self.cursorMoveDown()
 
   def cursorSelectDownScroll(self):
-    #todo:
-    if self.selectionMode == app.selectable.kSelectionNone:
-      self.selectionCharacter()
-    self.cursorMoveDown()
+    """Move the line below the selection to above the selection."""
+    upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
+    if lowerRow + 1 >= len(self.lines):
+      return
+    begin = lowerRow + 1
+    end = lowerRow + 2
+    to = upperRow
+    self.redoAddChange(('ml', (begin, end, to)))
+    self.redo()
 
   def cursorSelectLeft(self):
     if self.selectionMode == app.selectable.kSelectionNone:
@@ -689,10 +727,15 @@ class BackingTextBuffer(Mutator):
     self.cursorMoveUp()
 
   def cursorSelectUpScroll(self):
-    #todo:
-    if self.selectionMode == app.selectable.kSelectionNone:
-      self.selectionCharacter()
-    self.cursorMoveUp()
+    """Move the line above the selection to below the selection."""
+    upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
+    if upperRow == 0:
+      return
+    begin = upperRow - 1
+    end = upperRow
+    to = lowerRow + 1
+    self.redoAddChange(('ml', (begin, end, to)))
+    self.redo()
 
   def cursorEndOfLine(self):
     lineLen = len(self.lines[self.penRow])
