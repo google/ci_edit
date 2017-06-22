@@ -26,6 +26,7 @@ class Controller:
     self.host = host
     self.commandDefault = None
     self.commandSet = None
+    self.textBuffer = None
     self.name = name
 
   def changeToConfirmClose(self):
@@ -67,6 +68,9 @@ class Controller:
 
   def doCommand(self, ch):
     #Check the commandSet for the input with both its string and integer representation.
+    backspace = ord(curses.erasechar())
+    if not self.commandSet.get(backspace):
+      self.commandSet[backspace] = self.textBuffer.backspace
     self.savedCh = ch
     keyName = app.curses_util.cursesKeyName(ch)
     cmd = self.commandSet.get(keyName) or self.commandSet.get(ch)

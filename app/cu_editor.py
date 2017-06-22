@@ -41,10 +41,6 @@ def initCommandSet(editText, textBuffer):
     CTRL_Y: textBuffer.redo,
     CTRL_Z: textBuffer.undo,
 
-    KEY_BACKSPACE1: textBuffer.backspace,
-    KEY_BACKSPACE2: textBuffer.backspace,
-
-    KEY_BACKSPACE3: textBuffer.backspace,
     KEY_DELETE: textBuffer.delete,
     KEY_HOME: textBuffer.cursorStartOfLine,
     KEY_END: textBuffer.cursorEndOfLine,
