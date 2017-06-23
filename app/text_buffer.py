@@ -1416,7 +1416,8 @@ class BackingTextBuffer(Mutator):
   def unindent(self):
     if self.selectionMode == app.selectable.kSelectionAll:
       self.cursorMoveAndMark(len(self.lines) - 1 - self.penRow, -self.penCol,
-          -self.markerRow, -self.markerCol, kSelectionLine - self.selectionMode)
+          -self.markerRow, -self.markerCol,
+          app.selectable.kSelectionLine - self.selectionMode)
       self.redo()
       self.unindentLines()
     else:
