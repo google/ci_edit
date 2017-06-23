@@ -110,6 +110,7 @@ fi
 filename
 fixme
 formatter
+freebsd
 ftp
 gaia
 ge
@@ -140,6 +141,7 @@ ipv
 jpeg
 jpg
 json
+iter
 keyframe
 keyframed
 keyframes
@@ -157,11 +159,13 @@ msg
 na
 namespaces
 ne
+neq
 nullptr
 num
 oauth
 obj
 objc
+openbsd
 patcher
 pid
 png
@@ -200,6 +204,7 @@ runtime
 rv
 signin
 skia
+solaris
 src
 ssh
 std
