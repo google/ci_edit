@@ -82,25 +82,34 @@ class CiProgram:
     self.zOrder = []
 
   def commandLoop(self):
+    # At startup, focus the main window (just to start somewhere).
     window = self.inputWindow
     window.focus()
     self.focusedWindow = window
+    # Track the time needed to handle commands and render the UI.
+    # (A performance measurement).
     self.mainLoopTime = 0
     self.mainLoopTimePeak = 0
     start = time.time()
+    # This is the 'main loop'. Execution doesn't leave this loop until the
+    # application is closing down.
     while not self.exiting:
       self.refresh()
-      self.mainLoopTime = time.time()-start
+      self.mainLoopTime = time.time() - start
       if self.mainLoopTime > self.mainLoopTimePeak:
         self.mainLoopTimePeak = self.mainLoopTime
+      # Gather several commands into a batch before doing a redraw.
+      # (A performance optimization).
       cmdList = []
       mouseEvents = []
       while not len(cmdList):
         for i in range(5):
           ch = window.cursorWindow.getch()
-          #if ch != -1:
-          #  app.log.info('ch', ch)
           if ch == app.curses_util.KEY_ESCAPE:
+            # Some keys are sent from the terminal as a sequence of bytes
+            # beginning with an Escape character. To help reason about these
+            # events (and apply event handler callback functions) the sequence
+            # is converted into tuple.
             keySequence = []
             n = window.cursorWindow.getch()
             while n != curses.ERR:
@@ -109,23 +118,27 @@ class CiProgram:
             #app.log.info('sequence\n', keySequence)
             ch = tuple(keySequence)
             if not ch:
-              # The sequence was empty, just forward the esc.
+              # The sequence was empty, so it looks like this Escape wasn't
+              # really the start of a sequence and is instead a stand-alone
+              # Escape. Just forward the esc.
               ch = app.curses_util.KEY_ESCAPE
           if ch != curses.ERR:
             self.ch = ch
             if ch == curses.KEY_MOUSE:
               # On Ubuntu, Gnome terminal, curses.getmouse() may only be called
               # once for each KEY_MOUSE. Subsequent calls will throw an
-              # exception.
+              # exception. So getmouse is (only) called here and other parts of
+              # the code use the mouseEvents list instead of calling getmouse.
               self.debugMouseEvent = curses.getmouse()
               mouseEvents.append((self.debugMouseEvent, time.time()))
-              #app.log.info('mouse event\n', mouseEvents[-1])
             cmdList.append(ch)
       start = time.time()
       if len(cmdList):
         for cmd in cmdList:
           if cmd == curses.KEY_RESIZE:
             if sys.platform == 'darwin':
+              # Some terminals seem to resize the terminal and others leave it
+              # to the application to resize the curses terminal.
               rows, cols = app.curses_util.terminalSize()
               curses.resizeterm(rows, cols)
             self.layout()
@@ -226,7 +239,8 @@ class CiProgram:
     screenRows, screenCols = self.stdscr.getmaxyx()
     self.debugWindow.writeLine(
         "scr rows %d cols %d mlt %f/%f pt %f"
-        %(screenRows, screenCols, self.mainLoopTime, self.mainLoopTimePeak, textBuffer.parserTime))
+        %(screenRows, screenCols, self.mainLoopTime, self.mainLoopTimePeak,
+            textBuffer.parserTime))
     self.debugWindow.writeLine(
         "ch %3s %s"
         %(self.ch, app.curses_util.cursesKeyName(self.ch) or 'UNKNOWN'),
