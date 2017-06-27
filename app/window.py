@@ -29,6 +29,7 @@ class StaticWindow:
   def __init__(self, parent):
     self.parent = parent
     self.zOrder = []
+    self.colorIndex = 0
     self.color = 0
     self.colorSelected = 1
     self.isFocusable = False
@@ -294,7 +295,8 @@ class LabeledLine(Window):
     self.setTextBuffer(app.text_buffer.TextBuffer())
     self.label = label
     self.leftColumn = StaticWindow(self)
-    self.color = curses.color_pair(app.prefs.defaultColorIndex)
+    self.colorIndex = app.prefs.defaultColorIndex
+    self.color = curses.color_pair(self.colorIndex)
     self.colorSelected = curses.color_pair(87)
 
   def refresh(self):
@@ -595,7 +597,8 @@ class InputWindow(Window):
     self.showMessageLine = True
     self.showRightColumn = True
     self.showTopInfo = True
-    self.color = curses.color_pair(app.prefs.defaultColorIndex)
+    self.colorIndex = app.prefs.defaultColorIndex
+    self.color = curses.color_pair(self.colorIndex)
     self.colorSelected = curses.color_pair(app.prefs.selectedColor)
     self.controller = app.controller.MainController(self)
     self.controller.add(app.cu_editor.CuaPlusEdit(prg, self))
@@ -635,21 +638,24 @@ class InputWindow(Window):
       self.interactiveSaveAs.setController(app.cu_editor.InteractiveSaveAs)
     if 1:
       self.topInfo = TopInfo(self)
-      self.topInfo.color = curses.color_pair(168)
+      self.topInfo.colorIndex = 168
+      self.topInfo.color = curses.color_pair(self.topInfo.colorIndex)
       self.topInfo.colorSelected = curses.color_pair(47)
       self.topInfo.setParent(self, 0)
       if not self.showTopInfo:
         self.topInfo.hide()
     if 1:
       self.statusLine = StatusLine(self)
-      self.statusLine.color = curses.color_pair(168)
+      self.statusLine.colorIndex = 168
+      self.statusLine.color = curses.color_pair(self.statusLine.colorIndex)
       self.statusLine.colorSelected = curses.color_pair(47)
       self.statusLine.setParent(self, 0)
       if not self.showFooter:
         self.statusLine.hide()
     if 1:
       self.leftColumn = LineNumbers(self)
-      self.leftColumn.color = curses.color_pair(211)
+      self.leftColumn.colorIndex = 211
+      self.leftColumn.color = curses.color_pair(self.leftColumn.colorIndex)
       self.leftColumn.colorSelected = curses.color_pair(146)
       self.leftColumn.setParent(self, 0)
       if not self.showLineNumbers:
@@ -657,21 +663,23 @@ class InputWindow(Window):
     if 1:
       self.logoCorner = StaticWindow(self)
       self.logoCorner.name = 'Logo'
-      self.logoCorner.color = curses.color_pair(168)
+      self.logoCorner.colorIndex = 168
+      self.logoCorner.color = curses.color_pair(self.logoCorner.colorIndex)
       self.logoCorner.colorSelected = curses.color_pair(146)
       self.logoCorner.setParent(self, 0)
     if 1:
       self.rightColumn = StaticWindow(self)
       self.rightColumn.name = 'Right'
-      self.rightColumn.color = curses.color_pair(
-          app.prefs.outsideOfBufferColorIndex)
+      self.rightColumn.colorIndex = app.prefs.outsideOfBufferColorIndex
+      self.rightColumn.color = curses.color_pair(self.rightColumn.color)
       self.rightColumn.colorSelected = curses.color_pair(105)
       self.rightColumn.setParent(self, 0)
       if not self.showRightColumn:
         self.rightColumn.hide()
     if self.showMessageLine:
       self.messageLine = MessageLine(self)
-      self.messageLine.color = curses.color_pair(3)
+      self.messageLine.colorIndex = 3
+      self.messageLine.color = curses.color_pair(self.messageLine.colorIndex)
       self.messageLine.colorSelected = curses.color_pair(87)
       self.messageLine.setParent(self, 0)
 
