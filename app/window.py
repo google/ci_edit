@@ -555,6 +555,9 @@ class TopInfo(StaticWindow):
           lineCursor -= 1
     pathLine = self.host.textBuffer.fullPath
     if 1:
+      if tb.isReadOnly:
+        pathLine += ' [RO]'
+    if 1:
       if tb.isDirty():
         pathLine += ' * '
       else:
