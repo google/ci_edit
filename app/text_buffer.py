@@ -49,9 +49,9 @@ class Mutator(app.selectable.Selectable):
     self.parserTime = .0
     self.relativePath = ''
     self.redoChain = []
-    self.tempChain = [] #Used to store mouse actions without trimming redoChain
-    self.dirtyChain = False #Returns whether the last action was a non-trivial mouse action
-    self.redoDirty = False #Returns True if tempChain has an action that needs to be processed
+    self.tempChain = []  # Used to store cursor view actions without trimming redoChain
+    self.dirtyChain = False  # Whether the last action was a non-trivial mouse action
+    self.redoDirty = False  # True if tempChain has an action that needs to be processed
     self.redoIndex = 0
     self.savedAtRedoIndex = 0
     self.shouldReparse = False
