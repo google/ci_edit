@@ -24,11 +24,17 @@ cpplint
 cros
 darkconnect
 dcheck
+doesnt
+dont
 dsc
+eslint
 filemanager
+futf
 gdoc
 gdraw
 gmock
+gni
+grd
 gtest
 gurl
 hotword
@@ -46,6 +52,7 @@ presubmit
 pylint
 safebrowsing
 stringprintf
+tbr
 tryserver
 uma
 vox
