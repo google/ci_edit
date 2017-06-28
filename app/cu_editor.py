@@ -17,6 +17,7 @@
 from app.curses_util import *
 import app.controller
 import app.editor
+import app.interactive_prompt
 import curses
 import curses.ascii
 import text_buffer
@@ -182,10 +183,10 @@ class InteractivePrediction(app.editor.InteractivePrediction):
     self.commandDefault = self.textBuffer.insertPrintable
 
 
-class InteractivePrompt(app.editor.InteractivePrompt):
+class InteractivePrompt(app.interactive_prompt.InteractivePrompt):
   """Extended command prompt."""
   def __init__(self, host, textBuffer):
-    app.editor.InteractivePrompt.__init__(self, host, textBuffer)
+    app.interactive_prompt.InteractivePrompt.__init__(self, host, textBuffer)
     self.document = host
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
