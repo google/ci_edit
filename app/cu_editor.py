@@ -75,8 +75,8 @@ class ConfirmClose(app.controller.Controller):
     self.document = host
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
-      'n': self.closeFile,
-      'y': self.writeOrConfirmOverwrite,
+      ord('n'): self.closeFile,
+      ord('y'): self.writeOrConfirmOverwrite,
     })
     self.commandSet = commandSet
     self.commandDefault = self.exitConfirmationPrompt
@@ -90,7 +90,7 @@ class ConfirmOverwrite(app.controller.Controller):
     self.document = host
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
-      'y': self.overwriteHostFile,
+      ord('y'): self.overwriteHostFile,
     })
     self.commandSet = commandSet
     self.commandDefault = self.exitConfirmationPrompt
@@ -135,9 +135,9 @@ class InteractiveGoto(app.editor.InteractiveGoto):
       KEY_F1: self.info,
       CTRL_J: self.changeToHostWindow,
       CTRL_S: self.writeOrConfirmOverwrite,
-      'b': self.gotoBottom,
-      'h': self.gotoHalfway,
-      't': self.gotoTop,
+      ord('b'): self.gotoBottom,
+      ord('h'): self.gotoHalfway,
+      ord('t'): self.gotoTop,
     })
     self.commandSet = commandSet
     self.commandDefault = self.textBuffer.insertPrintable
@@ -206,8 +206,8 @@ class InteractiveQuit(app.controller.Controller):
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
       #KEY_F1: self.info,
-      'n': host.quitNow,
-      'y': self.writeOrConfirmOverwrite,
+      ord('n'): host.quitNow,
+      ord('y'): self.writeOrConfirmOverwrite,
     })
     self.commandSet = commandSet
     self.commandDefault = self.exitConfirmationPrompt

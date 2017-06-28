@@ -105,7 +105,7 @@ class CiProgram:
       while not len(cmdList):
         for i in range(5):
           ch = window.cursorWindow.getch()
-          if ch == app.curses_util.KEY_ESCAPE:
+          if ch == curses.ascii.ESC:
             # Some keys are sent from the terminal as a sequence of bytes
             # beginning with an Escape character. To help reason about these
             # events (and apply event handler callback functions) the sequence
@@ -121,7 +121,7 @@ class CiProgram:
               # The sequence was empty, so it looks like this Escape wasn't
               # really the start of a sequence and is instead a stand-alone
               # Escape. Just forward the esc.
-              ch = app.curses_util.KEY_ESCAPE
+              ch = curses.ascii.ESC
           if ch != curses.ERR:
             self.ch = ch
             if ch == curses.KEY_MOUSE:
