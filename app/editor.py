@@ -14,14 +14,10 @@
 
 """Interactive UIs for the ciEditor."""
 
-from app.curses_util import *
 import app.buffer_manager
 import app.controller
-import curses
-import curses.ascii
 import os
 import re
-import subprocess
 import text_buffer
 
 
