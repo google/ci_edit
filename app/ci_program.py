@@ -83,7 +83,7 @@ class CiProgram:
 
   def commandLoop(self):
     # At startup, focus the main window (just to start somewhere).
-    window = self.inputWindow
+    window = self.zOrder[-1]
     window.focus()
     self.focusedWindow = window
     # Track the time needed to handle commands and render the UI.
@@ -186,6 +186,7 @@ class CiProgram:
       self.paletteWindow = None
     self.paletteWindow = app.window.PaletteWindow(self)
     self.inputWindow = app.window.InputWindow(self)
+    self.zOrder.append(self.inputWindow)
     self.layout()
     self.inputWindow.startup()
 
@@ -203,7 +204,12 @@ class CiProgram:
           inputWidth + 1)
     else:
       inputWidth = cols
-    self.inputWindow.reshape(rows, inputWidth, 0, 0)
+    count = len(self.zOrder)
+    eachRows = rows / count
+    for i, window in enumerate(self.zOrder[:-1]):
+      window.reshape(eachRows, inputWidth, eachRows * i, 0)
+    self.zOrder[-1].reshape(rows - eachRows * (count - 1), inputWidth,
+        eachRows * (count - 1), 0)
 
   def debugDraw(self, win):
     """Draw real-time debug information to the screen."""

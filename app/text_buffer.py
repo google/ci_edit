@@ -44,6 +44,8 @@ class Mutator(app.selectable.Selectable):
     self.findBackRe = None
     self.fileExtension = ''
     self.fullPath = ''
+    self.fileStat = None
+    self.isReadOnly = False
     self.penGrammar = None
     self.parser = None
     self.parserTime = .0
@@ -100,6 +102,7 @@ class Mutator(app.selectable.Selectable):
   def isSafeToWrite(self):
     if not os.path.exists(self.fullPath):
       return True
+    self.isReadOnly = not os.access(self.fullPath, os.W_OK)
     s1 = os.stat(self.fullPath)
     s2 = self.fileStat
     app.log.info('st_mode', s1.st_mode, s2.st_mode)
@@ -954,6 +957,7 @@ class BackingTextBuffer(Mutator):
     try:
       file = open(self.fullPath, 'r')
       self.setMessage('Opened existing file')
+      self.isReadOnly = not os.access(self.fullPath, os.W_OK)
       self.fileStat = os.stat(self.fullPath)
     except:
       try:
@@ -997,6 +1001,8 @@ class BackingTextBuffer(Mutator):
         file.truncate()
         file.write(self.data)
         file.close()
+        # Hmm, could this be hard coded to False here?
+        self.isReadOnly = not os.access(self.fullPath, os.W_OK)
         self.fileStat = os.stat(self.fullPath)
         self.setMessage('File saved')
         self.savedAtRedoIndex = self.redoIndex
@@ -1671,7 +1677,7 @@ class TextBuffer(BackingTextBuffer):
       for i in range(rowLimit):
         line = self.lines[startRow + i][startCol:endCol]
         window.addStr(top + i, left, line + ' ' * (cols - len(line)),
-            window.color)
+            curses.color_pair(window.colorIndex + colorDelta))
     self.drawOverlays(window, top, left, rows, cols, colorDelta)
 
   def drawOverlays(self, window, top, left, maxRow, maxCol, colorDelta):

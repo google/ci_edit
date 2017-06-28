@@ -12,20 +12,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-# Lorem ipsum
-adipiscing
-amet
-consectetur
-elit
-
-
-# Unfiled (todo)
-crx
-embedder
-foobarbaz
-teardown
-typedeffed
-webcal
-webprefs
-xkb
+# Abbreviations
+apr
+aug
+bidi
+blvd
+concat
+config
+crypto
+dbg
+dec
+dev
+expr
+feb
+ipc
+isp
+iter
+jan
+jul
+lang
+nd
+nov
+oct
+ok
+perf
+rd
+rfc
+sep
+sept
+st
+ux
+ver

@@ -15,6 +15,7 @@
 # This word list is a fallback for times when an OS dictionary is not available.
 # It's not a full list of English words (not by a long way).
 # Additional abbreviations, acronyms, and names are in dictionary.en-misc.words.
+
 a
 aah
 aardvark
@@ -2182,6 +2183,7 @@ canals
 canaries
 canary
 cancel
+cancelable
 canceled
 canceler
 canceling
@@ -12427,6 +12429,7 @@ preponderance
 preposition
 prepositional
 prepositions
+preprocess
 preprocessor
 preps
 prerecorded
@@ -12620,6 +12623,7 @@ professor
 proficient
 profile
 profiled
+profiler
 profiles
 profiling
 profit
@@ -13231,6 +13235,7 @@ reattachment
 reattempt
 reattempts
 reauthorize
+rebase
 rebate
 rebel
 rebellious
@@ -14525,6 +14530,7 @@ schedulers
 schedules
 scheduling
 schema
+schemas
 schemata
 scheme
 schemed
@@ -15397,6 +15403,7 @@ sofa
 soft
 soften
 softest
+softly
 software
 soiled
 sol
