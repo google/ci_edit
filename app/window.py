@@ -686,6 +686,18 @@ class InputWindow(Window):
       self.messageLine.colorSelected = curses.color_pair(87)
       self.messageLine.setParent(self, 0)
 
+  def splitWindow(self):
+    """
+    Experimental.
+    """
+    app.log.info()
+    other = InputWindow(self.prg)
+    other.setTextBuffer(self.textBuffer)
+    app.log.info()
+    self.prg.zOrder.append(other)
+    self.prg.layout()
+    app.log.info()
+
   def startup(self):
     for f in self.prg.cliFiles:
       app.buffer_manager.buffers.loadTextBuffer(f['path'])

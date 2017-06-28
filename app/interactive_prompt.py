@@ -121,6 +121,7 @@ class InteractivePrompt(app.controller.Controller):
       'bm': self.bookmarkCommand,
       'build': self.buildCommand,
       'make': self.makeCommand,
+      #'split': self.splitCommand,  # Experimental wip.
     }
     self.filters = {
       'format': self.formatCommand,
@@ -169,6 +170,10 @@ class InteractivePrompt(app.controller.Controller):
 
   def makeCommand(self, cmdLine, view):
     return {}, 'making stuff'
+
+  def splitCommand(self, cmdLine, view):
+    view.splitWindow()
+    return {}, 'Split window'
 
   def execute(self):
     try:
