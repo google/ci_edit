@@ -13,18 +13,36 @@
 # limitations under the License.
 
 # Abbreviations
+apr
+aug
 bidi
 blvd
 concat
 config
+crypto
 dbg
+dec
 dev
 expr
+feb
+ipc
+isp
+iter
+jan
+jul
 lang
 nd
+nov
+oct
 ok
+perf
 rd
+rfc
+sep
+sept
 st
+ux
+ver
 
 
 # Lorem ipsum
@@ -50,6 +68,9 @@ cn
 cpu
 cua
 da
+ddd
+dll
+dns
 drm
 et
 eula
@@ -57,8 +78,11 @@ fil
 fpu
 fyi
 gb
+gc
+gdb
 gif
 gl
+gmt
 gpu
 gtg
 gtk
@@ -80,6 +104,8 @@ kde
 ko
 ld
 lgtm
+lldb
+llvm
 lsb
 ltr
 lv
@@ -87,7 +113,10 @@ mb
 mit
 mr
 msb
+msc
 msdn
+msvc
+mvc
 mx
 nasa
 nb
@@ -101,10 +130,14 @@ os
 osx
 pb
 pdf
+pdfs
+pgo
+php
 qa
 rc
 rgb
 rgba
+rsa
 rtl
 ru
 saml
@@ -112,6 +145,7 @@ sgml
 sk
 sl
 sr
+ssid
 ssl
 sv
 sw
@@ -121,6 +155,8 @@ tbd
 tcp
 te
 tif
+tls
+tp
 tpm
 ttfn
 tw
@@ -131,9 +167,14 @@ un
 uri
 url
 usb
+utc
+wep
 wip
 www
+xl
 xml
+xxl
+xxxl
 zh
 
 
