@@ -951,7 +951,7 @@ class BackingTextBuffer(Mutator):
 
   def selectText(self, row, col, length, mode):
     row = max(0, min(row, len(self.lines)-1))
-    col = max(0, min(col, len(self.lines[row])-1))
+    col = max(0, min(col, len(self.lines[row])))
     scrollRow = self.view.scrollRow
     scrollCol = self.view.scrollCol
     maxRow, maxCol = self.view.cursorWindow.getmaxyx()
