@@ -52,7 +52,7 @@ class Mutator(app.selectable.Selectable):
     self.relativePath = ''
     self.redoChain = []
     self.tempChange = None #Used to store cursor view actions without trimming redoChain
-    self.redoDirty = False #True if tempChain has an action that needs to be processed
+    self.activeTempChange = False #True if tempChange is not None and needs to be processed
     self.redoIndex = 0
     self.savedAtRedoIndex = 0
     self.shouldReparse = False
@@ -153,18 +153,18 @@ class Mutator(app.selectable.Selectable):
     self.markerRow += change[1][2]
     self.markerCol += change[1][3]
     self.selectionMode += change[1][4]
-    self.redoDirty = False
+    self.activeTempChange = False
 
   def redo(self):
     """Replay the next action on the redoChain."""
-    if self.redoDirty:
+    if self.activeTempChange:
       if self.debugRedo:
-        app.log.info('redoDirty', repr(change))
+        app.log.info('activeTempChange', repr(change))
       change = self.tempChange
       self.redoMove(change)
     else:
       if self.tempChange:
-        self.undoDirty()
+        self.undoMove()
         self.tempChange = None
       if self.redoIndex < len(self.redoChain):
         change = self.redoChain[self.redoIndex]
@@ -313,7 +313,7 @@ class Mutator(app.selectable.Selectable):
       if noOpInstruction(change):
         self.tempChange = None
         return
-      self.redoDirty = True
+      self.activeTempChange = True
       self.tempChange = change
     else:
       if len(self.redoChain) and change[0] == 'm':
@@ -330,11 +330,10 @@ class Mutator(app.selectable.Selectable):
         app.log.info('%2d:'%i, repr(c))
       app.log.info('tempChange', repr(self.tempChange))
 
-  def undoDirty(self):
+  def undoMove(self):
     """Undo the action in self.tempChange"""
-    app.log.detail('clean dirty chain')
+    app.log.detail('undo cursor move')
     change = self.tempChange
-    self.tempChange = None
     self.penRow -= change[1][0]
     self.penCol -= change[1][1]
     self.markerRow -= change[1][2]
@@ -348,15 +347,16 @@ class Mutator(app.selectable.Selectable):
     while self.undoOne():
       pass
     self.tempChange = None
-    self.redoDirty = False
+    self.activeTempChange = False
 
   def undoOne(self):
     """Undo the most recent change to the buffer.
     return whether undo should be repeated."""
     app.log.detail('undo')
-    #If chain is dirty, undo it first to fix cursor position.
+    #If tempChange is active, undo it first to fix cursor position.
     if self.tempChange:
-      self.undoDirty()
+      self.undoMove()
+      self.tempChange = None
       return True
     elif self.redoIndex > 0:
       self.redoIndex -= 1
