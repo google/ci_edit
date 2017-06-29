@@ -20,13 +20,19 @@ import os
 import re
 
 
+# If a change is in |noOpInstructions| then it has no real effect.
+noOpInstructions = set([
+  ('m', (0,0,0,0,0)),
+])
+
+
 def addVectors(a, b):
   """Add two list-like objects, pair-wise."""
   return tuple([a[i]+b[i] for i in range(len(a))])
 
 
 class Mutator(app.selectable.Selectable):
-  """Track changes to a body of text."""
+  """Track and enact changes to a body of text."""
   def __init__(self):
     app.selectable.Selectable.__init__(self)
     self.debugRedo = False
@@ -41,9 +47,14 @@ class Mutator(app.selectable.Selectable):
     self.parserTime = .0
     self.relativePath = ''
     self.redoChain = []
-    self.tempChange = None  # Used to store cursor view actions without trimming redoChain
-    self.processTempChange = False  # True if tempChange is not None and needs to be processed
-    self.stallNextRedo = False  # True if the next call to redo() should do nothing.
+    # |tempChange| is used to store cursor view actions without trimming
+    # redoChain.
+    self.tempChange = None
+    # |processTempChange| is True if tempChange is not None and needs to be
+    # processed.
+    self.processTempChange = False
+    # |stallNextRedo| is True if the next call to redo() should do nothing.
+    self.stallNextRedo = False
     self.redoIndex = 0
     self.savedAtRedoIndex = 0
     self.shouldReparse = False
@@ -252,19 +263,8 @@ class Mutator(app.selectable.Selectable):
   def redoAddChange(self, change):
     """
     Push a change onto the end of the redoChain. Call redo() to enact the
-     change.
+    change.
     """
-    def noOpInstruction(change):
-      # Eliminate no-op entries.
-      # app.log.info('opti', change)
-      noOpInstructions = set([
-        ('m', (0,0,0,0,0)),
-      ])
-      assert ('m', (0,0,0,0,0)) in noOpInstructions
-      if change in noOpInstructions:
-        return True
-      return False
-
     newTrivialChange = False
     if self.debugRedo:
       app.log.info('redoAddChange', change)
@@ -280,8 +280,9 @@ class Mutator(app.selectable.Selectable):
       self.redoChain = self.redoChain[:self.redoIndex]
       if self.tempChange:
         if len(self.redoChain) and self.redoChain[-1][0] == 'm':
-          combinedChange = ('m', addVectors(self.tempChange[1], self.redoChain[-1][1]))
-          if noOpInstruction(combinedChange):
+          combinedChange = ('m', addVectors(self.tempChange[1],
+              self.redoChain[-1][1]))
+          if combinedChange in noOpInstructions:
             self.redoChain.pop()
             self.redoIndex -= 1
           else:
@@ -307,7 +308,7 @@ class Mutator(app.selectable.Selectable):
         change = (change[0], addVectors(self.tempChange[1], change[1]))
         self.undoOne()
         self.tempChange = change
-      if noOpInstruction(change):
+      if change in noOpInstructions:
         self.stallNextRedo = True
         self.processTempChange = False
         self.tempChange = None
@@ -320,7 +321,7 @@ class Mutator(app.selectable.Selectable):
           change = (change[0], addVectors(self.redoChain[-1][1], change[1]))
           self.undoOne()
           self.redoChain.pop()
-        if noOpInstruction(change):
+        if change in noOpInstructions:
           self.stallNextRedo = True
           return
       self.redoChain.append(change)

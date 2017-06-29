@@ -129,6 +129,7 @@ prefs = {
   },
   'editor': {
     'captiveCursor': False,
+    'colorScheme': 'default',
     'showLineNumbers': True,
     'showStatusLine': True,
     'showTopInfo': True,
@@ -476,16 +477,40 @@ prefs = {
 }
 
 if 1:
+  # Check the user home directory for editor preferences.
+  prefsPath = os.path.expanduser(os.path.expandvars(
+      "~/.ci_edit/prefs/editor.json"))
+  if os.path.isfile(prefsPath) and os.access(prefsPath, os.R_OK):
+    with open(prefsPath, 'r') as f:
+      try:
+        editorPrefs = json.loads(f.read())
+        app.log.startup(editorPrefs)
+        prefs['editor'].update(editorPrefs)
+      except:
+        app.log.startup('failed to parse', prefsPath)
+
+builtInColorSchemes = {
+  'dark': {},
+  'light': {},
+  'sky': {},
+}
+
+colorSchemeName = prefs['editor']['colorScheme']
+if colorSchemeName == 'custom':
+  # Check the user home directory for a color scheme preference. If found load
+  # it to replace the default color scheme.
   prefsPath = os.path.expanduser(os.path.expandvars(
       "~/.ci_edit/prefs/color_scheme.json"))
   if os.path.isfile(prefsPath) and os.access(prefsPath, os.R_OK):
     with open(prefsPath, 'r') as f:
       try:
-        foo = json.loads(f.read())
-        app.log.startup(foo)
-        prefs['colors'].update(foo)
+        colorScheme = json.loads(f.read())
+        app.log.startup(colorScheme)
+        prefs['colors'].update(colorScheme)
       except:
-        app.log.startup('failed to parse color scheme prefs')
+        app.log.startup('failed to parse', prefsPath)
+elif colorSchemeName in builtInColorSchemes:
+    prefs['colors'].update(builtInColorSchemes[colorSchemeName])
 
 
 grammars = {}
