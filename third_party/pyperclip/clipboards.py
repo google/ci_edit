@@ -1,3 +1,4 @@
+import os
 import sys
 import subprocess
 from .exceptions import PyperclipException
@@ -68,8 +69,10 @@ def init_xclip_clipboard():
         p.communicate(input=text.encode('utf-8'))
 
     def paste_xclip():
-        p = subprocess.Popen(['xclip', '-selection', 'c', '-o'],
-                             stdout=subprocess.PIPE, close_fds=True)
+        with open(os.devnull, 'w') as devnull:
+            p = subprocess.Popen(['xclip', '-selection', 'c', '-o'],
+                                 stdout=subprocess.PIPE, stderr=devnull,
+                                 close_fds=True)
         stdout, stderr = p.communicate()
         return stdout.decode('utf-8')
 
