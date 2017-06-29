@@ -15,7 +15,6 @@
 # This word list is a fallback for times when an OS dictionary is not available.
 # It's not a full list of English words (not by a long way).
 # Additional abbreviations, acronyms, and names are in dictionary.en-misc.words.
-
 a
 aah
 aardvark
@@ -10066,6 +10065,7 @@ messing
 messy
 met
 meta
+metadata
 metal
 metallic
 metallurgist
@@ -14998,6 +14998,7 @@ shortens
 shorter
 shortest
 shorthand
+shorthands
 shortly
 shorts
 shorty

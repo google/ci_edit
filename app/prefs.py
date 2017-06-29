@@ -14,6 +14,8 @@
 
 import app.log
 import curses
+import json
+import os
 import re
 import sys
 import time
@@ -25,7 +27,7 @@ commentColorIndex = 2
 defaultColorIndex = 18
 foundColorIndex = 32
 keywordsColorIndex = 21
-selectedColor = 64 # Active find is a selection.
+selectedColor = 64  # Active find is a selection.
 specialsColorIndex = 20
 stringColorIndex = 5
 outsideOfBufferColorIndex = 211
@@ -127,6 +129,7 @@ prefs = {
   },
   'editor': {
     'captiveCursor': False,
+    'colorScheme': 'default',
     'showLineNumbers': True,
     'showStatusLine': True,
     'showTopInfo': True,
@@ -262,6 +265,7 @@ prefs = {
       'indent': '  ',
       'special': [
         r'^\s*#\s*?define\b', r'^\s*#\s*?defined\b', r'^\s*#\s*?elif\b',
+        r'^\s*#\s*?else\b',
         r'^\s*#\s*?endif\b', r'^\s*#\s*?if\b', r'^\s*#\s*ifdef\b',
         r'^\s*#\s*?ifndef\b', r'^\s*#\s*?include\b', r'^\s*#\s*?undef\b',
       ],
@@ -357,7 +361,8 @@ prefs = {
       'end': '</script>',
       'indent': '  ',
       'keywords': [
-        'arguments', 'break', 'case', 'continue', 'default', 'else',
+        'arguments', 'break', 'case', 'class', 'continue', 'default',
+        'document', 'else',
         'false', 'for', 'function', 'if', 'let', 'return',
         'switch', 'this', 'true', 'var', 'while',
       ],
@@ -470,6 +475,42 @@ prefs = {
     },
   },
 }
+
+if 1:
+  # Check the user home directory for editor preferences.
+  prefsPath = os.path.expanduser(os.path.expandvars(
+      "~/.ci_edit/prefs/editor.json"))
+  if os.path.isfile(prefsPath) and os.access(prefsPath, os.R_OK):
+    with open(prefsPath, 'r') as f:
+      try:
+        editorPrefs = json.loads(f.read())
+        app.log.startup(editorPrefs)
+        prefs['editor'].update(editorPrefs)
+      except:
+        app.log.startup('failed to parse', prefsPath)
+
+builtInColorSchemes = {
+  'dark': {},
+  'light': {},
+  'sky': {},
+}
+
+colorSchemeName = prefs['editor']['colorScheme']
+if colorSchemeName == 'custom':
+  # Check the user home directory for a color scheme preference. If found load
+  # it to replace the default color scheme.
+  prefsPath = os.path.expanduser(os.path.expandvars(
+      "~/.ci_edit/prefs/color_scheme.json"))
+  if os.path.isfile(prefsPath) and os.access(prefsPath, os.R_OK):
+    with open(prefsPath, 'r') as f:
+      try:
+        colorScheme = json.loads(f.read())
+        app.log.startup(colorScheme)
+        prefs['colors'].update(colorScheme)
+      except:
+        app.log.startup('failed to parse', prefsPath)
+elif colorSchemeName in builtInColorSchemes:
+    prefs['colors'].update(builtInColorSchemes[colorSchemeName])
 
 
 grammars = {}

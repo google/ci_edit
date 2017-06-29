@@ -29,7 +29,6 @@ ctime
 ctrl
 def
 del
-del
 dev
 difflib
 dirs
@@ -66,6 +65,7 @@ islower
 isprint
 isupper
 iteritems
+keyname
 kwargs
 leaveok
 len
@@ -101,6 +101,7 @@ rsplit
 sel
 sep
 setdefault
+sigwinch
 sleft
 splitext
 sre
@@ -108,6 +109,8 @@ sright
 startswith
 str
 sys
+termios
+tiocgwinsz
 traceback
 uid
 ungetch
