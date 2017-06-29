@@ -164,7 +164,7 @@ class Mutator(app.selectable.Selectable):
       self.redoMove(change)
     else:
       if self.tempChange:
-        self.undoMove()
+        self.undoMove(self.tempChange)
         self.tempChange = None
       if self.redoIndex < len(self.redoChain):
         change = self.redoChain[self.redoIndex]
@@ -330,10 +330,9 @@ class Mutator(app.selectable.Selectable):
         app.log.info('%2d:'%i, repr(c))
       app.log.info('tempChange', repr(self.tempChange))
 
-  def undoMove(self):
-    """Undo the action in self.tempChange"""
+  def undoMove(self, change):
+    """Undo the action of a cursor move"""
     app.log.detail('undo cursor move')
-    change = self.tempChange
     self.penRow -= change[1][0]
     self.penCol -= change[1][1]
     self.markerRow -= change[1][2]
@@ -355,7 +354,7 @@ class Mutator(app.selectable.Selectable):
     app.log.detail('undo')
     #If tempChange is active, undo it first to fix cursor position.
     if self.tempChange:
-      self.undoMove()
+      self.undoMove(self.tempChange)
       self.tempChange = None
       return True
     elif self.redoIndex > 0:
