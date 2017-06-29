@@ -51,8 +51,8 @@ class Mutator(app.selectable.Selectable):
     self.parserTime = .0
     self.relativePath = ''
     self.redoChain = []
-    self.tempChange = None #Used to store cursor view actions without trimming redoChain
-    self.redoDirty = False #True if tempChain has an action that needs to be processed
+    self.tempChange = None  # Used to store cursor view actions without trimming redoChain
+    self.redoDirty = False  # True if tempChain has an action that needs to be processed
     self.redoIndex = 0
     self.savedAtRedoIndex = 0
     self.shouldReparse = False
@@ -332,7 +332,7 @@ class Mutator(app.selectable.Selectable):
 
   def undoDirty(self):
     """Undo the action in self.tempChange"""
-    app.log.detail('clean dirty chain')
+    app.log.detail('undo tempChange')
     change = self.tempChange
     self.tempChange = None
     self.penRow -= change[1][0]
@@ -354,7 +354,7 @@ class Mutator(app.selectable.Selectable):
     """Undo the most recent change to the buffer.
     return whether undo should be repeated."""
     app.log.detail('undo')
-    #If chain is dirty, undo it first to fix cursor position.
+    # If there is a tempChange, undo it first to fix cursor position.
     if self.tempChange:
       self.undoDirty()
       return True
