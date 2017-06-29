@@ -52,7 +52,8 @@ class Mutator(app.selectable.Selectable):
     self.relativePath = ''
     self.redoChain = []
     self.tempChange = None #Used to store cursor view actions without trimming redoChain
-    self.activeTempChange = False #True if tempChange is not None and needs to be processed
+    self.processTempChange = False #True if tempChange is not None and needs to be processed
+    self.stallNextRedo = False #True if the next call to redo() should do nothing.
     self.redoIndex = 0
     self.savedAtRedoIndex = 0
     self.shouldReparse = False
@@ -153,13 +154,16 @@ class Mutator(app.selectable.Selectable):
     self.markerRow += change[1][2]
     self.markerCol += change[1][3]
     self.selectionMode += change[1][4]
-    self.activeTempChange = False
 
   def redo(self):
     """Replay the next action on the redoChain."""
-    if self.activeTempChange:
+    if self.stallNextRedo:
+      self.stallNextRedo = False
+      return
+    if self.processTempChange:
       if self.debugRedo:
-        app.log.info('activeTempChange', repr(change))
+        app.log.info('processTempChange', repr(change))
+      self.processTempChange = False
       change = self.tempChange
       self.redoMove(change)
     else:
@@ -256,8 +260,9 @@ class Mutator(app.selectable.Selectable):
         self.redo()
 
   def redoAddChange(self, change):
-    """Push a change onto the end of the redoChain. Call redo() to enact the
-        change."""
+    """
+    Push a change onto the end of the redoChain. Call redo() to enact the change.
+    """
     def noOpInstruction(change):
       # Eliminate no-op entries
       # app.log.info('opti', change)
@@ -283,13 +288,13 @@ class Mutator(app.selectable.Selectable):
         self.savedAtRedoIndex = -1
       self.redoChain = self.redoChain[:self.redoIndex]
       if self.tempChange:
-        if self.redoChain[-1][0] == 'm':
-          combinedChange = (change[0], addVectors(self.tempChange[1], self.redoChain[-1][1]))
+        if len(self.redoChain) and self.redoChain[-1][0] == 'm':
+          combinedChange = ('m', addVectors(self.tempChange[1], self.redoChain[-1][1]))
           if noOpInstruction(combinedChange):
             self.redoChain.pop()
             self.redoIndex -= 1
           else:
-            self.redoChain[self.redoIndex - 1] = combinedChange
+            self.redoChain[-1] = combinedChange
         else:
           self.redoChain.append(self.tempChange)
           self.redoIndex += 1
@@ -310,10 +315,13 @@ class Mutator(app.selectable.Selectable):
         #Combine new change with the existing tempChange
         change = (change[0], addVectors(self.tempChange[1], change[1]))
         self.undoOne()
+        self.tempChange = change
       if noOpInstruction(change):
+        self.stallNextRedo = True
+        self.processTempChange = False
         self.tempChange = None
         return
-      self.activeTempChange = True
+      self.processTempChange = True
       self.tempChange = change
     else:
       if len(self.redoChain) and change[0] == 'm':
@@ -322,6 +330,8 @@ class Mutator(app.selectable.Selectable):
           self.undoOne()
           self.redoChain.pop()
         if noOpInstruction(change):
+          self.stallNextRedo = True
+          self.redoIndex = max(0, self.redoIndex - 1)
           return
       self.redoChain.append(change)
     if self.debugRedo:
@@ -346,7 +356,7 @@ class Mutator(app.selectable.Selectable):
     while self.undoOne():
       pass
     self.tempChange = None
-    self.activeTempChange = False
+    self.processTempChange = False
 
   def undoOne(self):
     """Undo the most recent change to the buffer.
