@@ -19,14 +19,13 @@ import app.controller
 import app.editor
 import app.interactive_prompt
 import curses
-import curses.ascii
 import text_buffer
 
 
 def initCommandSet(editText, textBuffer):
   """The basic command set includes line editing controls."""
   return {
-    #curses.KEY_F10: editText.prg.debugWindowOrder,
+    #KEY_F10: editText.prg.debugWindowOrder,
     CTRL_A: textBuffer.selectionAll,
 
     CTRL_C: textBuffer.editCopy,
@@ -43,18 +42,18 @@ def initCommandSet(editText, textBuffer):
     CTRL_Y: textBuffer.redo,
     CTRL_Z: textBuffer.undo,
 
-    127: textBuffer.backspace,
-    curses.ascii.DEL: textBuffer.backspace,
+    KEY_BACKSPACE1: textBuffer.backspace,
+    KEY_BACKSPACE2: textBuffer.backspace,
 
-    curses.KEY_BACKSPACE: textBuffer.backspace,
-    curses.KEY_DC: textBuffer.delete,
-    curses.KEY_HOME: textBuffer.cursorStartOfLine,
-    curses.KEY_END: textBuffer.cursorEndOfLine,
+    KEY_BACKSPACE3: textBuffer.backspace,
+    KEY_DELETE: textBuffer.delete,
+    KEY_HOME: textBuffer.cursorStartOfLine,
+    KEY_END: textBuffer.cursorEndOfLine,
 
-    # curses.KEY_DOWN: textBuffer.cursorDown,
-    curses.KEY_LEFT: textBuffer.cursorLeft,
-    curses.KEY_RIGHT: textBuffer.cursorRight,
-    # curses.KEY_UP: textBuffer.cursorUp,
+    # KEY_DOWN: textBuffer.cursorDown,
+    KEY_LEFT: textBuffer.cursorLeft,
+    KEY_RIGHT: textBuffer.cursorRight,
+    # KEY_UP: textBuffer.cursorUp,
 
     KEY_ALT_LEFT: textBuffer.cursorMoveSubwordLeft,
     KEY_ALT_SHIFT_LEFT: textBuffer.cursorSelectSubwordLeft,
@@ -104,9 +103,9 @@ class InteractiveFind(app.editor.InteractiveFind):
     self.document = host
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
-      curses.ascii.ESC: self.changeToHostWindow,
-      curses.KEY_F1: self.info,
-      curses.KEY_F3: self.saveEventChangeToHostWindow,
+      KEY_ESCAPE: self.changeToHostWindow,
+      KEY_F1: self.info,
+      KEY_F3: self.saveEventChangeToHostWindow,
       KEY_SHIFT_F3: self.saveEventChangeToHostWindow,
       CTRL_E: self.findReplaceChangeToHostWindow,
       CTRL_F: self.findNext,
@@ -114,8 +113,8 @@ class InteractiveFind(app.editor.InteractiveFind):
       CTRL_J: self.changeToHostWindow,
       CTRL_R: self.findPrior,
       CTRL_S: self.writeOrConfirmOverwrite,
-      curses.KEY_DOWN: self.findNext,
-      curses.KEY_UP: self.findPrior,
+      KEY_DOWN: self.findNext,
+      KEY_UP: self.findPrior,
     })
     self.commandSet = commandSet
     self.commandDefault = self.textBuffer.insertPrintable
@@ -132,8 +131,8 @@ class InteractiveGoto(app.editor.InteractiveGoto):
     self.document = host
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
-      curses.ascii.ESC: self.changeToHostWindow,
-      curses.KEY_F1: self.info,
+      KEY_ESCAPE: self.changeToHostWindow,
+      KEY_F1: self.info,
       CTRL_J: self.changeToHostWindow,
       CTRL_S: self.writeOrConfirmOverwrite,
       ord('b'): self.gotoBottom,
@@ -151,8 +150,8 @@ class InteractiveOpener(app.editor.InteractiveOpener):
     self.document = host
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
-      curses.ascii.ESC: self.changeToHostWindow,
-      curses.KEY_F1: self.info,
+      KEY_ESCAPE: self.changeToHostWindow,
+      KEY_F1: self.info,
       CTRL_I: self.tabCompleteExtend,
       CTRL_J: self.createOrOpen,
       CTRL_N: self.createOrOpen,
@@ -170,14 +169,14 @@ class InteractivePrediction(app.editor.InteractivePrediction):
     self.document = host
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
-      curses.ascii.ESC: self.cancel,
-      curses.KEY_F1: self.info,
+      KEY_ESCAPE: self.cancel,
+      KEY_F1: self.info,
       CTRL_J: self.selectItem,
       CTRL_N: self.nextItem,
       CTRL_P: self.priorItem,
       CTRL_Q: self.saveEventChangeToHostWindow,
-      curses.KEY_DOWN: self.nextItem,
-      curses.KEY_UP: self.priorItem,
+      KEY_DOWN: self.nextItem,
+      KEY_UP: self.priorItem,
     })
     self.commandSet = commandSet
     self.commandDefault = self.textBuffer.insertPrintable
@@ -190,8 +189,8 @@ class InteractivePrompt(app.interactive_prompt.InteractivePrompt):
     self.document = host
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
-      curses.ascii.ESC: self.changeToHostWindow,
-      curses.KEY_F1: self.info,
+      KEY_ESCAPE: self.changeToHostWindow,
+      KEY_F1: self.info,
       CTRL_J: self.execute,
     })
     self.commandSet = commandSet
@@ -206,7 +205,7 @@ class InteractiveQuit(app.controller.Controller):
     self.document = host
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
-      #curses.KEY_F1: self.info,
+      #KEY_F1: self.info,
       ord('n'): host.quitNow,
       ord('y'): self.writeOrConfirmOverwrite,
     })
@@ -222,8 +221,8 @@ class InteractiveSaveAs(app.controller.Controller):
     self.document = host
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
-      curses.ascii.ESC: self.changeToHostWindow,
-      #curses.KEY_F1: self.info,
+      KEY_ESCAPE: self.changeToHostWindow,
+      #KEY_F1: self.info,
       CTRL_J: self.saveAs,
     })
     self.commandSet = commandSet
@@ -256,13 +255,13 @@ class CuaEdit(app.controller.Controller):
     self.textBuffer = textBuffer
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
-      curses.ascii.ESC: textBuffer.normalize,
+      KEY_ESCAPE: textBuffer.normalize,
 
-      curses.KEY_F1: self.info,
+      KEY_F1: self.info,
 
-      curses.KEY_BTAB: textBuffer.unindent,
-      curses.KEY_PPAGE: textBuffer.cursorPageUp,
-      curses.KEY_NPAGE: textBuffer.cursorPageDown,
+      KEY_BTAB: textBuffer.unindent,
+      KEY_PAGE_UP: textBuffer.cursorPageUp,
+      KEY_PAGE_DOWN: textBuffer.cursorPageDown,
 
       CTRL_F: self.changeToFind,
       CTRL_G: self.changeToGoto,
@@ -273,10 +272,10 @@ class CuaEdit(app.controller.Controller):
       CTRL_O: self.changeToFileOpen,
       CTRL_R: self.changeToFindPrior,
 
-      curses.KEY_DOWN: textBuffer.cursorDown,
-      curses.KEY_SLEFT: textBuffer.cursorSelectLeft,
-      curses.KEY_SRIGHT: textBuffer.cursorSelectRight,
-      curses.KEY_UP: textBuffer.cursorUp,
+      KEY_DOWN: textBuffer.cursorDown,
+      KEY_SHIFT_LEFT: textBuffer.cursorSelectLeft,
+      KEY_SHIFT_RIGHT: textBuffer.cursorSelectRight,
+      KEY_UP: textBuffer.cursorUp,
 
       KEY_SHIFT_DOWN: textBuffer.cursorSelectDown,
       KEY_SHIFT_UP: textBuffer.cursorSelectUp,
@@ -315,10 +314,10 @@ class CuaPlusEdit(CuaEdit):
       CTRL_E: self.changeToPrompt,
       CTRL_P: self.changeToPrediction,
 
-      curses.KEY_F2: textBuffer.bookmarkNext,
-      curses.KEY_F3: textBuffer.findAgain,
-      #curses.KEY_F4: self.prg.paletteWindow.focus,
-      #curses.KEY_F6: self.prg.shiftPalette,
+      KEY_F2: textBuffer.bookmarkNext,
+      KEY_F3: textBuffer.findAgain,
+      #KEY_F4: self.prg.paletteWindow.focus,
+      #KEY_F6: self.prg.shiftPalette,
       KEY_SHIFT_F2: textBuffer.bookmarkPrior,
       KEY_SHIFT_F3: textBuffer.findBack,
     })
@@ -337,9 +336,9 @@ class PaletteDialogController(app.controller.Controller):
     self.commandDefault = noOp
     self.commandSet = {
       CTRL_J: self.changeToHostWindow,
-      curses.ascii.ESC: self.changeToHostWindow,
-      curses.KEY_F3: self.prg.shiftPalette,
-      curses.KEY_F5: self.changeToHostWindow,
+      KEY_ESCAPE: self.changeToHostWindow,
+      KEY_F3: self.prg.shiftPalette,
+      KEY_F5: self.changeToHostWindow,
     }
 
   def changeToHostWindow(self):
