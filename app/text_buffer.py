@@ -264,7 +264,7 @@ class Mutator(app.selectable.Selectable):
     Push a change onto the end of the redoChain. Call redo() to enact the change.
     """
     def noOpInstruction(change):
-      # Eliminate no-op entries
+      # Eliminate no-op entries.
       # app.log.info('opti', change)
       noOpInstructions = set([
         ('m', (0,0,0,0,0)),
@@ -283,7 +283,7 @@ class Mutator(app.selectable.Selectable):
       newTrivialChange = True
     else:
       # Trim and combine main redoChain with tempChange
-      # if there is a non-trivial action
+      # if there is a non-trivial action.
       if self.redoIndex < self.savedAtRedoIndex:
         self.savedAtRedoIndex = -1
       self.redoChain = self.redoChain[:self.redoIndex]
@@ -312,7 +312,7 @@ class Mutator(app.selectable.Selectable):
           self.redoChain.pop()
     if newTrivialChange:
       if self.tempChange:
-        #Combine new change with the existing tempChange
+        # Combine new change with the existing tempChange.
         change = (change[0], addVectors(self.tempChange[1], change[1]))
         self.undoOne()
         self.tempChange = change
