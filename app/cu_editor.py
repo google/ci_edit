@@ -112,7 +112,6 @@ class InteractiveFind(app.editor.InteractiveFind):
       CTRL_G: self.findNext,
       CTRL_J: self.changeToHostWindow,
       CTRL_R: self.findPrior,
-      CTRL_S: self.writeOrConfirmOverwrite,
       KEY_DOWN: self.findNext,
       KEY_UP: self.findPrior,
     })
@@ -134,7 +133,6 @@ class InteractiveGoto(app.editor.InteractiveGoto):
       KEY_ESCAPE: self.changeToHostWindow,
       KEY_F1: self.info,
       CTRL_J: self.changeToHostWindow,
-      CTRL_S: self.writeOrConfirmOverwrite,
       ord('b'): self.gotoBottom,
       ord('h'): self.gotoHalfway,
       ord('t'): self.gotoTop,
