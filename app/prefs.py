@@ -262,6 +262,7 @@ prefs = {
       'indent': '  ',
       'special': [
         r'^\s*#\s*?define\b', r'^\s*#\s*?defined\b', r'^\s*#\s*?elif\b',
+        r'^\s*#\s*?else\b',
         r'^\s*#\s*?endif\b', r'^\s*#\s*?if\b', r'^\s*#\s*ifdef\b',
         r'^\s*#\s*?ifndef\b', r'^\s*#\s*?include\b', r'^\s*#\s*?undef\b',
       ],
@@ -357,7 +358,8 @@ prefs = {
       'end': '</script>',
       'indent': '  ',
       'keywords': [
-        'arguments', 'break', 'case', 'continue', 'default', 'else',
+        'arguments', 'break', 'case', 'class', 'continue', 'default',
+        'document', 'else',
         'false', 'for', 'function', 'if', 'let', 'return',
         'switch', 'this', 'true', 'var', 'while',
       ],
