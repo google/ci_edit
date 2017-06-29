@@ -19,41 +19,57 @@ import signal
 import struct
 import sys
 import termios
+import curses.ascii
 
 
-CTRL_AT = 0x00
-CTRL_SPACE = 0x00
-CTRL_A = 0x01
-CTRL_B = 0x02
-CTRL_C = 0x03
-CTRL_D = 0x04
-CTRL_E = 0x05
-CTRL_F = 0x06
-CTRL_G = 0x07
-CTRL_H = 0x08
-CTRL_I = 0x09
-CTRL_J = 0x0a
-CTRL_K = 0x0b
-CTRL_L = 0x0c
-CTRL_M = 0x0d
-CTRL_N = 0x0e
-CTRL_O = 0x0f
-CTRL_P = 0x10
-CTRL_Q = 0x11
-CTRL_R = 0x12
-CTRL_S = 0x13
-CTRL_T = 0x14
-CTRL_U = 0x15
-CTRL_V = 0x16
-CTRL_W = 0x17
-CTRL_X = 0x18
-CTRL_Y = 0x19
-CTRL_Z = 0x1a
-CTRL_OPEN_BRACKET = 0x1b  # ^[
-CTRL_BACKSLASH = 0x1c  # ^\
-CTRL_CLOSE_BRACKET = 0x1d  # ^]
-CTRL_CARROT = 0x1e  # ^^
-CTRL_UNDERBAR = 0x1f  # ^_
+# Strings are found using the cursesKeyName() function.
+# Constants are found using the curses.getch() function.
+
+CTRL_AT = '^@' #0x00
+CTRL_SPACE = '^@' #0x00
+CTRL_A = '^A' #0x01
+CTRL_B = '^B' #0x02
+CTRL_C = '^C' #0x03
+CTRL_D = '^D' #0x04
+CTRL_E = '^E' #0x05
+CTRL_F = '^F' #0x06
+CTRL_G = '^G' #0x07
+CTRL_H = '^H' #0x08
+CTRL_I = '^I' #0x09
+CTRL_J = '^J' #0x0a
+CTRL_K = '^K' #0x0b
+CTRL_L = '^L' #0x0c
+CTRL_M = '^M' #0x0d
+CTRL_N = '^N' #0x0e
+CTRL_O = '^O' #0x0f
+CTRL_P = '^P' #0x10
+CTRL_Q = '^Q' #0x11
+CTRL_R = '^R' #0x12
+CTRL_S = '^S' #0x13
+CTRL_T = '^T' #0x14
+CTRL_U = '^U' #0x15
+CTRL_V = '^V' #0x16
+CTRL_W = '^W' #0x17
+CTRL_X = '^X' #0x18
+CTRL_Y = '^Y' #0x19
+CTRL_Z = '^Z' #0x1a
+CTRL_OPEN_BRACKET = '^[' #0x1b
+CTRL_BACKSLASH = '^\\' #0x1c
+CTRL_CLOSE_BRACKET = '^]' #0x1d
+CTRL_CARROT = '^^' #0x1e
+CTRL_UNDERBAR = '^_' #0x1f
+
+KEY_ESCAPE = curses.ascii.ESC
+
+KEY_BACKSPACE1 = curses.ascii.BS # 8
+KEY_BACKSPACE2 = curses.ascii.DEL # 127
+KEY_BACKSPACE3 = curses.KEY_BACKSPACE #263
+KEY_DELETE = curses.KEY_DC
+KEY_HOME = curses.KEY_HOME
+KEY_END = curses.KEY_END
+KEY_PAGE_DOWN = curses.KEY_NPAGE
+KEY_PAGE_UP = curses.KEY_PPAGE
+KEY_BTAB = curses.KEY_BTAB
 
 KEY_ALT_A = 165
 KEY_ALT_B = 171
@@ -64,8 +80,8 @@ KEY_ALT_S = 159
 if sys.platform == 'darwin':
   KEY_ALT_LEFT = (91, 49, 59, 57, 68)
   KEY_ALT_RIGHT = (91, 49, 59, 57, 67)
-  KEY_ALT_SHIFT_LEFT = (None,)  # unkown
-  KEY_ALT_SHIFT_RIGHT = (None,)  # unkown
+  KEY_ALT_SHIFT_LEFT = (None,)  # unknown
+  KEY_ALT_SHIFT_RIGHT = (None,)  # unknown
   KEY_CTRL_DOWN = 521
   KEY_CTRL_SHIFT_DOWN = 522
   KEY_CTRL_LEFT = 541
@@ -75,36 +91,52 @@ if sys.platform == 'darwin':
   KEY_CTRL_UP = 562
   KEY_CTRL_SHIFT_UP = 563
 else:
-  KEY_ALT_LEFT = 542
-  KEY_ALT_RIGHT = 557
-  KEY_ALT_SHIFT_LEFT = 543
-  KEY_ALT_SHIFT_RIGHT = 558
-  KEY_CTRL_DOWN = 524
-  KEY_CTRL_SHIFT_DOWN = 525
-  KEY_CTRL_LEFT = 544
-  KEY_CTRL_SHIFT_LEFT = 545
-  KEY_CTRL_RIGHT = 559
-  KEY_CTRL_SHIFT_RIGHT = 560
-  KEY_CTRL_UP = 565
-  KEY_CTRL_SHIFT_UP = 566
+  KEY_ALT_LEFT = 'kLFT3'
+  KEY_ALT_RIGHT = 'kRIT3'
+  KEY_ALT_SHIFT_LEFT = 'kLFT4'
+  KEY_ALT_SHIFT_RIGHT = 'kRIT4'
+  KEY_CTRL_DOWN = 'kDN5'
+  KEY_CTRL_SHIFT_DOWN = 'kDN6'
+  KEY_CTRL_LEFT = 'kLFT5'
+  KEY_CTRL_SHIFT_LEFT = 'kLFT6'
+  KEY_CTRL_RIGHT = 'kRIT5'
+  KEY_CTRL_SHIFT_RIGHT = 'kRIT6'
+  KEY_CTRL_UP = 'kUP5'
+  KEY_CTRL_SHIFT_UP = 'kUP6'
 
 if 'SSH_CLIENT' in os.environ:
   KEY_ALT_LEFT = (98,)  # Need a better way to sort this out.
   KEY_ALT_RIGHT = (102,)  # ditto
 
-KEY_SHIFT_DOWN = 336
-KEY_SHIFT_F1 = 277
-KEY_SHIFT_F2 = 278
-KEY_SHIFT_F3 = 279
-KEY_SHIFT_F4 = 280
-KEY_SHIFT_F5 = 281
-KEY_SHIFT_F6 = 282
-KEY_SHIFT_F7 = 283
-KEY_SHIFT_F8 = 284
-KEY_SHIFT_F9 = 285
-KEY_SHIFT_F10 = 286
-KEY_SHIFT_UP = 337
+KEY_F1 = curses.KEY_F1
+KEY_F2 = curses.KEY_F2
+KEY_F3 = curses.KEY_F3
+KEY_F4 = curses.KEY_F4
+KEY_F5 = curses.KEY_F5
+KEY_F6 = curses.KEY_F6
+KEY_F7 = curses.KEY_F7
+KEY_F8 = curses.KEY_F8
+KEY_F9 = curses.KEY_F9
+KEY_F10 = curses.KEY_F10
+KEY_SHIFT_F1 = curses.KEY_F13
+KEY_SHIFT_F2 = curses.KEY_F14
+KEY_SHIFT_F3 = curses.KEY_F15
+KEY_SHIFT_F4 = curses.KEY_F16
+KEY_SHIFT_F5 = curses.KEY_F17
+KEY_SHIFT_F6 = curses.KEY_F18
+KEY_SHIFT_F7 = curses.KEY_F19
+KEY_SHIFT_F8 = curses.KEY_F20
+KEY_SHIFT_F9 = curses.KEY_F21
+KEY_SHIFT_F10 = curses.KEY_F22
 
+KEY_SHIFT_DOWN = curses.KEY_SF
+KEY_DOWN = curses.KEY_DOWN
+KEY_SHIFT_UP = curses.KEY_SR
+KEY_UP = curses.KEY_UP
+KEY_LEFT = curses.KEY_LEFT
+KEY_SHIFT_LEFT = curses.KEY_SLEFT
+KEY_RIGHT = curses.KEY_RIGHT
+KEY_SHIFT_RIGHT = curses.KEY_SRIGHT
 
 def mouseButtonName(bstate):
   """Curses debugging. Prints readable name for state of mouse buttons."""
@@ -161,7 +193,7 @@ def cursesKeyName(keyCode):
     return curses.keyname(keyCode)
   except:
     pass
-  return 'unknown'
+  return None
 
 # This should be provide by something built in and apparently it is in Python 3.
 # In Python 2 it's done by hand.
