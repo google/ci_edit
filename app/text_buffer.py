@@ -51,9 +51,9 @@ class Mutator(app.selectable.Selectable):
     self.parserTime = .0
     self.relativePath = ''
     self.redoChain = []
-    self.tempChange = None #Used to store cursor view actions without trimming redoChain
-    self.processTempChange = False #True if tempChange is not None and needs to be processed
-    self.stallNextRedo = False #True if the next call to redo() should do nothing.
+    self.tempChange = None  # Used to store cursor view actions without trimming redoChain
+    self.processTempChange = False  # True if tempChange is not None and needs to be processed
+    self.stallNextRedo = False  # True if the next call to redo() should do nothing.
     self.redoIndex = 0
     self.savedAtRedoIndex = 0
     self.shouldReparse = False
@@ -166,98 +166,98 @@ class Mutator(app.selectable.Selectable):
       self.processTempChange = False
       change = self.tempChange
       self.redoMove(change)
-    else:
-      if self.tempChange:
-        self.undoMove(self.tempChange)
-        self.tempChange = None
-      if self.redoIndex < len(self.redoChain):
-        change = self.redoChain[self.redoIndex]
-        if self.debugRedo:
-          app.log.info('redo', self.redoIndex, repr(change))
-        if change[0] != 'm':
-          self.shouldReparse = True
-        self.redoIndex += 1
-        if change[0] == 'b':
-          line = self.lines[self.penRow]
-          self.penCol -= len(change[1])
+      return
+    if self.tempChange:
+      self.undoMove(self.tempChange)
+      self.tempChange = None
+    if self.redoIndex < len(self.redoChain):
+      change = self.redoChain[self.redoIndex]
+      if self.debugRedo:
+        app.log.info('redo', self.redoIndex, repr(change))
+      if change[0] != 'm':
+        self.shouldReparse = True
+      self.redoIndex += 1
+      if change[0] == 'b':
+        line = self.lines[self.penRow]
+        self.penCol -= len(change[1])
+        x = self.penCol
+        self.lines[self.penRow] = line[:x] + line[x + len(change[1]):]
+      elif change[0] == 'd':
+        line = self.lines[self.penRow]
+        x = self.penCol
+        self.lines[self.penRow] = line[:x] + line[x + len(change[1]):]
+      elif change[0] == 'dr':  # Redo delete range.
+        self.doDelete(*change[1])
+      elif change[0] == 'ds':  # Redo delete selection.
+        self.doDeleteSelection()
+      elif change[0] == 'i':  # Redo insert.
+        line = self.lines[self.penRow]
+        x = self.penCol
+        self.lines[self.penRow] = line[:x] + change[1] + line[x:]
+        self.penCol += len(change[1])
+        self.view.goalCol = self.penCol
+      elif change[0] == 'j':  # Redo join lines.
+        self.lines[self.penRow] += self.lines[self.penRow + 1]
+        del self.lines[self.penRow + 1]
+      elif change[0] == 'ld':  # Redo line diff.
+        lines = []
+        index = 0
+        for ii in change[1]:
+          if type(ii) is type(0):
+            for line in self.lines[index:index + ii]:
+              lines.append(line)
+            index += ii
+          elif ii[0] == '+':
+            lines.append(ii[2:])
+          elif ii[0] == '-':
+            index += 1
+        app.log.info('ld', self.lines == lines)
+        self.lines = lines
+      elif change[0] == 'm':  # Redo move
+        self.redoMove(change)
+      elif change[0] == 'ml':
+        # Redo move lines
+        begin, end, to = change[1]
+        self.doMoveLines(begin, end, to)
+      elif change[0] == 'n':
+        # Redo split lines.
+        line = self.lines[self.penRow]
+        self.lines.insert(self.penRow + 1, line[self.penCol:])
+        self.lines[self.penRow] = line[:self.penCol]
+        for i in range(max(change[1][0] - 1, 0)):
+          self.lines.insert(self.penRow + 1, "")
+      elif change[0] == 'v':  # Redo paste.
+        self.insertLines(change[1])
+      elif change[0] == 'vb':
+        self.penCol -= len(change[1])
+        row = min(self.markerRow, self.penRow)
+        rowEnd = max(self.markerRow, self.penRow)
+        for i in range(row, rowEnd + 1):
+          line = self.lines[i]
           x = self.penCol
           self.lines[self.penRow] = line[:x] + line[x + len(change[1]):]
-        elif change[0] == 'd':
-          line = self.lines[self.penRow]
-          x = self.penCol
-          self.lines[self.penRow] = line[:x] + line[x + len(change[1]):]
-        elif change[0] == 'dr':  # Redo delete range.
-          self.doDelete(*change[1])
-        elif change[0] == 'ds':  # Redo delete selection.
-          self.doDeleteSelection()
-        elif change[0] == 'i':  # Redo insert.
-          line = self.lines[self.penRow]
-          x = self.penCol
-          self.lines[self.penRow] = line[:x] + change[1] + line[x:]
-          self.penCol += len(change[1])
-          self.view.goalCol = self.penCol
-        elif change[0] == 'j':  # Redo join lines.
-          self.lines[self.penRow] += self.lines[self.penRow + 1]
-          del self.lines[self.penRow + 1]
-        elif change[0] == 'ld':  # Redo line diff.
-          lines = []
-          index = 0
-          for ii in change[1]:
-            if type(ii) is type(0):
-              for line in self.lines[index:index + ii]:
-                lines.append(line)
-              index += ii
-            elif ii[0] == '+':
-              lines.append(ii[2:])
-            elif ii[0] == '-':
-              index += 1
-          app.log.info('ld', self.lines == lines)
-          self.lines = lines
-        elif change[0] == 'm':  # Redo move
-          self.redoMove(change)
-        elif change[0] == 'ml':
-          # Redo move lines
-          begin, end, to = change[1]
-          self.doMoveLines(begin, end, to)
-        elif change[0] == 'n':
-          # Redo split lines.
-          line = self.lines[self.penRow]
-          self.lines.insert(self.penRow + 1, line[self.penCol:])
-          self.lines[self.penRow] = line[:self.penCol]
-          for i in range(max(change[1][0] - 1, 0)):
-            self.lines.insert(self.penRow + 1, "")
-        elif change[0] == 'v':  # Redo paste.
-          self.insertLines(change[1])
-        elif change[0] == 'vb':
-          self.penCol -= len(change[1])
-          row = min(self.markerRow, self.penRow)
-          rowEnd = max(self.markerRow, self.penRow)
-          for i in range(row, rowEnd + 1):
-            line = self.lines[i]
-            x = self.penCol
-            self.lines[self.penRow] = line[:x] + line[x + len(change[1]):]
-        elif change[0] == 'vd':  # Redo vertical delete.
-          upperRow = min(self.markerRow, self.penRow)
-          lowerRow = max(self.markerRow, self.penRow)
-          x = self.penCol
-          for i in range(upperRow, lowerRow + 1):
-            line = self.lines[i]
-            self.lines[i] = line[:x] + line[x + len(change[1]):]
-        elif change[0] == 'vi':  # Redo vertical insert.
-          text = change[1]
-          col = self.penCol
-          row = min(self.markerRow, self.penRow)
-          rowEnd = max(self.markerRow, self.penRow)
-          app.log.info('do vi')
-          for i in range(row, rowEnd + 1):
-            line = self.lines[i]
-            self.lines[i] = line[:col] + text + line[col:]
-        else:
-          app.log.info('ERROR: unknown redo.')
-      # Redo again if there is a move next.
-      if (self.redoIndex < len(self.redoChain) and
-          self.redoChain[self.redoIndex][0] == 'm'):
-        self.redo()
+      elif change[0] == 'vd':  # Redo vertical delete.
+        upperRow = min(self.markerRow, self.penRow)
+        lowerRow = max(self.markerRow, self.penRow)
+        x = self.penCol
+        for i in range(upperRow, lowerRow + 1):
+          line = self.lines[i]
+          self.lines[i] = line[:x] + line[x + len(change[1]):]
+      elif change[0] == 'vi':  # Redo vertical insert.
+        text = change[1]
+        col = self.penCol
+        row = min(self.markerRow, self.penRow)
+        rowEnd = max(self.markerRow, self.penRow)
+        app.log.info('do vi')
+        for i in range(row, rowEnd + 1):
+          line = self.lines[i]
+          self.lines[i] = line[:col] + text + line[col:]
+      else:
+        app.log.info('ERROR: unknown redo.')
+    # Redo again if there is a move next.
+    if (self.redoIndex < len(self.redoChain) and
+        self.redoChain[self.redoIndex][0] == 'm'):
+      self.redo()
 
   def redoAddChange(self, change):
     """
@@ -361,7 +361,7 @@ class Mutator(app.selectable.Selectable):
     """Undo the most recent change to the buffer.
     return whether undo should be repeated."""
     app.log.detail('undo')
-    #If tempChange is active, undo it first to fix cursor position.
+    # If tempChange is active, undo it first to fix cursor position.
     if self.tempChange:
       self.undoMove(self.tempChange)
       self.tempChange = None
