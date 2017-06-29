@@ -14,6 +14,8 @@
 
 import app.log
 import curses
+import json
+import os
 import re
 import sys
 import time
@@ -25,7 +27,7 @@ commentColorIndex = 2
 defaultColorIndex = 18
 foundColorIndex = 32
 keywordsColorIndex = 21
-selectedColor = 64 # Active find is a selection.
+selectedColor = 64  # Active find is a selection.
 specialsColorIndex = 20
 stringColorIndex = 5
 outsideOfBufferColorIndex = 211
@@ -472,6 +474,18 @@ prefs = {
     },
   },
 }
+
+if 1:
+  prefsPath = os.path.expanduser(os.path.expandvars(
+      "~/.ci_edit/prefs/color_scheme.json"))
+  if os.path.isfile(prefsPath) and os.access(prefsPath, os.R_OK):
+    with open(prefsPath, 'r') as f:
+      try:
+        foo = json.loads(f.read())
+        app.log.startup(foo)
+        prefs['colors'].update(foo)
+      except:
+        app.log.startup('failed to parse color scheme prefs')
 
 
 grammars = {}
