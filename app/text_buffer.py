@@ -331,7 +331,6 @@ class Mutator(app.selectable.Selectable):
           self.redoChain.pop()
         if noOpInstruction(change):
           self.stallNextRedo = True
-          self.redoIndex = max(0, self.redoIndex - 1)
           return
       self.redoChain.append(change)
     if self.debugRedo:
