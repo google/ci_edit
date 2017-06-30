@@ -76,7 +76,9 @@ class ConfirmClose(app.controller.Controller):
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
       ord('n'): self.closeFile,
+      ord('N'): self.closeFile,
       ord('y'): self.writeOrConfirmOverwrite,
+      ord('Y'): self.writeOrConfirmOverwrite,
     })
     self.commandSet = commandSet
     self.commandDefault = self.exitConfirmationPrompt
@@ -91,6 +93,7 @@ class ConfirmOverwrite(app.controller.Controller):
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
       ord('y'): self.overwriteHostFile,
+      ord('Y'): self.overwriteHostFile,
     })
     self.commandSet = commandSet
     self.commandDefault = self.exitConfirmationPrompt
@@ -112,7 +115,6 @@ class InteractiveFind(app.editor.InteractiveFind):
       CTRL_G: self.findNext,
       CTRL_J: self.changeToHostWindow,
       CTRL_R: self.findPrior,
-      CTRL_S: self.writeOrConfirmOverwrite,
       KEY_DOWN: self.findNext,
       KEY_UP: self.findPrior,
     })
@@ -134,10 +136,12 @@ class InteractiveGoto(app.editor.InteractiveGoto):
       KEY_ESCAPE: self.changeToHostWindow,
       KEY_F1: self.info,
       CTRL_J: self.changeToHostWindow,
-      CTRL_S: self.writeOrConfirmOverwrite,
       ord('b'): self.gotoBottom,
+      ord('B'): self.gotoBottom,
       ord('h'): self.gotoHalfway,
+      ord('H'): self.gotoHalfway,
       ord('t'): self.gotoTop,
+      ord('T'): self.gotoTop,
     })
     self.commandSet = commandSet
     self.commandDefault = self.textBuffer.insertPrintable
@@ -207,7 +211,9 @@ class InteractiveQuit(app.controller.Controller):
     commandSet.update({
       #KEY_F1: self.info,
       ord('n'): host.quitNow,
+      ord('N'): host.quitNow,
       ord('y'): self.writeOrConfirmOverwrite,
+      ord('Y'): self.writeOrConfirmOverwrite,
     })
     self.commandSet = commandSet
     self.commandDefault = self.exitConfirmationPrompt

@@ -130,12 +130,14 @@ class Controller:
       self.changeToConfirmOverwrite()
       return
     tb.fileWrite()
+    saveMessage = tb.message #Store the save message so it is not overwritten
     if self.host.userIntent == 'quit':
       self.quitOrSwitchToConfirmQuit()
       return
     if self.host.userIntent == 'close':
       self.closeHostFile()
     self.changeToHostWindow()
+    tb.message = saveMessage #Restore the save message
 
   def quitOrSwitchToConfirmQuit(self):
     app.log.debug()
