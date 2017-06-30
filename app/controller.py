@@ -130,14 +130,16 @@ class Controller:
       self.changeToConfirmOverwrite()
       return
     tb.fileWrite()
-    saveMessage = tb.message #Store the save message so it is not overwritten
+    # TODO(dschuyler): Is there a deeper issue here that necessitates saving
+    # the message? Does this only need to wrap the changeToHostWindow()?
+    saveMessage = tb.message  # Store the save message so it is not overwritten.
     if self.host.userIntent == 'quit':
       self.quitOrSwitchToConfirmQuit()
       return
     if self.host.userIntent == 'close':
       self.closeHostFile()
     self.changeToHostWindow()
-    tb.message = saveMessage #Restore the save message
+    tb.message = saveMessage  # Restore the save message.
 
   def quitOrSwitchToConfirmQuit(self):
     app.log.debug()
