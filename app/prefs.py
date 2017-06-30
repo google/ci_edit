@@ -73,11 +73,11 @@ if colorSchemeName == 'custom':
       try:
         colorScheme = json.loads(f.read())
         app.log.startup(colorScheme)
-        prefs['colors'].update(colorScheme)
+        prefs['color'].update(colorScheme)
       except:
         app.log.startup('failed to parse', prefsPath)
 elif colorSchemeName in builtInColorSchemes:
-    prefs['colors'].update(builtInColorSchemes[colorSchemeName])
+    prefs['color'].update(builtInColorSchemes[colorSchemeName])
 
 
 grammars = {}
@@ -141,17 +141,17 @@ if 0:
     app.log.info('  ', k, ':', v)
 
 def init():
-  defaultColor = prefs['colors']['default']
-  defaultKeywordsColor = prefs['colors']['keywords']
-  defaultSpecialsColor = prefs['colors']['specials']
+  defaultColor = prefs['color']['default']
+  defaultKeywordsColor = prefs['color']['keyword']
+  defaultSpecialsColor = prefs['color']['special']
   for k,v in prefs['grammar'].items():
     # Colors.
-    v['colorIndex'] = prefs['colors'].get(k, defaultColor)
-    v['color'] = curses.color_pair(v['colorIndex'])
-    v['keywordsColor'] = curses.color_pair(
-        prefs['colors'].get(k+'_keyword_color', defaultKeywordsColor))
-    v['specialsColor'] = curses.color_pair(
-        prefs['colors'].get(k+'_special_color', defaultSpecialsColor))
+    v['colorIndex'] = prefs['color'].get(k, defaultColor)
+    if 0:
+      v['keywordsColor'] = curses.color_pair(
+          prefs['color'].get(k+'_keyword_color', defaultKeywordsColor))
+      v['specialsColor'] = curses.color_pair(
+          prefs['color'].get(k+'_special_color', defaultSpecialsColor))
   app.log.info('prefs init')
 
 def getGrammar(fileExtension):

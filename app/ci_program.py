@@ -222,22 +222,23 @@ class CiProgram:
     intent = "noIntent"
     try: intent = win.userIntent
     except: pass
+    color = app.color.get('debug_window')
+    color = app.prefs.prefs['color']['debug_window']
     self.debugWindow.writeLine(
         "   cRow %3d    cCol %2d goalCol %2d  %s"
-        %(win.cursorRow, win.cursorCol, win.goalCol, intent),
-        self.debugWindow.color)
+        %(win.cursorRow, win.cursorCol, win.goalCol, intent), color)
     self.debugWindow.writeLine(
         "   pRow %3d    pCol %2d"
-        %(textBuffer.penRow, textBuffer.penCol), self.debugWindow.color)
+        %(textBuffer.penRow, textBuffer.penCol), color)
     self.debugWindow.writeLine(
         " mkrRow %3d  mkrCol %2d sm %d"
         %(textBuffer.markerRow, textBuffer.markerCol,
             textBuffer.selectionMode),
-        self.debugWindow.color)
+        color)
     self.debugWindow.writeLine(
         "scrlRow %3d scrlCol %2d lines %3d"
         %(win.scrollRow, win.scrollCol, len(textBuffer.lines)),
-        self.debugWindow.color)
+        color)
     self.debugWindow.writeLine(
         "y %2d x %2d maxRow %d maxCol %d baud %d color %d"
         %(y, x, maxRow, maxCol, curses.baudrate(), curses.can_change_color()),
@@ -250,13 +251,13 @@ class CiProgram:
     self.debugWindow.writeLine(
         "ch %3s %s"
         %(self.ch, app.curses_util.cursesKeyName(self.ch) or 'UNKNOWN'),
-        self.debugWindow.color)
+        color)
     self.debugWindow.writeLine("win %r"%(win,),
-        self.debugWindow.color)
+        color)
     self.debugWindow.writeLine("win %r"%(self.focusedWindow,),
-        self.debugWindow.color)
+        color)
     self.debugWindow.writeLine("tb %r"%(textBuffer,),
-        self.debugWindow.color)
+        color)
     (id, mouseCol, mouseRow, mouseZ, bState) = self.debugMouseEvent
     self.debugWindow.writeLine(
         "mouse id %d, mouseCol %d, mouseRow %d, mouseZ %d"
@@ -264,13 +265,13 @@ class CiProgram:
     self.debugWindow.writeLine(
         "bState %s %d"
         %(app.curses_util.mouseButtonName(bState), bState),
-            self.debugWindow.color)
+            color)
     # Display some of the redo chain.
     self.debugWindow.writeLine(
         "redoIndex %3d savedAt %3d depth %3d"
         %(textBuffer.redoIndex, textBuffer.savedAtRedoIndex,
           len(textBuffer.redoChain)),
-        self.debugWindow.color + 100)
+        color + 100)
     lenChain = textBuffer.redoIndex
     for i in range(textBuffer.redoIndex - 5, textBuffer.redoIndex):
       text = i >= 0 and textBuffer.redoChain[i] or ''

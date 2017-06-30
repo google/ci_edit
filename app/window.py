@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import app.buffer_manager
+import app.color
 import app.controller
 import app.cu_editor
 import app.editor
@@ -29,9 +30,6 @@ class StaticWindow:
   def __init__(self, parent):
     self.parent = parent
     self.zOrder = []
-    self.colorIndex = 0
-    self.color = 0
-    self.colorSelected = 1
     self.isFocusable = False
     self.top = 0
     self.left = 0
@@ -65,10 +63,10 @@ class StaticWindow:
   def presentModal(self, changeTo, paneRow, paneCol):
     self.parent.presentModal(changeTo, paneRow, paneCol)
 
-  def blank(self):
+  def blank(self, colorPair):
     """Clear the window."""
     for i in range(self.rows):
-      self.addStr(i, 0, ' '*self.cols, self.color)
+      self.addStr(i, 0, ' '*self.cols, colorPair)
     self.cursorWindow.refresh()
 
   def contains(self, row, col):
@@ -295,12 +293,10 @@ class LabeledLine(Window):
     self.setTextBuffer(app.text_buffer.TextBuffer())
     self.label = label
     self.leftColumn = StaticWindow(self)
-    self.colorIndex = app.prefs.defaultColorIndex
-    self.color = curses.color_pair(self.colorIndex)
-    self.colorSelected = curses.color_pair(87)
 
   def refresh(self):
-    self.leftColumn.addStr(0, 0, self.label, self.color)
+    self.leftColumn.addStr(0, 0, self.label,
+        app.prefs.prefs['color']['default'])
     self.leftColumn.cursorWindow.refresh()
     Window.refresh(self)
 
@@ -317,9 +313,9 @@ class LabeledLine(Window):
     self.reshape(self.rows, self.cols, self.top, self.left)
 
   def unfocus(self):
-    self.blank()
+    self.blank(app.color.get('message_line'))
     self.hide()
-    self.leftColumn.blank()
+    self.leftColumn.blank(app.color.get('message_line'))
     self.leftColumn.hide()
     Window.unfocus(self)
 
@@ -374,16 +370,16 @@ class LineNumbers(StaticWindow):
     maxRow, maxCol = self.cursorWindow.getmaxyx()
     textBuffer = self.host.textBuffer
     limit = min(maxRow, len(textBuffer.lines)-self.host.scrollRow)
+    color = curses.color_pair(app.prefs.prefs['color']['line_number'])
     for i in range(limit):
-      self.addStr(i, 0,
-          ' %5d  '%(self.host.scrollRow+i+1), self.color)
+      self.addStr(i, 0, ' %5d  '%(self.host.scrollRow + i + 1), color)
     color = curses.color_pair(app.prefs.outsideOfBufferColorIndex)
     for i in range(limit, maxRow):
       self.addStr(i, 0, '       ', color)
     if 1:
+      color = curses.color_pair(app.prefs.prefs['color']['line_number_current'])
       cursorAt = self.host.cursorRow-self.host.scrollRow
-      self.addStr(cursorAt, 1,
-          '%5d'%(self.host.cursorRow+1), self.colorSelected)
+      self.addStr(cursorAt, 1, '%5d'%(self.host.cursorRow+1), color)
     self.cursorWindow.refresh()
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
@@ -451,16 +447,15 @@ class MessageLine(StaticWindow):
     StaticWindow.__init__(self, host)
     self.host = host
     self.message = None
-    self.colorIndex = 1
     self.renderedMessage = None
 
   def refresh(self):
     if self.message:
       if self.message != self.renderedMessage:
         self.writeLineRow = 0
-        self.writeLine(self.message[0], curses.color_pair(self.colorIndex))
+        self.writeLine(self.message[0], app.color.get('message_line'))
     else:
-      self.blank()
+      self.blank(app.color.get('message_line'))
     self.cursorWindow.refresh()
 
 
@@ -501,15 +496,14 @@ class StatusLine(StaticWindow):
     if len(statusLine):
       rightSide += ' |'
     if self.host.prg.showLogWindow:
-      rightSide += ' %s | %s |'%(
-          tb.cursorGrammarName(),
-          tb.selectionModeName())
+      rightSide += ' %s | %s |'%(tb.cursorGrammarName(), tb.selectionModeName())
     rightSide += ' %4d,%2d | %3d%%,%3d%%'%(
         self.host.cursorRow+1, self.host.cursorCol+1,
         rowPercentage,
         colPercentage)
     statusLine += ' '*(maxCol-len(statusLine)-len(rightSide)) + rightSide
-    self.addStr(0, 0, statusLine, self.color)
+    color = curses.color_pair(app.prefs.prefs['color']['status_line'])
+    self.addStr(0, 0, statusLine, color)
     self.cursorWindow.refresh()
 
 
@@ -576,10 +570,11 @@ class TopInfo(StaticWindow):
     """Render the context information at the top of the window."""
     lines = self.lines
     lines.reverse()
+    color = curses.color_pair(app.prefs.prefs['color']['top_info'])
     for i,line in enumerate(lines):
-      self.addStr(i, 0, line+' '*(self.cols-len(line)), self.color)
+      self.addStr(i, 0, line+' '*(self.cols-len(line)), color)
     for i in range(len(lines), self.rows):
-      self.addStr(i, 0, ' '*self.cols, self.color)
+      self.addStr(i, 0, ' '*self.cols, color)
     self.cursorWindow.refresh()
 
   def reshape(self, rows, cols, top, left):
@@ -600,9 +595,6 @@ class InputWindow(Window):
     self.showMessageLine = True
     self.showRightColumn = True
     self.showTopInfo = True
-    self.colorIndex = app.prefs.defaultColorIndex
-    self.color = curses.color_pair(self.colorIndex)
-    self.colorSelected = curses.color_pair(app.prefs.selectedColor)
     self.controller = app.controller.MainController(self)
     self.controller.add(app.cu_editor.CuaPlusEdit(prg, self))
     # What does the user appear to want: edit, quit, or something else?
@@ -641,49 +633,31 @@ class InputWindow(Window):
       self.interactiveSaveAs.setController(app.cu_editor.InteractiveSaveAs)
     if 1:
       self.topInfo = TopInfo(self)
-      self.topInfo.colorIndex = 168
-      self.topInfo.color = curses.color_pair(self.topInfo.colorIndex)
-      self.topInfo.colorSelected = curses.color_pair(47)
       self.topInfo.setParent(self, 0)
       if not self.showTopInfo:
         self.topInfo.hide()
     if 1:
       self.statusLine = StatusLine(self)
-      self.statusLine.colorIndex = 168
-      self.statusLine.color = curses.color_pair(self.statusLine.colorIndex)
-      self.statusLine.colorSelected = curses.color_pair(47)
       self.statusLine.setParent(self, 0)
       if not self.showFooter:
         self.statusLine.hide()
     if 1:
       self.leftColumn = LineNumbers(self)
-      self.leftColumn.colorIndex = 211
-      self.leftColumn.color = curses.color_pair(self.leftColumn.colorIndex)
-      self.leftColumn.colorSelected = curses.color_pair(146)
       self.leftColumn.setParent(self, 0)
       if not self.showLineNumbers:
         self.leftColumn.hide()
     if 1:
       self.logoCorner = StaticWindow(self)
       self.logoCorner.name = 'Logo'
-      self.logoCorner.colorIndex = 168
-      self.logoCorner.color = curses.color_pair(self.logoCorner.colorIndex)
-      self.logoCorner.colorSelected = curses.color_pair(146)
       self.logoCorner.setParent(self, 0)
     if 1:
       self.rightColumn = StaticWindow(self)
       self.rightColumn.name = 'Right'
-      self.rightColumn.colorIndex = app.prefs.outsideOfBufferColorIndex
-      self.rightColumn.color = curses.color_pair(self.rightColumn.color)
-      self.rightColumn.colorSelected = curses.color_pair(105)
       self.rightColumn.setParent(self, 0)
       if not self.showRightColumn:
         self.rightColumn.hide()
     if self.showMessageLine:
       self.messageLine = MessageLine(self)
-      self.messageLine.colorIndex = 3
-      self.messageLine.color = curses.color_pair(self.messageLine.colorIndex)
-      self.messageLine.colorSelected = curses.color_pair(87)
       self.messageLine.setParent(self, 0)
 
   def splitWindow(self):
@@ -758,7 +732,7 @@ class InputWindow(Window):
   def drawLogoCorner(self):
     """."""
     maxRow, maxCol = self.logoCorner.cursorWindow.getmaxyx()
-    color = self.logoCorner.color
+    color = app.color.get('logo')
     for i in range(maxRow):
       self.logoCorner.addStr(i, 0, ' '*maxCol, color)
     self.logoCorner.addStr(0, 1, 'ci', color)
@@ -770,10 +744,10 @@ class InputWindow(Window):
     maxRow, maxCol = self.cursorWindow.getmaxyx()
     limit = min(maxRow, len(self.textBuffer.lines)-self.scrollRow)
     for i in range(limit):
-      color = self.rightColumn.color
+      color = app.color.get('right_column')
       if len(self.textBuffer.lines[
           i+self.scrollRow])-self.scrollCol > maxCol:
-        color = self.rightColumn.colorSelected
+        color = app.color.get('line_overflow')
       self.rightColumn.addStr(i, 0, ' ', color)
     color = curses.color_pair(app.prefs.outsideOfBufferColorIndex)
     for i in range(limit, maxRow):

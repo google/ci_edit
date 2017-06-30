@@ -95,12 +95,14 @@ numberTest('02f', (0, 3))
 
 # These prefs are not fully working.
 prefs = {
-  'colors': {
+  'color': {
     '_pre_selection': stringColorIndex,
+    'bracket': 6,
     'default': defaultColorIndex,
+    'number': 31,
     'text': defaultColorIndex,
-    'keywords': keywordsColorIndex,
-    'specials': specialsColorIndex,
+    'keyword': keywordsColorIndex,
+    'special': specialsColorIndex,
     'c': defaultColorIndex,
     'cpp_block_comment': commentColorIndex,
     'cpp_line_comment': commentColorIndex,
@@ -112,11 +114,25 @@ prefs = {
     'regex_string': stringColorIndex,
     'doc_block_comment': commentColorIndex,
     'html_block_comment': commentColorIndex,
+    'found_find': foundColorIndex,
+    'line_number': 168,
+    'line_number_current': 146,
+    'line_overflow': 105,
+    'right_column': outsideOfBufferColorIndex,
+    'logo': 168,
+    'matching_bracket': 201,
+    'matching_find': 9,
+    'message_line': 3,
+    'misspelling': 9,
     'pound_comment': commentColorIndex,
     'py_raw_string1': stringColorIndex,
     'py_raw_string2': stringColorIndex,
     'py_string1': stringColorIndex,
     'py_string2': stringColorIndex,
+    'selected': selectedColor,
+    'status_line': 168,
+    'top_info': 168,
+    'trailing_space': 180,
     'quoted_string2': stringColorIndex,
   },
   'editor': {
