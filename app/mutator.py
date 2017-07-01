@@ -93,6 +93,20 @@ class Mutator(app.selectable.Selectable):
 
   def isDirty(self):
     """Whether the buffer contains non-trivial changes since the last save."""
+
+    # TODO(dschuyler): Remove this temporary bug search code.
+    if (self.savedAtRedoIndex >= 0 and self.savedAtRedoIndex != self.redoIndex):
+      if self.redoIndex + 1 == self.savedAtRedoIndex:
+        assert self.redoIndex >= 0, self.redoIndex
+        assert self.savedAtRedoIndex >= 0, self.savedAtRedoIndex
+        assert len(self.redoChain) > 0
+        assert len(self.redoChain[self.redoIndex]) > 0
+      elif self.redoIndex - 1 == self.savedAtRedoIndex:
+        assert self.redoIndex > 0, self.redoIndex
+        assert self.savedAtRedoIndex >= 0, self.savedAtRedoIndex
+        assert len(self.redoChain) > 0
+        assert len(self.redoChain[self.redoIndex - 1]) > 0
+
     clean = self.savedAtRedoIndex >= 0 and (
         self.savedAtRedoIndex == self.redoIndex or
         (self.redoIndex + 1 == self.savedAtRedoIndex and
