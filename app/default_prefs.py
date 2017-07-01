@@ -111,6 +111,7 @@ prefs = {
     'c_raw_string2': stringColorIndex,
     'c_string1': stringColorIndex,
     'c_string2': stringColorIndex,
+    'debug_window': defaultColorIndex,
     'regex_string': stringColorIndex,
     'doc_block_comment': commentColorIndex,
     'html_block_comment': commentColorIndex,

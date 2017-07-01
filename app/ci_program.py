@@ -242,7 +242,7 @@ class CiProgram:
     self.debugWindow.writeLine(
         "y %2d x %2d maxRow %d maxCol %d baud %d color %d"
         %(y, x, maxRow, maxCol, curses.baudrate(), curses.can_change_color()),
-            self.debugWindow.color)
+            color)
     screenRows, screenCols = self.stdscr.getmaxyx()
     self.debugWindow.writeLine(
         "scr rows %d cols %d mlt %f/%f pt %f"
@@ -261,7 +261,7 @@ class CiProgram:
     (id, mouseCol, mouseRow, mouseZ, bState) = self.debugMouseEvent
     self.debugWindow.writeLine(
         "mouse id %d, mouseCol %d, mouseRow %d, mouseZ %d"
-        %(id, mouseCol, mouseRow, mouseZ), self.debugWindow.color)
+        %(id, mouseCol, mouseRow, mouseZ), color)
     self.debugWindow.writeLine(
         "bState %s %d"
         %(app.curses_util.mouseButtonName(bState), bState),
