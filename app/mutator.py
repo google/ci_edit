@@ -145,10 +145,10 @@ class Mutator(app.selectable.Selectable):
     if begin < to:
       assert end < to
       assert self.penRow < to
-      to -= end - begin
+      to -= count
       self.penRow -= count
       if self.selectionMode != app.selectable.kSelectionNone:
-        assert self.markerRow < to
+        assert self.markerRow < to + count
         self.markerRow -= count
     else:
       assert end > to
