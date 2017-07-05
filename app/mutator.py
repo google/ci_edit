@@ -110,9 +110,11 @@ class Mutator(app.selectable.Selectable):
     clean = self.savedAtRedoIndex >= 0 and (
         self.savedAtRedoIndex == self.redoIndex or
         (self.redoIndex + 1 == self.savedAtRedoIndex and
-          self.redoChain[self.redoIndex][0] == 'm') or
+          self.redoChain[self.redoIndex][0] == 'm'
+         if self.redoIndex < len(self.redoChain) else False) or
         (self.redoIndex - 1 == self.savedAtRedoIndex and
-          self.redoChain[self.redoIndex - 1][0] == 'm'))
+          self.redoChain[self.redoIndex - 1][0] == 'm'
+         if self.redoIndex - 1 < len(self.redoChain) else False))
     return not clean
 
   def isSafeToWrite(self):
