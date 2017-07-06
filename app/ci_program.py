@@ -36,7 +36,7 @@ def userMessage(*args):
   global userConsoleMessage
   if not userConsoleMessage:
     userConsoleMessage = ''
-  userConsoleMessage += ' '.join(args)
+  userConsoleMessage += ' '.join(args) + '\n'
 
 
 class CiProgram:
