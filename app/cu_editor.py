@@ -77,8 +77,8 @@ class ConfirmClose(app.controller.Controller):
     commandSet.update({
       ord('n'): self.closeFile,
       ord('N'): self.closeFile,
-      ord('y'): self.writeOrConfirmOverwrite,
-      ord('Y'): self.writeOrConfirmOverwrite,
+      ord('y'): self.saveOrChangeToSaveAs,
+      ord('Y'): self.saveOrChangeToSaveAs,
     })
     self.commandSet = commandSet
     self.commandDefault = self.exitConfirmationPrompt
@@ -212,8 +212,8 @@ class InteractiveQuit(app.controller.Controller):
       #KEY_F1: self.info,
       ord('n'): host.quitNow,
       ord('N'): host.quitNow,
-      ord('y'): self.writeOrConfirmOverwrite,
-      ord('Y'): self.writeOrConfirmOverwrite,
+      ord('y'): self.saveOrChangeToSaveAs,
+      ord('Y'): self.saveOrChangeToSaveAs,
     })
     self.commandSet = commandSet
     self.commandDefault = self.exitConfirmationPrompt
