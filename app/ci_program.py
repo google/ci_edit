@@ -53,7 +53,7 @@ class CiProgram:
     self.savedMouseWindow = None
     self.savedMouseX = -1
     self.savedMouseY = -1
-    self.stdscr = cursesScreen
+    self.cursesScreen = cursesScreen
     self.ch = 0
     curses.mousemask(-1)
     curses.mouseinterval(0)
@@ -144,7 +144,7 @@ class CiProgram:
             self.layout()
             window.controller.onChange()
             self.refresh()
-            app.log.debug(self.stdscr.getmaxyx(), time.time())
+            app.log.debug(self.cursesScreen.getmaxyx(), time.time())
             continue
           window.controller.doCommand(cmd)
           if cmd == curses.KEY_MOUSE:
@@ -192,7 +192,7 @@ class CiProgram:
 
   def layout(self):
     """Arrange the debug, log, and input windows."""
-    rows, cols = self.stdscr.getmaxyx()
+    rows, cols = self.cursesScreen.getmaxyx()
     #app.log.detail('layout', rows, cols)
     if self.showLogWindow:
       inputWidth = min(80, cols)
@@ -243,7 +243,7 @@ class CiProgram:
         "y %2d x %2d maxRow %d maxCol %d baud %d color %d"
         %(y, x, maxRow, maxCol, curses.baudrate(), curses.can_change_color()),
             color)
-    screenRows, screenCols = self.stdscr.getmaxyx()
+    screenRows, screenCols = self.cursesScreen.getmaxyx()
     self.debugWindow.writeLine(
         "scr rows %d cols %d mlt %f/%f pt %f"
         %(screenRows, screenCols, self.mainLoopTime, self.mainLoopTimePeak,
