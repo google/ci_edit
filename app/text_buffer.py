@@ -1362,7 +1362,7 @@ class TextBuffer(BackingTextBuffer):
       upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
       if 1:
         selStartCol = max(upperCol, startCol)
-        selEndCol = min(lowerCol, maxCol)
+        selEndCol = min(lowerCol, endCol)
         start = max(0, min(upperRow - startRow, maxRow))
         end = max(0, min(lowerRow - startRow, maxRow))
         if self.selectionMode == app.selectable.kSelectionBlock:
@@ -1380,19 +1380,27 @@ class TextBuffer(BackingTextBuffer):
             # Go one row past the selection or to the last line.
             for i in range(start, min(end + 1, len(self.lines) - startRow)):
               line = self.lines[startRow + i]
+              # TODO(dschuyler): This is essentially
+              # left + (upperCol or (scrollCol + left)) - scrollCol - left
+              # which seems like it could be simplified.
+              paneCol = left + selStartCol - startCol
               if len(line) == len(self.lines[startRow + i]):
                 line += " "  # Maybe do: "\\n".
               if i == lowerRow - startRow and i == upperRow - startRow:
-                window.addStr(top + i, selStartCol,
-                    line[selStartCol:selEndCol], colorSelected)
+                # Selection entirely on one line.
+                window.addStr(top + i, paneCol, line[selStartCol:selEndCol],
+                    colorSelected)
               elif i == lowerRow - startRow:
-                window.addStr(top + i, left, line[left:selEndCol],
+                # End of multi-line selection.
+                window.addStr(top + i, left, line[startCol:selEndCol],
                     colorSelected)
               elif i == upperRow - startRow:
-                window.addStr(top + i, selStartCol, line[selStartCol:],
+                # Start of multi-line selection.
+                window.addStr(top + i, paneCol, line[selStartCol:endCol],
                     colorSelected)
               else:
-                window.addStr(top + i, left, line[left:],
+                # Middle of multi-line selection.
+                window.addStr(top + i, left, line[startCol:endCol],
                     colorSelected)
         elif self.selectionMode == app.selectable.kSelectionLine:
           if not (lowerRow < startRow or upperRow >= endRow):
