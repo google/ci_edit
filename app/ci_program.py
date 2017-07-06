@@ -12,6 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+import os
+import sys
+if os.getenv('CI_EDIT_USE_FAKE_CURSES'):
+  # Replace curses with a fake version for testing.
+  sys.path = ['test_fake'] + sys.path
+
+
 import app.bookmarks
 import app.curses_util
 import app.help
@@ -21,9 +29,7 @@ import app.prefs
 import app.text_buffer
 import app.window
 import cProfile
-import os
 import pstats
-import sys
 import cPickle as pickle
 import curses
 import StringIO
