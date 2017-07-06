@@ -14,7 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import sys
+if os.getenv('CI_EDIT_USE_FAKE_CURSES'):
+  # Replace curses with a fake version for testing.
+  sys.path = ['test_fake'] + sys.path
 
 if '--test' in sys.argv:
   import unit_tests
