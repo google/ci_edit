@@ -397,7 +397,7 @@ prefs = {
       'keywords': __common_keywords + [
         'and', 'as', 'assert', 'class',
         'def', 'dict', 'elif', 'except',
-        'False', 'from',
+        'False', 'finally', 'from',
         'global', 'import', 'in', 'is', 'len', 'list',
         'None', 'not',
         'or', 'pass',
