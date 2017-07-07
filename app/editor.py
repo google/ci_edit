@@ -291,7 +291,7 @@ class InteractiveFind(app.controller.Controller):
       # Make a single regex line.
       selection = "\\n".join(selection)
       app.log.info(selection)
-      self.textBuffer.insert(selection)
+      self.textBuffer.insert(re.escape(selection))
     self.textBuffer.selectionAll()
 
   def info(self):
