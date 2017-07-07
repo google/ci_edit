@@ -1159,6 +1159,7 @@ class TextBuffer(BackingTextBuffer):
     startCol = self.view.scrollCol + left
     endCol = self.view.scrollCol + left + cols
     colors = app.prefs.prefs['color']
+    spellChecking = app.prefs.prefs['editor'].get('spellChecking', True)
     if self.parser:
       # Highlight grammar.
       rowLimit = min(max(len(self.lines) - startRow, 0), rows)
@@ -1181,7 +1182,7 @@ class TextBuffer(BackingTextBuffer):
           subStart = k - preceding
           subEnd = k + remaining
           subLine = line[subStart:subEnd]
-          if 1:
+          if spellChecking:
             if node.grammar.get('spelling', True):
               # Highlight spelling errors
               grammarName = node.grammar.get('name', 'unknown')
