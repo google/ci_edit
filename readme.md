@@ -22,7 +22,7 @@ press Q). Here are a few common commands:
 There are more, but you probably get the idea. These common controls are not
 common in command line editors.
 
-So, what if you like to edit a file in the terminal window but don't want to
+So, what if you'd like to edit a file in the terminal window but don't want to
 recall how to save or quit in an unfamiliar editor? This is where ci_edit
 shines, because ci_edit does support those familiar key sequences. You already
 know how to save in ci_edit, it's ctrl+s. Simple.
