@@ -370,11 +370,10 @@ prefs = {
       'end': '</script>',
       'indent': '  ',
       'keywords': [
-        'arguments', 'break', 'case', 'class', 'continue', 'default',
-        'document', 'else',
-        'false', 'for', 'function', 'if', 'let', 'return',
-        'switch', 'this', 'true', 'var', 'while',
-      ],
+        'arguments', 'break', 'case', 'class', 'const', 'continue', 'default',
+        'document', 'else', 'false', 'for', 'function', 'if', 'let', 'of',
+        'return', 'switch', 'this', 'true', 'var', 'while',
+       ],
       'special': [
         '\bsetTimeout\b', '\brequestCallback\b', '\bconsole\b', '\bwindow\b',
       ],
