@@ -1,23 +1,45 @@
-### The ci_text editor
+### What is ci_edit
 
-The world does need another text editor. (Or at least I think so).
+ci_edit is a text editor. It can help you view or edit text files.
 
-There are other fine curses based editors. I found that I was often trying to
-tweak them to get just what I wanted. Almost as often, some aspect of those
-editors prevented that last little bit of customization. So writing a text
-editor should allow all the customization I like, right?
+ci_edit runs in the command line (also called the terminal). To start using
+ci_edit, download ci_edit and open (execute) ci.py.
 
-Writing a text editor is an interesting project. Give it a try sometime.
+## What ci_edit can do for you
+
+Many other command line text editors require learning a different set of mouse
+and keyboard commands. Many of us use a graphical editor (GUI) that supports
+a common set of commands like ctrl+q to quit (that is, hold the control key and
+press Q). Here are a few common commands:
+
+  - ctrl + q    to quit the program
+  - ctrl + s    to save the file
+  - ctrl + z    undo
+  - ctrl + x    cut
+  - ctrl + c    copy
+  - ctrl + v    paste
+
+There are more, but you probably get the idea. These common controls are not
+common in command line editors.
+
+So, what if you like to edit a file in the terminal window but don't want to
+recall how to save or quit in an unfamiliar editor? This is where ci_edit
+shines, because ci_edit does support those familiar key sequences. You already
+know how to save in ci_edit, it's ctrl+s. Simple.
 
 This version of ci_edit still doesn't have all the intended features, but it's
 a start. It's has the necessary features of a basic text editor and a few fancy
-extras.
+extras. Those fancy extras stay out of your way until you want them.
 
-The help I now need is finding out what puts users off; what causes someone who
-tries the editor to stop using it. I'm looking to address those issues so that
+
+## What you can do for ci_edit
+
+The help we now need is finding out what puts users off; what causes someone who
+tries the editor to stop using it. We intend to address those issues so that
 more users are happy users for a longer time.
 
-Features of ci
+
+## Features of ci
 
 - runs on nCurses
   - This means that it can use used in the terminal window just  like vim,
@@ -75,7 +97,7 @@ Features of ci
   - regex text substitution, such as s/dogs/cats/ replaces the text "dogs" with
     the text "cats".
 
-Future features (todo)
+## Future features (the to do list)
 
 - bookmarks
 - find in files
@@ -93,9 +115,22 @@ Future features (todo)
 - saved undo/redo
   - Open a file and undo prior edits of that document
 - a lot more...
-  - I have dreams for the future.
+  - There are so many dreams for the future.
 
 
+## Origins
+
+The world does need another text editor. (Or at least I think so).
+
+There are other fine curses based editors. I found that I was often trying to
+tweak them to get just what I wanted. Almost as often, some aspect of those
+editors prevented that last little bit of customization. So writing a text
+editor should allow all the customization I like, right?
+
+Writing a text editor is an interesting project. Give it a try sometime.
+
+
+## Note
 
 This is not an official Google product.
 
