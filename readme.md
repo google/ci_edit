@@ -1,4 +1,4 @@
-### What is ci_edit
+# What is ci_edit
 
 ci_edit is a text editor. It can help you view or edit text files.
 
@@ -12,12 +12,12 @@ and keyboard commands. Many of us use a graphical editor (GUI) that supports
 a common set of commands like ctrl+q to quit (that is, hold the control key and
 press Q). Here are a few common commands:
 
-  - ctrl + q    to quit the program
-  - ctrl + s    to save the file
-  - ctrl + z    undo
-  - ctrl + x    cut
-  - ctrl + c    copy
-  - ctrl + v    paste
+  - ctrl+q    to quit the program
+  - ctrl+s    to save the file
+  - ctrl+z    undo
+  - ctrl+x    cut
+  - ctrl+c    copy
+  - ctrl+v    paste
 
 There are more, but you probably get the idea. These common controls are not
 common in command line editors.
@@ -39,16 +39,15 @@ tries the editor to stop using it. We intend to address those issues so that
 more users are happy users for a longer time.
 
 
-## Features of ci
+# Features of ci_edit
 
 - runs on nCurses
   - This means that it can use used in the terminal window just  like vim,
     emacs, and pine.
 - cut/copy/paste
-  - Using common GUI editor keyboard short-cuts: control-x, control-c, and
-    control-v!
+  - Using common GUI editor keyboard short-cuts: ctrl+x, ctrl+c, and ctrl+v!
 - sensible save and quit
-  - Using GUI editor keyboard short-cuts: control-s and control-q respectively.
+  - Using GUI editor keyboard short-cuts: ctrl+s and ctrl+q respectively.
 - syntax highlighting
   - keywords an such are displayed in different colors.
 - nested grammars
@@ -59,7 +58,7 @@ more users are happy users for a longer time.
   - Regular expression search forward and backward.
 - line numbers
   - Shown on the left side.
-- go to line
+- go to line with ctrl+g
   - Jump to a line number or the top, bottom, or middle of the document
 - unlimited undo/redo
   - Or at least within the limits of disk space to page to
@@ -75,6 +74,11 @@ more users are happy users for a longer time.
     characters are highlighted.
 - mouse support
   - Yes, in the terminal
+  - click to place the cursor
+  - double click to select by word
+  - triple click to select by line
+  - shift+click to extend selection
+  - alt+click for rectangular (block) selection
 - pipe to editor
   - Send the output from another program directly into the editor without the
     need for a temporary file
@@ -116,6 +120,9 @@ more users are happy users for a longer time.
   - Open a file and undo prior edits of that document
 - a lot more...
   - There are so many dreams for the future.
+
+
+# Obligatory
 
 
 ## Origins
