@@ -21,7 +21,7 @@ import traceback
 screenLog = ["--- screen log ---"]
 fullLog = ["--- begin log ---"]
 enabledChannels = {'meta': True, 'mouse': True, 'startup': True}
-shouldWritePrintLog = True
+shouldWritePrintLog = False
 
 if os.getenv('CI_EDIT_USE_FAKE_CURSES'):
   enabledChannels = {
