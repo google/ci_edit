@@ -475,7 +475,7 @@ class BackingTextBuffer(app.mutator.Mutator):
         self.performDelete()
       self.redoAddChange(('v', clip))
       self.redo()
-      rowDelta = len(clip)-1
+      rowDelta = len(clip) - 1
       if rowDelta == 0:
         endCol = self.penCol + len(clip[0])
       else:
@@ -578,7 +578,7 @@ class BackingTextBuffer(app.mutator.Mutator):
       app.log.info('except had exception')
 
   def selectText(self, row, col, length, mode):
-    row = max(0, min(row, len(self.lines)-1))
+    row = max(0, min(row, len(self.lines) - 1))
     col = max(0, min(col, len(self.lines[row])))
     scrollRow = self.view.scrollRow
     scrollCol = self.view.scrollCol
@@ -731,7 +731,7 @@ class BackingTextBuffer(app.mutator.Mutator):
     if direction >= 0:
       theRange = range(self.penRow)
     else:
-      theRange = range(len(self.lines)-1, self.penRow, -1)
+      theRange = range(len(self.lines) - 1, self.penRow, -1)
     for i in theRange:
       found = localRe.search(self.lines[i])
       if found:

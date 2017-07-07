@@ -83,7 +83,7 @@ class StaticWindow:
   def hide(self):
     """Remove window from the render list."""
     try: self.parent.zOrder.remove(self)
-    except ValueError: app.log.detail(repr(self)+'not found in zOrder')
+    except ValueError: app.log.detail(repr(self) + 'not found in zOrder')
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
     pass
@@ -591,7 +591,8 @@ class InputWindow(Window):
     self.prg = prg
     self.showFooter = True
     self.useInteractiveFind = True
-    self.showLineNumbers = True
+    self.showLineNumbers = app.prefs.prefs['editor'].get(
+        'showLineNumbers', True)
     self.showMessageLine = True
     self.showRightColumn = True
     self.showTopInfo = True
@@ -642,10 +643,10 @@ class InputWindow(Window):
       if not self.showFooter:
         self.statusLine.hide()
     if 1:
-      self.leftColumn = LineNumbers(self)
-      self.leftColumn.setParent(self, 0)
+      self.lineNumberColumn = LineNumbers(self)
+      self.lineNumberColumn.setParent(self, 0)
       if not self.showLineNumbers:
-        self.leftColumn.hide()
+        self.lineNumberColumn.hide()
     if 1:
       self.logoCorner = StaticWindow(self)
       self.logoCorner.name = 'Logo'
@@ -712,7 +713,7 @@ class InputWindow(Window):
       self.statusLine.reshape(1, cols, top+rows-bottomRows-1, left)
       rows -= bottomRows+1
     if self.showLineNumbers:
-      self.leftColumn.reshape(rows, lineNumbersCols, top, left)
+      self.lineNumberColumn.reshape(rows, lineNumbersCols, top, left)
       cols -= lineNumbersCols
       left += lineNumbersCols
     if self.showRightColumn:
@@ -724,7 +725,7 @@ class InputWindow(Window):
 
   def resizeTopBy(self, rowDelta):
     Window.resizeTopBy(self, rowDelta)
-    self.leftColumn.resizeTopBy(rowDelta)
+    self.lineNumberColumn.resizeTopBy(rowDelta)
     self.logoCorner.resizeBottomBy(rowDelta)
     self.rightColumn.resizeTopBy(rowDelta)
     self.textBuffer.updateScrollPosition()
