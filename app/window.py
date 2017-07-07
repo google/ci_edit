@@ -107,7 +107,7 @@ class StaticWindow:
     pass
 
   def moveTo(self, top, left):
-    app.log.detail('move', top, left)
+    app.log.detail(top, left)
     if top == self.top and left == self.left:
       return
     self.top = top
@@ -137,7 +137,7 @@ class StaticWindow:
     self.resizeTo(rows, cols)
 
   def resizeTo(self, rows, cols):
-    app.log.detail('resizeTo', rows, cols)
+    app.log.detail(rows, cols)
     self.rows = rows
     self.cols = cols
     try:
@@ -146,14 +146,14 @@ class StaticWindow:
       app.log.detail('resize failed', self.rows, self.cols)
 
   def resizeBottomBy(self, rows):
-    app.log.detail('resizeTopBy', rows, repr(self))
+    app.log.detail(rows, repr(self))
     self.rows += rows
     if self.rows <= 0:
       return
     self.cursorWindow.resize(self.rows, self.cols)
 
   def resizeBy(self, rows, cols):
-    app.log.detail('resizeBy', rows, cols, repr(self))
+    app.log.detail(rows, cols, repr(self))
     self.rows += rows
     self.cols += cols
     if self.rows <= 0 or self.cols <= 0:

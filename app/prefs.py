@@ -53,8 +53,11 @@ if 1:
         editorPrefs = json.loads(f.read())
         app.log.startup(editorPrefs)
         prefs['editor'].update(editorPrefs)
-      except:
+        app.log.startup('Updated editor prefs from', prefsPath)
+        app.log.startup('as', prefs['editor'])
+      except Exception, e:
         app.log.startup('failed to parse', prefsPath)
+        app.log.startup('error', e)
 
 builtInColorSchemes = {
   'dark': {},
