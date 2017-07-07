@@ -101,6 +101,7 @@ class Mutator(app.selectable.Selectable):
         assert self.savedAtRedoIndex >= 0, self.savedAtRedoIndex
         assert len(self.redoChain) > 0
         assert self.redoIndex < len(self.redoChain), "redoIndex %d, len redoChain%d" % (self.redoIndex, len(self.redoChain))
+        assert self.savedAtRedoIndex < len(self.redoChain), "savedAtRedoIndex %d, len redoChain%d" % (self.savedAtRedoIndex, len(self.redoChain))
         assert len(self.redoChain[self.redoIndex]) > 0
       elif self.redoIndex - 1 == self.savedAtRedoIndex:
         assert self.redoIndex > 0, self.redoIndex
