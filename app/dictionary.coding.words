@@ -44,6 +44,7 @@ adate
 alloc
 apis
 arg
+argb
 argc
 args
 argv
@@ -54,6 +55,7 @@ attrs
 auth
 baz
 bool
+buf
 bugzilla
 bzip
 calc
@@ -66,10 +68,12 @@ chr
 cli
 cmd
 cntl
+codec
 codeview
 configs
 constexpr
 cpp
+crc
 crtl
 css
 ctor
@@ -93,6 +97,7 @@ dword
 dx
 edu
 emacs
+endian
 endif
 env
 eof
@@ -150,6 +155,7 @@ keyframed
 keyframes
 le
 lf
+lhs
 localhost
 loopback
 lorem
@@ -202,6 +208,7 @@ regex
 regexes
 remoting
 renderer
+rhs
 ro
 runtime
 rv
@@ -231,6 +238,7 @@ tgz
 throbber
 tk
 tkinter
+tmp
 todo
 tolltip
 tooltip
