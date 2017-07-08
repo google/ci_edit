@@ -509,8 +509,11 @@ class CiProgram:
     app.bookmarks.saveUserBookmarks()
 
   def setUpPalette(self):
-    foreground = app.prefs.prefs['palette'].get('foregroundIndexes')
-    background = app.prefs.prefs['palette'].get('backgroundIndexes')
+    name = 'default'
+    #name = 'dark'
+    #name = 'test'
+    foreground = app.prefs.prefs['palette'][name].get('foregroundIndexes')
+    background = app.prefs.prefs['palette'][name].get('backgroundIndexes')
     cycle = len(foreground)
     for i in range(1, curses.COLORS):
       curses.init_pair(i, foreground[i % cycle], background[i / cycle])
