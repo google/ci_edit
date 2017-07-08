@@ -83,8 +83,7 @@ class CiProgram:
       app.log.detail("color_content, after:")
       for i in range(0, curses.COLORS):
         app.log.detail("color", i, ": ", curses.color_content(i))
-    self.showPalette = 0
-    self.shiftPalette()
+    self.setUpPalette()
     self.zOrder = []
 
   def commandLoop(self):
@@ -509,25 +508,12 @@ class CiProgram:
     app.history.saveUserHistory()
     app.bookmarks.saveUserBookmarks()
 
-  def shiftPalette(self):
-    """Test different palette options. Each call to shiftPalette will change the
-    palette to the next one in the ring of palettes."""
-    self.showPalette = (self.showPalette + 1) % 3
-    if self.showPalette == 1:
-      dark = [
-        18,  1,  2,   3,   4,   5,  6,  7,   8,  9, 10, 11,   12, 13, 14,  15,
-        94, 134, 0, 240, 138,  21, 22, 23,  24, 25, 26, 27,   28, 29, 30,  57,
-      ]
-      #light = [-1, 230, 147, 221,   255, 254, 253, 14]
-      light = [231, 229, 14, 221,   255, 254, 253, 225]
-      for i in range(1, curses.COLORS):
-        curses.init_pair(i, dark[i%len(dark)], light[i / 32])
-    elif self.showPalette == 2:
-      for i in range(1, curses.COLORS):
-        curses.init_pair(i, i, 231)
-    else:
-      for i in range(1, curses.COLORS):
-        curses.init_pair(i, 16, i)
+  def setUpPalette(self):
+    foreground = app.prefs.prefs['palette'].get('foregroundIndexes')
+    background = app.prefs.prefs['palette'].get('backgroundIndexes')
+    cycle = len(foreground)
+    for i in range(1, curses.COLORS):
+      curses.init_pair(i, foreground[i % cycle], background[i / cycle])
 
 def wrapped_ci(cursesScreen):
   try:

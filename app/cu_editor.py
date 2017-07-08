@@ -323,7 +323,6 @@ class CuaPlusEdit(CuaEdit):
       KEY_F2: textBuffer.bookmarkNext,
       KEY_F3: textBuffer.findAgain,
       #KEY_F4: self.prg.paletteWindow.focus,
-      #KEY_F6: self.prg.shiftPalette,
       KEY_SHIFT_F2: textBuffer.bookmarkPrior,
       KEY_SHIFT_F3: textBuffer.findBack,
     })
@@ -343,8 +342,6 @@ class PaletteDialogController(app.controller.Controller):
     self.commandSet = {
       CTRL_J: self.changeToHostWindow,
       KEY_ESCAPE: self.changeToHostWindow,
-      KEY_F3: self.prg.shiftPalette,
-      KEY_F5: self.changeToHostWindow,
     }
 
   def changeToHostWindow(self):
