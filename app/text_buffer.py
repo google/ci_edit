@@ -133,9 +133,7 @@ class BackingTextBuffer(app.mutator.Mutator):
 
   def carriageReturn(self):
     self.performDelete()
-    self.redoAddChange(('n', (1,)))
-    self.redo()
-    self.cursorMove(1, -self.penCol)
+    self.redoAddChange(('n', (1, self.getCursorMove(1, -self.penCol))))
     self.redo()
     if 1: # todo: if indent on CR
       line = self.lines[self.penRow - 1]
@@ -172,8 +170,30 @@ class BackingTextBuffer(app.mutator.Mutator):
     self.selectionNone()
     self.cursorMoveLeft()
 
+  def getCursorMove(self, rowDelta, colDelta):
+    return self.getCursorMoveAndMark(rowDelta, colDelta, 0, 0, 0)
+
   def cursorMove(self, rowDelta, colDelta):
     self.cursorMoveAndMark(rowDelta, colDelta, 0, 0, 0)
+
+  def getCursorMoveAndMark(self, rowDelta, colDelta, markRowDelta,
+      markColDelta, selectionModeDelta):
+    self.view.goalCol = self.penCol + colDelta
+    maxRow, maxCol = self.view.cursorWindow.getmaxyx()
+    scrollRows = 0
+    if self.view.scrollRow > self.penRow + rowDelta:
+      scrollRows = self.penRow + rowDelta - self.view.scrollRow
+    elif self.penRow + rowDelta >= self.view.scrollRow + maxRow:
+      scrollRows = self.penRow + rowDelta - (self.view.scrollRow + maxRow - 1)
+    scrollCols = 0
+    if self.view.scrollCol > self.penCol + colDelta:
+      scrollCols = self.penCol + colDelta - self.view.scrollCol
+    elif self.penCol + colDelta >= self.view.scrollCol + maxCol:
+      scrollCols = self.penCol + colDelta - (self.view.scrollCol + maxCol - 1)
+    self.view.scrollRow += scrollRows
+    self.view.scrollCol += scrollCols
+    return ('m', (rowDelta, colDelta,
+        markRowDelta, markColDelta, selectionModeDelta))
 
   def cursorMoveAndMark(self, rowDelta, colDelta, markRowDelta,
       markColDelta, selectionModeDelta):
