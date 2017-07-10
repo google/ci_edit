@@ -509,14 +509,17 @@ class CiProgram:
     app.bookmarks.saveUserBookmarks()
 
   def setUpPalette(self):
-    name = 'default'
-    #name = 'dark'
-    #name = 'test'
-    foreground = app.prefs.prefs['palette'][name].get('foregroundIndexes')
-    background = app.prefs.prefs['palette'][name].get('backgroundIndexes')
-    cycle = len(foreground)
-    for i in range(1, curses.COLORS):
-      curses.init_pair(i, foreground[i % cycle], background[i / cycle])
+    def applyPalette(name):
+      palette = app.prefs.prefs['palette'][name]
+      foreground = palette['foregroundIndexes']
+      background = palette['backgroundIndexes']
+      cycle = len(foreground)
+      for i in range(1, curses.COLORS):
+        curses.init_pair(i, foreground[i % cycle], background[i / cycle])
+    try:
+      applyPalette(app.prefs.prefs['editor']['palette'])
+    except:
+      applyPalette('default')
 
 def wrapped_ci(cursesScreen):
   try:

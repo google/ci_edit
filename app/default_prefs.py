@@ -139,6 +139,7 @@ prefs = {
   'editor': {
     'captiveCursor': False,
     'colorScheme': 'default',
+    'palette': 'default',
     'showLineNumbers': True,
     'showStatusLine': True,
     'showTopInfo': True,
