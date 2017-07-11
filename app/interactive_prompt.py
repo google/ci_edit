@@ -126,6 +126,7 @@ class InteractivePrompt(app.controller.Controller):
     self.filters = {
       'format': self.formatCommand,
       'lower': self.lowerSelectedLines,
+      'numEnum': self.assignIndexToSelectedLines,
       's' : self.substituteText,
       'sort': self.sortSelectedLines,
       'sub' : self.substituteText,
@@ -253,6 +254,12 @@ class InteractivePrompt(app.controller.Controller):
   def lowerSelectedLines(self, cmdLine, lines):
     lines = [line.lower() for line in lines]
     return lines, 'Changed %d lines'%(len(lines),)
+
+  def assignIndexToSelectedLines(self, cmdLine, lines):
+    output = []
+    for i, line in enumerate(lines):
+      output.append("%s = %d" % (line, i))
+    return output, 'Changed %d lines'%(len(output),)
 
   def sortSelectedLines(self, cmdLine, lines):
     lines.sort()
