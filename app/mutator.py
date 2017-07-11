@@ -55,7 +55,9 @@ class Mutator(app.selectable.Selectable):
     self.processTempChange = False
     # |stallNextRedo| is True if the next call to redo() should do nothing.
     self.stallNextRedo = False
+    # |redoIndex| may be equal to len(self.redoChain) (must be <=).
     self.redoIndex = 0
+    # |savedAtRedoIndex| may be > len(self.redoChain).
     self.savedAtRedoIndex = 0
     self.shouldReparse = False
 
@@ -93,28 +95,13 @@ class Mutator(app.selectable.Selectable):
 
   def isDirty(self):
     """Whether the buffer contains non-trivial changes since the last save."""
-
-    # TODO(dschuyler): Remove this temporary bug search code.
-    if (self.savedAtRedoIndex >= 0 and self.savedAtRedoIndex != self.redoIndex):
-      if self.redoIndex + 1 == self.savedAtRedoIndex:
-        assert self.redoIndex >= 0, self.redoIndex
-        assert self.savedAtRedoIndex >= 0, self.savedAtRedoIndex
-        assert len(self.redoChain) > 0
-        assert self.redoIndex < len(self.redoChain), "redoIndex %d, len redoChain%d" % (self.redoIndex, len(self.redoChain))
-        #assert self.savedAtRedoIndex < len(self.redoChain), "savedAtRedoIndex %d, len redoChain%d" % (self.savedAtRedoIndex, len(self.redoChain))
-        assert len(self.redoChain[self.redoIndex]) > 0
-      elif self.redoIndex - 1 == self.savedAtRedoIndex:
-        assert self.redoIndex > 0, self.redoIndex
-        assert self.savedAtRedoIndex >= 0, self.savedAtRedoIndex
-        assert len(self.redoChain) > 0
-        assert self.redoIndex - 1 < len(self.redoChain), "redoIndex %d, len redoChain%d" % (self.redoIndex - 1, len(self.redoChain))
-        assert len(self.redoChain[self.redoIndex - 1]) > 0
-
     clean = self.savedAtRedoIndex >= 0 and (
         self.savedAtRedoIndex == self.redoIndex or
         (self.redoIndex + 1 == self.savedAtRedoIndex and
+          self.redoIndex < len(self.redoChain) and
           self.redoChain[self.redoIndex][0] == 'm') or
         (self.redoIndex - 1 == self.savedAtRedoIndex and
+          self.redoIndex > 0 and
           self.redoChain[self.redoIndex - 1][0] == 'm'))
     return not clean
 
@@ -176,6 +163,7 @@ class Mutator(app.selectable.Selectable):
 
   def redo(self):
     """Replay the next action on the redoChain."""
+    assert 0 <= self.redoIndex <= len(self.redoChain)
     if self.stallNextRedo:
       self.stallNextRedo = False
       return
@@ -371,6 +359,7 @@ class Mutator(app.selectable.Selectable):
     """Undo the most recent change to the buffer.
     return whether undo should be repeated."""
     app.log.detail('undo')
+    assert 0 <= self.redoIndex <= len(self.redoChain)
     # If tempChange is active, undo it first to fix cursor position.
     if self.tempChange:
       self.undoMove(self.tempChange)
