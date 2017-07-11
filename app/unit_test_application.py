@@ -14,20 +14,39 @@
 
 
 import os
-#TODO(dschuyler): os.environ['CI_EDIT_USE_FAKE_CURSES'] = '1'
+os.environ['CI_EDIT_USE_FAKE_CURSES'] = '1'
 
 import app.ci_program
+from app.curses_util import *
+import curses
 import re
+import sys
 import unittest
 
 
 class IntentionTestCases(unittest.TestCase):
   def setUp(self):
-    pass
+    cursesScreen = curses.StandardScreen()
+    self.prg = app.ci_program.CiProgram(cursesScreen)
 
   def tearDown(self):
     pass
 
+  def test_empty_buffer_manager(self):
+    assert self.prg
+
+  def test_open_and_quit(self):
+    self.assertTrue(self.prg)
+    self.assertFalse(self.prg.exiting)
+    curses.setFakeInputs([CTRL_Q])
+    self.prg.run()
+    self.assertTrue(self.prg.exiting)
+
   def test_new_file_quit(self):
-    pass
+    self.assertTrue(self.prg)
+    self.assertFalse(self.prg.exiting)
+    curses.setFakeInputs([CTRL_Q])
+    sys.argv = ['cats', '--p']
+    self.prg.run()
+    self.assertTrue(self.prg.exiting)
 
