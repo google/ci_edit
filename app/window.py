@@ -185,12 +185,11 @@ class StaticWindow:
     except: pass
     self.parent.zOrder.append(self)
 
-  def writeLine(self, text, colorPair=1):
+  def writeLine(self, text, color):
     """Simple line writer for static windows."""
     text = str(text)[:self.cols]
-    text = text + ' '*max(0, self.cols-len(text))
-    try: self.cursorWindow.addstr(self.writeLineRow, 0, text,
-        curses.color_pair(colorPair))
+    text = text + ' ' * max(0, self.cols - len(text))
+    try: self.cursorWindow.addstr(self.writeLineRow, 0, text, color)
     except curses.error: pass
     self.writeLineRow += 1
 
@@ -351,10 +350,11 @@ class Menu(StaticWindow):
     self.reshape(len(self.lines), longest+2, left, top)
 
   def refresh(self):
+    color = app.color.get('context_menu')
     maxRow, maxCol = self.cursorWindow.getmaxyx()
     self.writeLineRow = 0
     for i in self.lines[:maxRow]:
-      self.writeLine(" "+i, 192);
+      self.writeLine(" "+i, color);
     StaticWindow.refresh(self)
 
   def setController(self, controllerClass):
@@ -370,14 +370,14 @@ class LineNumbers(StaticWindow):
     maxRow, maxCol = self.cursorWindow.getmaxyx()
     textBuffer = self.host.textBuffer
     limit = min(maxRow, len(textBuffer.lines)-self.host.scrollRow)
-    color = curses.color_pair(app.prefs.prefs['color']['line_number'])
+    color = app.color.get('line_number')
     for i in range(limit):
       self.addStr(i, 0, ' %5d  '%(self.host.scrollRow + i + 1), color)
-    color = curses.color_pair(app.prefs.outsideOfBufferColorIndex)
+    color = app.color.get('outside_document')
     for i in range(limit, maxRow):
       self.addStr(i, 0, '       ', color)
     if 1:
-      color = curses.color_pair(app.prefs.prefs['color']['line_number_current'])
+      color = app.color.get('line_number_current')
       cursorAt = self.host.cursorRow-self.host.scrollRow
       self.addStr(cursorAt, 1, '%5d'%(self.host.cursorRow+1), color)
     self.cursorWindow.refresh()
@@ -433,10 +433,12 @@ class LogWindow(StaticWindow):
     app.log.meta(" "*10, self.refreshCounter, "- screen refresh -")
     maxRow, maxCol = self.cursorWindow.getmaxyx()
     self.writeLineRow = 0
+    colorA = app.color.get(0)
+    colorB = app.color.get(96)
     for i in self.lines[-maxRow:]:
-      color = 0
+      color = colorA
       if len(i) and i[-1] == '-':
-        color = 96
+        color = colorB
       self.writeLine(i, color);
     StaticWindow.refresh(self)
 
@@ -502,7 +504,7 @@ class StatusLine(StaticWindow):
         rowPercentage,
         colPercentage)
     statusLine += ' '*(maxCol-len(statusLine)-len(rightSide)) + rightSide
-    color = curses.color_pair(app.prefs.prefs['color']['status_line'])
+    color = app.color.get('status_line')
     self.addStr(0, 0, statusLine, color)
     self.cursorWindow.refresh()
 
@@ -570,7 +572,7 @@ class TopInfo(StaticWindow):
     """Render the context information at the top of the window."""
     lines = self.lines
     lines.reverse()
-    color = curses.color_pair(app.prefs.prefs['color']['top_info'])
+    color = app.color.get('top_info')
     for i,line in enumerate(lines):
       self.addStr(i, 0, line+' '*(self.cols-len(line)), color)
     for i in range(len(lines), self.rows):
@@ -750,7 +752,7 @@ class InputWindow(Window):
           i+self.scrollRow])-self.scrollCol > maxCol:
         color = app.color.get('line_overflow')
       self.rightColumn.addStr(i, 0, ' ', color)
-    color = curses.color_pair(app.prefs.outsideOfBufferColorIndex)
+    color = app.color.get('outside_document')
     for i in range(limit, maxRow):
       self.rightColumn.addStr(i, 0, ' ', color)
     self.rightColumn.cursorWindow.refresh()
@@ -811,6 +813,6 @@ class PaletteWindow(ActiveWindow):
     rows = 16
     for i in range(width):
       for k in range(rows):
-        self.addStr(k, i*5, ' %3d '%(i+k*width,), curses.color_pair(i+k*width))
+        self.addStr(k, i*5, ' %3d '%(i+k*width,), app.color.get(i+k*width))
     self.cursorWindow.refresh()
 

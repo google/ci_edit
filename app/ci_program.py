@@ -228,7 +228,6 @@ class CiProgram:
     try: intent = win.userIntent
     except: pass
     color = app.color.get('debug_window')
-    color = app.prefs.prefs['color']['debug_window']
     self.debugWindow.writeLine(
         "   cRow %3d    cCol %2d goalCol %2d  %s"
         %(win.cursorRow, win.cursorCol, win.goalCol, intent), color)
@@ -252,7 +251,7 @@ class CiProgram:
     self.debugWindow.writeLine(
         "scr rows %d cols %d mlt %f/%f pt %f"
         %(screenRows, screenCols, self.mainLoopTime, self.mainLoopTimePeak,
-            textBuffer.parserTime))
+            textBuffer.parserTime), color)
     self.debugWindow.writeLine(
         "ch %3s %s"
         %(self.ch, app.curses_util.cursesKeyName(self.ch) or 'UNKNOWN'),
@@ -272,19 +271,22 @@ class CiProgram:
         %(app.curses_util.mouseButtonName(bState), bState),
             color)
     # Display some of the redo chain.
+    redoColorA = app.color.get(100)
     self.debugWindow.writeLine(
         "redoIndex %3d savedAt %3d depth %3d"
         %(textBuffer.redoIndex, textBuffer.savedAtRedoIndex,
           len(textBuffer.redoChain)),
-        color + 100)
+        redoColorA)
     lenChain = textBuffer.redoIndex
+    redoColorB = app.color.get(101)
     for i in range(textBuffer.redoIndex - 5, textBuffer.redoIndex):
       text = i >= 0 and textBuffer.redoChain[i] or ''
-      self.debugWindow.writeLine(text, 101)
+      self.debugWindow.writeLine(text, redoColorB)
+    redoColorC = app.color.get(1)
     for i in range(textBuffer.redoIndex, textBuffer.redoIndex + 4):
       text = (i < len(textBuffer.redoChain) and
           textBuffer.redoChain[i] or '')
-      self.debugWindow.writeLine(text, 1)
+      self.debugWindow.writeLine(text, redoColorC)
     # Refresh the display.
     self.debugWindow.cursorWindow.refresh()
 

@@ -66,7 +66,7 @@ class TextBuffer(app.actions.Actions):
     rows, cols = window.cursorWindow.getmaxyx()
     if 0:
       for i in range(rows):
-        window.addStr(i, 0, '?' * cols, curses.color_pair(120))
+        window.addStr(i, 0, '?' * cols, app.color.get(120))
     if 0:
       self.drawTextArea(window, 0, 0, rows, cols, 0)
     elif 1:
@@ -84,7 +84,7 @@ class TextBuffer(app.actions.Actions):
       self.drawTextArea(window, splitRow, splitCol, rows - splitRow,
           cols-splitCol, 0)
     # Blank screen past the end of the buffer.
-    color = curses.color_pair(app.prefs.outsideOfBufferColorIndex)
+    color = app.color.get('outside_document')
     endOfText = min(max(len(self.lines) - self.view.scrollRow, 0), rows)
     for i in range(endOfText, rows):
       window.addStr(i, 0, ' ' * cols, color)
@@ -107,7 +107,7 @@ class TextBuffer(app.actions.Actions):
           assert remaining >= 0, remaining
           remaining = min(len(line) - k, remaining)
           length = min(endCol - k, remaining)
-          color = curses.color_pair(node.grammar.get(
+          color = app.color.get(node.grammar.get(
               'colorIndex', app.prefs.defaultColorIndex) + colorDelta)
           if length <= 0:
             window.addStr(top + i, left + k - startCol, ' ' * (endCol - k),
@@ -121,7 +121,7 @@ class TextBuffer(app.actions.Actions):
             if node.grammar.get('spelling', True):
               # Highlight spelling errors
               grammarName = node.grammar.get('name', 'unknown')
-              misspellingColor = curses.color_pair(
+              misspellingColor = app.color.get(
                   colors['misspelling'] + colorDelta)
               for found in re.finditer(app.selectable.kReSubwords, subLine):
                 reg = found.regs[0]  # Mispelllled word
@@ -138,7 +138,7 @@ class TextBuffer(app.actions.Actions):
                         misspellingColor | curses.A_BOLD | curses.A_REVERSE)
           if 1:
             # Highlight keywords.
-            keywordColor = curses.color_pair(colors['keyword'] + colorDelta)
+            keywordColor = app.color.get(colors['keyword'] + colorDelta)
             regex = node.grammar.get('keywordsRe', app.prefs.kReNonMatching)
             for found in regex.finditer(subLine):
               reg = found.regs[0]
@@ -152,7 +152,7 @@ class TextBuffer(app.actions.Actions):
                     wordFragment, keywordColor)
           if 1:
             # Highlight specials.
-            keywordColor = curses.color_pair(colors['keyword'] + colorDelta)
+            keywordColor = app.color.get(colors['keyword'] + colorDelta)
             regex = node.grammar.get('specialsRe', app.prefs.kReNonMatching)
             for found in regex.finditer(subLine):
               reg = found.regs[0]
@@ -171,7 +171,7 @@ class TextBuffer(app.actions.Actions):
       for i in range(rowLimit):
         line = self.lines[startRow + i][startCol:endCol]
         window.addStr(top + i, left, line + ' ' * (cols - len(line)),
-            curses.color_pair(app.prefs.prefs['color']['default'] + colorDelta))
+            app.color.get(app.prefs.prefs['color']['default'] + colorDelta))
     self.drawOverlays(window, top, left, rows, cols, colorDelta)
 
   def drawOverlays(self, window, top, left, maxRow, maxCol, colorDelta):
@@ -183,7 +183,7 @@ class TextBuffer(app.actions.Actions):
     colors = app.prefs.prefs['color']
     if 1:
       # Highlight brackets.
-      color = curses.color_pair(colors['bracket'] + colorDelta)
+      color = app.color.get(colors['bracket'] + colorDelta)
       for i in range(rowLimit):
         line = self.lines[startRow + i][startCol:endCol]
         for k in re.finditer(app.selectable.kReBrackets, line):
@@ -212,8 +212,7 @@ class TextBuffer(app.actions.Actions):
                 if not (textCol < startCol or textCol >= endCol):
                   window.addStr(top + row - startRow,
                       textCol - self.view.scrollCol, openCh,
-                      curses.color_pair(
-                          colors['matching_bracket'] + colorDelta))
+                      app.color.get(colors['matching_bracket'] + colorDelta))
                 return
         def searchForward(openCh, closeCh):
           count = 1
@@ -233,8 +232,7 @@ class TextBuffer(app.actions.Actions):
                 if not (textCol < startCol or textCol >= endCol):
                   window.addStr(top + row - startRow,
                       textCol - self.view.scrollCol, closeCh,
-                      curses.color_pair(
-                          colors['matching_bracket'] + colorDelta))
+                      app.color.get(colors['matching_bracket'] + colorDelta))
                 return
         matcher = {
           '(': (')', searchForward),
@@ -251,7 +249,7 @@ class TextBuffer(app.actions.Actions):
               top + self.penRow - startRow,
               self.penCol - self.view.scrollCol,
               self.lines[self.penRow][self.penCol],
-              curses.color_pair(colors['matching_bracket'] + colorDelta))
+              app.color.get(colors['matching_bracket'] + colorDelta))
     if 1:
       # Highlight numbers.
       for i in range(rowLimit):
@@ -259,7 +257,7 @@ class TextBuffer(app.actions.Actions):
         for k in re.finditer(app.selectable.kReNumbers, line):
           for f in k.regs:
             window.addStr(top + i, left + f[0], line[f[0]:f[1]],
-                curses.color_pair(colors['number'] + colorDelta))
+                app.color.get(colors['number'] + colorDelta))
     if 1:
       # Highlight space ending lines.
       for i in range(rowLimit):
@@ -271,7 +269,7 @@ class TextBuffer(app.actions.Actions):
         for k in app.selectable.kReEndSpaces.finditer(line):
           for f in k.regs:
             window.addStr(top + i, left + offset + f[0], line[f[0]:f[1]],
-                curses.color_pair(colors['trailing_space'] + colorDelta))
+                app.color.get(colors['trailing_space'] + colorDelta))
     if 0:
       lengthLimit = self.lineLimitIndicator
       if endCol >= lengthLimit:
@@ -282,7 +280,7 @@ class TextBuffer(app.actions.Actions):
             continue
           length = min(endCol, len(line) - lengthLimit)
           window.addStr(top + i, left + lengthLimit - startCol,
-              line[lengthLimit:endCol], curses.color_pair(96 + colorDelta))
+              line[lengthLimit:endCol], app.color.get(96 + colorDelta))
     if self.findRe is not None:
       # Highlight find.
       for i in range(rowLimit):
@@ -291,10 +289,10 @@ class TextBuffer(app.actions.Actions):
           reg = k.regs[0]
           #for ref in k.regs[1:]:
           window.addStr(top + i, left + reg[0], line[reg[0]:reg[1]],
-              curses.color_pair(colors['found_find'] + colorDelta))
+              app.color.get(colors['found_find'] + colorDelta))
     if rowLimit and self.selectionMode != app.selectable.kSelectionNone:
       # Highlight selected text.
-      colorSelected = curses.color_pair(colors['selected'])
+      colorSelected = app.color.get('selected')
       upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
       if 1:
         selStartCol = max(upperCol, startCol)
