@@ -713,31 +713,32 @@ class InputWindow(Window):
     bottomRows = 1  # Not including status line.
 
     if self.showTopInfo:
-      self.topInfo.reshape(0, cols-lineNumbersCols, top,
-          left+lineNumbersCols)
-    self.confirmClose.reshape(1, cols, top+rows-1, left)
-    self.confirmOverwrite.reshape(1, cols, top+rows-1, left)
-    self.interactiveOpen.reshape(1, cols, top+rows-1, left)
-    self.interactivePrediction.reshape(1, cols, top+rows-1, left)
-    self.interactivePrompt.reshape(1, cols, top+rows-1, left)
-    self.interactiveQuit.reshape(1, cols, top+rows-1, left)
-    self.interactiveSaveAs.reshape(1, cols, top+rows-1, left)
+      self.topInfo.reshape(0, cols - lineNumbersCols, top,
+          left + lineNumbersCols)
+    self.confirmClose.reshape(1, cols, top + rows - 1, left)
+    self.confirmOverwrite.reshape(1, cols, top + rows - 1, left)
+    self.interactiveOpen.reshape(1, cols, top + rows - 1, left)
+    self.interactivePrediction.reshape(1, cols, top + rows - 1, left)
+    self.interactivePrompt.reshape(1, cols, top + rows - 1, left)
+    self.interactiveQuit.reshape(1, cols, top + rows - 1, left)
+    self.interactiveSaveAs.reshape(1, cols, top + rows - 1, left)
     if self.showMessageLine:
-      self.messageLine.reshape(bottomRows, cols, top+rows-bottomRows, left)
+      self.messageLine.reshape(bottomRows, cols, top + rows - bottomRows, left)
     if self.useInteractiveFind:
       self.interactiveFind.reshape(bottomRows, cols,
           top+rows-bottomRows, left)
     if 1:
-      self.interactiveGoto.reshape(bottomRows, cols, top+rows-bottomRows, left)
+      self.interactiveGoto.reshape(bottomRows, cols, top + rows - bottomRows,
+          left)
     if self.showFooter:
-      self.statusLine.reshape(1, cols, top+rows-bottomRows-1, left)
+      self.statusLine.reshape(1, cols, top + rows - bottomRows - 1, left)
       rows -= bottomRows+1
     if self.showLineNumbers:
       self.lineNumberColumn.reshape(rows, lineNumbersCols, top, left)
       cols -= lineNumbersCols
       left += lineNumbersCols
     if self.showRightColumn:
-      self.rightColumn.reshape(rows, 1, top, left+cols-1)
+      self.rightColumn.reshape(rows, 1, top, left + cols - 1)
       cols -= 1
     # The top, left of the main window is the rows, cols of the logo corner.
     self.logoCorner.reshape(top, left, 0, 0)
@@ -755,7 +756,7 @@ class InputWindow(Window):
     maxRow, maxCol = self.logoCorner.cursorWindow.getmaxyx()
     color = app.color.get('logo')
     for i in range(maxRow):
-      self.logoCorner.addStr(i, 0, ' '*maxCol, color)
+      self.logoCorner.addStr(i, 0, ' ' * maxCol, color)
     self.logoCorner.addStr(0, 1, 'ci', color)
     self.logoCorner.refresh()
 
