@@ -629,7 +629,9 @@ class InputWindow(Window):
           "Overwrite exiting file? (yes or no): ")
       self.confirmOverwrite.setController(app.cu_editor.ConfirmOverwrite)
     self.contextMenu = Menu(prg, self)
-    if 1:
+    if 0:  # wip on multi-line interactive find.
+      self.interactiveFind = InteractiveFind(self)
+    else:
       self.interactiveFind = LabeledLine(self, 'find: ')
       self.interactiveFind.setController(app.cu_editor.InteractiveFind)
     if 1:
