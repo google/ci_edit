@@ -773,6 +773,9 @@ class InputWindow(Window):
   def setTextBuffer(self, textBuffer):
     app.log.info('setTextBuffer')
     #self.normalize()
+    if self.textBuffer is not None:
+      app.history.set(['files', self.textBuffer.fullPath, 'cursor'],
+          (self.textBuffer.penRow, self.textBuffer.penCol))
     #restore positions and selections  +
     textBuffer.lineLimitIndicator = 80
     self.controller.setTextBuffer(textBuffer)
