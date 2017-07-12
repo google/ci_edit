@@ -15,3 +15,6 @@
 ESC = 1
 BS = 2
 DEL = 3
+
+def isprint():
+  pass
