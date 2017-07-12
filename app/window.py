@@ -443,6 +443,24 @@ class LogWindow(StaticWindow):
     StaticWindow.refresh(self)
 
 
+class InteractiveFind(Window):
+  def __init__(self, host):
+    Window.__init__(self, host)
+    self.findLine = LabeledLine(self, 'find: ')
+    self.findLine.setController(app.cu_editor.InteractiveFind)
+    self.zOrder.append(self.findLine)
+    self.replaceLine = LabeledLine(self, 'replace: ')
+    self.replaceLine.setController(app.cu_editor.InteractiveFind)
+    self.zOrder.append(self.replaceLine)
+    self.setTextBuffer(app.text_buffer.TextBuffer())
+    self.controller = app.cu_editor.InteractiveFind(host, self.findLine.textBuffer)
+
+  def reshape(self, rows, cols, top, left):
+    self.findLine.reshape(1, cols, top, left)
+    top += 1
+    self.findLine.reshape(1, cols, top, left)
+
+
 class MessageLine(StaticWindow):
   """The message line appears at the bottom of the screen."""
   def __init__(self, host):
