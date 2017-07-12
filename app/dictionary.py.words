@@ -38,6 +38,7 @@ elif
 en
 endswith
 environ
+errorpass
 exc
 expanduser
 expandvars
@@ -75,6 +76,8 @@ makedirs
 max
 maxint
 min
+mouseinterval
+mousemask
 mtiem
 mtime
 multiline
