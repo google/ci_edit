@@ -40,6 +40,9 @@ class BackingTextBuffer(app.mutator.Mutator):
     self.rootGrammar = app.prefs.getGrammar(None)
     self.skipUpdateScroll = False
 
+    # Determines whether case matters when finding a selection
+    self.ignoreCaseFind = True
+
   def setView(self, view):
     self.view = view
 
@@ -607,8 +610,12 @@ class BackingTextBuffer(app.mutator.Mutator):
       self.doSelectionMode(app.selectable.kSelectionNone)
       return
     # The saved re is also used for highlighting.
-    self.findRe = re.compile('()'+searchFor)
-    self.findBackRe = re.compile('(.*)'+searchFor)
+    if self.ignoreCaseFind:
+      self.findRe = re.compile('()'+searchFor, re.IGNORECASE)
+      self.findBackRe = re.compile('(.*)'+searchFor, re.IGNORECASE)
+    else:
+      self.findRe = re.compile('()'+searchFor)
+      self.findBackRe = re.compile('(.*)'+searchFor)
     self.findCurrentPattern(direction)
 
   def findPlainText(self, text):
