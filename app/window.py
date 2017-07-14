@@ -696,16 +696,17 @@ class InputWindow(Window):
     app.log.info()
 
   def startup(self):
-    for f in self.prg.cliFiles:
+    for f in app.prefs.prefs['startup'].get('cliFiles', []):
       app.buffer_manager.buffers.loadTextBuffer(f['path'])
-    if self.prg.readStdin:
+    if app.prefs.prefs['startup'].get('readStdin'):
       app.buffer_manager.buffers.readStdin()
     tb = app.buffer_manager.buffers.topBuffer()
     if not tb:
       tb = app.buffer_manager.buffers.newTextBuffer()
     self.setTextBuffer(tb)
-    if self.prg.openToLine is not None:
-      self.textBuffer.selectText(self.prg.openToLine - 1, 0, 0,
+    openToLine = app.prefs.prefs['startup'].get('openToLine')
+    if openToLine is not None:
+      self.textBuffer.selectText(openToLine - 1, 0, 0,
           app.selectable.kSelectionNone)
 
   def reshape(self, rows, cols, top, left):
@@ -734,7 +735,7 @@ class InputWindow(Window):
           left)
     if self.showFooter:
       self.statusLine.reshape(1, cols, top + rows - bottomRows - 1, left)
-      rows -= bottomRows+1
+      rows -= bottomRows + 1
     if self.showLineNumbers:
       self.lineNumberColumn.reshape(rows, lineNumbersCols, top, left)
       cols -= lineNumbersCols
@@ -803,7 +804,7 @@ class InputWindow(Window):
     textBuffer.lineLimitIndicator = 80
     self.controller.setTextBuffer(textBuffer)
     Window.setTextBuffer(self, textBuffer)
-    self.textBuffer.debugRedo = self.prg.debugRedo
+    self.textBuffer.debugRedo = app.prefs.prefs['startup'].get('debugRedo')
     # Restore cursor position.
     cursor = app.history.get(['files', textBuffer.fullPath, 'cursor'], (0, 0))
     if not len(textBuffer.lines):

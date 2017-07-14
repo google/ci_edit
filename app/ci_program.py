@@ -398,24 +398,24 @@ class CiProgram:
 
   def parseArgs(self):
     """Interpret the command line arguments."""
-    self.debugRedo = False
-    self.showLogWindow = False
-    self.cliFiles = []
-    self.openToLine = None
-    self.profile = False
-    self.readStdin = False
+    debugRedo = False
+    showLogWindow = False
+    cliFiles = []
+    openToLine = None
+    profile = False
+    readStdin = False
     takeAll = False  # Take all args as file paths.
     for i in sys.argv[1:]:
       if not takeAll and i[:1] == '+':
-        self.openToLine = int(i[1:])
+        openToLine = int(i[1:])
         continue
       if not takeAll and i[:2] == '--':
         if i == '--debugRedo':
-          self.debugRedo = True
+          debugRedo = True
         elif i == '--profile':
-          self.profile = True
+          profile = True
         elif i == '--log':
-          self.showLogWindow = True
+          showLogWindow = True
         elif i == '--d':
           app.log.channelEnable('debug', True)
         elif i == '--m':
@@ -446,10 +446,19 @@ class CiProgram:
           return
         continue
       if i == '-':
-        self.readStdin = True
+        readStdin = True
       else:
-        self.cliFiles.append({'path': i})
+        cliFiles.append({'path': i})
     app.prefs.init()
+    app.prefs.prefs['startup'] = {
+      'debugRedo': debugRedo,
+      'showLogWindow': showLogWindow,
+      'cliFiles': cliFiles,
+      'openToLine': openToLine,
+      'profile': profile,
+      'readStdin': readStdin,
+    }
+    self.showLogWindow = showLogWindow
 
   def quit(self):
     """Determine whether it's ok to quit. quitNow() will be called if it
@@ -497,7 +506,7 @@ class CiProgram:
     app.history.loadUserHistory(os.path.join(homePath, 'history.dat'))
     app.curses_util.hackCursesFixes()
     self.startup()
-    if self.profile:
+    if app.prefs.prefs['startup'].get('profile'):
       profile = cProfile.Profile()
       profile.enable()
       self.commandLoop()
