@@ -253,7 +253,6 @@ class CuaEdit(app.controller.Controller):
   """Keyboard mappings for CUA. CUA is the Cut/Copy/Paste paradigm."""
   def __init__(self, prg, host):
     app.controller.Controller.__init__(self, host, 'CuaEdit')
-    self.prg = prg
     self.host = host
     app.log.info('CuaEdit.__init__')
 
@@ -333,7 +332,6 @@ class PaletteDialogController(app.controller.Controller):
   """."""
   def __init__(self, prg, view):
     app.controller.Controller.__init__(self, prg, 'Palette')
-    self.prg = prg
     self.view = view
     app.log.info('PaletteDialogController.__init__')
     def noOp(c):

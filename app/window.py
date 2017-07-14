@@ -321,8 +321,8 @@ class LabeledLine(Window):
 
 class Menu(StaticWindow):
   """"""
-  def __init__(self, prg, host):
-    StaticWindow.__init__(self, prg)
+  def __init__(self, host):
+    StaticWindow.__init__(self, host)
     self.host = host
     self.controller = None
     self.lines = []
@@ -515,7 +515,7 @@ class StatusLine(StaticWindow):
     rightSide = ''
     if len(statusLine):
       rightSide += ' |'
-    if self.host.prg.showLogWindow:
+    if app.prefs.prefs['startup'].get('showLogWindow'):
       rightSide += ' %s | %s |'%(tb.cursorGrammarName(), tb.selectionModeName())
     rightSide += ' %4d,%2d | %3d%%,%3d%%'%(
         self.host.cursorRow+1, self.host.cursorCol+1,
@@ -604,11 +604,11 @@ class TopInfo(StaticWindow):
 
 class InputWindow(Window):
   """This is the main content window. Often the largest pane displayed."""
-  def __init__(self, prg):
-    assert(prg)
-    Window.__init__(self, prg)
+  def __init__(self, host):
+    assert(host)
+    Window.__init__(self, host)
     self.bookmarkIndex = 0
-    self.prg = prg
+    self.host = host
     self.showFooter = True
     self.useInteractiveFind = True
     self.showLineNumbers = app.prefs.prefs['editor'].get(
@@ -617,7 +617,7 @@ class InputWindow(Window):
     self.showRightColumn = True
     self.showTopInfo = True
     self.controller = app.controller.MainController(self)
-    self.controller.add(app.cu_editor.CuaPlusEdit(prg, self))
+    self.controller.add(app.cu_editor.CuaPlusEdit(host, self))
     # What does the user appear to want: edit, quit, or something else?
     self.userIntent = 'edit'
     if 1:
@@ -628,7 +628,7 @@ class InputWindow(Window):
       self.confirmOverwrite = LabeledLine(self,
           "Overwrite exiting file? (yes or no): ")
       self.confirmOverwrite.setController(app.cu_editor.ConfirmOverwrite)
-    self.contextMenu = Menu(prg, self)
+    self.contextMenu = Menu(self)
     if 0:  # wip on multi-line interactive find.
       self.interactiveFind = InteractiveFind(self)
     else:
@@ -683,17 +683,18 @@ class InputWindow(Window):
       self.messageLine = MessageLine(self)
       self.messageLine.setParent(self, 0)
 
-  def splitWindow(self):
-    """
-    Experimental.
-    """
-    app.log.info()
-    other = InputWindow(self.prg)
-    other.setTextBuffer(self.textBuffer)
-    app.log.info()
-    self.prg.zOrder.append(other)
-    self.prg.layout()
-    app.log.info()
+  if 0:
+    def splitWindow(self):
+      """
+      Experimental.
+      """
+      app.log.info()
+      other = InputWindow(self.prg)
+      other.setTextBuffer(self.textBuffer)
+      app.log.info()
+      self.prg.zOrder.append(other)
+      self.prg.layout()
+      app.log.info()
 
   def startup(self):
     for f in app.prefs.prefs['startup'].get('cliFiles', []):
@@ -785,7 +786,7 @@ class InputWindow(Window):
     Window.focus(self)
 
   def quitNow(self):
-    self.prg.quitNow()
+    self.host.quitNow()
 
   def refresh(self):
     self.textBuffer.updateScrollPosition()
