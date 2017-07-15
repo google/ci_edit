@@ -13,10 +13,10 @@ class CheckedCall(object):
         super(CheckedCall, self).__setattr__("f", f)
 
     def __call__(self, *args):
-        ret = self.f(*args)
-        if not ret and get_errno():
+        result = self.f(*args)
+        if not result and get_errno():
             raise PyperclipWindowsException("Error calling " + self.f.__name__)
-        return ret
+        return result
 
     def __setattr__(self, key, value):
         setattr(self.f, key, value)
@@ -140,9 +140,9 @@ def init_windows_clipboard():
                         # This might not ever happen. It won't happen
                         # if get_errno() is set.
                         # If this were to happen, then this could
-                        # leak 'handle', from ealier. My concern is
+                        # leak 'handle', from earlier. My concern is
                         # security rather than a leak, so I'm
-                        # leaving the possilbe leak for another day.
+                        # leaving the possible leak for another day.
                         return
 
                     ctypes.memmove(c_wchar_p(locked_handle), c_wchar_p(text), count * sizeof(c_wchar))

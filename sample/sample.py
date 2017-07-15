@@ -15,9 +15,9 @@
 # Python comment
 /* Not a comment */
 /** Not a comment */
-<!-- Not a coment -->
+<!-- Not a comment -->
 // Not a comment
-<script> Still Python (no embeded script) </script>
+<script> Still Python (no embedded script) </script>
 
 # TODO(dschuyler): A test comment.
 
