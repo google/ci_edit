@@ -228,7 +228,6 @@ class CiProgram:
     try: intent = win.userIntent
     except: pass
     color = app.color.get('debug_window')
-    color = app.prefs.prefs['color']['debug_window']
     self.debugWindow.writeLine(
         "   cRow %3d    cCol %2d goalCol %2d  %s"
         %(win.cursorRow, win.cursorCol, win.goalCol, intent), color)
@@ -252,7 +251,7 @@ class CiProgram:
     self.debugWindow.writeLine(
         "scr rows %d cols %d mlt %f/%f pt %f"
         %(screenRows, screenCols, self.mainLoopTime, self.mainLoopTimePeak,
-            textBuffer.parserTime))
+            textBuffer.parserTime), color)
     self.debugWindow.writeLine(
         "ch %3s %s"
         %(self.ch, app.curses_util.cursesKeyName(self.ch) or 'UNKNOWN'),
@@ -272,19 +271,22 @@ class CiProgram:
         %(app.curses_util.mouseButtonName(bState), bState),
             color)
     # Display some of the redo chain.
+    redoColorA = app.color.get(100)
     self.debugWindow.writeLine(
         "redoIndex %3d savedAt %3d depth %3d"
         %(textBuffer.redoIndex, textBuffer.savedAtRedoIndex,
           len(textBuffer.redoChain)),
-        color + 100)
+        redoColorA)
     lenChain = textBuffer.redoIndex
+    redoColorB = app.color.get(101)
     for i in range(textBuffer.redoIndex - 5, textBuffer.redoIndex):
       text = i >= 0 and textBuffer.redoChain[i] or ''
-      self.debugWindow.writeLine(text, 101)
+      self.debugWindow.writeLine(text, redoColorB)
+    redoColorC = app.color.get(1)
     for i in range(textBuffer.redoIndex, textBuffer.redoIndex + 4):
       text = (i < len(textBuffer.redoChain) and
           textBuffer.redoChain[i] or '')
-      self.debugWindow.writeLine(text, 1)
+      self.debugWindow.writeLine(text, redoColorC)
     # Refresh the display.
     self.debugWindow.cursorWindow.refresh()
 
@@ -396,24 +398,24 @@ class CiProgram:
 
   def parseArgs(self):
     """Interpret the command line arguments."""
-    self.debugRedo = False
-    self.showLogWindow = False
-    self.cliFiles = []
-    self.openToLine = None
-    self.profile = False
-    self.readStdin = False
+    debugRedo = False
+    showLogWindow = False
+    cliFiles = []
+    openToLine = None
+    profile = False
+    readStdin = False
     takeAll = False  # Take all args as file paths.
     for i in sys.argv[1:]:
       if not takeAll and i[:1] == '+':
-        self.openToLine = int(i[1:])
+        openToLine = int(i[1:])
         continue
       if not takeAll and i[:2] == '--':
         if i == '--debugRedo':
-          self.debugRedo = True
+          debugRedo = True
         elif i == '--profile':
-          self.profile = True
+          profile = True
         elif i == '--log':
-          self.showLogWindow = True
+          showLogWindow = True
         elif i == '--d':
           app.log.channelEnable('debug', True)
         elif i == '--m':
@@ -444,10 +446,19 @@ class CiProgram:
           return
         continue
       if i == '-':
-        self.readStdin = True
+        readStdin = True
       else:
-        self.cliFiles.append({'path': i})
+        cliFiles.append({'path': i})
     app.prefs.init()
+    app.prefs.prefs['startup'] = {
+      'debugRedo': debugRedo,
+      'showLogWindow': showLogWindow,
+      'cliFiles': cliFiles,
+      'openToLine': openToLine,
+      'profile': profile,
+      'readStdin': readStdin,
+    }
+    self.showLogWindow = showLogWindow
 
   def quit(self):
     """Determine whether it's ok to quit. quitNow() will be called if it
@@ -495,7 +506,7 @@ class CiProgram:
     app.history.loadUserHistory(os.path.join(homePath, 'history.dat'))
     app.curses_util.hackCursesFixes()
     self.startup()
-    if self.profile:
+    if app.prefs.prefs['startup'].get('profile'):
       profile = cProfile.Profile()
       profile.enable()
       self.commandLoop()
