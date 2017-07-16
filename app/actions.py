@@ -692,7 +692,7 @@ class Actions(app.mutator.Mutator):
     if localRe is None:
       app.log.info('localRe is None')
       return
-    # Current line.
+    # Check part of current line.
     text = self.lines[self.penRow]
     if direction >= 0:
       text = text[offset:]
@@ -701,51 +701,45 @@ class Actions(app.mutator.Mutator):
       offset = 0
     #app.log.info('find() searching', repr(text))
     found = localRe.search(text)
-    if found:
-      start = found.regs[1][1]
-      end = found.regs[0][1]
-      #app.log.info('found on line', self.penRow, start)
-      self.selectText(self.penRow, offset + start, end - start,
-          app.selectable.kSelectionCharacter)
-      return
-    # To end of file.
-    if direction >= 0:
-      theRange = range(self.penRow + 1, len(self.lines))
-    else:
-      theRange = range(self.penRow - 1, -1, -1)
-    import pdb; pdb.set_trace
-    for i in theRange:
-      found = localRe.search(self.lines[i])
-      if found:
-        if 0:
-          for k in found.regs:
-            app.log.info('AAA', k[0], k[1])
-          app.log.info('b found on line', i, repr(found))
-        start = found.regs[1][1]
-        end = found.regs[0][1]
-        self.selectText(i, start, end - start,
-            app.selectable.kSelectionCharacter)
-        return
-    # Warp around to the start of the file.
-    self.setMessage('Find wrapped around.')
-    if direction >= 0:
-      theRange = range(self.penRow)
-    else:
-      theRange = range(len(self.lines) - 1, self.penRow, -1)
-    offset = 0
-    for i in theRange:
-      found = localRe.search(self.lines[i])
-      rowFound = i
-      if found:
-        break
-    if not theRange:
+    rowFound = self.penRow
+    if not found:
+      offset = 0
+      # To end of file.
       if direction >= 0:
-        text = self.lines[self.penRow]
+        theRange = range(self.penRow + 1, len(self.lines))
       else:
-        text = self.lines[self.penRow][self.penCol:]
-        offset = self.penCol
-      found = localRe.search(text)
-      rowFound = self.penRow
+        theRange = range(self.penRow - 1, -1, -1)
+      for i in theRange:
+        found = localRe.search(self.lines[i])
+        if found:
+          if 0:
+            for k in found.regs:
+              app.log.info('AAA', k[0], k[1])
+            app.log.info('b found on line', i, repr(found))
+          rowFound = i
+          break
+      if not found:
+        # Wrap around to the opposite side of the file.
+        self.setMessage('Find wrapped around.')
+        if direction >= 0:
+          theRange = range(self.penRow)
+        else:
+          theRange = range(len(self.lines) - 1, self.penRow, -1)
+        for i in theRange:
+          found = localRe.search(self.lines[i])
+          rowFound = i
+          if found:
+            break
+        import pdb; pdb.set_trace()
+        if not found:
+          # Check the rest of the current line
+          if direction >= 0:
+            text = self.lines[self.penRow]
+          else:
+            text = self.lines[self.penRow][self.penCol:]
+            offset = self.penCol
+          found = localRe.search(text)
+          rowFound = self.penRow
     if found:
       #app.log.info('c found on line', rowFound, repr(found))
       start = found.regs[1][1]
