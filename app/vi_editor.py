@@ -16,6 +16,7 @@
 
 from app.curses_util import *
 import app.controller
+import app.log
 import curses
 import curses.ascii
 import os
@@ -26,13 +27,12 @@ import text_buffer
 class ViEdit:
   """Vi is a common Unix editor. This mapping supports some common vi/vim
   commands."""
-  def __init__(self, prg, host):
-    self.prg = prg
+  def __init__(self, host):
     self.host = host
     self.commandDefault = None
 
   def focus(self):
-    self.prg.log('VimEdit.focus')
+    app.log.info('VimEdit.focus')
     if not self.commandDefault:
       self.commandDefault = self.textBuffer.noOp
       self.commandSet = self.commandSet_Normal
@@ -41,7 +41,7 @@ class ViEdit:
     pass
 
   def setTextBuffer(self, textBuffer):
-    self.prg.log('VimEdit.setTextBuffer');
+    app.log.info('VimEdit.setTextBuffer');
     self.textBuffer = textBuffer
     self.commandSet_Normal = {
       ord('^'): textBuffer.cursorStartOfLine,
@@ -57,12 +57,12 @@ class ViEdit:
     }
 
   def switchToCommandSetInsert(self, ignored=1):
-    self.prg.log('insert mode')
+    app.log.info('insert mode')
     self.commandDefault = self.textBuffer.insertPrintable
     self.commandSet = self.commandSet_Insert
 
   def switchToCommandSetNormal(self, ignored=1):
-    self.prg.log('normal mode')
+    app.log.info('normal mode')
     self.commandDefault = self.textBuffer.noOp
     self.commandSet = self.commandSet_Normal
 
