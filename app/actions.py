@@ -727,10 +727,9 @@ class Actions(app.mutator.Mutator):
           theRange = range(len(self.lines) - 1, self.penRow, -1)
         for i in theRange:
           found = localRe.search(self.lines[i])
-          rowFound = i
           if found:
+            rowFound = i
             break
-        import pdb; pdb.set_trace()
         if not found:
           # Check the rest of the current line
           if direction >= 0:
