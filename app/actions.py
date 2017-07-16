@@ -713,6 +713,7 @@ class Actions(app.mutator.Mutator):
       theRange = range(self.penRow + 1, len(self.lines))
     else:
       theRange = range(self.penRow - 1, -1, -1)
+    import pdb; pdb.set_trace
     for i in theRange:
       found = localRe.search(self.lines[i])
       if found:
@@ -731,34 +732,30 @@ class Actions(app.mutator.Mutator):
       theRange = range(self.penRow)
     else:
       theRange = range(len(self.lines) - 1, self.penRow, -1)
-    if theRange:
-      for i in theRange:
-        found = localRe.search(self.lines[i])
-        if found:
-          #app.log.info('c found on line', i, repr(found))
-          start = found.regs[1][1]
-          end = found.regs[0][1]
-          self.selectText(i, start, end - start,
-              app.selectable.kSelectionCharacter)
-          return
-    else:
+    offset = 0
+    for i in theRange:
+      found = localRe.search(self.lines[i])
+      rowFound = i
+      if found:
+        break
+    if not theRange:
       if direction >= 0:
         text = self.lines[self.penRow]
-        offset = 0
       else:
         text = self.lines[self.penRow][self.penCol:]
         offset = self.penCol
       found = localRe.search(text)
-      if found:
-          #app.log.info('c found on line', self.penRow, repr(found))
-          start = found.regs[1][1]
-          end = found.regs[0][1]
-          self.selectText(self.penRow, offset + start, end - start,
-                          app.selectable.kSelectionCharacter)
-          return
+      rowFound = self.penRow
+    if found:
+      #app.log.info('c found on line', rowFound, repr(found))
+      start = found.regs[1][1]
+      end = found.regs[0][1]
+      self.selectText(rowFound, offset + start, end - start,
+                      app.selectable.kSelectionCharacter)
+      return
     app.log.info('find not found')
     self.doSelectionMode(app.selectable.kSelectionNone)
-    
+
   def findAgain(self):
     """Find the current pattern, searching down the document."""
     self.findCurrentPattern(1)
