@@ -686,6 +686,7 @@ class Actions(app.mutator.Mutator):
 
   def findCurrentPattern(self, direction):
     localRe = self.findRe
+    offset = self.penCol + direction
     if direction < 0:
       localRe = self.findBackRe
     if localRe is None:
@@ -694,8 +695,7 @@ class Actions(app.mutator.Mutator):
     # Current line.
     text = self.lines[self.penRow]
     if direction >= 0:
-      text = text[self.penCol + direction:]
-      offset = self.penCol + direction
+      text = text[offset:]
     else:
       text = text[:self.penCol]
       offset = 0
@@ -731,18 +731,34 @@ class Actions(app.mutator.Mutator):
       theRange = range(self.penRow)
     else:
       theRange = range(len(self.lines) - 1, self.penRow, -1)
-    for i in theRange:
-      found = localRe.search(self.lines[i])
+    if theRange:
+      for i in theRange:
+        found = localRe.search(self.lines[i])
+        if found:
+          #app.log.info('c found on line', i, repr(found))
+          start = found.regs[1][1]
+          end = found.regs[0][1]
+          self.selectText(i, start, end - start,
+              app.selectable.kSelectionCharacter)
+          return
+    else:
+      if direction >= 0:
+        text = self.lines[self.penRow]
+        offset = 0
+      else:
+        text = self.lines[self.penRow][self.penCol:]
+        offset = self.penCol
+      found = localRe.search(text)
       if found:
-        #app.log.info('c found on line', i, repr(found))
-        start = found.regs[1][1]
-        end = found.regs[0][1]
-        self.selectText(i, start, end - start,
-            app.selectable.kSelectionCharacter)
-        return
+          #app.log.info('c found on line', self.penRow, repr(found))
+          start = found.regs[1][1]
+          end = found.regs[0][1]
+          self.selectText(self.penRow, offset + start, end - start,
+                          app.selectable.kSelectionCharacter)
+          return
     app.log.info('find not found')
     self.doSelectionMode(app.selectable.kSelectionNone)
-
+    
   def findAgain(self):
     """Find the current pattern, searching down the document."""
     self.findCurrentPattern(1)
