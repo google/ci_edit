@@ -114,9 +114,8 @@ class StaticWindow:
     self.left = left
     try:
       self.cursorWindow.mvwin(self.top, self.left)
-    except:
-      app.log.info('error mvwin', top, left, repr(self))
-      app.log.detail('error mvwin', top, left, repr(self))
+    except Exception, e:
+      app.log.debug('error mvwin', top, left, "\n", repr(self), e)
 
   def moveBy(self, top, left):
     app.log.detail('moveBy', top, left, repr(self))
@@ -142,8 +141,8 @@ class StaticWindow:
     self.cols = cols
     try:
       self.cursorWindow.resize(self.rows, self.cols)
-    except:
-      app.log.detail('resize failed', self.rows, self.cols)
+    except Exception, e:
+      app.log.debug('resize failed', self.rows, self.cols, "\n", e)
 
   def resizeBottomBy(self, rows):
     app.log.detail(rows, repr(self))
@@ -772,7 +771,7 @@ class InputWindow(Window):
     for i in range(limit):
       color = app.color.get('right_column')
       if len(self.textBuffer.lines[
-          i+self.scrollRow])-self.scrollCol > maxCol:
+          i + self.scrollRow]) - self.scrollCol > maxCol:
         color = app.color.get('line_overflow')
       self.rightColumn.addStr(i, 0, ' ', color)
     color = app.color.get('outside_document')
