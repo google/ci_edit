@@ -132,6 +132,7 @@ class StaticWindow:
       child.refresh()
 
   def reshape(self, rows, cols, top, left):
+    self.resizeTo(1, 1)
     self.moveTo(top, left)
     self.resizeTo(rows, cols)
 
