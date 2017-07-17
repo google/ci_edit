@@ -233,6 +233,7 @@ class Mutator(app.selectable.Selectable):
         self.lines[self.penRow] = line[:self.penCol]
         for i in range(max(change[1][0] - 1, 0)):
           self.lines.insert(self.penRow + 1, "")
+        self.redoMove(change[1][1])
       elif change[0] == 'v':  # Redo paste.
         self.insertLines(change[1])
       elif change[0] == 'vb':
@@ -305,7 +306,12 @@ class Mutator(app.selectable.Selectable):
           self.undoOne()
           self.redoChain.pop()
         elif self.redoChain[-1][0] == change[0] and change[0] == 'n':
-          change = (change[0], addVectors(self.redoChain[-1][1], change[1]))
+          newMouseChange = change[1][1]
+          newCarriageReturns = change[1][0]
+          oldMouseChange = self.redoChain[-1][1][1]
+          oldCarriageReturns = self.redoChain[-1][1][0]
+          change = (change[0], (oldCarriageReturns + newCarriageReturns, 
+                                ('m', addVectors(newMouseChange[1], oldMouseChange[1]))))
           self.undoOne()
           self.redoChain.pop()
     if newTrivialChange:
@@ -432,6 +438,7 @@ class Mutator(app.selectable.Selectable):
           self.doMoveLines(to, to + count, begin + count)
       elif change[0] == 'n':
         # Undo split lines.
+        self.undoMove(change[1][1])
         self.lines[self.penRow] += self.lines[self.penRow + change[1][0]]
         for i in range(change[1][0]):
           del self.lines[self.penRow + 1]

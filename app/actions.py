@@ -132,9 +132,7 @@ class Actions(app.mutator.Mutator):
 
   def carriageReturn(self):
     self.performDelete()
-    self.redoAddChange(('n', (1,)))
-    self.redo()
-    self.cursorMove(1, -self.penCol)
+    self.redoAddChange(('n', (1, self.getCursorMove(1, -self.penCol))))
     self.redo()
     if 1: # todo: if indent on CR
       line = self.lines[self.penRow - 1]
@@ -171,10 +169,13 @@ class Actions(app.mutator.Mutator):
     self.selectionNone()
     self.cursorMoveLeft()
 
+  def getCursorMove(self, rowDelta, colDelta):
+    return self.getCursorMoveAndMark(rowDelta, colDelta, 0, 0, 0)
+
   def cursorMove(self, rowDelta, colDelta):
     self.cursorMoveAndMark(rowDelta, colDelta, 0, 0, 0)
 
-  def cursorMoveAndMark(self, rowDelta, colDelta, markRowDelta,
+  def getCursorMoveAndMark(self, rowDelta, colDelta, markRowDelta,
       markColDelta, selectionModeDelta):
     self.view.goalCol = self.penCol + colDelta
     maxRow, maxCol = self.view.cursorWindow.getmaxyx()
@@ -190,8 +191,14 @@ class Actions(app.mutator.Mutator):
       scrollCols = self.penCol + colDelta - (self.view.scrollCol + maxCol - 1)
     self.view.scrollRow += scrollRows
     self.view.scrollCol += scrollCols
-    self.redoAddChange(('m', (rowDelta, colDelta,
-        markRowDelta, markColDelta, selectionModeDelta)))
+    return ('m', (rowDelta, colDelta,
+        markRowDelta, markColDelta, selectionModeDelta))
+
+  def cursorMoveAndMark(self, rowDelta, colDelta, markRowDelta,
+      markColDelta, selectionModeDelta):
+    change = self.getCursorMoveAndMark(rowDelta, colDelta, markRowDelta,
+                                       markColDelta, selectionModeDelta)
+    self.redoAddChange(change)
 
   def cursorMoveScroll(self, rowDelta, colDelta,
       scrollRowDelta, scrollColDelta):
