@@ -776,7 +776,7 @@ class Actions(app.mutator.Mutator):
 
   def indent(self):
     if self.selectionMode == app.selectable.kSelectionNone:
-      self.cursorMoveAndMark(0, -self.penCol,
+      self.cursorMoveAndMark(0, 0,
           self.penRow - self.markerRow, self.penCol - self.markerCol, 0)
       self.redo()
       self.indentLines()
@@ -793,7 +793,10 @@ class Actions(app.mutator.Mutator):
       self.indentLines()
 
   def indentLines(self):
-    self.redoAddChange(('vi', ('  ')))
+    indentation = '  '
+    self.redoAddChange(('vi', (indentation)))
+    self.redo()
+    self.cursorMoveAndMark(0, len(indentation), 0, 0, 0)
     self.redo()
 
   def verticalInsert(self, row, endRow, col, text):
