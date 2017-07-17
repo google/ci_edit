@@ -327,11 +327,13 @@ class CiProgram:
       app.log.mouse('click landed on screen')
       return
     if self.focusedWindow != window and window.isFocusable:
+      app.log.debug('before change focus')
       window.changeFocusTo(window)
+      app.log.debug('after change focus')
     mouseRow -= window.top
     mouseCol -= window.left
     app.log.mouse(mouseRow, mouseCol)
-    app.log.mouse("\n",window)
+    app.log.mouse("\n", window)
     #app.log.info('bState', app.curses_util.mouseButtonName(bState))
     if bState & curses.BUTTON1_RELEASED:
       app.log.mouse(bState, curses.BUTTON1_RELEASED)

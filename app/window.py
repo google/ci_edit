@@ -140,10 +140,11 @@ class StaticWindow:
     app.log.detail(rows, cols)
     self.rows = rows
     self.cols = cols
+    assert self.rows, repr(self)
     try:
       self.cursorWindow.resize(self.rows, self.cols)
     except Exception, e:
-      app.log.debug('resize failed', self.rows, self.cols, "\n", e)
+      app.log.debug('resize failed', self.rows, self.cols, "\n", repr(self))
 
   def resizeBottomBy(self, rows):
     app.log.detail(rows, repr(self))
@@ -458,7 +459,7 @@ class InteractiveFind(Window):
   def reshape(self, rows, cols, top, left):
     self.findLine.reshape(1, cols, top, left)
     top += 1
-    self.findLine.reshape(1, cols, top, left)
+    self.replaceLine.reshape(1, cols, top, left)
 
 
 class MessageLine(StaticWindow):
@@ -582,7 +583,8 @@ class TopInfo(StaticWindow):
     if self.mode > 0:
       infoRows = self.mode
     if self.borrowedRows != infoRows:
-      self.host.resizeTopBy(infoRows-self.borrowedRows)
+      assert infoRows
+      self.host.resizeTopBy(infoRows - self.borrowedRows)
       self.resizeTo(infoRows, self.cols)
       self.borrowedRows = infoRows
 
@@ -592,9 +594,9 @@ class TopInfo(StaticWindow):
     lines.reverse()
     color = app.color.get('top_info')
     for i,line in enumerate(lines):
-      self.addStr(i, 0, line+' '*(self.cols-len(line)), color)
+      self.addStr(i, 0, line + ' ' * (self.cols - len(line)), color)
     for i in range(len(lines), self.rows):
-      self.addStr(i, 0, ' '*self.cols, color)
+      self.addStr(i, 0, ' ' * self.cols, color)
     self.cursorWindow.refresh()
 
   def reshape(self, rows, cols, top, left):
@@ -719,12 +721,13 @@ class InputWindow(Window):
 
   def layout(self):
     """Change self and sub-windows to fit within the given rectangle."""
+    app.log.info()
     rows, cols, top, left = self.outerShape
     lineNumbersCols = 7
     bottomRows = self.bottomRows
 
     if self.showTopInfo:
-      self.topInfo.reshape(0, cols - lineNumbersCols, top,
+      self.topInfo.reshape(1, cols - lineNumbersCols, top,
           left + lineNumbersCols)
     self.confirmClose.reshape(1, cols, top + rows - 1, left)
     self.confirmOverwrite.reshape(1, cols, top + rows - 1, left)
@@ -752,7 +755,7 @@ class InputWindow(Window):
       self.rightColumn.reshape(rows, 1, top, left + cols - 1)
       cols -= 1
     # The top, left of the main window is the rows, cols of the logo corner.
-    self.logoCorner.reshape(top, left, 0, 0)
+    self.logoCorner.reshape(1, 1, top, left)
     Window.reshape(self, rows, cols, top, left)
 
   def resizeTopBy(self, rowDelta):
@@ -788,6 +791,8 @@ class InputWindow(Window):
     self.rightColumn.cursorWindow.refresh()
 
   def focus(self):
+    app.log.debug()
+    self.layout()
     if self.showMessageLine:
       self.messageLine.show()
     Window.focus(self)
