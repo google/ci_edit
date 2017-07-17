@@ -1060,7 +1060,9 @@ class Actions(app.mutator.Mutator):
         self.performDeleteRange(i, found.regs[0][0], i, found.regs[0][1])
 
   def unindent(self):
-    if self.selectionMode == app.selectable.kSelectionAll:
+    if self.selectionMode == app.selectable.kSelectionNone:
+      return
+    elif self.selectionMode == app.selectable.kSelectionAll:
       self.cursorMoveAndMark(len(self.lines) - 1 - self.penRow, -self.penCol,
           -self.markerRow, -self.markerCol,
           app.selectable.kSelectionLine - self.selectionMode)
@@ -1071,6 +1073,7 @@ class Actions(app.mutator.Mutator):
     self.unindentLines()
 
   def unindentLines(self):
+    indentation = '  '
     upperRow = min(self.markerRow, self.penRow)
     lowerRow = max(self.markerRow, self.penRow)
     app.log.info('unindentLines', upperRow, lowerRow)
@@ -1079,7 +1082,7 @@ class Actions(app.mutator.Mutator):
           (len(line) >= 2 and line[:2] != '  ')):
         # Handle multi-delete.
         return
-    self.redoAddChange(('vd', ('  ')))
+    self.redoAddChange(('vd', (indentation)))
     self.redo()
 
   def updateScrollPosition(self):
