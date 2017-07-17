@@ -22,7 +22,6 @@ import curses
 import re
 import sys
 
-
 class TextBuffer(app.actions.Actions):
   """The TextBuffer adds the drawing/rendering to the BackingTextBuffer."""
   def __init__(self):
