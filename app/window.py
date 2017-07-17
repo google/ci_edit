@@ -713,6 +713,12 @@ class InputWindow(Window):
   def reshape(self, rows, cols, top, left):
     """Change self and sub-windows to fit within the given rectangle."""
     app.log.detail('reshape', rows, cols, top, left)
+    self.outerShape = (rows, cols, top, left)
+    self.layout()
+
+  def layout(self):
+    """Change self and sub-windows to fit within the given rectangle."""
+    rows, cols, top, left = self.outerShape
     lineNumbersCols = 7
     bottomRows = 1  # Not including status line.
 
