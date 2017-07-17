@@ -608,6 +608,7 @@ class InputWindow(Window):
     assert(host)
     Window.__init__(self, host)
     self.bookmarkIndex = 0
+    self.bottomRows = 1  # Not including status line.
     self.host = host
     self.showFooter = True
     self.useInteractiveFind = True
@@ -720,7 +721,7 @@ class InputWindow(Window):
     """Change self and sub-windows to fit within the given rectangle."""
     rows, cols, top, left = self.outerShape
     lineNumbersCols = 7
-    bottomRows = 1  # Not including status line.
+    bottomRows = self.bottomRows
 
     if self.showTopInfo:
       self.topInfo.reshape(0, cols - lineNumbersCols, top,
