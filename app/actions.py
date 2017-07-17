@@ -778,20 +778,15 @@ class Actions(app.mutator.Mutator):
     if self.selectionMode == app.selectable.kSelectionNone:
       self.cursorMoveAndMark(0, 0,
           self.penRow - self.markerRow, self.penCol - self.markerCol, 0)
-      self.redo()
-      self.indentLines()
     elif self.selectionMode == app.selectable.kSelectionAll:
       self.cursorMoveAndMark(len(self.lines) - 1 - self.penRow, -self.penCol,
           -self.markerRow, -self.markerCol,
           app.selectable.kSelectionLine - self.selectionMode)
-      self.redo()
-      self.indentLines()
     else:
       self.cursorMoveAndMark(0, -self.penCol, 0, -self.markerCol,
           app.selectable.kSelectionLine - self.selectionMode)
-      self.redo()
-      self.indentLines()
-
+    self.redo()
+    self.indentLines()
   def indentLines(self):
     indentation = '  '
     self.redoAddChange(('vi', (indentation)))
@@ -1069,13 +1064,11 @@ class Actions(app.mutator.Mutator):
       self.cursorMoveAndMark(len(self.lines) - 1 - self.penRow, -self.penCol,
           -self.markerRow, -self.markerCol,
           app.selectable.kSelectionLine - self.selectionMode)
-      self.redo()
-      self.unindentLines()
     else:
       self.cursorMoveAndMark(0, -self.penCol, 0, -self.markerCol,
           app.selectable.kSelectionLine - self.selectionMode)
-      self.redo()
-      self.unindentLines()
+    self.redo()
+    self.unindentLines()
 
   def unindentLines(self):
     upperRow = min(self.markerRow, self.penRow)
