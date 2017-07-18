@@ -252,14 +252,15 @@ class Mutator(app.selectable.Selectable):
           line = self.lines[i]
           self.lines[i] = line[:x] + line[x + len(change[1]):]
       elif change[0] == 'vi':  # Redo vertical insert.
-        text = change[1]
-        col = self.penCol
-        row = min(self.markerRow, self.penRow)
-        rowEnd = max(self.markerRow, self.penRow)
+        text = change[1][0]
+        col = change[1][3]
+        row = change[1][1]
+        endRow = change[1][2]
         app.log.info('do vi')
-        for i in range(row, rowEnd + 1):
+        for i in range(row, endRow + 1):
           line = self.lines[i]
           self.lines[i] = line[:col] + text + line[col:]
+
       else:
         app.log.info('ERROR: unknown redo.')
     # Redo again if there is a move next.
@@ -472,10 +473,10 @@ class Mutator(app.selectable.Selectable):
           line = self.lines[i]
           self.lines[i] = line[:x] + change[1] + line[x:]
       elif change[0] == 'vi':  # Undo.
-        text = change[1]
-        col = self.penCol
-        row = min(self.markerRow, self.penRow)
-        endRow = max(self.markerRow, self.penRow)
+        text = change[1][0]
+        col = change[1][3]
+        row = change[1][1]
+        endRow = change[1][2]
         textLen = len(text)
         app.log.info('undo vi', textLen)
         for i in range(row, endRow + 1):
