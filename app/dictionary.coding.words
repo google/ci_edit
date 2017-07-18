@@ -40,6 +40,8 @@ abcdefghijklmnopqrstuvw
 abcdefghijklmnopqrstuvwx
 abcdefghijklmnopqrstuvwxy
 abcdefghijklmnopqrstuvwxyz
+accessor
+accessors
 adate
 alloc
 apis
@@ -169,6 +171,7 @@ na
 namespaces
 ne
 neq
+ndebug
 nullptr
 num
 oauth
