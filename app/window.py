@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import app.buffer_manager
+import app.color
 import app.controller
 import app.cu_editor
 import app.editor
@@ -29,8 +30,6 @@ class StaticWindow:
   def __init__(self, parent):
     self.parent = parent
     self.zOrder = []
-    self.color = 0
-    self.colorSelected = 1
     self.isFocusable = False
     self.top = 0
     self.left = 0
@@ -64,10 +63,10 @@ class StaticWindow:
   def presentModal(self, changeTo, paneRow, paneCol):
     self.parent.presentModal(changeTo, paneRow, paneCol)
 
-  def blank(self):
+  def blank(self, colorPair):
     """Clear the window."""
     for i in range(self.rows):
-      self.addStr(i, 0, ' '*self.cols, self.color)
+      self.addStr(i, 0, ' '*self.cols, colorPair)
     self.cursorWindow.refresh()
 
   def contains(self, row, col):
@@ -84,7 +83,7 @@ class StaticWindow:
   def hide(self):
     """Remove window from the render list."""
     try: self.parent.zOrder.remove(self)
-    except ValueError: app.log.detail(repr(self)+'not found in zOrder')
+    except ValueError: app.log.detail(repr(self) + 'not found in zOrder')
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
     pass
@@ -108,16 +107,15 @@ class StaticWindow:
     pass
 
   def moveTo(self, top, left):
-    app.log.detail('move', top, left)
+    app.log.detail(top, left)
     if top == self.top and left == self.left:
       return
     self.top = top
     self.left = left
     try:
       self.cursorWindow.mvwin(self.top, self.left)
-    except:
-      app.log.info('error mvwin', top, left, repr(self))
-      app.log.detail('error mvwin', top, left, repr(self))
+    except Exception, e:
+      app.log.debug('error mvwin', top, left, "\n", repr(self), e)
 
   def moveBy(self, top, left):
     app.log.detail('moveBy', top, left, repr(self))
@@ -134,27 +132,28 @@ class StaticWindow:
       child.refresh()
 
   def reshape(self, rows, cols, top, left):
+    self.resizeTo(1, 1)
     self.moveTo(top, left)
     self.resizeTo(rows, cols)
 
   def resizeTo(self, rows, cols):
-    app.log.detail('resizeTo', rows, cols)
+    app.log.detail(rows, cols)
     self.rows = rows
     self.cols = cols
     try:
       self.cursorWindow.resize(self.rows, self.cols)
-    except:
-      app.log.detail('resize failed', self.rows, self.cols)
+    except Exception, e:
+      app.log.debug('resize failed', self.rows, self.cols, "\n", repr(self))
 
   def resizeBottomBy(self, rows):
-    app.log.detail('resizeTopBy', rows, repr(self))
+    app.log.detail(rows, repr(self))
     self.rows += rows
     if self.rows <= 0:
       return
     self.cursorWindow.resize(self.rows, self.cols)
 
   def resizeBy(self, rows, cols):
-    app.log.detail('resizeBy', rows, cols, repr(self))
+    app.log.detail(rows, cols, repr(self))
     self.rows += rows
     self.cols += cols
     if self.rows <= 0 or self.cols <= 0:
@@ -186,12 +185,11 @@ class StaticWindow:
     except: pass
     self.parent.zOrder.append(self)
 
-  def writeLine(self, text, colorPair=1):
+  def writeLine(self, text, color):
     """Simple line writer for static windows."""
     text = str(text)[:self.cols]
-    text = text + ' '*max(0, self.cols-len(text))
-    try: self.cursorWindow.addstr(self.writeLineRow, 0, text,
-        curses.color_pair(colorPair))
+    text = text + ' ' * max(0, self.cols - len(text))
+    try: self.cursorWindow.addstr(self.writeLineRow, 0, text, color)
     except curses.error: pass
     self.writeLineRow += 1
 
@@ -294,17 +292,16 @@ class LabeledLine(Window):
     self.setTextBuffer(app.text_buffer.TextBuffer())
     self.label = label
     self.leftColumn = StaticWindow(self)
-    self.color = curses.color_pair(app.prefs.defaultColorIndex)
-    self.colorSelected = curses.color_pair(87)
 
   def refresh(self):
-    self.leftColumn.addStr(0, 0, self.label, self.color)
+    self.leftColumn.addStr(0, 0, self.label,
+        app.prefs.prefs['color']['default'])
     self.leftColumn.cursorWindow.refresh()
     Window.refresh(self)
 
   def reshape(self, rows, cols, top, left):
     labelWidth = len(self.label)
-    Window.reshape(self, rows, cols-labelWidth, top, left+labelWidth)
+    Window.reshape(self, rows, cols - labelWidth, top, left + labelWidth)
     self.leftColumn.reshape(rows, labelWidth, top, left)
 
   def setController(self, controllerClass):
@@ -315,17 +312,17 @@ class LabeledLine(Window):
     self.reshape(self.rows, self.cols, self.top, self.left)
 
   def unfocus(self):
-    self.blank()
+    self.blank(app.color.get('message_line'))
     self.hide()
-    self.leftColumn.blank()
+    self.leftColumn.blank(app.color.get('message_line'))
     self.leftColumn.hide()
     Window.unfocus(self)
 
 
 class Menu(StaticWindow):
   """"""
-  def __init__(self, prg, host):
-    StaticWindow.__init__(self, prg)
+  def __init__(self, host):
+    StaticWindow.__init__(self, host)
     self.host = host
     self.controller = None
     self.lines = []
@@ -350,13 +347,14 @@ class Menu(StaticWindow):
     for i in self.lines:
       if len(i) > longest:
         longest = len(i)
-    self.reshape(len(self.lines), longest+2, left, top)
+    self.reshape(len(self.lines), longest + 2, left, top)
 
   def refresh(self):
+    color = app.color.get('context_menu')
     maxRow, maxCol = self.cursorWindow.getmaxyx()
     self.writeLineRow = 0
     for i in self.lines[:maxRow]:
-      self.writeLine(" "+i, 192);
+      self.writeLine(" "+i, color);
     StaticWindow.refresh(self)
 
   def setController(self, controllerClass):
@@ -372,16 +370,16 @@ class LineNumbers(StaticWindow):
     maxRow, maxCol = self.cursorWindow.getmaxyx()
     textBuffer = self.host.textBuffer
     limit = min(maxRow, len(textBuffer.lines)-self.host.scrollRow)
+    color = app.color.get('line_number')
     for i in range(limit):
-      self.addStr(i, 0,
-          ' %5d  '%(self.host.scrollRow+i+1), self.color)
-    color = curses.color_pair(app.prefs.outsideOfBufferColorIndex)
+      self.addStr(i, 0, ' %5d  '%(self.host.scrollRow + i + 1), color)
+    color = app.color.get('outside_document')
     for i in range(limit, maxRow):
       self.addStr(i, 0, '       ', color)
     if 1:
+      color = app.color.get('line_number_current')
       cursorAt = self.host.cursorRow-self.host.scrollRow
-      self.addStr(cursorAt, 1,
-          '%5d'%(self.host.cursorRow+1), self.colorSelected)
+      self.addStr(cursorAt, 1, '%5d'%(self.host.cursorRow+1), color)
     self.cursorWindow.refresh()
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
@@ -435,12 +433,32 @@ class LogWindow(StaticWindow):
     app.log.meta(" "*10, self.refreshCounter, "- screen refresh -")
     maxRow, maxCol = self.cursorWindow.getmaxyx()
     self.writeLineRow = 0
+    colorA = app.color.get(0)
+    colorB = app.color.get(96)
     for i in self.lines[-maxRow:]:
-      color = 0
+      color = colorA
       if len(i) and i[-1] == '-':
-        color = 96
+        color = colorB
       self.writeLine(i, color);
     StaticWindow.refresh(self)
+
+
+class InteractiveFind(Window):
+  def __init__(self, host):
+    Window.__init__(self, host)
+    self.findLine = LabeledLine(self, 'find: ')
+    self.findLine.setController(app.cu_editor.InteractiveFind)
+    self.zOrder.append(self.findLine)
+    self.replaceLine = LabeledLine(self, 'replace: ')
+    self.replaceLine.setController(app.cu_editor.InteractiveFind)
+    self.zOrder.append(self.replaceLine)
+    self.setTextBuffer(app.text_buffer.TextBuffer())
+    self.controller = app.cu_editor.InteractiveFind(host, self.findLine.textBuffer)
+
+  def reshape(self, rows, cols, top, left):
+    self.findLine.reshape(1, cols, top, left)
+    top += 1
+    self.replaceLine.reshape(1, cols, top, left)
 
 
 class MessageLine(StaticWindow):
@@ -449,16 +467,15 @@ class MessageLine(StaticWindow):
     StaticWindow.__init__(self, host)
     self.host = host
     self.message = None
-    self.colorIndex = 1
     self.renderedMessage = None
 
   def refresh(self):
     if self.message:
       if self.message != self.renderedMessage:
         self.writeLineRow = 0
-        self.writeLine(self.message[0], curses.color_pair(self.colorIndex))
+        self.writeLine(self.message[0], app.color.get('message_line'))
     else:
-      self.blank()
+      self.blank(app.color.get('message_line'))
     self.cursorWindow.refresh()
 
 
@@ -498,16 +515,15 @@ class StatusLine(StaticWindow):
     rightSide = ''
     if len(statusLine):
       rightSide += ' |'
-    if self.host.prg.showLogWindow:
-      rightSide += ' %s | %s |'%(
-          tb.cursorGrammarName(),
-          tb.selectionModeName())
+    if app.prefs.prefs['startup'].get('showLogWindow'):
+      rightSide += ' %s | %s |'%(tb.cursorGrammarName(), tb.selectionModeName())
     rightSide += ' %4d,%2d | %3d%%,%3d%%'%(
         self.host.cursorRow+1, self.host.cursorCol+1,
         rowPercentage,
         colPercentage)
     statusLine += ' '*(maxCol-len(statusLine)-len(rightSide)) + rightSide
-    self.addStr(0, 0, statusLine, self.color)
+    color = app.color.get('status_line')
+    self.addStr(0, 0, statusLine, color)
     self.cursorWindow.refresh()
 
 
@@ -553,6 +569,9 @@ class TopInfo(StaticWindow):
           lineCursor -= 1
     pathLine = self.host.textBuffer.fullPath
     if 1:
+      if tb.isReadOnly:
+        pathLine += ' [RO]'
+    if 1:
       if tb.isDirty():
         pathLine += ' * '
       else:
@@ -563,18 +582,19 @@ class TopInfo(StaticWindow):
     if self.mode > 0:
       infoRows = self.mode
     if self.borrowedRows != infoRows:
-      self.host.resizeTopBy(infoRows-self.borrowedRows)
-      self.resizeTo(infoRows, self.cols)
+      self.host.topRows = infoRows
+      self.host.layout()
       self.borrowedRows = infoRows
 
   def refresh(self):
     """Render the context information at the top of the window."""
     lines = self.lines
     lines.reverse()
+    color = app.color.get('top_info')
     for i,line in enumerate(lines):
-      self.addStr(i, 0, line+' '*(self.cols-len(line)), self.color)
+      self.addStr(i, 0, line + ' ' * (self.cols - len(line)), color)
     for i in range(len(lines), self.rows):
-      self.addStr(i, 0, ' '*self.cols, self.color)
+      self.addStr(i, 0, ' ' * self.cols, color)
     self.cursorWindow.refresh()
 
   def reshape(self, rows, cols, top, left):
@@ -584,21 +604,22 @@ class TopInfo(StaticWindow):
 
 class InputWindow(Window):
   """This is the main content window. Often the largest pane displayed."""
-  def __init__(self, prg):
-    assert(prg)
-    Window.__init__(self, prg)
+  def __init__(self, host):
+    assert(host)
+    Window.__init__(self, host)
     self.bookmarkIndex = 0
-    self.prg = prg
+    self.bottomRows = 1  # Not including status line.
+    self.host = host
     self.showFooter = True
     self.useInteractiveFind = True
-    self.showLineNumbers = True
+    self.showLineNumbers = app.prefs.prefs['editor'].get(
+        'showLineNumbers', True)
     self.showMessageLine = True
     self.showRightColumn = True
     self.showTopInfo = True
-    self.color = curses.color_pair(app.prefs.defaultColorIndex)
-    self.colorSelected = curses.color_pair(app.prefs.selectedColor)
+    self.topRows = 0
     self.controller = app.controller.MainController(self)
-    self.controller.add(app.cu_editor.CuaPlusEdit(prg, self))
+    self.controller.add(app.cu_editor.CuaPlusEdit(host, self))
     # What does the user appear to want: edit, quit, or something else?
     self.userIntent = 'edit'
     if 1:
@@ -609,8 +630,10 @@ class InputWindow(Window):
       self.confirmOverwrite = LabeledLine(self,
           "Overwrite exiting file? (yes or no): ")
       self.confirmOverwrite.setController(app.cu_editor.ConfirmOverwrite)
-    self.contextMenu = Menu(prg, self)
-    if 1:
+    self.contextMenu = Menu(self)
+    if 0:  # wip on multi-line interactive find.
+      self.interactiveFind = InteractiveFind(self)
+    else:
       self.interactiveFind = LabeledLine(self, 'find: ')
       self.interactiveFind.setController(app.cu_editor.InteractiveFind)
     if 1:
@@ -635,109 +658,115 @@ class InputWindow(Window):
       self.interactiveSaveAs.setController(app.cu_editor.InteractiveSaveAs)
     if 1:
       self.topInfo = TopInfo(self)
-      self.topInfo.color = curses.color_pair(168)
-      self.topInfo.colorSelected = curses.color_pair(47)
       self.topInfo.setParent(self, 0)
       if not self.showTopInfo:
         self.topInfo.hide()
     if 1:
       self.statusLine = StatusLine(self)
-      self.statusLine.color = curses.color_pair(168)
-      self.statusLine.colorSelected = curses.color_pair(47)
       self.statusLine.setParent(self, 0)
       if not self.showFooter:
         self.statusLine.hide()
     if 1:
-      self.leftColumn = LineNumbers(self)
-      self.leftColumn.color = curses.color_pair(211)
-      self.leftColumn.colorSelected = curses.color_pair(146)
-      self.leftColumn.setParent(self, 0)
+      self.lineNumberColumn = LineNumbers(self)
+      self.lineNumberColumn.setParent(self, 0)
       if not self.showLineNumbers:
-        self.leftColumn.hide()
+        self.lineNumberColumn.hide()
     if 1:
       self.logoCorner = StaticWindow(self)
       self.logoCorner.name = 'Logo'
-      self.logoCorner.color = curses.color_pair(168)
-      self.logoCorner.colorSelected = curses.color_pair(146)
       self.logoCorner.setParent(self, 0)
     if 1:
       self.rightColumn = StaticWindow(self)
       self.rightColumn.name = 'Right'
-      self.rightColumn.color = curses.color_pair(
-          app.prefs.outsideOfBufferColorIndex)
-      self.rightColumn.colorSelected = curses.color_pair(105)
       self.rightColumn.setParent(self, 0)
       if not self.showRightColumn:
         self.rightColumn.hide()
     if self.showMessageLine:
       self.messageLine = MessageLine(self)
-      self.messageLine.color = curses.color_pair(3)
-      self.messageLine.colorSelected = curses.color_pair(87)
       self.messageLine.setParent(self, 0)
 
+  if 0:
+    def splitWindow(self):
+      """
+      Experimental.
+      """
+      app.log.info()
+      other = InputWindow(self.prg)
+      other.setTextBuffer(self.textBuffer)
+      app.log.info()
+      self.prg.zOrder.append(other)
+      self.prg.layout()
+      app.log.info()
+
   def startup(self):
-    for f in self.prg.cliFiles:
+    for f in app.prefs.prefs['startup'].get('cliFiles', []):
       app.buffer_manager.buffers.loadTextBuffer(f['path'])
-    if self.prg.readStdin:
+    if app.prefs.prefs['startup'].get('readStdin'):
       app.buffer_manager.buffers.readStdin()
     tb = app.buffer_manager.buffers.topBuffer()
     if not tb:
       tb = app.buffer_manager.buffers.newTextBuffer()
     self.setTextBuffer(tb)
-    if self.prg.openToLine is not None:
-      self.textBuffer.selectText(self.prg.openToLine - 1, 0, 0,
+    openToLine = app.prefs.prefs['startup'].get('openToLine')
+    if openToLine is not None:
+      self.textBuffer.selectText(openToLine - 1, 0, 0,
           app.selectable.kSelectionNone)
 
   def reshape(self, rows, cols, top, left):
     """Change self and sub-windows to fit within the given rectangle."""
     app.log.detail('reshape', rows, cols, top, left)
+    self.outerShape = (rows, cols, top, left)
+    self.layout()
+
+  def layout(self):
+    """Change self and sub-windows to fit within the given rectangle."""
+    app.log.info()
+    rows, cols, top, left = self.outerShape
     lineNumbersCols = 7
-    bottomRows = 1  # Not including status line.
+    topRows = self.topRows
+    bottomRows = self.bottomRows
 
     if self.showTopInfo:
-      self.topInfo.reshape(0, cols-lineNumbersCols, top,
-          left+lineNumbersCols)
-    self.confirmClose.reshape(1, cols, top+rows-1, left)
-    self.confirmOverwrite.reshape(1, cols, top+rows-1, left)
-    self.interactiveOpen.reshape(1, cols, top+rows-1, left)
-    self.interactivePrediction.reshape(1, cols, top+rows-1, left)
-    self.interactivePrompt.reshape(1, cols, top+rows-1, left)
-    self.interactiveQuit.reshape(1, cols, top+rows-1, left)
-    self.interactiveSaveAs.reshape(1, cols, top+rows-1, left)
+      self.topInfo.reshape(topRows, cols - lineNumbersCols, top,
+          left + lineNumbersCols)
+      top += topRows
+      rows -= topRows
+    rows -= bottomRows
+    bottomFirstRow = top + rows
+    self.confirmClose.reshape(bottomRows, cols, bottomFirstRow, left)
+    self.confirmOverwrite.reshape(bottomRows, cols, bottomFirstRow, left)
+    self.interactiveOpen.reshape(bottomRows, cols, bottomFirstRow, left)
+    self.interactivePrediction.reshape(bottomRows, cols, bottomFirstRow, left)
+    self.interactivePrompt.reshape(bottomRows, cols, bottomFirstRow, left)
+    self.interactiveQuit.reshape(bottomRows, cols, bottomFirstRow, left)
+    self.interactiveSaveAs.reshape(bottomRows, cols, bottomFirstRow, left)
     if self.showMessageLine:
-      self.messageLine.reshape(bottomRows, cols, top+rows-bottomRows, left)
+      self.messageLine.reshape(bottomRows, cols, bottomFirstRow, left)
     if self.useInteractiveFind:
-      self.interactiveFind.reshape(bottomRows, cols,
-          top+rows-bottomRows, left)
+      self.interactiveFind.reshape(bottomRows, cols, bottomFirstRow, left)
     if 1:
-      self.interactiveGoto.reshape(bottomRows, cols, top+rows-bottomRows, left)
+      self.interactiveGoto.reshape(bottomRows, cols, bottomFirstRow,
+          left)
     if self.showFooter:
-      self.statusLine.reshape(1, cols, top+rows-bottomRows-1, left)
-      rows -= bottomRows+1
+      self.statusLine.reshape(1, cols, bottomFirstRow - 1, left)
+      rows -= 1
     if self.showLineNumbers:
-      self.leftColumn.reshape(rows, lineNumbersCols, top, left)
+      self.lineNumberColumn.reshape(rows, lineNumbersCols, top, left)
       cols -= lineNumbersCols
       left += lineNumbersCols
     if self.showRightColumn:
-      self.rightColumn.reshape(rows, 1, top, left+cols-1)
+      self.rightColumn.reshape(rows, 1, top, left + cols - 1)
       cols -= 1
     # The top, left of the main window is the rows, cols of the logo corner.
     self.logoCorner.reshape(top, left, 0, 0)
     Window.reshape(self, rows, cols, top, left)
 
-  def resizeTopBy(self, rowDelta):
-    Window.resizeTopBy(self, rowDelta)
-    self.leftColumn.resizeTopBy(rowDelta)
-    self.logoCorner.resizeBottomBy(rowDelta)
-    self.rightColumn.resizeTopBy(rowDelta)
-    self.textBuffer.updateScrollPosition()
-
   def drawLogoCorner(self):
     """."""
     maxRow, maxCol = self.logoCorner.cursorWindow.getmaxyx()
-    color = self.logoCorner.color
+    color = app.color.get('logo')
     for i in range(maxRow):
-      self.logoCorner.addStr(i, 0, ' '*maxCol, color)
+      self.logoCorner.addStr(i, 0, ' ' * maxCol, color)
     self.logoCorner.addStr(0, 1, 'ci', color)
     self.logoCorner.refresh()
 
@@ -747,23 +776,25 @@ class InputWindow(Window):
     maxRow, maxCol = self.cursorWindow.getmaxyx()
     limit = min(maxRow, len(self.textBuffer.lines)-self.scrollRow)
     for i in range(limit):
-      color = self.rightColumn.color
+      color = app.color.get('right_column')
       if len(self.textBuffer.lines[
-          i+self.scrollRow])-self.scrollCol > maxCol:
-        color = self.rightColumn.colorSelected
+          i + self.scrollRow]) - self.scrollCol > maxCol:
+        color = app.color.get('line_overflow')
       self.rightColumn.addStr(i, 0, ' ', color)
-    color = curses.color_pair(app.prefs.outsideOfBufferColorIndex)
+    color = app.color.get('outside_document')
     for i in range(limit, maxRow):
       self.rightColumn.addStr(i, 0, ' ', color)
     self.rightColumn.cursorWindow.refresh()
 
   def focus(self):
+    app.log.debug()
+    self.layout()
     if self.showMessageLine:
       self.messageLine.show()
     Window.focus(self)
 
   def quitNow(self):
-    self.prg.quitNow()
+    self.host.quitNow()
 
   def refresh(self):
     self.textBuffer.updateScrollPosition()
@@ -775,11 +806,14 @@ class InputWindow(Window):
   def setTextBuffer(self, textBuffer):
     app.log.info('setTextBuffer')
     #self.normalize()
+    if self.textBuffer is not None:
+      app.history.set(['files', self.textBuffer.fullPath, 'cursor'],
+          (self.textBuffer.penRow, self.textBuffer.penCol))
     #restore positions and selections  +
     textBuffer.lineLimitIndicator = 80
     self.controller.setTextBuffer(textBuffer)
     Window.setTextBuffer(self, textBuffer)
-    self.textBuffer.debugRedo = self.prg.debugRedo
+    self.textBuffer.debugRedo = app.prefs.prefs['startup'].get('debugRedo')
     # Restore cursor position.
     cursor = app.history.get(['files', textBuffer.fullPath, 'cursor'], (0, 0))
     if not len(textBuffer.lines):
@@ -810,6 +844,6 @@ class PaletteWindow(ActiveWindow):
     rows = 16
     for i in range(width):
       for k in range(rows):
-        self.addStr(k, i*5, ' %3d '%(i+k*width,), curses.color_pair(i+k*width))
+        self.addStr(k, i*5, ' %3d '%(i+k*width,), app.color.get(i+k*width))
     self.cursorWindow.refresh()
 

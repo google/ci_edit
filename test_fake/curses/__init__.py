@@ -13,19 +13,5 @@
 # limitations under the License.
 
 
-# Lorem ipsum
-adipiscing
-amet
-consectetur
-elit
-
-
-# Unfiled (todo)
-crx
-embedder
-foobarbaz
-teardown
-typedeffed
-webcal
-webprefs
-xkb
+from curses import *
+#__all__ = ["ascii"]

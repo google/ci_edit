@@ -16,6 +16,7 @@
 
 from app.curses_util import *
 import app.controller
+import app.log
 import curses
 import curses.ascii
 import os
@@ -78,15 +79,15 @@ class EditText(app.controller.Controller):
     }
 
   def focus(self):
-    self.prg.log('EditText.focus', repr(self))
+    app.log.info('EditText.focus', repr(self))
     self.commandDefault = self.textBuffer.insertPrintable
     self.commandSet = self.commandSet
 
   def info(self):
-    self.prg.log('EditText command set')
+    app.log.info('EditText command set')
 
   def saveDocument(self):
-    self.prg.log('saveDocument', self.document)
+    app.log.info('saveDocument', self.document)
     if self.document and self.document.textBuffer:
       self.document.textBuffer.fileWrite()
 
@@ -99,7 +100,7 @@ class InteractiveOpener(EditText):
   def __init__(self, prg, host, textBuffer):
     EditText.__init__(self, prg, host, textBuffer)
     self.document = host
-    self.prg.log('xxxxx', self.document)
+    app.log.info('xxxxx', self.document)
     commandSet = self.commandSet.copy()
     commandSet.update({
       curses.ascii.ESC: self.changeToInputWindow,
@@ -113,16 +114,16 @@ class InteractiveOpener(EditText):
     self.commandSet = commandSet
 
   def focus(self):
-    self.prg.log('InteractiveOpener.focus')
+    app.log.info('InteractiveOpener.focus')
     EditText.focus(self)
     # Create a new text buffer to display dir listing.
     self.host.setTextBuffer(text_buffer.TextBuffer(self.prg))
 
   def info(self):
-    self.prg.log('InteractiveOpener command set')
+    app.log.info('InteractiveOpener command set')
 
   def createOrOpen(self):
-    self.prg.log('createOrOpen')
+    app.log.info('createOrOpen')
     expandedPath = os.path.abspath(os.path.expanduser(self.textBuffer.lines[0]))
     if not os.path.isdir(expandedPath):
       self.host.setTextBuffer(
@@ -161,7 +162,7 @@ class InteractiveOpener(EditText):
       if i.startswith(fileName):
         matches.append(i)
       else:
-        self.prg.log('not', i)
+        app.log.info('not', i)
     if len(matches) <= 0:
       self.maybeSlash(expandedDir)
       self.onChange()
@@ -197,14 +198,14 @@ class InteractiveOpener(EditText):
     path = os.path.expanduser(os.path.expandvars(self.textBuffer.lines[0]))
     dirPath, fileName = os.path.split(path)
     dirPath = dirPath or '.'
-    self.prg.log('O.onChange', dirPath, fileName)
+    app.log.info('O.onChange', dirPath, fileName)
     if os.path.isdir(dirPath):
       lines = []
       for i in os.listdir(dirPath):
         if i.startswith(fileName):
           lines.append(i)
       if len(lines) == 1 and os.path.isfile(os.path.join(dirPath, fileName)):
-        self.host.setTextBuffer(self.prg.bufferManager.loadTextBuffer(
+        self.host.setTextBuffer(app.buffer_manager.buffers.loadTextBuffer(
             os.path.join(dirPath, fileName)))
       else:
         self.host.textBuffer.lines = [
@@ -250,13 +251,13 @@ class InteractiveFind(EditText):
       self.textBuffer.selectionAll()
       self.textBuffer.insertLines(selection)
     self.textBuffer.selectionAll()
-    self.prg.log('find tb', self.textBuffer.cursorCol)
+    app.log.info('find tb', self.textBuffer.cursorCol)
 
   def info(self):
-    self.prg.log('InteractiveFind command set')
+    app.log.info('InteractiveFind command set')
 
   def onChange(self):
-    self.prg.log('InteractiveFind.onChange')
+    app.log.info('InteractiveFind.onChange')
     searchFor = self.textBuffer.lines[0]
     try:
       self.findCmd(searchFor)
@@ -268,7 +269,7 @@ class InteractiveFind(EditText):
   #  pass
 
   def unfocus(self):
-    self.prg.log('unfocus Find')
+    app.log.info('unfocus Find')
     #self.hide()
     return
     self.document.resizeBy(self.height, 0)
@@ -295,14 +296,14 @@ class InteractiveGoto(EditText):
     self.commandSet = commandSet
 
   def focus(self):
-    self.prg.log('InteractiveGoto.focus')
+    app.log.info('InteractiveGoto.focus')
     self.textBuffer.selectionAll()
     self.textBuffer.insert(str(self.document.textBuffer.cursorRow+1))
     self.textBuffer.selectionAll()
     EditText.focus(self)
 
   def info(self):
-    self.prg.log('InteractiveGoto command set')
+    app.log.info('InteractiveGoto command set')
 
   def gotoBottom(self):
     self.cursorMoveTo(len(self.document.textBuffer.lines), 0)
@@ -319,7 +320,7 @@ class InteractiveGoto(EditText):
   def cursorMoveTo(self, row, col):
     textBuffer = self.document.textBuffer
     cursorRow = min(max(row - 1, 0), len(textBuffer.lines)-1)
-    self.prg.log('cursorMoveTo row', row, cursorRow)
+    app.log.info('cursorMoveTo row', row, cursorRow)
     textBuffer.cursorMove(cursorRow-textBuffer.cursorRow,
         col-textBuffer.cursorCol,
         col-textBuffer.goalCol)
@@ -340,7 +341,7 @@ class CiEdit(app.controller.Controller):
   """Keyboard mappings for ci."""
   def __init__(self, prg, textBuffer):
     app.controller.Controller.__init__(self, prg, None, 'CiEdit')
-    self.prg.log('CiEdit.__init__')
+    app.log.info('CiEdit.__init__')
     self.textBuffer = textBuffer
     self.commandSet_Main = {
       CTRL_SPACE: self.switchToCommandSetCmd,
@@ -464,7 +465,7 @@ class CuaEdit(app.controller.Controller):
     app.controller.Controller.__init__(self, prg, None, 'CuaEdit')
     self.prg = prg
     self.host = host
-    self.prg.log('CuaEdit.__init__')
+    app.log.info('CuaEdit.__init__')
 
   def setTextBuffer(self, textBuffer):
     self.textBuffer = textBuffer
@@ -538,8 +539,8 @@ class CuaEdit(app.controller.Controller):
     self.commandSet = self.commandSet_Main
 
   def info(self):
-    self.prg.log('CuaEdit Command set main')
-    self.prg.log(repr(self))
+    app.log.info('CuaEdit Command set main')
+    app.log.info(repr(self))
 
   def onChange(self):
     pass
@@ -567,14 +568,14 @@ class CuaPlusEdit(CuaEdit):
   """Keyboard mappings for CUA, plus some extra."""
   def __init__(self, prg, host):
     CuaEdit.__init__(self, prg, host)
-    self.prg.log('CuaPlusEdit.__init__')
+    app.log.info('CuaPlusEdit.__init__')
 
   def info(self):
-    self.prg.log('CuaPlusEdit Command set main')
-    self.prg.log(repr(self))
+    app.log.info('CuaPlusEdit Command set main')
+    app.log.info(repr(self))
 
   def setTextBuffer(self, textBuffer):
-    self.prg.log('CuaPlusEdit.__init__')
+    app.log.info('CuaPlusEdit.__init__')
     CuaEdit.setTextBuffer(self, textBuffer)
     commandSet = self.commandSet_Main.copy()
     commandSet.update({
@@ -591,7 +592,7 @@ class EmacsEdit:
     self.host = host
 
   def focus(self):
-    self.prg.log('EmacsEdit.focus')
+    app.log.info('EmacsEdit.focus')
     self.commandDefault = self.textBuffer.insertPrintable
     self.commandSet = self.commandSet_Main
 
@@ -599,7 +600,7 @@ class EmacsEdit:
     pass
 
   def setTextBuffer(self, textBuffer):
-    self.prg.log('EmacsEdit.setTextBuffer')
+    app.log.info('EmacsEdit.setTextBuffer')
     self.textBuffer = textBuffer
     self.commandSet_Main = {
       curses.KEY_F1: self.info,
@@ -645,8 +646,8 @@ class EmacsEdit:
     }
 
   def info(self):
-    self.prg.log('EmacsEdit Command set main')
-    self.prg.log(repr(self))
+    app.log.info('EmacsEdit Command set main')
+    app.log.info(repr(self))
 
   def switchToCommandSetX(self):
     self.log('emacs x')
@@ -662,7 +663,7 @@ class VimEdit:
     self.commandDefault = None
 
   def focus(self):
-    self.prg.log('VimEdit.focus')
+    app.log.info('VimEdit.focus')
     if not self.commandDefault:
       self.commandDefault = self.textBuffer.noOp
       self.commandSet = self.commandSet_Normal
@@ -671,7 +672,7 @@ class VimEdit:
     pass
 
   def setTextBuffer(self, textBuffer):
-    self.prg.log('VimEdit.setTextBuffer');
+    app.log.info('VimEdit.setTextBuffer');
     self.textBuffer = textBuffer
     self.commandSet_Normal = {
       ord('^'): textBuffer.cursorStartOfLine,
@@ -687,12 +688,12 @@ class VimEdit:
     }
 
   def switchToCommandSetInsert(self, ignored=1):
-    self.prg.log('insert mode')
+    app.log.info('insert mode')
     self.commandDefault = self.textBuffer.insertPrintable
     self.commandSet = self.commandSet_Insert
 
   def switchToCommandSetNormal(self, ignored=1):
-    self.prg.log('normal mode')
+    app.log.info('normal mode')
     self.commandDefault = self.textBuffer.noOp
     self.commandSet = self.commandSet_Normal
 

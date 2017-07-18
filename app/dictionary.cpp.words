@@ -12,7 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+atexit
+calloc
+ceil
+cmath
 cout
+endl
+extern
+iomanip
+iostream
+lu
+malloc
 memcmp
 memcpy
 memset
@@ -21,6 +31,10 @@ npos
 printf
 rbegin
 refcounted
+setprecision
+setw
 std
 stddef
 stdint
+uint
+va

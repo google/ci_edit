@@ -3,40 +3,57 @@ Note: these are outline notes I used to work through design issues. They
 probably don't make a lot of sense to another reader at the moment. My
 apologies.
 
-find
+# Find UI
+
+## What features should a find / replace tool have
+
+find (xor)
   all
   next
   prior
-replace
+replace (xor)
   all
   current
   next
   prior
-regex
+regex (boolean)
 match case (exact)
 smart cap replacement (smart)
 span lines (wrap)
 whole words (words)
 within
-  anything
-  comments
-  code
+  anything (same as selecting all options?)
+  comments (a grammar?)
+  code (a grammar?)
+  licenses (a grammar?)
   selection
+  quoted (strings) though maybe this is a grammar
+  a particular grammar (like py, js, cpp)
 files
-  current
-  open
-  directory
-  recursive
-path
-  include
-  exclude
+  recursive (boolean)
+  where (multi)
+    current file
+    open files
+    current directory (or include '.')
+    path
+      include (list)
+      exclude (list)
+Maybe (not sure on these)
+  mark lines with matches (boolean)
+  querySelect style
+  find misspelled word
+  error
+  external call/script
+  highlight all matches (boolean)
 
-mark lines with matches
-highlight all matches
+## Might be a silly idea, but what about a set notation so say where and how
+## to search
 
  within: code || comments || content || markup || quoted /* && marked && selection */
  within: -code +comments -content &marked +markup &quoted =selection
 
+
+## Here is a draft of a multi-line find UI
 
    find: dog
 replace: cat
@@ -46,4 +63,5 @@ that is: -marked -selected -changed
   paths: +example.txt
 exit^w  forward^f  reverse^r  replace^s  all^e  mark^m
 
+## There are some options that I'd like to operate on the main document
 undo/redo/save/quit

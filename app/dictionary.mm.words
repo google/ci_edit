@@ -12,20 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-# Lorem ipsum
-adipiscing
-amet
-consectetur
-elit
-
-
-# Unfiled (todo)
-crx
-embedder
-foobarbaz
-teardown
-typedeffed
-webcal
-webprefs
-xkb
+nsobject

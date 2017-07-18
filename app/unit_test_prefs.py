@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import app.prefs
+import app.default_prefs
 import re
 import unittest
 
 
-numbersRe = re.compile(app.prefs.joinReList(app.prefs.__common_numbers))
+numbersRe = re.compile(app.default_prefs.joinReList(
+    app.default_prefs.__common_numbers))
 
 
 class PrefsTestCases(unittest.TestCase):

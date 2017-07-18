@@ -12,20 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import app.prefs
+import curses
 
-# Lorem ipsum
-adipiscing
-amet
-consectetur
-elit
+cache__ = {}
 
+def reset():
+  global cache__
+  cache__ = {}
 
-# Unfiled (todo)
-crx
-embedder
-foobarbaz
-teardown
-typedeffed
-webcal
-webprefs
-xkb
+def get(colorType):
+  global cache__
+  r = cache__.get(colorType)
+  if r is not None:
+    return r
+  if type(colorType) == type(0):
+    colorIndex = colorType
+  else:
+    colorIndex = app.prefs.prefs['color'][colorType]
+  color = curses.color_pair(colorIndex)
+  cache__[colorType] = color
+  return color

@@ -38,6 +38,7 @@ abide
 abides
 abilities
 ability
+ablation
 able
 abnormal
 abnormally
@@ -843,6 +844,7 @@ architectures
 archival
 archive
 archived
+archiver
 archives
 archiving
 arcs
@@ -2182,6 +2184,7 @@ canals
 canaries
 canary
 cancel
+cancelable
 canceled
 canceler
 canceling
@@ -2894,6 +2897,7 @@ collects
 college
 colleges
 collide
+collided
 collides
 colliding
 collision
@@ -8382,6 +8386,8 @@ insensitivity
 inseparable
 insert
 inserted
+inserter
+inserters
 inserting
 insertion
 insertions
@@ -9569,6 +9575,7 @@ loses
 losing
 loss
 losses
+lossy
 lost
 lot
 lots
@@ -10061,6 +10068,7 @@ messing
 messy
 met
 meta
+metadata
 metal
 metallic
 metallurgist
@@ -12424,6 +12432,7 @@ preponderance
 preposition
 prepositional
 prepositions
+preprocess
 preprocessor
 preps
 prerecorded
@@ -12617,6 +12626,7 @@ professor
 proficient
 profile
 profiled
+profiler
 profiles
 profiling
 profit
@@ -13228,6 +13238,7 @@ reattachment
 reattempt
 reattempts
 reauthorize
+rebase
 rebate
 rebel
 rebellious
@@ -13471,6 +13482,7 @@ reflector
 reflects
 reflex
 reflexive
+reflowed
 refocus
 refocused
 refocuses
@@ -13853,6 +13865,7 @@ rerun
 rerunning
 res
 resale
+rescale
 reschedule
 rescheduled
 reschedules
@@ -14479,6 +14492,7 @@ says
 scad
 scaffolding
 scag
+scalable
 scalar
 scalars
 scale
@@ -14522,6 +14536,7 @@ schedulers
 schedules
 scheduling
 schema
+schemas
 schemata
 scheme
 schemed
@@ -14546,6 +14561,10 @@ scientist
 scientists
 scissor
 scissors
+scoop
+scooped
+scooping
+scoops
 scooted
 scope
 scoped
@@ -14938,6 +14957,8 @@ shimmed
 shims
 shin
 shine
+shined
+shines
 shingle
 shingles
 shingling
@@ -14985,6 +15006,7 @@ shortens
 shorter
 shortest
 shorthand
+shorthands
 shortly
 shorts
 shorty
@@ -15390,6 +15412,7 @@ sofa
 soft
 soften
 softest
+softly
 software
 soiled
 sol

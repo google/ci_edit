@@ -12,20 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+ESC = 1
+BS = 2
+DEL = 3
 
-# Lorem ipsum
-adipiscing
-amet
-consectetur
-elit
-
-
-# Unfiled (todo)
-crx
-embedder
-foobarbaz
-teardown
-typedeffed
-webcal
-webprefs
-xkb
+def isprint():
+  pass
