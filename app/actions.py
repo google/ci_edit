@@ -778,14 +778,17 @@ class Actions(app.mutator.Mutator):
     indentation = app.prefs.prefs['editor'].get('indentation')
     if self.selectionMode == app.selectable.kSelectionNone:
       self.verticalInsert(self.penRow, self.penRow, self.penCol, indentation)
-      self.cursorMoveAndMark(0, len(indentation), 0, 0, 0)
-      self.redo()
     else:
       self.indentLines()
-      self.cursorMoveAndMark(0, len(indentation), 0, 0, 0)
-      self.redo()
+    self.cursorMoveAndMark(0, len(indentation), 0, 0, 0)
+    self.redo()
 
   def indentLines(self):
+    """
+    Indents all selected lines. Do not use for when the selection mode
+    is kSelectionNone since markerRow/markerCol currently do not get
+    updated alongside penRow/penCol.
+    """
     col = 0
     row = min(self.markerRow, self.penRow)
     endRow = max(self.markerRow, self.penRow)
