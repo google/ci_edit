@@ -1071,18 +1071,19 @@ class Actions(app.mutator.Mutator):
 
   def unindentLines(self):
     indentation = app.prefs.prefs['editor'].get('indentation')
+    indentationLength = len(indentation)
     row = min(self.markerRow, self.penRow)
     endRow = max(self.markerRow, self.penRow)
     col = 0
     app.log.info('unindentLines', indentation, row, endRow, col)
     for line in self.lines[row:endRow + 1]:
-      if ((len(line) == 1 and line[:1] != ' ') or
-          (len(line) >= 2 and line[:2] != '  ')):
+      if (len(line) < indentationLength or
+          (line[:indentationLength] != indentation)):
         # Handle multi-delete.
         return
     self.redoAddChange(('vd', (indentation, row, endRow, col)))
     self.redo()
-    self.cursorMoveAndMark(0, -len(indentation), 0, -len(indentation), 0)
+    self.cursorMoveAndMark(0, -indentationLength, 0, -indentationLength, 0)
     self.redo()
 
   def updateScrollPosition(self):
