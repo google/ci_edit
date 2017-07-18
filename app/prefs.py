@@ -83,6 +83,10 @@ elif colorSchemeName in builtInColorSchemes:
     prefs['color'].update(builtInColorSchemes[colorSchemeName])
 
 
+editor = prefs['editor']
+palette = prefs['palette']
+
+
 grammars = {}
 # Arrange all the grammars by name.
 for k,v in prefs['grammar'].items():

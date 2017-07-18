@@ -26,7 +26,7 @@ class TextBuffer(app.actions.Actions):
   """The TextBuffer adds the drawing/rendering to the BackingTextBuffer."""
   def __init__(self):
     app.actions.Actions.__init__(self)
-    self.lineLimitIndicator = sys.maxint
+    self.lineLimitIndicator = app.prefs.editor['lineLimitIndicator']
     self.highlightRe = None
 
   def checkScrollToCursor(self, window):
@@ -70,7 +70,8 @@ class TextBuffer(app.actions.Actions):
       self.drawTextArea(window, 0, 0, rows, cols, 0)
     elif 1:
       splitRow = rows
-      splitCol = min(cols, self.lineLimitIndicator)
+      splitCol = max(0,
+          min(cols, self.lineLimitIndicator - self.view.scrollCol))
       self.drawTextArea(window, 0, 0, splitRow, splitCol, 0)
       if splitCol < cols:
         self.drawTextArea(window, 0, splitCol, splitRow, cols-splitCol, 32*4)
