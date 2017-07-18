@@ -177,6 +177,8 @@ class Actions(app.mutator.Mutator):
 
   def getCursorMoveAndMark(self, rowDelta, colDelta, markRowDelta,
       markColDelta, selectionModeDelta):
+    if self.penCol + colDelta < 0: #Catch cursor at beginning of line
+      colDelta = -self.penCol
     self.view.goalCol = self.penCol + colDelta
     maxRow, maxCol = self.view.cursorWindow.getmaxyx()
     scrollRows = 0
