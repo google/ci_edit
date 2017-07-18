@@ -257,7 +257,6 @@ class Mutator(app.selectable.Selectable):
         row = change[1][1]
         endRow = change[1][2]
         app.log.info('do vi')
-        self.markerCol += len(text)
         for i in range(row, endRow + 1):
           line = self.lines[i]
           self.lines[i] = line[:col] + text + line[col:]
@@ -478,7 +477,6 @@ class Mutator(app.selectable.Selectable):
         row = change[1][1]
         endRow = change[1][2]
         textLen = len(text)
-        self.markerCol -= textLen
         app.log.info('undo vi', textLen)
         for i in range(row, endRow + 1):
           line = self.lines[i]
