@@ -143,6 +143,7 @@ prefs = {
     'colorScheme': 'default',
     'findIgnoreCase': True,
     'indentation': '  ',
+    'lineLimitIndicator': 80,
     'palette': 'default',
     'showLineNumbers': True,
     'showStatusLine': True,
@@ -161,11 +162,14 @@ prefs = {
       'grammar': 'binary',
     },
     'c': {
-      'ext': ['.c', '.h'],
+      'ext': ['.c'],
       'grammar': 'c',
     },
     'cpp': {
-      'ext': ['.cc', '.cpp', '.cxx', '.c++', '.hpp', '.hxx', '.h++', '.inc'],
+      'ext': [
+        '.cc', '.cpp', '.cxx', '.c++', '.hpp', '.hxx', '.h++', '.inc',
+        '.h'  # Hmm, some source uses .h for cpp headers.
+      ],
       'grammar': 'cpp',
     },
     'css': {

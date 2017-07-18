@@ -41,7 +41,6 @@ class Parser:
   """A parser generates a set of grammar segments (ParserNode objects)."""
   def __init__(self):
     self.data = ""
-    self.grammarPrefs = app.prefs.prefs['grammar']
     self.grammarRowList = []
     app.log.parser('__init__')
 

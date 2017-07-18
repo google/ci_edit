@@ -327,11 +327,13 @@ class CiProgram:
       app.log.mouse('click landed on screen')
       return
     if self.focusedWindow != window and window.isFocusable:
+      app.log.debug('before change focus')
       window.changeFocusTo(window)
+      app.log.debug('after change focus')
     mouseRow -= window.top
     mouseCol -= window.left
     app.log.mouse(mouseRow, mouseCol)
-    app.log.mouse("\n",window)
+    app.log.mouse("\n", window)
     #app.log.info('bState', app.curses_util.mouseButtonName(bState))
     if bState & curses.BUTTON1_RELEASED:
       app.log.mouse(bState, curses.BUTTON1_RELEASED)
@@ -450,7 +452,7 @@ class CiProgram:
       else:
         cliFiles.append({'path': i})
     app.prefs.init()
-    app.prefs.prefs['startup'] = {
+    app.prefs.startup = {
       'debugRedo': debugRedo,
       'showLogWindow': showLogWindow,
       'cliFiles': cliFiles,
@@ -506,7 +508,7 @@ class CiProgram:
     app.history.loadUserHistory(os.path.join(homePath, 'history.dat'))
     app.curses_util.hackCursesFixes()
     self.startup()
-    if app.prefs.prefs['startup'].get('profile'):
+    if app.prefs.startup.get('profile'):
       profile = cProfile.Profile()
       profile.enable()
       self.commandLoop()
@@ -522,14 +524,14 @@ class CiProgram:
 
   def setUpPalette(self):
     def applyPalette(name):
-      palette = app.prefs.prefs['palette'][name]
+      palette = app.prefs.palette[name]
       foreground = palette['foregroundIndexes']
       background = palette['backgroundIndexes']
       cycle = len(foreground)
       for i in range(1, curses.COLORS):
         curses.init_pair(i, foreground[i % cycle], background[i / cycle])
     try:
-      applyPalette(app.prefs.prefs['editor']['palette'])
+      applyPalette(app.prefs.editor['palette'])
     except:
       applyPalette('default')
 
@@ -557,4 +559,3 @@ def run_ci():
 
 if __name__ == '__main__':
   run_ci()
-

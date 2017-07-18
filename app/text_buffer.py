@@ -26,7 +26,7 @@ class TextBuffer(app.actions.Actions):
   """The TextBuffer adds the drawing/rendering to the BackingTextBuffer."""
   def __init__(self):
     app.actions.Actions.__init__(self)
-    self.lineLimitIndicator = sys.maxint
+    self.lineLimitIndicator = app.prefs.editor['lineLimitIndicator']
     self.highlightRe = None
 
   def checkScrollToCursor(self, window):
@@ -70,7 +70,8 @@ class TextBuffer(app.actions.Actions):
       self.drawTextArea(window, 0, 0, rows, cols, 0)
     elif 1:
       splitRow = rows
-      splitCol = min(cols, self.lineLimitIndicator)
+      splitCol = max(0,
+          min(cols, self.lineLimitIndicator - self.view.scrollCol))
       self.drawTextArea(window, 0, 0, splitRow, splitCol, 0)
       if splitCol < cols:
         self.drawTextArea(window, 0, splitCol, splitRow, cols-splitCol, 32*4)
@@ -92,8 +93,8 @@ class TextBuffer(app.actions.Actions):
     startRow = self.view.scrollRow + top
     startCol = self.view.scrollCol + left
     endCol = self.view.scrollCol + left + cols
-    colors = app.prefs.prefs['color']
-    spellChecking = app.prefs.prefs['editor'].get('spellChecking', True)
+    colors = app.prefs.color
+    spellChecking = app.prefs.editor.get('spellChecking', True)
     if self.parser:
       # Highlight grammar.
       rowLimit = min(max(len(self.lines) - startRow, 0), rows)
@@ -170,7 +171,7 @@ class TextBuffer(app.actions.Actions):
       for i in range(rowLimit):
         line = self.lines[startRow + i][startCol:endCol]
         window.addStr(top + i, left, line + ' ' * (cols - len(line)),
-            app.color.get(app.prefs.prefs['color']['default'] + colorDelta))
+            app.color.get(app.prefs.color['default'] + colorDelta))
     self.drawOverlays(window, top, left, rows, cols, colorDelta)
 
   def drawOverlays(self, window, top, left, maxRow, maxCol, colorDelta):
@@ -179,7 +180,7 @@ class TextBuffer(app.actions.Actions):
     startCol = self.view.scrollCol + left
     endCol = self.view.scrollCol + left + maxCol
     rowLimit = min(max(len(self.lines) - startRow, 0), maxRow)
-    colors = app.prefs.prefs['color']
+    colors = app.prefs.color
     if 1:
       # Highlight brackets.
       color = app.color.get(colors['bracket'] + colorDelta)

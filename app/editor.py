@@ -228,7 +228,7 @@ class InteractivePrediction(app.controller.Controller):
     for i in os.listdir(os.path.expandvars(os.path.expanduser(dirPath)) or '.'):
       f, e = os.path.splitext(i)
       if file == f and ext != e and e not in ignoreExt:
-        self.items.append((None, os.path.join(dirPath, i), ' '))
+        self.items.append((None, os.path.join(dirPath, i), '='))
     # Suggest item.
     return (len(app.buffer_manager.buffers.buffers) - 2) % len(self.items)
 
