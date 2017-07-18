@@ -1062,29 +1062,26 @@ class Actions(app.mutator.Mutator):
         self.performDeleteRange(i, found.regs[0][0], i, found.regs[0][1])
 
   def unindent(self):
+    indentation = app.prefs.prefs['editor'].get('indentation')
     if self.selectionMode == app.selectable.kSelectionNone:
-      return
-    elif self.selectionMode == app.selectable.kSelectionAll:
-      self.cursorMoveAndMark(len(self.lines) - 1 - self.penRow, -self.penCol,
-          -self.markerRow, -self.markerCol,
-          app.selectable.kSelectionLine - self.selectionMode)
+      pass
     else:
-      self.cursorMoveAndMark(0, -self.penCol, 0, -self.markerCol,
-          app.selectable.kSelectionLine - self.selectionMode)
-    self.redo()
-    self.unindentLines()
+      self.unindentLines()
 
   def unindentLines(self):
-    indentation = '  '
-    upperRow = min(self.markerRow, self.penRow)
-    lowerRow = max(self.markerRow, self.penRow)
-    app.log.info('unindentLines', upperRow, lowerRow)
-    for line in self.lines[upperRow:lowerRow + 1]:
+    indentation = app.prefs.prefs['editor'].get('indentation')
+    row = min(self.markerRow, self.penRow)
+    endRow = max(self.markerRow, self.penRow)
+    col = 0
+    app.log.info('unindentLines', indentation, row, endRow, col)
+    for line in self.lines[row:endRow + 1]:
       if ((len(line) == 1 and line[:1] != ' ') or
           (len(line) >= 2 and line[:2] != '  ')):
         # Handle multi-delete.
         return
-    self.redoAddChange(('vd', (indentation)))
+    self.redoAddChange(('vd', (indentation, row, endRow, col)))
+    self.redo()
+    self.cursorMoveAndMark(0, -len(indentation), 0, -len(indentation), 0)
     self.redo()
 
   def updateScrollPosition(self):
