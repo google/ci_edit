@@ -461,12 +461,10 @@ class Mutator(app.selectable.Selectable):
           self.lines[self.penRow] = line[:x] + change[1] + line[x:]
         self.penCol += len(change[1])
       elif change[0] == 'vd':
-        upperRow = min(self.markerRow, self.penRow)
-        lowerRow = max(self.markerRow, self.penRow)
-        x = self.penCol
-        for i in range(upperRow, lowerRow + 1):
+        text, row, endRow, col = change[1]
+        for i in range(row, endRow + 1):
           line = self.lines[i]
-          self.lines[i] = line[:x] + change[1] + line[x:]
+          self.lines[i] = line[:col] + text + line[col:]
       elif change[0] == 'vi':  # Undo.
         text = change[1][0]
         col = change[1][3]
