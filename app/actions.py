@@ -1062,7 +1062,6 @@ class Actions(app.mutator.Mutator):
         self.performDeleteRange(i, found.regs[0][0], i, found.regs[0][1])
 
   def unindent(self):
-    indentation = app.prefs.prefs['editor'].get('indentation')
     if self.selectionMode == app.selectable.kSelectionNone:
       pass
     else:

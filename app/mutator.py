@@ -150,6 +150,18 @@ class Mutator(app.selectable.Selectable):
         self.markerRow += count
     self.lines = self.lines[:to] + lines + self.lines[to:]
 
+  def doVerticalInsert(self, change):
+    text, row, endRow, col = change[1]
+    for i in range(row, endRow + 1):
+      line = self.lines[i]
+      self.lines[i] = line[:col] + text + line[col:]
+
+  def doVerticalDelete(self, change):
+    text, row, endRow, col = change[1]
+    for i in range(row, endRow + 1):
+      line = self.lines[i]
+      self.lines[i] = line[:col] + line[col + len(text):]
+
   def redoMove(self, change):
     assert self.penRow + change[1][0] >= 0, "%s %s"%(
         self.penRow, change[1][0])
@@ -245,17 +257,11 @@ class Mutator(app.selectable.Selectable):
           x = self.penCol
           self.lines[self.penRow] = line[:x] + line[x + len(change[1]):]
       elif change[0] == 'vd':  # Redo vertical delete.
-        text, row, endRow, col = change[1]
         app.log.info('do vd')
-        for i in range(row, endRow + 1):
-          line = self.lines[i]
-          self.lines[i] = line[:col] + line[col + len(text):]
+        self.doVerticalDelete(change)
       elif change[0] == 'vi':  # Redo vertical insert.
-        text, row, endRow, col = change[1]
         app.log.info('do vi')
-        for i in range(row, endRow + 1):
-          line = self.lines[i]
-          self.lines[i] = line[:col] + text + line[col:]
+        self.doVerticalInsert(change)
       else:
         app.log.info('ERROR: unknown redo.')
     # Redo again if there is a move next.
@@ -415,14 +421,7 @@ class Mutator(app.selectable.Selectable):
             lines.append(ii[2:])
         self.lines = lines
       elif change[0] == 'm':
-        app.log.detail('undo move')
-        self.penRow -= change[1][0]
-        self.penCol -= change[1][1]
-        self.markerRow -= change[1][2]
-        self.markerCol -= change[1][3]
-        self.selectionMode -= change[1][4]
-        assert self.penRow >= 0
-        assert self.penCol >= 0
+        self.undoMove(change)
         return True
       elif change[0] == 'ml':
         # Undo move lines
@@ -448,7 +447,7 @@ class Mutator(app.selectable.Selectable):
               self.lines[row][:col] +
               self.lines[row][col + len(clip[0]):])
         else:
-          self.lines[row] = (self.lines[row][:col]+
+          self.lines[row] = (self.lines[row][:col] +
               self.lines[row + len(clip)-1][len(clip[-1]):])
           delLineCount = len(clip[1:-1])
           del self.lines[row + 1:row + 1 + delLineCount + 1]
@@ -460,21 +459,12 @@ class Mutator(app.selectable.Selectable):
           x = self.penCol
           self.lines[self.penRow] = line[:x] + change[1] + line[x:]
         self.penCol += len(change[1])
-      elif change[0] == 'vd':
-        text, row, endRow, col = change[1]
-        for i in range(row, endRow + 1):
-          line = self.lines[i]
-          self.lines[i] = line[:col] + text + line[col:]
-      elif change[0] == 'vi':  # Undo.
-        text = change[1][0]
-        col = change[1][3]
-        row = change[1][1]
-        endRow = change[1][2]
-        textLen = len(text)
-        app.log.info('undo vi', textLen)
-        for i in range(row, endRow + 1):
-          line = self.lines[i]
-          self.lines[i] = line[:col] + line[col + textLen:]
+      elif change[0] == 'vd': # Undo vertical delete
+        app.log.info('undo vd', change[1])
+        self.doVerticalInsert(change)
+      elif change[0] == 'vi':  # Undo vertical insert
+        app.log.info('undo vi', change[1])
+        self.doVerticalDelete(change)
       else:
         app.log.info('ERROR: unknown undo.')
     return False
