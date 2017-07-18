@@ -142,6 +142,7 @@ prefs = {
     'captiveCursor': False,
     'colorScheme': 'default',
     'findIgnoreCase': True,
+    'indentation': '  ',
     'palette': 'default',
     'showLineNumbers': True,
     'showStatusLine': True,

@@ -775,23 +775,34 @@ class Actions(app.mutator.Mutator):
     self.find(searchFor, -1)
 
   def indent(self):
+    indentation = app.prefs.prefs['editor'].get('indentation')
     if self.selectionMode == app.selectable.kSelectionNone:
       self.cursorMoveAndMark(0, 0,
           self.penRow - self.markerRow, self.penCol - self.markerCol, 0)
+      self.redo()
+      self.indentLines()
+      self.cursorMoveAndMark(0, len(indentation), 0, 0, 0)
+      self.redo()
     elif self.selectionMode == app.selectable.kSelectionAll:
-      self.cursorMoveAndMark(len(self.lines) - 1 - self.penRow, -self.penCol,
-          -self.markerRow, -self.markerCol,
-          app.selectable.kSelectionLine - self.selectionMode)
+      penCol = self.penCol
+      self.cursorMoveAndMark(0, -self.penCol, -self.markerRow, -self.markerCol, 0)
+      self.redo()
+      self.indentLines()
+      self.cursorMoveAndMark(0, penCol + len(indentation), 0, 0, 0)
+      self.redo()
+      return
     else:
       self.cursorMoveAndMark(0, -self.penCol, 0, -self.markerCol,
           app.selectable.kSelectionLine - self.selectionMode)
-    self.redo()
-    self.indentLines()
+      self.redo()
+      self.indentLines()
+      self.cursorMoveAndMark(0, len(indentation), 0, 0, 0)
+      self.redo()
+
+
   def indentLines(self):
-    indentation = '  '
+    indentation = app.prefs.prefs['editor'].get('indentation')
     self.redoAddChange(('vi', (indentation)))
-    self.redo()
-    self.cursorMoveAndMark(0, len(indentation), 0, 0, 0)
     self.redo()
 
   def verticalInsert(self, row, endRow, col, text):
