@@ -613,7 +613,7 @@ class Actions(app.mutator.Mutator):
       self.doSelectionMode(app.selectable.kSelectionNone)
       return
     # The saved re is also used for highlighting.
-    ignoreCaseFlag = (app.prefs.prefs['editor'].get('findIgnoreCase') and
+    ignoreCaseFlag = (app.prefs.editor.get('findIgnoreCase') and
                       re.IGNORECASE or 0)
     self.findRe = re.compile('()'+searchFor, ignoreCaseFlag)
     self.findBackRe = re.compile('(.*)'+searchFor, ignoreCaseFlag)

@@ -225,7 +225,7 @@ class Window(ActiveWindow):
     self.cursorRow = 0
     self.cursorCol = 0
     self.goalCol = 0
-    self.hasCaptiveCursor = app.prefs.prefs['editor']['captiveCursor']
+    self.hasCaptiveCursor = app.prefs.editor['captiveCursor']
     self.hasFocus = False
     self.shouldShowCursor = True
     self.textBuffer = None
@@ -295,7 +295,7 @@ class LabeledLine(Window):
 
   def refresh(self):
     self.leftColumn.addStr(0, 0, self.label,
-        app.prefs.prefs['color']['default'])
+        app.prefs.color['default'])
     self.leftColumn.cursorWindow.refresh()
     Window.refresh(self)
 
@@ -515,7 +515,7 @@ class StatusLine(StaticWindow):
     rightSide = ''
     if len(statusLine):
       rightSide += ' |'
-    if app.prefs.prefs['startup'].get('showLogWindow'):
+    if app.prefs.startup.get('showLogWindow'):
       rightSide += ' %s | %s |'%(tb.cursorGrammarName(), tb.selectionModeName())
     rightSide += ' %4d,%2d | %3d%%,%3d%%'%(
         self.host.cursorRow+1, self.host.cursorCol+1,
@@ -612,7 +612,7 @@ class InputWindow(Window):
     self.host = host
     self.showFooter = True
     self.useInteractiveFind = True
-    self.showLineNumbers = app.prefs.prefs['editor'].get(
+    self.showLineNumbers = app.prefs.editor.get(
         'showLineNumbers', True)
     self.showMessageLine = True
     self.showRightColumn = True
@@ -699,15 +699,15 @@ class InputWindow(Window):
       app.log.info()
 
   def startup(self):
-    for f in app.prefs.prefs['startup'].get('cliFiles', []):
+    for f in app.prefs.startup.get('cliFiles', []):
       app.buffer_manager.buffers.loadTextBuffer(f['path'])
-    if app.prefs.prefs['startup'].get('readStdin'):
+    if app.prefs.startup.get('readStdin'):
       app.buffer_manager.buffers.readStdin()
     tb = app.buffer_manager.buffers.topBuffer()
     if not tb:
       tb = app.buffer_manager.buffers.newTextBuffer()
     self.setTextBuffer(tb)
-    openToLine = app.prefs.prefs['startup'].get('openToLine')
+    openToLine = app.prefs.startup.get('openToLine')
     if openToLine is not None:
       self.textBuffer.selectText(openToLine - 1, 0, 0,
           app.selectable.kSelectionNone)
@@ -812,7 +812,7 @@ class InputWindow(Window):
     #restore positions and selections  +
     self.controller.setTextBuffer(textBuffer)
     Window.setTextBuffer(self, textBuffer)
-    self.textBuffer.debugRedo = app.prefs.prefs['startup'].get('debugRedo')
+    self.textBuffer.debugRedo = app.prefs.startup.get('debugRedo')
     # Restore cursor position.
     cursor = app.history.get(['files', textBuffer.fullPath, 'cursor'], (0, 0))
     if not len(textBuffer.lines):

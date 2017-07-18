@@ -83,6 +83,7 @@ elif colorSchemeName in builtInColorSchemes:
     prefs['color'].update(builtInColorSchemes[colorSchemeName])
 
 
+color = prefs['color']
 editor = prefs['editor']
 palette = prefs['palette']
 

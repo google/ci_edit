@@ -93,8 +93,8 @@ class TextBuffer(app.actions.Actions):
     startRow = self.view.scrollRow + top
     startCol = self.view.scrollCol + left
     endCol = self.view.scrollCol + left + cols
-    colors = app.prefs.prefs['color']
-    spellChecking = app.prefs.prefs['editor'].get('spellChecking', True)
+    colors = app.prefs.color
+    spellChecking = app.prefs.editor.get('spellChecking', True)
     if self.parser:
       # Highlight grammar.
       rowLimit = min(max(len(self.lines) - startRow, 0), rows)
@@ -171,7 +171,7 @@ class TextBuffer(app.actions.Actions):
       for i in range(rowLimit):
         line = self.lines[startRow + i][startCol:endCol]
         window.addStr(top + i, left, line + ' ' * (cols - len(line)),
-            app.color.get(app.prefs.prefs['color']['default'] + colorDelta))
+            app.color.get(app.prefs.color['default'] + colorDelta))
     self.drawOverlays(window, top, left, rows, cols, colorDelta)
 
   def drawOverlays(self, window, top, left, maxRow, maxCol, colorDelta):
@@ -180,7 +180,7 @@ class TextBuffer(app.actions.Actions):
     startCol = self.view.scrollCol + left
     endCol = self.view.scrollCol + left + maxCol
     rowLimit = min(max(len(self.lines) - startRow, 0), maxRow)
-    colors = app.prefs.prefs['color']
+    colors = app.prefs.color
     if 1:
       # Highlight brackets.
       color = app.color.get(colors['bracket'] + colorDelta)
