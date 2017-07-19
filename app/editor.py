@@ -36,7 +36,7 @@ def parseInt(str):
 def test_parseInt():
   assert parseInt('0') == 0
   assert parseInt('0e') == 0
-  assert parseInt('qwee') == 0
+  assert parseInt('text') == 0
   assert parseInt('10') == 10
   assert parseInt('+10') == 10
   assert parseInt('-10') == -10
@@ -189,7 +189,6 @@ class InteractivePrediction(app.controller.Controller):
   def __init__(self, host, textBuffer):
     app.controller.Controller.__init__(self, host, 'opener')
     self.textBuffer = textBuffer
-    self.textBuffer.lines = [""]
 
   def cancel(self):
     self.items = [(self.priorTextBuffer, '')]
@@ -204,10 +203,11 @@ class InteractivePrediction(app.controller.Controller):
 
   def focus(self):
     app.log.info('InteractivePrediction.focus')
-    self.commandDefault = self.textBuffer.insertPrintable
     self.priorTextBuffer = self.host.textBuffer
     self.index = self.buildFileList(self.host.textBuffer.fullPath)
     self.host.setTextBuffer(text_buffer.TextBuffer())
+    self.commandDefault = self.host.textBuffer.insertPrintable
+    self.host.textBuffer.lineLimitIndicator = 0
     self.host.textBuffer.rootGrammar = app.prefs.getGrammar('_pre')
 
   def info(self):
@@ -331,7 +331,7 @@ class InteractiveGoto(app.controller.Controller):
 
   def gotoHalfway(self):
     self.textBuffer.selectionAll()
-    self.textBuffer.insert(str(len(self.document.textBuffer.lines)/2+1))
+    self.textBuffer.insert(str(len(self.document.textBuffer.lines) / 2 + 1))
     self.changeToHostWindow()
 
   def gotoTop(self):

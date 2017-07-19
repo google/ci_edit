@@ -67,15 +67,26 @@ class TextBuffer(app.actions.Actions):
       for i in range(rows):
         window.addStr(i, 0, '?' * cols, app.color.get(120))
     if 0:
+      # Draw window with no concern for sub-rectangles.
       self.drawTextArea(window, 0, 0, rows, cols, 0)
     elif 1:
       splitRow = rows
-      splitCol = max(0,
-          min(cols, self.lineLimitIndicator - self.view.scrollCol))
-      self.drawTextArea(window, 0, 0, splitRow, splitCol, 0)
-      if splitCol < cols:
-        self.drawTextArea(window, 0, splitCol, splitRow, cols-splitCol, 32*4)
+      splitCol = max(0, self.lineLimitIndicator - self.view.scrollCol)
+      if self.lineLimitIndicator <= 0 or splitCol >= cols:
+        # Draw only left side.
+        self.drawTextArea(window, 0, 0, splitRow, cols, 0)
+      elif 0 < splitCol < cols:
+        # Draw both sides.
+        self.drawTextArea(window, 0, 0, splitRow, splitCol, 0)
+        self.drawTextArea(window, 0, splitCol, splitRow, cols - splitCol,
+            32 * 4)
+      else:
+        # Draw only right side.
+        assert splitCol <= 0
+        self.drawTextArea(window, 0, splitCol, splitRow, cols - splitCol,
+            32 * 4)
     else:
+      # Draw debug checker board.
       splitRow = rows / 2
       splitCol = 17
       self.drawTextArea(window, 0, 0, splitRow, splitCol, 0)
