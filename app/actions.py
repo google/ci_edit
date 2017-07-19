@@ -777,7 +777,7 @@ class Actions(app.mutator.Mutator):
     self.find(searchFor, -1)
 
   def indent(self):
-    indentation = app.prefs.prefs['editor'].get('indentation')
+    indentation = app.prefs.editor['indentation']
     indentationLength = len(indentation)
     if self.selectionMode == app.selectable.kSelectionNone:
       self.verticalInsert(self.penRow, self.penRow, self.penCol, indentation)
@@ -795,7 +795,7 @@ class Actions(app.mutator.Mutator):
     col = 0
     row = min(self.markerRow, self.penRow)
     endRow = max(self.markerRow, self.penRow)
-    indentation = app.prefs.prefs['editor'].get('indentation')
+    indentation = app.prefs.editor['indentation']
     self.verticalInsert(row, endRow, col, indentation)
 
   def verticalInsert(self, row, endRow, col, text):
@@ -1070,7 +1070,7 @@ class Actions(app.mutator.Mutator):
       self.unindentLines()
 
   def unindentLines(self):
-    indentation = app.prefs.prefs['editor'].get('indentation')
+    indentation = app.prefs.editor['indentation']
     indentationLength = len(indentation)
     row = min(self.markerRow, self.penRow)
     endRow = max(self.markerRow, self.penRow)
