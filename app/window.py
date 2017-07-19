@@ -809,7 +809,7 @@ class InputWindow(Window):
     if self.textBuffer is not None:
       app.history.set(['files', self.textBuffer.fullPath, 'cursor'],
           (self.textBuffer.penRow, self.textBuffer.penCol))
-    #restore positions and selections  +
+    # TODO(dschuyler): Do we need to restore positions and selections here?
     self.controller.setTextBuffer(textBuffer)
     Window.setTextBuffer(self, textBuffer)
     self.textBuffer.debugRedo = app.prefs.startup.get('debugRedo')
