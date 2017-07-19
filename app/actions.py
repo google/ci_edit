@@ -177,6 +177,8 @@ class Actions(app.mutator.Mutator):
 
   def getCursorMoveAndMark(self, rowDelta, colDelta, markRowDelta,
       markColDelta, selectionModeDelta):
+    if self.penCol + colDelta < 0: #Catch cursor at beginning of line
+      colDelta = -self.penCol
     self.view.goalCol = self.penCol + colDelta
     maxRow, maxCol = self.view.cursorWindow.getmaxyx()
     scrollRows = 0
@@ -775,29 +777,29 @@ class Actions(app.mutator.Mutator):
     self.find(searchFor, -1)
 
   def indent(self):
+    indentation = app.prefs.prefs['editor'].get('indentation')
+    indentationLength = len(indentation)
     if self.selectionMode == app.selectable.kSelectionNone:
-      self.cursorMoveAndMark(0, -self.penCol,
-          self.penRow - self.markerRow, self.penCol - self.markerCol, 0)
-      self.redo()
-      self.indentLines()
-    elif self.selectionMode == app.selectable.kSelectionAll:
-      self.cursorMoveAndMark(len(self.lines) - 1 - self.penRow, -self.penCol,
-          -self.markerRow, -self.markerCol,
-          app.selectable.kSelectionLine - self.selectionMode)
-      self.redo()
-      self.indentLines()
+      self.verticalInsert(self.penRow, self.penRow, self.penCol, indentation)
     else:
-      self.cursorMoveAndMark(0, -self.penCol, 0, -self.markerCol,
-          app.selectable.kSelectionLine - self.selectionMode)
-      self.redo()
       self.indentLines()
-
-  def indentLines(self):
-    self.redoAddChange(('vi', ('  ')))
+    self.cursorMoveAndMark(0, indentationLength, 0, indentationLength, 0)
     self.redo()
 
+  def indentLines(self):
+    """
+    Indents all selected lines. Do not use for when the selection mode
+    is kSelectionNone since markerRow/markerCol currently do not get
+    updated alongside penRow/penCol.
+    """
+    col = 0
+    row = min(self.markerRow, self.penRow)
+    endRow = max(self.markerRow, self.penRow)
+    indentation = app.prefs.prefs['editor'].get('indentation')
+    self.verticalInsert(row, endRow, col, indentation)
+
   def verticalInsert(self, row, endRow, col, text):
-    self.redoAddChange(('vi', (text)))
+    self.redoAddChange(('vi', (text, row, endRow, col)))
     self.redo()
 
   def insert(self, text):
@@ -1062,28 +1064,26 @@ class Actions(app.mutator.Mutator):
         self.performDeleteRange(i, found.regs[0][0], i, found.regs[0][1])
 
   def unindent(self):
-    if self.selectionMode == app.selectable.kSelectionAll:
-      self.cursorMoveAndMark(len(self.lines) - 1 - self.penRow, -self.penCol,
-          -self.markerRow, -self.markerCol,
-          app.selectable.kSelectionLine - self.selectionMode)
-      self.redo()
-      self.unindentLines()
+    if self.selectionMode == app.selectable.kSelectionNone:
+      pass
     else:
-      self.cursorMoveAndMark(0, -self.penCol, 0, -self.markerCol,
-          app.selectable.kSelectionLine - self.selectionMode)
-      self.redo()
       self.unindentLines()
 
   def unindentLines(self):
-    upperRow = min(self.markerRow, self.penRow)
-    lowerRow = max(self.markerRow, self.penRow)
-    app.log.info('unindentLines', upperRow, lowerRow)
-    for line in self.lines[upperRow:lowerRow + 1]:
-      if ((len(line) == 1 and line[:1] != ' ') or
-          (len(line) >= 2 and line[:2] != '  ')):
+    indentation = app.prefs.prefs['editor'].get('indentation')
+    indentationLength = len(indentation)
+    row = min(self.markerRow, self.penRow)
+    endRow = max(self.markerRow, self.penRow)
+    col = 0
+    app.log.info('unindentLines', indentation, row, endRow, col)
+    for line in self.lines[row:endRow + 1]:
+      if (len(line) < indentationLength or
+          (line[:indentationLength] != indentation)):
         # Handle multi-delete.
         return
-    self.redoAddChange(('vd', ('  ')))
+    self.redoAddChange(('vd', (indentation, row, endRow, col)))
+    self.redo()
+    self.cursorMoveAndMark(0, -indentationLength, 0, -indentationLength, 0)
     self.redo()
 
   def updateScrollPosition(self):
