@@ -67,6 +67,39 @@ def initCommandSet(editText, textBuffer):
   }
 
 
+def mainWindowCommands(controller, textBuffer):
+  """The command set for a window (rather than a single line)."""
+  commands = initCommandSet(controller, textBuffer).copy()
+  commands.update({
+    KEY_ESCAPE: textBuffer.normalize,
+    KEY_F1: controller.info,
+    KEY_BTAB: textBuffer.unindent,
+    KEY_PAGE_UP: textBuffer.cursorPageUp,
+    KEY_PAGE_DOWN: textBuffer.cursorPageDown,
+
+    CTRL_F: controller.changeToFind,
+    CTRL_G: controller.changeToGoto,
+    CTRL_I: textBuffer.indent,
+    CTRL_J: textBuffer.carriageReturn,
+    CTRL_O: controller.changeToFileOpen,
+    CTRL_R: controller.changeToFindPrior,
+
+    KEY_DOWN: textBuffer.cursorDown,
+    KEY_SHIFT_LEFT: textBuffer.cursorSelectLeft,
+    KEY_SHIFT_RIGHT: textBuffer.cursorSelectRight,
+    KEY_UP: textBuffer.cursorUp,
+
+    KEY_SHIFT_DOWN: textBuffer.cursorSelectDown,
+    KEY_SHIFT_UP: textBuffer.cursorSelectUp,
+
+    KEY_CTRL_DOWN: textBuffer.cursorDownScroll,
+    KEY_CTRL_SHIFT_DOWN: textBuffer.cursorSelectDownScroll,
+    KEY_CTRL_UP: textBuffer.cursorUpScroll,
+    KEY_CTRL_SHIFT_UP: textBuffer.cursorSelectUpScroll,
+  })
+  return commands
+
+
 class ConfirmClose(app.controller.Controller):
   """Ask about closing a file with unsaved changes."""
   def __init__(self, host, textBuffer):
@@ -258,39 +291,7 @@ class CuaEdit(app.controller.Controller):
 
   def setTextBuffer(self, textBuffer):
     self.textBuffer = textBuffer
-    commandSet = initCommandSet(self, textBuffer)
-    commandSet.update({
-      KEY_ESCAPE: textBuffer.normalize,
-
-      KEY_F1: self.info,
-
-      KEY_BTAB: textBuffer.unindent,
-      KEY_PAGE_UP: textBuffer.cursorPageUp,
-      KEY_PAGE_DOWN: textBuffer.cursorPageDown,
-
-      CTRL_F: self.changeToFind,
-      CTRL_G: self.changeToGoto,
-
-      CTRL_I: textBuffer.indent,
-      CTRL_J: textBuffer.carriageReturn,
-
-      CTRL_O: self.changeToFileOpen,
-      CTRL_R: self.changeToFindPrior,
-
-      KEY_DOWN: textBuffer.cursorDown,
-      KEY_SHIFT_LEFT: textBuffer.cursorSelectLeft,
-      KEY_SHIFT_RIGHT: textBuffer.cursorSelectRight,
-      KEY_UP: textBuffer.cursorUp,
-
-      KEY_SHIFT_DOWN: textBuffer.cursorSelectDown,
-      KEY_SHIFT_UP: textBuffer.cursorSelectUp,
-
-      KEY_CTRL_DOWN: textBuffer.cursorDownScroll,
-      KEY_CTRL_SHIFT_DOWN: textBuffer.cursorSelectDownScroll,
-      KEY_CTRL_UP: textBuffer.cursorUpScroll,
-      KEY_CTRL_SHIFT_UP: textBuffer.cursorSelectUpScroll,
-    })
-    self.commandSet = commandSet
+    self.commandSet = mainWindowCommands(self, textBuffer)
     self.commandDefault = self.textBuffer.insertPrintable
 
   def info(self):
@@ -312,7 +313,7 @@ class CuaPlusEdit(CuaEdit):
     app.log.info(repr(self))
 
   def setTextBuffer(self, textBuffer):
-    app.log.info('CuaPlusEdit.__init__')
+    app.log.info()
     CuaEdit.setTextBuffer(self, textBuffer)
     commandSet = self.commandSet.copy()
     commandSet.update({
