@@ -19,21 +19,21 @@
 import app.log
 import cPickle as pickle
 import os
+import hashlib
 
 data = {}
 path = None
+md5 = hashlib.md5()
 
 def get(keyPath, default=None):
   global data
-  cursor = data
-  cursor = cursor.setdefault(keyPath[-1], {})
-  return cursor.get(keyPath[-1], default)
+  data = data.setdefault(keyPath[-1], {})
+  return data.get(keyPath[-1], default)
 
 def set(keyPath, value):
   global data
-  cursor = data
-  cursor = cursor.setdefault(keyPath[-1], {})
-  cursor[keyPath[-1]] = value
+  data = data.setdefault(keyPath[-1], {})
+  data[keyPath[-1]] = value
   #assert get(keyPath) == value
 
 def loadUserHistory(filePath):
@@ -45,6 +45,7 @@ def loadUserHistory(filePath):
         data = pickle.load(file)
     else:
       data = {}
+    import pdb; pdb.set_trace()
   except Exception, e:
     app.log.error('exception')
     data = {}
@@ -56,5 +57,19 @@ def saveUserHistory():
       with open(path, "wb") as file:
         pickle.dump(data, file)
       app.log.info('wrote pickle')
+    import pdb; pdb.set_trace()
   except Exception, e:
     app.log.error('exception')
+
+def clearUserHistory():
+  """
+  Clears all user history from all files.
+  """
+  global data, path
+  data = {}
+  try:
+    os.remove(path)
+    app.log.info("user history cleared")
+  except Exception as e:
+    app.log.error('clearUserHistory exception', e)
+
