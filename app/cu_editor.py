@@ -25,15 +25,10 @@ import text_buffer
 def initCommandSet(editText, textBuffer):
   """The basic command set includes line editing controls."""
   return {
-    #KEY_F10: editText.prg.debugWindowOrder,
     CTRL_A: textBuffer.selectionAll,
-
     CTRL_C: textBuffer.editCopy,
-
-    CTRL_H: textBuffer.backspace,
-
+    #CTRL_H: textBuffer.backspace,
     CTRL_L: textBuffer.cursorSelectLine,
-
     CTRL_Q: editText.quitOrSwitchToConfirmQuit,
     CTRL_S: editText.saveOrChangeToSaveAs,
     CTRL_V: textBuffer.editPaste,
@@ -284,7 +279,7 @@ class InteractiveSaveAs(app.controller.Controller):
 
 class CuaEdit(app.controller.Controller):
   """Keyboard mappings for CUA. CUA is the Cut/Copy/Paste paradigm."""
-  def __init__(self, prg, host):
+  def __init__(self, host):
     app.controller.Controller.__init__(self, host, 'CuaEdit')
     self.host = host
     app.log.info('CuaEdit.__init__')
@@ -304,8 +299,8 @@ class CuaEdit(app.controller.Controller):
 
 class CuaPlusEdit(CuaEdit):
   """Keyboard mappings for CUA, plus some extra."""
-  def __init__(self, prg, host):
-    CuaEdit.__init__(self, prg, host)
+  def __init__(self, host):
+    CuaEdit.__init__(self, host)
     app.log.info('CuaPlusEdit.__init__')
 
   def info(self):
@@ -331,8 +326,8 @@ class CuaPlusEdit(CuaEdit):
 
 class PaletteDialogController(app.controller.Controller):
   """."""
-  def __init__(self, prg, view):
-    app.controller.Controller.__init__(self, prg, 'Palette')
+  def __init__(self, view):
+    app.controller.Controller.__init__(self, view, 'Palette')
     self.view = view
     app.log.info('PaletteDialogController.__init__')
     def noOp(c):

@@ -619,7 +619,7 @@ class InputWindow(Window):
     self.showTopInfo = True
     self.topRows = 0
     self.controller = app.controller.MainController(self)
-    self.controller.add(app.cu_editor.CuaPlusEdit(host, self))
+    self.controller.add(app.cu_editor.CuaPlusEdit(self))
     # What does the user appear to want: edit, quit, or something else?
     self.userIntent = 'edit'
     if 1:
@@ -835,8 +835,7 @@ class PaletteWindow(ActiveWindow):
     self.resizeTo(16, 16*5)
     self.moveTo(8, 8)
     self.controller = app.controller.MainController(self)
-    self.controller.add(app.cu_editor.PaletteDialogController(
-        prg, self))
+    self.controller.add(app.cu_editor.PaletteDialogController(self))
 
   def refresh(self):
     width = 16
