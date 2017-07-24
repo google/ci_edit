@@ -557,6 +557,11 @@ class Actions(app.mutator.Mutator):
   def fileWrite(self):
     app.history.set(
         ['files', self.fullPath, 'pen'], (self.penRow, self.penCol))
+    app.history.set(
+        ['files', self.fullPath, 'redoChain'], self.redoChain)
+    self.savedAtRedoIndex = self.redoIndex
+    app.history.set(
+        ['files', self.fullPath, 'savedAtRedoIndex'], self.savedAtRedoIndex)
     # Preload the message with an error that should be overwritten.
     self.setMessage('Error saving file')
     try:
@@ -572,7 +577,6 @@ class Actions(app.mutator.Mutator):
         self.isReadOnly = not os.access(self.fullPath, os.W_OK)
         self.fileStat = os.stat(self.fullPath)
         self.setMessage('File saved')
-        self.savedAtRedoIndex = self.redoIndex
       except Exception as e:
         type_, value, tb = sys.exc_info()
         self.setMessage(
