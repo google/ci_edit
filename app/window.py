@@ -821,7 +821,10 @@ class InputWindow(Window):
       row = max(0, min(cursor[0], len(textBuffer.lines)-1))
       col = max(0, min(cursor[1], len(textBuffer.lines[row])))
     textBuffer.selectText(row, col, 0, app.selectable.kSelectionNone)
-
+    # Restore redo chain and indices
+    textBuffer.redoChain = app.history.get(['files', textBuffer.fullPath, 'redoChain'], [])
+    textBuffer.savedAtRedoIndex = app.history.get(['files', textBuffer.fullPath, 'savedAtRedoIndex'], 0)
+    textBuffer.redoIndex = textBuffer.savedAtRedoIndex
   def unfocus(self):
     if self.showMessageLine:
       self.messageLine.hide()

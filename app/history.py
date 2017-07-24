@@ -26,15 +26,13 @@ path = None
 def get(keyPath, default=None):
   global data
   cursor = data
-  for i in keyPath[:-1]:
-    cursor = cursor.setdefault(i, {})
+  cursor = cursor.setdefault(keyPath[-1], {})
   return cursor.get(keyPath[-1], default)
 
 def set(keyPath, value):
   global data
   cursor = data
-  for i in keyPath[:-1]:
-    cursor = cursor.setdefault(i, {})
+  cursor = cursor.setdefault(keyPath[-1], {})
   cursor[keyPath[-1]] = value
   #assert get(keyPath) == value
 
