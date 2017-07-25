@@ -95,6 +95,10 @@ class CiProgram:
     # (A performance measurement).
     self.mainLoopTime = 0
     self.mainLoopTimePeak = 0
+    if app.prefs.startup['timeStartup']:
+      # When running a timing of the application startup, push a CTRL_Q onto the
+      # curses event messages to simulate a full startup with a GUI render.
+      curses.ungetch(17)
     start = time.time()
     # This is the 'main loop'. Execution doesn't leave this loop until the
     # application is closing down.
@@ -407,6 +411,7 @@ class CiProgram:
     profile = False
     readStdin = False
     takeAll = False  # Take all args as file paths.
+    timeStartup = False
     for i in sys.argv[1:]:
       if not takeAll and i[:1] == '+':
         openToLine = int(i[1:])
@@ -431,6 +436,8 @@ class CiProgram:
           app.log.channelEnable('parser', True)
         elif i == '--startup':
           app.log.channelEnable('startup', logStartup)
+        elif i == '--timeStartup':
+          timeStartup = True
         elif i == '--':
           # All remaining args are file paths.
           takeAll = True
@@ -459,6 +466,7 @@ class CiProgram:
       'openToLine': openToLine,
       'profile': profile,
       'readStdin': readStdin,
+      'timeStartup': timeStartup,
     }
     self.showLogWindow = showLogWindow
 
