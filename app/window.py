@@ -211,6 +211,10 @@ class ActiveWindow(StaticWindow):
     self.parent.zOrder.append(self)
     self.controller.focus()
 
+  def setController(self, controllerClass):
+    self.controller = controllerClass(self.host)
+    self.controller.setTextBuffer(self.textBuffer)
+
   def unfocus(self):
     app.log.info(self)
     self.hasFocus = False
@@ -305,7 +309,8 @@ class LabeledLine(Window):
     self.leftColumn.reshape(rows, labelWidth, top, left)
 
   def setController(self, controllerClass):
-    self.controller = controllerClass(self.host, self.textBuffer)
+    self.controller = controllerClass(self.host)
+    self.controller.setTextBuffer(self.textBuffer)
 
   def setLabel(self, label):
     self.label = label
@@ -358,7 +363,8 @@ class Menu(StaticWindow):
     StaticWindow.refresh(self)
 
   def setController(self, controllerClass):
-    self.controller = controllerClass(self.host, self.textBuffer)
+    self.controller = controllerClass(self.host)
+    self.controller.setTextBuffer(self.textBuffer)
 
 
 class LineNumbers(StaticWindow):
