@@ -541,6 +541,8 @@ class Actions(app.mutator.Mutator):
     if file:
       self.fileFilter(file.read())
       file.close()
+      app.history.loadUserHistory(app.prefs.prefs['userData'].get('historyPath'), 
+                                  self.fullPath)
     else:
       self.data = ""
     self.fileExtension = os.path.splitext(self.fullPath)[1]
@@ -573,6 +575,8 @@ class Actions(app.mutator.Mutator):
         file.truncate()
         file.write(self.data)
         file.close()
+        app.history.saveUserHistory(app.prefs.prefs['userData'].get('historyPath'),
+                                    self.fullPath)
         # Hmm, could this be hard coded to False here?
         self.isReadOnly = not os.access(self.fullPath, os.W_OK)
         self.fileStat = os.stat(self.fullPath)
