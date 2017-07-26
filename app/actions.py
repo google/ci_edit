@@ -543,6 +543,7 @@ class Actions(app.mutator.Mutator):
       file.close()
       app.history.loadUserHistory(app.prefs.prefs['userData'].get('historyPath'), 
                                   self.fullPath)
+      self.restoreUserHistory()
     else:
       self.data = ""
     self.fileExtension = os.path.splitext(self.fullPath)[1]
@@ -553,12 +554,28 @@ class Actions(app.mutator.Mutator):
     else:
       self.parser = None
 
+  def restoreUserHistory(self):
+    # Restore cursor position.
+    cursor = app.history.get(['files', self.fullPath, 'cursor'], (0, 0))
+    if not len(self.lines):
+      row = col = 0
+    else:
+      row = max(0, min(cursor[0], len(self.lines)-1))
+      col = max(0, min(cursor[1], len(self.lines[row])))
+    change = ('m', (row, col, row, col, app.selectable.kSelectionNone))
+    self.redoMove(change)
+    # Restore redo chain
+    self.redoChain = app.history.get(['files', self.fullPath, 'redoChain'], [])
+    # Restore indices
+    self.savedAtRedoIndex = app.history.get(['files', self.fullPath, 'savedAtRedoIndex'], 0)
+    self.redoIndex = self.savedAtRedoIndex
+
   def linesToData(self):
     self.data = self.doLinesToData(self.lines)
 
   def fileWrite(self):
     app.history.set(
-        ['files', self.fullPath, 'pen'], (self.penRow, self.penCol))
+        ['files', self.fullPath, 'cursor'], (self.cursorRow, self.cursorCol))
     app.history.set(
         ['files', self.fullPath, 'redoChain'], self.redoChain)
     self.savedAtRedoIndex = self.redoIndex

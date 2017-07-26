@@ -825,6 +825,7 @@ class InputWindow(Window):
     textBuffer.redoChain = app.history.get(['files', textBuffer.fullPath, 'redoChain'], [])
     textBuffer.savedAtRedoIndex = app.history.get(['files', textBuffer.fullPath, 'savedAtRedoIndex'], 0)
     textBuffer.redoIndex = textBuffer.savedAtRedoIndex
+
   def unfocus(self):
     if self.showMessageLine:
       self.messageLine.hide()
