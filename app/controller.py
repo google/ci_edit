@@ -147,7 +147,7 @@ class Controller:
     tb = self.host.textBuffer
     self.host.userIntent = 'quit'
     app.history.set(['files', tb.fullPath, 'cursor'],
-        (self.host.cursorRow, self.host.cursorCol))
+        (self.host.textBuffer.penRow, self.host.textBuffer.penCol))
     if tb.isDirty():
       self.changeToConfirmQuit()
       return

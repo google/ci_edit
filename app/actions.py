@@ -153,8 +153,8 @@ class Actions(app.mutator.Mutator):
     if toRow >= len(self.lines):
       return
     lineLen = len(self.lines[toRow])
-    if self.view.goalCol <= lineLen:
-      return self.view.goalCol - self.penCol
+    if self.goalCol <= lineLen:
+      return self.goalCol - self.penCol
     return lineLen - self.penCol
 
   def cursorDown(self):
@@ -179,7 +179,7 @@ class Actions(app.mutator.Mutator):
       markColDelta, selectionModeDelta):
     if self.penCol + colDelta < 0:  # Catch cursor at beginning of line.
       colDelta = -self.penCol
-    self.view.goalCol = self.penCol + colDelta
+    self.goalCol = self.penCol + colDelta
     maxRow, maxCol = self.view.cursorWindow.getmaxyx()
     scrollRows = 0
     if self.view.scrollRow > self.penRow + rowDelta:
@@ -211,10 +211,10 @@ class Actions(app.mutator.Mutator):
 
   def cursorMoveDown(self):
     if self.penRow + 1 < len(self.lines):
-      savedGoal = self.view.goalCol
+      savedGoal = self.goalCol
       self.cursorMove(1, self.cursorColDelta(self.penRow + 1))
       self.redo()
-      self.view.goalCol = savedGoal
+      self.goalCol = savedGoal
 
   def cursorMoveLeft(self):
     if self.penCol > 0:
@@ -236,15 +236,15 @@ class Actions(app.mutator.Mutator):
 
   def cursorMoveUp(self):
     if self.penRow > 0:
-      savedGoal = self.view.goalCol
+      savedGoal = self.goalCol
       lineLen = len(self.lines[self.penRow - 1])
-      if self.view.goalCol <= lineLen:
-        self.cursorMove(-1, self.view.goalCol - self.penCol)
+      if self.goalCol <= lineLen:
+        self.cursorMove(-1, self.goalCol - self.penCol)
         self.redo()
       else:
         self.cursorMove(-1, lineLen - self.penCol)
         self.redo()
-      self.view.goalCol = savedGoal
+      self.goalCol = savedGoal
 
   def cursorMoveSubwordLeft(self):
     self.doCursorMoveLeftTo(app.selectable.kReSubwordBoundaryRvr)

@@ -310,7 +310,7 @@ class InteractiveGoto(app.controller.Controller):
   def focus(self):
     app.log.info('InteractiveGoto.focus')
     self.textBuffer.selectionAll()
-    self.textBuffer.insert(str(self.host.textBuffer.cursorRow+1))
+    self.textBuffer.insert(str(self.host.textBuffer.penRow + 1))
     self.textBuffer.selectionAll()
 
   def info(self):

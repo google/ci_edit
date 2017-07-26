@@ -228,7 +228,6 @@ class Window(ActiveWindow):
     ActiveWindow.__init__(self, parent)
     self.cursorRow = 0
     self.cursorCol = 0
-    self.goalCol = 0
     self.hasCaptiveCursor = app.prefs.editor['captiveCursor']
     self.hasFocus = False
     self.shouldShowCursor = True
@@ -262,8 +261,6 @@ class Window(ActiveWindow):
   def refresh(self):
     self.cursorRow = self.textBuffer.penRow
     self.cursorCol = self.textBuffer.penCol
-    self.textBuffer.cursorRow = self.textBuffer.penRow
-    self.textBuffer.cursorCol = self.textBuffer.penCol
     self.textBuffer.draw(self)
     StaticWindow.refresh(self)
     if self.hasFocus:

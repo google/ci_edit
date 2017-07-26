@@ -234,7 +234,9 @@ class CiProgram:
     color = app.color.get('debug_window')
     self.debugWindow.writeLine(
         "   cRow %3d    cCol %2d goalCol %2d  %s"
-        %(win.cursorRow, win.cursorCol, win.goalCol, intent), color)
+        %(win.textBuffer.penRow, win.textBuffer.penCol, win.textBuffer.goalCol,
+            intent),
+        color)
     self.debugWindow.writeLine(
         "   pRow %3d    pCol %2d"
         %(textBuffer.penRow, textBuffer.penCol), color)
