@@ -180,7 +180,7 @@ class Actions(app.mutator.Mutator):
     if self.penCol + colDelta < 0:  # Catch cursor at beginning of line.
       colDelta = -self.penCol
     self.goalCol = self.penCol + colDelta
-    maxRow, maxCol = self.view.cursorWindow.getmaxyx()
+    maxRow, maxCol = self.view.rows, self.view.cols
     scrollRows = 0
     if self.view.scrollRow > self.penRow + rowDelta:
       scrollRows = self.penRow + rowDelta - self.view.scrollRow
@@ -384,7 +384,7 @@ class Actions(app.mutator.Mutator):
   def cursorPageDown(self):
     if self.penRow == len(self.lines):
       return
-    maxRow, maxCol = self.view.cursorWindow.getmaxyx()
+    maxRow, maxCol = self.view.rows, self.view.cols
     penRowDelta = maxRow
     scrollDelta = maxRow
     numLines = len(self.lines)
@@ -403,7 +403,7 @@ class Actions(app.mutator.Mutator):
   def cursorPageUp(self):
     if self.penRow == 0:
       return
-    maxRow, maxCol = self.view.cursorWindow.getmaxyx()
+    maxRow, maxCol = self.view.rows, self.view.cols
     penRowDelta = -maxRow
     scrollDelta = -maxRow
     if self.penRow < maxRow:
@@ -416,7 +416,7 @@ class Actions(app.mutator.Mutator):
     self.redo()
 
   def cursorScrollToMiddle(self):
-    maxRow, maxCol = self.view.cursorWindow.getmaxyx()
+    maxRow, maxCol = self.view.rows, self.view.cols
     rowDelta = min(max(0, len(self.lines)-maxRow),
                    max(0, self.penRow - maxRow / 2)) - self.view.scrollRow
     self.cursorMoveScroll(0, 0, rowDelta, 0)
@@ -590,7 +590,7 @@ class Actions(app.mutator.Mutator):
     col = max(0, min(col, len(self.lines[row])))
     scrollRow = self.view.scrollRow
     scrollCol = self.view.scrollCol
-    maxRow, maxCol = self.view.cursorWindow.getmaxyx()
+    maxRow, maxCol = self.view.rows, self.view.cols
     if not (self.view.scrollRow < row <= self.view.scrollRow + maxRow):
       scrollRow = max(row - 10, 0)
     if not (self.view.scrollCol < col <= self.view.scrollCol + maxCol):
@@ -806,7 +806,7 @@ class Actions(app.mutator.Mutator):
     self.performDelete()
     self.redoAddChange(('i', text))
     self.redo()
-    maxRow, maxCol = self.view.cursorWindow.getmaxyx()
+    maxRow, maxCol = self.view.rows, self.view.cols
     deltaCol = self.penCol - self.view.scrollCol - maxCol + 1
     if deltaCol > 0:
       self.cursorMoveScroll(0, 0, 0, deltaCol);
@@ -925,7 +925,7 @@ class Actions(app.mutator.Mutator):
       if not self.view.hasCaptiveCursor:
         self.skipUpdateScroll = True
       return
-    maxRow, maxCol = self.view.cursorWindow.getmaxyx()
+    maxRow, maxCol = self.view.rows, self.view.cols
     cursorDelta = 0
     if self.penRow >= self.view.scrollRow + maxRow - 2:
       cursorDelta = self.view.scrollRow + maxRow - 2 - self.penRow
@@ -943,7 +943,7 @@ class Actions(app.mutator.Mutator):
     self.scrollDown()
 
   def scrollDown(self):
-    maxRow, maxCol = self.view.cursorWindow.getmaxyx()
+    maxRow, maxCol = self.view.rows, self.view.cols
     if self.view.scrollRow + maxRow >= len(self.lines):
       if not self.view.hasCaptiveCursor:
         self.skipUpdateScroll = True
@@ -1091,7 +1091,7 @@ class Actions(app.mutator.Mutator):
     if self.skipUpdateScroll:
       self.skipUpdateScroll = False
       return
-    maxRow, maxCol = self.view.cursorWindow.getmaxyx()
+    maxRow, maxCol = self.view.rows, self.view.cols
     if self.view.scrollRow > self.penRow:
       self.view.scrollRow = self.penRow
     elif self.penRow >= self.view.scrollRow + maxRow:

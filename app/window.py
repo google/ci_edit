@@ -353,7 +353,7 @@ class Menu(StaticWindow):
 
   def refresh(self):
     color = app.color.get('context_menu')
-    maxRow, maxCol = self.cursorWindow.getmaxyx()
+    maxRow, maxCol = self.rows, self.cols
     self.writeLineRow = 0
     for i in self.lines[:maxRow]:
       self.writeLine(" "+i, color);
@@ -370,7 +370,7 @@ class LineNumbers(StaticWindow):
     self.host = host
 
   def drawLineNumbers(self):
-    maxRow, maxCol = self.cursorWindow.getmaxyx()
+    maxRow, maxCol = self.rows, self.cols
     textBuffer = self.host.textBuffer
     limit = min(maxRow, len(textBuffer.lines)-self.host.scrollRow)
     color = app.color.get('line_number')
@@ -434,7 +434,7 @@ class LogWindow(StaticWindow):
   def refresh(self):
     self.refreshCounter += 1
     app.log.meta(" "*10, self.refreshCounter, "- screen refresh -")
-    maxRow, maxCol = self.cursorWindow.getmaxyx()
+    maxRow, maxCol = self.rows, self.cols
     self.writeLineRow = 0
     colorA = app.color.get(0)
     colorB = app.color.get(96)
@@ -490,7 +490,7 @@ class StatusLine(StaticWindow):
     self.host = host
 
   def refresh(self):
-    maxRow, maxCol = self.cursorWindow.getmaxyx()
+    maxRow, maxCol = self.rows, self.cols
     tb = self.host.textBuffer
     statusLine = ''
     if tb.message:
@@ -766,7 +766,7 @@ class InputWindow(Window):
 
   def drawLogoCorner(self):
     """."""
-    maxRow, maxCol = self.logoCorner.cursorWindow.getmaxyx()
+    maxRow, maxCol = self.logoCorner.rows, self.logoCorner.cols
     color = app.color.get('logo')
     for i in range(maxRow):
       self.logoCorner.addStr(i, 0, ' ' * maxCol, color)
@@ -776,7 +776,7 @@ class InputWindow(Window):
   def drawRightEdge(self):
     """Draw makers to indicate text extending past the right edge of the
     window."""
-    maxRow, maxCol = self.cursorWindow.getmaxyx()
+    maxRow, maxCol = self.rows, self.cols
     limit = min(maxRow, len(self.textBuffer.lines)-self.scrollRow)
     for i in range(limit):
       color = app.color.get('right_column')

@@ -153,7 +153,6 @@ class CiProgram:
             self.layout()
             window.controller.onChange()
             self.refresh()
-            app.log.debug(self.cursesScreen.getmaxyx(), time.time())
             continue
           window.controller.doCommand(cmd)
           if cmd == curses.KEY_MOUSE:
@@ -226,7 +225,7 @@ class CiProgram:
       return
     textBuffer = win.textBuffer
     y, x = win.cursorWindow.getyx()
-    maxRow, maxCol = win.cursorWindow.getmaxyx()
+    maxRow, maxCol = win.rows, win.cols
     self.debugWindow.writeLineRow = 0
     intent = "noIntent"
     try: intent = win.userIntent
