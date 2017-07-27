@@ -543,7 +543,6 @@ class Actions(app.mutator.Mutator):
       file.close()
       app.history.loadUserHistory(app.prefs.prefs['userData'].get('historyPath'), 
                                   self.fullPath)
-      self.restoreUserHistory()
     else:
       self.data = ""
     self.fileExtension = os.path.splitext(self.fullPath)[1]
@@ -556,14 +555,12 @@ class Actions(app.mutator.Mutator):
 
   def restoreUserHistory(self):
     # Restore cursor position.
-    cursor = app.history.get(['files', self.fullPath, 'cursor'], (0, 0))
-    if not len(self.lines):
-      row = col = 0
-    else:
-      row = max(0, min(cursor[0], len(self.lines)-1))
-      col = max(0, min(cursor[1], len(self.lines[row])))
-    change = ('m', (row, col, row, col, app.selectable.kSelectionNone))
-    self.redoMove(change)
+    self.cursorRow, self.cursorCol = app.history.get(['files', self.fullPath, 'cursor'], (0, 0))
+    self.view.scrollRow, self.view.scrollCol = app.history.get(['files', self.fullPath, 'scroll'], (0, 0))
+    self.penRow, self.penCol = app.history.get(['files', self.fullPath, 'pen'], (0, 0))
+    self.doSelectionMode(app.history.get(['files', self.fullPath, 'selectionMode'], 
+                         app.selectable.kSelectionNone))
+    self.markerRow, self.markerCol = app.history.get(['files', self.fullPath, 'marker'], (0, 0))
     # Restore redo chain
     self.redoChain = app.history.get(['files', self.fullPath, 'redoChain'], [])
     # Restore indices
@@ -574,13 +571,22 @@ class Actions(app.mutator.Mutator):
     self.data = self.doLinesToData(self.lines)
 
   def fileWrite(self):
+    # Save all user data into history
+    self.savedAtRedoIndex = self.redoIndex
+    app.history.set(
+        ['files', self.fullPath, 'redoChain'], self.redoChain)
+    app.history.set(
+        ['files', self.fullPath, 'savedAtRedoIndex'], self.savedAtRedoIndex)
+    app.history.set(
+        ['files', self.fullPath, 'pen'], (self.penRow, self.penCol))
     app.history.set(
         ['files', self.fullPath, 'cursor'], (self.cursorRow, self.cursorCol))
     app.history.set(
-        ['files', self.fullPath, 'redoChain'], self.redoChain)
-    self.savedAtRedoIndex = self.redoIndex
+        ['files', self.fullPath, 'scroll'], (self.view.scrollRow, self.view.scrollCol))
     app.history.set(
-        ['files', self.fullPath, 'savedAtRedoIndex'], self.savedAtRedoIndex)
+        ['files', self.fullPath, 'marker'], (self.markerRow, self.markerCol))
+    app.history.set(
+        ['files', self.fullPath, 'selectionMode'], self.selectionMode)
     # Preload the message with an error that should be overwritten.
     self.setMessage('Error saving file')
     try:

@@ -806,11 +806,9 @@ class InputWindow(Window):
   def setTextBuffer(self, textBuffer):
     app.log.info('setTextBuffer')
     #self.normalize()
-    if self.textBuffer is not None:
-      app.history.set(['files', self.textBuffer.fullPath, 'cursor'],
-          (self.textBuffer.penRow, self.textBuffer.penCol))
     self.controller.setTextBuffer(textBuffer)
     Window.setTextBuffer(self, textBuffer)
+    self.textBuffer.restoreUserHistory()
     self.textBuffer.debugRedo = app.prefs.startup.get('debugRedo')
 
   def unfocus(self):

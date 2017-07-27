@@ -502,7 +502,7 @@ class CiProgram:
 
   def run(self):
     self.parseArgs()
-    homePath = os.path.expanduser('~/.ci_edit')
+    homePath = app.prefs.prefs['userData'].get('homePath')
     self.makeHomeDirs(homePath)
     app.bookmarks.loadUserBookmarks(os.path.join(homePath, 'bookmarks.dat'))
     app.curses_util.hackCursesFixes()
