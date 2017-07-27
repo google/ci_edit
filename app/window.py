@@ -575,12 +575,12 @@ class StatusLine(StaticWindow):
     if app.prefs.startup.get('showLogWindow'):
       rightSide += ' %s | %s |'%(tb.cursorGrammarName(), tb.selectionModeName())
     rightSide += ' %4d,%2d | %3d%%,%3d%%'%(
-        self.host.cursorRow+1, self.host.cursorCol+1,
+        self.host.cursorRow+1, self.host.cursorCol + 1,
         rowPercentage,
         colPercentage)
-    statusLine += ' '*(maxCol-len(statusLine)-len(rightSide)) + rightSide
+    statusLine += ' ' * (maxCol - len(statusLine) - len(rightSide)) + rightSide
     color = app.color.get('status_line')
-    self.addStr(0, 0, statusLine, color)
+    self.addStr(0, 0, statusLine[:self.cols], color)
     if not app.prefs.devTest['oneWindow']:
       self.cursorWindow.refresh()
 
@@ -650,7 +650,8 @@ class TopInfo(StaticWindow):
     lines.reverse()
     color = app.color.get('top_info')
     for i,line in enumerate(lines):
-      self.addStr(i, 0, line + ' ' * (self.cols - len(line)), color)
+      self.addStr(i, 0, (line + ' ' * (self.cols - len(line)))[:self.cols],
+          color)
     for i in range(len(lines), self.rows):
       self.addStr(i, 0, ' ' * self.cols, color)
     if not app.prefs.devTest['oneWindow']:
@@ -822,12 +823,14 @@ class InputWindow(Window):
 
   def drawLogoCorner(self):
     """."""
-    maxRow, maxCol = self.logoCorner.rows, self.logoCorner.cols
+    logo = self.logoCorner
+    if logo.rows <= 0 or logo.cols <= 0:
+      return
     color = app.color.get('logo')
-    for i in range(maxRow):
-      self.logoCorner.addStr(i, 0, ' ' * maxCol, color)
-    self.logoCorner.addStr(0, 1, 'ci', color)
-    self.logoCorner.refresh()
+    for i in range(logo.rows):
+      logo.addStr(i, 0, ' ' * logo.cols, color)
+    logo.addStr(0, 1, 'ci'[:self.cols], color)
+    logo.refresh()
 
   def drawRightEdge(self):
     """Draw makers to indicate text extending past the right edge of the
