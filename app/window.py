@@ -168,6 +168,8 @@ class StaticWindow:
 
   def resizeTo(self, rows, cols):
     app.log.detail(rows, cols, self)
+    assert rows >=0, rows
+    assert cols >=0, cols
     self.rows = rows
     self.cols = cols
     if not app.prefs.devTest['oneWindow']:
@@ -351,7 +353,8 @@ class LabeledLine(Window):
 
   def reshape(self, rows, cols, top, left):
     labelWidth = len(self.label)
-    Window.reshape(self, rows, cols - labelWidth, top, left + labelWidth)
+    Window.reshape(self, rows, max(0, cols - labelWidth), top,
+        left + labelWidth)
     self.leftColumn.reshape(rows, labelWidth, top, left)
 
   def setController(self, controllerClass):
@@ -782,7 +785,7 @@ class InputWindow(Window):
     topRows = self.topRows
     bottomRows = self.bottomRows
 
-    if self.showTopInfo:
+    if self.showTopInfo and rows > topRows and cols > lineNumbersCols:
       self.topInfo.reshape(topRows, cols - lineNumbersCols, top,
           left + lineNumbersCols)
       top += topRows
@@ -803,14 +806,14 @@ class InputWindow(Window):
     if 1:
       self.interactiveGoto.reshape(bottomRows, cols, bottomFirstRow,
           left)
-    if self.showFooter:
+    if self.showFooter and rows > 0:
       self.statusLine.reshape(1, cols, bottomFirstRow - 1, left)
       rows -= 1
-    if self.showLineNumbers:
+    if self.showLineNumbers and cols > lineNumbersCols:
       self.lineNumberColumn.reshape(rows, lineNumbersCols, top, left)
       cols -= lineNumbersCols
       left += lineNumbersCols
-    if self.showRightColumn:
+    if self.showRightColumn and cols > 0:
       self.rightColumn.reshape(rows, 1, top, left + cols - 1)
       cols -= 1
     # The top, left of the main window is the rows, cols of the logo corner.
