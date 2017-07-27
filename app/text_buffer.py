@@ -57,6 +57,8 @@ class TextBuffer(app.actions.Actions):
     self.view.scrollCol += cols
 
   def draw(self, window):
+    if self.view.rows <= 0 or self.view.cols <= 0:
+      return
     if self.shouldReparse:
       self.parseGrammars()
       self.shouldReparse = False
