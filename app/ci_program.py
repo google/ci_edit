@@ -514,8 +514,6 @@ class CiProgram:
         self.curses___Window.move(
             k.top + k.cursorRow - k.scrollRow,
             k.left + k.cursorCol - k.scrollCol)
-        curses.curs_set(1)
-        self.curses___Window.refresh()
 
   def makeHomeDirs(self, homePath):
     try:
