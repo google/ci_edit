@@ -562,7 +562,7 @@ class StatusLine(StaticWindow):
          rowPercentage = 100
       charCount = len(tb.lines[self.host.cursorRow])
       if (self.host.cursorCol < charCount):
-        colPercentage = self.host.cursorCol*100/charCount
+        colPercentage = self.host.cursorCol * 100 / charCount
       else:
         colPercentage = 100
     # Format.
