@@ -319,10 +319,14 @@ class Window(ActiveWindow):
                 self.cursorCol - self.scrollCol)
           except curses.error:
             pass
-        else:
-          curses___Window.move(
-              self.cursorRow - self.scrollRow,
-              self.cursorCol - self.scrollCol)
+        elif 0:
+          # TODO(dschuyler): Decide if this is necessary.
+          try:
+            self.cursorWindow.move(
+                self.cursorRow - self.scrollRow,
+                self.cursorCol - self.scrollCol)
+          except curses.error:
+            pass
 
   def setTextBuffer(self, textBuffer):
     textBuffer.setView(self)

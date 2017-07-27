@@ -112,9 +112,12 @@ class CiProgram:
     # This is the 'main loop'. Execution doesn't leave this loop until the
     # application is closing down.
     while not self.exiting:
+      if app.prefs.devTest['oneWindow']:
+        self.curses___Window.noutrefresh()
       self.refresh()
       if app.prefs.devTest['oneWindow']:
-        self.curses___Window.refresh()
+        # TODO(dschuyler): What is refreshing with window if it's not this.
+        pass #self.curses___Window.refresh()
       self.mainLoopTime = time.time() - start
       if self.mainLoopTime > self.mainLoopTimePeak:
         self.mainLoopTimePeak = self.mainLoopTime
