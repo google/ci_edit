@@ -138,6 +138,9 @@ prefs = {
     'trailing_space': 180,
     'quoted_string2': stringColorIndex,
   },
+  'devTest': {
+    'oneWindow': True,
+  },
   'editor': {
     'captiveCursor': False,
     'colorScheme': 'default',

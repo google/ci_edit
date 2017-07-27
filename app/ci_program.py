@@ -84,6 +84,15 @@ class CiProgram:
       for i in range(0, curses.COLORS):
         app.log.detail("color", i, ": ", curses.color_content(i))
     self.setUpPalette()
+    if app.prefs.devTest['oneWindow']:
+      rows, cols = self.cursesScreen.getmaxyx()
+      self.curses___Window = curses.newwin(rows, cols)
+      #self.curses___Window.leaveok(1)  # Don't update cursor position.
+      self.curses___Window.timeout(10)
+      self.curses___Window.keypad(1)
+      self.top, self.left = self.curses___Window.getyx()
+      self.rows, self.cols = self.curses___Window.getmaxyx()
+      app.window.curses___Window = self.curses___Window
     self.zOrder = []
 
   def commandLoop(self):
@@ -104,6 +113,8 @@ class CiProgram:
     # application is closing down.
     while not self.exiting:
       self.refresh()
+      if app.prefs.devTest['oneWindow']:
+        self.curses___Window.refresh()
       self.mainLoopTime = time.time() - start
       if self.mainLoopTime > self.mainLoopTimePeak:
         self.mainLoopTimePeak = self.mainLoopTime
@@ -111,19 +122,23 @@ class CiProgram:
       # (A performance optimization).
       cmdList = []
       mouseEvents = []
+      if not app.prefs.devTest['oneWindow']:
+        cursesWindow = window.cursorWindow
+      else:
+        cursesWindow = self.curses___Window
       while not len(cmdList):
         for i in range(5):
-          ch = window.cursorWindow.getch()
+          ch = cursesWindow.getch()
           if ch == curses.ascii.ESC:
             # Some keys are sent from the terminal as a sequence of bytes
             # beginning with an Escape character. To help reason about these
             # events (and apply event handler callback functions) the sequence
             # is converted into tuple.
             keySequence = []
-            n = window.cursorWindow.getch()
+            n = cursesWindow.getch()
             while n != curses.ERR:
               keySequence.append(n)
-              n = window.cursorWindow.getch()
+              n = cursesWindow.getch()
             #app.log.info('sequence\n', keySequence)
             ch = tuple(keySequence)
             if not ch:
@@ -224,7 +239,7 @@ class CiProgram:
     if not self.debugWindow:
       return
     textBuffer = win.textBuffer
-    y, x = win.cursorWindow.getyx()
+    y, x = win.top, win.left
     maxRow, maxCol = win.rows, win.cols
     self.debugWindow.writeLineRow = 0
     intent = "noIntent"
@@ -292,8 +307,9 @@ class CiProgram:
       text = (i < len(textBuffer.redoChain) and
           textBuffer.redoChain[i] or '')
       self.debugWindow.writeLine(text, redoColorC)
-    # Refresh the display.
-    self.debugWindow.cursorWindow.refresh()
+    if not app.prefs.devTest['oneWindow']:
+      # Refresh the display.
+      self.debugWindow.cursorWindow.refresh()
 
   def debugWindowOrder(self):
     app.log.info('debugWindowOrder')
@@ -494,6 +510,12 @@ class CiProgram:
       k.refresh()
     if k.shouldShowCursor:
       curses.curs_set(1)
+      if app.prefs.devTest['oneWindow']:
+        self.curses___Window.move(
+            k.top + k.cursorRow - k.scrollRow,
+            k.left + k.cursorCol - k.scrollCol)
+        curses.curs_set(1)
+        self.curses___Window.refresh()
 
   def makeHomeDirs(self, homePath):
     try:
