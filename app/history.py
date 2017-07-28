@@ -23,9 +23,10 @@ import hashlib
 
 fileHistory = {}
 userHistory = {}
-historyPath = None
+pathToHistory = None
 hasher = None
 checksum = None
+fileSize = 0
 
 def get(keyPath, default={}):
   return fileHistory.setdefault(keyPath[-1], default)
@@ -36,20 +37,24 @@ def set(keyPath, value):
   #assert get(keyPath) == value
 
 def loadUserHistory(historyPath, filePath):
-  global userHistory, fileHistory, checksum
+  global userHistory, fileHistory, checksum, fileSize, pathToHistory
+  pathToHistory = historyPath
   if os.path.isfile(historyPath):
     with open(historyPath, 'rb') as file:
       userHistory = pickle.load(file)
     checksum = calculateChecksum(filePath)
-    fileHistory = userHistory.get(checksum, {})
+    fileSize = os.stat(filePath).st_size
+    fileHistory = userHistory.get((checksum, fileSize), {})
 
 def saveUserHistory(historyPath, filePath):
-  global userHistory, fileHistory, checksum
+  global userHistory, fileHistory, checksum, fileSize, pathToHistory
   try:
     if historyPath is not None:
-      userHistory.pop(checksum, None)
+      pathToHistory = historyPath
+      userHistory.pop((checksum, fileSize), None)
       checksum = calculateChecksum(filePath)
-      userHistory[checksum] = fileHistory
+      fileSize = os.stat(filePath).st_size
+      userHistory[(checksum, fileSize)] = fileHistory
       with open(historyPath, 'wb') as file:
         pickle.dump(userHistory, file)
       app.log.info('wrote pickle')
@@ -57,21 +62,22 @@ def saveUserHistory(historyPath, filePath):
     app.log.error('exception')
 
 def calculateChecksum(filePath):
+  app.log.info("Calculate checksum of the current file")
   hasher = hashlib.sha512()
   with open(filePath, 'rb') as file:
     hasher.update(file.read())
   return hasher.hexdigest()
 
-# def clearUserHistory():
-#   """
-#   Clears user history for all files.
-#   """
-#   global fileHistory, userHistory, path
-#   fileHistory = {}
-#   userHistory = {}
-#   try:
-#     os.remove(path)
-#     app.log.info("user history cleared")
-#   except Exception as e:
-#     app.log.error('clearUserHistory exception', e)
+def clearUserHistory():
+  """
+  Clears user history for all files.
+  """
+  global fileHistory, userHistory, pathToHistory
+  fileHistory = {}
+  userHistory = {}
+  try:
+    os.remove(pathToHistory)
+    app.log.info("user history cleared")
+  except Exception as e:
+    app.log.error('clearUserHistory exception', e)
 
