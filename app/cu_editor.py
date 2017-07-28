@@ -25,15 +25,10 @@ import text_buffer
 def initCommandSet(editText, textBuffer):
   """The basic command set includes line editing controls."""
   return {
-    #KEY_F10: editText.prg.debugWindowOrder,
     CTRL_A: textBuffer.selectionAll,
-
     CTRL_C: textBuffer.editCopy,
-
-    CTRL_H: textBuffer.backspace,
-
+    #CTRL_H: textBuffer.backspace,
     CTRL_L: textBuffer.cursorSelectLine,
-
     CTRL_Q: editText.quitOrSwitchToConfirmQuit,
     CTRL_S: editText.saveOrChangeToSaveAs,
     CTRL_V: textBuffer.editPaste,
@@ -67,12 +62,46 @@ def initCommandSet(editText, textBuffer):
   }
 
 
+def mainWindowCommands(controller, textBuffer):
+  """The command set for a window (rather than a single line)."""
+  commands = initCommandSet(controller, textBuffer).copy()
+  commands.update({
+    KEY_ESCAPE: textBuffer.normalize,
+    KEY_F1: controller.info,
+    KEY_BTAB: textBuffer.unindent,
+    KEY_PAGE_UP: textBuffer.cursorPageUp,
+    KEY_PAGE_DOWN: textBuffer.cursorPageDown,
+
+    CTRL_F: controller.changeToFind,
+    CTRL_G: controller.changeToGoto,
+    CTRL_I: textBuffer.indent,
+    CTRL_J: textBuffer.carriageReturn,
+    CTRL_O: controller.changeToFileOpen,
+    CTRL_R: controller.changeToFindPrior,
+
+    KEY_DOWN: textBuffer.cursorDown,
+    KEY_SHIFT_LEFT: textBuffer.cursorSelectLeft,
+    KEY_SHIFT_RIGHT: textBuffer.cursorSelectRight,
+    KEY_UP: textBuffer.cursorUp,
+
+    KEY_SHIFT_DOWN: textBuffer.cursorSelectDown,
+    KEY_SHIFT_UP: textBuffer.cursorSelectUp,
+
+    KEY_CTRL_DOWN: textBuffer.cursorDownScroll,
+    KEY_CTRL_SHIFT_DOWN: textBuffer.cursorSelectDownScroll,
+    KEY_CTRL_UP: textBuffer.cursorUpScroll,
+    KEY_CTRL_SHIFT_UP: textBuffer.cursorSelectUpScroll,
+  })
+  return commands
+
+
 class ConfirmClose(app.controller.Controller):
   """Ask about closing a file with unsaved changes."""
-  def __init__(self, host, textBuffer):
-    app.controller.Controller.__init__(self, host, textBuffer)
-    self.textBuffer = textBuffer
-    self.document = host
+  def __init__(self, host):
+    app.controller.Controller.__init__(self, host, 'confirmClose')
+
+  def setTextBuffer(self, textBuffer):
+    app.controller.Controller.setTextBuffer(self, textBuffer)
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
       ord('n'): self.closeFile,
@@ -86,10 +115,11 @@ class ConfirmClose(app.controller.Controller):
 
 class ConfirmOverwrite(app.controller.Controller):
   """Ask about writing over an existing file."""
-  def __init__(self, host, textBuffer):
-    app.controller.Controller.__init__(self, host, textBuffer)
-    self.textBuffer = textBuffer
-    self.document = host
+  def __init__(self, host):
+    app.controller.Controller.__init__(self, host, 'confirmOverwrite')
+
+  def setTextBuffer(self, textBuffer):
+    app.controller.Controller.setTextBuffer(self, textBuffer)
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
       ord('y'): self.overwriteHostFile,
@@ -101,9 +131,11 @@ class ConfirmOverwrite(app.controller.Controller):
 
 class InteractiveFind(app.editor.InteractiveFind):
   """Find text within the current document."""
-  def __init__(self, host, textBuffer):
-    app.editor.InteractiveFind.__init__(self, host, textBuffer)
-    self.document = host
+  def __init__(self, host):
+    app.editor.InteractiveFind.__init__(self, host)
+
+  def setTextBuffer(self, textBuffer):
+    app.editor.InteractiveFind.setTextBuffer(self, textBuffer)
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
       KEY_ESCAPE: self.changeToHostWindow,
@@ -128,9 +160,11 @@ class InteractiveFind(app.editor.InteractiveFind):
 
 class InteractiveGoto(app.editor.InteractiveGoto):
   """Jump to a particular line number."""
-  def __init__(self, host, textBuffer):
-    app.editor.InteractiveGoto.__init__(self, host, textBuffer)
-    self.document = host
+  def __init__(self, host):
+    app.editor.InteractiveGoto.__init__(self, host)
+
+  def setTextBuffer(self, textBuffer):
+    app.editor.InteractiveGoto.setTextBuffer(self, textBuffer)
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
       KEY_ESCAPE: self.changeToHostWindow,
@@ -149,9 +183,11 @@ class InteractiveGoto(app.editor.InteractiveGoto):
 
 class InteractiveOpener(app.editor.InteractiveOpener):
   """Open a file to edit."""
-  def __init__(self, host, textBuffer):
-    app.editor.InteractiveOpener.__init__(self, host, textBuffer)
-    self.document = host
+  def __init__(self, host):
+    app.editor.InteractiveOpener.__init__(self, host)
+
+  def setTextBuffer(self, textBuffer):
+    app.editor.InteractiveOpener.setTextBuffer(self, textBuffer)
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
       KEY_ESCAPE: self.changeToHostWindow,
@@ -168,9 +204,11 @@ class InteractiveOpener(app.editor.InteractiveOpener):
 
 class InteractivePrediction(app.editor.InteractivePrediction):
   """Make a guess."""
-  def __init__(self, host, textBuffer):
-    app.editor.InteractivePrediction.__init__(self, host, textBuffer)
-    self.document = host
+  def __init__(self, host):
+    app.editor.InteractivePrediction.__init__(self, host)
+
+  def setTextBuffer(self, textBuffer):
+    app.editor.InteractivePrediction.setTextBuffer(self, textBuffer)
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
       KEY_ESCAPE: self.cancel,
@@ -188,9 +226,11 @@ class InteractivePrediction(app.editor.InteractivePrediction):
 
 class InteractivePrompt(app.interactive_prompt.InteractivePrompt):
   """Extended command prompt."""
-  def __init__(self, host, textBuffer):
-    app.interactive_prompt.InteractivePrompt.__init__(self, host, textBuffer)
-    self.document = host
+  def __init__(self, host):
+    app.interactive_prompt.InteractivePrompt.__init__(self, host)
+
+  def setTextBuffer(self, textBuffer):
+    app.interactive_prompt.InteractivePrompt.setTextBuffer(self, textBuffer)
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
       KEY_ESCAPE: self.changeToHostWindow,
@@ -203,15 +243,17 @@ class InteractivePrompt(app.interactive_prompt.InteractivePrompt):
 
 class InteractiveQuit(app.controller.Controller):
   """Ask about unsaved changes."""
-  def __init__(self, host, textBuffer):
-    app.controller.Controller.__init__(self, host, textBuffer)
+  def __init__(self, host):
+    app.controller.Controller.__init__(self, host, 'interactiveQuit')
+
+  def setTextBuffer(self, textBuffer):
+    app.controller.Controller.setTextBuffer(self, textBuffer)
     self.textBuffer = textBuffer
-    self.document = host
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
       #KEY_F1: self.info,
-      ord('n'): host.quitNow,
-      ord('N'): host.quitNow,
+      ord('n'): self.host.quitNow,
+      ord('N'): self.host.quitNow,
       ord('y'): self.saveOrChangeToSaveAs,
       ord('Y'): self.saveOrChangeToSaveAs,
     })
@@ -221,10 +263,11 @@ class InteractiveQuit(app.controller.Controller):
 
 class InteractiveSaveAs(app.controller.Controller):
   """Ask about unsaved files."""
-  def __init__(self, host, textBuffer):
-    app.controller.Controller.__init__(self, host, textBuffer)
-    self.textBuffer = textBuffer
-    self.document = host
+  def __init__(self, host):
+    app.controller.Controller.__init__(self, host, 'saveAs')
+
+  def setTextBuffer(self, textBuffer):
+    app.controller.Controller.setTextBuffer(self, textBuffer)
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
       KEY_ESCAPE: self.changeToHostWindow,
@@ -238,59 +281,26 @@ class InteractiveSaveAs(app.controller.Controller):
     app.log.info('saveAs')
     name = self.textBuffer.lines[0]
     if not len(name):
-      self.document.textBuffer.setMessage(
+      self.host.textBuffer.setMessage(
           'File not saved (file name was empty).')
       self.changeToHostWindow()
       return
-    self.document.textBuffer.setFilePath(self.textBuffer.lines[0])
+    self.host.textBuffer.setFilePath(self.textBuffer.lines[0])
     # Preload the message with an error that should be overwritten.
-    self.document.textBuffer.setMessage('Error saving file')
-    self.document.textBuffer.fileWrite()
+    self.host.textBuffer.setMessage('Error saving file')
+    self.host.textBuffer.fileWrite()
     self.changeToHostWindow()
 
 
 class CuaEdit(app.controller.Controller):
   """Keyboard mappings for CUA. CUA is the Cut/Copy/Paste paradigm."""
-  def __init__(self, prg, host):
+  def __init__(self, host):
     app.controller.Controller.__init__(self, host, 'CuaEdit')
     self.host = host
-    app.log.info('CuaEdit.__init__')
 
   def setTextBuffer(self, textBuffer):
-    self.textBuffer = textBuffer
-    commandSet = initCommandSet(self, textBuffer)
-    commandSet.update({
-      KEY_ESCAPE: textBuffer.normalize,
-
-      KEY_F1: self.info,
-
-      KEY_BTAB: textBuffer.unindent,
-      KEY_PAGE_UP: textBuffer.cursorPageUp,
-      KEY_PAGE_DOWN: textBuffer.cursorPageDown,
-
-      CTRL_F: self.changeToFind,
-      CTRL_G: self.changeToGoto,
-
-      CTRL_I: textBuffer.indent,
-      CTRL_J: textBuffer.carriageReturn,
-
-      CTRL_O: self.changeToFileOpen,
-      CTRL_R: self.changeToFindPrior,
-
-      KEY_DOWN: textBuffer.cursorDown,
-      KEY_SHIFT_LEFT: textBuffer.cursorSelectLeft,
-      KEY_SHIFT_RIGHT: textBuffer.cursorSelectRight,
-      KEY_UP: textBuffer.cursorUp,
-
-      KEY_SHIFT_DOWN: textBuffer.cursorSelectDown,
-      KEY_SHIFT_UP: textBuffer.cursorSelectUp,
-
-      KEY_CTRL_DOWN: textBuffer.cursorDownScroll,
-      KEY_CTRL_SHIFT_DOWN: textBuffer.cursorSelectDownScroll,
-      KEY_CTRL_UP: textBuffer.cursorUpScroll,
-      KEY_CTRL_SHIFT_UP: textBuffer.cursorSelectUpScroll,
-    })
-    self.commandSet = commandSet
+    app.controller.Controller.setTextBuffer(self, textBuffer)
+    self.commandSet = mainWindowCommands(self, textBuffer)
     self.commandDefault = self.textBuffer.insertPrintable
 
   def info(self):
@@ -303,8 +313,8 @@ class CuaEdit(app.controller.Controller):
 
 class CuaPlusEdit(CuaEdit):
   """Keyboard mappings for CUA, plus some extra."""
-  def __init__(self, prg, host):
-    CuaEdit.__init__(self, prg, host)
+  def __init__(self, host):
+    CuaEdit.__init__(self, host)
     app.log.info('CuaPlusEdit.__init__')
 
   def info(self):
@@ -312,7 +322,6 @@ class CuaPlusEdit(CuaEdit):
     app.log.info(repr(self))
 
   def setTextBuffer(self, textBuffer):
-    app.log.info('CuaPlusEdit.__init__')
     CuaEdit.setTextBuffer(self, textBuffer)
     commandSet = self.commandSet.copy()
     commandSet.update({
@@ -330,8 +339,8 @@ class CuaPlusEdit(CuaEdit):
 
 class PaletteDialogController(app.controller.Controller):
   """."""
-  def __init__(self, prg, view):
-    app.controller.Controller.__init__(self, prg, 'Palette')
+  def __init__(self, view):
+    app.controller.Controller.__init__(self, view, 'Palette')
     self.view = view
     app.log.info('PaletteDialogController.__init__')
     def noOp(c):

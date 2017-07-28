@@ -31,7 +31,7 @@ class TextBuffer(app.actions.Actions):
 
   def checkScrollToCursor(self, window):
     """Move the selected view rectangle so that the cursor is visible."""
-    maxRow, maxCol = window.cursorWindow.getmaxyx()
+    maxRow, maxCol = window.rows, window.cols
     #     self.penRow >= self.view.scrollRow + maxRow 1 0
     rows = 0
     if self.view.scrollRow > self.penRow:
@@ -57,12 +57,14 @@ class TextBuffer(app.actions.Actions):
     self.view.scrollCol += cols
 
   def draw(self, window):
+    if self.view.rows <= 0 or self.view.cols <= 0:
+      return
     if self.shouldReparse:
       self.parseGrammars()
       self.shouldReparse = False
     if self.view.hasCaptiveCursor:
       self.checkScrollToCursor(window)
-    rows, cols = window.cursorWindow.getmaxyx()
+    rows, cols = window.rows, window.cols
     if 0:
       for i in range(rows):
         window.addStr(i, 0, '?' * cols, app.color.get(120))

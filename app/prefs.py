@@ -85,6 +85,7 @@ elif colorSchemeName in builtInColorSchemes:
 
 color = prefs['color']
 editor = prefs['editor']
+devTest = prefs['devTest']
 palette = prefs['palette']
 
 

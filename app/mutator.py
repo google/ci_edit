@@ -41,6 +41,7 @@ class Mutator(app.selectable.Selectable):
     self.fileExtension = ''
     self.fullPath = ''
     self.fileStat = None
+    self.goalCol = 0
     self.isReadOnly = False
     self.penGrammar = None
     self.parser = None
@@ -215,7 +216,7 @@ class Mutator(app.selectable.Selectable):
         x = self.penCol
         self.lines[self.penRow] = line[:x] + change[1] + line[x:]
         self.penCol += len(change[1])
-        self.view.goalCol = self.penCol
+        self.goalCol = self.penCol
       elif change[0] == 'j':  # Redo join lines.
         self.lines[self.penRow] += self.lines[self.penRow + 1]
         del self.lines[self.penRow + 1]
@@ -313,7 +314,7 @@ class Mutator(app.selectable.Selectable):
           newCarriageReturns = change[1][0]
           oldMouseChange = self.redoChain[-1][1][1]
           oldCarriageReturns = self.redoChain[-1][1][0]
-          change = (change[0], (oldCarriageReturns + newCarriageReturns, 
+          change = (change[0], (oldCarriageReturns + newCarriageReturns,
                                 ('m', addVectors(newMouseChange[1], oldMouseChange[1]))))
           self.undoOne()
           self.redoChain.pop()
@@ -401,7 +402,7 @@ class Mutator(app.selectable.Selectable):
         x = self.penCol
         self.penCol -= len(change[1])
         self.lines[self.penRow] = line[:x - len(change[1])] + line[x:]
-        self.view.goalCol = self.penCol
+        self.goalCol = self.penCol
       elif change[0] == 'j':
         # Join lines.
         line = self.lines[self.penRow]

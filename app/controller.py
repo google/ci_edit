@@ -172,6 +172,10 @@ class Controller:
     curses.ungetch(self.savedCh)
     self.host.changeFocusTo(self.host)
 
+  def setTextBuffer(self, textBuffer):
+    app.log.info(textBuffer)
+    self.textBuffer = textBuffer
+
   def unfocus(self):
     pass
 

@@ -73,7 +73,9 @@ inventwithpython
 isdigit
 isdir
 isfile
+islink
 islower
+ismount
 isprint
 isupper
 iteritems
