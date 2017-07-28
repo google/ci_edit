@@ -49,7 +49,7 @@ class StaticWindow:
       try: self.cursorWindow.addstr(row, col, text, colorPair)
       except curses.error: pass
     else:
-      if 0:
+      if 1:
         if row < 0 or col >= self.cols:
           return
         if col < 0:
