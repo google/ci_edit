@@ -101,6 +101,7 @@ multiline
 mvwin
 ndiff
 newwin
+noutrefresh
 npage
 ord
 os

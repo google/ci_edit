@@ -502,6 +502,7 @@ class CiProgram:
   def refresh(self):
     """Repaint stacked windows, furthest to nearest."""
     if app.prefs.devTest['oneWindow']:
+      # Ask curses to hold the back buffer until curses refresh().
       self.curses___Window.noutrefresh()
     curses.curs_set(0)
     if self.showLogWindow:
@@ -516,6 +517,7 @@ class CiProgram:
         self.curses___Window.move(
             k.top + k.cursorRow - k.scrollRow,
             k.left + k.cursorCol - k.scrollCol)
+        # Calling refresh will draw the cursor.
         self.curses___Window.refresh()
         self.curses___Window.leaveok(1)  # Don't update cursor position.
 
