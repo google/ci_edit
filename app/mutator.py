@@ -197,78 +197,84 @@ class Mutator(app.selectable.Selectable):
       if change[0] != 'm':
         self.shouldReparse = True
       self.redoIndex += 1
-      if change[0] == 'b':
-        line = self.lines[self.penRow]
-        self.penCol -= len(change[1])
-        x = self.penCol
-        self.lines[self.penRow] = line[:x] + line[x + len(change[1]):]
-      elif change[0] == 'd':
-        line = self.lines[self.penRow]
-        x = self.penCol
-        self.lines[self.penRow] = line[:x] + line[x + len(change[1]):]
-      elif change[0] == 'dr':  # Redo delete range.
-        self.doDelete(*change[1])
-      elif change[0] == 'ds':  # Redo delete selection.
-        self.doDeleteSelection()
-      elif change[0] == 'i':  # Redo insert.
-        line = self.lines[self.penRow]
-        x = self.penCol
-        self.lines[self.penRow] = line[:x] + change[1] + line[x:]
-        self.penCol += len(change[1])
-        self.goalCol = self.penCol
-      elif change[0] == 'j':  # Redo join lines.
-        self.lines[self.penRow] += self.lines[self.penRow + 1]
-        del self.lines[self.penRow + 1]
-      elif change[0] == 'ld':  # Redo line diff.
-        lines = []
-        index = 0
-        for ii in change[1]:
-          if type(ii) is type(0):
-            for line in self.lines[index:index + ii]:
-              lines.append(line)
-            index += ii
-          elif ii[0] == '+':
-            lines.append(ii[2:])
-          elif ii[0] == '-':
-            index += 1
-        app.log.info('ld', self.lines == lines)
-        self.lines = lines
-      elif change[0] == 'm':  # Redo move
-        self.redoMove(change)
-      elif change[0] == 'ml':
-        # Redo move lines
-        begin, end, to = change[1]
-        self.doMoveLines(begin, end, to)
-      elif change[0] == 'n':
-        # Redo split lines.
-        line = self.lines[self.penRow]
-        self.lines.insert(self.penRow + 1, line[self.penCol:])
-        self.lines[self.penRow] = line[:self.penCol]
-        for i in range(max(change[1][0] - 1, 0)):
-          self.lines.insert(self.penRow + 1, "")
-        self.redoMove(change[1][1])
-      elif change[0] == 'v':  # Redo paste.
-        self.insertLines(change[1])
-      elif change[0] == 'vb':
-        self.penCol -= len(change[1])
-        row = min(self.markerRow, self.penRow)
-        rowEnd = max(self.markerRow, self.penRow)
-        for i in range(row, rowEnd + 1):
-          line = self.lines[i]
-          x = self.penCol
-          self.lines[self.penRow] = line[:x] + line[x + len(change[1]):]
-      elif change[0] == 'vd':  # Redo vertical delete.
-        app.log.info('do vd')
-        self.doVerticalDelete(change)
-      elif change[0] == 'vi':  # Redo vertical insert.
-        app.log.info('do vi')
-        self.doVerticalInsert(change)
-      else:
-        app.log.info('ERROR: unknown redo.')
+      self.__redoStep(change)
     # Redo again if there is a move next.
     if (self.redoIndex < len(self.redoChain) and
         self.redoChain[self.redoIndex][0] == 'm'):
       self.redo()
+
+  def __redoStep(self, change):
+    if change[0] == 'b':
+      line = self.lines[self.penRow]
+      self.penCol -= len(change[1])
+      x = self.penCol
+      self.lines[self.penRow] = line[:x] + line[x + len(change[1]):]
+    elif change[0] == 'cc':  # Redo compound change.
+      for change in change[1]:
+        self.__redoStep(change)
+    elif change[0] == 'd':
+      line = self.lines[self.penRow]
+      x = self.penCol
+      self.lines[self.penRow] = line[:x] + line[x + len(change[1]):]
+    elif change[0] == 'dr':  # Redo delete range.
+      self.doDelete(*change[1])
+    elif change[0] == 'ds':  # Redo delete selection.
+      self.doDeleteSelection()
+    elif change[0] == 'i':  # Redo insert.
+      line = self.lines[self.penRow]
+      x = self.penCol
+      self.lines[self.penRow] = line[:x] + change[1] + line[x:]
+      self.penCol += len(change[1])
+      self.goalCol = self.penCol
+    elif change[0] == 'j':  # Redo join lines.
+      self.lines[self.penRow] += self.lines[self.penRow + 1]
+      del self.lines[self.penRow + 1]
+    elif change[0] == 'ld':  # Redo line diff.
+      lines = []
+      index = 0
+      for ii in change[1]:
+        if type(ii) is type(0):
+          for line in self.lines[index:index + ii]:
+            lines.append(line)
+          index += ii
+        elif ii[0] == '+':
+          lines.append(ii[2:])
+        elif ii[0] == '-':
+          index += 1
+      app.log.info('ld', self.lines == lines)
+      self.lines = lines
+    elif change[0] == 'm':  # Redo move
+      self.redoMove(change)
+    elif change[0] == 'ml':
+      # Redo move lines
+      begin, end, to = change[1]
+      self.doMoveLines(begin, end, to)
+    elif change[0] == 'n':
+      # Redo split lines.
+      line = self.lines[self.penRow]
+      self.lines.insert(self.penRow + 1, line[self.penCol:])
+      self.lines[self.penRow] = line[:self.penCol]
+      for i in range(max(change[1][0] - 1, 0)):
+        self.lines.insert(self.penRow + 1, "")
+      self.redoMove(change[1][1])
+    elif change[0] == 'v':  # Redo paste.
+      self.insertLines(change[1])
+    elif change[0] == 'vb':
+      self.penCol -= len(change[1])
+      row = min(self.markerRow, self.penRow)
+      rowEnd = max(self.markerRow, self.penRow)
+      for i in range(row, rowEnd + 1):
+        line = self.lines[i]
+        x = self.penCol
+        self.lines[self.penRow] = line[:x] + line[x + len(change[1]):]
+    elif change[0] == 'vd':  # Redo vertical delete.
+      app.log.info('do vd')
+      self.doVerticalDelete(change)
+    elif change[0] == 'vi':  # Redo vertical insert.
+      app.log.info('do vi')
+      self.doVerticalInsert(change)
+    else:
+      app.log.info('ERROR: unknown redo.')
 
   def redoAddChange(self, change):
     """
@@ -381,91 +387,98 @@ class Mutator(app.selectable.Selectable):
         self.shouldReparse = True
       if self.debugRedo:
         app.log.info('undo', self.redoIndex, repr(change))
-      if change[0] == 'b':
-        line = self.lines[self.penRow]
-        x = self.penCol
-        self.lines[self.penRow] = line[:x] + change[1] + line[x:]
-        self.penCol += len(change[1])
-      elif change[0] == 'd':
-        line = self.lines[self.penRow]
-        x = self.penCol
-        self.lines[self.penRow] = line[:x] + change[1] + line[x:]
-      elif change[0] == 'dr':  # Undo delete range.
-        app.log.detail('undo dr', change[1])
-        self.insertLinesAt(change[1][0], change[1][1], change[2])
-      elif change[0] == 'ds':  # Undo delete selection.
-        app.log.detail('undo ds', change[1])
-        self.insertLines(change[1])
-      elif change[0] == 'i':
-        line = self.lines[self.penRow]
-        x = self.penCol
-        self.penCol -= len(change[1])
-        self.lines[self.penRow] = line[:x - len(change[1])] + line[x:]
-        self.goalCol = self.penCol
-      elif change[0] == 'j':
-        # Join lines.
-        line = self.lines[self.penRow]
-        self.lines.insert(self.penRow + 1, line[self.penCol:])
-        self.lines[self.penRow] = line[:self.penCol]
-      elif change[0] == 'ld':  # Undo line diff.
-        app.log.info('ld')
-        lines = []
-        index = 0
-        for ii in change[1]:
-          if type(ii) is type(0):
-            for line in self.lines[index:index + ii]:
-              lines.append(line)
-            index += ii
-          elif ii[0] == '+':
-            index += 1
-          elif ii[0] == '-':
-            lines.append(ii[2:])
-        self.lines = lines
-      elif change[0] == 'm':
-        self.undoMove(change)
-        return True
-      elif change[0] == 'ml':
-        # Undo move lines
-        begin, end, to = change[1]
-        count = end - begin
-        if begin < to:
-          self.doMoveLines(to - 1, to + count - 1, begin + count - 1)
-        else:
-          self.doMoveLines(to, to + count, begin + count)
-      elif change[0] == 'n':
-        # Undo split lines.
-        self.undoMove(change[1][1])
-        self.lines[self.penRow] += self.lines[self.penRow + change[1][0]]
-        for i in range(change[1][0]):
-          del self.lines[self.penRow + 1]
-      elif change[0] == 'v':  # undo paste
-        clip = change[1]
-        row = self.penRow
-        col = self.penCol
-        app.log.info('len clip', len(clip))
-        if len(clip) == 1:
-          self.lines[row] = (
-              self.lines[row][:col] +
-              self.lines[row][col + len(clip[0]):])
-        else:
-          self.lines[row] = (self.lines[row][:col] +
-              self.lines[row + len(clip)-1][len(clip[-1]):])
-          delLineCount = len(clip[1:-1])
-          del self.lines[row + 1:row + 1 + delLineCount + 1]
-      elif change[0] == 'vb':
-        row = min(self.markerRow, self.penRow)
-        endRow = max(self.markerRow, self.penRow)
-        for i in range(row, endRow + 1):
-          line = self.lines[self.penRow]
-          x = self.penCol
-          self.lines[self.penRow] = line[:x] + change[1] + line[x:]
-        self.penCol += len(change[1])
-      elif change[0] == 'vd': # Undo vertical delete
-        app.log.info('undo vd', change[1])
-        self.doVerticalInsert(change)
-      elif change[0] == 'vi':  # Undo vertical insert
-        app.log.info('undo vi', change[1])
-        self.doVerticalDelete(change)
+      return self.__undoStep(change)
+    return False
+
+  def __undoStep(self, change):
+    if change[0] == 'b':
+      line = self.lines[self.penRow]
+      x = self.penCol
+      self.lines[self.penRow] = line[:x] + change[1] + line[x:]
+      self.penCol += len(change[1])
+    elif change[0] == 'cc':  # Undo compound change.
+      for change in change[1]:
+        self.__undoStep(change)
+    elif change[0] == 'd':
+      line = self.lines[self.penRow]
+      x = self.penCol
+      self.lines[self.penRow] = line[:x] + change[1] + line[x:]
+    elif change[0] == 'dr':  # Undo delete range.
+      app.log.detail('undo dr', change[1])
+      self.insertLinesAt(change[1][0], change[1][1], change[2])
+    elif change[0] == 'ds':  # Undo delete selection.
+      app.log.detail('undo ds', change[1])
+      self.insertLines(change[1])
+    elif change[0] == 'i':
+      line = self.lines[self.penRow]
+      x = self.penCol
+      self.penCol -= len(change[1])
+      self.lines[self.penRow] = line[:x - len(change[1])] + line[x:]
+      self.goalCol = self.penCol
+    elif change[0] == 'j':
+      # Join lines.
+      line = self.lines[self.penRow]
+      self.lines.insert(self.penRow + 1, line[self.penCol:])
+      self.lines[self.penRow] = line[:self.penCol]
+    elif change[0] == 'ld':  # Undo line diff.
+      app.log.info('ld')
+      lines = []
+      index = 0
+      for ii in change[1]:
+        if type(ii) is type(0):
+          for line in self.lines[index:index + ii]:
+            lines.append(line)
+          index += ii
+        elif ii[0] == '+':
+          index += 1
+        elif ii[0] == '-':
+          lines.append(ii[2:])
+      self.lines = lines
+    elif change[0] == 'm':
+      self.undoMove(change)
+      return True
+    elif change[0] == 'ml':
+      # Undo move lines
+      begin, end, to = change[1]
+      count = end - begin
+      if begin < to:
+        self.doMoveLines(to - 1, to + count - 1, begin + count - 1)
       else:
-        app.log.info('ERROR: unknown undo.')
+        self.doMoveLines(to, to + count, begin + count)
+    elif change[0] == 'n':
+      # Undo split lines.
+      self.undoMove(change[1][1])
+      self.lines[self.penRow] += self.lines[self.penRow + change[1][0]]
+      for i in range(change[1][0]):
+        del self.lines[self.penRow + 1]
+    elif change[0] == 'v':  # undo paste
+      clip = change[1]
+      row = self.penRow
+      col = self.penCol
+      app.log.info('len clip', len(clip))
+      if len(clip) == 1:
+        self.lines[row] = (
+            self.lines[row][:col] +
+            self.lines[row][col + len(clip[0]):])
+      else:
+        self.lines[row] = (self.lines[row][:col] +
+            self.lines[row + len(clip)-1][len(clip[-1]):])
+        delLineCount = len(clip[1:-1])
+        del self.lines[row + 1:row + 1 + delLineCount + 1]
+    elif change[0] == 'vb':
+      row = min(self.markerRow, self.penRow)
+      endRow = max(self.markerRow, self.penRow)
+      for i in range(row, endRow + 1):
+        line = self.lines[self.penRow]
+        x = self.penCol
+        self.lines[self.penRow] = line[:x] + change[1] + line[x:]
+      self.penCol += len(change[1])
+    elif change[0] == 'vd': # Undo vertical delete
+      app.log.info('undo vd', change[1])
+      self.doVerticalInsert(change)
+    elif change[0] == 'vi':  # Undo vertical insert
+      app.log.info('undo vi', change[1])
+      self.doVerticalDelete(change)
+    else:
+      app.log.info('ERROR: unknown undo.')
     return False
