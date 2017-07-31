@@ -123,6 +123,7 @@ repr
 resizeterm
 restype
 rsplit
+scrollok
 sel
 sep
 setattr
