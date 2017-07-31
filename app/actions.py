@@ -1059,9 +1059,11 @@ class Actions(app.mutator.Mutator):
     self.insertPrintable(0x00)
 
   def stripTrailingWhiteSpace(self):
+    # todo(dschuyler): add '[' change
     for i in range(len(self.lines)):
       for found in app.selectable.kReEndSpaces.finditer(self.lines[i]):
         self.performDeleteRange(i, found.regs[0][0], i, found.regs[0][1])
+    # todo(dschuyler): add ']' change
 
   def unindent(self):
     if self.selectionMode == app.selectable.kSelectionNone:

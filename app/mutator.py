@@ -190,6 +190,11 @@ class Mutator(app.selectable.Selectable):
     if self.tempChange:
       self.undoMove(self.tempChange)
       self.tempChange = None
+    self.compoundDepth = 0
+    while self.redoOne() or self.compoundDepth:
+      pass
+
+  def redoOne(self):
     if self.redoIndex < len(self.redoChain):
       change = self.redoChain[self.redoIndex]
       if self.debugRedo:
@@ -197,21 +202,21 @@ class Mutator(app.selectable.Selectable):
       if change[0] != 'm':
         self.shouldReparse = True
       self.redoIndex += 1
-      self.__redoStep(change)
+      return self.__redoStep(change)
     # Redo again if there is a move next.
-    if (self.redoIndex < len(self.redoChain) and
-        self.redoChain[self.redoIndex][0] == 'm'):
-      self.redo()
+    return (self.redoIndex < len(self.redoChain) and
+        self.redoChain[self.redoIndex][0] == 'm')
 
   def __redoStep(self, change):
-    if change[0] == 'b':
+    if change[0] == '[':
+      self.compoundDepth += 1
+    elif change[0] == ']':
+      self.compoundDepth -= 1
+    elif change[0] == 'b':
       line = self.lines[self.penRow]
       self.penCol -= len(change[1])
       x = self.penCol
       self.lines[self.penRow] = line[:x] + line[x + len(change[1]):]
-    elif change[0] == 'cc':  # Redo compound change.
-      for change in change[1]:
-        self.__redoStep(change)
     elif change[0] == 'd':
       line = self.lines[self.penRow]
       x = self.penCol
@@ -275,6 +280,7 @@ class Mutator(app.selectable.Selectable):
       self.doVerticalInsert(change)
     else:
       app.log.info('ERROR: unknown redo.')
+    return False
 
   def redoAddChange(self, change):
     """
@@ -365,9 +371,10 @@ class Mutator(app.selectable.Selectable):
 
   def undo(self):
     """Undo a set of redo nodes."""
-    while self.undoOne():
+    self.compoundDepth = 0
+    while self.undoOne() or self.compoundDepth:
       pass
-    self.tempChange = None
+    assert self.tempChange == None
     self.processTempChange = False
 
   def undoOne(self):
@@ -380,7 +387,7 @@ class Mutator(app.selectable.Selectable):
       self.undoMove(self.tempChange)
       self.tempChange = None
       return True
-    elif self.redoIndex > 0:
+    if self.redoIndex > 0:
       self.redoIndex -= 1
       change = self.redoChain[self.redoIndex]
       if change[0] != 'm':
@@ -391,14 +398,15 @@ class Mutator(app.selectable.Selectable):
     return False
 
   def __undoStep(self, change):
-    if change[0] == 'b':
+    if change[0] == ']':
+      self.compoundDepth += 1
+    elif change[0] == '[':
+      self.compoundDepth -= 1
+    elif change[0] == 'b':
       line = self.lines[self.penRow]
       x = self.penCol
       self.lines[self.penRow] = line[:x] + change[1] + line[x:]
       self.penCol += len(change[1])
-    elif change[0] == 'cc':  # Undo compound change.
-      for change in change[1]:
-        self.__undoStep(change)
     elif change[0] == 'd':
       line = self.lines[self.penRow]
       x = self.penCol
