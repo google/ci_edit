@@ -183,7 +183,8 @@ class Mutator(app.selectable.Selectable):
 
   def redo(self):
     """Replay the next action on the redoChain."""
-    assert self.__compoundChange is None
+    if self.__compoundChange is not None:
+      return
     assert 0 <= self.redoIndex <= len(self.redoChain)
     if self.stallNextRedo:
       self.stallNextRedo = False

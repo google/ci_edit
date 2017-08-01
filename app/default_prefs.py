@@ -147,6 +147,7 @@ prefs = {
     'findIgnoreCase': True,
     'indentation': '  ',
     'lineLimitIndicator': 80,
+    'onSaveStripTrailingSpaces': True,
     'palette': 'default',
     'showLineNumbers': True,
     'showStatusLine': True,

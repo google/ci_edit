@@ -561,7 +561,8 @@ class Actions(app.mutator.Mutator):
     self.setMessage('Error saving file')
     try:
       try:
-        self.stripTrailingWhiteSpace()
+        if app.prefs.editor['onSaveStripTrailingSpaces']:
+          self.stripTrailingWhiteSpace()
         self.linesToData()
         file = open(self.fullPath, 'w+')
         file.seek(0)
