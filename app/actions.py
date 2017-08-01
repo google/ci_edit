@@ -593,9 +593,11 @@ class Actions(app.mutator.Mutator):
     scrollCol = self.view.scrollCol
     maxRow, maxCol = self.view.rows, self.view.cols
     if not (self.view.scrollRow < row <= self.view.scrollRow + maxRow):
-      scrollRow = max(row - 10, 0)
+      optimalCursorRow = app.prefs.editor['optimalCursorRow'] * self.view.rows
+      scrollRow = max(row - int(optimalCursorRow), 0)
     if not (self.view.scrollCol < col <= self.view.scrollCol + maxCol):
-      scrollCol = max(col - 10, 0)
+      optimalCursorCol = app.prefs.editor['optimalCursorCol'] * self.view.cols
+      scrollCol = max(col - int(optimalCursorCol), 0)
     self.doSelectionMode(app.selectable.kSelectionNone)
     self.view.scrollRow = scrollRow
     self.view.scrollCol = scrollCol
