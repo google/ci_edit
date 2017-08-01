@@ -37,7 +37,7 @@ class Actions(app.mutator.Mutator):
     app.mutator.Mutator.__init__(self)
     self.view = None
     self.rootGrammar = app.prefs.getGrammar(None)
-    self.skipUpdateScroll = False
+    self.__skipUpdateScroll = False
 
   def setView(self, view):
     self.view = view
@@ -923,7 +923,7 @@ class Actions(app.mutator.Mutator):
   def scrollUp(self):
     if self.view.scrollRow == 0:
       if not self.view.hasCaptiveCursor:
-        self.skipUpdateScroll = True
+        self.__skipUpdateScroll = True
       return
     maxRow, maxCol = self.view.rows, self.view.cols
     cursorDelta = 0
@@ -935,7 +935,7 @@ class Actions(app.mutator.Mutator):
           self.cursorColDelta(self.penRow + cursorDelta), 0, 0)
       self.redo()
     else:
-      self.skipUpdateScroll = True
+      self.__skipUpdateScroll = True
 
   def mouseWheelUp(self, shift, ctrl, alt):
     if not shift:
@@ -946,7 +946,7 @@ class Actions(app.mutator.Mutator):
     maxRow, maxCol = self.view.rows, self.view.cols
     if self.view.scrollRow + maxRow >= len(self.lines):
       if not self.view.hasCaptiveCursor:
-        self.skipUpdateScroll = True
+        self.__skipUpdateScroll = True
       return
     cursorDelta = 0
     if self.penRow <= self.view.scrollRow + 1:
@@ -957,7 +957,7 @@ class Actions(app.mutator.Mutator):
           self.cursorColDelta(self.penRow + cursorDelta), 0, 0)
       self.redo()
     else:
-      self.skipUpdateScroll = True
+      self.__skipUpdateScroll = True
 
   def nextSelectionMode(self):
     next = self.selectionMode + 1
@@ -1090,8 +1090,8 @@ class Actions(app.mutator.Mutator):
 
   def updateScrollPosition(self):
     """Move the selected view rectangle so that the cursor is visible."""
-    if self.skipUpdateScroll:
-      self.skipUpdateScroll = False
+    if self.__skipUpdateScroll:
+      self.__skipUpdateScroll = False
       return
     maxRow, maxCol = self.view.rows, self.view.cols
     if self.view.scrollRow > self.penRow:

@@ -129,7 +129,7 @@ class Mutator(app.selectable.Selectable):
         s1.st_mtime == s2.st_mtime and
         s1.st_ctime == s2.st_ctime)
 
-  def doMoveLines(self, begin, end, to):
+  def __doMoveLines(self, begin, end, to):
     lines = self.lines[begin:end]
     del self.lines[begin:end]
     count = end - begin
@@ -151,19 +151,19 @@ class Mutator(app.selectable.Selectable):
         self.markerRow += count
     self.lines = self.lines[:to] + lines + self.lines[to:]
 
-  def doVerticalInsert(self, change):
+  def __doVerticalInsert(self, change):
     text, row, endRow, col = change[1]
     for i in range(row, endRow + 1):
       line = self.lines[i]
       self.lines[i] = line[:col] + text + line[col:]
 
-  def doVerticalDelete(self, change):
+  def __doVerticalDelete(self, change):
     text, row, endRow, col = change[1]
     for i in range(row, endRow + 1):
       line = self.lines[i]
       self.lines[i] = line[:col] + line[col + len(text):]
 
-  def redoMove(self, change):
+  def __redoMove(self, change):
     assert self.penRow + change[1][0] >= 0, "%s %s"%(
         self.penRow, change[1][0])
     assert self.penCol + change[1][1] >= 0, "%s %s"%(
@@ -185,16 +185,16 @@ class Mutator(app.selectable.Selectable):
         app.log.info('processTempChange', repr(change))
       self.processTempChange = False
       change = self.tempChange
-      self.redoMove(change)
+      self.__redoMove(change)
       return
     if self.tempChange:
-      self.undoMove(self.tempChange)
+      self.__undoMove(self.tempChange)
       self.tempChange = None
-    self.compoundDepth = 0
-    while self.redoOne() or self.compoundDepth:
+    self.__compoundDepth = 0
+    while self.__redoOne() or self.__compoundDepth:
       pass
 
-  def redoOne(self):
+  def __redoOne(self):
     if self.redoIndex < len(self.redoChain):
       change = self.redoChain[self.redoIndex]
       if self.debugRedo:
@@ -209,9 +209,9 @@ class Mutator(app.selectable.Selectable):
 
   def __redoStep(self, change):
     if change[0] == '[':
-      self.compoundDepth += 1
+      self.__compoundDepth += 1
     elif change[0] == ']':
-      self.compoundDepth -= 1
+      self.__compoundDepth -= 1
     elif change[0] == 'b':
       line = self.lines[self.penRow]
       self.penCol -= len(change[1])
@@ -249,11 +249,11 @@ class Mutator(app.selectable.Selectable):
       app.log.info('ld', self.lines == lines)
       self.lines = lines
     elif change[0] == 'm':  # Redo move
-      self.redoMove(change)
+      self.__redoMove(change)
     elif change[0] == 'ml':
       # Redo move lines
       begin, end, to = change[1]
-      self.doMoveLines(begin, end, to)
+      self.__doMoveLines(begin, end, to)
     elif change[0] == 'n':
       # Redo split lines.
       line = self.lines[self.penRow]
@@ -261,7 +261,7 @@ class Mutator(app.selectable.Selectable):
       self.lines[self.penRow] = line[:self.penCol]
       for i in range(max(change[1][0] - 1, 0)):
         self.lines.insert(self.penRow + 1, "")
-      self.redoMove(change[1][1])
+      self.__redoMove(change[1][1])
     elif change[0] == 'v':  # Redo paste.
       self.insertLines(change[1])
     elif change[0] == 'vb':
@@ -274,10 +274,10 @@ class Mutator(app.selectable.Selectable):
         self.lines[self.penRow] = line[:x] + line[x + len(change[1]):]
     elif change[0] == 'vd':  # Redo vertical delete.
       app.log.info('do vd')
-      self.doVerticalDelete(change)
+      self.__doVerticalDelete(change)
     elif change[0] == 'vi':  # Redo vertical insert.
       app.log.info('do vi')
-      self.doVerticalInsert(change)
+      self.__doVerticalInsert(change)
     else:
       app.log.info('ERROR: unknown redo.')
     return False
@@ -318,7 +318,7 @@ class Mutator(app.selectable.Selectable):
         if (self.redoChain[-1][0] == change[0] and
             change[0] in ('d', 'i')):
           change = (change[0], self.redoChain[-1][1] + change[1])
-          self.undoOne()
+          self.__undoOne()
           self.redoChain.pop()
         elif self.redoChain[-1][0] == change[0] and change[0] == 'n':
           newMouseChange = change[1][1]
@@ -327,14 +327,14 @@ class Mutator(app.selectable.Selectable):
           oldCarriageReturns = self.redoChain[-1][1][0]
           change = (change[0], (oldCarriageReturns + newCarriageReturns,
                                 ('m', addVectors(newMouseChange[1], oldMouseChange[1]))))
-          self.undoOne()
+          self.__undoOne()
           self.redoChain.pop()
     if newTrivialChange:
       if self.tempChange:
         # Combine new change with the existing tempChange.
         change = (change[0], addVectors(self.tempChange[1], change[1]))
         self.undoOne()
-        self.tempChange = change
+        self.__tempChange = change
       if change in noOpInstructions:
         self.stallNextRedo = True
         self.processTempChange = False
@@ -346,7 +346,7 @@ class Mutator(app.selectable.Selectable):
       if len(self.redoChain) and change[0] == 'm':
         if self.redoChain[-1][0] == 'm':
           change = (change[0], addVectors(self.redoChain[-1][1], change[1]))
-          self.undoOne()
+          self.__undoOne()
           self.redoChain.pop()
         if change in noOpInstructions:
           self.stallNextRedo = True
@@ -358,7 +358,7 @@ class Mutator(app.selectable.Selectable):
         app.log.info('%2d:'%i, repr(c))
       app.log.info('tempChange', repr(self.tempChange))
 
-  def undoMove(self, change):
+  def __undoMove(self, change):
     """Undo the action of a cursor move"""
     app.log.detail('undo cursor move')
     self.penRow -= change[1][0]
@@ -371,20 +371,20 @@ class Mutator(app.selectable.Selectable):
 
   def undo(self):
     """Undo a set of redo nodes."""
-    self.compoundDepth = 0
-    while self.undoOne() or self.compoundDepth:
+    self.__compoundDepth = 0
+    while self.__undoOne() or self.__compoundDepth:
       pass
     assert self.tempChange == None
     self.processTempChange = False
 
-  def undoOne(self):
+  def __undoOne(self):
     """Undo the most recent change to the buffer.
     return whether undo should be repeated."""
     app.log.detail('undo')
     assert 0 <= self.redoIndex <= len(self.redoChain)
     # If tempChange is active, undo it first to fix cursor position.
     if self.tempChange:
-      self.undoMove(self.tempChange)
+      self.__undoMove(self.tempChange)
       self.tempChange = None
       return True
     if self.redoIndex > 0:
@@ -399,9 +399,9 @@ class Mutator(app.selectable.Selectable):
 
   def __undoStep(self, change):
     if change[0] == ']':
-      self.compoundDepth += 1
+      self.__compoundDepth += 1
     elif change[0] == '[':
-      self.compoundDepth -= 1
+      self.__compoundDepth -= 1
     elif change[0] == 'b':
       line = self.lines[self.penRow]
       x = self.penCol
@@ -443,19 +443,19 @@ class Mutator(app.selectable.Selectable):
           lines.append(ii[2:])
       self.lines = lines
     elif change[0] == 'm':
-      self.undoMove(change)
+      self.__undoMove(change)
       return True
     elif change[0] == 'ml':
       # Undo move lines
       begin, end, to = change[1]
       count = end - begin
       if begin < to:
-        self.doMoveLines(to - 1, to + count - 1, begin + count - 1)
+        self.__doMoveLines(to - 1, to + count - 1, begin + count - 1)
       else:
-        self.doMoveLines(to, to + count, begin + count)
+        self.__doMoveLines(to, to + count, begin + count)
     elif change[0] == 'n':
       # Undo split lines.
-      self.undoMove(change[1][1])
+      self.__undoMove(change[1][1])
       self.lines[self.penRow] += self.lines[self.penRow + change[1][0]]
       for i in range(change[1][0]):
         del self.lines[self.penRow + 1]
@@ -483,10 +483,10 @@ class Mutator(app.selectable.Selectable):
       self.penCol += len(change[1])
     elif change[0] == 'vd': # Undo vertical delete
       app.log.info('undo vd', change[1])
-      self.doVerticalInsert(change)
+      self.__doVerticalInsert(change)
     elif change[0] == 'vi':  # Undo vertical insert
       app.log.info('undo vi', change[1])
-      self.doVerticalDelete(change)
+      self.__doVerticalDelete(change)
     else:
       app.log.info('ERROR: unknown undo.')
     return False
