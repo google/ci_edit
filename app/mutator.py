@@ -35,6 +35,7 @@ class Mutator(app.selectable.Selectable):
   """Track and enact changes to a body of text."""
   def __init__(self):
     app.selectable.Selectable.__init__(self)
+    self.__compoundChange = None
     self.debugRedo = False
     self.findRe = None
     self.findBackRe = None
@@ -61,6 +62,17 @@ class Mutator(app.selectable.Selectable):
     # |savedAtRedoIndex| may be > len(self.redoChain).
     self.savedAtRedoIndex = 0
     self.shouldReparse = False
+
+  def compoundChangeBegin(self):
+    assert self.__compoundChange is None
+    self.__compoundChange = []
+
+  def compoundChangeEnd(self):
+    assert self.__compoundChange is not None
+    changes = tuple(self.__compoundChange)
+    self.__compoundChange = None
+    self.redoAddChange(('cc', changes))
+    self.redo()
 
   def getPenOffset(self, row, col):
     """inefficient test hack. wip on parser"""
@@ -171,6 +183,7 @@ class Mutator(app.selectable.Selectable):
 
   def redo(self):
     """Replay the next action on the redoChain."""
+    assert self.__compoundChange is None
     assert 0 <= self.redoIndex <= len(self.redoChain)
     if self.stallNextRedo:
       self.stallNextRedo = False
@@ -185,8 +198,7 @@ class Mutator(app.selectable.Selectable):
     if self.tempChange:
       self.__undoMove(self.tempChange)
       self.tempChange = None
-    self.__compoundDepth = 0
-    while self.__redoOne() or self.__compoundDepth:
+    while self.__redoOne():
       pass
 
   def __redoOne(self):
@@ -197,17 +209,17 @@ class Mutator(app.selectable.Selectable):
       if change[0] != 'm':
         self.shouldReparse = True
       self.redoIndex += 1
-      return self.__redoStep(change)
+      if change[0] == 'cc':
+        for i in change[1]:
+          self.__redoStep(i)
+      else:
+        return self.__redoStep(change)
     # Redo again if there is a move next.
     return (self.redoIndex < len(self.redoChain) and
         self.redoChain[self.redoIndex][0] == 'm')
 
   def __redoStep(self, change):
-    if change[0] == '[':
-      self.__compoundDepth += 1
-    elif change[0] == ']':
-      self.__compoundDepth -= 1
-    elif change[0] == 'b':
+    if change[0] == 'b':
       line = self.lines[self.penRow]
       self.penCol -= len(change[1])
       x = self.penCol
@@ -282,6 +294,10 @@ class Mutator(app.selectable.Selectable):
     Push a change onto the end of the redoChain. Call redo() to enact the
     change.
     """
+    if self.__compoundChange is not None:
+      # Accumulating changes together as a unit.
+      self.__compoundChange.append(change)
+      return
     newTrivialChange = False
     if self.debugRedo:
       app.log.info('redoAddChange', change)
@@ -328,7 +344,7 @@ class Mutator(app.selectable.Selectable):
       if self.tempChange:
         # Combine new change with the existing tempChange.
         change = (change[0], addVectors(self.tempChange[1], change[1]))
-        self.undoOne()
+        self.__undoOne()
         self.__tempChange = change
       if change in noOpInstructions:
         self.stallNextRedo = True
@@ -389,15 +405,17 @@ class Mutator(app.selectable.Selectable):
         self.shouldReparse = True
       if self.debugRedo:
         app.log.info('undo', self.redoIndex, repr(change))
-      return self.__undoStep(change)
+      if change[0] == 'cc':
+        changes = list(change[1])
+        changes.reverse()
+        for i in changes:
+          self.__undoStep(i)
+      else:
+        return self.__undoStep(change)
     return False
 
   def __undoStep(self, change):
-    if change[0] == ']':
-      self.__compoundDepth += 1
-    elif change[0] == '[':
-      self.__compoundDepth -= 1
-    elif change[0] == 'b':
+    if change[0] == 'b':
       line = self.lines[self.penRow]
       x = self.penCol
       self.lines[self.penRow] = line[:x] + change[1] + line[x:]
