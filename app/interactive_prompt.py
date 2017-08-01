@@ -185,6 +185,7 @@ class InteractivePrompt(app.controller.Controller):
       try: cmdLine = self.textBuffer.lines[0]
       except: pass
       if not len(cmdLine):
+        self.changeToHostWindow()
         return
       tb = self.host.textBuffer
       lines = list(tb.getSelectedText())
