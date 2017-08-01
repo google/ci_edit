@@ -62,11 +62,6 @@ class Mutator(app.selectable.Selectable):
     self.savedAtRedoIndex = 0
     self.shouldReparse = False
 
-  def addLine(self, msg):
-    """Direct manipulator for logging to a read-only buffer."""
-    self.lines.append(msg)
-    self.penRow += 1
-
   def getPenOffset(self, row, col):
     """inefficient test hack. wip on parser"""
     offset = 0
