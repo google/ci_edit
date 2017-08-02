@@ -38,34 +38,26 @@ class StaticWindow:
     self.scrollRow = 0
     self.scrollCol = 0
     self.writeLineRow = 0
-    if not app.prefs.devTest['oneWindow']:
-      self.cursorWindow = curses.newwin(1, 1)
-      self.cursorWindow.leaveok(1)  # Don't update cursor position.
-      self.cursorWindow.timeout(10)
 
   def addStr(self, row, col, text, colorPair):
     """Overwrite text a row, column with text."""
-    if not app.prefs.devTest['oneWindow']:
-      try: self.cursorWindow.addstr(row, col, text, colorPair)
-      except curses.error: pass
+    if 1:
+      if row < 0 or col >= self.cols:
+        return
+      if col < 0:
+        text = text[col * -1:]
+        col = 0
+      if len(text) > self.cols:
+        text = text[:self.cols]
     else:
-      if 0:
-        if row < 0 or col >= self.cols:
-          return
-        if col < 0:
-          text = text[col * -1:]
-          col = 0
-        if len(text) > self.cols:
-          text = text[:self.cols]
-      else:
-        assert row >= 0, row
-        assert row < self.rows, "%d, %d" %(row, self.rows)
-        assert col <= self.cols, "%d, %d" %(col, self.cols)
-        assert col >= 0, col
-        assert len(text) <= self.cols, "%d, %d" %(len(text), self.cols)
-      try:
-        curses___Window.addstr(self.top + row, self.left + col, text, colorPair)
-      except curses.error: pass
+      assert row >= 0, row
+      assert row < self.rows, "%d, %d" %(row, self.rows)
+      assert col <= self.cols, "%d, %d" %(col, self.cols)
+      assert col >= 0, col
+      assert len(text) <= self.cols, "%d, %d" %(len(text), self.cols)
+    try:
+      curses___Window.addstr(self.top + row, self.left + col, text, colorPair)
+    except curses.error: pass
 
   def changeFocusTo(self, changeTo):
     self.parent.changeFocusTo(changeTo)
@@ -78,10 +70,7 @@ class StaticWindow:
       fyi, I thought this may be faster than using addStr to paint over the text
       with a different colorPair. It looks like there isn't a significant
       performance difference between chgat and addstr."""
-    if not app.prefs.devTest['oneWindow']:
-      self.cursorWindow.chgat(row, col, count, colorPair)
-    else:
-      curses___Window.chgat(self.top + row, self.left + col, count, colorPair)
+    curses___Window.chgat(self.top + row, self.left + col, count, colorPair)
 
   def presentModal(self, changeTo, paneRow, paneCol):
     self.parent.presentModal(changeTo, paneRow, paneCol)
@@ -90,8 +79,6 @@ class StaticWindow:
     """Clear the window."""
     for i in range(self.rows):
       self.addStr(i, 0, ' '*self.cols, colorPair)
-    if not app.prefs.devTest['oneWindow']:
-      self.cursorWindow.refresh()
 
   def contains(self, row, col):
     """Determine whether the position at row, col lay within this window."""
@@ -131,38 +118,19 @@ class StaticWindow:
     pass
 
   def moveTo(self, top, left):
-    app.log.detail(top, left, self)
-    if not app.prefs.devTest['oneWindow']:
-      if top == self.top and left == self.left:
-        return
     self.top = top
     self.left = left
-    if not app.prefs.devTest['oneWindow']:
-      try:
-        self.cursorWindow.mvwin(self.top, self.left)
-      except Exception, e:
-        app.log.debug('error mvwin', top, left, "\n", repr(self), e)
 
   def moveBy(self, top, left):
-    app.log.detail('moveBy', top, left, repr(self))
-    if not app.prefs.devTest['oneWindow']:
-      if top == 0 and left == 0:
-        return
     self.top += top
     self.left += left
-    if not app.prefs.devTest['oneWindow']:
-      self.cursorWindow.mvwin(self.top, self.left)
 
   def refresh(self):
     """Redraw window."""
-    if not app.prefs.devTest['oneWindow']:
-      self.cursorWindow.refresh()
     for child in self.zOrder:
       child.refresh()
 
   def reshape(self, rows, cols, top, left):
-    if not app.prefs.devTest['oneWindow']:
-      self.resizeTo(1, 1)
     self.moveTo(top, left)
     self.resizeTo(rows, cols)
 
@@ -172,40 +140,17 @@ class StaticWindow:
     assert cols >=0, cols
     self.rows = rows
     self.cols = cols
-    if not app.prefs.devTest['oneWindow']:
-      try:
-        self.cursorWindow.resize(self.rows, self.cols)
-      except Exception, e:
-        app.log.debug('resize failed', self.rows, self.cols, "\n", repr(self))
 
   def resizeBottomBy(self, rows):
-    app.log.detail(rows, repr(self))
     self.rows += rows
-    if self.rows <= 0:
-      return
-    if not app.prefs.devTest['oneWindow']:
-      self.cursorWindow.resize(self.rows, self.cols)
 
   def resizeBy(self, rows, cols):
-    app.log.detail(rows, cols, repr(self))
     self.rows += rows
     self.cols += cols
-    if self.rows <= 0 or self.cols <= 0:
-      return
-    if not app.prefs.devTest['oneWindow']:
-      self.cursorWindow.resize(self.rows, self.cols)
 
   def resizeTopBy(self, rows):
     self.top += rows
     self.rows -= rows
-    if self.rows <= 0:
-      return
-    if not app.prefs.devTest['oneWindow']:
-      try:
-        self.cursorWindow.resize(self.rows, self.cols)
-        self.cursorWindow.mvwin(self.top, self.left)
-      except:
-        app.log.error('window resize failed')
 
   def setParent(self, parent, layerIndex):
     if self.parent:
@@ -225,14 +170,10 @@ class StaticWindow:
     """Simple line writer for static windows."""
     text = str(text)[:self.cols]
     text = text + ' ' * max(0, self.cols - len(text))
-    if not app.prefs.devTest['oneWindow']:
-      try: self.cursorWindow.addstr(self.writeLineRow, 0, text, color)
-      except curses.error: pass
-    else:
-      try:
-        curses___Window.addstr(self.top + self.writeLineRow, self.left, text,
-            color)
-      except curses.error: pass
+    try:
+      curses___Window.addstr(self.top + self.writeLineRow, self.left, text,
+          color)
+    except curses.error: pass
     self.writeLineRow += 1
 
 
@@ -241,8 +182,6 @@ class ActiveWindow(StaticWindow):
   def __init__(self, parent, controller=None):
     StaticWindow.__init__(self, parent)
     self.controller = controller
-    if not app.prefs.devTest['oneWindow']:
-      self.cursorWindow.keypad(1)
     self.isFocusable = True
     self.shouldShowCursor = False
 
@@ -276,11 +215,6 @@ class Window(ActiveWindow):
     self.shouldShowCursor = True
     self.textBuffer = None
 
-  def focus(self):
-    if not app.prefs.devTest['oneWindow']:
-      self.cursorWindow.leaveok(0)  # Do update cursor position.
-    ActiveWindow.focus(self)
-
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
     self.textBuffer.mouseClick(paneRow, paneCol, shift, ctrl, alt)
 
@@ -311,30 +245,12 @@ class Window(ActiveWindow):
       self.parent.debugDraw(self)
       self.shouldShowCursor = (self.cursorRow >= self.scrollRow and
           self.cursorRow < self.scrollRow+self.rows)
-      if self.shouldShowCursor:
-        if not app.prefs.devTest['oneWindow']:
-          try:
-            self.cursorWindow.move(
-                self.cursorRow - self.scrollRow,
-                self.cursorCol - self.scrollCol)
-          except curses.error:
-            pass
-        elif 0:
-          # TODO(dschuyler): Decide if this is necessary.
-          try:
-            self.cursorWindow.move(
-                self.cursorRow - self.scrollRow,
-                self.cursorCol - self.scrollCol)
-          except curses.error:
-            pass
 
   def setTextBuffer(self, textBuffer):
     textBuffer.setView(self)
     self.textBuffer = textBuffer
 
   def unfocus(self):
-    if not app.prefs.devTest['oneWindow']:
-      self.cursorWindow.leaveok(1)  # Don't update cursor position.
     ActiveWindow.unfocus(self)
 
 
@@ -351,8 +267,6 @@ class LabeledLine(Window):
   def refresh(self):
     self.leftColumn.addStr(0, 0, self.label,
         app.prefs.color['default'])
-    if not app.prefs.devTest['oneWindow']:
-      self.leftColumn.cursorWindow.refresh()
     Window.refresh(self)
 
   def reshape(self, rows, cols, top, left):
@@ -439,8 +353,6 @@ class LineNumbers(StaticWindow):
     if 0 <= cursorAt < limit:
       color = app.color.get('line_number_current')
       self.addStr(cursorAt, 1, '%5d'%(self.host.cursorRow + 1), color)
-    if not app.prefs.devTest['oneWindow']:
-      self.cursorWindow.refresh()
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
     app.log.info(paneRow, paneCol, shift)
@@ -536,8 +448,6 @@ class MessageLine(StaticWindow):
         self.writeLine(self.message[0], app.color.get('message_line'))
     else:
       self.blank(app.color.get('message_line'))
-    if not app.prefs.devTest['oneWindow']:
-      self.cursorWindow.refresh()
 
 
 class StatusLine(StaticWindow):
@@ -585,8 +495,6 @@ class StatusLine(StaticWindow):
     statusLine += ' ' * (maxCol - len(statusLine) - len(rightSide)) + rightSide
     color = app.color.get('status_line')
     self.addStr(0, 0, statusLine[:self.cols], color)
-    if not app.prefs.devTest['oneWindow']:
-      self.cursorWindow.refresh()
 
 
 class TopInfo(StaticWindow):
@@ -658,8 +566,6 @@ class TopInfo(StaticWindow):
           color)
     for i in range(len(lines), self.rows):
       self.addStr(i, 0, ' ' * self.cols, color)
-    if not app.prefs.devTest['oneWindow']:
-      self.cursorWindow.refresh()
 
   def reshape(self, rows, cols, top, left):
     self.borrowedRows = 0
@@ -850,8 +756,6 @@ class InputWindow(Window):
     color = app.color.get('outside_document')
     for i in range(limit, maxRow):
       self.rightColumn.addStr(i, 0, ' ', color)
-    if not app.prefs.devTest['oneWindow']:
-      self.rightColumn.cursorWindow.refresh()
 
   def focus(self):
     app.log.debug()
@@ -899,6 +803,4 @@ class PaletteWindow(ActiveWindow):
     for i in range(width):
       for k in range(rows):
         self.addStr(k, i*5, ' %3d '%(i+k*width,), app.color.get(i+k*width))
-    if not app.prefs.devTest['oneWindow']:
-      self.cursorWindow.refresh()
 

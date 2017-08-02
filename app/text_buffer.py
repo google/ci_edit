@@ -104,8 +104,9 @@ class TextBuffer(app.actions.Actions):
 
   def drawTextArea(self, window, top, left, rows, cols, colorDelta):
     startRow = self.view.scrollRow + top
+    endRow = startRow + rows
     startCol = self.view.scrollCol + left
-    endCol = self.view.scrollCol + left + cols
+    endCol = startCol + cols
     colors = app.prefs.color
     spellChecking = app.prefs.editor.get('spellChecking', True)
     if self.parser:
@@ -186,6 +187,9 @@ class TextBuffer(app.actions.Actions):
         window.addStr(top + i, left, line + ' ' * (cols - len(line)),
             app.color.get(app.prefs.color['default'] + colorDelta))
     self.drawOverlays(window, top, left, rows, cols, colorDelta)
+    if 0: # Experiment: draw our own cursor.
+      if startRow <= self.penRow < endRow and  startCol <= self.penCol < endCol:
+        window.addStr(self.penRow - startRow, self.penCol - startCol, 'X', 200)
 
   def drawOverlays(self, window, top, left, maxRow, maxCol, colorDelta):
     startRow = self.view.scrollRow + top

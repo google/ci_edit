@@ -146,6 +146,7 @@ class InteractiveFind(app.editor.InteractiveFind):
       CTRL_F: self.findNext,
       CTRL_G: self.findNext,
       CTRL_J: self.changeToHostWindow,
+      CTRL_P: self.changeToPrediction,
       CTRL_R: self.findPrior,
       KEY_DOWN: self.findNext,
       KEY_UP: self.findPrior,
@@ -169,7 +170,9 @@ class InteractiveGoto(app.editor.InteractiveGoto):
     commandSet.update({
       KEY_ESCAPE: self.changeToHostWindow,
       KEY_F1: self.info,
+      CTRL_F: self.changeToFind,
       CTRL_J: self.changeToHostWindow,
+      CTRL_P: self.changeToPrediction,
       ord('b'): self.gotoBottom,
       ord('B'): self.gotoBottom,
       ord('h'): self.gotoHalfway,
@@ -213,6 +216,8 @@ class InteractivePrediction(app.editor.InteractivePrediction):
     commandSet.update({
       KEY_ESCAPE: self.cancel,
       KEY_F1: self.info,
+      CTRL_F: self.changeToFind,
+      CTRL_G: self.changeToGoto,
       CTRL_J: self.selectItem,
       CTRL_N: self.nextItem,
       CTRL_P: self.priorItem,

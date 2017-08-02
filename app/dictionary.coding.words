@@ -117,8 +117,10 @@ fd
 fds
 ff
 fi
+fifo
 filename
 fixme
+fn
 formatter
 freebsd
 ftp
@@ -158,6 +160,7 @@ keyframes
 le
 lf
 lhs
+lifo
 localhost
 loopback
 lorem
@@ -169,9 +172,11 @@ mozilla
 msg
 na
 namespaces
+ndebug
 ne
 neq
-ndebug
+nulled
+nulling
 nullptr
 num
 oauth
@@ -219,6 +224,7 @@ serializable
 signin
 skia
 solaris
+sql
 src
 ssh
 std

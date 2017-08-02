@@ -188,7 +188,7 @@ class InteractivePrediction(app.controller.Controller):
     app.controller.Controller.__init__(self, host, 'opener')
 
   def cancel(self):
-    self.items = [(self.priorTextBuffer, '')]
+    self.items = [(self.priorTextBuffer, self.priorTextBuffer.fullPath, '')]
     self.index = 0
     self.changeToHostWindow()
 

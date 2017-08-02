@@ -101,6 +101,7 @@ multiline
 mvwin
 ndiff
 newwin
+noutrefresh
 npage
 ord
 os
@@ -122,6 +123,7 @@ repr
 resizeterm
 restype
 rsplit
+scrollok
 sel
 sep
 setattr
