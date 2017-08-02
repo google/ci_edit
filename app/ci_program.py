@@ -86,14 +86,14 @@ class CiProgram:
     self.setUpPalette()
     if 1:
       rows, cols = self.cursesScreen.getmaxyx()
-      self.curses___Window = curses.newwin(rows, cols)
-      self.curses___Window.leaveok(1)  # Don't update cursor position.
-      self.curses___Window.scrollok(0)
-      self.curses___Window.timeout(10)
-      self.curses___Window.keypad(1)
-      self.top, self.left = self.curses___Window.getyx()
-      self.rows, self.cols = self.curses___Window.getmaxyx()
-      app.window.curses___Window = self.curses___Window
+      cursesWindow = curses.newwin(rows, cols)
+      cursesWindow.leaveok(1)  # Don't update cursor position.
+      cursesWindow.scrollok(0)
+      cursesWindow.timeout(10)
+      cursesWindow.keypad(1)
+      self.top, self.left = cursesWindow.getyx()
+      self.rows, self.cols = cursesWindow.getmaxyx()
+      app.window.curses___Window = cursesWindow
     self.zOrder = []
 
   def commandLoop(self):
@@ -121,7 +121,7 @@ class CiProgram:
       # (A performance optimization).
       cmdList = []
       mouseEvents = []
-      cursesWindow = self.curses___Window
+      cursesWindow = app.window.curses___Window
       while not len(cmdList):
         for i in range(5):
           ch = cursesWindow.getch()
@@ -496,7 +496,8 @@ class CiProgram:
   def refresh(self):
     """Repaint stacked windows, furthest to nearest."""
     # Ask curses to hold the back buffer until curses refresh().
-    self.curses___Window.noutrefresh()
+    cursesWindow = app.window.curses___Window
+    cursesWindow.noutrefresh()
     curses.curs_set(0)
     if self.showLogWindow:
       self.logWindow.refresh()
@@ -506,13 +507,13 @@ class CiProgram:
     if k.shouldShowCursor:
       curses.curs_set(1)
       if 1:
-        self.curses___Window.leaveok(0)  # Do update cursor position.
-        self.curses___Window.move(
+        cursesWindow.leaveok(0)  # Do update cursor position.
+        cursesWindow.move(
             k.top + k.cursorRow - k.scrollRow,
             k.left + k.cursorCol - k.scrollCol)
         # Calling refresh will draw the cursor.
-        self.curses___Window.refresh()
-        self.curses___Window.leaveok(1)  # Don't update cursor position.
+        cursesWindow.refresh()
+        cursesWindow.leaveok(1)  # Don't update cursor position.
 
   def makeHomeDirs(self, homePath):
     try:
