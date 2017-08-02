@@ -84,7 +84,7 @@ class CiProgram:
       for i in range(0, curses.COLORS):
         app.log.detail("color", i, ": ", curses.color_content(i))
     self.setUpPalette()
-    if app.prefs.devTest['oneWindow']:
+    if 1:
       rows, cols = self.cursesScreen.getmaxyx()
       self.curses___Window = curses.newwin(rows, cols)
       self.curses___Window.leaveok(1)  # Don't update cursor position.
@@ -121,10 +121,7 @@ class CiProgram:
       # (A performance optimization).
       cmdList = []
       mouseEvents = []
-      if not app.prefs.devTest['oneWindow']:
-        cursesWindow = window.cursorWindow
-      else:
-        cursesWindow = self.curses___Window
+      cursesWindow = self.curses___Window
       while not len(cmdList):
         for i in range(5):
           ch = cursesWindow.getch()
@@ -306,9 +303,6 @@ class CiProgram:
       text = (i < len(textBuffer.redoChain) and
           textBuffer.redoChain[i] or '')
       self.debugWindow.writeLine(text, redoColorC)
-    if not app.prefs.devTest['oneWindow']:
-      # Refresh the display.
-      self.debugWindow.cursorWindow.refresh()
 
   def debugWindowOrder(self):
     app.log.info('debugWindowOrder')
@@ -501,9 +495,8 @@ class CiProgram:
 
   def refresh(self):
     """Repaint stacked windows, furthest to nearest."""
-    if app.prefs.devTest['oneWindow']:
-      # Ask curses to hold the back buffer until curses refresh().
-      self.curses___Window.noutrefresh()
+    # Ask curses to hold the back buffer until curses refresh().
+    self.curses___Window.noutrefresh()
     curses.curs_set(0)
     if self.showLogWindow:
       self.logWindow.refresh()
@@ -512,7 +505,7 @@ class CiProgram:
       k.refresh()
     if k.shouldShowCursor:
       curses.curs_set(1)
-      if app.prefs.devTest['oneWindow']:
+      if 1:
         self.curses___Window.leaveok(0)  # Do update cursor position.
         self.curses___Window.move(
             k.top + k.cursorRow - k.scrollRow,

@@ -139,7 +139,6 @@ prefs = {
     'quoted_string2': stringColorIndex,
   },
   'devTest': {
-    'oneWindow': True,
   },
   'editor': {
     'captiveCursor': False,
