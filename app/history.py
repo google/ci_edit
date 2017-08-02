@@ -23,8 +23,7 @@ import hashlib
 
 fileHistory = {}
 userHistory = {}
-pathToHistory = None
-hasher = None
+pathToHistory = app.prefs.prefs['userData'].get('historyPath')
 checksum = None
 fileSize = 0
 
@@ -36,7 +35,7 @@ def set(keyPath, value):
   fileHistory[keyPath[-1]] = value
   #assert get(keyPath) == value
 
-def loadUserHistory(historyPath, filePath):
+def loadUserHistory(filePath, historyPath=pathToHistory):
   global userHistory, fileHistory, checksum, fileSize, pathToHistory
   pathToHistory = historyPath
   if os.path.isfile(historyPath):
@@ -46,7 +45,7 @@ def loadUserHistory(historyPath, filePath):
     fileSize = os.stat(filePath).st_size
     fileHistory = userHistory.get((checksum, fileSize), {})
 
-def saveUserHistory(historyPath, filePath):
+def saveUserHistory(filePath, historyPath=pathToHistory):
   global userHistory, fileHistory, checksum, fileSize, pathToHistory
   try:
     if historyPath is not None:

@@ -571,36 +571,36 @@ class Actions(app.mutator.Mutator):
     self.data = self.doLinesToData(self.lines)
 
   def fileWrite(self):
-    # Save all user data into history
-    self.savedAtRedoIndex = self.redoIndex
-    app.history.set(
-        ['files', self.fullPath, 'redoChain'], self.redoChain)
-    app.history.set(
-        ['files', self.fullPath, 'savedAtRedoIndex'], self.savedAtRedoIndex)
-    app.history.set(
-        ['files', self.fullPath, 'pen'], (self.penRow, self.penCol))
-    app.history.set(
-        ['files', self.fullPath, 'cursor'], (self.cursorRow, self.cursorCol))
-    app.history.set(
-        ['files', self.fullPath, 'scroll'], (self.view.scrollRow, self.view.scrollCol))
-    app.history.set(
-        ['files', self.fullPath, 'marker'], (self.markerRow, self.markerCol))
-    app.history.set(
-        ['files', self.fullPath, 'selectionMode'], self.selectionMode)
     # Preload the message with an error that should be overwritten.
     self.setMessage('Error saving file')
     try:
       try:
         if app.prefs.editor['onSaveStripTrailingSpaces']:
           self.stripTrailingWhiteSpace()
+        # Save all user data into history
+        self.savedAtRedoIndex = self.redoIndex
+        app.history.set(
+            ['files', self.fullPath, 'redoChain'], self.redoChain)
+        app.history.set(
+            ['files', self.fullPath, 'savedAtRedoIndex'], self.savedAtRedoIndex)
+        app.history.set(
+            ['files', self.fullPath, 'pen'], (self.penRow, self.penCol))
+        app.history.set(
+            ['files', self.fullPath, 'cursor'], (self.cursorRow, self.cursorCol))
+        app.history.set(
+            ['files', self.fullPath, 'scroll'], (self.view.scrollRow, self.view.scrollCol))
+        app.history.set(
+            ['files', self.fullPath, 'marker'], (self.markerRow, self.markerCol))
+        app.history.set(
+            ['files', self.fullPath, 'selectionMode'], self.selectionMode)
         self.linesToData()
         file = open(self.fullPath, 'w+')
         file.seek(0)
         file.truncate()
         file.write(self.data)
         file.close()
-        app.history.saveUserHistory(app.prefs.prefs['userData'].get('historyPath'),
-                                    self.fullPath)
+        userHistoryPath = app.prefs.prefs['userData'].get('historyPath')
+        app.history.saveUserHistory(userHistoryPath, self.fullPath)
         # Hmm, could this be hard coded to False here?
         self.isReadOnly = not os.access(self.fullPath, os.W_OK)
         self.fileStat = os.stat(self.fullPath)
@@ -623,11 +623,11 @@ class Actions(app.mutator.Mutator):
     scrollRow = self.view.scrollRow
     scrollCol = self.view.scrollCol
     maxRow, maxCol = self.view.rows, self.view.cols
-    if not (self.view.scrollRow < row <= self.view.scrollRow + maxRow):
-      optimalCursorRow = app.prefs.editor['optimalCursorRow'] * self.view.rows
+    if not (scrollRow < row <= scrollRow + maxRow):
+      optimalCursorRow = app.prefs.editor['optimalCursorRow'] * maxRow
       scrollRow = max(row - int(optimalCursorRow), 0)
-    if not (self.view.scrollCol < col <= self.view.scrollCol + maxCol):
-      optimalCursorCol = app.prefs.editor['optimalCursorCol'] * self.view.cols
+    if not (scrollCol < col <= scrollCol + maxCol):
+      optimalCursorCol = app.prefs.editor['optimalCursorCol'] * maxCol
       scrollCol = max(col - int(optimalCursorCol), 0)
     self.doSelectionMode(app.selectable.kSelectionNone)
     self.view.scrollRow = scrollRow
