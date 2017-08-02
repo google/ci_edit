@@ -86,14 +86,17 @@ class CiProgram:
     self.setUpPalette()
     if 1:
       rows, cols = self.cursesScreen.getmaxyx()
+      # TODO(dschuyler): Is there any benefit to creating a window to overlay
+      # the screen or should the screen be used directly?
       cursesWindow = curses.newwin(rows, cols)
+      #cursesWindow = self.cursesScreen
       cursesWindow.leaveok(1)  # Don't update cursor position.
       cursesWindow.scrollok(0)
       cursesWindow.timeout(10)
       cursesWindow.keypad(1)
       self.top, self.left = cursesWindow.getyx()
       self.rows, self.cols = cursesWindow.getmaxyx()
-      app.window.curses___Window = cursesWindow
+      app.window.mainCursesWindow = cursesWindow
     self.zOrder = []
 
   def commandLoop(self):
@@ -121,7 +124,7 @@ class CiProgram:
       # (A performance optimization).
       cmdList = []
       mouseEvents = []
-      cursesWindow = app.window.curses___Window
+      cursesWindow = app.window.mainCursesWindow
       while not len(cmdList):
         for i in range(5):
           ch = cursesWindow.getch()
@@ -496,7 +499,7 @@ class CiProgram:
   def refresh(self):
     """Repaint stacked windows, furthest to nearest."""
     # Ask curses to hold the back buffer until curses refresh().
-    cursesWindow = app.window.curses___Window
+    cursesWindow = app.window.mainCursesWindow
     cursesWindow.noutrefresh()
     curses.curs_set(0)
     if self.showLogWindow:

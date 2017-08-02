@@ -23,6 +23,10 @@ import sys
 import curses
 
 
+# The terminal area that the curses can draw to.
+mainCursesWindow = None
+
+
 class StaticWindow:
   """A static window does not get focus.
   parent is responsible for the order in which this window is updated, relative
@@ -56,7 +60,7 @@ class StaticWindow:
       assert col >= 0, col
       assert len(text) <= self.cols, "%d, %d" %(len(text), self.cols)
     try:
-      curses___Window.addstr(self.top + row, self.left + col, text, colorPair)
+      mainCursesWindow.addstr(self.top + row, self.left + col, text, colorPair)
     except curses.error: pass
 
   def changeFocusTo(self, changeTo):
@@ -70,7 +74,7 @@ class StaticWindow:
       fyi, I thought this may be faster than using addStr to paint over the text
       with a different colorPair. It looks like there isn't a significant
       performance difference between chgat and addstr."""
-    curses___Window.chgat(self.top + row, self.left + col, count, colorPair)
+    mainCursesWindow.chgat(self.top + row, self.left + col, count, colorPair)
 
   def presentModal(self, changeTo, paneRow, paneCol):
     self.parent.presentModal(changeTo, paneRow, paneCol)
@@ -171,7 +175,7 @@ class StaticWindow:
     text = str(text)[:self.cols]
     text = text + ' ' * max(0, self.cols - len(text))
     try:
-      curses___Window.addstr(self.top + self.writeLineRow, self.left, text,
+      mainCursesWindow.addstr(self.top + self.writeLineRow, self.left, text,
           color)
     except curses.error: pass
     self.writeLineRow += 1
