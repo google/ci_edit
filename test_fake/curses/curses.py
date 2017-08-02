@@ -179,6 +179,9 @@ class FakeCursesWindow:
   def resize(self, a, b):
     testLog(a, b)
 
+  def scrollok(self, a):
+    testLog(a)
+
   def timeout(self, a):
     testLog(a)
 

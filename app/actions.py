@@ -37,7 +37,7 @@ class Actions(app.mutator.Mutator):
     app.mutator.Mutator.__init__(self)
     self.view = None
     self.rootGrammar = app.prefs.getGrammar(None)
-    self.skipUpdateScroll = False
+    self.__skipUpdateScroll = False
 
   def setView(self, view):
     self.view = view
@@ -591,6 +591,8 @@ class Actions(app.mutator.Mutator):
     self.setMessage('Error saving file')
     try:
       try:
+        if app.prefs.editor['onSaveStripTrailingSpaces']:
+          self.stripTrailingWhiteSpace()
         self.linesToData()
         file = open(self.fullPath, 'w+')
         file.seek(0)
@@ -622,9 +624,11 @@ class Actions(app.mutator.Mutator):
     scrollCol = self.view.scrollCol
     maxRow, maxCol = self.view.rows, self.view.cols
     if not (self.view.scrollRow < row <= self.view.scrollRow + maxRow):
-      scrollRow = max(row - 10, 0)
+      optimalCursorRow = app.prefs.editor['optimalCursorRow'] * self.view.rows
+      scrollRow = max(row - int(optimalCursorRow), 0)
     if not (self.view.scrollCol < col <= self.view.scrollCol + maxCol):
-      scrollCol = max(col - 10, 0)
+      optimalCursorCol = app.prefs.editor['optimalCursorCol'] * self.view.cols
+      scrollCol = max(col - int(optimalCursorCol), 0)
     self.doSelectionMode(app.selectable.kSelectionNone)
     self.view.scrollRow = scrollRow
     self.view.scrollCol = scrollCol
@@ -953,7 +957,7 @@ class Actions(app.mutator.Mutator):
   def scrollUp(self):
     if self.view.scrollRow == 0:
       if not self.view.hasCaptiveCursor:
-        self.skipUpdateScroll = True
+        self.__skipUpdateScroll = True
       return
     maxRow, maxCol = self.view.rows, self.view.cols
     cursorDelta = 0
@@ -965,7 +969,7 @@ class Actions(app.mutator.Mutator):
           self.cursorColDelta(self.penRow + cursorDelta), 0, 0)
       self.redo()
     else:
-      self.skipUpdateScroll = True
+      self.__skipUpdateScroll = True
 
   def mouseWheelUp(self, shift, ctrl, alt):
     if not shift:
@@ -976,7 +980,7 @@ class Actions(app.mutator.Mutator):
     maxRow, maxCol = self.view.rows, self.view.cols
     if self.view.scrollRow + maxRow >= len(self.lines):
       if not self.view.hasCaptiveCursor:
-        self.skipUpdateScroll = True
+        self.__skipUpdateScroll = True
       return
     cursorDelta = 0
     if self.penRow <= self.view.scrollRow + 1:
@@ -987,7 +991,7 @@ class Actions(app.mutator.Mutator):
           self.cursorColDelta(self.penRow + cursorDelta), 0, 0)
       self.redo()
     else:
-      self.skipUpdateScroll = True
+      self.__skipUpdateScroll = True
 
   def nextSelectionMode(self):
     next = self.selectionMode + 1
@@ -1089,9 +1093,11 @@ class Actions(app.mutator.Mutator):
     self.insertPrintable(0x00)
 
   def stripTrailingWhiteSpace(self):
+    self.compoundChangeBegin()
     for i in range(len(self.lines)):
       for found in app.selectable.kReEndSpaces.finditer(self.lines[i]):
         self.performDeleteRange(i, found.regs[0][0], i, found.regs[0][1])
+    self.compoundChangeEnd()
 
   def unindent(self):
     if self.selectionMode == app.selectable.kSelectionNone:
@@ -1118,8 +1124,8 @@ class Actions(app.mutator.Mutator):
 
   def updateScrollPosition(self):
     """Move the selected view rectangle so that the cursor is visible."""
-    if self.skipUpdateScroll:
-      self.skipUpdateScroll = False
+    if self.__skipUpdateScroll:
+      self.__skipUpdateScroll = False
       return
     maxRow, maxCol = self.view.rows, self.view.cols
     if self.view.scrollRow > self.penRow:

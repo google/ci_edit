@@ -87,7 +87,8 @@ class CiProgram:
     if app.prefs.devTest['oneWindow']:
       rows, cols = self.cursesScreen.getmaxyx()
       self.curses___Window = curses.newwin(rows, cols)
-      #self.curses___Window.leaveok(1)  # Don't update cursor position.
+      self.curses___Window.leaveok(1)  # Don't update cursor position.
+      self.curses___Window.scrollok(0)
       self.curses___Window.timeout(10)
       self.curses___Window.keypad(1)
       self.top, self.left = self.curses___Window.getyx()
@@ -112,12 +113,7 @@ class CiProgram:
     # This is the 'main loop'. Execution doesn't leave this loop until the
     # application is closing down.
     while not self.exiting:
-      if app.prefs.devTest['oneWindow']:
-        self.curses___Window.noutrefresh()
       self.refresh()
-      if app.prefs.devTest['oneWindow']:
-        # TODO(dschuyler): What is refreshing with window if it's not this.
-        pass #self.curses___Window.refresh()
       self.mainLoopTime = time.time() - start
       if self.mainLoopTime > self.mainLoopTimePeak:
         self.mainLoopTimePeak = self.mainLoopTime
@@ -505,6 +501,9 @@ class CiProgram:
 
   def refresh(self):
     """Repaint stacked windows, furthest to nearest."""
+    if app.prefs.devTest['oneWindow']:
+      # Ask curses to hold the back buffer until curses refresh().
+      self.curses___Window.noutrefresh()
     curses.curs_set(0)
     if self.showLogWindow:
       self.logWindow.refresh()
@@ -514,9 +513,13 @@ class CiProgram:
     if k.shouldShowCursor:
       curses.curs_set(1)
       if app.prefs.devTest['oneWindow']:
+        self.curses___Window.leaveok(0)  # Do update cursor position.
         self.curses___Window.move(
             k.top + k.cursorRow - k.scrollRow,
             k.left + k.cursorCol - k.scrollCol)
+        # Calling refresh will draw the cursor.
+        self.curses___Window.refresh()
+        self.curses___Window.leaveok(1)  # Don't update cursor position.
 
   def makeHomeDirs(self, homePath):
     try:

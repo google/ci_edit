@@ -148,6 +148,9 @@ prefs = {
     'findIgnoreCase': True,
     'indentation': '  ',
     'lineLimitIndicator': 80,
+    'onSaveStripTrailingSpaces': True,
+    'optimalCursorRow': 0.28,  # Ratio of rows: 0 top, 0.5 middle, 1.0 bottom.
+    'optimalCursorCol': 0.28,  # Ratio of columns: 0 left, 1.0 right.
     'palette': 'default',
     'showLineNumbers': True,
     'showStatusLine': True,
