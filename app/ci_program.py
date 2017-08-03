@@ -116,7 +116,17 @@ class CiProgram:
     # This is the 'main loop'. Execution doesn't leave this loop until the
     # application is closing down.
     while not self.exiting:
-      self.refresh()
+      if 0:
+        profile = cProfile.Profile()
+        profile.enable()
+        self.refresh()
+        profile.disable()
+        output = StringIO.StringIO()
+        stats = pstats.Stats(profile, stream=output).sort_stats('cumulative')
+        stats.print_stats()
+        app.log.info(output.getvalue())
+      else:
+        self.refresh()
       self.mainLoopTime = time.time() - start
       if self.mainLoopTime > self.mainLoopTimePeak:
         self.mainLoopTimePeak = self.mainLoopTime
@@ -214,7 +224,7 @@ class CiProgram:
 
   def layout(self):
     """Arrange the debug, log, and input windows."""
-    rows, cols = self.cursesScreen.getmaxyx()
+    rows, cols = self.rows, self.cols
     #app.log.detail('layout', rows, cols)
     if self.showLogWindow:
       inputWidth = min(80, cols)
