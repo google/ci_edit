@@ -20,6 +20,8 @@ import app.log
 import cPickle as pickle
 import os
 import hashlib
+import time
+import app.prefs
 
 fileHistory = {}
 userHistory = {}
@@ -27,13 +29,11 @@ pathToHistory = app.prefs.prefs['userData'].get('historyPath')
 checksum = None
 fileSize = 0
 
-def get(keyPath, default={}):
-  return fileHistory.setdefault(keyPath[-1], default)
+def get(key, default={}):
+  return fileHistory.setdefault(key, default)
 
-def set(keyPath, value):
-  # element = fileHistory.setdefault(keyPath[-1], {})
-  fileHistory[keyPath[-1]] = value
-  #assert get(keyPath) == value
+def set(key, value):
+  fileHistory[key] = value
 
 def loadUserHistory(filePath, historyPath=pathToHistory):
   global userHistory, fileHistory, checksum, fileSize, pathToHistory
@@ -44,6 +44,7 @@ def loadUserHistory(filePath, historyPath=pathToHistory):
     checksum = calculateChecksum(filePath)
     fileSize = os.stat(filePath).st_size
     fileHistory = userHistory.get((checksum, fileSize), {})
+  fileHistory['adate'] = time.time()
 
 def saveUserHistory(filePath, historyPath=pathToHistory):
   global userHistory, fileHistory, checksum, fileSize, pathToHistory
