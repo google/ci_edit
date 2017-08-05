@@ -45,20 +45,21 @@ class StaticWindow:
 
   def addStr(self, row, col, text, colorPair):
     """Overwrite text a row, column with text."""
-    if 1:
-      if row < 0 or col >= self.cols:
-        return
-      if col < 0:
-        text = text[col * -1:]
-        col = 0
-      if len(text) > self.cols:
-        text = text[:self.cols]
-    else:
-      assert row >= 0, row
-      assert row < self.rows, "%d, %d" %(row, self.rows)
-      assert col <= self.cols, "%d, %d" %(col, self.cols)
-      assert col >= 0, col
-      assert len(text) <= self.cols, "%d, %d" %(len(text), self.cols)
+    if 0:
+      if 0:
+        if row < 0 or col >= self.cols:
+          return
+        if col < 0:
+          text = text[col * -1:]
+          col = 0
+        if len(text) > self.cols:
+          text = text[:self.cols]
+      else:
+        assert row >= 0, row
+        assert row < self.rows, "%d, %d" %(row, self.rows)
+        assert col <= self.cols, "%d, %d" %(col, self.cols)
+        assert col >= 0, col
+        assert len(text) <= self.cols, "%d, %d" %(len(text), self.cols)
     try:
       mainCursesWindow.addstr(self.top + row, self.left + col, text, colorPair)
     except curses.error: pass

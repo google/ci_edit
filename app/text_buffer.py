@@ -114,9 +114,14 @@ class TextBuffer(app.actions.Actions):
       rowLimit = min(max(len(self.lines) - startRow, 0), rows)
       for i in range(rowLimit):
         k = startCol
+        if k == 0:
+          grammarIndex = 0
+        else:
+          grammarIndex = self.parser.grammarIndexFromRowCol(startRow + i, k)
         while k < endCol:
-          node, preceding, remaining = self.parser.grammarFromRowCol(
-              startRow + i, k)
+          node, preceding, remaining = self.parser.grammarAtIndex(
+              startRow + i, k, grammarIndex)
+          grammarIndex += 1
           line = self.lines[startRow + i]
           assert remaining >= 0, remaining
           remaining = min(len(line) - k, remaining)

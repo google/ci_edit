@@ -41,33 +41,52 @@ class Parser:
   """A parser generates a set of grammar segments (ParserNode objects)."""
   def __init__(self):
     self.data = ""
+    self.emptyNode = ParserNode()
+    self.emptyNode.grammar = {}
+    self.endNode = ParserNode()
+    self.endNode.grammar = {}
+    self.endNode.begin = sys.maxint
+    self.endNode.col = sys.maxint
     self.grammarRowList = []
     app.log.parser('__init__')
 
-  def grammarFromRowCol(self, row, col):
-    sentinel = ParserNode()
-    sentinel.grammar = {}
-    sentinel.begin = sys.maxint
-    sentinel.col = sys.maxint
+  def grammarIndexFromRowCol(self, row, col):
+    """
+    returns (index, node, preceding, remaining). |index| may then be passed to
+        grammarNext(). |proceeding| and |remaining| are relative to the |col|
+        parameter.
+    """
     if row >= len(self.grammarRowList):
       # This file is too large. There's other ways to handle this, but for now
       # let's leave the tail un-highlighted.
-      empty = ParserNode()
-      empty.grammar = {}
-      return empty, 0, sys.maxint
-    gl = self.grammarRowList[row] + [sentinel]
+      return None, self.emptyNode, 0, sys.maxint
+    gl = self.grammarRowList[row] + [self.endNode]
     offset = gl[0].begin + col
     # Binary search to find the node for the column.
     low = 0
-    high = len(gl)-1
+    high = len(gl) - 1
     while True:
-      index = (high+low)/2
-      if offset >= gl[index+1].begin:
+      index = (high + low) / 2
+      if offset >= gl[index + 1].begin:
         low = index
       elif offset < gl[index].begin:
         high = index
       else:
-        return gl[index], offset - gl[index].begin, gl[index+1].begin-offset
+        return index
+
+  def grammarAtIndex(self, row, col, index):
+    """
+    Call grammarIndexFromRowCol() to get the index parameter.
+    returns (index, node, preceding, remaining). |index| may then be passed to
+        grammarNext(). |proceeding| and |remaining| are relative to the |col|
+        parameter.
+    """
+    if index >= len(self.grammarRowList[row]):
+      return self.emptyNode, 0, sys.maxint
+    gl = self.grammarRowList[row] + [self.endNode]
+    offset = gl[0].begin + col
+    node = gl[index]
+    return node, offset - node.begin, gl[index + 1].begin - offset
 
   def parse(self, data, grammar):
     app.log.parser('grammar', grammar['name'])
@@ -143,7 +162,9 @@ class Parser:
         child.begin = cursor + reg[0]
         cursor += reg[1]
         grammarStack.append(child.grammar)
-      if len(self.grammarRowList[0]) and self.grammarRowList[0][-1].begin == child.begin:
+      if not len(self.grammarRowList[-1]):
+        self.grammarRowList[-1].append(child)
+      elif self.grammarRowList[-1][-1].begin == child.begin:
         self.grammarRowList[-1][-1] = child
       else:
         self.grammarRowList[-1].append(child)
