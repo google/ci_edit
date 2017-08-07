@@ -85,21 +85,12 @@ class Mutator(app.selectable.Selectable):
     """inefficient test hack. wip on parser"""
     if not self.parser:
       return 'no parser'
-    self.penGrammar = self.parser.grammarFromRowCol(
-        self.penRow, self.penCol)[0]
+    index = self.parser.grammarIndexFromRowCol(self.penRow, self.penCol)
+    self.penGrammar = self.parser.grammarAtIndex(
+        self.penRow, self.penCol, index)[0]
     if self.penGrammar is None:
       return 'None'
     return self.penGrammar.grammar.get('name', 'unknown')
-
-  def cursorGrammarRemaining(self):
-    """inefficient test hack. wip on parser"""
-    if not self.parser:
-      return -2
-    remaining = self.parser.grammarFromRowCol(
-        self.penRow, self.penCol)[1]
-    if remaining is None:
-      return -1
-    return remaining
 
   def isDirty(self):
     """Whether the buffer contains non-trivial changes since the last save."""

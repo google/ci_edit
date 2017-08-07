@@ -86,14 +86,17 @@ class CiProgram:
     self.setUpPalette()
     if 1:
       rows, cols = self.cursesScreen.getmaxyx()
+      # TODO(dschuyler): Is there any benefit to creating a window to overlay
+      # the screen or should the screen be used directly?
       cursesWindow = curses.newwin(rows, cols)
+      #cursesWindow = self.cursesScreen
       cursesWindow.leaveok(1)  # Don't update cursor position.
       cursesWindow.scrollok(0)
       cursesWindow.timeout(10)
       cursesWindow.keypad(1)
       self.top, self.left = cursesWindow.getyx()
       self.rows, self.cols = cursesWindow.getmaxyx()
-      app.window.curses___Window = cursesWindow
+      app.window.mainCursesWindow = cursesWindow
     self.zOrder = []
 
   def commandLoop(self):
@@ -113,7 +116,17 @@ class CiProgram:
     # This is the 'main loop'. Execution doesn't leave this loop until the
     # application is closing down.
     while not self.exiting:
-      self.refresh()
+      if 0:
+        profile = cProfile.Profile()
+        profile.enable()
+        self.refresh()
+        profile.disable()
+        output = StringIO.StringIO()
+        stats = pstats.Stats(profile, stream=output).sort_stats('cumulative')
+        stats.print_stats()
+        app.log.info(output.getvalue())
+      else:
+        self.refresh()
       self.mainLoopTime = time.time() - start
       if self.mainLoopTime > self.mainLoopTimePeak:
         self.mainLoopTimePeak = self.mainLoopTime
@@ -121,7 +134,7 @@ class CiProgram:
       # (A performance optimization).
       cmdList = []
       mouseEvents = []
-      cursesWindow = app.window.curses___Window
+      cursesWindow = app.window.mainCursesWindow
       while not len(cmdList):
         for i in range(5):
           ch = cursesWindow.getch()
@@ -211,7 +224,7 @@ class CiProgram:
 
   def layout(self):
     """Arrange the debug, log, and input windows."""
-    rows, cols = self.cursesScreen.getmaxyx()
+    rows, cols = self.rows, self.cols
     #app.log.detail('layout', rows, cols)
     if self.showLogWindow:
       inputWidth = min(80, cols)
@@ -496,7 +509,7 @@ class CiProgram:
   def refresh(self):
     """Repaint stacked windows, furthest to nearest."""
     # Ask curses to hold the back buffer until curses refresh().
-    cursesWindow = app.window.curses___Window
+    cursesWindow = app.window.mainCursesWindow
     cursesWindow.noutrefresh()
     curses.curs_set(0)
     if self.showLogWindow:
