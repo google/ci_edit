@@ -224,7 +224,7 @@ class CiProgram:
 
   def layout(self):
     """Arrange the debug, log, and input windows."""
-    rows, cols = self.rows, self.cols
+    rows, cols = self.cursesScreen.getmaxyx()
     #app.log.detail('layout', rows, cols)
     if self.showLogWindow:
       inputWidth = min(80, cols)
