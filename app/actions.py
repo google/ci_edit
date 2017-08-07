@@ -555,8 +555,13 @@ class Actions(app.mutator.Mutator):
   def restoreUserHistory(self):
     # Restore cursor position.
     self.cursorRow, self.cursorCol = app.history.get('cursor', (0, 0))
-    self.view.scrollRow, self.view.scrollCol = app.history.get('scroll', (0, 0))
     self.penRow, self.penCol = app.history.get('pen', (0, 0))
+    # self.view.scrollRow, self.view.scrollCol = app.history.get('scroll', (0, 0))
+    # Optimal cursor position
+    self.view.scrollRow = max(0, min(len(self.lines) - 1, self.penRow -
+                              int(app.prefs.editor['optimalCursorRow'] * (self.view.rows - 3))))
+    self.view.scrollCol = max(0, self.penCol -
+                              int(app.prefs.editor['optimalCursorCol'] * (self.view.cols - 1)))
     self.doSelectionMode(app.history.get('selectionMode', app.selectable.kSelectionNone))
     self.markerRow, self.markerCol = app.history.get('marker', (0, 0))
     # Restore redo chain
