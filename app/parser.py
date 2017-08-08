@@ -120,6 +120,7 @@ class Parser:
         # be terminated). e.g. unmatched string quote or xml tag.
         break
       newGrammarIndexLimit = 2 + len(grammarStack[-1].get('contains', []))
+      keywordIndexLimit = newGrammarIndexLimit + len(grammarStack[-1].get('keywords', []))
       index = -1
       for i,k in enumerate(found.groups()):
         if k is not None:
@@ -163,12 +164,36 @@ class Parser:
         child.begin = cursor + reg[0]
         cursor += reg[1]
         grammarStack.append(child.grammar)
-      else:
+      elif index < keywordIndexLimit:
         # A keyword doesn't change the grammarStack.
         keywordNode = ParserNode()
         keywordNode.grammar = app.prefs.grammars['keyword']
         keywordNode.begin = cursor + reg[0]
-        self.grammarRowList[-1].append(keywordNode)
+
+        if not len(self.grammarRowList[-1]):
+          self.grammarRowList[-1].append(keywordNode)
+        elif self.grammarRowList[-1][-1].begin == keywordNode.begin:
+          self.grammarRowList[-1][-1] = keywordNode
+        else:
+          self.grammarRowList[-1].append(keywordNode)
+
+        # Resume the current grammar.
+        child.grammar = grammarStack[-1]
+        child.begin = cursor + reg[1]
+        cursor += reg[1]
+      else:
+        # A special doesn't change the grammarStack.
+        specialNode = ParserNode()
+        specialNode.grammar = app.prefs.grammars['special']
+        specialNode.begin = cursor + reg[0]
+
+        if not len(self.grammarRowList[-1]):
+          self.grammarRowList[-1].append(specialNode)
+        elif self.grammarRowList[-1][-1].begin == specialNode.begin:
+          self.grammarRowList[-1][-1] = specialNode
+        else:
+          self.grammarRowList[-1].append(specialNode)
+
         # Resume the current grammar.
         child.grammar = grammarStack[-1]
         child.begin = cursor + reg[1]

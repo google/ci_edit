@@ -134,6 +134,8 @@ for k,v in prefs['grammar'].items():
   # Index [2+len(contains)..]
   for keyword in v.get('keywords', []):
     markers.append(r'\b' + keyword + r'\b')
+  # Index [2+len(contains)+len(keywords)..]
+  markers += v.get('special', [])
   # Index [-1]
   markers.append(r'\n')
   app.log.startup('markers', markers)

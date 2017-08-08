@@ -169,7 +169,7 @@ class TextBuffer(app.actions.Actions):
                 wordFragment = line[offsetStart:min(endCol, offsetEnd)]
                 window.addStr(top + i, left + offsetStart - startCol,
                     wordFragment, keywordColor)
-          if 1:
+          if 0:
             # Highlight specials.
             keywordColor = app.color.get(colors['keyword'] + colorDelta)
             regex = node.grammar.get('specialsRe', app.prefs.kReNonMatching)

@@ -297,21 +297,21 @@ prefs = {
     'c_raw_string1': {
       'begin': "[uU]?[rR]'",
       'end': "'",
-      'escaped': r"\\.",
+      'escaped': r"\\'",
       'indent': '  ',
       'single_line': True,
     },
     'c_raw_string2': {
       'begin': '[uU]?[rR]"',
       'end': '"',
-      'escaped': r'\\.',
+      'escaped': r'\\"',
       'indent': '  ',
       'single_line': True,
     },
     'c_string1': {
       'begin': "'(?!'')",
       'end': r"'",
-      'escaped': r'\\.',
+      'escaped': r"\\'",
       'indent': '  ',
       'special': __special_string_escapes + [r"\\'"],
       'single_line': True,
@@ -319,7 +319,7 @@ prefs = {
     'c_string2': {
       'begin': '"(?!"")',
       'end': r'"',
-      'escaped': r'\\.',
+      'escaped': r'\\"',
       'indent': '  ',
       'special': __special_string_escapes + [r'\\"'],
       'single_line': True,
@@ -464,14 +464,14 @@ prefs = {
     'py_string1': {
       'begin': "[uU]?'''",
       'end': "'''",
-      'escaped': r'\\.',
+      'escaped': r"\\'",
       'indent': '  ',
       'special': __special_string_escapes + [r"\\'"],
     },
     'py_string2': {
       'begin': '[uU]?"""',
       'end': '"""',
-      'escaped': r'\\.',
+      'escaped': r'\\"',
       'indent': '  ',
       'special': __special_string_escapes + [r'\\"'],
     },
@@ -492,6 +492,8 @@ prefs = {
       'indent': '  ',
       'special': __special_string_escapes + [r"\\/"],
       'single_line': True,
+    },
+    'special': {
     },
     'text': {
       'indent': '  ',
