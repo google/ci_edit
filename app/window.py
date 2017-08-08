@@ -515,33 +515,33 @@ class TopInfo(StaticWindow):
       return
     tb = self.host.textBuffer
     lines = []
-    if len(tb.lines):
-      lineCursor = self.host.scrollRow
-      line = ""
-      while len(line) == 0 and lineCursor > 0:
-        line = tb.lines[lineCursor]
-        lineCursor -= 1
-      if len(line):
-        indent = len(line) - len(line.lstrip(' '))
-        lineCursor += 1
-        while lineCursor < len(tb.lines):
-          line = tb.lines[lineCursor]
-          if not len(line):
-            continue
-          z = len(line) - len(line.lstrip(' '))
-          if z > indent:
-            indent = z
-            lineCursor += 1
-          else:
-            break
-        while indent and lineCursor > 0:
-          line = tb.lines[lineCursor]
-          if len(line):
-            z = len(line) - len(line.lstrip(' '))
-            if z < indent:
-              indent = z
-              lines.append(line)
-          lineCursor -= 1
+    # if len(tb.lines):
+    #   lineCursor = self.host.scrollRow
+    #   line = ""
+    #   while len(line) == 0 and lineCursor > 0:
+    #     line = tb.lines[lineCursor]
+    #     lineCursor -= 1
+    #   if len(line):
+    #     indent = len(line) - len(line.lstrip(' '))
+    #     lineCursor += 1
+    #     while lineCursor < len(tb.lines):
+    #       line = tb.lines[lineCursor]
+    #       if not len(line):
+    #         continue
+    #       z = len(line) - len(line.lstrip(' '))
+    #       if z > indent:
+    #         indent = z
+    #         lineCursor += 1
+    #       else:
+    #         break
+    #     while indent and lineCursor > 0:
+    #       line = tb.lines[lineCursor]
+    #       if len(line):
+    #         z = len(line) - len(line.lstrip(' '))
+    #         if z < indent:
+    #           indent = z
+    #           lines.append(line)
+    #       lineCursor -= 1
     pathLine = self.host.textBuffer.fullPath
     if 1:
       if tb.isReadOnly:
