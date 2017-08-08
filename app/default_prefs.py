@@ -397,6 +397,7 @@ prefs = {
       ],
     },
     'keyword': {
+      'spelling': False,
     },
     'md': {
       'indent': '  ',
@@ -494,6 +495,7 @@ prefs = {
       'single_line': True,
     },
     'special': {
+      'spelling': False,
     },
     'text': {
       'indent': '  ',

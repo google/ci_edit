@@ -120,7 +120,8 @@ class Parser:
         # be terminated). e.g. unmatched string quote or xml tag.
         break
       newGrammarIndexLimit = 2 + len(grammarStack[-1].get('contains', []))
-      keywordIndexLimit = newGrammarIndexLimit + len(grammarStack[-1].get('keywords', []))
+      keywordIndexLimit = newGrammarIndexLimit + len(grammarStack[-1].get(
+          'keywords', []))
       index = -1
       for i,k in enumerate(found.groups()):
         if k is not None:
