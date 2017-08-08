@@ -169,14 +169,7 @@ class CiProgram:
       if len(cmdList):
         for cmd in cmdList:
           if cmd == curses.KEY_RESIZE:
-            if sys.platform == 'darwin':
-              # Some terminals seem to resize the terminal and others leave it
-              # to the application to resize the curses terminal.
-              rows, cols = app.curses_util.terminalSize()
-              curses.resizeterm(rows, cols)
-            self.layout()
-            window.controller.onChange()
-            self.refresh()
+            self.handleScreenResize(window)
             continue
           window.controller.doCommand(cmd)
           if cmd == curses.KEY_MOUSE:
@@ -227,7 +220,7 @@ class CiProgram:
     rows, cols = self.rows, self.cols
     #app.log.detail('layout', rows, cols)
     if self.showLogWindow:
-      inputWidth = min(80, cols)
+      inputWidth = min(88, cols)
       debugWidth = max(cols - inputWidth - 1, 0)
       debugRows = 20
       self.debugWindow.reshape(debugRows, debugWidth, 0,
@@ -421,8 +414,18 @@ class CiProgram:
     self.savedMouseX = mouseCol
     self.savedMouseY = mouseRow
 
-  def handleScreenResize(self):
-    app.log.debug('handleScreenResize -----------------------')
+  def handleScreenResize(self, window):
+    #app.log.debug('handleScreenResize -----------------------')
+    if sys.platform == 'darwin':
+      # Some terminals seem to resize the terminal and others leave it
+      # to the application to resize the curses terminal.
+      rows, cols = app.curses_util.terminalSize()
+      curses.resizeterm(rows, cols)
+    self.layout()
+    window.controller.onChange()
+    self.refresh()
+    self.top, self.left = app.window.mainCursesWindow.getyx()
+    self.rows, self.cols = app.window.mainCursesWindow.getmaxyx()
     self.layout()
 
   def parseArgs(self):
