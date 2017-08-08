@@ -155,7 +155,7 @@ class TextBuffer(app.actions.Actions):
                     window.addStr(top + i, left + offsetStart - startCol,
                         wordFragment,
                         misspellingColor | curses.A_BOLD | curses.A_REVERSE)
-          if 1:
+          if 0:
             # Highlight keywords.
             keywordColor = app.color.get(colors['keyword'] + colorDelta)
             regex = node.grammar.get('keywordsRe', app.prefs.kReNonMatching)

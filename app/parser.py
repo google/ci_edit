@@ -117,8 +117,9 @@ class Parser:
       if not found:
         grammarStack.pop()
         # todo(dschuyler): mark parent grammars as unterminated (if they expect
-        # be terminated. e.g. unmatched string quote or xml tag.
+        # be terminated). e.g. unmatched string quote or xml tag.
         break
+      newGrammarIndexLimit = 2 + len(grammarStack[-1].get('contains', []))
       index = -1
       for i,k in enumerate(found.groups()):
         if k is not None:
@@ -156,12 +157,22 @@ class Parser:
             remaining.begin = cursor + reg[0] + 1
             self.grammarRowList[-1].append(remaining)
           self.grammarRowList.append([])
-      else:
+      elif index < newGrammarIndexLimit:
         # A new grammar within this grammar (a 'contains').
         child.grammar = grammarStack[-1].get('matchGrammars', [])[index]
         child.begin = cursor + reg[0]
         cursor += reg[1]
         grammarStack.append(child.grammar)
+      else:
+        # A keyword doesn't change the grammarStack.
+        keywordNode = ParserNode()
+        keywordNode.grammar = app.prefs.grammars['keyword']
+        keywordNode.begin = cursor + reg[0]
+        self.grammarRowList[-1].append(keywordNode)
+        # Resume the current grammar.
+        child.grammar = grammarStack[-1]
+        child.begin = cursor + reg[1]
+        cursor += reg[1]
       if not len(self.grammarRowList[-1]):
         self.grammarRowList[-1].append(child)
       elif self.grammarRowList[-1][-1].begin == child.begin:

@@ -396,6 +396,8 @@ prefs = {
         'cpp_line_comment', 'regex_string',
       ],
     },
+    'keyword': {
+    },
     'md': {
       'indent': '  ',
       'keywords': [],
