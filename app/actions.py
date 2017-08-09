@@ -542,7 +542,6 @@ class Actions(app.mutator.Mutator):
       self.fileFilter(file.read())
       file.close()
       app.history.loadUserHistory(self.fullPath)
-      self.fileHistory = app.history.getFileHistory(self.fullPath)
       self.restoreUserHistory()
     else:
       self.data = ""
@@ -555,6 +554,19 @@ class Actions(app.mutator.Mutator):
       self.parser = None
 
   def restoreUserHistory(self):
+    """
+    This function restores all stored history of the file into the TextBuffer object.
+    If there does not exist a stored history of the file, it will initialize the
+    variables to default values.
+
+    Args:
+      None
+
+    Returns:
+      None
+    """
+    # Restore the file history
+    self.fileHistory = app.history.getFileHistory(self.fullPath)
     # Restore cursor position.
     self.view.cursorRow, self.view.cursorCol = self.fileHistory.setdefault('cursor', (0, 0))
     self.penRow, self.penCol = self.fileHistory.setdefault('pen', (0, 0))
@@ -571,6 +583,8 @@ class Actions(app.mutator.Mutator):
     # Restore indices
     self.savedAtRedoIndex = self.fileHistory.setdefault('savedAtRedoIndex', 0)
     self.redoIndex = self.savedAtRedoIndex
+    # Store the file's info
+    self.lastChecksum, self.lastFileSize = app.history.getFileInfo(self.fullPath)
 
   def linesToData(self):
     self.data = self.doLinesToData(self.lines)
@@ -597,7 +611,10 @@ class Actions(app.mutator.Mutator):
         file.truncate()
         file.write(self.data)
         file.close()
-        app.history.saveUserHistory(self.fullPath, self.fileHistory)
+        app.history.saveUserHistory((self.fullPath, self.lastChecksum, self.lastFileSize),
+                                     self.fileHistory)
+        # Store the file's new info
+        self.lastChecksum, self.lastFileSize = app.history.getFileInfo(self.fullPath)
         # Hmm, could this be hard coded to False here?
         self.isReadOnly = not os.access(self.fullPath, os.W_OK)
         self.fileStat = os.stat(self.fullPath)

@@ -29,6 +29,8 @@ class TextBuffer(app.actions.Actions):
     self.lineLimitIndicator = app.prefs.editor['lineLimitIndicator']
     self.highlightRe = None
     self.fileHistory = {}
+    self.lastChecksum = None
+    self.lastFileSize = 0
 
   def checkScrollToCursor(self, window):
     """Move the selected view rectangle so that the cursor is visible."""

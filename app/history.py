@@ -25,8 +25,6 @@ import app.prefs
 
 userHistory = {}
 pathToHistory = app.prefs.prefs['userData'].get('historyPath')
-checksum = None
-fileSize = 0
 
 def loadUserHistory(filePath, historyPath=pathToHistory):
   global userHistory, fileHistory, checksum, fileSize, pathToHistory
@@ -35,15 +33,24 @@ def loadUserHistory(filePath, historyPath=pathToHistory):
     with open(historyPath, 'rb') as file:
       userHistory = pickle.load(file)
 
-def saveUserHistory(filePath, fileHistory, historyPath=pathToHistory):
-  global userHistory, checksum, fileSize, pathToHistory
+def saveUserHistory(fileInfo, fileHistory, historyPath=pathToHistory):
+  """
+  Args:
+    fileInfo (tuple): Contains (filePath, lastChecksum, lastFileSize).
+    fileHistory (dict): The history of the file that the user wants to save.
+    historyPath (str): The path to the user's saved history.
+
+  Returns:
+    None
+  """
+  global userHistory, pathToHistory
+  filePath, lastChecksum, lastFileSize = fileInfo
   try:
     if historyPath is not None:
       pathToHistory = historyPath
-      userHistory.pop((checksum, fileSize), None)
-      checksum = calculateChecksum(filePath)
-      fileSize = os.stat(filePath).st_size
-      userHistory[(checksum, fileSize)] = fileHistory
+      userHistory.pop((lastChecksum, lastFileSize), None)
+      newChecksum, newFileSize = getFileInfo(filePath)
+      userHistory[(newChecksum, newFileSize)] = fileHistory
       with open(historyPath, 'wb') as file:
         pickle.dump(userHistory, file)
       app.log.info('wrote pickle')
@@ -51,11 +58,25 @@ def saveUserHistory(filePath, fileHistory, historyPath=pathToHistory):
     app.log.error('exception')
 
 def getFileHistory(filePath):
+  checksum, fileSize = getFileInfo(filePath)
+  fileHistory = userHistory.get((checksum, fileSize), {})
+  fileHistory['adate'] = time.time()
+  return fileHistory
+
+def getFileInfo(filePath):
+  """
+  Args:
+    filePath (str): The absolute path to the file.
+
+  Returns:
+    A tuple containing the checksum and size of the file.
+  """
+  try:
     checksum = calculateChecksum(filePath)
     fileSize = os.stat(filePath).st_size
-    fileHistory = userHistory.get((checksum, fileSize), {})
-    fileHistory['adate'] = time.time()
-    return fileHistory
+    return (checksum, fileSize)
+  except:
+    return (None, 0)
 
 def calculateChecksum(filePath):
   app.log.info("Calculate checksum of the current file")
