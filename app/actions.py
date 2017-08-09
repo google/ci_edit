@@ -542,6 +542,7 @@ class Actions(app.mutator.Mutator):
       self.fileFilter(file.read())
       file.close()
       app.history.loadUserHistory(self.fullPath)
+      self.restoreUserHistory()
     else:
       self.data = ""
     self.fileExtension = os.path.splitext(self.fullPath)[1]

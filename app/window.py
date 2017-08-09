@@ -675,7 +675,7 @@ class InputWindow(Window):
 
   def startup(self):
     for f in app.prefs.startup.get('cliFiles', []):
-      app.buffer_manager.buffers.loadTextBuffer(f['path'])
+      app.buffer_manager.buffers.loadTextBuffer(f['path'], self)
     if app.prefs.startup.get('readStdin'):
       app.buffer_manager.buffers.readStdin()
     tb = app.buffer_manager.buffers.topBuffer()
@@ -782,9 +782,8 @@ class InputWindow(Window):
   def setTextBuffer(self, textBuffer):
     app.log.info('setTextBuffer')
     #self.normalize()
-    self.controller.setTextBuffer(textBuffer)
     Window.setTextBuffer(self, textBuffer)
-    self.textBuffer.restoreUserHistory()
+    self.controller.setTextBuffer(textBuffer)
     self.textBuffer.debugRedo = app.prefs.startup.get('debugRedo')
 
   def unfocus(self):

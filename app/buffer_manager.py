@@ -72,7 +72,7 @@ class BufferManager:
     self.buffers.append(textBuffer)
     return textBuffer
 
-  def loadTextBuffer(self, relPath):
+  def loadTextBuffer(self, relPath, view):
     fullPath = os.path.abspath(os.path.expanduser(os.path.expandvars(relPath)))
     app.log.info(fullPath)
     textBuffer = None
@@ -91,6 +91,7 @@ class BufferManager:
         app.log.info('creating a new file at\n ', fullPath)
       textBuffer = app.text_buffer.TextBuffer()
       self.renameBuffer(textBuffer, fullPath)
+      textBuffer.view = view
       textBuffer.fileLoad()
       self.buffers.append(textBuffer)
     if 0:
