@@ -50,6 +50,14 @@ class Parser:
     self.grammarRowList = []
     app.log.parser('__init__')
 
+  def __addNode(self, node):
+    if not len(self.grammarRowList[-1]):
+      self.grammarRowList[-1].append(node)
+    elif self.grammarRowList[-1][-1].begin == node.begin:
+      self.grammarRowList[-1][-1] = node
+    else:
+      self.grammarRowList[-1].append(node)
+
   def grammarIndexFromRowCol(self, row, col):
     """
     returns (index, node, preceding, remaining). |index| may then be passed to
@@ -96,13 +104,13 @@ class Parser:
     node.begin = 0
     self.grammarRowList = [[node]]
     startTime = time.time()
-    self.buildGrammarList()
+    self.__buildGrammarList()
     totalTime = time.time() - startTime
     if app.log.enabledChannels.get('parser', False):
       self.debugLog(app.log.parser, data)
     app.log.startup('parsing took', totalTime)
 
-  def buildGrammarList(self):
+  def __buildGrammarList(self):
     # An arbitrary limit to avoid run-away looping.
     leash = 10000
     cursor = 0
@@ -117,8 +125,11 @@ class Parser:
       if not found:
         grammarStack.pop()
         # todo(dschuyler): mark parent grammars as unterminated (if they expect
-        # be terminated. e.g. unmatched string quote or xml tag.
+        # be terminated). e.g. unmatched string quote or xml tag.
         break
+      newGrammarIndexLimit = 2 + len(grammarStack[-1].get('contains', []))
+      keywordIndexLimit = newGrammarIndexLimit + len(grammarStack[-1].get(
+          'keywords', []))
       index = -1
       for i,k in enumerate(found.groups()):
         if k is not None:
@@ -156,18 +167,33 @@ class Parser:
             remaining.begin = cursor + reg[0] + 1
             self.grammarRowList[-1].append(remaining)
           self.grammarRowList.append([])
-      else:
+      elif index < newGrammarIndexLimit:
         # A new grammar within this grammar (a 'contains').
         child.grammar = grammarStack[-1].get('matchGrammars', [])[index]
         child.begin = cursor + reg[0]
         cursor += reg[1]
         grammarStack.append(child.grammar)
-      if not len(self.grammarRowList[-1]):
-        self.grammarRowList[-1].append(child)
-      elif self.grammarRowList[-1][-1].begin == child.begin:
-        self.grammarRowList[-1][-1] = child
+      elif index < keywordIndexLimit:
+        # A keyword doesn't change the grammarStack.
+        keywordNode = ParserNode()
+        keywordNode.grammar = app.prefs.grammars['keyword']
+        keywordNode.begin = cursor + reg[0]
+        self.__addNode(keywordNode)
+        # Resume the current grammar.
+        child.grammar = grammarStack[-1]
+        child.begin = cursor + reg[1]
+        cursor += reg[1]
       else:
-        self.grammarRowList[-1].append(child)
+        # A special doesn't change the grammarStack.
+        specialNode = ParserNode()
+        specialNode.grammar = app.prefs.grammars['special']
+        specialNode.begin = cursor + reg[0]
+        self.__addNode(specialNode)
+        # Resume the current grammar.
+        child.grammar = grammarStack[-1]
+        child.begin = cursor + reg[1]
+        cursor += reg[1]
+      self.__addNode(child)
 
   def debugLog(self, out, data):
     out('parser debug:')
