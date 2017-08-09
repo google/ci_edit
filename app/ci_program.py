@@ -523,13 +523,16 @@ class CiProgram:
     if k.shouldShowCursor:
       curses.curs_set(1)
       if 1:
-        cursesWindow.leaveok(0)  # Do update cursor position.
-        cursesWindow.move(
-            k.top + k.cursorRow - k.scrollRow,
-            k.left + k.cursorCol - k.scrollCol)
-        # Calling refresh will draw the cursor.
-        cursesWindow.refresh()
-        cursesWindow.leaveok(1)  # Don't update cursor position.
+        try:
+          cursesWindow.leaveok(0)  # Do update cursor position.
+          cursesWindow.move(
+              k.top + k.cursorRow - k.scrollRow,
+              k.left + k.cursorCol - k.scrollCol)
+          # Calling refresh will draw the cursor.
+          cursesWindow.refresh()
+          cursesWindow.leaveok(1)  # Don't update cursor position.
+        except:
+          pass
 
   def makeHomeDirs(self, homePath):
     try:
