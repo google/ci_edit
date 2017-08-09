@@ -23,17 +23,10 @@ import hashlib
 import time
 import app.prefs
 
-fileHistory = {}
 userHistory = {}
 pathToHistory = app.prefs.prefs['userData'].get('historyPath')
 checksum = None
 fileSize = 0
-
-def get(key, default={}):
-  return fileHistory.setdefault(key, default)
-
-def set(key, value):
-  fileHistory[key] = value
 
 def loadUserHistory(filePath, historyPath=pathToHistory):
   global userHistory, fileHistory, checksum, fileSize, pathToHistory
@@ -41,13 +34,9 @@ def loadUserHistory(filePath, historyPath=pathToHistory):
   if os.path.isfile(historyPath):
     with open(historyPath, 'rb') as file:
       userHistory = pickle.load(file)
-    checksum = calculateChecksum(filePath)
-    fileSize = os.stat(filePath).st_size
-    fileHistory = userHistory.get((checksum, fileSize), {})
-  fileHistory['adate'] = time.time()
 
-def saveUserHistory(filePath, historyPath=pathToHistory):
-  global userHistory, fileHistory, checksum, fileSize, pathToHistory
+def saveUserHistory(filePath, fileHistory, historyPath=pathToHistory):
+  global userHistory, checksum, fileSize, pathToHistory
   try:
     if historyPath is not None:
       pathToHistory = historyPath
@@ -61,6 +50,13 @@ def saveUserHistory(filePath, historyPath=pathToHistory):
   except Exception, e:
     app.log.error('exception')
 
+def getFileHistory(filePath):
+    checksum = calculateChecksum(filePath)
+    fileSize = os.stat(filePath).st_size
+    fileHistory = userHistory.get((checksum, fileSize), {})
+    fileHistory['adate'] = time.time()
+    return fileHistory
+
 def calculateChecksum(filePath):
   app.log.info("Calculate checksum of the current file")
   hasher = hashlib.sha512()
@@ -72,8 +68,7 @@ def clearUserHistory():
   """
   Clears user history for all files.
   """
-  global fileHistory, userHistory, pathToHistory
-  fileHistory = {}
+  global userHistory, pathToHistory
   userHistory = {}
   try:
     os.remove(pathToHistory)

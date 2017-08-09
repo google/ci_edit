@@ -542,6 +542,7 @@ class Actions(app.mutator.Mutator):
       self.fileFilter(file.read())
       file.close()
       app.history.loadUserHistory(self.fullPath)
+      self.fileHistory = app.history.getFileHistory(self.fullPath)
       self.restoreUserHistory()
     else:
       self.data = ""
@@ -555,20 +556,20 @@ class Actions(app.mutator.Mutator):
 
   def restoreUserHistory(self):
     # Restore cursor position.
-    self.cursorRow, self.cursorCol = app.history.get('cursor', (0, 0))
-    self.penRow, self.penCol = app.history.get('pen', (0, 0))
-    # self.view.scrollRow, self.view.scrollCol = app.history.get('scroll', (0, 0))
+    self.view.cursorRow, self.view.cursorCol = self.fileHistory.setdefault('cursor', (0, 0))
+    self.penRow, self.penCol = self.fileHistory.setdefault('pen', (0, 0))
+    # self.view.scrollRow, self.view.scrollCol = self.fileHistory.setdefault('scroll', (0, 0))
     # Optimal cursor position
     self.view.scrollRow = max(0, min(len(self.lines) - 1, self.penRow -
                               int(app.prefs.editor['optimalCursorRow'] * (self.view.rows - 3))))
     self.view.scrollCol = max(0, self.penCol -
                               int(app.prefs.editor['optimalCursorCol'] * (self.view.cols - 1)))
-    self.doSelectionMode(app.history.get('selectionMode', app.selectable.kSelectionNone))
-    self.markerRow, self.markerCol = app.history.get('marker', (0, 0))
+    self.doSelectionMode(self.fileHistory.setdefault('selectionMode', app.selectable.kSelectionNone))
+    self.markerRow, self.markerCol = self.fileHistory.setdefault('marker', (0, 0))
     # Restore redo chain
-    self.redoChain = app.history.get('redoChain', [])
+    self.redoChain = self.fileHistory.setdefault('redoChain', [])
     # Restore indices
-    self.savedAtRedoIndex = app.history.get('savedAtRedoIndex', 0)
+    self.savedAtRedoIndex = self.fileHistory.setdefault('savedAtRedoIndex', 0)
     self.redoIndex = self.savedAtRedoIndex
 
   def linesToData(self):
@@ -583,20 +584,20 @@ class Actions(app.mutator.Mutator):
           self.stripTrailingWhiteSpace()
         # Save all user data into history
         self.savedAtRedoIndex = self.redoIndex
-        app.history.set('redoChain', self.redoChain)
-        app.history.set('savedAtRedoIndex', self.savedAtRedoIndex)
-        app.history.set('pen', (self.penRow, self.penCol))
-        app.history.set('cursor', (self.cursorRow, self.cursorCol))
-        app.history.set('scroll', (self.view.scrollRow, self.view.scrollCol))
-        app.history.set('marker', (self.markerRow, self.markerCol))
-        app.history.set('selectionMode', self.selectionMode)
+        self.fileHistory['redoChain'] = self.redoChain
+        self.fileHistory['savedAtRedoIndex'] = self.savedAtRedoIndex
+        self.fileHistory['pen'] = (self.penRow, self.penCol)
+        self.fileHistory['cursor'] = (self.view.cursorRow, self.view.cursorCol)
+        self.fileHistory['scroll'] = (self.view.scrollRow, self.view.scrollCol)
+        self.fileHistory['marker'] = (self.markerRow, self.markerCol)
+        self.fileHistory['selectionMode'] = self.selectionMode
         self.linesToData()
         file = open(self.fullPath, 'w+')
         file.seek(0)
         file.truncate()
         file.write(self.data)
         file.close()
-        app.history.saveUserHistory(self.fullPath)
+        app.history.saveUserHistory(self.fullPath, self.fileHistory)
         # Hmm, could this be hard coded to False here?
         self.isReadOnly = not os.access(self.fullPath, os.W_OK)
         self.fileStat = os.stat(self.fullPath)
