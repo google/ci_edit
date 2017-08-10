@@ -515,12 +515,14 @@ class TopInfo(StaticWindow):
       return
     tb = self.host.textBuffer
     lines = []
+    # TODO: Make dynamic topinfo work properly
     if len(tb.lines):
       lineCursor = self.host.scrollRow
       line = ""
-      while len(line) == 0 and lineCursor > 0:
-        line = tb.lines[lineCursor]
-        lineCursor -= 1
+      if len(tb.lines) > lineCursor:
+        while len(line) == 0 and lineCursor > 0:
+          line = tb.lines[lineCursor]
+          lineCursor -= 1
       if len(line):
         indent = len(line) - len(line.lstrip(' '))
         lineCursor += 1
