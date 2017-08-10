@@ -35,6 +35,7 @@ def loadUserHistory(filePath, historyPath=pathToHistory):
 
 def saveUserHistory(fileInfo, fileHistory, historyPath=pathToHistory):
   """
+  Saves the user's file history by writing to a pickle file.
   Args:
     fileInfo (tuple): Contains (filePath, lastChecksum, lastFileSize).
     fileHistory (dict): The history of the file that the user wants to save.
@@ -57,13 +58,19 @@ def saveUserHistory(fileInfo, fileHistory, historyPath=pathToHistory):
   except Exception, e:
     app.log.error('exception')
 
-def getFileHistory(filePath):
-  checksum, fileSize = getFileInfo(filePath)
+def getFileHistory(filePath, data=None):
+  """
+  Args:
+    filePath (str): The absolute path to the file.
+  Returns:
+    The file history (dict) of the desired file if it exists.
+  """
+  checksum, fileSize = getFileInfo(filePath, data)
   fileHistory = userHistory.get((checksum, fileSize), {})
   fileHistory['adate'] = time.time()
   return fileHistory
 
-def getFileInfo(filePath):
+def getFileInfo(filePath, data=None):
   """
   Args:
     filePath (str): The absolute path to the file.
@@ -72,17 +79,29 @@ def getFileInfo(filePath):
     A tuple containing the checksum and size of the file.
   """
   try:
-    checksum = calculateChecksum(filePath)
+    checksum = calculateChecksum(filePath, data)
     fileSize = os.stat(filePath).st_size
     return (checksum, fileSize)
   except:
     return (None, 0)
 
-def calculateChecksum(filePath):
+def calculateChecksum(filePath, data=None):
+  """
+  Args:
+    filePath (str): The absolute path to the file.
+    data (str): Defaults to None. This is the data
+      returned by calling read() on a file object.
+
+  Returns:
+    The hash value of the file's data.
+  """
   app.log.info("Calculate checksum of the current file")
   hasher = hashlib.sha512()
-  with open(filePath, 'rb') as file:
-    hasher.update(file.read())
+  if data:
+    hasher.update(data)
+  else:
+    with open(filePath, 'rb') as file:
+      hasher.update(file.read())
   return hasher.hexdigest()
 
 def clearUserHistory():

@@ -566,7 +566,7 @@ class Actions(app.mutator.Mutator):
       None
     """
     # Restore the file history
-    self.fileHistory = app.history.getFileHistory(self.fullPath)
+    self.fileHistory = app.history.getFileHistory(self.fullPath, self.data)
     # Restore cursor position.
     self.view.cursorRow, self.view.cursorCol = self.fileHistory.setdefault('cursor', (0, 0))
     self.penRow, self.penCol = self.fileHistory.setdefault('pen', (0, 0))
