@@ -118,8 +118,10 @@ class TextBuffer(app.actions.Actions):
       for i in range(rowLimit):
         k = startCol
         if k == 0:
+          # When rendering from column 0 the grammar index is always zero.
           grammarIndex = 0
         else:
+          # When starting mid-line, find starting grammar index.
           grammarIndex = self.parser.grammarIndexFromRowCol(startRow + i, k)
         while k < endCol:
           node, preceding, remaining = self.parser.grammarAtIndex(
@@ -139,53 +141,23 @@ class TextBuffer(app.actions.Actions):
           subStart = k - preceding
           subEnd = k + remaining
           subLine = line[subStart:subEnd]
-          if spellChecking:
-            if node.grammar.get('spelling', True):
-              # Highlight spelling errors
-              grammarName = node.grammar.get('name', 'unknown')
-              misspellingColor = app.color.get(
-                  colors['misspelling'] + colorDelta)
-              for found in re.finditer(app.selectable.kReSubwords, subLine):
-                reg = found.regs[0]  # Mispelllled word
-                offsetStart = subStart + reg[0]
-                offsetEnd = subStart + reg[1]
-                if startCol < offsetEnd and offsetStart < endCol:
-                  word = line[offsetStart:offsetEnd]
-                  if not app.spelling.isCorrect(word, grammarName):
-                    if startCol > offsetStart:
-                      offsetStart += startCol - offsetStart
-                    wordFragment = line[offsetStart:min(endCol, offsetEnd)]
-                    window.addStr(top + i, left + offsetStart - startCol,
-                        wordFragment,
-                        misspellingColor | curses.A_BOLD | curses.A_REVERSE)
-          if 1:
-            # Highlight keywords.
-            keywordColor = app.color.get(colors['keyword'] + colorDelta)
-            regex = node.grammar.get('keywordsRe', app.prefs.kReNonMatching)
-            for found in regex.finditer(subLine):
-              reg = found.regs[0]
+          if spellChecking and node.grammar.get('spelling', True):
+            # Highlight spelling errors
+            grammarName = node.grammar.get('name', 'unknown')
+            misspellingColor = app.color.get(colors['misspelling'] + colorDelta)
+            for found in re.finditer(app.selectable.kReSubwords, subLine):
+              reg = found.regs[0]  # Mispelllled word
               offsetStart = subStart + reg[0]
               offsetEnd = subStart + reg[1]
               if startCol < offsetEnd and offsetStart < endCol:
-                if startCol > offsetStart:
-                  offsetStart += startCol - offsetStart
-                wordFragment = line[offsetStart:min(endCol, offsetEnd)]
-                window.addStr(top + i, left + offsetStart - startCol,
-                    wordFragment, keywordColor)
-          if 1:
-            # Highlight specials.
-            keywordColor = app.color.get(colors['keyword'] + colorDelta)
-            regex = node.grammar.get('specialsRe', app.prefs.kReNonMatching)
-            for found in regex.finditer(subLine):
-              reg = found.regs[0]
-              offsetStart = subStart + reg[0]
-              offsetEnd = subStart + reg[1]
-              if startCol < offsetEnd and offsetStart < endCol:
-                if startCol > offsetStart:
-                  offsetStart += startCol - offsetStart
-                wordFragment = line[offsetStart:min(endCol, offsetEnd)]
-                window.addStr(top + i, left + offsetStart - startCol,
-                    wordFragment, keywordColor)
+                word = line[offsetStart:offsetEnd]
+                if not app.spelling.isCorrect(word, grammarName):
+                  if startCol > offsetStart:
+                    offsetStart += startCol - offsetStart
+                  wordFragment = line[offsetStart:min(endCol, offsetEnd)]
+                  window.addStr(top + i, left + offsetStart - startCol,
+                      wordFragment,
+                      misspellingColor | curses.A_BOLD | curses.A_REVERSE)
           k += length
     else:
       # Draw to screen.

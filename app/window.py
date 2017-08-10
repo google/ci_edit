@@ -407,7 +407,7 @@ class LogWindow(StaticWindow):
 
   def refresh(self):
     self.refreshCounter += 1
-    app.log.meta(" "*10, self.refreshCounter, "- screen refresh -")
+    app.log.meta(" " * 10, self.refreshCounter, "- screen refresh -")
     maxRow, maxCol = self.rows, self.cols
     self.writeLineRow = 0
     colorA = app.color.get(0)

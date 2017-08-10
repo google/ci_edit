@@ -104,6 +104,7 @@ for k,v in prefs['grammar'].items():
   # contains and end re.
   matchGrammars = []
   markers = []
+  # Index [0]
   if v.get('escaped'):
     markers.append(v['escaped'])
     matchGrammars.append(v)
@@ -111,6 +112,7 @@ for k,v in prefs['grammar'].items():
     # Add a non-matchable placeholder.
     markers.append(kNonMatchingRegex)
     matchGrammars.append(None)
+  # Index [1]
   if v.get('end'):
     markers.append(v['end'])
     matchGrammars.append(v)
@@ -118,6 +120,7 @@ for k,v in prefs['grammar'].items():
     # Add a non-matchable placeholder.
     markers.append(kNonMatchingRegex)
     matchGrammars.append(None)
+  # Index [2..len(contains)]
   for grammarName in v.get('contains', []):
     g = grammars.get(grammarName, None)
     if g is None:
@@ -128,6 +131,12 @@ for k,v in prefs['grammar'].items():
       sys.exit(1)
     markers.append(g['begin'])
     matchGrammars.append(g)
+  # Index [2+len(contains)..]
+  for keyword in v.get('keywords', []):
+    markers.append(r'\b' + keyword + r'\b')
+  # Index [2+len(contains)+len(keywords)..]
+  markers += v.get('special', [])
+  # Index [-1]
   markers.append(r'\n')
   app.log.startup('markers', markers)
   v['matchRe'] = re.compile(joinReList(markers))
