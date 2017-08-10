@@ -541,8 +541,6 @@ class Actions(app.mutator.Mutator):
     if file:
       self.fileFilter(file.read())
       file.close()
-      app.history.loadUserHistory(self.fullPath)
-      self.restoreUserHistory()
     else:
       self.data = ""
     self.fileExtension = os.path.splitext(self.fullPath)[1]
@@ -552,6 +550,8 @@ class Actions(app.mutator.Mutator):
       self.dataToLines()
     else:
       self.parser = None
+    app.history.loadUserHistory(self.fullPath)
+    self.restoreUserHistory()
 
   def restoreUserHistory(self):
     """

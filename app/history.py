@@ -27,7 +27,7 @@ userHistory = {}
 pathToHistory = app.prefs.prefs['userData'].get('historyPath')
 
 def loadUserHistory(filePath, historyPath=pathToHistory):
-  global userHistory, fileHistory, checksum, fileSize, pathToHistory
+  global userHistory, pathToHistory
   pathToHistory = historyPath
   if os.path.isfile(historyPath):
     with open(historyPath, 'rb') as file:
