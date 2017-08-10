@@ -166,6 +166,7 @@ class Mutator(app.selectable.Selectable):
         self.penRow, change[1][0])
     assert self.penCol + change[1][1] >= 0, "%s %s"%(
         self.penCol, change[1][1])
+
     self.penRow += change[1][0]
     self.penCol += change[1][1]
     self.markerRow += change[1][2]

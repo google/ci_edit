@@ -14,6 +14,7 @@
 
 import app.log
 import re
+import os
 
 commentColorIndex = 2
 defaultColorIndex = 18
@@ -524,5 +525,9 @@ prefs = {
       ],
       "backgroundIndexes": [231, 229, 14, 221,   255, 254, 253, 225],
     },
+  },
+  'userData': {
+    'homePath': os.path.expanduser('~/.ci_edit'),
+    'historyPath': os.path.join(os.path.expanduser('~/.ci_edit'), 'history.dat'),
   },
 }
