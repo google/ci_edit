@@ -96,10 +96,11 @@ Within the Goto line prompt:
 
   'version': \
 """
-  Version (build iteration): v26
+  Version (build iteration): v27
   See LICENSE for license information
   See readme.md for an introduction
   Both files may be found in "%s"
-  Please send feedback and bug reports to dschuyler@
+  Please give the gift of feedback and bug reports at
+    https://github.com/google/ci_edit/issues
 """ % (dirPath,),
 }
