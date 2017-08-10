@@ -27,6 +27,16 @@ userHistory = {}
 pathToHistory = app.prefs.prefs['userData'].get('historyPath')
 
 def loadUserHistory(filePath, historyPath=pathToHistory):
+  """
+  Retrieves the user's complete edit history for all files
+  Args:
+    filePath (str): The absolute path to the file.
+    historyPath (str): Defaults ot pathToHistory.
+      The path to the user's saved history.
+
+  Returns:
+    None
+  """
   global userHistory, pathToHistory
   pathToHistory = historyPath
   if os.path.isfile(historyPath):
@@ -39,7 +49,8 @@ def saveUserHistory(fileInfo, fileHistory, historyPath=pathToHistory):
   Args:
     fileInfo (tuple): Contains (filePath, lastChecksum, lastFileSize).
     fileHistory (dict): The history of the file that the user wants to save.
-    historyPath (str): The path to the user's saved history.
+    historyPath (str): Defaults ot pathToHistory.
+      The path to the user's saved history.
 
   Returns:
     None
@@ -62,6 +73,9 @@ def getFileHistory(filePath, data=None):
   """
   Args:
     filePath (str): The absolute path to the file.
+    data (str): Defaults to None. This is the data
+      returned by calling read() on a file object.
+
   Returns:
     The file history (dict) of the desired file if it exists.
   """
@@ -74,6 +88,8 @@ def getFileInfo(filePath, data=None):
   """
   Args:
     filePath (str): The absolute path to the file.
+    data (str): Defaults to None. This is the data
+      returned by calling read() on a file object.
 
   Returns:
     A tuple containing the checksum and size of the file.
