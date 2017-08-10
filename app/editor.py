@@ -176,7 +176,8 @@ class InteractiveOpener(app.controller.Controller):
           app.buffer_manager.buffers.getValidTextBuffer(self.priorTextBuffer))
     else:
       app.log.info('non-dir\n\n', expandedPath)
-      textBuffer = app.buffer_manager.buffers.loadTextBuffer(expandedPath, self.host)
+      textBuffer = app.buffer_manager.buffers.loadTextBuffer(expandedPath,
+          self.host)
       app.log.info('non-dir\n\n', textBuffer.lines[0])
       self.host.setTextBuffer(textBuffer)
 
@@ -258,7 +259,7 @@ class InteractivePrediction(app.controller.Controller):
     else:
       expandedPath = os.path.abspath(os.path.expanduser(fullPath))
       textBuffer = app.buffer_manager.buffers.loadTextBuffer(expandedPath,
-                                                             self.host)
+          self.host)
       self.host.setTextBuffer(textBuffer)
     self.items = None
 

@@ -330,7 +330,7 @@ class Mutator(app.selectable.Selectable):
           oldMouseChange = self.redoChain[-1][1][1]
           oldCarriageReturns = self.redoChain[-1][1][0]
           change = (change[0], (oldCarriageReturns + newCarriageReturns,
-                                ('m', addVectors(newMouseChange[1], oldMouseChange[1]))))
+              ('m', addVectors(newMouseChange[1], oldMouseChange[1]))))
           self.__undoOne()
           self.redoChain.pop()
     if newTrivialChange:

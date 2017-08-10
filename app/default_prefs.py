@@ -528,6 +528,7 @@ prefs = {
   },
   'userData': {
     'homePath': os.path.expanduser('~/.ci_edit'),
-    'historyPath': os.path.join(os.path.expanduser('~/.ci_edit'), 'history.dat'),
+    'historyPath': os.path.join(os.path.expanduser('~/.ci_edit'),
+        'history.dat'),
   },
 }
