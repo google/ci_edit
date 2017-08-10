@@ -17,8 +17,6 @@ import app.history
 import app.text_buffer
 import os
 import sys
-import time
-
 
 class BufferManager:
   """Manage a set of text buffers. Some text buffers may be hidden."""
@@ -74,10 +72,9 @@ class BufferManager:
     self.buffers.append(textBuffer)
     return textBuffer
 
-  def loadTextBuffer(self, relPath):
+  def loadTextBuffer(self, relPath, view):
     fullPath = os.path.abspath(os.path.expanduser(os.path.expandvars(relPath)))
     app.log.info(fullPath)
-    app.history.set(('files', fullPath, 'adate'), time.time())
     textBuffer = None
     for i,tb in enumerate(self.buffers):
       if tb.fullPath == fullPath:
@@ -94,6 +91,7 @@ class BufferManager:
         app.log.info('creating a new file at\n ', fullPath)
       textBuffer = app.text_buffer.TextBuffer()
       self.renameBuffer(textBuffer, fullPath)
+      textBuffer.view = view
       textBuffer.fileLoad()
       self.buffers.append(textBuffer)
     if 0:

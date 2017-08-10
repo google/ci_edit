@@ -127,7 +127,7 @@ class InteractiveOpener(EditText):
     expandedPath = os.path.abspath(os.path.expanduser(self.textBuffer.lines[0]))
     if not os.path.isdir(expandedPath):
       self.host.setTextBuffer(
-          self.prg.bufferManager.loadTextBuffer(expandedPath))
+          self.prg.bufferManager.loadTextBuffer(expandedPath), self.host)
     self.changeToInputWindow()
 
   def maybeSlash(self, expandedPath):
@@ -206,7 +206,7 @@ class InteractiveOpener(EditText):
           lines.append(i)
       if len(lines) == 1 and os.path.isfile(os.path.join(dirPath, fileName)):
         self.host.setTextBuffer(app.buffer_manager.buffers.loadTextBuffer(
-            os.path.join(dirPath, fileName)))
+            os.path.join(dirPath, fileName), self.host))
       else:
         self.host.textBuffer.lines = [
             os.path.abspath(os.path.expanduser(dirPath))+":"] + lines

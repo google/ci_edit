@@ -550,30 +550,75 @@ class Actions(app.mutator.Mutator):
       self.dataToLines()
     else:
       self.parser = None
+    app.history.loadUserHistory(self.fullPath)
+    self.restoreUserHistory()
+
+  def restoreUserHistory(self):
+    """
+    This function restores all stored history of the file into the TextBuffer object.
+    If there does not exist a stored history of the file, it will initialize the
+    variables to default values.
+
+    Args:
+      None
+
+    Returns:
+      None
+    """
+    # Restore the file history
+    self.fileHistory = app.history.getFileHistory(self.fullPath, self.data)
+    # Restore cursor position.
+    self.view.cursorRow, self.view.cursorCol = self.fileHistory.setdefault('cursor', (0, 0))
+    self.penRow, self.penCol = self.fileHistory.setdefault('pen', (0, 0))
+    # self.view.scrollRow, self.view.scrollCol = self.fileHistory.setdefault('scroll', (0, 0))
+    # Optimal cursor position
+    self.view.scrollRow = max(0, min(len(self.lines) - 1, self.penRow -
+                              int(app.prefs.editor['optimalCursorRow'] * (self.view.rows - 3))))
+    self.view.scrollCol = max(0, self.penCol -
+                              int(app.prefs.editor['optimalCursorCol'] * (self.view.cols - 1)))
+    self.doSelectionMode(self.fileHistory.setdefault('selectionMode', app.selectable.kSelectionNone))
+    self.markerRow, self.markerCol = self.fileHistory.setdefault('marker', (0, 0))
+    # Restore redo chain
+    self.redoChain = self.fileHistory.setdefault('redoChain', [])
+    # Restore indices
+    self.savedAtRedoIndex = self.fileHistory.setdefault('savedAtRedoIndex', 0)
+    self.redoIndex = self.savedAtRedoIndex
+    # Store the file's info
+    self.lastChecksum, self.lastFileSize = app.history.getFileInfo(self.fullPath)
 
   def linesToData(self):
     self.data = self.doLinesToData(self.lines)
 
   def fileWrite(self):
-    app.history.set(
-        ['files', self.fullPath, 'pen'], (self.penRow, self.penCol))
     # Preload the message with an error that should be overwritten.
     self.setMessage('Error saving file')
     try:
       try:
         if app.prefs.editor['onSaveStripTrailingSpaces']:
           self.stripTrailingWhiteSpace()
+        # Save all user data into history
+        self.savedAtRedoIndex = self.redoIndex
+        self.fileHistory['redoChain'] = self.redoChain
+        self.fileHistory['savedAtRedoIndex'] = self.savedAtRedoIndex
+        self.fileHistory['pen'] = (self.penRow, self.penCol)
+        self.fileHistory['cursor'] = (self.view.cursorRow, self.view.cursorCol)
+        self.fileHistory['scroll'] = (self.view.scrollRow, self.view.scrollCol)
+        self.fileHistory['marker'] = (self.markerRow, self.markerCol)
+        self.fileHistory['selectionMode'] = self.selectionMode
         self.linesToData()
         file = open(self.fullPath, 'w+')
         file.seek(0)
         file.truncate()
         file.write(self.data)
         file.close()
+        app.history.saveUserHistory((self.fullPath, self.lastChecksum, self.lastFileSize),
+                                     self.fileHistory)
+        # Store the file's new info
+        self.lastChecksum, self.lastFileSize = app.history.getFileInfo(self.fullPath)
         # Hmm, could this be hard coded to False here?
         self.isReadOnly = not os.access(self.fullPath, os.W_OK)
         self.fileStat = os.stat(self.fullPath)
         self.setMessage('File saved')
-        self.savedAtRedoIndex = self.redoIndex
       except Exception as e:
         type_, value, tb = sys.exc_info()
         self.setMessage(
@@ -592,11 +637,11 @@ class Actions(app.mutator.Mutator):
     scrollRow = self.view.scrollRow
     scrollCol = self.view.scrollCol
     maxRow, maxCol = self.view.rows, self.view.cols
-    if not (self.view.scrollRow < row <= self.view.scrollRow + maxRow):
-      optimalCursorRow = app.prefs.editor['optimalCursorRow'] * self.view.rows
+    if not (scrollRow < row <= scrollRow + maxRow):
+      optimalCursorRow = app.prefs.editor['optimalCursorRow'] * maxRow
       scrollRow = max(row - int(optimalCursorRow), 0)
-    if not (self.view.scrollCol < col <= self.view.scrollCol + maxCol):
-      optimalCursorCol = app.prefs.editor['optimalCursorCol'] * self.view.cols
+    if not (scrollCol < col <= scrollCol + maxCol):
+      optimalCursorCol = app.prefs.editor['optimalCursorCol'] * maxCol
       scrollCol = max(col - int(optimalCursorCol), 0)
     self.doSelectionMode(app.selectable.kSelectionNone)
     self.view.scrollRow = scrollRow

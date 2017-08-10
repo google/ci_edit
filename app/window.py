@@ -677,7 +677,7 @@ class InputWindow(Window):
 
   def startup(self):
     for f in app.prefs.startup.get('cliFiles', []):
-      app.buffer_manager.buffers.loadTextBuffer(f['path'])
+      app.buffer_manager.buffers.loadTextBuffer(f['path'], self)
     if app.prefs.startup.get('readStdin'):
       app.buffer_manager.buffers.readStdin()
     tb = app.buffer_manager.buffers.topBuffer()
@@ -784,21 +784,9 @@ class InputWindow(Window):
   def setTextBuffer(self, textBuffer):
     app.log.info('setTextBuffer')
     #self.normalize()
-    if self.textBuffer is not None:
-      app.history.set(['files', self.textBuffer.fullPath, 'cursor'],
-          (self.textBuffer.penRow, self.textBuffer.penCol))
-    # TODO(dschuyler): Do we need to restore positions and selections here?
-    self.controller.setTextBuffer(textBuffer)
     Window.setTextBuffer(self, textBuffer)
+    self.controller.setTextBuffer(textBuffer)
     self.textBuffer.debugRedo = app.prefs.startup.get('debugRedo')
-    # Restore cursor position.
-    cursor = app.history.get(['files', textBuffer.fullPath, 'cursor'], (0, 0))
-    if not len(textBuffer.lines):
-      row = col = 0
-    else:
-      row = max(0, min(cursor[0], len(textBuffer.lines)-1))
-      col = max(0, min(cursor[1], len(textBuffer.lines[row])))
-    textBuffer.selectText(row, col, 0, app.selectable.kSelectionNone)
 
   def unfocus(self):
     if self.showMessageLine:

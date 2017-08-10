@@ -19,44 +19,116 @@
 import app.log
 import cPickle as pickle
 import os
+import hashlib
+import time
+import app.prefs
 
-data = {}
-path = None
+userHistory = {}
+pathToHistory = app.prefs.prefs['userData'].get('historyPath')
 
-def get(keyPath, default=None):
-  global data
-  cursor = data
-  for i in keyPath[:-1]:
-    cursor = cursor.setdefault(i, {})
-  return cursor.get(keyPath[-1], default)
+def loadUserHistory(filePath, historyPath=pathToHistory):
+  """
+  Retrieves the user's complete edit history for all files
+  Args:
+    filePath (str): The absolute path to the file.
+    historyPath (str): Defaults ot pathToHistory.
+      The path to the user's saved history.
 
-def set(keyPath, value):
-  global data
-  cursor = data
-  for i in keyPath[:-1]:
-    cursor = cursor.setdefault(i, {})
-  cursor[keyPath[-1]] = value
-  #assert get(keyPath) == value
+  Returns:
+    None
+  """
+  global userHistory, pathToHistory
+  pathToHistory = historyPath
+  if os.path.isfile(historyPath):
+    with open(historyPath, 'rb') as file:
+      userHistory = pickle.load(file)
 
-def loadUserHistory(filePath):
-  global data, path
+def saveUserHistory(fileInfo, fileHistory, historyPath=pathToHistory):
+  """
+  Saves the user's file history by writing to a pickle file.
+  Args:
+    fileInfo (tuple): Contains (filePath, lastChecksum, lastFileSize).
+    fileHistory (dict): The history of the file that the user wants to save.
+    historyPath (str): Defaults ot pathToHistory.
+      The path to the user's saved history.
+
+  Returns:
+    None
+  """
+  global userHistory, pathToHistory
+  filePath, lastChecksum, lastFileSize = fileInfo
   try:
-    path = filePath
-    if os.path.isfile(path):
-      with open(path, "rb") as file:
-        data = pickle.load(file)
-    else:
-      data = {}
-  except Exception, e:
-    app.log.error('exception')
-    data = {}
-
-def saveUserHistory():
-  global data, path
-  try:
-    if path is not None:
-      with open(path, "wb") as file:
-        pickle.dump(data, file)
+    if historyPath is not None:
+      pathToHistory = historyPath
+      userHistory.pop((lastChecksum, lastFileSize), None)
+      newChecksum, newFileSize = getFileInfo(filePath)
+      userHistory[(newChecksum, newFileSize)] = fileHistory
+      with open(historyPath, 'wb') as file:
+        pickle.dump(userHistory, file)
       app.log.info('wrote pickle')
   except Exception, e:
     app.log.error('exception')
+
+def getFileHistory(filePath, data=None):
+  """
+  Args:
+    filePath (str): The absolute path to the file.
+    data (str): Defaults to None. This is the data
+      returned by calling read() on a file object.
+
+  Returns:
+    The file history (dict) of the desired file if it exists.
+  """
+  checksum, fileSize = getFileInfo(filePath, data)
+  fileHistory = userHistory.get((checksum, fileSize), {})
+  fileHistory['adate'] = time.time()
+  return fileHistory
+
+def getFileInfo(filePath, data=None):
+  """
+  Args:
+    filePath (str): The absolute path to the file.
+    data (str): Defaults to None. This is the data
+      returned by calling read() on a file object.
+
+  Returns:
+    A tuple containing the checksum and size of the file.
+  """
+  try:
+    checksum = calculateChecksum(filePath, data)
+    fileSize = os.stat(filePath).st_size
+    return (checksum, fileSize)
+  except:
+    return (None, 0)
+
+def calculateChecksum(filePath, data=None):
+  """
+  Args:
+    filePath (str): The absolute path to the file.
+    data (str): Defaults to None. This is the data
+      returned by calling read() on a file object.
+
+  Returns:
+    The hash value of the file's data.
+  """
+  app.log.info("Calculate checksum of the current file")
+  hasher = hashlib.sha512()
+  if data:
+    hasher.update(data)
+  else:
+    with open(filePath, 'rb') as file:
+      hasher.update(file.read())
+  return hasher.hexdigest()
+
+def clearUserHistory():
+  """
+  Clears user history for all files.
+  """
+  global userHistory, pathToHistory
+  userHistory = {}
+  try:
+    os.remove(pathToHistory)
+    app.log.info("user history cleared")
+  except Exception as e:
+    app.log.error('clearUserHistory exception', e)
+
