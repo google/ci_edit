@@ -56,10 +56,10 @@ class StaticWindow:
           text = text[:self.cols]
       else:
         assert row >= 0, row
-        assert row < self.rows, "%d, %d" %(row, self.rows)
-        assert col <= self.cols, "%d, %d" %(col, self.cols)
+        assert row < self.rows, "%d, %d" % (row, self.rows)
+        assert col <= self.cols, "%d, %d" % (col, self.cols)
         assert col >= 0, col
-        assert len(text) <= self.cols, "%d, %d" %(len(text), self.cols)
+        assert len(text) <= self.cols, "%d, %d" % (len(text), self.cols)
     try:
       mainCursesWindow.addstr(self.top + row, self.left + col, text, colorPair)
     except curses.error: pass
@@ -83,14 +83,14 @@ class StaticWindow:
   def blank(self, colorPair):
     """Clear the window."""
     for i in range(self.rows):
-      self.addStr(i, 0, ' '*self.cols, colorPair)
+      self.addStr(i, 0, ' ' * self.cols, colorPair)
 
   def contains(self, row, col):
     """Determine whether the position at row, col lay within this window."""
     for i in self.zOrder:
       if i.contains(row, col):
         return i
-    return (self.top <= row < self.top+self.rows and
+    return (self.top <= row < self.top + self.rows and
         self.left <= col < self.left + self.cols and self)
 
   def debugDraw(self, win):
@@ -194,7 +194,7 @@ class ActiveWindow(StaticWindow):
     app.log.info(self)
     self.hasFocus = True
     try: self.parent.zOrder.remove(self)
-    except ValueError: app.log.detail(repr(self)+'not found in zOrder')
+    except ValueError: app.log.detail(repr(self) + 'not found in zOrder')
     self.parent.zOrder.append(self)
     self.controller.focus()
 
@@ -350,14 +350,14 @@ class LineNumbers(StaticWindow):
     limit = min(maxRow, len(textBuffer.lines)-self.host.scrollRow)
     color = app.color.get('line_number')
     for i in range(limit):
-      self.addStr(i, 0, ' %5d '%(self.host.scrollRow + i + 1), color)
+      self.addStr(i, 0, ' %5d ' % (self.host.scrollRow + i + 1), color)
     color = app.color.get('outside_document')
     for i in range(limit, maxRow):
       self.addStr(i, 0, '       ', color)
     cursorAt = self.host.cursorRow - self.host.scrollRow
     if 0 <= cursorAt < limit:
       color = app.color.get('line_number_current')
-      self.addStr(cursorAt, 1, '%5d'%(self.host.cursorRow + 1), color)
+      self.addStr(cursorAt, 1, '%5d' % (self.host.cursorRow + 1), color)
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
     app.log.info(paneRow, paneCol, shift)
@@ -430,7 +430,8 @@ class InteractiveFind(Window):
     self.replaceLine.setController(app.cu_editor.InteractiveFind)
     self.zOrder.append(self.replaceLine)
     self.setTextBuffer(app.text_buffer.TextBuffer())
-    self.controller = app.cu_editor.InteractiveFind(host, self.findLine.textBuffer)
+    self.controller = app.cu_editor.InteractiveFind(host,
+        self.findLine.textBuffer)
 
   def reshape(self, rows, cols, top, left):
     self.findLine.reshape(1, cols, top, left)
@@ -479,7 +480,7 @@ class StatusLine(StaticWindow):
     colPercentage = 0
     lineCount = len(tb.lines)
     if lineCount:
-      rowPercentage = self.host.cursorRow*100/lineCount
+      rowPercentage = self.host.cursorRow * 100 / lineCount
       if self.host.cursorRow >= lineCount - 1:
          rowPercentage = 100
       charCount = len(tb.lines[self.host.cursorRow])
@@ -492,8 +493,9 @@ class StatusLine(StaticWindow):
     if len(statusLine):
       rightSide += ' |'
     if app.prefs.startup.get('showLogWindow'):
-      rightSide += ' %s | %s |'%(tb.cursorGrammarName(), tb.selectionModeName())
-    rightSide += ' %4d,%2d | %3d%%,%3d%%'%(
+      rightSide += ' %s | %s |' % (tb.cursorGrammarName(),
+          tb.selectionModeName())
+    rightSide += ' %4d,%2d | %3d%%,%3d%%' % (
         self.host.cursorRow+1, self.host.cursorCol + 1,
         rowPercentage,
         colPercentage)
@@ -519,6 +521,7 @@ class TopInfo(StaticWindow):
     if len(tb.lines):
       lineCursor = self.host.scrollRow
       line = ""
+      # Check for extremely small window.
       if len(tb.lines) > lineCursor:
         while len(line) == 0 and lineCursor > 0:
           line = tb.lines[lineCursor]
@@ -810,7 +813,7 @@ class PaletteWindow(ActiveWindow):
   """A window with example foreground and background text colors."""
   def __init__(self, prg):
     ActiveWindow.__init__(self, prg)
-    self.resizeTo(16, 16*5)
+    self.resizeTo(16, 16 * 5)
     self.moveTo(8, 8)
     self.controller = app.controller.MainController(self)
     self.controller.add(app.cu_editor.PaletteDialogController(self))
@@ -820,5 +823,6 @@ class PaletteWindow(ActiveWindow):
     rows = 16
     for i in range(width):
       for k in range(rows):
-        self.addStr(k, i*5, ' %3d '%(i+k*width,), app.color.get(i+k*width))
+        self.addStr(k, i * 5, ' %3d ' % (i + k * width,),
+            app.color.get(i + k * width))
 
