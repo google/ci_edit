@@ -113,8 +113,11 @@ functionTestEq(kReUnquote.sub('\\2', '"da\\"te"'),
 
 class InteractivePrompt(app.controller.Controller):
   """Extended commands prompt."""
-  def __init__(self, host, textBuffer):
+  def __init__(self, host):
     app.controller.Controller.__init__(self, host, 'prompt')
+
+  def setTextBuffer(self, textBuffer):
+    app.controller.Controller.setTextBuffer(self, textBuffer)
     self.textBuffer = textBuffer
     self.textBuffer.lines = [""]
     self.commands = {
@@ -182,6 +185,7 @@ class InteractivePrompt(app.controller.Controller):
       try: cmdLine = self.textBuffer.lines[0]
       except: pass
       if not len(cmdLine):
+        self.changeToHostWindow()
         return
       tb = self.host.textBuffer
       lines = list(tb.getSelectedText())

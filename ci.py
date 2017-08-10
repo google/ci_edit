@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# TODO(dschuyler): !/usr/bin/python -O
 
 # Copyright 2016 Google Inc.
 #

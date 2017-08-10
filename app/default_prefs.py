@@ -138,10 +138,17 @@ prefs = {
     'trailing_space': 180,
     'quoted_string2': stringColorIndex,
   },
+  'devTest': {
+  },
   'editor': {
     'captiveCursor': False,
     'colorScheme': 'default',
     'findIgnoreCase': True,
+    'indentation': '  ',
+    'lineLimitIndicator': 80,
+    'onSaveStripTrailingSpaces': True,
+    'optimalCursorRow': 0.28,  # Ratio of rows: 0 top, 0.5 middle, 1.0 bottom.
+    'optimalCursorCol': 0.28,  # Ratio of columns: 0 left, 1.0 right.
     'palette': 'default',
     'showLineNumbers': True,
     'showStatusLine': True,
@@ -160,11 +167,14 @@ prefs = {
       'grammar': 'binary',
     },
     'c': {
-      'ext': ['.c', '.h'],
+      'ext': ['.c'],
       'grammar': 'c',
     },
     'cpp': {
-      'ext': ['.cc', '.cpp', '.cxx', '.c++', '.hpp', '.hxx', '.h++', '.inc'],
+      'ext': [
+        '.cc', '.cpp', '.cxx', '.c++', '.hpp', '.hxx', '.h++', '.inc',
+        '.h'  # Hmm, some source uses .h for cpp headers.
+      ],
       'grammar': 'cpp',
     },
     'css': {
@@ -287,21 +297,21 @@ prefs = {
     'c_raw_string1': {
       'begin': "[uU]?[rR]'",
       'end': "'",
-      'escaped': r"\\.",
+      'escaped': r"\\'",
       'indent': '  ',
       'single_line': True,
     },
     'c_raw_string2': {
       'begin': '[uU]?[rR]"',
       'end': '"',
-      'escaped': r'\\.',
+      'escaped': r'\\"',
       'indent': '  ',
       'single_line': True,
     },
     'c_string1': {
       'begin': "'(?!'')",
       'end': r"'",
-      'escaped': r'\\.',
+      'escaped': r"\\'",
       'indent': '  ',
       'special': __special_string_escapes + [r"\\'"],
       'single_line': True,
@@ -309,7 +319,7 @@ prefs = {
     'c_string2': {
       'begin': '"(?!"")',
       'end': r'"',
-      'escaped': r'\\.',
+      'escaped': r'\\"',
       'indent': '  ',
       'special': __special_string_escapes + [r'\\"'],
       'single_line': True,
@@ -386,6 +396,9 @@ prefs = {
         'cpp_line_comment', 'regex_string',
       ],
     },
+    'keyword': {
+      'spelling': False,
+    },
     'md': {
       'indent': '  ',
       'keywords': [],
@@ -452,14 +465,14 @@ prefs = {
     'py_string1': {
       'begin': "[uU]?'''",
       'end': "'''",
-      'escaped': r'\\.',
+      'escaped': r"\\'",
       'indent': '  ',
       'special': __special_string_escapes + [r"\\'"],
     },
     'py_string2': {
       'begin': '[uU]?"""',
       'end': '"""',
-      'escaped': r'\\.',
+      'escaped': r'\\"',
       'indent': '  ',
       'special': __special_string_escapes + [r'\\"'],
     },
@@ -480,6 +493,9 @@ prefs = {
       'indent': '  ',
       'special': __special_string_escapes + [r"\\/"],
       'single_line': True,
+    },
+    'special': {
+      'spelling': False,
     },
     'text': {
       'indent': '  ',

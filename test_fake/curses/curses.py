@@ -153,6 +153,10 @@ class FakeCursesWindow:
     testLog()
     return fakeInputs and fakeInputs.pop() or ERR
 
+  def getyx(self):
+    testLog()
+    return (0, 0)
+
   def getmaxyx(self):
     testLog()
     return (1, 1)
@@ -166,11 +170,17 @@ class FakeCursesWindow:
   def move(self, a, b):
     testLog(a, b)
 
+  def noutrefresh(self):
+    pass
+
   def refresh(self):
     testLog()
 
   def resize(self, a, b):
     testLog(a, b)
+
+  def scrollok(self, a):
+    testLog(a)
 
   def timeout(self, a):
     testLog(a)
@@ -179,6 +189,10 @@ class FakeCursesWindow:
 class StandardScreen:
   def __init__(self):
     testLog()
+
+  def getyx(self):
+    testLog()
+    return (0, 0)
 
   def getmaxyx(self):
     testLog()

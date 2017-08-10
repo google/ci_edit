@@ -29,7 +29,7 @@ def get(colorType):
   if type(colorType) == type(0):
     colorIndex = colorType
   else:
-    colorIndex = app.prefs.prefs['color'][colorType]
+    colorIndex = app.prefs.color[colorType]
   color = curses.color_pair(colorIndex)
   cache__[colorType] = color
   return color

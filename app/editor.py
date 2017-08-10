@@ -36,7 +36,7 @@ def parseInt(str):
 def test_parseInt():
   assert parseInt('0') == 0
   assert parseInt('0e') == 0
-  assert parseInt('qwee') == 0
+  assert parseInt('text') == 0
   assert parseInt('10') == 10
   assert parseInt('+10') == 10
   assert parseInt('-10') == -10
@@ -46,10 +46,8 @@ def test_parseInt():
 
 class InteractiveOpener(app.controller.Controller):
   """Open a file to edit."""
-  def __init__(self, host, textBuffer):
+  def __init__(self, host):
     app.controller.Controller.__init__(self, host, 'opener')
-    self.textBuffer = textBuffer
-    self.textBuffer.lines = [""]
 
   def createOrOpen(self):
     self.changeToHostWindow()
@@ -186,28 +184,27 @@ class InteractiveOpener(app.controller.Controller):
 
 class InteractivePrediction(app.controller.Controller):
   """Make a guess about what the user desires."""
-  def __init__(self, host, textBuffer):
+  def __init__(self, host):
     app.controller.Controller.__init__(self, host, 'opener')
-    self.textBuffer = textBuffer
-    self.textBuffer.lines = [""]
 
   def cancel(self):
-    self.items = [(self.priorTextBuffer, '')]
+    self.items = [(self.priorTextBuffer, self.priorTextBuffer.fullPath, '')]
     self.index = 0
     self.changeToHostWindow()
 
   def cursorMoveTo(self, row, col):
-    textBuffer = self.document.textBuffer
+    textBuffer = self.host.textBuffer
     textBuffer.cursorMoveTo(row, col)
     textBuffer.cursorScrollToMiddle()
     textBuffer.redo()
 
   def focus(self):
     app.log.info('InteractivePrediction.focus')
-    self.commandDefault = self.textBuffer.insertPrintable
     self.priorTextBuffer = self.host.textBuffer
     self.index = self.buildFileList(self.host.textBuffer.fullPath)
     self.host.setTextBuffer(text_buffer.TextBuffer())
+    self.commandDefault = self.host.textBuffer.insertPrintable
+    self.host.textBuffer.lineLimitIndicator = 0
     self.host.textBuffer.rootGrammar = app.prefs.getGrammar('_pre')
 
   def info(self):
@@ -228,7 +225,7 @@ class InteractivePrediction(app.controller.Controller):
     for i in os.listdir(os.path.expandvars(os.path.expanduser(dirPath)) or '.'):
       f, e = os.path.splitext(i)
       if file == f and ext != e and e not in ignoreExt:
-        self.items.append((None, os.path.join(dirPath, i), ' '))
+        self.items.append((None, os.path.join(dirPath, i), '='))
     # Suggest item.
     return (len(app.buffer_manager.buffers.buffers) - 2) % len(self.items)
 
@@ -268,24 +265,22 @@ class InteractivePrediction(app.controller.Controller):
 
 class InteractiveFind(app.controller.Controller):
   """Find text within the current document."""
-  def __init__(self, host, textBuffer):
+  def __init__(self, host):
     app.controller.Controller.__init__(self, host, 'find')
-    self.textBuffer = textBuffer
-    self.textBuffer.lines = [""]
 
   def findNext(self):
-    self.findCmd = self.document.textBuffer.findNext
+    self.findCmd = self.host.textBuffer.findNext
 
   def findPrior(self):
-    self.findCmd = self.document.textBuffer.findPrior
+    self.findCmd = self.host.textBuffer.findPrior
 
   def findReplace(self):
-    self.findCmd = self.document.textBuffer.findReplace
+    self.findCmd = self.host.textBuffer.findReplace
 
   def focus(self):
     app.log.info('InteractiveFind')
-    self.findCmd = self.document.textBuffer.find
-    selection = self.document.textBuffer.getSelectedText()
+    self.findCmd = self.host.textBuffer.find
+    selection = self.host.textBuffer.getSelectedText()
     if selection:
       self.textBuffer.selectionAll()
       # Make a single regex line.
@@ -304,20 +299,18 @@ class InteractiveFind(app.controller.Controller):
       self.findCmd(searchFor)
     except re.error, e:
       self.error = e.message
-    self.findCmd = self.document.textBuffer.find
+    self.findCmd = self.host.textBuffer.find
 
 
 class InteractiveGoto(app.controller.Controller):
   """Jump to a particular line number."""
-  def __init__(self, host, textBuffer):
+  def __init__(self, host):
     app.controller.Controller.__init__(self, host, 'goto')
-    self.textBuffer = textBuffer
-    self.textBuffer.lines = [""]
 
   def focus(self):
     app.log.info('InteractiveGoto.focus')
     self.textBuffer.selectionAll()
-    self.textBuffer.insert(str(self.document.textBuffer.cursorRow+1))
+    self.textBuffer.insert(str(self.host.textBuffer.penRow + 1))
     self.textBuffer.selectionAll()
 
   def info(self):
@@ -326,22 +319,21 @@ class InteractiveGoto(app.controller.Controller):
   def gotoBottom(self):
     app.log.info()
     self.textBuffer.selectionAll()
-    self.textBuffer.insert(str(len(self.document.textBuffer.lines)))
+    self.textBuffer.insert(str(len(self.host.textBuffer.lines)))
     self.changeToHostWindow()
 
   def gotoHalfway(self):
     self.textBuffer.selectionAll()
-    self.textBuffer.insert(str(len(self.document.textBuffer.lines)/2+1))
+    self.textBuffer.insert(str(len(self.host.textBuffer.lines) / 2 + 1))
     self.changeToHostWindow()
 
   def gotoTop(self):
-    app.log.info(self.document)
     self.textBuffer.selectionAll()
     self.textBuffer.insert("0")
     self.changeToHostWindow()
 
   def cursorMoveTo(self, row, col):
-    textBuffer = self.document.textBuffer
+    textBuffer = self.host.textBuffer
     textBuffer.cursorMoveTo(row, col)
     textBuffer.cursorScrollToMiddle()
     textBuffer.redo()

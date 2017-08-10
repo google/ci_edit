@@ -24,6 +24,10 @@ class FakeCursorWindow:
 class FakeView:
   def __init__(self):
     self.cursorWindow = FakeCursorWindow()
+    self.top = 0
+    self.left = 0
+    self.rows = 10
+    self.cols = 100
     self.scrollRow = 0
     self.scrollCol = 0
 

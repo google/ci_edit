@@ -37,7 +37,7 @@ class Actions(app.mutator.Mutator):
     app.mutator.Mutator.__init__(self)
     self.view = None
     self.rootGrammar = app.prefs.getGrammar(None)
-    self.skipUpdateScroll = False
+    self.__skipUpdateScroll = False
 
   def setView(self, view):
     self.view = view
@@ -153,8 +153,8 @@ class Actions(app.mutator.Mutator):
     if toRow >= len(self.lines):
       return
     lineLen = len(self.lines[toRow])
-    if self.view.goalCol <= lineLen:
-      return self.view.goalCol - self.penCol
+    if self.goalCol <= lineLen:
+      return self.goalCol - self.penCol
     return lineLen - self.penCol
 
   def cursorDown(self):
@@ -177,8 +177,10 @@ class Actions(app.mutator.Mutator):
 
   def getCursorMoveAndMark(self, rowDelta, colDelta, markRowDelta,
       markColDelta, selectionModeDelta):
-    self.view.goalCol = self.penCol + colDelta
-    maxRow, maxCol = self.view.cursorWindow.getmaxyx()
+    if self.penCol + colDelta < 0:  # Catch cursor at beginning of line.
+      colDelta = -self.penCol
+    self.goalCol = self.penCol + colDelta
+    maxRow, maxCol = self.view.rows, self.view.cols
     scrollRows = 0
     if self.view.scrollRow > self.penRow + rowDelta:
       scrollRows = self.penRow + rowDelta - self.view.scrollRow
@@ -209,10 +211,10 @@ class Actions(app.mutator.Mutator):
 
   def cursorMoveDown(self):
     if self.penRow + 1 < len(self.lines):
-      savedGoal = self.view.goalCol
+      savedGoal = self.goalCol
       self.cursorMove(1, self.cursorColDelta(self.penRow + 1))
       self.redo()
-      self.view.goalCol = savedGoal
+      self.goalCol = savedGoal
 
   def cursorMoveLeft(self):
     if self.penCol > 0:
@@ -234,15 +236,15 @@ class Actions(app.mutator.Mutator):
 
   def cursorMoveUp(self):
     if self.penRow > 0:
-      savedGoal = self.view.goalCol
+      savedGoal = self.goalCol
       lineLen = len(self.lines[self.penRow - 1])
-      if self.view.goalCol <= lineLen:
-        self.cursorMove(-1, self.view.goalCol - self.penCol)
+      if self.goalCol <= lineLen:
+        self.cursorMove(-1, self.goalCol - self.penCol)
         self.redo()
       else:
         self.cursorMove(-1, lineLen - self.penCol)
         self.redo()
-      self.view.goalCol = savedGoal
+      self.goalCol = savedGoal
 
   def cursorMoveSubwordLeft(self):
     self.doCursorMoveLeftTo(app.selectable.kReSubwordBoundaryRvr)
@@ -382,7 +384,7 @@ class Actions(app.mutator.Mutator):
   def cursorPageDown(self):
     if self.penRow == len(self.lines):
       return
-    maxRow, maxCol = self.view.cursorWindow.getmaxyx()
+    maxRow, maxCol = self.view.rows, self.view.cols
     penRowDelta = maxRow
     scrollDelta = maxRow
     numLines = len(self.lines)
@@ -401,7 +403,7 @@ class Actions(app.mutator.Mutator):
   def cursorPageUp(self):
     if self.penRow == 0:
       return
-    maxRow, maxCol = self.view.cursorWindow.getmaxyx()
+    maxRow, maxCol = self.view.rows, self.view.cols
     penRowDelta = -maxRow
     scrollDelta = -maxRow
     if self.penRow < maxRow:
@@ -414,7 +416,7 @@ class Actions(app.mutator.Mutator):
     self.redo()
 
   def cursorScrollToMiddle(self):
-    maxRow, maxCol = self.view.cursorWindow.getmaxyx()
+    maxRow, maxCol = self.view.rows, self.view.cols
     rowDelta = min(max(0, len(self.lines)-maxRow),
                    max(0, self.penRow - maxRow / 2)) - self.view.scrollRow
     self.cursorMoveScroll(0, 0, rowDelta, 0)
@@ -559,7 +561,8 @@ class Actions(app.mutator.Mutator):
     self.setMessage('Error saving file')
     try:
       try:
-        self.stripTrailingWhiteSpace()
+        if app.prefs.editor['onSaveStripTrailingSpaces']:
+          self.stripTrailingWhiteSpace()
         self.linesToData()
         file = open(self.fullPath, 'w+')
         file.seek(0)
@@ -588,11 +591,13 @@ class Actions(app.mutator.Mutator):
     col = max(0, min(col, len(self.lines[row])))
     scrollRow = self.view.scrollRow
     scrollCol = self.view.scrollCol
-    maxRow, maxCol = self.view.cursorWindow.getmaxyx()
+    maxRow, maxCol = self.view.rows, self.view.cols
     if not (self.view.scrollRow < row <= self.view.scrollRow + maxRow):
-      scrollRow = max(row - 10, 0)
+      optimalCursorRow = app.prefs.editor['optimalCursorRow'] * self.view.rows
+      scrollRow = max(row - int(optimalCursorRow), 0)
     if not (self.view.scrollCol < col <= self.view.scrollCol + maxCol):
-      scrollCol = max(col - 10, 0)
+      optimalCursorCol = app.prefs.editor['optimalCursorCol'] * self.view.cols
+      scrollCol = max(col - int(optimalCursorCol), 0)
     self.doSelectionMode(app.selectable.kSelectionNone)
     self.view.scrollRow = scrollRow
     self.view.scrollCol = scrollCol
@@ -613,7 +618,7 @@ class Actions(app.mutator.Mutator):
       self.doSelectionMode(app.selectable.kSelectionNone)
       return
     # The saved re is also used for highlighting.
-    ignoreCaseFlag = (app.prefs.prefs['editor'].get('findIgnoreCase') and
+    ignoreCaseFlag = (app.prefs.editor.get('findIgnoreCase') and
                       re.IGNORECASE or 0)
     self.findRe = re.compile('()'+searchFor, ignoreCaseFlag)
     self.findBackRe = re.compile('(.*)'+searchFor, ignoreCaseFlag)
@@ -775,36 +780,36 @@ class Actions(app.mutator.Mutator):
     self.find(searchFor, -1)
 
   def indent(self):
+    indentation = app.prefs.editor['indentation']
+    indentationLength = len(indentation)
     if self.selectionMode == app.selectable.kSelectionNone:
-      self.cursorMoveAndMark(0, -self.penCol,
-          self.penRow - self.markerRow, self.penCol - self.markerCol, 0)
-      self.redo()
-      self.indentLines()
-    elif self.selectionMode == app.selectable.kSelectionAll:
-      self.cursorMoveAndMark(len(self.lines) - 1 - self.penRow, -self.penCol,
-          -self.markerRow, -self.markerCol,
-          app.selectable.kSelectionLine - self.selectionMode)
-      self.redo()
-      self.indentLines()
+      self.verticalInsert(self.penRow, self.penRow, self.penCol, indentation)
     else:
-      self.cursorMoveAndMark(0, -self.penCol, 0, -self.markerCol,
-          app.selectable.kSelectionLine - self.selectionMode)
-      self.redo()
       self.indentLines()
-
-  def indentLines(self):
-    self.redoAddChange(('vi', ('  ')))
+    self.cursorMoveAndMark(0, indentationLength, 0, indentationLength, 0)
     self.redo()
 
+  def indentLines(self):
+    """
+    Indents all selected lines. Do not use for when the selection mode
+    is kSelectionNone since markerRow/markerCol currently do not get
+    updated alongside penRow/penCol.
+    """
+    col = 0
+    row = min(self.markerRow, self.penRow)
+    endRow = max(self.markerRow, self.penRow)
+    indentation = app.prefs.editor['indentation']
+    self.verticalInsert(row, endRow, col, indentation)
+
   def verticalInsert(self, row, endRow, col, text):
-    self.redoAddChange(('vi', (text)))
+    self.redoAddChange(('vi', (text, row, endRow, col)))
     self.redo()
 
   def insert(self, text):
     self.performDelete()
     self.redoAddChange(('i', text))
     self.redo()
-    maxRow, maxCol = self.view.cursorWindow.getmaxyx()
+    maxRow, maxCol = self.view.rows, self.view.cols
     deltaCol = self.penCol - self.view.scrollCol - maxCol + 1
     if deltaCol > 0:
       self.cursorMoveScroll(0, 0, 0, deltaCol);
@@ -921,9 +926,9 @@ class Actions(app.mutator.Mutator):
   def scrollUp(self):
     if self.view.scrollRow == 0:
       if not self.view.hasCaptiveCursor:
-        self.skipUpdateScroll = True
+        self.__skipUpdateScroll = True
       return
-    maxRow, maxCol = self.view.cursorWindow.getmaxyx()
+    maxRow, maxCol = self.view.rows, self.view.cols
     cursorDelta = 0
     if self.penRow >= self.view.scrollRow + maxRow - 2:
       cursorDelta = self.view.scrollRow + maxRow - 2 - self.penRow
@@ -933,7 +938,7 @@ class Actions(app.mutator.Mutator):
           self.cursorColDelta(self.penRow + cursorDelta), 0, 0)
       self.redo()
     else:
-      self.skipUpdateScroll = True
+      self.__skipUpdateScroll = True
 
   def mouseWheelUp(self, shift, ctrl, alt):
     if not shift:
@@ -941,10 +946,10 @@ class Actions(app.mutator.Mutator):
     self.scrollDown()
 
   def scrollDown(self):
-    maxRow, maxCol = self.view.cursorWindow.getmaxyx()
+    maxRow, maxCol = self.view.rows, self.view.cols
     if self.view.scrollRow + maxRow >= len(self.lines):
       if not self.view.hasCaptiveCursor:
-        self.skipUpdateScroll = True
+        self.__skipUpdateScroll = True
       return
     cursorDelta = 0
     if self.penRow <= self.view.scrollRow + 1:
@@ -955,7 +960,7 @@ class Actions(app.mutator.Mutator):
           self.cursorColDelta(self.penRow + cursorDelta), 0, 0)
       self.redo()
     else:
-      self.skipUpdateScroll = True
+      self.__skipUpdateScroll = True
 
   def nextSelectionMode(self):
     next = self.selectionMode + 1
@@ -1057,41 +1062,41 @@ class Actions(app.mutator.Mutator):
     self.insertPrintable(0x00)
 
   def stripTrailingWhiteSpace(self):
+    self.compoundChangeBegin()
     for i in range(len(self.lines)):
       for found in app.selectable.kReEndSpaces.finditer(self.lines[i]):
         self.performDeleteRange(i, found.regs[0][0], i, found.regs[0][1])
+    self.compoundChangeEnd()
 
   def unindent(self):
-    if self.selectionMode == app.selectable.kSelectionAll:
-      self.cursorMoveAndMark(len(self.lines) - 1 - self.penRow, -self.penCol,
-          -self.markerRow, -self.markerCol,
-          app.selectable.kSelectionLine - self.selectionMode)
-      self.redo()
-      self.unindentLines()
+    if self.selectionMode == app.selectable.kSelectionNone:
+      pass
     else:
-      self.cursorMoveAndMark(0, -self.penCol, 0, -self.markerCol,
-          app.selectable.kSelectionLine - self.selectionMode)
-      self.redo()
       self.unindentLines()
 
   def unindentLines(self):
-    upperRow = min(self.markerRow, self.penRow)
-    lowerRow = max(self.markerRow, self.penRow)
-    app.log.info('unindentLines', upperRow, lowerRow)
-    for line in self.lines[upperRow:lowerRow + 1]:
-      if ((len(line) == 1 and line[:1] != ' ') or
-          (len(line) >= 2 and line[:2] != '  ')):
+    indentation = app.prefs.editor['indentation']
+    indentationLength = len(indentation)
+    row = min(self.markerRow, self.penRow)
+    endRow = max(self.markerRow, self.penRow)
+    col = 0
+    app.log.info('unindentLines', indentation, row, endRow, col)
+    for line in self.lines[row:endRow + 1]:
+      if (len(line) < indentationLength or
+          (line[:indentationLength] != indentation)):
         # Handle multi-delete.
         return
-    self.redoAddChange(('vd', ('  ')))
+    self.redoAddChange(('vd', (indentation, row, endRow, col)))
+    self.redo()
+    self.cursorMoveAndMark(0, -indentationLength, 0, -indentationLength, 0)
     self.redo()
 
   def updateScrollPosition(self):
     """Move the selected view rectangle so that the cursor is visible."""
-    if self.skipUpdateScroll:
-      self.skipUpdateScroll = False
+    if self.__skipUpdateScroll:
+      self.__skipUpdateScroll = False
       return
-    maxRow, maxCol = self.view.cursorWindow.getmaxyx()
+    maxRow, maxCol = self.view.rows, self.view.cols
     if self.view.scrollRow > self.penRow:
       self.view.scrollRow = self.penRow
     elif self.penRow >= self.view.scrollRow + maxRow:

@@ -73,7 +73,9 @@ inventwithpython
 isdigit
 isdir
 isfile
+islink
 islower
+ismount
 isprint
 isupper
 iteritems
@@ -99,6 +101,7 @@ multiline
 mvwin
 ndiff
 newwin
+noutrefresh
 npage
 ord
 os
@@ -120,6 +123,7 @@ repr
 resizeterm
 restype
 rsplit
+scrollok
 sel
 sep
 setattr

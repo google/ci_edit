@@ -16,17 +16,20 @@
 # Chromium (May be specific to Chromium development)
 arraysize
 asan
+backend
 browsertest
 checkboxes
 chromevox
 codereview
 cpplint
 cros
+crosh
 darkconnect
 dcheck
 doesnt
 dont
 dsc
+eap
 eslint
 filemanager
 futf

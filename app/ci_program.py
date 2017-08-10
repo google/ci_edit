@@ -84,6 +84,19 @@ class CiProgram:
       for i in range(0, curses.COLORS):
         app.log.detail("color", i, ": ", curses.color_content(i))
     self.setUpPalette()
+    if 1:
+      rows, cols = self.cursesScreen.getmaxyx()
+      # TODO(dschuyler): Is there any benefit to creating a window to overlay
+      # the screen or should the screen be used directly?
+      cursesWindow = curses.newwin(rows, cols)
+      #cursesWindow = self.cursesScreen
+      cursesWindow.leaveok(1)  # Don't update cursor position.
+      cursesWindow.scrollok(0)
+      cursesWindow.timeout(10)
+      cursesWindow.keypad(1)
+      self.top, self.left = cursesWindow.getyx()
+      self.rows, self.cols = cursesWindow.getmaxyx()
+      app.window.mainCursesWindow = cursesWindow
     self.zOrder = []
 
   def commandLoop(self):
@@ -95,11 +108,25 @@ class CiProgram:
     # (A performance measurement).
     self.mainLoopTime = 0
     self.mainLoopTimePeak = 0
+    if app.prefs.startup['timeStartup']:
+      # When running a timing of the application startup, push a CTRL_Q onto the
+      # curses event messages to simulate a full startup with a GUI render.
+      curses.ungetch(17)
     start = time.time()
     # This is the 'main loop'. Execution doesn't leave this loop until the
     # application is closing down.
     while not self.exiting:
-      self.refresh()
+      if 0:
+        profile = cProfile.Profile()
+        profile.enable()
+        self.refresh()
+        profile.disable()
+        output = StringIO.StringIO()
+        stats = pstats.Stats(profile, stream=output).sort_stats('cumulative')
+        stats.print_stats()
+        app.log.info(output.getvalue())
+      else:
+        self.refresh()
       self.mainLoopTime = time.time() - start
       if self.mainLoopTime > self.mainLoopTimePeak:
         self.mainLoopTimePeak = self.mainLoopTime
@@ -107,19 +134,20 @@ class CiProgram:
       # (A performance optimization).
       cmdList = []
       mouseEvents = []
+      cursesWindow = app.window.mainCursesWindow
       while not len(cmdList):
         for i in range(5):
-          ch = window.cursorWindow.getch()
+          ch = cursesWindow.getch()
           if ch == curses.ascii.ESC:
             # Some keys are sent from the terminal as a sequence of bytes
             # beginning with an Escape character. To help reason about these
             # events (and apply event handler callback functions) the sequence
             # is converted into tuple.
             keySequence = []
-            n = window.cursorWindow.getch()
+            n = cursesWindow.getch()
             while n != curses.ERR:
               keySequence.append(n)
-              n = window.cursorWindow.getch()
+              n = cursesWindow.getch()
             #app.log.info('sequence\n', keySequence)
             ch = tuple(keySequence)
             if not ch:
@@ -141,15 +169,7 @@ class CiProgram:
       if len(cmdList):
         for cmd in cmdList:
           if cmd == curses.KEY_RESIZE:
-            if sys.platform == 'darwin':
-              # Some terminals seem to resize the terminal and others leave it
-              # to the application to resize the curses terminal.
-              rows, cols = app.curses_util.terminalSize()
-              curses.resizeterm(rows, cols)
-            self.layout()
-            window.controller.onChange()
-            self.refresh()
-            app.log.debug(self.cursesScreen.getmaxyx(), time.time())
+            self.handleScreenResize(window)
             continue
           window.controller.doCommand(cmd)
           if cmd == curses.KEY_MOUSE:
@@ -197,10 +217,10 @@ class CiProgram:
 
   def layout(self):
     """Arrange the debug, log, and input windows."""
-    rows, cols = self.cursesScreen.getmaxyx()
+    rows, cols = self.rows, self.cols
     #app.log.detail('layout', rows, cols)
     if self.showLogWindow:
-      inputWidth = min(80, cols)
+      inputWidth = min(88, cols)
       debugWidth = max(cols - inputWidth - 1, 0)
       debugRows = 20
       self.debugWindow.reshape(debugRows, debugWidth, 0,
@@ -221,8 +241,8 @@ class CiProgram:
     if not self.debugWindow:
       return
     textBuffer = win.textBuffer
-    y, x = win.cursorWindow.getyx()
-    maxRow, maxCol = win.cursorWindow.getmaxyx()
+    y, x = win.top, win.left
+    maxRow, maxCol = win.rows, win.cols
     self.debugWindow.writeLineRow = 0
     intent = "noIntent"
     try: intent = win.userIntent
@@ -230,7 +250,9 @@ class CiProgram:
     color = app.color.get('debug_window')
     self.debugWindow.writeLine(
         "   cRow %3d    cCol %2d goalCol %2d  %s"
-        %(win.cursorRow, win.cursorCol, win.goalCol, intent), color)
+        %(win.textBuffer.penRow, win.textBuffer.penCol, win.textBuffer.goalCol,
+            intent),
+        color)
     self.debugWindow.writeLine(
         "   pRow %3d    pCol %2d"
         %(textBuffer.penRow, textBuffer.penCol), color)
@@ -287,8 +309,6 @@ class CiProgram:
       text = (i < len(textBuffer.redoChain) and
           textBuffer.redoChain[i] or '')
       self.debugWindow.writeLine(text, redoColorC)
-    # Refresh the display.
-    self.debugWindow.cursorWindow.refresh()
 
   def debugWindowOrder(self):
     app.log.info('debugWindowOrder')
@@ -394,8 +414,18 @@ class CiProgram:
     self.savedMouseX = mouseCol
     self.savedMouseY = mouseRow
 
-  def handleScreenResize(self):
-    app.log.debug('handleScreenResize -----------------------')
+  def handleScreenResize(self, window):
+    #app.log.debug('handleScreenResize -----------------------')
+    if sys.platform == 'darwin':
+      # Some terminals seem to resize the terminal and others leave it
+      # to the application to resize the curses terminal.
+      rows, cols = app.curses_util.terminalSize()
+      curses.resizeterm(rows, cols)
+    self.layout()
+    window.controller.onChange()
+    self.refresh()
+    self.top, self.left = app.window.mainCursesWindow.getyx()
+    self.rows, self.cols = app.window.mainCursesWindow.getmaxyx()
     self.layout()
 
   def parseArgs(self):
@@ -407,6 +437,7 @@ class CiProgram:
     profile = False
     readStdin = False
     takeAll = False  # Take all args as file paths.
+    timeStartup = False
     for i in sys.argv[1:]:
       if not takeAll and i[:1] == '+':
         openToLine = int(i[1:])
@@ -431,6 +462,8 @@ class CiProgram:
           app.log.channelEnable('parser', True)
         elif i == '--startup':
           app.log.channelEnable('startup', logStartup)
+        elif i == '--timeStartup':
+          timeStartup = True
         elif i == '--':
           # All remaining args are file paths.
           takeAll = True
@@ -452,13 +485,14 @@ class CiProgram:
       else:
         cliFiles.append({'path': i})
     app.prefs.init()
-    app.prefs.prefs['startup'] = {
+    app.prefs.startup = {
       'debugRedo': debugRedo,
       'showLogWindow': showLogWindow,
       'cliFiles': cliFiles,
       'openToLine': openToLine,
       'profile': profile,
       'readStdin': readStdin,
+      'timeStartup': timeStartup,
     }
     self.showLogWindow = showLogWindow
 
@@ -477,6 +511,9 @@ class CiProgram:
 
   def refresh(self):
     """Repaint stacked windows, furthest to nearest."""
+    # Ask curses to hold the back buffer until curses refresh().
+    cursesWindow = app.window.mainCursesWindow
+    cursesWindow.noutrefresh()
     curses.curs_set(0)
     if self.showLogWindow:
       self.logWindow.refresh()
@@ -485,6 +522,17 @@ class CiProgram:
       k.refresh()
     if k.shouldShowCursor:
       curses.curs_set(1)
+      if 1:
+        try:
+          cursesWindow.leaveok(0)  # Do update cursor position.
+          cursesWindow.move(
+              k.top + k.cursorRow - k.scrollRow,
+              k.left + k.cursorCol - k.scrollCol)
+          # Calling refresh will draw the cursor.
+          cursesWindow.refresh()
+          cursesWindow.leaveok(1)  # Don't update cursor position.
+        except:
+          pass
 
   def makeHomeDirs(self, homePath):
     try:
@@ -508,7 +556,7 @@ class CiProgram:
     app.history.loadUserHistory(os.path.join(homePath, 'history.dat'))
     app.curses_util.hackCursesFixes()
     self.startup()
-    if app.prefs.prefs['startup'].get('profile'):
+    if app.prefs.startup.get('profile'):
       profile = cProfile.Profile()
       profile.enable()
       self.commandLoop()
@@ -524,14 +572,14 @@ class CiProgram:
 
   def setUpPalette(self):
     def applyPalette(name):
-      palette = app.prefs.prefs['palette'][name]
+      palette = app.prefs.palette[name]
       foreground = palette['foregroundIndexes']
       background = palette['backgroundIndexes']
       cycle = len(foreground)
       for i in range(1, curses.COLORS):
         curses.init_pair(i, foreground[i % cycle], background[i / cycle])
     try:
-      applyPalette(app.prefs.prefs['editor']['palette'])
+      applyPalette(app.prefs.editor['palette'])
     except:
       applyPalette('default')
 
@@ -559,4 +607,3 @@ def run_ci():
 
 if __name__ == '__main__':
   run_ci()
-
