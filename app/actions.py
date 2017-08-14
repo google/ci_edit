@@ -573,11 +573,12 @@ class Actions(app.mutator.Mutator):
     self.penRow, self.penCol = self.fileHistory.setdefault('pen', (0, 0))
     self.view.scrollRow, self.view.scrollCol = self.fileHistory.setdefault(
         'scroll', (0, 0))
+    # Restore the view's position.
     if (self.view.scrollRow > self.penRow or 
         self.penRow > self.view.scrollRow + self.view.rows or 
         self.view.scrollCol > self.penCol or
         self.penCol > self.view.scrollCol + self.view.cols):
-      # Optimal cursor position
+      # Use cursor position preferences set in default_prefs.py.
       self.view.scrollRow = max(0, min(len(self.lines) - 1,
           self.penRow -
               int(app.prefs.editor['optimalCursorRow'] * (self.view.rows - 1))))
