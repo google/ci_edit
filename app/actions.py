@@ -571,14 +571,22 @@ class Actions(app.mutator.Mutator):
     self.view.cursorRow, self.view.cursorCol = self.fileHistory.setdefault(
         'cursor', (0, 0))
     self.penRow, self.penCol = self.fileHistory.setdefault('pen', (0, 0))
-    # self.view.scrollRow, self.view.scrollCol = self.fileHistory.setdefault('scroll', (0, 0))
-    # Optimal cursor position
-    self.view.scrollRow = max(0, min(len(self.lines) - 1,
-        self.penRow -
-            int(app.prefs.editor['optimalCursorRow'] * (self.view.rows - 3))))
-    self.view.scrollCol = max(0,
-        self.penCol -
-            int(app.prefs.editor['optimalCursorCol'] * (self.view.cols - 1)))
+    self.view.scrollRow, self.view.scrollCol = self.fileHistory.setdefault(
+        'scroll', (0, 0))
+    if (self.view.scrollRow > self.penRow or 
+        self.penRow > self.view.scrollRow + self.view.rows or 
+        self.view.scrollCol > self.penCol or
+        self.penCol > self.view.scrollCol + self.view.cols):
+      # Optimal cursor position
+      self.view.scrollRow = max(0, min(len(self.lines) - 1,
+          self.penRow -
+              int(app.prefs.editor['optimalCursorRow'] * (self.view.rows - 1))))
+      if self.penCol < self.view.cols:
+        self.view.scrollCol = 0
+      else:
+        self.view.scrollCol = max(0,
+            self.penCol -
+                int(app.prefs.editor['optimalCursorCol'] * (self.view.cols - 1)))
     self.doSelectionMode(self.fileHistory.setdefault('selectionMode',
         app.selectable.kSelectionNone))
     self.markerRow, self.markerCol = self.fileHistory.setdefault('marker',

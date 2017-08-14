@@ -597,7 +597,7 @@ class InputWindow(Window):
     self.showMessageLine = True
     self.showRightColumn = True
     self.showTopInfo = True
-    self.topRows = 0
+    self.topRows = 2 # Number of lines in default TopInfo status.
     self.controller = app.controller.MainController(self)
     self.controller.add(app.cu_editor.CuaPlusEdit(self))
     # What does the user appear to want: edit, quit, or something else?
