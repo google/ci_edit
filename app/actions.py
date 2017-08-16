@@ -868,11 +868,8 @@ class Actions(app.mutator.Mutator):
       self.redo()
 
   def insertPrintable(self, ch):
-    #app.log.info('insertPrintable')
     if curses.ascii.isprint(ch):
       self.insert(chr(ch))
-    # else:
-    #   self.insert("\xfe%02x"%(ch,))
 
   def joinLines(self):
     """join the next line onto the current line."""

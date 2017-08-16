@@ -36,13 +36,23 @@ def setFakeInputs(cmdList):
 
 
 def testLog(*msg):
+  return
+  functionLine = inspect.stack()[1][2]
   function = inspect.stack()[1][3]
   frame = inspect.stack()[2]
-  caller = "%20s %5s %20s %s " % (os.path.split(frame[1])[1],
-        frame[2], frame[3], function)
-  #print dir(inspect.stack()[1][0])
-  #print inspect.stack()[1][0].__class__
-  print caller + " ".join([str(i) for i in msg])
+  callingFile = os.path.split(frame[1])[1]
+  callingLine = frame[2]
+  callingFunction = frame[3]
+  caller = "%20s %5s %20s %3s %s " % (callingFile,
+        callingLine, callingFunction, functionLine, function)
+  print caller + " ".join([repr(i) for i in msg])
+
+
+getchCallback = None
+def setGetchCallback(callback):
+  global getchCallback
+  getchCallback = callback
+
 
 COLORS = 256
 
@@ -141,16 +151,49 @@ ERR = 22
 REPORT_MOUSE_POSITION = 23
 
 
+# Test output. Use |display| to check the screen output.
+maxRow = 15
+maxCol = 40
+display = [['x' for k in range(maxCol)] for i in range(maxRow)]
+cursorRow = 0
+cursorCol = 0
+
+
+def checkDisplayForErrors(row, col, lines):
+  for i in range(len(lines)):
+    line = lines[i]
+    for k in range(len(line)):
+      d = display[row + i][col + k]
+      c = line[k]
+      if d != c:
+        return "row %s, col %s mismatch %s != %s" % (row + i, col + k, d, c)
+  return None
+
+def showDisplay():
+  return [''.join(display[i]) for i in range(maxRow)]
+
+
 class FakeCursesWindow:
   def __init__(self):
     testLog()
 
   def addstr(self, *args):
+    global display
     testLog(*args)
+    cursorRow = args[0]
+    cursorCol = args[1]
+    text = args[2]
+    color = args[3]
+    for i in range(len(text)):
+      display[cursorRow][cursorCol + i] = text[i]
     return (1, 1)
 
   def getch(self):
     testLog()
+    global getchCallback
+    if getchCallback:
+      val = getchCallback()
+      return val
     return fakeInputs and fakeInputs.pop() or ERR
 
   def getyx(self):
@@ -159,7 +202,7 @@ class FakeCursesWindow:
 
   def getmaxyx(self):
     testLog()
-    return (1, 1)
+    return (maxRow, maxCol)
 
   def keypad(self, a):
     testLog(a)
@@ -230,23 +273,24 @@ def has_colors():
 def init_color():
   testLog()
 
-def init_pair():
-  testLog()
+def init_pair(*args):
+  testLog(*args)
 
 def keyname():
   testLog()
 
-def meta():
-  testLog()
+def meta(*args):
+  testLog(*args)
 
-def mouseinterval():
-  testLog()
+def mouseinterval(*args):
+  testLog(*args)
 
-def mousemask():
-  testLog()
+def mousemask(*args):
+  testLog(*args)
 
-def newwin():
-  pass
+def newwin(*args):
+  testLog(*args)
+  return FakeCursesWindow()
 
 def raw():
   pass
@@ -263,34 +307,7 @@ def ungetch():
 def use_default_colors():
   pass
 
-def wrapper():
-  pass
-
-def getch():
-  return -1
-
 def get_pair(a):
-  pass
-
-def init_pair(a, b, c):
-  pass
-
-def meta(a):
-  pass
-
-def mouseinterval(a):
-  pass
-
-def mousemask(a):
-  pass
-
-def newwin(a, b):
-  return FakeCursesWindow()
-
-def raw():
-  pass
-
-def use_default_colors():
   pass
 
 def wrapper(fun, *args, **kw):

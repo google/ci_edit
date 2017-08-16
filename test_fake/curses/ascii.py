@@ -16,5 +16,5 @@ ESC = 1
 BS = 2
 DEL = 3
 
-def isprint():
-  pass
+def isprint(*args):
+  return 31 < args[0] <= 127
