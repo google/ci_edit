@@ -62,33 +62,8 @@ class IntentionTestCases(unittest.TestCase):
         for i in curses.showDisplay():
           print 'display ', i
       self.assertFalse(curses.checkDisplayForErrors(2, 7, ["text "]))
-    def flush():
-      pass
-    kNoOpsPerFlush = 5
-    closure = {
-      'commands': ['t', 'e', 'x', 't', flush, testDisplay, CTRL_Q, 'n', flush],
-      'index': -1,
-      'flushCounter': kNoOpsPerFlush,
-    }
-    def handler():
-      while closure['index'] + 1 < len(closure['commands']):
-        closure['index'] += 1
-        cmd = closure['commands'][closure['index']]
-        if cmd is flush:
-          if closure['flushCounter']:
-            closure['index'] -= 1
-            closure['flushCounter'] -= 1
-            return -1
-          closure['flushCounter'] = kNoOpsPerFlush
-        elif type(cmd) == type(handler):
-          cmd()
-        elif type(cmd) == type('a') and len(cmd) == 1:
-          return ord(cmd)
-        else:
-          return cmd
-    curses.setGetchCallback(handler)
+    curses.setFakeInputs(['t', 'e', 'x', 't', testDisplay, CTRL_Q, 'n'])
     sys.argv = ['test_file', '--p']
     self.prg.run()
-    curses.setGetchCallback(None)
-
+    self.assertFalse(curses.checkDisplayForErrors(0, 0, [" ci "]))
 

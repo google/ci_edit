@@ -29,10 +29,31 @@ import traceback
 
 
 fakeInputs = []
+fakeInputsIndex = -1
+kNoOpsPerFlush = 5
+flushCounter = kNoOpsPerFlush
 def setFakeInputs(cmdList):
-  global fakeInputs
-  fakeInputs = cmdList[:]
-  fakeInputs.reverse()
+  global fakeInputs, fakeInputsIndex, flushCounter
+  fakeInputs = cmdList
+  fakeInputsIndex = -1
+  flushCounter = kNoOpsPerFlush
+
+def nextFakeInput():
+  global fakeInputsIndex, flushCounter
+  while fakeInputsIndex + 1 < len(fakeInputs):
+    fakeInputsIndex += 1
+    cmd = fakeInputs[fakeInputsIndex]
+    if type(cmd) == type(nextFakeInput):
+      if flushCounter:
+        fakeInputsIndex -= 1
+        flushCounter -= 1
+        return -1
+      cmd()
+      flushCounter = kNoOpsPerFlush
+    elif type(cmd) == type('a') and len(cmd) == 1:
+      return ord(cmd)
+    else:
+      return cmd
 
 
 def testLog(*msg):
@@ -190,11 +211,12 @@ class FakeCursesWindow:
 
   def getch(self):
     testLog()
-    global getchCallback
-    if getchCallback:
-      val = getchCallback()
-      return val
-    return fakeInputs and fakeInputs.pop() or ERR
+    if 0:
+      global getchCallback
+      if getchCallback:
+        val = getchCallback()
+        return val
+    return nextFakeInput()
 
   def getyx(self):
     testLog()
