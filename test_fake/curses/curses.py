@@ -54,6 +54,7 @@ def nextFakeInput():
       return ord(cmd)
     else:
       return cmd
+  return -1
 
 
 def testLog(*msg):
@@ -73,6 +74,40 @@ getchCallback = None
 def setGetchCallback(callback):
   global getchCallback
   getchCallback = callback
+
+
+# Test output. Use |display| to check the screen output.
+fakeDisplayRows = 15
+fakeDisplayCols = 40
+display = [['x' for k in range(fakeDisplayCols)] for i in range(fakeDisplayRows)]
+cursorRow = 0
+cursorCol = 0
+
+def checkFakeDisplay(row, col, lines):
+  for i in range(len(lines)):
+    line = lines[i]
+    for k in range(len(line)):
+      d = display[row + i][col + k]
+      c = line[k]
+      if d != c:
+        return "row %s, col %s mismatch '%s' != '%s'" % (row + i, col + k, d, c)
+  return None
+
+def getFakeDisplay():
+  return [''.join(display[i]) for i in range(fakeDisplayRows)]
+
+def printFakeDisplay():
+  print '+' + '-' * fakeDisplayCols + '+'
+  for line in getFakeDisplay():
+    print '|' + line + '|'
+  print '+' + '-' * fakeDisplayCols + '+'
+
+def resetFakeDisplay():
+  global display
+  display = [['x' for k in range(fakeDisplayCols)] for i in range(fakeDisplayRows)]
+
+
+#####################################
 
 
 COLORS = 256
@@ -172,28 +207,6 @@ ERR = 22
 REPORT_MOUSE_POSITION = 23
 
 
-# Test output. Use |display| to check the screen output.
-maxRow = 15
-maxCol = 40
-display = [['x' for k in range(maxCol)] for i in range(maxRow)]
-cursorRow = 0
-cursorCol = 0
-
-
-def checkDisplayForErrors(row, col, lines):
-  for i in range(len(lines)):
-    line = lines[i]
-    for k in range(len(line)):
-      d = display[row + i][col + k]
-      c = line[k]
-      if d != c:
-        return "row %s, col %s mismatch %s != %s" % (row + i, col + k, d, c)
-  return None
-
-def showDisplay():
-  return [''.join(display[i]) for i in range(maxRow)]
-
-
 class FakeCursesWindow:
   def __init__(self):
     testLog()
@@ -211,12 +224,14 @@ class FakeCursesWindow:
 
   def getch(self):
     testLog()
-    if 0:
+    if 1:
       global getchCallback
       if getchCallback:
         val = getchCallback()
         return val
-    return nextFakeInput()
+    val = nextFakeInput()
+    #print 'val', val
+    return val
 
   def getyx(self):
     testLog()
@@ -224,7 +239,7 @@ class FakeCursesWindow:
 
   def getmaxyx(self):
     testLog()
-    return (maxRow, maxCol)
+    return (fakeDisplayRows, fakeDisplayCols)
 
   def keypad(self, a):
     testLog(a)
@@ -254,6 +269,7 @@ class FakeCursesWindow:
 class StandardScreen:
   def __init__(self):
     testLog()
+    resetFakeDisplay()
 
   def getyx(self):
     testLog()
@@ -261,7 +277,7 @@ class StandardScreen:
 
   def getmaxyx(self):
     testLog()
-    return (11, 19)
+    return (fakeDisplayRows, fakeDisplayCols)
 
 
 def can_change_color():

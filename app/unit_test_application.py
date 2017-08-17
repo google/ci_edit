@@ -24,8 +24,15 @@ import sys
 import unittest
 
 
+kTestFile = '#test_file~'
+
+
 class IntentionTestCases(unittest.TestCase):
   def setUp(self):
+    print '@@@@@@ set up'
+    if os.path.isfile(kTestFile):
+      os.unlink(kTestFile)
+    self.assertFalse(os.path.isfile(kTestFile))
     cursesScreen = curses.StandardScreen()
     self.prg = app.ci_program.CiProgram(cursesScreen)
 
@@ -43,27 +50,41 @@ class IntentionTestCases(unittest.TestCase):
     self.assertTrue(self.prg.exiting)
 
   def test_new_file_quit(self):
+    curses.printFakeDisplay()
     self.assertTrue(self.prg)
     self.assertFalse(self.prg.exiting)
     curses.setFakeInputs([CTRL_Q])
-    sys.argv = ['test_file', '--p']
+    sys.argv = [kTestFile]
     self.prg.run()
     self.assertTrue(self.prg.exiting)
+    curses.printFakeDisplay()
 
   def test_logo(self):
-    curses.setFakeInputs([CTRL_Q])
-    sys.argv = ['test_file', '--p']
+    curses.printFakeDisplay()
+    curses.setFakeInputs([CTRL_Q, curses.printFakeDisplay])
     self.prg.run()
-    self.assertFalse(curses.checkDisplayForErrors(0, 0, [" ci "]))
+    self.assertFalse(curses.checkFakeDisplay(0, 0, [" ci "]))
+    curses.printFakeDisplay()
 
   def test_text_contents(self):
+    curses.printFakeDisplay()
     def testDisplay():
-      if 0:
-        for i in curses.showDisplay():
-          print 'display ', i
-      self.assertFalse(curses.checkDisplayForErrors(2, 7, ["text "]))
+      self.assertFalse(curses.checkFakeDisplay(2, 7, ["text "]))
     curses.setFakeInputs(['t', 'e', 'x', 't', testDisplay, CTRL_Q, 'n'])
-    sys.argv = ['test_file', '--p']
+    sys.argv = [kTestFile]
     self.prg.run()
-    self.assertFalse(curses.checkDisplayForErrors(0, 0, [" ci "]))
+    curses.printFakeDisplay()
+
+  def test_backspace(self):
+    curses.printFakeDisplay()
+    def test1():
+      self.assertFalse(curses.checkFakeDisplay(2, 7, ["tex "]))
+    def test2():
+      self.assertFalse(curses.checkFakeDisplay(2, 7, ["tet "]))
+    curses.setFakeInputs([
+      't', 'e', 'x', test1, KEY_BACKSPACE1, 't', test2, CTRL_Q, 'n',
+    ])
+    sys.argv = [kTestFile]
+    self.prg.run()
+    curses.printFakeDisplay()
 
