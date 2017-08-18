@@ -110,7 +110,7 @@ class ConfirmClose(app.controller.Controller):
       ord('Y'): self.saveOrChangeToSaveAs,
     })
     self.commandSet = commandSet
-    self.commandDefault = self.exitConfirmationPrompt
+    self.commandDefault = self.confirmationPromptFinish
 
 
 class ConfirmOverwrite(app.controller.Controller):
@@ -126,7 +126,7 @@ class ConfirmOverwrite(app.controller.Controller):
       ord('Y'): self.overwriteHostFile,
     })
     self.commandSet = commandSet
-    self.commandDefault = self.exitConfirmationPrompt
+    self.commandDefault = self.confirmationPromptFinish
 
 
 class InteractiveFind(app.editor.InteractiveFind):
@@ -263,7 +263,7 @@ class InteractiveQuit(app.controller.Controller):
       ord('Y'): self.saveOrChangeToSaveAs,
     })
     self.commandSet = commandSet
-    self.commandDefault = self.exitConfirmationPrompt
+    self.commandDefault = self.confirmationPromptFinish
 
 
 class InteractiveSaveAs(app.controller.Controller):

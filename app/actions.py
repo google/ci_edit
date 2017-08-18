@@ -560,15 +560,15 @@ class Actions(app.mutator.Mutator):
     initialize the variables to default values.
 
     Args:
-      None
+      None.
 
     Returns:
-      None
+      None.
     """
-    # Restore the file history
+    # Restore the file history.
     self.fileHistory = app.history.getFileHistory(self.fullPath, self.data)
 
-    # Restore all positions and values of variables
+    # Restore all positions and values of variables.
     self.view.cursorRow, self.view.cursorCol = self.fileHistory.setdefault(
         'cursor', (0, 0))
     self.penRow, self.penCol = self.fileHistory.setdefault('pen', (0, 0))
@@ -584,7 +584,7 @@ class Actions(app.mutator.Mutator):
     self.savedAtRedoIndex = self.fileHistory.setdefault('savedAtRedoIndex', 0)
     self.redoIndex = self.savedAtRedoIndex
 
-    # Store the file's info
+    # Store the file's info.
     self.lastChecksum, self.lastFileSize = app.history.getFileInfo(
         self.fullPath)
 
@@ -889,11 +889,8 @@ class Actions(app.mutator.Mutator):
       self.redo()
 
   def insertPrintable(self, ch):
-    #app.log.info('insertPrintable')
     if curses.ascii.isprint(ch):
       self.insert(chr(ch))
-    # else:
-    #   self.insert("\xfe%02x"%(ch,))
 
   def joinLines(self):
     """join the next line onto the current line."""

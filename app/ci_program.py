@@ -86,10 +86,7 @@ class CiProgram:
     self.setUpPalette()
     if 1:
       rows, cols = self.cursesScreen.getmaxyx()
-      # TODO(dschuyler): Is there any benefit to creating a window to overlay
-      # the screen or should the screen be used directly?
-      cursesWindow = curses.newwin(rows, cols)
-      #cursesWindow = self.cursesScreen
+      cursesWindow = self.cursesScreen
       cursesWindow.leaveok(1)  # Don't update cursor position.
       cursesWindow.scrollok(0)
       cursesWindow.timeout(10)
@@ -470,15 +467,12 @@ class CiProgram:
         elif i == '--help':
           userMessage(app.help.docs['command line'])
           self.quitNow()
-          return
         elif i == '--version':
           userMessage(app.help.docs['version'])
           self.quitNow()
-          return
         elif i.startswith('--'):
           userMessage("unknown command line argument", i)
           self.quitNow()
-          return
         continue
       if i == '-':
         readStdin = True

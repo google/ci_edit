@@ -76,6 +76,7 @@ textdirection
 th
 thead
 theader
+transitionend
 truthy
 tspan
 typeof

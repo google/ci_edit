@@ -19,6 +19,7 @@ cmath
 cout
 endl
 extern
+intptr
 iomanip
 iostream
 lu
@@ -36,5 +37,8 @@ setw
 std
 stddef
 stdint
+stdlib
+strerror
+toupper
 uint
 va

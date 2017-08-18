@@ -24,10 +24,16 @@ import sys
 import unittest
 
 
+kTestFile = '#test_file_with_unlikely_file_name~'
+
+
 class IntentionTestCases(unittest.TestCase):
   def setUp(self):
-    cursesScreen = curses.StandardScreen()
-    self.prg = app.ci_program.CiProgram(cursesScreen)
+    if os.path.isfile(kTestFile):
+      os.unlink(kTestFile)
+    self.assertFalse(os.path.isfile(kTestFile))
+    self.cursesScreen = curses.StandardScreen()
+    self.prg = app.ci_program.CiProgram(self.cursesScreen)
 
   def tearDown(self):
     pass
@@ -36,17 +42,67 @@ class IntentionTestCases(unittest.TestCase):
     assert self.prg
 
   def test_open_and_quit(self):
+    def notReached(display):
+      self.assertTrue(False)
     self.assertTrue(self.prg)
     self.assertFalse(self.prg.exiting)
-    curses.setFakeInputs([CTRL_Q])
+    self.cursesScreen.setFakeInputs([CTRL_Q, notReached])
+    self.assertFalse(os.path.isfile(kTestFile))
     self.prg.run()
     self.assertTrue(self.prg.exiting)
 
   def test_new_file_quit(self):
+    def notReached(display):
+      self.assertTrue(False)
+    def test0(display):
+      self.assertFalse(display.check(2, 7, ["        "]))
     self.assertTrue(self.prg)
     self.assertFalse(self.prg.exiting)
-    curses.setFakeInputs([CTRL_Q])
-    sys.argv = ['cats', '--p']
+    self.cursesScreen.setFakeInputs([test0, CTRL_Q, notReached])
+    sys.argv = [kTestFile]
+    self.assertFalse(os.path.isfile(kTestFile))
     self.prg.run()
     self.assertTrue(self.prg.exiting)
+
+  def test_logo(self):
+    def notReached(display):
+      self.assertTrue(False)
+    def test1(display):
+      self.assertFalse(display.check(0, 0, [" ci "]))
+    self.cursesScreen.setFakeInputs([test1, CTRL_Q, notReached])
+    self.assertFalse(os.path.isfile(kTestFile))
+    self.prg.run()
+
+  def test_text_contents(self):
+    def notReached(display):
+      self.assertTrue(False)
+    def test0(display):
+      self.assertFalse(display.check(2, 7, ["        "]))
+    def testDisplay(display):
+      self.assertFalse(display.check(2, 7, ["text "]))
+    self.cursesScreen.setFakeInputs([
+        test0, 't', 'e', 'x', 't', testDisplay,  CTRL_Q, 'n', notReached])
+    sys.argv = [kTestFile]
+    self.assertFalse(os.path.isfile(kTestFile))
+    self.prg.run()
+
+  def test_backspace(self):
+    # TODO(dschuyler): The app currently stores state in module variables, which
+    # doesn't play well with unittest. Need to look into fixing that.
+    return
+
+    def notReached(display):
+      self.assertTrue(False)
+    def test0(display):
+      self.assertFalse(display.check(2, 7, ["        "]))
+    def test1(display):
+      self.assertFalse(display.check(2, 7, ["tex "]))
+    def test2(display):
+      self.assertFalse(display.check(2, 7, ["tet "]))
+    self.cursesScreen.setFakeInputs([
+        test0, 't', 'e', 'x', test1, KEY_BACKSPACE1, 't', test2, CTRL_Q, 'n',
+        notReached])
+    sys.argv = [kTestFile]
+    self.assertFalse(os.path.isfile(kTestFile))
+    self.prg.run()
 
