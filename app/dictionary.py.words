@@ -61,6 +61,8 @@ getyx
 gid
 gmem
 goto
+hashlib
+hexdigest
 hglobal
 hinstance
 hmenu
