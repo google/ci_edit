@@ -572,23 +572,22 @@ class Actions(app.mutator.Mutator):
         'cursor', (0, 0))
     self.penRow, self.penCol = self.fileHistory.setdefault('pen', (0, 0))
     # self.view.scrollRow, self.view.scrollCol = self.fileHistory.setdefault('scroll', (0, 0))
-    # Optimal cursor position
-    self.view.scrollRow = max(0, min(len(self.lines) - 1,
-        self.penRow -
-            int(app.prefs.editor['optimalCursorRow'] * (self.view.rows - 3))))
-    self.view.scrollCol = max(0,
-        self.penCol -
-            int(app.prefs.editor['optimalCursorCol'] * (self.view.cols - 1)))
+    # Determine optimal cursor position.
+    oRow = int(app.prefs.editor['optimalCursorRow'] * (self.view.rows - 3))
+    self.view.scrollRow = max(0, min(len(self.lines) - 1, self.penRow - oRow))
+    oCol = int(app.prefs.editor['optimalCursorCol'] * (self.view.cols - 1))
+    self.view.scrollCol = max(0, self.penCol - oCol)
+    # Restore selection.
     self.doSelectionMode(self.fileHistory.setdefault('selectionMode',
         app.selectable.kSelectionNone))
     self.markerRow, self.markerCol = self.fileHistory.setdefault('marker',
         (0, 0))
-    # Restore redo chain
+    # Restore redo chain.
     self.redoChain = self.fileHistory.setdefault('redoChain', [])
-    # Restore indices
+    # Restore indices.
     self.savedAtRedoIndex = self.fileHistory.setdefault('savedAtRedoIndex', 0)
     self.redoIndex = self.savedAtRedoIndex
-    # Store the file's info
+    # Store the file's info.
     self.lastChecksum, self.lastFileSize = app.history.getFileInfo(
         self.fullPath)
 

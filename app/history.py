@@ -31,7 +31,7 @@ def loadUserHistory(filePath, historyPath=pathToHistory):
   Retrieves the user's complete edit history for all files
   Args:
     filePath (str): The absolute path to the file.
-    historyPath (str): Defaults ot pathToHistory.
+    historyPath (str): Defaults to pathToHistory.
       The path to the user's saved history.
 
   Returns:
@@ -49,7 +49,7 @@ def saveUserHistory(fileInfo, fileHistory, historyPath=pathToHistory):
   Args:
     fileInfo (tuple): Contains (filePath, lastChecksum, lastFileSize).
     fileHistory (dict): The history of the file that the user wants to save.
-    historyPath (str): Defaults ot pathToHistory.
+    historyPath (str): Defaults to pathToHistory.
       The path to the user's saved history.
 
   Returns:
