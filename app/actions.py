@@ -606,7 +606,7 @@ class Actions(app.mutator.Mutator):
     maxCols = self.view.cols
     scrollRow = self.view.scrollRow
     scrollCol = self.view.scrollCol
-    if (scrollRow <= row <= scrollRow + maxRows or 
+    if not (scrollRow <= row <= scrollRow + maxRows and
         scrollCol <= col <= scrollCol + maxCols):
       # Use optimal position preferences set in default_prefs.py.
       scrollRow = max(0, min(len(self.lines) - 1, 
