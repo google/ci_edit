@@ -28,36 +28,39 @@ import sys
 import traceback
 
 
-fakeInputs = []
-fakeInputsIndex = -1
-kNoOpsPerFlush = 5
-flushCounter = kNoOpsPerFlush
-def setFakeInputs(cmdList):
-  global fakeInputs, fakeInputsIndex, flushCounter
-  fakeInputs = cmdList
-  fakeInputsIndex = -1
-  flushCounter = kNoOpsPerFlush
+kNoOpsPerFlush = 5  # TODO: match to value in commandLoop().
+class FakeInput:
+  def __init__(self, display):
+    self.fakeDisplay = display
+    self.inputs = []
+    self.inputsIndex = -1
+    self.flushCounter = kNoOpsPerFlush
 
-def nextFakeInput():
-  global fakeInputsIndex, flushCounter
-  while fakeInputsIndex + 1 < len(fakeInputs):
-    fakeInputsIndex += 1
-    cmd = fakeInputs[fakeInputsIndex]
-    if type(cmd) == type(nextFakeInput):
-      if flushCounter:
-        fakeInputsIndex -= 1
-        flushCounter -= 1
-        return -1
-      cmd()
-      flushCounter = kNoOpsPerFlush
-    elif type(cmd) == type('a') and len(cmd) == 1:
-      return ord(cmd)
-    else:
-      return cmd
-  return -1
+  def setInputs(self, cmdList):
+    self.inputs = cmdList
+    self.inputsIndex = -1
+    self.flushCounter = kNoOpsPerFlush
+
+  def next(self):
+    while self.inputsIndex + 1 < len(self.inputs):
+      self.inputsIndex += 1
+      cmd = self.inputs[self.inputsIndex]
+      if type(cmd) == type(testLog):
+        if self.flushCounter:
+          self.inputsIndex -= 1
+          self.flushCounter -= 1
+          return -1
+        cmd(self.fakeDisplay)
+        self.flushCounter = kNoOpsPerFlush
+      elif type(cmd) == type('a') and len(cmd) == 1:
+        return ord(cmd)
+      else:
+        return cmd
+    return -1
 
 
 def testLog(*msg):
+  # Remove return to get function call trace.
   return
   functionLine = inspect.stack()[1][2]
   function = inspect.stack()[1][3]
@@ -77,34 +80,48 @@ def setGetchCallback(callback):
 
 
 # Test output. Use |display| to check the screen output.
-fakeDisplayRows = 15
-fakeDisplayCols = 40
-display = [['x' for k in range(fakeDisplayCols)] for i in range(fakeDisplayRows)]
-cursorRow = 0
-cursorCol = 0
+class FakeDisplay:
+  def __init__(self):
+    self.rows = 15
+    self.cols = 40
+    self.cursorRow = 0
+    self.cursorCol = 0
+    self.display = None
+    self.reset()
 
-def checkFakeDisplay(row, col, lines):
-  for i in range(len(lines)):
-    line = lines[i]
-    for k in range(len(line)):
-      d = display[row + i][col + k]
-      c = line[k]
-      if d != c:
-        return "row %s, col %s mismatch '%s' != '%s'" % (row + i, col + k, d, c)
-  return None
+  def check(self, row, col, lines):
+    for i in range(len(lines)):
+      line = lines[i]
+      for k in range(len(line)):
+        d = self.display[row + i][col + k]
+        c = line[k]
+        if d != c:
+          self.show()
+          return "row %s, col %s mismatch '%s' != '%s'" % (
+              row + i, col + k, d, c)
+    return None
+
+  def get(self):
+    return [''.join(self.display[i]) for i in range(self.rows)]
+
+  def show(self):
+    print '+' + '-' * self.cols + '+'
+    for line in self.get():
+      print '|' + line + '|'
+    print '+' + '-' * self.cols + '+'
+
+  def reset(self):
+    self.display = [
+        ['x' for k in range(self.cols)] for i in range(self.rows)]
+
+fakeDisplay = None
+fakeInput = None
 
 def getFakeDisplay():
-  return [''.join(display[i]) for i in range(fakeDisplayRows)]
+  return fakeDisplay
 
 def printFakeDisplay():
-  print '+' + '-' * fakeDisplayCols + '+'
-  for line in getFakeDisplay():
-    print '|' + line + '|'
-  print '+' + '-' * fakeDisplayCols + '+'
-
-def resetFakeDisplay():
-  global display
-  display = [['x' for k in range(fakeDisplayCols)] for i in range(fakeDisplayRows)]
+  fakeDisplay.show()
 
 
 #####################################
@@ -208,18 +225,19 @@ REPORT_MOUSE_POSITION = 23
 
 
 class FakeCursesWindow:
-  def __init__(self):
-    testLog()
+  def __init__(self, rows, cols):
+    self.rows = rows
+    self.cols = cols
 
   def addstr(self, *args):
-    global display
+    global fakeDisplay
     testLog(*args)
     cursorRow = args[0]
     cursorCol = args[1]
     text = args[2]
     color = args[3]
     for i in range(len(text)):
-      display[cursorRow][cursorCol + i] = text[i]
+      fakeDisplay.display[cursorRow][cursorCol + i] = text[i]
     return (1, 1)
 
   def getch(self):
@@ -229,8 +247,9 @@ class FakeCursesWindow:
       if getchCallback:
         val = getchCallback()
         return val
-    val = nextFakeInput()
-    #print 'val', val
+    val = fakeInput.next()
+    if 0 and val != -1:
+      print 'val', val
     return val
 
   def getyx(self):
@@ -239,7 +258,7 @@ class FakeCursesWindow:
 
   def getmaxyx(self):
     testLog()
-    return (fakeDisplayRows, fakeDisplayCols)
+    return (fakeDisplay.rows, fakeDisplay.cols)
 
   def keypad(self, a):
     testLog(a)
@@ -269,7 +288,13 @@ class FakeCursesWindow:
 class StandardScreen:
   def __init__(self):
     testLog()
-    resetFakeDisplay()
+    global fakeDisplay, fakeInput
+    fakeDisplay = FakeDisplay()
+    fakeInput = FakeInput(fakeDisplay)
+    self.fakeInput = fakeInput
+
+  def setFakeInputs(self, cmdList):
+    self.fakeInput.setInputs(cmdList)
 
   def getyx(self):
     testLog()
@@ -277,7 +302,8 @@ class StandardScreen:
 
   def getmaxyx(self):
     testLog()
-    return (fakeDisplayRows, fakeDisplayCols)
+    global fakeDisplay
+    return (fakeDisplay.rows, fakeDisplay.cols)
 
 
 def can_change_color():
@@ -328,7 +354,7 @@ def mousemask(*args):
 
 def newwin(*args):
   testLog(*args)
-  return FakeCursesWindow()
+  return FakeCursesWindow(args[0], args[1])
 
 def raw():
   pass
