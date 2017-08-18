@@ -470,15 +470,12 @@ class CiProgram:
         elif i == '--help':
           userMessage(app.help.docs['command line'])
           self.quitNow()
-          return
         elif i == '--version':
           userMessage(app.help.docs['version'])
           self.quitNow()
-          return
         elif i.startswith('--'):
           userMessage("unknown command line argument", i)
           self.quitNow()
-          return
         continue
       if i == '-':
         readStdin = True
