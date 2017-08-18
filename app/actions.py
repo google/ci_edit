@@ -567,39 +567,56 @@ class Actions(app.mutator.Mutator):
     """
     # Restore the file history
     self.fileHistory = app.history.getFileHistory(self.fullPath, self.data)
-    # Restore cursor position.
+
+    # Restore all positions and values of variables
     self.view.cursorRow, self.view.cursorCol = self.fileHistory.setdefault(
         'cursor', (0, 0))
     self.penRow, self.penCol = self.fileHistory.setdefault('pen', (0, 0))
-    self.view.scrollRow, self.view.scrollCol = self.fileHistory.setdefault(
+    self.view.scrollRow, self.view.scrollCol =  self.fileHistory.setdefault(
         'scroll', (0, 0))
-    # Restore the view's position.
-    if (self.view.scrollRow > self.penRow or 
-        self.penRow > self.view.scrollRow + self.view.rows or 
-        self.view.scrollCol > self.penCol or
-        self.penCol > self.view.scrollCol + self.view.cols):
-      # Use cursor position preferences set in default_prefs.py.
-      self.view.scrollRow = max(0, min(len(self.lines) - 1,
-          self.penRow -
-              int(app.prefs.editor['optimalCursorRow'] * (self.view.rows - 1))))
-      if self.penCol < self.view.cols:
-        self.view.scrollCol = 0
-      else:
-        self.view.scrollCol = max(0,
-            self.penCol -
-                int(app.prefs.editor['optimalCursorCol'] * (self.view.cols - 1)))
+    self.view.scrollRow, self.view.scrollCol = self.optimalScrollPosition(
+        self.penRow, self.penCol)
     self.doSelectionMode(self.fileHistory.setdefault('selectionMode',
         app.selectable.kSelectionNone))
     self.markerRow, self.markerCol = self.fileHistory.setdefault('marker',
         (0, 0))
-    # Restore redo chain
     self.redoChain = self.fileHistory.setdefault('redoChain', [])
-    # Restore indices
     self.savedAtRedoIndex = self.fileHistory.setdefault('savedAtRedoIndex', 0)
     self.redoIndex = self.savedAtRedoIndex
+
     # Store the file's info
     self.lastChecksum, self.lastFileSize = app.history.getFileInfo(
         self.fullPath)
+
+  def optimalScrollPosition(self, row, col):
+    """
+    Calculates the optimal position for the view.
+
+    Args:
+      row (int): The cursor's row position.
+      col (int): The cursor's column position.
+
+    Returns:
+      A tuple of (row, col) representing where
+      the view should be placed.
+    """
+    optimalRowRatio = app.prefs.editor['optimalCursorRow']
+    optimalColRatio = app.prefs.editor['optimalCursorCol'] 
+    maxRows = self.view.rows
+    maxCols = self.view.cols
+    scrollRow = self.view.scrollRow
+    scrollCol = self.view.scrollCol
+    if (scrollRow <= row <= scrollRow + maxRows or 
+        scrollCol <= col <= scrollCol + maxCols):
+      # Use optimal position preferences set in default_prefs.py.
+      scrollRow = max(0, min(len(self.lines) - 1, 
+        row - int(optimalRowRatio * (maxRows - 1))))
+      if col < maxCols:
+        scrollCol = 0
+      else:
+        scrollCol = max(0, col - int(optimalColRatio * (maxCols - 1)))
+    return (scrollRow, scrollCol)
+
 
   def linesToData(self):
     self.data = self.doLinesToData(self.lines)
@@ -653,12 +670,7 @@ class Actions(app.mutator.Mutator):
     scrollRow = self.view.scrollRow
     scrollCol = self.view.scrollCol
     maxRow, maxCol = self.view.rows, self.view.cols
-    if not (scrollRow < row <= scrollRow + maxRow):
-      optimalCursorRow = app.prefs.editor['optimalCursorRow'] * maxRow
-      scrollRow = max(row - int(optimalCursorRow), 0)
-    if not (scrollCol < col <= scrollCol + maxCol):
-      optimalCursorCol = app.prefs.editor['optimalCursorCol'] * maxCol
-      scrollCol = max(col - int(optimalCursorCol), 0)
+    scrollRow, scrollCol = self.optimalScrollPosition(row, col)
     self.doSelectionMode(app.selectable.kSelectionNone)
     self.view.scrollRow = scrollRow
     self.view.scrollCol = scrollCol
