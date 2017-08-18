@@ -67,7 +67,7 @@ class Parser:
     if row >= len(self.grammarRowList):
       # This file is too large. There's other ways to handle this, but for now
       # let's leave the tail un-highlighted.
-      return None, self.emptyNode, 0, sys.maxint
+      return 0
     gl = self.grammarRowList[row] + [self.endNode]
     offset = gl[0].begin + col
     # Binary search to find the node for the column.
@@ -89,7 +89,8 @@ class Parser:
         grammarNext(). |proceeding| and |remaining| are relative to the |col|
         parameter.
     """
-    if index >= len(self.grammarRowList[row]):
+    if (row >= len(self.grammarRowList) or
+        index >= len(self.grammarRowList[row])):
       return self.emptyNode, 0, sys.maxint
     gl = self.grammarRowList[row] + [self.endNode]
     offset = gl[0].begin + col
