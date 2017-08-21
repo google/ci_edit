@@ -76,7 +76,7 @@ fi
 
 INSTALL_DIR="${APP_PATH}/${APP_DIR}"
 # Go over board to avoid "rm -rf /"; e.g. APP_PATH is set above, testing anyway.
-if [[ -z "$APP_PATH" && -z "${APP_DIR}" && "$INSTALL_DIR" -eq "/" ]]; then
+if [[ -z "$APP_PATH" || -z "${APP_DIR}" || "$INSTALL_DIR" -eq "/" ]]; then
   echo "Something is incorrect about the install directory. Exiting."
   exit -1
 fi
