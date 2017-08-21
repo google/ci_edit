@@ -66,15 +66,24 @@ else
     read -p "Customize Command ? " -n 1 -r CMD_REPLY
     echo ""
     if [[ "$CMD_REPLY" =~ ^[Yy]$ ]]; then
-	read -p "Your Custom Unique command: " -r THE_CMD
+        read -p "Your Custom Unique command: " -r THE_CMD
     else
-	THE_CMD="we"
+        THE_CMD="we"
     fi
     echo "...installing"
     sleep 1
 fi
 
-rm -rf "${APP_PATH}/${APP_DIR}"
+INSTALL_DIR="${APP_PATH}/${APP_DIR}"
+# Go over board to avoid "rm -rf /"; e.g. APP_PATH is set above, testing anyway.
+if [[ -z "$APP_PATH" && -z "${APP_DIR}" && "$INSTALL_DIR" -eq "/" ]]; then
+  echo "Something is incorrect about the install directory. Exiting."
+  exit -1
+fi
+# Yes, this is redundant with the above. User safety is top priority.
+if [[ -n "$APP_PATH" && -n "${APP_DIR}" && "$INSTALL_DIR" -ne "/" ]]; then
+  rm -rf "$INSTALL_DIR"
+fi
 cp -Rv "$THE_CWD" "${APP_PATH}/${APP_DIR}"
 ln -sf "${APP_PATH}/${APP_DIR}/ci.py" "${BIN_PATH}/${THE_CMD}"
 echo "...Success! Enjoy."
