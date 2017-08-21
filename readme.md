@@ -5,6 +5,7 @@ ci_edit is a text editor. It can help you view or edit text files.
 ci_edit runs in the command line (also called the terminal). To start using
 ci_edit, download ci_edit and open (execute) ci.py.
 
+
 ## What ci_edit can do for you
 
 Many other command line text editors require learning a different set of mouse
@@ -32,7 +33,37 @@ a start. It's has the necessary features of a basic text editor and a few fancy
 extras. Those fancy extras stay out of your way until you want them.
 
 
+### Installation (Linux / Mac OS)
+
+* Change directory `cd` to the downloaded directory (or local repository):
+  `ci_edit`.
+
+```
+$ sudo ./install.sh
+```
+
+* **Note:** This script creates a copy of the repository in the directory
+  `/opt/ci_edit`; the **update**, overwrites that copy.  Then a symbolic
+  link is created in the directory `/usr/local/bin`, which is generally
+  designated for user programs not managed by the distribution package manager
+
+### Usage
+
+* This command opens the text editor from any directory.  The execution command
+  for the editor can be specified by user choice
+
+```
+$ we
+```
+
+* to edit a file by name
+
+```
+$ we README.md
+```
+
 ## What you can do for ci_edit
+
 
 The help we now need is finding out what puts users off; what causes someone who
 tries the editor to stop using it. We intend to address those issues so that
