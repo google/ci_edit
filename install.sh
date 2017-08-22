@@ -15,31 +15,38 @@
 #
 # Install File Description:
 #
-# This is an init (install) script that first copies or updates the current
-# directory to the path: /opt/[$PWD], which will be your installation
-# Then, a sym link is created in the directory /usr/local/bin
+# This is an init (install) script that first copies or updates the editor
+# code to the path: /opt/[$PWD], which will be your installation.
+# Then, a symbolic link (sym-link) is created in the directory /usr/local/bin.
 # This directory is generally designated for user programs not managed
 # by the distribution package manager.
-# The link references the execution command in the install directory
+# The link references the execution command in the install directory.
 # The default command will be `we`, but this can be customized to user
-# preference
+# preference during the install.
 
 if [ "$(id -u)" != "0" ]; then
     echo "Usage: sudo ./install.sh (please use root privileges)"
     [[ "$0" = "$BASH_SOURCE" ]] && exit 1 || return 1
 fi
 
-THE_CWD="$(pwd)"
-APP_DIR="$(pwd | grep -o '[^/]*$')"
+# Split path to this install script into an array.
+IFS='/' SRC_PATH=($0)
+# Remove this file name.
+unset SRC_PATH[-1]
+# Grab the directory name.
+APP_DIR="${SRC_PATH[-1]}"
+# Joint path back together.
+SRC_PATH="${SRC_PATH[*]}"
 BIN_PATH="/usr/local/bin"
 APP_PATH="/opt"
+INSTALL_DIR="${APP_PATH}/${APP_DIR}"
 
 echo "* *********************************************************** *"
 echo "*                                                             *"
 echo "*   installation steps:                                       *"
 echo "*                                                             *"
-echo "*   (1) copies (or updates) current directory to the path:    *"
-echo "*       '/opt/[CURRENT DIRECTORY]' (likely '/opt/ci_edit')    *"
+echo "*   (1) copies (or updates) ci_edit directory to the path:    *"
+echo "*       '$INSTALL_DIR'"
 echo "*                                                             *"
 echo "*   (2) creates (or updates) the execution command:           *"
 echo "*       (a) this will be a sym link to the install directory  *"
@@ -74,7 +81,6 @@ else
     sleep 1
 fi
 
-INSTALL_DIR="${APP_PATH}/${APP_DIR}"
 # Go over board to avoid "rm -rf /"; e.g. APP_PATH is set above, testing anyway.
 if [[ -z "$APP_PATH" || -z "${APP_DIR}" || "$INSTALL_DIR" -eq "/" ]]; then
   echo "Something is incorrect about the install directory. Exiting."
@@ -84,6 +90,13 @@ fi
 if [[ -n "$APP_PATH" && -n "${APP_DIR}" && "$INSTALL_DIR" -ne "/" ]]; then
   rm -rf "$INSTALL_DIR"
 fi
-cp -Rv "$THE_CWD" "${APP_PATH}/${APP_DIR}"
+
+cp -Rv "$SRC_PATH" "$INSTALL_DIR"
+# Make installed directories usable by all users.
+find "$INSTALL_DIR" -type d -exec chmod +rx {} \;
+# Make installed files readable by all users.
+chmod -R +r "$INSTALL_DIR"
+# Allow all users to execute the editor.
+chmod +rx "$INSTALL_DIR/ci.py"
 ln -sf "${APP_PATH}/${APP_DIR}/ci.py" "${BIN_PATH}/${THE_CMD}"
 echo "...Success! Enjoy."

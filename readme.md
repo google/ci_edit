@@ -36,7 +36,7 @@ extras. Those fancy extras stay out of your way until you want them.
 ### Installation (Linux / Mac OS)
 
 * Change directory `cd` to the downloaded directory (or local repository):
-  `ci_edit`.
+  `ci_edit`. (Or use the path to "install.sh" in the command below).
 
 ```
 $ sudo ./install.sh
