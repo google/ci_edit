@@ -29,6 +29,13 @@ kTestFile = '#test_file_with_unlikely_file_name~'
 
 class IntentionTestCases(unittest.TestCase):
   def setUp(self):
+    if True:
+      # The buffer manager will retain the test file in RAM. Reset it.
+      try:
+        del sys.modules['app.buffer_manager']
+        import app.buffer_manager
+      except KeyError:
+        pass
     if os.path.isfile(kTestFile):
       os.unlink(kTestFile)
     self.assertFalse(os.path.isfile(kTestFile))
@@ -87,10 +94,6 @@ class IntentionTestCases(unittest.TestCase):
     self.prg.run()
 
   def test_backspace(self):
-    # TODO(dschuyler): The app currently stores state in module variables, which
-    # doesn't play well with unittest. Need to look into fixing that.
-    return
-
     def notReached(display):
       self.assertTrue(False)
     def test0(display):

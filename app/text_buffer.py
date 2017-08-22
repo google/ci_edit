@@ -26,7 +26,7 @@ class TextBuffer(app.actions.Actions):
   """The TextBuffer adds the drawing/rendering to the BackingTextBuffer."""
   def __init__(self):
     app.actions.Actions.__init__(self)
-    self.lineLimitIndicator = app.prefs.editor['lineLimitIndicator']
+    self.lineLimitIndicator = 0
     self.highlightRe = None
     self.fileHistory = {}
     self.lastChecksum = None
