@@ -12,36 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Abbreviations
-apr
-aug
-bidi
-blvd
-concat
-config
-crypto
-dbg
-dec
-dev
-expr
-feb
-idl
-ipc
-isp
-iter
-jan
-jul
-lang
-nd
-nov
-oct
-ok
-perf
-rd
-rfc
-sep
-sept
-st
-tos
-ux
-ver
+allnodes
+allhosts
+allrouters

@@ -40,6 +40,8 @@ abcdefghijklmnopqrstuvw
 abcdefghijklmnopqrstuvwx
 abcdefghijklmnopqrstuvwxy
 abcdefghijklmnopqrstuvwxyz
+accessor
+accessors
 adate
 alloc
 apis
@@ -97,6 +99,7 @@ dword
 dx
 edu
 emacs
+enablement
 endian
 endif
 env
@@ -115,8 +118,10 @@ fd
 fds
 ff
 fi
+fifo
 filename
 fixme
+fn
 formatter
 freebsd
 ftp
@@ -130,6 +135,7 @@ grey
 guid
 gz
 gzip
+hasher
 hpp
 htm
 https
@@ -156,6 +162,7 @@ keyframes
 le
 lf
 lhs
+lifo
 localhost
 loopback
 lorem
@@ -167,8 +174,11 @@ mozilla
 msg
 na
 namespaces
+ndebug
 ne
 neq
+nulled
+nulling
 nullptr
 num
 oauth
@@ -213,9 +223,11 @@ ro
 runtime
 rv
 serializable
+sha
 signin
 skia
 solaris
+sql
 src
 ssh
 std
@@ -234,6 +246,8 @@ syncable
 sys
 sysex
 tar
+templatizer
+templatizers
 tgz
 throbber
 tk
@@ -260,6 +274,7 @@ utf
 vpn
 vpns
 waitable
+wb
 webkit
 websocket
 webview

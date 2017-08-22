@@ -52,6 +52,7 @@ words.update(grammarWords.get('user', set()))
 words.update(grammarWords.get('cpp', set()))
 words.update(grammarWords.get('en-gb', set()))
 words.update(grammarWords.get('html', set()))
+words.update(grammarWords.get('css', set()))
 
 
 def isCorrect(word, grammarName):

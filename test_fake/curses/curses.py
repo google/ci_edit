@@ -21,6 +21,7 @@ what ci_edit uses, without regard or reference to the internals of the curses
 library."""
 
 
+from .constants import *
 import app.curses_util
 import inspect
 import os
@@ -28,134 +29,140 @@ import sys
 import traceback
 
 
-fakeInputs = []
-def setFakeInputs(cmdList):
-  global fakeInputs
-  fakeInputs = cmdList[:]
-  fakeInputs.reverse()
+kNoOpsPerFlush = 5  # TODO: match to value in commandLoop().
+class FakeInput:
+  def __init__(self, display):
+    self.fakeDisplay = display
+    self.inputs = []
+    self.inputsIndex = -1
+    self.flushCounter = kNoOpsPerFlush
+
+  def setInputs(self, cmdList):
+    self.inputs = cmdList
+    self.inputsIndex = -1
+    self.flushCounter = kNoOpsPerFlush
+
+  def next(self):
+    while self.inputsIndex + 1 < len(self.inputs):
+      self.inputsIndex += 1
+      cmd = self.inputs[self.inputsIndex]
+      if type(cmd) == type(testLog):
+        if self.flushCounter:
+          self.inputsIndex -= 1
+          self.flushCounter -= 1
+          return ERR
+        cmd(self.fakeDisplay)
+        self.flushCounter = kNoOpsPerFlush
+      elif type(cmd) == type('a') and len(cmd) == 1:
+        return ord(cmd)
+      else:
+        return cmd
+    return ERR
 
 
 def testLog(*msg):
+  # Remove return to get function call trace.
+  return
+  functionLine = inspect.stack()[1][2]
   function = inspect.stack()[1][3]
   frame = inspect.stack()[2]
-  caller = "%20s %5s %20s %s " % (os.path.split(frame[1])[1],
-        frame[2], frame[3], function)
-  #print dir(inspect.stack()[1][0])
-  #print inspect.stack()[1][0].__class__
-  print caller + " ".join([str(i) for i in msg])
-
-COLORS = 256
-
-KEY_ALT_A = 0
-KEY_ALT_B = 1
-KEY_ALT_C = 2
-KEY_ALT_LEFT = 3
-KEY_ALT_RIGHT = 4
-KEY_ALT_S = 5
-KEY_ALT_SHIFT_LEFT = 6
-KEY_ALT_SHIFT_RIGHT = 7
-KEY_BACKSPACE = 8
-KEY_BACKSPACE1 = 9
-KEY_BACKSPACE2 = 10
-KEY_BACKSPACE3 = 11
-KEY_BTAB = 12
-KEY_CTRL_DOWN = 13
-KEY_CTRL_LEFT = 14
-KEY_CTRL_RIGHT = 15
-KEY_CTRL_SHIFT_DOWN = 16
-KEY_CTRL_SHIFT_LEFT = 17
-KEY_CTRL_SHIFT_RIGHT = 18
-KEY_CTRL_SHIFT_UP = 19
-KEY_CTRL_UP = 20
-KEY_DC = 21
-KEY_DELETE = 22
-KEY_DOWN = 23
-KEY_END = 24
-KEY_ESCAPE = 25
-KEY_F1 = 26
-KEY_F10 = 27
-KEY_F13 = 28
-KEY_F14 = 29
-KEY_F15 = 30
-KEY_F16 = 31
-KEY_F17 = 32
-KEY_F18 = 33
-KEY_F19 = 34
-KEY_F2 = 35
-KEY_F20 = 36
-KEY_F21 = 37
-KEY_F22 = 38
-KEY_F3 = 39
-KEY_F4 = 40
-KEY_F5 = 41
-KEY_F6 = 42
-KEY_F7 = 43
-KEY_F8 = 44
-KEY_F9 = 45
-KEY_HOME = 46
-KEY_LEFT = 47
-KEY_MOUSE = 48
-KEY_NPAGE = 49
-KEY_PAGE_DOWN = 50
-KEY_PAGE_UP = 51
-KEY_PPAGE = 52
-KEY_RESIZE = 53
-KEY_RESIZE = 54
-KEY_RIGHT = 55
-KEY_SF = 56
-KEY_SHIFT_DOWN = 57
-KEY_SHIFT_F2 = 58
-KEY_SHIFT_F3 = 59
-KEY_SHIFT_LEFT = 60
-KEY_SHIFT_RIGHT = 61
-KEY_SHIFT_UP = 62
-KEY_SLEFT = 63
-KEY_SR = 64
-KEY_SRIGHT = 65
-KEY_UP = 66
+  callingFile = os.path.split(frame[1])[1]
+  callingLine = frame[2]
+  callingFunction = frame[3]
+  caller = "%20s %5s %20s %3s %s " % (callingFile,
+        callingLine, callingFunction, functionLine, function)
+  print caller + " ".join([repr(i) for i in msg])
 
 
-A_REVERSE = 0
-BUTTON1_CLICKED = 1
-BUTTON1_DOUBLE_CLICKED = 2
-BUTTON1_PRESSED = 3
-BUTTON1_RELEASED = 4
-BUTTON2_CLICKED = 5
-BUTTON2_DOUBLE_CLICKED = 6
-BUTTON2_PRESSED = 7
-BUTTON2_RELEASED = 8
-BUTTON3_CLICKED = 9
-BUTTON3_DOUBLE_CLICKED = 10
-BUTTON3_PRESSED = 11
-BUTTON3_RELEASED = 12
-BUTTON4_CLICKED = 13
-BUTTON4_DOUBLE_CLICKED = 14
-BUTTON4_PRESSED = 15
-BUTTON4_RELEASED = 16
-BUTTON_ALT = 17
-BUTTON_CTRL = 18
-BUTTON_SHIFT = 19
-COLORS = 20
-COLORS256 = 21
-ERR = 22
-REPORT_MOUSE_POSITION = 23
+getchCallback = None
+def setGetchCallback(callback):
+  global getchCallback
+  getchCallback = callback
+
+
+# Test output. Use |display| to check the screen output.
+class FakeDisplay:
+  def __init__(self):
+    self.rows = 15
+    self.cols = 40
+    self.cursorRow = 0
+    self.cursorCol = 0
+    self.display = None
+    self.reset()
+
+  def check(self, row, col, lines):
+    for i in range(len(lines)):
+      line = lines[i]
+      for k in range(len(line)):
+        d = self.display[row + i][col + k]
+        c = line[k]
+        if d != c:
+          self.show()
+          return "row %s, col %s mismatch '%s' != '%s'" % (
+              row + i, col + k, d, c)
+    return None
+
+  def get(self):
+    return [''.join(self.display[i]) for i in range(self.rows)]
+
+  def show(self):
+    print '+' + '-' * self.cols + '+'
+    for line in self.get():
+      print '|' + line + '|'
+    print '+' + '-' * self.cols + '+'
+
+  def reset(self):
+    self.display = [
+        ['x' for k in range(self.cols)] for i in range(self.rows)]
+
+fakeDisplay = None
+fakeInput = None
+
+def getFakeDisplay():
+  return fakeDisplay
+
+def printFakeDisplay():
+  fakeDisplay.show()
+
+
+#####################################
 
 
 class FakeCursesWindow:
-  def __init__(self):
-    testLog()
+  def __init__(self, rows, cols):
+    self.rows = rows
+    self.cols = cols
 
   def addstr(self, *args):
+    global fakeDisplay
     testLog(*args)
+    cursorRow = args[0]
+    cursorCol = args[1]
+    text = args[2]
+    color = args[3]
+    for i in range(len(text)):
+      fakeDisplay.display[cursorRow][cursorCol + i] = text[i]
     return (1, 1)
 
   def getch(self):
     testLog()
-    return fakeInputs and fakeInputs.pop() or ERR
+    if 1:
+      global getchCallback
+      if getchCallback:
+        val = getchCallback()
+        return val
+    val = fakeInput.next()
+    if 0 and val != ERR:
+      print 'val', val
+    return val
+
+  def getyx(self):
+    testLog()
+    return (0, 0)
 
   def getmaxyx(self):
     testLog()
-    return (1, 1)
+    return (fakeDisplay.rows, fakeDisplay.cols)
 
   def keypad(self, a):
     testLog(a)
@@ -166,23 +173,41 @@ class FakeCursesWindow:
   def move(self, a, b):
     testLog(a, b)
 
+  def noutrefresh(self):
+    pass
+
   def refresh(self):
     testLog()
 
   def resize(self, a, b):
     testLog(a, b)
 
+  def scrollok(self, a):
+    testLog(a)
+
   def timeout(self, a):
     testLog(a)
 
 
-class StandardScreen:
+class StandardScreen(FakeCursesWindow):
   def __init__(self):
     testLog()
+    global fakeDisplay, fakeInput
+    fakeDisplay = FakeDisplay()
+    fakeInput = FakeInput(fakeDisplay)
+    self.fakeInput = fakeInput
+
+  def setFakeInputs(self, cmdList):
+    self.fakeInput.setInputs(cmdList)
+
+  def getyx(self):
+    testLog()
+    return (0, 0)
 
   def getmaxyx(self):
     testLog()
-    return (11, 19)
+    global fakeDisplay
+    return (fakeDisplay.rows, fakeDisplay.cols)
 
 
 def can_change_color():
@@ -216,23 +241,24 @@ def has_colors():
 def init_color():
   testLog()
 
-def init_pair():
-  testLog()
+def init_pair(*args):
+  testLog(*args)
 
 def keyname():
   testLog()
 
-def meta():
-  testLog()
+def meta(*args):
+  testLog(*args)
 
-def mouseinterval():
-  testLog()
+def mouseinterval(*args):
+  testLog(*args)
 
-def mousemask():
-  testLog()
+def mousemask(*args):
+  testLog(*args)
 
-def newwin():
-  pass
+def newwin(*args):
+  testLog(*args)
+  return FakeCursesWindow(args[0], args[1])
 
 def raw():
   pass
@@ -249,34 +275,7 @@ def ungetch():
 def use_default_colors():
   pass
 
-def wrapper():
-  pass
-
-def getch():
-  return -1
-
 def get_pair(a):
-  pass
-
-def init_pair(a, b, c):
-  pass
-
-def meta(a):
-  pass
-
-def mouseinterval(a):
-  pass
-
-def mousemask(a):
-  pass
-
-def newwin(a, b):
-  return FakeCursesWindow()
-
-def raw():
-  pass
-
-def use_default_colors():
   pass
 
 def wrapper(fun, *args, **kw):

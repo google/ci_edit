@@ -16,17 +16,24 @@
 # Chromium (May be specific to Chromium development)
 arraysize
 asan
+autolaunch
+backend
+breakpad
 browsertest
 checkboxes
 chromevox
 codereview
 cpplint
+cras
 cros
+crosh
+cryptohome
 darkconnect
 dcheck
 doesnt
 dont
 dsc
+eap
 eslint
 filemanager
 futf
@@ -39,6 +46,7 @@ grd
 gtest
 gurl
 hotword
+hwid
 jstemplate
 nacl
 nav
@@ -51,12 +59,14 @@ powerwash
 ppapi
 presubmit
 pylint
+remora
 safebrowsing
 stringprintf
 tbr
 tryserver
 uma
 unittests
+vlog
 vox
 webstore
 wildcard

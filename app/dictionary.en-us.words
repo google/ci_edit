@@ -212,6 +212,7 @@ activated
 activates
 activating
 activation
+activations
 activator
 active
 actively
@@ -684,6 +685,7 @@ announce
 announced
 announcement
 announcements
+announcer
 announces
 announcing
 annoy
@@ -1016,6 +1018,7 @@ asymptotic
 asymptotically
 asynchronous
 asynchronously
+asynchrony
 at
 ate
 atheist
@@ -1225,6 +1228,7 @@ backdoor
 backdrop
 backdrops
 backed
+backend
 backgammon
 background
 backgrounds
@@ -3018,6 +3022,7 @@ companionship
 company
 comparable
 comparative
+comparator
 compare
 compared
 compares
@@ -4238,6 +4243,7 @@ delegated
 delegates
 delegating
 delegation
+deletable
 delete
 deleted
 deletes
@@ -4724,6 +4730,7 @@ discouraged
 discourse
 discourses
 discover
+discoverable
 discovered
 discoverer
 discoveries
@@ -4866,6 +4873,7 @@ distrusted
 distrusting
 distrusts
 disturb
+disturbed
 disturbing
 disuse
 ditch
@@ -5880,6 +5888,7 @@ exp
 expand
 expandable
 expanded
+expander
 expanding
 expands
 expansion
@@ -5999,6 +6008,7 @@ extinct
 extort
 extra
 extract
+extractable
 extracted
 extracting
 extraction
@@ -7336,6 +7346,7 @@ hacking
 hackish
 hackneyed
 hacks
+hacky
 had
 haft
 hag
@@ -7407,6 +7418,7 @@ happen
 happened
 happening
 happens
+happenstance
 happier
 happily
 happiness
@@ -8404,6 +8416,7 @@ insignificant
 insist
 insofar
 inspect
+inspectable
 inspected
 inspecting
 inspection
@@ -13440,6 +13453,7 @@ redwoods
 reed
 reeks
 reel
+reenrollment
 reenter
 reentry
 reevaluate
@@ -13917,6 +13931,7 @@ resistance
 resistant
 resisting
 resit
+resizable
 resize
 resizeable
 resized
@@ -13991,6 +14006,7 @@ resultant
 resulted
 resulting
 results
+resumable
 resume
 resumed
 resumes
@@ -16665,6 +16681,9 @@ temperature
 temperatures
 template
 templates
+templatize
+templatized
+templatizing
 temple
 tempo
 temporal
@@ -17007,6 +17026,11 @@ togs
 toil
 toke
 token
+tokenization
+tokenize
+tokenized
+tokenizer
+tokenizing
 tokens
 told
 tolerable
@@ -18030,6 +18054,7 @@ valentine
 vales
 valet
 valid
+validatable
 validate
 validated
 validates
@@ -18037,6 +18062,7 @@ validating
 validation
 validations
 validator
+validators
 validity
 validly
 valley

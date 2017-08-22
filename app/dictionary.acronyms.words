@@ -21,9 +21,9 @@ ar
 bg
 bmp
 bn
-bs
 brb
 brt
+bs
 bsd
 btw
 cn
@@ -46,6 +46,7 @@ gif
 gl
 gmt
 gpu
+gsm
 gtg
 gtk
 gu
@@ -56,6 +57,7 @@ hud
 ico
 icu
 idc
+ie
 ieee
 iiuc
 ime
@@ -71,9 +73,11 @@ lgtm
 lldb
 llvm
 lsb
+lte
 ltr
 lv
 mb
+mdn
 mit
 mr
 msb
@@ -90,6 +94,7 @@ nss
 nt
 nv
 oobe
+oop
 os
 osx
 pb
@@ -102,6 +107,7 @@ rc
 rgb
 rgba
 rsa
+rtc
 rtl
 ru
 saml

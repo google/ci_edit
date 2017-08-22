@@ -67,7 +67,8 @@ class Controller:
     self.host.changeFocusTo(self.host.interactiveSaveAs)
 
   def doCommand(self, ch):
-    #Check the commandSet for the input with both its string and integer representation.
+    # Check the commandSet for the input with both its string and integer
+    # representation.
     self.savedCh = ch
     cmd = (self.commandSet.get(ch) or
           self.commandSet.get(app.curses_util.cursesKeyName(ch)))
@@ -80,7 +81,7 @@ class Controller:
     app.log.info('base controller focus()')
     pass
 
-  def exitConfirmationPrompt(self, ignore=1):
+  def confirmationPromptFinish(self, ignore=1):
     self.host.userIntent = 'edit'
     self.changeToHostWindow()
 
@@ -97,9 +98,10 @@ class Controller:
 
   def closeFile(self):
     app.log.info()
-    app.buffer_manager.buffers.closeTextBuffer(self.host.textBuffer)
-    self.host.setTextBuffer(app.buffer_manager.buffers.newTextBuffer())
-    self.exitConfirmationPrompt()
+    self.closeHostFile()
+    #app.buffer_manager.buffers.closeTextBuffer(self.host.textBuffer)
+    #self.host.setTextBuffer(app.buffer_manager.buffers.newTextBuffer())
+    self.confirmationPromptFinish()
 
   def closeOrConfirmClose(self):
     """If the file is clean, close it. If it is dirty, prompt the user
@@ -145,8 +147,6 @@ class Controller:
     app.log.debug()
     tb = self.host.textBuffer
     self.host.userIntent = 'quit'
-    app.history.set(['files', tb.fullPath, 'cursor'],
-        (self.host.cursorRow, self.host.cursorCol))
     if tb.isDirty():
       self.changeToConfirmQuit()
       return
@@ -172,6 +172,10 @@ class Controller:
   def saveEventChangeToHostWindow(self, ignored=1):
     curses.ungetch(self.savedCh)
     self.host.changeFocusTo(self.host)
+
+  def setTextBuffer(self, textBuffer):
+    app.log.info(textBuffer)
+    self.textBuffer = textBuffer
 
   def unfocus(self):
     pass

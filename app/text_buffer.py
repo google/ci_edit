@@ -22,17 +22,19 @@ import curses
 import re
 import sys
 
-
 class TextBuffer(app.actions.Actions):
   """The TextBuffer adds the drawing/rendering to the BackingTextBuffer."""
   def __init__(self):
     app.actions.Actions.__init__(self)
-    self.lineLimitIndicator = sys.maxint
+    self.lineLimitIndicator = 0
     self.highlightRe = None
+    self.fileHistory = {}
+    self.lastChecksum = None
+    self.lastFileSize = 0
 
   def checkScrollToCursor(self, window):
     """Move the selected view rectangle so that the cursor is visible."""
-    maxRow, maxCol = window.cursorWindow.getmaxyx()
+    maxRow, maxCol = window.rows, window.cols
     #     self.penRow >= self.view.scrollRow + maxRow 1 0
     rows = 0
     if self.view.scrollRow > self.penRow:
@@ -58,24 +60,38 @@ class TextBuffer(app.actions.Actions):
     self.view.scrollCol += cols
 
   def draw(self, window):
+    if self.view.rows <= 0 or self.view.cols <= 0:
+      return
     if self.shouldReparse:
       self.parseGrammars()
       self.shouldReparse = False
     if self.view.hasCaptiveCursor:
       self.checkScrollToCursor(window)
-    rows, cols = window.cursorWindow.getmaxyx()
+    rows, cols = window.rows, window.cols
     if 0:
       for i in range(rows):
         window.addStr(i, 0, '?' * cols, app.color.get(120))
     if 0:
+      # Draw window with no concern for sub-rectangles.
       self.drawTextArea(window, 0, 0, rows, cols, 0)
     elif 1:
       splitRow = rows
-      splitCol = min(cols, self.lineLimitIndicator)
-      self.drawTextArea(window, 0, 0, splitRow, splitCol, 0)
-      if splitCol < cols:
-        self.drawTextArea(window, 0, splitCol, splitRow, cols-splitCol, 32*4)
+      splitCol = max(0, self.lineLimitIndicator - self.view.scrollCol)
+      if self.lineLimitIndicator <= 0 or splitCol >= cols:
+        # Draw only left side.
+        self.drawTextArea(window, 0, 0, splitRow, cols, 0)
+      elif 0 < splitCol < cols:
+        # Draw both sides.
+        self.drawTextArea(window, 0, 0, splitRow, splitCol, 0)
+        self.drawTextArea(window, 0, splitCol, splitRow, cols - splitCol,
+            32 * 4)
+      else:
+        # Draw only right side.
+        assert splitCol <= 0
+        self.drawTextArea(window, 0, splitCol, splitRow, cols - splitCol,
+            32 * 4)
     else:
+      # Draw debug checker board.
       splitRow = rows / 2
       splitCol = 17
       self.drawTextArea(window, 0, 0, splitRow, splitCol, 0)
@@ -91,18 +107,26 @@ class TextBuffer(app.actions.Actions):
 
   def drawTextArea(self, window, top, left, rows, cols, colorDelta):
     startRow = self.view.scrollRow + top
+    endRow = startRow + rows
     startCol = self.view.scrollCol + left
-    endCol = self.view.scrollCol + left + cols
-    colors = app.prefs.prefs['color']
-    spellChecking = app.prefs.prefs['editor'].get('spellChecking', True)
+    endCol = startCol + cols
+    colors = app.prefs.color
+    spellChecking = app.prefs.editor.get('spellChecking', True)
     if self.parser:
       # Highlight grammar.
       rowLimit = min(max(len(self.lines) - startRow, 0), rows)
       for i in range(rowLimit):
         k = startCol
+        if k == 0:
+          # When rendering from column 0 the grammar index is always zero.
+          grammarIndex = 0
+        else:
+          # When starting mid-line, find starting grammar index.
+          grammarIndex = self.parser.grammarIndexFromRowCol(startRow + i, k)
         while k < endCol:
-          node, preceding, remaining = self.parser.grammarFromRowCol(
-              startRow + i, k)
+          node, preceding, remaining = self.parser.grammarAtIndex(
+              startRow + i, k, grammarIndex)
+          grammarIndex += 1
           line = self.lines[startRow + i]
           assert remaining >= 0, remaining
           remaining = min(len(line) - k, remaining)
@@ -117,53 +141,23 @@ class TextBuffer(app.actions.Actions):
           subStart = k - preceding
           subEnd = k + remaining
           subLine = line[subStart:subEnd]
-          if spellChecking:
-            if node.grammar.get('spelling', True):
-              # Highlight spelling errors
-              grammarName = node.grammar.get('name', 'unknown')
-              misspellingColor = app.color.get(
-                  colors['misspelling'] + colorDelta)
-              for found in re.finditer(app.selectable.kReSubwords, subLine):
-                reg = found.regs[0]  # Mispelllled word
-                offsetStart = subStart + reg[0]
-                offsetEnd = subStart + reg[1]
-                if startCol < offsetEnd and offsetStart < endCol:
-                  word = line[offsetStart:offsetEnd]
-                  if not app.spelling.isCorrect(word, grammarName):
-                    if startCol > offsetStart:
-                      offsetStart += startCol - offsetStart
-                    wordFragment = line[offsetStart:min(endCol, offsetEnd)]
-                    window.addStr(top + i, left + offsetStart - startCol,
-                        wordFragment,
-                        misspellingColor | curses.A_BOLD | curses.A_REVERSE)
-          if 1:
-            # Highlight keywords.
-            keywordColor = app.color.get(colors['keyword'] + colorDelta)
-            regex = node.grammar.get('keywordsRe', app.prefs.kReNonMatching)
-            for found in regex.finditer(subLine):
-              reg = found.regs[0]
+          if spellChecking and node.grammar.get('spelling', True):
+            # Highlight spelling errors
+            grammarName = node.grammar.get('name', 'unknown')
+            misspellingColor = app.color.get(colors['misspelling'] + colorDelta)
+            for found in re.finditer(app.selectable.kReSubwords, subLine):
+              reg = found.regs[0]  # Mispelllled word
               offsetStart = subStart + reg[0]
               offsetEnd = subStart + reg[1]
               if startCol < offsetEnd and offsetStart < endCol:
-                if startCol > offsetStart:
-                  offsetStart += startCol - offsetStart
-                wordFragment = line[offsetStart:min(endCol, offsetEnd)]
-                window.addStr(top + i, left + offsetStart - startCol,
-                    wordFragment, keywordColor)
-          if 1:
-            # Highlight specials.
-            keywordColor = app.color.get(colors['keyword'] + colorDelta)
-            regex = node.grammar.get('specialsRe', app.prefs.kReNonMatching)
-            for found in regex.finditer(subLine):
-              reg = found.regs[0]
-              offsetStart = subStart + reg[0]
-              offsetEnd = subStart + reg[1]
-              if startCol < offsetEnd and offsetStart < endCol:
-                if startCol > offsetStart:
-                  offsetStart += startCol - offsetStart
-                wordFragment = line[offsetStart:min(endCol, offsetEnd)]
-                window.addStr(top + i, left + offsetStart - startCol,
-                    wordFragment, keywordColor)
+                word = line[offsetStart:offsetEnd]
+                if not app.spelling.isCorrect(word, grammarName):
+                  if startCol > offsetStart:
+                    offsetStart += startCol - offsetStart
+                  wordFragment = line[offsetStart:min(endCol, offsetEnd)]
+                  window.addStr(top + i, left + offsetStart - startCol,
+                      wordFragment,
+                      misspellingColor | curses.A_BOLD | curses.A_REVERSE)
           k += length
     else:
       # Draw to screen.
@@ -171,8 +165,11 @@ class TextBuffer(app.actions.Actions):
       for i in range(rowLimit):
         line = self.lines[startRow + i][startCol:endCol]
         window.addStr(top + i, left, line + ' ' * (cols - len(line)),
-            app.color.get(app.prefs.prefs['color']['default'] + colorDelta))
+            app.color.get(app.prefs.color['default'] + colorDelta))
     self.drawOverlays(window, top, left, rows, cols, colorDelta)
+    if 0: # Experiment: draw our own cursor.
+      if startRow <= self.penRow < endRow and  startCol <= self.penCol < endCol:
+        window.addStr(self.penRow - startRow, self.penCol - startCol, 'X', 200)
 
   def drawOverlays(self, window, top, left, maxRow, maxCol, colorDelta):
     startRow = self.view.scrollRow + top
@@ -180,7 +177,7 @@ class TextBuffer(app.actions.Actions):
     startCol = self.view.scrollCol + left
     endCol = self.view.scrollCol + left + maxCol
     rowLimit = min(max(len(self.lines) - startRow, 0), maxRow)
-    colors = app.prefs.prefs['color']
+    colors = app.prefs.color
     if 1:
       # Highlight brackets.
       color = app.color.get(colors['bracket'] + colorDelta)

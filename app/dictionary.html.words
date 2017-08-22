@@ -32,6 +32,7 @@ dragstart
 el
 enctype
 evenodd
+falsy
 fieldset
 flexbox
 hd
@@ -42,7 +43,9 @@ inputmode
 isdir
 keydown
 keypress
+keypresses
 labelledby
+li
 lt
 mailto
 maxlength
@@ -73,5 +76,8 @@ textdirection
 th
 thead
 theader
+transitionend
+truthy
 tspan
 typeof
+ul

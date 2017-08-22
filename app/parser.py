@@ -41,34 +41,61 @@ class Parser:
   """A parser generates a set of grammar segments (ParserNode objects)."""
   def __init__(self):
     self.data = ""
-    self.grammarPrefs = app.prefs.prefs['grammar']
+    self.emptyNode = ParserNode()
+    self.emptyNode.grammar = {}
+    self.endNode = ParserNode()
+    self.endNode.grammar = {}
+    self.endNode.begin = sys.maxint
+    self.endNode.col = sys.maxint
     self.grammarRowList = []
     app.log.parser('__init__')
 
-  def grammarFromRowCol(self, row, col):
-    sentinel = ParserNode()
-    sentinel.grammar = {}
-    sentinel.begin = sys.maxint
-    sentinel.col = sys.maxint
+  def __addNode(self, node):
+    if not len(self.grammarRowList[-1]):
+      self.grammarRowList[-1].append(node)
+    elif self.grammarRowList[-1][-1].begin == node.begin:
+      self.grammarRowList[-1][-1] = node
+    else:
+      self.grammarRowList[-1].append(node)
+
+  def grammarIndexFromRowCol(self, row, col):
+    """
+    returns (index, node, preceding, remaining). |index| may then be passed to
+        grammarNext(). |proceeding| and |remaining| are relative to the |col|
+        parameter.
+    """
     if row >= len(self.grammarRowList):
       # This file is too large. There's other ways to handle this, but for now
       # let's leave the tail un-highlighted.
-      empty = ParserNode()
-      empty.grammar = {}
-      return empty, 0, sys.maxint
-    gl = self.grammarRowList[row] + [sentinel]
+      return 0
+    gl = self.grammarRowList[row] + [self.endNode]
     offset = gl[0].begin + col
     # Binary search to find the node for the column.
     low = 0
-    high = len(gl)-1
+    high = len(gl) - 1
     while True:
-      index = (high+low)/2
-      if offset >= gl[index+1].begin:
+      index = (high + low) / 2
+      if offset >= gl[index + 1].begin:
         low = index
       elif offset < gl[index].begin:
         high = index
       else:
-        return gl[index], offset - gl[index].begin, gl[index+1].begin-offset
+        return index
+
+  def grammarAtIndex(self, row, col, index):
+    """
+    Call grammarIndexFromRowCol() to get the index parameter.
+    returns (index, node, preceding, remaining). |index| may then be passed to
+        grammarNext(). |proceeding| and |remaining| are relative to the |col|
+        parameter.
+    """
+    if (row >= len(self.grammarRowList) or
+        index >= len(self.grammarRowList[row])):
+      return self.emptyNode, 0, sys.maxint
+    gl = self.grammarRowList[row] + [self.endNode]
+    offset = gl[0].begin + col
+    node = gl[index]
+    return node, offset - node.begin, gl[index + 1].begin - offset
 
   def parse(self, data, grammar):
     app.log.parser('grammar', grammar['name'])
@@ -78,13 +105,13 @@ class Parser:
     node.begin = 0
     self.grammarRowList = [[node]]
     startTime = time.time()
-    self.buildGrammarList()
+    self.__buildGrammarList()
     totalTime = time.time() - startTime
     if app.log.enabledChannels.get('parser', False):
       self.debugLog(app.log.parser, data)
     app.log.startup('parsing took', totalTime)
 
-  def buildGrammarList(self):
+  def __buildGrammarList(self):
     # An arbitrary limit to avoid run-away looping.
     leash = 10000
     cursor = 0
@@ -99,8 +126,11 @@ class Parser:
       if not found:
         grammarStack.pop()
         # todo(dschuyler): mark parent grammars as unterminated (if they expect
-        # be terminated. e.g. unmatched string quote or xml tag.
+        # be terminated). e.g. unmatched string quote or xml tag.
         break
+      newGrammarIndexLimit = 2 + len(grammarStack[-1].get('contains', []))
+      keywordIndexLimit = newGrammarIndexLimit + len(grammarStack[-1].get(
+          'keywords', []))
       index = -1
       for i,k in enumerate(found.groups()):
         if k is not None:
@@ -138,16 +168,33 @@ class Parser:
             remaining.begin = cursor + reg[0] + 1
             self.grammarRowList[-1].append(remaining)
           self.grammarRowList.append([])
-      else:
+      elif index < newGrammarIndexLimit:
         # A new grammar within this grammar (a 'contains').
         child.grammar = grammarStack[-1].get('matchGrammars', [])[index]
         child.begin = cursor + reg[0]
         cursor += reg[1]
         grammarStack.append(child.grammar)
-      if len(self.grammarRowList[0]) and self.grammarRowList[0][-1].begin == child.begin:
-        self.grammarRowList[-1][-1] = child
+      elif index < keywordIndexLimit:
+        # A keyword doesn't change the grammarStack.
+        keywordNode = ParserNode()
+        keywordNode.grammar = app.prefs.grammars['keyword']
+        keywordNode.begin = cursor + reg[0]
+        self.__addNode(keywordNode)
+        # Resume the current grammar.
+        child.grammar = grammarStack[-1]
+        child.begin = cursor + reg[1]
+        cursor += reg[1]
       else:
-        self.grammarRowList[-1].append(child)
+        # A special doesn't change the grammarStack.
+        specialNode = ParserNode()
+        specialNode.grammar = app.prefs.grammars['special']
+        specialNode.begin = cursor + reg[0]
+        self.__addNode(specialNode)
+        # Resume the current grammar.
+        child.grammar = grammarStack[-1]
+        child.begin = cursor + reg[1]
+        cursor += reg[1]
+      self.__addNode(child)
 
   def debugLog(self, out, data):
     out('parser debug:')
