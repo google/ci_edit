@@ -27,9 +27,12 @@ import curses
 mainCursesWindow = None
 
 
-class StaticWindow:
-  """A static window does not get focus.
-  parent is responsible for the order in which this window is updated, relative
+class ViewWindow:
+  """A view window is a base window that does not get focus or have TextBuffer.
+  See class ActiveWindow for a window that can get focus.
+  See class Window for a window that can get focus and have a TextBuffer.
+
+  arg: parent is responsible for the order in which this window is updated, relative
   to its siblings."""
   def __init__(self, parent):
     self.parent = parent
@@ -44,7 +47,9 @@ class StaticWindow:
     self.writeLineRow = 0
 
   def addStr(self, row, col, text, colorPair):
-    """Overwrite text a row, column with text."""
+    """Overwrite text at row, column with text. The caller is responsible for
+    avoiding overdraw.
+    """
     if 0:
       if 0:
         if row < 0 or col >= self.cols:
@@ -74,7 +79,8 @@ class StaticWindow:
     """Paint text a row, column with colorPair.
       fyi, I thought this may be faster than using addStr to paint over the text
       with a different colorPair. It looks like there isn't a significant
-      performance difference between chgat and addstr."""
+      performance difference between chgat and addstr.
+    """
     mainCursesWindow.chgat(self.top + row, self.left + col, count, colorPair)
 
   def presentModal(self, changeTo, paneRow, paneCol):
@@ -158,6 +164,9 @@ class StaticWindow:
     self.rows -= rows
 
   def setParent(self, parent, layerIndex):
+    """Setting the parent will cause the the window to refresh (i.e. if self
+    was hidden with hide() it will no longer be hidden).
+    """
     if self.parent:
       try: self.parent.zOrder.remove(self)
       except: pass
@@ -182,10 +191,10 @@ class StaticWindow:
     self.writeLineRow += 1
 
 
-class ActiveWindow(StaticWindow):
+class ActiveWindow(ViewWindow):
   """An ActiveWindow may have focus and a controller."""
   def __init__(self, parent, controller=None):
-    StaticWindow.__init__(self, parent)
+    ViewWindow.__init__(self, parent)
     self.controller = controller
     self.isFocusable = True
     self.shouldShowCursor = False
@@ -245,7 +254,7 @@ class Window(ActiveWindow):
     self.cursorRow = self.textBuffer.penRow
     self.cursorCol = self.textBuffer.penCol
     self.textBuffer.draw(self)
-    StaticWindow.refresh(self)
+    ViewWindow.refresh(self)
     if self.hasFocus:
       self.parent.debugDraw(self)
       self.shouldShowCursor = (self.cursorRow >= self.scrollRow and
@@ -267,7 +276,7 @@ class LabeledLine(Window):
     self.host = parent
     self.setTextBuffer(app.text_buffer.TextBuffer())
     self.label = label
-    self.leftColumn = StaticWindow(self)
+    self.leftColumn = ViewWindow(self)
 
   def refresh(self):
     self.leftColumn.addStr(0, 0, self.label,
@@ -296,10 +305,10 @@ class LabeledLine(Window):
     Window.unfocus(self)
 
 
-class Menu(StaticWindow):
+class Menu(ViewWindow):
   """"""
   def __init__(self, host):
-    StaticWindow.__init__(self, host)
+    ViewWindow.__init__(self, host)
     self.host = host
     self.controller = None
     self.lines = []
@@ -332,16 +341,16 @@ class Menu(StaticWindow):
     self.writeLineRow = 0
     for i in self.lines[:maxRow]:
       self.writeLine(" "+i, color);
-    StaticWindow.refresh(self)
+    ViewWindow.refresh(self)
 
   def setController(self, controllerClass):
     self.controller = controllerClass(self.host)
     self.controller.setTextBuffer(self.textBuffer)
 
 
-class LineNumbers(StaticWindow):
+class LineNumbers(ViewWindow):
   def __init__(self, host):
-    StaticWindow.__init__(self, host)
+    ViewWindow.__init__(self, host)
     self.host = host
 
   def drawLineNumbers(self):
@@ -399,9 +408,9 @@ class LineNumbers(StaticWindow):
     self.drawLineNumbers()
 
 
-class LogWindow(StaticWindow):
+class LogWindow(ViewWindow):
   def __init__(self, parent):
-    StaticWindow.__init__(self, parent)
+    ViewWindow.__init__(self, parent)
     self.lines = app.log.getLines()
     self.refreshCounter = 0
 
@@ -417,7 +426,7 @@ class LogWindow(StaticWindow):
       if len(i) and i[-1] == '-':
         color = colorB
       self.writeLine(i, color);
-    StaticWindow.refresh(self)
+    ViewWindow.refresh(self)
 
 
 class InteractiveFind(Window):
@@ -439,10 +448,10 @@ class InteractiveFind(Window):
     self.replaceLine.reshape(1, cols, top, left)
 
 
-class MessageLine(StaticWindow):
+class MessageLine(ViewWindow):
   """The message line appears at the bottom of the screen."""
   def __init__(self, host):
-    StaticWindow.__init__(self, host)
+    ViewWindow.__init__(self, host)
     self.host = host
     self.message = None
     self.renderedMessage = None
@@ -456,11 +465,11 @@ class MessageLine(StaticWindow):
       self.blank(app.color.get('message_line'))
 
 
-class StatusLine(StaticWindow):
+class StatusLine(ViewWindow):
   """The status line appears at the bottom of the screen. It shows the current
   line and column the cursor is on."""
   def __init__(self, host):
-    StaticWindow.__init__(self, host)
+    ViewWindow.__init__(self, host)
     self.host = host
 
   def refresh(self):
@@ -504,9 +513,9 @@ class StatusLine(StaticWindow):
     self.addStr(0, 0, statusLine[:self.cols], color)
 
 
-class TopInfo(StaticWindow):
+class TopInfo(ViewWindow):
   def __init__(self, host):
-    StaticWindow.__init__(self, host)
+    ViewWindow.__init__(self, host)
     self.host = host
     self.borrowedRows = 0
     self.lines = []
@@ -579,7 +588,7 @@ class TopInfo(StaticWindow):
 
   def reshape(self, rows, cols, top, left):
     self.borrowedRows = 0
-    StaticWindow.reshape(self, rows, cols, top, left)
+    ViewWindow.reshape(self, rows, cols, top, left)
 
 
 class InputWindow(Window):
@@ -652,11 +661,11 @@ class InputWindow(Window):
       if not self.showLineNumbers:
         self.lineNumberColumn.hide()
     if 1:
-      self.logoCorner = StaticWindow(self)
+      self.logoCorner = ViewWindow(self)
       self.logoCorner.name = 'Logo'
       self.logoCorner.setParent(self, 0)
     if 1:
-      self.rightColumn = StaticWindow(self)
+      self.rightColumn = ViewWindow(self)
       self.rightColumn.name = 'Right'
       self.rightColumn.setParent(self, 0)
       if not self.showRightColumn:

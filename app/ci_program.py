@@ -198,7 +198,7 @@ class CiProgram:
     """A second init-like function. Called after command line arguments are
     parsed."""
     if self.showLogWindow:
-      self.debugWindow = app.window.StaticWindow(self)
+      self.debugWindow = app.window.ViewWindow(self)
       #self.zOrder += [self.debugWindow]
       self.logWindow = app.window.LogWindow(self)
       #self.zOrder += [self.logWindow]
