@@ -787,9 +787,10 @@ class InputWindow(Window):
   def setTextBuffer(self, textBuffer):
     app.log.info('setTextBuffer')
     #self.normalize()
+    textBuffer.lineLimitIndicator = app.prefs.editor['lineLimitIndicator']
+    textBuffer.debugRedo = app.prefs.startup.get('debugRedo')
     Window.setTextBuffer(self, textBuffer)
     self.controller.setTextBuffer(textBuffer)
-    self.textBuffer.debugRedo = app.prefs.startup.get('debugRedo')
 
   def unfocus(self):
     if self.showMessageLine:
