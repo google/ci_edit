@@ -149,7 +149,7 @@ prefs = {
     'lineLimitIndicator': 80,
     'onSaveStripTrailingSpaces': True,
     'optimalCursorRow': 0.28,  # Ratio of rows: 0 top, 0.5 middle, 1.0 bottom.
-    'optimalCursorCol': .98,  # Ratio of columns: 0 left, 1.0 right.
+    'optimalCursorCol': 0.98,  # Ratio of columns: 0 left, 1.0 right.
     'palette': 'default',
     'showLineNumbers': True,
     'showStatusLine': True,
