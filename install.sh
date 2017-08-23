@@ -29,14 +29,12 @@ if [ "$(id -u)" != "0" ]; then
     [[ "$0" = "$BASH_SOURCE" ]] && exit 1 || return 1
 fi
 
-# Split path to this install script into an array.
-IFS='/' SRC_PATH=($0)
-# Remove this file name.
-unset SRC_PATH[-1]
+#Create opt folder under root
+mkdir -p /opt
+#Get current shell script directory name
+SRC_PATH=$(cd "$(dirname "$0")"; pwd)
 # Grab the directory name.
-APP_DIR="${SRC_PATH[-1]}"
-# Joint path back together.
-SRC_PATH="${SRC_PATH[*]}"
+APP_DIR=${PWD##*/}
 BIN_PATH="/usr/local/bin"
 APP_PATH="/opt"
 INSTALL_DIR="${APP_PATH}/${APP_DIR}"
