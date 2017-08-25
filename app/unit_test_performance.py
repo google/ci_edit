@@ -1,4 +1,4 @@
-# Copyright 2016 Google Inc.
+# Copyright 2017 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,8 +25,33 @@ class PerformanceTestCases(unittest.TestCase):
   def tearDown(self):
     pass
 
+  def test_array_vs_getter(self):
+    setup = '''data = ['a'] * 100\n'''
+    setup += '''def get(n):\n'''
+    setup += '''  return data[n]\n'''
+    setup += '''class B:\n'''
+    setup += '''  def __getitem__(self, n):\n'''
+    setup += '''    return data[n]\n'''
+    setup += '''b = B()\n'''
+    a = timeit(
+        '''x = data[5]\n''',
+        setup=setup,
+        number=10000)
+    b = timeit(
+        '''x = get(5)\n''',
+        setup=setup,
+        number=10000)
+    c = timeit(
+        '''x = b[5]\n''',
+        setup=setup,
+        number=10000)
+    #print "\n%s %s %s | %s %s" % (a, b, a/b, c, a/c)
+    # Calling a function or member is significantly slower than direct access.
+    self.assertGreater(b, a * 2)
+    self.assertGreater(c, a * 2)
+
   def test_insert1(self):
-    return  # Remove to enable test.
+    return  # Remove to enable test (disabled due to running time).
     # This tests a performance assumption. If this test fails, the program
     # should still work fine, but it may not run as fast as it could by using
     # different assumptions.
@@ -66,7 +91,7 @@ class PerformanceTestCases(unittest.TestCase):
     self.assertLess(a, b * 24)
 
   def test_split_insert(self):
-    return  # Remove to enable test.
+    return  # Remove to enable test (disabled due to running time).
     # This tests a performance assumption. If this test fails, the program
     # should still work fine, but it may not run as fast as it could by using
     # different assumptions.
@@ -86,7 +111,7 @@ class PerformanceTestCases(unittest.TestCase):
       self.assertGreater(a, b)
 
   def test_split_insert_balance(self):
-    return  # Remove to enable test.
+    return  # Remove to enable test (disabled due to running time).
     # This tests a performance assumption. If this test fails, the program
     # should still work fine, but it may not run as fast as it could by using
     # different assumptions.
