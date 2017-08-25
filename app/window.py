@@ -596,7 +596,6 @@ class InputWindow(Window):
   def __init__(self, host):
     assert(host)
     Window.__init__(self, host)
-    self.bookmarkIndex = 0
     self.bottomRows = 1  # Not including status line.
     self.host = host
     self.showFooter = True

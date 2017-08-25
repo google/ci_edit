@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import app.bookmarks
 import app.buffer_manager
 import app.clipboard
 import app.log
@@ -675,6 +674,8 @@ class Actions(app.mutator.Mutator):
       self.dataToLines()
     else:
       self.parser = None
+
+    # Restore all user history.
     app.history.loadUserHistory(self.fullPath)
     self.restoreUserHistory()
 
@@ -708,6 +709,10 @@ class Actions(app.mutator.Mutator):
     self.redoChain = self.fileHistory.setdefault('redoChain', [])
     self.savedAtRedoIndex = self.fileHistory.setdefault('savedAtRedoIndex', 0)
     self.redoIndex = self.savedAtRedoIndex
+
+    # Restore file bookmarks
+    self.bookmarks = self.fileHistory.setDefault('bookmarks', [])
+    self.bookmarkSets = self.fileHistory.setDefault('bookmarkSets', [])
 
     # Store the file's info.
     self.lastChecksum, self.lastFileSize = app.history.getFileInfo(
@@ -763,6 +768,8 @@ class Actions(app.mutator.Mutator):
         self.fileHistory['scroll'] = (self.view.scrollRow, self.view.scrollCol)
         self.fileHistory['marker'] = (self.markerRow, self.markerCol)
         self.fileHistory['selectionMode'] = self.selectionMode
+        self.fileHistory['bookmarks'] = self.bookmarkSets
+        self.fileHistory['bookmarkSets'] = self.bookmarkSets
         self.linesToData()
         file = open(self.fullPath, 'w+')
         file.seek(0)
