@@ -160,22 +160,67 @@ class Actions(app.mutator.Mutator):
       self.bookmarks[row] = bookmark
     bisect.insort(self.bookmarkSets, bookmarkRange)
 
-  def bookmarkGoto(self):
+  def bookmarkGoto(self, bookmark):
+    """
+    Goes to the bookmark that is passed in.
+
+    Args:
+      bookmark (tuple): contains bookmarkRange and bookmarkData. More info can
+        be found in the dataToBookmark function.
+
+    Returns:
+      None
+    """
     app.log.debug()
-    bookmark = app.bookmarks.get(self.view.bookmarkIndex)
-    if bookmark:
-      self.selectText(bookmark['row'], bookmark['col'], bookmark['length'],
-          bookmark['mode'])
+    bookmarkRange, bookmarkData = bookmark
+    self.cursorRow, self.cursorCol = bookmarkData['cursor']
+    self.penRow, self.penCol = bookmarkData['pen']
+    self.doSelectionMode(bookmarkData['selectionMode'])
+    self.markerRow, self.markerCol = bookmarkData['marker']
 
   def bookmarkNext(self):
+    """
+    Goes to the closest bookmark after the cursor.
+
+    Args:
+      None
+
+    Returns:
+      None
+    """
     app.log.debug()
-    self.view.bookmarkIndex += 1
-    self.bookmarkGoto()
+    bookmark = None
+    for bookmarkSet in self.bookmarkSets:
+      if bookmarkSet[0] > self.penRow:
+        bookmark = self.bookmarks[bookmarkSet[0]]
+    if not bookmark and len(self.bookmarkSets):
+      bookmarkIndex = self.bookmarkSets[0][0]
+      bookmark = self.bookmarks[bookmarkIndex]
+      self.bookmarkGoto(bookmark)
+    else:
+      # TODO: Make labeled line show that there are no more bookmarks.
 
   def bookmarkPrior(self):
+    """
+    Goes to the closest bookmark before the cursor.
+
+    Args:
+      None
+
+    Returns:
+      None
+    """
     app.log.debug()
-    self.view.bookmarkIndex -= 1
-    self.bookmarkGoto()
+    bookmark = None
+    for bookmarkSet in reversed(self.bookmarkSets):
+      if bookmarkSet[-1] < self.penRow:
+        bookmark = self.bookmarks[bookmarkSet[0]]
+    if not bookmark and len(self.bookmarkSets):
+      bookmarkIndex = self.bookmarkSets[-1][0]
+      bookmark = self.bookmarks[bookmarkIndex]
+      self.bookmarkGoto(bookmark)
+    else:
+      # TODO: Make labeled line show that there are no more bookmarks.
 
   def bookmarkRemove(self):
     """
