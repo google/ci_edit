@@ -25,13 +25,15 @@ def get(index):
     return None
   return data[index % len(data)]
 
-def add(filePath, row, col, length, selectionMode):
+def add(filePath, cursorRow, cursorCol,
+        markerRow, markerCol,
+        penRow, penCol, selectionMode):
   global data
   bookmark = {
+    'cursor': (cursorRow, cursorCol),
+    'marker': (markerRow, markerCol),
     'path': filePath,
-    'row': row,
-    'col': col,
-    'length': length,
+    'pen': (penRow, penCol),
     'mode': selectionMode,
   }
   data.append(bookmark)

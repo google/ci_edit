@@ -21,6 +21,7 @@ import app.mutator
 import app.parser
 import app.prefs
 import app.selectable
+import bisect
 import curses.ascii
 import difflib
 import os
@@ -92,8 +93,27 @@ class Actions(app.mutator.Mutator):
       self.redo()
 
   def bookmarkAdd(self):
-    app.bookmarks.add(self.fullPath, self.penRow, self.penCol, 0,
-        app.selectable.kSelectionNone)
+    cursor = (self.cursorRow, self.cursorCol)
+    pen = (self.penRow, self.penCol)
+    marker = (self.markerRow, self.markerCol)
+    selectionMode = self.selectionMode
+    bookmark = {
+      'cursor': cursor
+      'marker': marker,
+      'path': self.fullPath,
+      'pen': pen,
+      'mode': selectionMode,
+    }
+    lowerRow = min(self.markerRow, self.penRow)
+    upperRow = max(self.markerRow, self.penRow)
+    while len(self.bookmarks) < len(self.lines):
+      # Double the length of the array
+      length = self.bookmarks
+      self.bookmarks.extend([None] * length)
+    bookmarkRange = tuple(i for i in range(lowerRow, upperRow + 1))
+    for row in bookmarkRange
+      self.bookmarks[row] = (bookmarkRange, bookmark)
+    bisect.insort(self.bookmarkSets, bookmarkRange)
 
   def bookmarkGoto(self):
     app.log.debug()
