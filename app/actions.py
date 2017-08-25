@@ -111,7 +111,12 @@ class Actions(app.mutator.Mutator):
       length = self.bookmarks
       self.bookmarks.extend([None] * length)
     bookmarkRange = tuple(i for i in range(lowerRow, upperRow + 1))
-    for row in bookmarkRange
+    for row in bookmarkRange:
+      if self.bookmarks[row]:
+        try:
+          self.bookmarkSets.remove(self.bookmarks[row][0])
+        except ValueError:
+          pass
       self.bookmarks[row] = (bookmarkRange, bookmark)
     bisect.insort(self.bookmarkSets, bookmarkRange)
 
