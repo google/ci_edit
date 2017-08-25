@@ -92,12 +92,40 @@ class Actions(app.mutator.Mutator):
         self.getText(upperRow, upperCol, lowerRow, lowerCol)))
       self.redo()
 
-  def bookmarkAdd(self):
+  def enforceBookmarkListLength(self):
+    """
+    Repeatedly doubles the length self.bookmarks until
+    its length is at least the number of lines in the document.
+
+    Args:
+      None
+
+    Returns:
+      None
+    """
+    while len(self.bookmarks) < len(self.lines):
+      # Double the length of the array
+      length = self.bookmarks
+      self.bookmarks.extend([None] * length)
+
+  def dataToBookmark(self):
+    """
+    Grabs all the cursor data and returns a bookmark.
+
+    Args:
+      None
+
+    Returns:
+      A bookmark in the form of (bookmarkRange, bookmarkData).
+      bookmarkRange is an ordered tuple in which its elements
+      are the rows that the bookmark affects.
+      bookmarkData is a dictionary that contains the cursor data.
+    """
     cursor = (self.cursorRow, self.cursorCol)
     pen = (self.penRow, self.penCol)
     marker = (self.markerRow, self.markerCol)
     selectionMode = self.selectionMode
-    bookmark = {
+    bookmarkData = {
       'cursor': cursor
       'marker': marker,
       'path': self.fullPath,
@@ -106,18 +134,30 @@ class Actions(app.mutator.Mutator):
     }
     lowerRow = min(self.markerRow, self.penRow)
     upperRow = max(self.markerRow, self.penRow)
-    while len(self.bookmarks) < len(self.lines):
-      # Double the length of the array
-      length = self.bookmarks
-      self.bookmarks.extend([None] * length)
     bookmarkRange = tuple(i for i in range(lowerRow, upperRow + 1))
+    return (bookmarkRange, bookmarkData)
+
+  def bookmarkAdd(self):
+    """
+    Adds a bookmark at the cursor's location. If multiple lines are 
+    selected, all existing bookmarks in those lines are overwritten 
+    with the new bookmark.
+
+    Args:
+      None
+
+    Returns:
+      None
+    """
+    bookmarkRange, bookmarkData = self.dataToBookmark()
+    self.enforceBookmarkListLength()
     for row in bookmarkRange:
       if self.bookmarks[row]:
         try:
           self.bookmarkSets.remove(self.bookmarks[row][0])
         except ValueError:
           pass
-      self.bookmarks[row] = (bookmarkRange, bookmark)
+      self.bookmarks[row] = bookmark
     bisect.insort(self.bookmarkSets, bookmarkRange)
 
   def bookmarkGoto(self):
@@ -138,8 +178,23 @@ class Actions(app.mutator.Mutator):
     self.bookmarkGoto()
 
   def bookmarkRemove(self):
+    """
+    Removes bookmarks in all selected lines.
+
+    Args:
+      None
+
+    Returns:
+      None
+    """
     app.log.debug()
-    return app.bookmarks.remove(self.view.bookmarkIndex)
+    bookmark = self.bookmarks[self.penRow]
+    if bookmark:
+      bookmarkRange, bookmarkData = bookmark[0]
+      self.bookmarkSets.remove(bookmarkRange)
+      for row in bookmarkRange:
+        self.bookmarks[row] = None
+
 
   def backspace(self):
     app.log.info('backspace', self.penRow > self.markerRow)
