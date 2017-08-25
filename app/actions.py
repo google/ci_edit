@@ -104,8 +104,8 @@ class Actions(app.mutator.Mutator):
     """
     while len(self.bookmarks) < len(self.lines):
       # Double the length of the array
-      length = self.bookmarks
-      self.bookmarks.extend([None] * length)
+      length = len(self.bookmarks)
+      self.bookmarks.extend([None] * max(1, length))
 
   def dataToBookmark(self):
     """
@@ -120,20 +120,19 @@ class Actions(app.mutator.Mutator):
       are the rows that the bookmark affects.
       bookmarkData is a dictionary that contains the cursor data.
     """
-    cursor = (self.cursorRow, self.cursorCol)
+    cursor = (self.view.cursorRow, self.view.cursorCol)
     pen = (self.penRow, self.penCol)
     marker = (self.markerRow, self.markerCol)
     selectionMode = self.selectionMode
     bookmarkData = {
-      'cursor': cursor
+      'cursor': cursor,
       'marker': marker,
       'path': self.fullPath,
       'pen': pen,
-      'mode': selectionMode,
+      'selectionMode': selectionMode,
     }
-    lowerRow = min(self.markerRow, self.penRow)
-    upperRow = max(self.markerRow, self.penRow)
-    bookmarkRange = tuple(i for i in range(lowerRow, upperRow + 1))
+    upperRow, _, lowerRow, _ = self.startAndEnd()
+    bookmarkRange = tuple(row for row in range(upperRow, lowerRow + 1))
     return (bookmarkRange, bookmarkData)
 
   def bookmarkAdd(self):
@@ -151,13 +150,15 @@ class Actions(app.mutator.Mutator):
     bookmarkRange, bookmarkData = self.dataToBookmark()
     self.enforceBookmarkListLength()
     for row in bookmarkRange:
-      if self.bookmarks[row]:
+      existingBookmark = self.bookmarks[row]
+      if existingBookmark:
         try:
-          self.bookmarkSets.remove(self.bookmarks[row][0])
+          self.bookmarkSets.remove(existingBookmark[0])
         except ValueError:
           pass
-      self.bookmarks[row] = bookmark
+      self.bookmarks[row] = (bookmarkRange, bookmarkData)
     bisect.insort(self.bookmarkSets, bookmarkRange)
+    # import pdb; pdb.set_trace()
 
   def bookmarkGoto(self, bookmark):
     """
@@ -170,9 +171,10 @@ class Actions(app.mutator.Mutator):
     Returns:
       None
     """
+    # import pdb; pdb.set_trace()
     app.log.debug()
     bookmarkRange, bookmarkData = bookmark
-    self.cursorRow, self.cursorCol = bookmarkData['cursor']
+    self.view.cursorRow, self.view.cursorCol = bookmarkData['cursor']
     self.penRow, self.penCol = bookmarkData['pen']
     self.doSelectionMode(bookmarkData['selectionMode'])
     self.markerRow, self.markerCol = bookmarkData['marker']
@@ -187,17 +189,19 @@ class Actions(app.mutator.Mutator):
     Returns:
       None
     """
+    # import pdb; pdb.set_trace()
     app.log.debug()
     bookmark = None
+    _, _, lowerRow, _ = self.startAndEnd()
     for bookmarkSet in self.bookmarkSets:
-      if bookmarkSet[0] > self.penRow:
+      if bookmarkSet[0] > lowerRow:
         bookmark = self.bookmarks[bookmarkSet[0]]
+        break
     if not bookmark and len(self.bookmarkSets):
       bookmarkIndex = self.bookmarkSets[0][0]
       bookmark = self.bookmarks[bookmarkIndex]
-      self.bookmarkGoto(bookmark)
-    else:
-      # TODO: Make labeled line show that there are no more bookmarks.
+    self.bookmarkGoto(bookmark)
+    # TODO: Make labeled line show that there are no more bookmarks.
 
   def bookmarkPrior(self):
     """
@@ -211,15 +215,16 @@ class Actions(app.mutator.Mutator):
     """
     app.log.debug()
     bookmark = None
+    upperRow, _, _, _ = self.startAndEnd()
     for bookmarkSet in reversed(self.bookmarkSets):
-      if bookmarkSet[-1] < self.penRow:
+      if bookmarkSet[-1] < upperRow:
         bookmark = self.bookmarks[bookmarkSet[0]]
+        break
     if not bookmark and len(self.bookmarkSets):
       bookmarkIndex = self.bookmarkSets[-1][0]
       bookmark = self.bookmarks[bookmarkIndex]
-      self.bookmarkGoto(bookmark)
-    else:
-      # TODO: Make labeled line show that there are no more bookmarks.
+    self.bookmarkGoto(bookmark)
+    # TODO: Make labeled line show that there are no more bookmarks.
 
   def bookmarkRemove(self):
     """
@@ -231,14 +236,22 @@ class Actions(app.mutator.Mutator):
     Returns:
       None
     """
+    # import pdb; pdb.set_trace()
+    removedBookmark = False
     app.log.debug()
-    bookmark = self.bookmarks[self.penRow]
-    if bookmark:
-      bookmarkRange, bookmarkData = bookmark[0]
-      self.bookmarkSets.remove(bookmarkRange)
-      for row in bookmarkRange:
-        self.bookmarks[row] = None
-
+    upperRow, _, lowerRow, _ = self.startAndEnd()
+    for row in range(upperRow, lowerRow + 1):
+      bookmark = self.bookmarks[row]
+      if bookmark:
+        removedBookmark = True
+        bookmarkRange, bookmarkData = bookmark
+        try:
+          self.bookmarkSets.remove(bookmarkRange)
+        except ValueError:
+          pass
+        for row in bookmarkRange:
+          self.bookmarks[row] = None
+    return removedBookmark
 
   def backspace(self):
     app.log.info('backspace', self.penRow > self.markerRow)
@@ -711,8 +724,8 @@ class Actions(app.mutator.Mutator):
     self.redoIndex = self.savedAtRedoIndex
 
     # Restore file bookmarks
-    self.bookmarks = self.fileHistory.setDefault('bookmarks', [])
-    self.bookmarkSets = self.fileHistory.setDefault('bookmarkSets', [])
+    self.bookmarks = self.fileHistory.setdefault('bookmarks', [])
+    self.bookmarkSets = self.fileHistory.setdefault('bookmarkSets', [])
 
     # Store the file's info.
     self.lastChecksum, self.lastFileSize = app.history.getFileInfo(
