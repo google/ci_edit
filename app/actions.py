@@ -629,10 +629,7 @@ class Actions(app.mutator.Mutator):
       try:
         if app.prefs.editor['onSaveStripTrailingSpaces']:
           self.stripTrailingWhiteSpace()
-        # Save all user data into history
-        self.savedAtRedoIndex = self.redoIndex
-        self.fileHistory['redoChain'] = self.redoChain
-        self.fileHistory['savedAtRedoIndex'] = self.savedAtRedoIndex
+        # Save user data that applies to read-only files into history.
         self.fileHistory['pen'] = (self.penRow, self.penCol)
         self.fileHistory['cursor'] = (self.view.cursorRow, self.view.cursorCol)
         self.fileHistory['scroll'] = (self.view.scrollRow, self.view.scrollCol)
@@ -644,11 +641,10 @@ class Actions(app.mutator.Mutator):
         file.truncate()
         file.write(self.data)
         file.close()
-        app.history.saveUserHistory((self.fullPath, self.lastChecksum,
-            self.lastFileSize), self.fileHistory)
-        # Store the file's new info
-        self.lastChecksum, self.lastFileSize = app.history.getFileInfo(
-            self.fullPath)
+        # Save user data that applies to writable files.
+        self.savedAtRedoIndex = self.redoIndex
+        self.fileHistory['redoChain'] = self.redoChain
+        self.fileHistory['savedAtRedoIndex'] = self.savedAtRedoIndex
         # Hmm, could this be hard coded to False here?
         self.isReadOnly = not os.access(self.fullPath, os.W_OK)
         self.fileStat = os.stat(self.fullPath)
@@ -664,6 +660,11 @@ class Actions(app.mutator.Mutator):
           app.log.info(i)
     except:
       app.log.info('except had exception')
+    app.history.saveUserHistory((self.fullPath, self.lastChecksum,
+        self.lastFileSize), self.fileHistory)
+    # Store the file's new info
+    self.lastChecksum, self.lastFileSize = app.history.getFileInfo(
+        self.fullPath)
 
   def selectText(self, row, col, length, mode):
     row = max(0, min(row, len(self.lines) - 1))
