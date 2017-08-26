@@ -601,7 +601,7 @@ class Actions(app.mutator.Mutator):
       the view should be placed.
     """
     optimalRowRatio = app.prefs.editor['optimalCursorRow']
-    optimalColRatio = app.prefs.editor['optimalCursorCol'] 
+    optimalColRatio = app.prefs.editor['optimalCursorCol']
     maxRows = self.view.rows
     maxCols = self.view.cols
     scrollRow = self.view.scrollRow
@@ -610,7 +610,7 @@ class Actions(app.mutator.Mutator):
         scrollCol <= col < scrollCol + maxCols):
       # Use optimal position preferences set in default_prefs.py
       # or $HOME/.ci_edit/prefs/editor.py
-      scrollRow = max(0, min(len(self.lines) - 1, 
+      scrollRow = max(0, min(len(self.lines) - 1,
         row - int(optimalRowRatio * (maxRows - 1))))
       if col < maxCols:
         scrollCol = 0
