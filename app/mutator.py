@@ -71,8 +71,9 @@ class Mutator(app.selectable.Selectable):
     assert self.__compoundChange is not None
     changes = tuple(self.__compoundChange)
     self.__compoundChange = None
-    self.redoAddChange(('cc', changes))
-    self.redo()
+    if len(changes):
+      self.redoAddChange(('cc', changes))
+      self.redo()
 
   def getPenOffset(self, row, col):
     """inefficient test hack. wip on parser"""

@@ -40,7 +40,7 @@ fi
 # grab current directory name to use as subdirectory for the installed app
 APP_DIR=$(basename "$SRC_PATH")
 # path for sym link to executable ci.py
-BIN_PATH="/usr/local/bin"
+IN_PATH="/usr/local/bin"
 # location of install directory
 APP_PATH="/opt"
 # full install directory
