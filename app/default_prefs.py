@@ -233,8 +233,10 @@ prefs = {
     'bash': {
       'indent': '  ',
       'keywords': [
-        'break', 'case', 'continue', 'do', 'done', 'exit', 'fi', 'if', 'for',
-        'return', 'switch', 'then', 'while',
+        'basename', 'break', 'case', 'chmod', 'continue', 'cp',
+        'dirname', 'do', 'done', 'echo', 'else', 'exit',
+        'fi', 'find', 'if', 'for',
+        'ln', 'mkdir', 'read', 'return', 'rm', 'sleep', 'switch', 'then', 'while',
       ],
       'contains': ['c_string1', 'c_string2', 'pound_comment'],
     },
