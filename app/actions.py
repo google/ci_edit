@@ -21,6 +21,7 @@ import app.mutator
 import app.parser
 import app.prefs
 import app.selectable
+import codecs
 import curses.ascii
 import difflib
 import os
@@ -522,7 +523,7 @@ class Actions(app.mutator.Mutator):
     app.log.info('fileLoad', self.fullPath)
     file = None
     try:
-      file = open(self.fullPath, 'r')
+      file = codecs.open(self.fullPath, encoding='utf-8')
       self.setMessage('Opened existing file')
       self.isReadOnly = not os.access(self.fullPath, os.W_OK)
       self.fileStat = os.stat(self.fullPath)
@@ -636,7 +637,7 @@ class Actions(app.mutator.Mutator):
         self.fileHistory['marker'] = (self.markerRow, self.markerCol)
         self.fileHistory['selectionMode'] = self.selectionMode
         self.linesToData()
-        file = open(self.fullPath, 'w+')
+        file = codecs.open(self.fullPath, 'w+', encoding='utf-8')
         file.seek(0)
         file.truncate()
         file.write(self.data)
