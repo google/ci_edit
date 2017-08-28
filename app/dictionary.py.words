@@ -24,6 +24,7 @@ baudrate
 btab
 chgat
 chr
+codecs
 col
 cols
 contextlib
