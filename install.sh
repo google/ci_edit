@@ -12,7 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
+
+
 # Install File Description:
 #
 # This is an init (install) script that first copies or updates the editor
@@ -29,21 +30,21 @@ if [ "$(id -u)" != "0" ]; then
     [[ "$0" = "$BASH_SOURCE" ]] && exit 1 || return 1
 fi
 
-# source path to find current directory and to copy application to /opt/
-SRC_PATH=$(dirname "$0") # path from which install was executed
+# Source path to find current directory and to copy application to /opt/.
+SRC_PATH=$(dirname "$0")  # Path from which install was executed.
 SRC_PATH=$(cd "$SRC_PATH" && pwd)  # absolute path
 if [ -z "$SRC_PATH" ]; then
-    # exit if for some reason, the path is empty string
+    # Exit if for some reason, the path is empty string.
     [[ "$0" = "$BASH_SOURCE" ]] && exit 1 || return 1
 fi
 
-# grab current directory name to use as subdirectory for the installed app
+# Grab current directory name to use as subdirectory for the installed app.
 APP_DIR=$(basename "$SRC_PATH")
-# path for sym link to executable ci.py
+# Path for sym link to executable ci.py.
 BIN_PATH="/usr/local/bin"
-# location of install directory
+# Location of install directory.
 APP_PATH="/opt"
-# full install directory
+# Full install directory.
 INSTALL_DIR="${APP_PATH}/${APP_DIR}"
 
 echo "* *********************************************************** *"
@@ -99,9 +100,9 @@ if [[ -n "$APP_PATH" && -n "${APP_DIR}" && "$INSTALL_DIR" != "/" ]]; then
     rm -rf "$INSTALL_DIR"
 fi
 
-# creates the directory if not already existing /opt/
+# Create the directory if not already existing /opt/.
 mkdir -p /opt/
-# Copies Source to /opt/$INSTALL_DIR
+# Copies Source to /opt/$INSTALL_DIR.
 cp -Rv "$SRC_PATH" "$INSTALL_DIR"
 # Make installed directories usable by all users.
 find "$INSTALL_DIR" -type d -exec chmod +rx {} \;
