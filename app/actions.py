@@ -750,7 +750,7 @@ class Actions(app.mutator.Mutator):
       the view should be placed.
     """
     optimalRowRatio = app.prefs.editor['optimalCursorRow']
-    optimalColRatio = app.prefs.editor['optimalCursorCol'] 
+    optimalColRatio = app.prefs.editor['optimalCursorCol']
     maxRows = self.view.rows
     maxCols = self.view.cols
     scrollRow = self.view.scrollRow
@@ -759,7 +759,7 @@ class Actions(app.mutator.Mutator):
         scrollCol <= col < scrollCol + maxCols):
       # Use optimal position preferences set in default_prefs.py
       # or $HOME/.ci_edit/prefs/editor.py
-      scrollRow = max(0, min(len(self.lines) - 1, 
+      scrollRow = max(0, min(len(self.lines) - 1,
         row - int(optimalRowRatio * (maxRows - 1))))
       if col < maxCols:
         scrollCol = 0
@@ -778,10 +778,7 @@ class Actions(app.mutator.Mutator):
       try:
         if app.prefs.editor['onSaveStripTrailingSpaces']:
           self.stripTrailingWhiteSpace()
-        # Save all user data into history
-        self.savedAtRedoIndex = self.redoIndex
-        self.fileHistory['redoChain'] = self.redoChain
-        self.fileHistory['savedAtRedoIndex'] = self.savedAtRedoIndex
+        # Save user data that applies to read-only files into history.
         self.fileHistory['pen'] = (self.penRow, self.penCol)
         self.fileHistory['cursor'] = (self.view.cursorRow, self.view.cursorCol)
         self.fileHistory['scroll'] = (self.view.scrollRow, self.view.scrollCol)
@@ -795,11 +792,10 @@ class Actions(app.mutator.Mutator):
         file.truncate()
         file.write(self.data)
         file.close()
-        app.history.saveUserHistory((self.fullPath, self.lastChecksum,
-            self.lastFileSize), self.fileHistory)
-        # Store the file's new info
-        self.lastChecksum, self.lastFileSize = app.history.getFileInfo(
-            self.fullPath)
+        # Save user data that applies to writable files.
+        self.savedAtRedoIndex = self.redoIndex
+        self.fileHistory['redoChain'] = self.redoChain
+        self.fileHistory['savedAtRedoIndex'] = self.savedAtRedoIndex
         # Hmm, could this be hard coded to False here?
         self.isReadOnly = not os.access(self.fullPath, os.W_OK)
         self.fileStat = os.stat(self.fullPath)
@@ -815,6 +811,11 @@ class Actions(app.mutator.Mutator):
           app.log.info(i)
     except:
       app.log.info('except had exception')
+    app.history.saveUserHistory((self.fullPath, self.lastChecksum,
+        self.lastFileSize), self.fileHistory)
+    # Store the file's new info
+    self.lastChecksum, self.lastFileSize = app.history.getFileInfo(
+        self.fullPath)
 
   def selectText(self, row, col, length, mode):
     row = max(0, min(row, len(self.lines) - 1))

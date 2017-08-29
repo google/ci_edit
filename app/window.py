@@ -280,7 +280,7 @@ class LabeledLine(Window):
 
   def refresh(self):
     self.leftColumn.addStr(0, 0, self.label,
-        app.color.get('message_line'))
+        app.color.get('keyword'))
     Window.refresh(self)
 
   def reshape(self, rows, cols, top, left):

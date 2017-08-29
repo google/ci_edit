@@ -140,6 +140,7 @@ startswith
 str
 sys
 termios
+timeit
 tiocgwinsz
 traceback
 uid
