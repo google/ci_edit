@@ -1169,11 +1169,5 @@ class Actions(app.mutator.Mutator):
       self.__skipUpdateScroll = False
       return
     maxRow, maxCol = self.view.rows, self.view.cols
-    if self.view.scrollRow > self.penRow:
-      self.view.scrollRow = self.penRow
-    elif self.penRow >= self.view.scrollRow + maxRow:
-      self.view.scrollRow = self.penRow - (maxRow - 1)
-    if self.view.scrollCol > self.penCol:
-      self.view.scrollCol = self.penCol
-    elif self.penCol >= self.view.scrollCol + maxCol:
-      self.view.scrollCol = self.penCol - (maxCol - 1)
+    self.view.scrollRow, self.view.scrollCol = self.optimalScrollPosition(
+        self.penRow, self.penCol)
