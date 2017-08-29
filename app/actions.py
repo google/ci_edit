@@ -172,10 +172,14 @@ class Actions(app.mutator.Mutator):
     """
     app.log.debug()
     bookmarkRange, bookmarkData = bookmark
-    self.view.cursorRow, self.view.cursorCol = bookmarkData['cursor']
-    self.penRow, self.penCol = bookmarkData['pen']
-    self.markerRow, self.markerCol = bookmarkData['marker']
-    self.selectionMode = bookmarkData['selectionMode']
+    cursorRow, cursorCol = bookmarkData['cursor']
+    penRow, penCol = bookmarkData['pen']
+    markerRow, markerCol = bookmarkData['marker']
+    selectionMode = bookmarkData['selectionMode']
+    self.redoAddChange(('m', (penRow - self.penRow, penCol - self.penCol,
+                       markerRow - self.markerRow, markerCol - self.markerCol,
+                       selectionMode - self.selectionMode)))
+    self.redo()
 
   def bookmarkNext(self):
     """
