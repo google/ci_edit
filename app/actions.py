@@ -91,7 +91,7 @@ class Actions(app.mutator.Mutator):
         self.getText(upperRow, upperCol, lowerRow, lowerCol)))
       self.redo()
 
-  def enforceBookmarkListLength(self):
+  def resizeBookmarkList(self):
     """
     Repeatedly doubles the length self.bookmarks until
     its length is at least the number of lines in the document.
@@ -148,7 +148,7 @@ class Actions(app.mutator.Mutator):
       None
     """
     bookmarkRange, bookmarkData = self.dataToBookmark()
-    self.enforceBookmarkListLength()
+    self.resizeBookmarkList()
     for row in bookmarkRange:
       existingBookmark = self.bookmarks[row]
       if existingBookmark:
@@ -205,7 +205,7 @@ class Actions(app.mutator.Mutator):
     if bookmark:
       self.bookmarkGoto(bookmark)
     else:
-      self.setMessage("No bookmarks")
+      self.setMessage("No bookmarks to jump to")
 
   def bookmarkPrior(self):
     """
@@ -230,7 +230,7 @@ class Actions(app.mutator.Mutator):
     if bookmark:
       self.bookmarkGoto(bookmark)
     else:
-      self.setMessage("No bookmarks")
+      self.setMessage("No bookmarks to jump to")
 
   def bookmarkRemove(self):
     """
@@ -242,13 +242,13 @@ class Actions(app.mutator.Mutator):
     Returns:
       None
     """
-    removedBookmark = False
+    bookmarkWasRemoved = False
     app.log.debug()
     upperRow, _, lowerRow, _ = self.startAndEnd()
     for row in range(upperRow, lowerRow + 1):
       bookmark = self.bookmarks[row]
       if bookmark:
-        removedBookmark = True
+        bookmarkWasRemoved = True
         bookmarkRange, bookmarkData = bookmark
         try:
           self.bookmarkSets.remove(bookmarkRange)
@@ -256,7 +256,7 @@ class Actions(app.mutator.Mutator):
           pass
         for row in bookmarkRange:
           self.bookmarks[row] = None
-    return removedBookmark
+    return bookmarkWasRemoved
 
   def backspace(self):
     app.log.info('backspace', self.penRow > self.markerRow)
