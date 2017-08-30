@@ -66,7 +66,8 @@ class ViewWindow:
         assert col >= 0, col
         assert len(text) <= self.cols, "%d, %d" % (len(text), self.cols)
     try:
-      mainCursesWindow.addstr(self.top + row, self.left + col, text, colorPair)
+      mainCursesWindow.addstr(self.top + row, self.left + col,
+          text.encode('utf-8'), colorPair)
     except curses.error: pass
 
   def changeFocusTo(self, changeTo):
@@ -185,8 +186,8 @@ class ViewWindow:
     text = str(text)[:self.cols]
     text = text + ' ' * max(0, self.cols - len(text))
     try:
-      mainCursesWindow.addstr(self.top + self.writeLineRow, self.left, text,
-          color)
+      mainCursesWindow.addstr(self.top + self.writeLineRow, self.left,
+          text.encode('utf-8'), color)
     except curses.error: pass
     self.writeLineRow += 1
 

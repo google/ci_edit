@@ -303,6 +303,7 @@ prefs = {
       'escaped': r"\\'",
       'indent': '  ',
       'single_line': True,
+      'special': __special_string_escapes + [r"\\\\"],
     },
     'c_raw_string2': {
       'begin': '[uU]?[rR]"',
@@ -310,6 +311,7 @@ prefs = {
       'escaped': r'\\"',
       'indent': '  ',
       'single_line': True,
+      'special': __special_string_escapes + [r"\\\\"],
     },
     'c_string1': {
       'begin': "'(?!'')",
@@ -362,7 +364,9 @@ prefs = {
         'body', 'button', 'div', 'head', 'html', 'href', 'img', 'input',
         'script', 'select', 'span', 'style',
       ],
-      'special': [r'&.{1,5}?;',],
+      'special': [
+        r'&.{1,5}?;', '<if\s+expr="[^"]*[^>]*>', '</if>',
+      ],
       'contains': [
         'quoted_string1', 'quoted_string2', 'css', 'html_block_comment', 'js',
       ],
