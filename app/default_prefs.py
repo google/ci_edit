@@ -364,7 +364,9 @@ prefs = {
         'body', 'button', 'div', 'head', 'html', 'href', 'img', 'input',
         'script', 'select', 'span', 'style',
       ],
-      'special': [r'&.{1,5}?;',],
+      'special': [
+        r'&.{1,5}?;', '<if\s+expr="[^"]*[^>]*>', '</if>',
+      ],
       'contains': [
         'quoted_string1', 'quoted_string2', 'css', 'html_block_comment', 'js',
       ],
