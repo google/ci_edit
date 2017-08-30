@@ -528,11 +528,13 @@ class Actions(app.mutator.Mutator):
       try:
         file = io.open(self.fullPath)
         data = file.read()
+        self.fileEncoding = file.encoding
         self.setMessage('Opened existing file')
       except:
         try:
           file = io.open(self.fullPath, 'rb')
           data = file.read()
+          self.fileEncoding = None  # i.e. binary.
           self.setMessage('Opened file as a binary file')
         except:
           app.log.info('error opening file', self.fullPath)
@@ -642,7 +644,10 @@ class Actions(app.mutator.Mutator):
         self.fileHistory['marker'] = (self.markerRow, self.markerCol)
         self.fileHistory['selectionMode'] = self.selectionMode
         self.linesToData()
-        file = io.open(self.fullPath, 'w+')
+        if self.fileEncoding is None:
+          file = io.open(self.fullPath, 'wb+')
+        else:
+          file = io.open(self.fullPath, 'w+', encoding=self.fileEncoding)
         file.seek(0)
         file.truncate()
         file.write(self.data)
