@@ -21,9 +21,9 @@ import app.mutator
 import app.parser
 import app.prefs
 import app.selectable
-import codecs
 import curses.ascii
 import difflib
+import io
 import os
 import re
 import sys
@@ -522,25 +522,30 @@ class Actions(app.mutator.Mutator):
   def fileLoad(self):
     app.log.info('fileLoad', self.fullPath)
     file = None
-    try:
-      file = codecs.open(self.fullPath, encoding='utf-8')
-      self.setMessage('Opened existing file')
+    if not os.path.exists(self.fullPath):
+      self.setMessage('Creating new file')
+    else:
+      try:
+        file = io.open(self.fullPath)
+        data = file.read()
+        self.setMessage('Opened existing file')
+      except:
+        try:
+          file = io.open(self.fullPath, 'rb')
+          data = file.read()
+          self.setMessage('Opened file as a binary file')
+        except:
+          app.log.info('error opening file', self.fullPath)
+          self.setMessage('error opening file', self.fullPath)
+          return
       self.isReadOnly = not os.access(self.fullPath, os.W_OK)
       self.fileStat = os.stat(self.fullPath)
-    except:
-      try:
-        # Create a new file.
-        self.setMessage('Creating new file')
-      except:
-        app.log.info('error opening file', self.fullPath)
-        self.setMessage('error opening file', self.fullPath)
-        return
     self.relativePath = os.path.relpath(self.fullPath, os.getcwd())
     app.log.info('fullPath', self.fullPath)
     app.log.info('cwd', os.getcwd())
     app.log.info('relativePath', self.relativePath)
     if file:
-      self.fileFilter(file.read())
+      self.fileFilter(data)
       file.close()
     else:
       self.data = ""
@@ -637,7 +642,7 @@ class Actions(app.mutator.Mutator):
         self.fileHistory['marker'] = (self.markerRow, self.markerCol)
         self.fileHistory['selectionMode'] = self.selectionMode
         self.linesToData()
-        file = codecs.open(self.fullPath, 'w+', encoding='utf-8')
+        file = io.open(self.fullPath, 'w+')
         file.seek(0)
         file.truncate()
         file.write(self.data)
