@@ -176,9 +176,10 @@ class Actions(app.mutator.Mutator):
     penRow, penCol = bookmarkData['pen']
     markerRow, markerCol = bookmarkData['marker']
     selectionMode = bookmarkData['selectionMode']
-    self.redoAddChange(('m', (penRow - self.penRow, penCol - self.penCol,
-                       markerRow - self.markerRow, markerCol - self.markerCol,
-                       selectionMode - self.selectionMode)))
+    self.__skipCursorScroll = True
+    self.cursorMoveAndMark(penRow - self.penRow, penCol - self.penCol,
+        markerRow - self.markerRow, markerCol - self.markerCol,
+        selectionMode - self.selectionMode)
     self.redo()
 
   def bookmarkNext(self):
