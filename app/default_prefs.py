@@ -303,6 +303,7 @@ prefs = {
       'escaped': r"\\'",
       'indent': '  ',
       'single_line': True,
+      'special': __special_string_escapes + [r"\\\\"],
     },
     'c_raw_string2': {
       'begin': '[uU]?[rR]"',
@@ -310,6 +311,7 @@ prefs = {
       'escaped': r'\\"',
       'indent': '  ',
       'single_line': True,
+      'special': __special_string_escapes + [r"\\\\"],
     },
     'c_string1': {
       'begin': "'(?!'')",
