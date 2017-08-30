@@ -23,6 +23,7 @@ import app.selectable
 import bisect
 import curses.ascii
 import difflib
+import io
 import os
 import re
 import sys
@@ -663,25 +664,32 @@ class Actions(app.mutator.Mutator):
   def fileLoad(self):
     app.log.info('fileLoad', self.fullPath)
     file = None
-    try:
-      file = open(self.fullPath, 'r')
-      self.setMessage('Opened existing file')
+    if not os.path.exists(self.fullPath):
+      self.setMessage('Creating new file')
+    else:
+      try:
+        file = io.open(self.fullPath)
+        data = file.read()
+        self.fileEncoding = file.encoding
+        self.setMessage('Opened existing file')
+      except:
+        try:
+          file = io.open(self.fullPath, 'rb')
+          data = file.read()
+          self.fileEncoding = None  # i.e. binary.
+          self.setMessage('Opened file as a binary file')
+        except:
+          app.log.info('error opening file', self.fullPath)
+          self.setMessage('error opening file', self.fullPath)
+          return
       self.isReadOnly = not os.access(self.fullPath, os.W_OK)
       self.fileStat = os.stat(self.fullPath)
-    except:
-      try:
-        # Create a new file.
-        self.setMessage('Creating new file')
-      except:
-        app.log.info('error opening file', self.fullPath)
-        self.setMessage('error opening file', self.fullPath)
-        return
     self.relativePath = os.path.relpath(self.fullPath, os.getcwd())
     app.log.info('fullPath', self.fullPath)
     app.log.info('cwd', os.getcwd())
     app.log.info('relativePath', self.relativePath)
     if file:
-      self.fileFilter(file.read())
+      self.fileFilter(data)
       file.close()
     else:
       self.data = ""
@@ -786,7 +794,10 @@ class Actions(app.mutator.Mutator):
         self.fileHistory['bookmarks'] = self.bookmarks
         self.fileHistory['bookmarkSets'] = self.bookmarkSets
         self.linesToData()
-        file = open(self.fullPath, 'w+')
+        if self.fileEncoding is None:
+          file = io.open(self.fullPath, 'wb+')
+        else:
+          file = io.open(self.fullPath, 'w+', encoding=self.fileEncoding)
         file.seek(0)
         file.truncate()
         file.write(self.data)

@@ -32,6 +32,7 @@ import cProfile
 import pstats
 import cPickle as pickle
 import curses
+import locale
 import StringIO
 import time
 import traceback
@@ -584,6 +585,7 @@ def wrapped_ci(cursesScreen):
       app.log.error(i[:-1])
 
 def run_ci():
+  locale.setlocale(locale.LC_ALL, '')
   try:
     # Reduce the delay waiting for escape sequences.
     os.environ.setdefault('ESCDELAY', '1')

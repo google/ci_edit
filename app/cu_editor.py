@@ -146,6 +146,7 @@ class InteractiveFind(app.editor.InteractiveFind):
       CTRL_F: self.findNext,
       CTRL_G: self.findNext,
       CTRL_J: self.changeToHostWindow,
+      CTRL_O: self.changeToFileOpen,
       CTRL_P: self.changeToPrediction,
       CTRL_R: self.findPrior,
       KEY_DOWN: self.findNext,
@@ -199,6 +200,7 @@ class InteractiveOpener(app.editor.InteractiveOpener):
       CTRL_J: self.createOrOpen,
       CTRL_N: self.createOrOpen,
       CTRL_O: self.createOrOpen,
+      CTRL_P: self.changeToPrediction,
       CTRL_Q: self.saveEventChangeToHostWindow,
     })
     self.commandSet = commandSet
@@ -220,6 +222,7 @@ class InteractivePrediction(app.editor.InteractivePrediction):
       CTRL_G: self.changeToGoto,
       CTRL_J: self.selectItem,
       CTRL_N: self.nextItem,
+      CTRL_O: self.changeToFileOpen,
       CTRL_P: self.priorItem,
       CTRL_Q: self.saveEventChangeToHostWindow,
       KEY_DOWN: self.nextItem,
