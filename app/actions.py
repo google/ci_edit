@@ -38,6 +38,7 @@ class Actions(app.mutator.Mutator):
     self.view = None
     self.rootGrammar = app.prefs.getGrammar(None)
     self.__skipUpdateScroll = False
+    self.__skipCursorScroll = False
 
   def setView(self, view):
     self.view = view
@@ -181,18 +182,21 @@ class Actions(app.mutator.Mutator):
       colDelta = -self.penCol
     self.goalCol = self.penCol + colDelta
     maxRow, maxCol = self.view.rows, self.view.cols
-    scrollRows = 0
-    if self.view.scrollRow > self.penRow + rowDelta:
-      scrollRows = self.penRow + rowDelta - self.view.scrollRow
-    elif self.penRow + rowDelta >= self.view.scrollRow + maxRow:
-      scrollRows = self.penRow + rowDelta - (self.view.scrollRow + maxRow - 1)
-    scrollCols = 0
-    if self.view.scrollCol > self.penCol + colDelta:
-      scrollCols = self.penCol + colDelta - self.view.scrollCol
-    elif self.penCol + colDelta >= self.view.scrollCol + maxCol:
-      scrollCols = self.penCol + colDelta - (self.view.scrollCol + maxCol - 1)
-    self.view.scrollRow += scrollRows
-    self.view.scrollCol += scrollCols
+    if self.__skipCursorScroll:
+      self.__skipCursorScroll = False
+    else:
+      scrollRows = 0
+      if self.view.scrollRow > self.penRow + rowDelta:
+        scrollRows = self.penRow + rowDelta - self.view.scrollRow
+      elif self.penRow + rowDelta >= self.view.scrollRow + maxRow:
+        scrollRows = self.penRow + rowDelta - (self.view.scrollRow + maxRow - 1)
+      scrollCols = 0
+      if self.view.scrollCol > self.penCol + colDelta:
+        scrollCols = self.penCol + colDelta - self.view.scrollCol
+      elif self.penCol + colDelta >= self.view.scrollCol + maxCol:
+        scrollCols = self.penCol + colDelta - (self.view.scrollCol + maxCol - 1)
+      self.view.scrollRow += scrollRows
+      self.view.scrollCol += scrollCols
     return ('m', (rowDelta, colDelta,
         markRowDelta, markColDelta, selectionModeDelta))
 
@@ -201,7 +205,7 @@ class Actions(app.mutator.Mutator):
     change = self.getCursorMoveAndMark(rowDelta, colDelta, markRowDelta,
                                        markColDelta, selectionModeDelta)
     self.redoAddChange(change)
-
+ 
   def cursorMoveScroll(self, rowDelta, colDelta,
       scrollRowDelta, scrollColDelta):
     self.view.scrollRow += scrollRowDelta
@@ -588,7 +592,7 @@ class Actions(app.mutator.Mutator):
     self.lastChecksum, self.lastFileSize = app.history.getFileInfo(
         self.fullPath)
 
-  def optimalScrollPosition(self, row, col):
+  def optimalScrollPosition(self, row=None, col=None):
     """
     Calculates the optimal position for the view.
 
@@ -606,16 +610,36 @@ class Actions(app.mutator.Mutator):
     maxCols = self.view.cols
     scrollRow = self.view.scrollRow
     scrollCol = self.view.scrollCol
-    if not (scrollRow <= row < scrollRow + maxRows and
-        scrollCol <= col < scrollCol + maxCols):
-      # Use optimal position preferences set in default_prefs.py
-      # or $HOME/.ci_edit/prefs/editor.py
-      scrollRow = max(0, min(len(self.lines) - 1,
-        row - int(optimalRowRatio * (maxRows - 1))))
-      if col < maxCols:
-        scrollCol = 0
-      else:
-        scrollCol = max(0, col - int(optimalColRatio * (maxCols - 1)))
+    # if not (scrollRow <= row < scrollRow + maxRows and
+    #     scrollCol <= col < scrollCol + maxCols):
+    #   # Use optimal position preferences set in default_prefs.py
+    #   # or $HOME/.ci_edit/prefs/editor.py
+    #   scrollRow = max(0, min(len(self.lines) - 1,
+    #     row - int(optimalRowRatio * (maxRows - 1))))
+    #   if col < maxCols:
+    #     scrollCol = 0
+    #   else:
+    #     scrollCol = max(0, col - int(optimalColRatio * (maxCols - 1)))
+    top, left, bottom, right = self.startAndEnd()
+    height = bottom - top + 1
+    length = right - left + 1
+    extraRows = maxRows - height
+    extraCols = maxCols - length
+    if extraRows > 0:
+      if not (scrollRow <= top and bottom < scrollRow + maxRows):
+        scrollRow = max(0, min(len(self.lines) - 1,
+          top - int(optimalRowRatio * (maxRows - 1))))
+    else:
+      scrollRow = top
+    if extraCols > 0:
+      if not (scrollCol <= left and right < scrollCol + maxCols):
+        if right < maxCols:
+          scrollCol = 0
+        else:
+          scrollCol = max(0, min(right, 
+            left - int(optimalColRatio * (maxCols - 1))))
+    else:
+      scrollCol = left
     return (scrollRow, scrollCol)
 
 
@@ -672,16 +696,14 @@ class Actions(app.mutator.Mutator):
     scrollRow = self.view.scrollRow
     scrollCol = self.view.scrollCol
     maxRow, maxCol = self.view.rows, self.view.cols
-    scrollRow, scrollCol = self.optimalScrollPosition(row, col)
     self.doSelectionMode(app.selectable.kSelectionNone)
-    self.view.scrollRow = scrollRow
-    self.view.scrollCol = scrollCol
     self.cursorMoveScroll(
         row - self.penRow,
         col + length - self.penCol,
         0, 0)
     self.redo()
     self.doSelectionMode(mode)
+    self.__skipCursorScroll = True
     self.cursorMove(0, -length)
     self.redo()
 
