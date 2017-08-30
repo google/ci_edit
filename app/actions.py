@@ -205,8 +205,7 @@ class Actions(app.mutator.Mutator):
     if bookmark:
       self.bookmarkGoto(bookmark)
     else:
-      pass
-      # TODO: Make labeled line show that there are no more bookmarks.
+      self.setMessage("No bookmarks")
 
   def bookmarkPrior(self):
     """
@@ -231,8 +230,7 @@ class Actions(app.mutator.Mutator):
     if bookmark:
       self.bookmarkGoto(bookmark)
     else:
-      pass
-      # TODO: Make labeled line show that there are no more bookmarks.
+      self.setMessage("No bookmarks")
 
   def bookmarkRemove(self):
     """
