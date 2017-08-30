@@ -38,6 +38,8 @@ class Actions(app.mutator.Mutator):
     self.view = None
     self.rootGrammar = app.prefs.getGrammar(None)
     self.__skipUpdateScroll = False
+    # |__skipCursorScroll| is True if you want to set the scroll 
+    # view to the optimal cursor position on the next update.
     self.__skipCursorScroll = False
 
   def setView(self, view):
@@ -185,18 +187,17 @@ class Actions(app.mutator.Mutator):
     if self.__skipCursorScroll:
       self.__skipCursorScroll = False
     else:
-      scrollRows = 0
+      scrollRowDelta = 0
       if self.view.scrollRow > self.penRow + rowDelta:
-        scrollRows = self.penRow + rowDelta - self.view.scrollRow
+        scrollRowDelta = self.penRow + rowDelta - self.view.scrollRow
       elif self.penRow + rowDelta >= self.view.scrollRow + maxRow:
-        scrollRows = self.penRow + rowDelta - (self.view.scrollRow + maxRow - 1)
-      scrollCols = 0
+        scrollRowDelta = self.penRow + rowDelta - (self.view.scrollRow + maxRow - 1)
+      scrollColDelta = 0
       if self.view.scrollCol > self.penCol + colDelta:
-        scrollCols = self.penCol + colDelta - self.view.scrollCol
+        scrollColDelta = self.penCol + colDelta - self.view.scrollCol
       elif self.penCol + colDelta >= self.view.scrollCol + maxCol:
-        scrollCols = self.penCol + colDelta - (self.view.scrollCol + maxCol - 1)
-      self.view.scrollRow += scrollRows
-      self.view.scrollCol += scrollCols
+        scrollColDelta = self.penCol + colDelta - (self.view.scrollCol + maxCol - 1)
+      self.updateScrollPosition(scrollRowDelta, scrollColDelta)
     return ('m', (rowDelta, colDelta,
         markRowDelta, markColDelta, selectionModeDelta))
 
@@ -208,8 +209,7 @@ class Actions(app.mutator.Mutator):
  
   def cursorMoveScroll(self, rowDelta, colDelta,
       scrollRowDelta, scrollColDelta):
-    self.view.scrollRow += scrollRowDelta
-    self.view.scrollCol += scrollColDelta
+    self.updateScrollPosition(scrollRowDelta, scrollColDelta)
     self.redoAddChange(('m', (rowDelta, colDelta,
         0,0, 0)))
 
@@ -386,37 +386,37 @@ class Actions(app.mutator.Mutator):
     self.redo()
 
   def cursorPageDown(self):
+    # self.doSelectionMode(app.selectable.kSelectionNone)
     if self.penRow == len(self.lines):
       return
     maxRow, maxCol = self.view.rows, self.view.cols
     penRowDelta = maxRow
-    scrollDelta = maxRow
+    scrollRowDelta = maxRow
     numLines = len(self.lines)
     if self.penRow + maxRow >= numLines:
       penRowDelta = numLines - self.penRow - 1
     if numLines <= maxRow:
-      scrollDelta = -self.view.scrollRow
+      scrollRowDelta = -self.view.scrollRow
     elif numLines <= 2*maxRow + self.view.scrollRow:
-      scrollDelta = numLines - self.view.scrollRow - maxRow
-
-    self.view.scrollRow += scrollDelta
+      scrollRowDelta = numLines - self.view.scrollRow - maxRow
     self.cursorMoveScroll(penRowDelta,
-        self.cursorColDelta(self.penRow + penRowDelta), 0, 0)
+        self.cursorColDelta(self.penRow + penRowDelta), scrollRowDelta, 0)
     self.redo()
 
   def cursorPageUp(self):
+    # self.doSelectionMode(app.selectable.kSelectionNone)
     if self.penRow == 0:
       return
     maxRow, maxCol = self.view.rows, self.view.cols
     penRowDelta = -maxRow
-    scrollDelta = -maxRow
+    scrollRowDelta = -maxRow
     if self.penRow < maxRow:
       penRowDelta = -self.penRow
-    if self.view.scrollRow + scrollDelta < 0:
-      scrollDelta = -self.view.scrollRow
-    self.view.scrollRow += scrollDelta
-    self.cursorMoveScroll(penRowDelta,
-        self.cursorColDelta(self.penRow + penRowDelta), 0, 0)
+    if self.view.scrollRow + scrollRowDelta < 0:
+      scrollRowDelta = -self.view.scrollRow
+    cursorColDelta = self.cursorColDelta(self.penRow + penRowDelta)
+    self.cursorMoveScroll(penRowDelta, cursorColDelta, scrollRowDelta, 0)
+    self.__skipUpdateScroll = True
     self.redo()
 
   def cursorScrollToMiddle(self):
@@ -1026,7 +1026,7 @@ class Actions(app.mutator.Mutator):
     cursorDelta = 0
     if self.penRow >= self.view.scrollRow + maxRow - 2:
       cursorDelta = self.view.scrollRow + maxRow - 2 - self.penRow
-    self.view.scrollRow -= 1
+    self.updateScrollPosition(-1, 0)
     if self.view.hasCaptiveCursor:
       self.cursorMoveScroll(cursorDelta,
           self.cursorColDelta(self.penRow + cursorDelta), 0, 0)
@@ -1048,7 +1048,7 @@ class Actions(app.mutator.Mutator):
     cursorDelta = 0
     if self.penRow <= self.view.scrollRow + 1:
       cursorDelta = self.view.scrollRow - self.penRow + 1
-    self.view.scrollRow += 1
+    self.updateScrollPosition(1, 0)
     if self.view.hasCaptiveCursor:
       self.cursorMoveScroll(cursorDelta,
           self.cursorColDelta(self.penRow + cursorDelta), 0, 0)
@@ -1185,11 +1185,29 @@ class Actions(app.mutator.Mutator):
     self.cursorMoveAndMark(0, -indentationLength, 0, -indentationLength, 0)
     self.redo()
 
-  def updateScrollPosition(self):
-    """Move the selected view rectangle so that the cursor is visible."""
+
+  def updateScrollPosition(self, scrollRowDelta=None, scrollColDelta=None):
+    """
+    This function updates the view's scroll position using the optional
+    scrollRowDelta and scrollColDelta arguments.
+    If either of them are None, then the selected view rectangle 
+    will be moved so that the cursor is visible.
+
+    Args:
+      scrollRowDelta (int): Default to None. The number of rows 
+                                 down to move the view.
+      scrollColDelta (int): Default to None. The number of rows 
+                                 right to move the view.
+    
+    Returns:
+      None
+    """
     if self.__skipUpdateScroll:
       self.__skipUpdateScroll = False
       return
-    maxRow, maxCol = self.view.rows, self.view.cols
-    self.view.scrollRow, self.view.scrollCol = self.optimalScrollPosition(
-        self.penRow, self.penCol)
+    if scrollRowDelta is None or scrollColDelta is None:
+      self.view.scrollRow, self.view.scrollCol = self.optimalScrollPosition(
+          self.penRow, self.penCol)
+    else:
+      self.view.scrollRow += scrollRowDelta
+      self.view.scrollCol += scrollColDelta
