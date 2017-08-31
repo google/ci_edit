@@ -451,7 +451,7 @@ class Actions(app.mutator.Mutator):
       None.
     """
     self.doSelectionMode(app.selectable.kSelectionNone)
-    self.cursorPageDown()
+    self.__cursorPageDown()
 
   def cursorNeutralPageUp(self):
     """
@@ -466,7 +466,7 @@ class Actions(app.mutator.Mutator):
       None.
     """
     self.doSelectionMode(app.selectable.kSelectionNone)
-    self.cursorPageUp()
+    self.__cursorPageUp()
 
   def cursorSelectPageDown(self):
     """
@@ -486,7 +486,7 @@ class Actions(app.mutator.Mutator):
       None.
     """
     self.doSelectionMode(app.selectable.kSelectionCharacter)
-    self.cursorPageDown()
+    self.__cursorPageDown()
 
   def cursorSelectPageUp(self):
     """
@@ -506,7 +506,7 @@ class Actions(app.mutator.Mutator):
       None.
     """
     self.doSelectionMode(app.selectable.kSelectionCharacter)
-    self.cursorPageUp()
+    self.__cursorPageUp()
 
   def cursorScrollToMiddle(self):
     maxRow, maxCol = self.view.rows, self.view.cols
