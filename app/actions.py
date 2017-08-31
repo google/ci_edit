@@ -416,6 +416,22 @@ class Actions(app.mutator.Mutator):
         self.cursorColDelta(self.penRow + penRowDelta), 0, 0)
     self.redo()
 
+  def cursorNeutralPageDown(self):
+    self.doSelectionMode(app.selectable.kSelectionNone)
+    self.cursorPageDown()
+
+  def cursorNeutralPageUp(self):
+    self.doSelectionMode(app.selectable.kSelectionNone)
+    self.cursorPageUp()
+
+  def cursorSelectPageDown(self):
+    self.doSelectionMode(app.selectable.kSelectionBlock)
+    self.cursorPageDown()
+
+  def cursorSelectPageUp(self):
+    self.doSelectionMode(app.selectable.kSelectionBlock)
+    self.cursorPageUp()
+
   def cursorScrollToMiddle(self):
     maxRow, maxCol = self.view.rows, self.view.cols
     rowDelta = min(max(0, len(self.lines)-maxRow),
