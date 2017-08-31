@@ -425,11 +425,11 @@ class Actions(app.mutator.Mutator):
     self.cursorPageUp()
 
   def cursorSelectPageDown(self):
-    self.doSelectionMode(app.selectable.kSelectionBlock)
+    self.doSelectionMode(app.selectable.kSelectionCharacter)
     self.cursorPageDown()
 
   def cursorSelectPageUp(self):
-    self.doSelectionMode(app.selectable.kSelectionBlock)
+    self.doSelectionMode(app.selectable.kSelectionCharacter)
     self.cursorPageUp()
 
   def cursorScrollToMiddle(self):

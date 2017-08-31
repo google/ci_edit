@@ -69,8 +69,10 @@ def mainWindowCommands(controller, textBuffer):
     KEY_ESCAPE: textBuffer.normalize,
     KEY_F1: controller.info,
     KEY_BTAB: textBuffer.unindent,
-    KEY_PAGE_UP: textBuffer.cursorPageUp,
-    KEY_PAGE_DOWN: textBuffer.cursorPageDown,
+    KEY_PAGE_UP: textBuffer.cursorNeutralPageUp,
+    KEY_PAGE_DOWN: textBuffer.cursorNeutralPageDown,
+    KEY_SHIFT_PAGE_UP: textBuffer.cursorSelectPageUp,
+    KEY_SHIFT_PAGE_DOWN: textBuffer.cursorSelectPageDown,
 
     CTRL_F: controller.changeToFind,
     CTRL_G: controller.changeToGoto,
