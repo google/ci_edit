@@ -57,12 +57,12 @@ class EditText(app.controller.Controller):
     self.commandSet = {
       KEY_F1: self.info,
       CTRL_A: textBuffer.selectionAll,
-      KEY_BACKSPACE1: textBuffer.backspace,
-      KEY_BACKSPACE2: textBuffer.backspace,
-      KEY_BACKSPACE3: textBuffer.backspace,
 
       CTRL_C: textBuffer.editCopy,
       CTRL_H: textBuffer.backspace,
+      KEY_BACKSPACE1: textBuffer.backspace,
+      KEY_BACKSPACE2: textBuffer.backspace,
+      KEY_BACKSPACE3: textBuffer.backspace,
 
       CTRL_Q: self.prg.quit,
       CTRL_S: self.saveDocument,
@@ -352,16 +352,17 @@ class CiEdit(app.controller.Controller):
 
       CTRL_C: self.editCopy,
 
-      KEY_BACKSPACE1: self.backspace,
-      KEY_BACKSPACE2: self.backspace,
-      KEY_BACKSPACE3: self.backspace,
-
       CTRL_D: self.delete,
 
       CTRL_E: self.cursorEndOfLine,
 
       CTRL_F: self.cursorRight,
       KEY_RIGHT: self.cursorRight,
+
+      CTRL_H: self.backspace,
+      KEY_BACKSPACE1: self.backspace,
+      KEY_BACKSPACE2: self.backspace,
+      KEY_BACKSPACE3: self.backspace,
 
       CTRL_J: self.carriageReturn,
 
