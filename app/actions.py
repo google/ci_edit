@@ -38,6 +38,8 @@ class Actions(app.mutator.Mutator):
     app.mutator.Mutator.__init__(self)
     self.view = None
     self.rootGrammar = app.prefs.getGrammar(None)
+    # |__skipUpdateScroll| is False if you do not want the program
+    # to automatically set the view to the optimal scroll position.
     self.__skipUpdateScroll = False
     # |__skipCursorScroll| is True if you want to set the scroll 
     # view to the optimal cursor position on the next update.
@@ -1200,9 +1202,11 @@ class Actions(app.mutator.Mutator):
   def updateScrollPosition(self, scrollRowDelta=None, scrollColDelta=None):
     """
     This function updates the view's scroll position using the optional
-    scrollRowDelta and scrollColDelta arguments.
-    If either of them are None, then the selected view rectangle 
-    will be moved so that the cursor is visible.
+    scrollRowDelta and scrollColDelta arguments. If either of them is
+    None, then the selected view rectangle will be moved so that the
+    cursor is visible. If you do not want this function to automatically
+    set the view to the defined optimal position, then you must set
+    self.__skipUpdateScroll to True or make sure the cursor is on the screen.
 
     Args:
       scrollRowDelta (int): Default to None. The number of rows 
@@ -1213,12 +1217,13 @@ class Actions(app.mutator.Mutator):
     Returns:
       None
     """
+    if not (scrollRowDelta is None or scrollColDelta is None):
+      self.view.scrollRow += scrollRowDelta
+      self.view.scrollCol += scrollColDelta
+      return
     if self.__skipUpdateScroll:
       self.__skipUpdateScroll = False
       return
-    if scrollRowDelta is None or scrollColDelta is None:
+    else:
       self.view.scrollRow, self.view.scrollCol = self.optimalScrollPosition(
           self.penRow, self.penCol)
-    else:
-      self.view.scrollRow += scrollRowDelta
-      self.view.scrollCol += scrollColDelta
