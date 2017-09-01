@@ -120,23 +120,6 @@ class Actions(app.mutator.Mutator):
     bookmarkRange = tuple(row for row in range(upperRow, lowerRow + 1))
     return (bookmarkRange, bookmarkData)
 
-  def findBookmarkIndex(self, bookmark):
-    """
-    Given the range of rows of a bookmark, return the index position
-    that the bookmark would belong to in self.bookmarks so that
-    the positions are sorted.
-
-    Args:
-      bookmark (tuple): contains bookmarkRange and bookmarkData. More info can
-        be found in the dataToBookmark function.
-
-    Returns:
-      None.
-    """
-    bookmarkRange, bookmarkData = bookmark
-    numBookmarks = len(self.bookmarks)
-    while bookmark
-
   def bookmarkAdd(self):
     """
     Adds a bookmark at the cursor's location. If multiple lines are 
@@ -236,9 +219,7 @@ class Actions(app.mutator.Mutator):
     Returns:
       None
     """
-    def bookmarksOverlap(bookmark1, bookmark2):
-      bookmarkRange1 = bookmark1[0]
-      bookmarkRange2 = bookmark2[0]
+    def bookmarksOverlap(bookmarkRange1, bookmarkRange2):
       if (bookmarkRange1[-1] >= bookmarkRange2[0] and
           bookmarkRange1[0] <= bookmarkRange2[-1]):
         return True
@@ -250,7 +231,7 @@ class Actions(app.mutator.Mutator):
         return
       if startIndex == endIndex:
         currentBookmarkRange = self.bookmarks[startIndex][0]
-        if bookmarksOverlap(bookmarkRange, currentBookmarkRange)
+        if bookmarksOverlap(bookmarkRange, currentBookmarkRange):
           self.bookmarks[startIndex] = None
           return
       while 1:
@@ -267,10 +248,12 @@ class Actions(app.mutator.Mutator):
     app.log.debug()
     upperRow, _, lowerRow, _ = self.startAndEnd()
     numBookmarks = len(self.bookmarks)
-    bookmarkRange = (upperRow, lowerRow, 0, numBookmarks - 1)
-    helpRemoveBookmarks(bookmarkRange, low)
-    self.bookmarks = [b for b in self.bookmarks if b]
+    bookmarkRange = (upperRow, lowerRow)
+    if self.bookmarks:
+      helpRemoveBookmarks(bookmarkRange, 0, numBookmarks - 1)
+      self.bookmarks = [b for b in self.bookmarks if b]
     return len(self.bookmarks) != numBookmarks
+
 
   def backspace(self):
     app.log.info('backspace', self.penRow > self.markerRow)
