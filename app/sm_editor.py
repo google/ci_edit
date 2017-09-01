@@ -36,20 +36,21 @@ class CiEdit(app.controller.Controller):
       CTRL_A: textBuffer.cursorStartOfLine,
 
       CTRL_B: textBuffer.cursorLeft,
-      curses.KEY_LEFT: self.cursorLeft,
+      KEY_LEFT: self.cursorLeft,
 
       CTRL_C: self.editCopy,
 
       CTRL_H: self.backspace,
-      curses.ascii.DEL: self.backspace,
-      curses.KEY_BACKSPACE: self.backspace,
+      KEY_BACKSPACE1: textBuffer.backspace,
+      KEY_BACKSPACE2: textBuffer.backspace,
+      KEY_BACKSPACE3: textBuffer.backspace,
 
       CTRL_D: self.delete,
 
       CTRL_E: self.cursorEndOfLine,
 
       CTRL_F: self.cursorRight,
-      curses.KEY_RIGHT: self.cursorRight,
+      KEY_RIGHT: self.cursorRight,
 
       CTRL_J: self.carriageReturn,
 
@@ -58,12 +59,12 @@ class CiEdit(app.controller.Controller):
       CTRL_L: self.win.refresh,
 
       CTRL_N: self.cursorDown,
-      curses.KEY_DOWN: self.cursorDown,
+      KEY_DOWN: self.cursorDown,
 
       CTRL_O: self.splitLine,
 
       CTRL_P: self.cursorUp,
-      curses.KEY_UP: self.cursorUp,
+      KEY_UP: self.cursorUp,
 
       CTRL_V: self.editPaste,
       CTRL_X: self.editCut,
