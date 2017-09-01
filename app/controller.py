@@ -17,6 +17,7 @@
 import app.log
 import curses
 import curses.ascii
+import app.curses_util
 
 
 class Controller:
@@ -208,7 +209,7 @@ class MainController:
       self.commandDefault = self.controller.commandDefault
       commandSet = self.controller.commandSet.copy()
       commandSet.update({
-        curses.KEY_F2: self.nextController,
+        app.curses_util.KEY_F2: self.nextController,
       })
       self.controller.commandSet = commandSet
 

@@ -134,6 +134,9 @@ KEY_SHIFT_LEFT = curses.KEY_SLEFT
 KEY_RIGHT = curses.KEY_RIGHT
 KEY_SHIFT_RIGHT = curses.KEY_SRIGHT
 
+KEY_MOUSE = curses.KEY_MOUSE
+KEY_RESIZE = curses.KEY_RESIZE
+
 def mouseButtonName(buttonState):
   """Curses debugging. Prints readable name for state of mouse buttons."""
   result = ''
