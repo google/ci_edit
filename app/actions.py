@@ -487,7 +487,9 @@ class Actions(app.mutator.Mutator):
     Returns:
       None.
     """
-    if self.selectionMode == app.selectable.kSelectionNone:
+    # Selection mode must be kSelectionCharacter
+    # or else weird behaviors will occur.
+    if self.selectionMode != app.selectable.kSelectionCharacter:
       self.doSelectionMode(app.selectable.kSelectionCharacter)
     self.__cursorPageDown()
 
@@ -508,7 +510,9 @@ class Actions(app.mutator.Mutator):
     Returns:
       None.
     """
-    if self.selectionMode == app.selectable.kSelectionNone:
+    # Selection mode must be kSelectionCharacter
+    # or else weird behaviors will occur.
+    if self.selectionMode != app.selectable.kSelectionCharacter:
       self.doSelectionMode(app.selectable.kSelectionCharacter)
     self.__cursorPageUp()
 
