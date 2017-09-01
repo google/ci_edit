@@ -483,8 +483,10 @@ class CuaEdit(app.controller.Controller):
       KEY_BTAB: textBuffer.unindent,
       KEY_HOME: textBuffer.cursorStartOfLine,
       KEY_END: textBuffer.cursorEndOfLine,
-      KEY_PAGE_UP: textBuffer.cursorPageUp,
-      KEY_PAGE_DOWN: textBuffer.cursorPageDown,
+      KEY_PAGE_UP: textBuffer.cursorNeutralPageUp,
+      KEY_PAGE_DOWN: textBuffer.cursorNeutralPageDown,
+      KEY_SHIFT_PAGE_UP: textBuffer.cursorSelectPageUp,
+      KEY_SHIFT_PAGE_DOWN: textBuffer.cursorSelectPageDown,
 
       CTRL_A: textBuffer.selectionAll,
 
