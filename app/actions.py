@@ -92,22 +92,6 @@ class Actions(app.mutator.Mutator):
         self.getText(upperRow, upperCol, lowerRow, lowerCol)))
       self.redo()
 
-  def resizeBookmarkList(self):
-    """
-    Repeatedly doubles the length self.bookmarks until
-    its length is at least the number of lines in the document.
-
-    Args:
-      None
-
-    Returns:
-      None
-    """
-    while len(self.bookmarks) < len(self.lines):
-      # Double the length of the array
-      length = len(self.bookmarks)
-      self.bookmarks.extend([None] * max(1, length))
-
   def dataToBookmark(self):
     """
     Grabs all the cursor data and returns a bookmark.
@@ -136,6 +120,23 @@ class Actions(app.mutator.Mutator):
     bookmarkRange = tuple(row for row in range(upperRow, lowerRow + 1))
     return (bookmarkRange, bookmarkData)
 
+  def findBookmarkIndex(self, bookmark):
+    """
+    Given the range of rows of a bookmark, return the index position
+    that the bookmark would belong to in self.bookmarks so that
+    the positions are sorted.
+
+    Args:
+      bookmark (tuple): contains bookmarkRange and bookmarkData. More info can
+        be found in the dataToBookmark function.
+
+    Returns:
+      None.
+    """
+    bookmarkRange, bookmarkData = bookmark
+    numBookmarks = len(self.bookmarks)
+    while bookmark
+
   def bookmarkAdd(self):
     """
     Adds a bookmark at the cursor's location. If multiple lines are 
@@ -149,7 +150,6 @@ class Actions(app.mutator.Mutator):
       None
     """
     bookmarkRange, bookmarkData = self.dataToBookmark()
-    self.resizeBookmarkList()
     for row in bookmarkRange:
       existingBookmark = self.bookmarks[row]
       if existingBookmark:
@@ -243,21 +243,41 @@ class Actions(app.mutator.Mutator):
     Returns:
       None
     """
-    bookmarkWasRemoved = False
+    def bookmarksOverlap(bookmark1, bookmark2):
+      bookmarkRange1 = bookmark1[0]
+      bookmarkRange2 = bookmark2[0]
+      if (bookmarkRange1[-1] >= bookmarkRange2[0] and
+          bookmarkRange1[0] <= bookmarkRange2[-1]):
+        return True
+      else:
+        return False
+
+    def helpRemoveBookmarks(bookmarkRange, startIndex, endIndex):
+      if endIndex < startIndex:
+        return
+      if startIndex == endIndex:
+        currentBookmarkRange = self.bookmarks[startIndex][0]
+        if bookmarksOverlap(bookmarkRange, currentBookmarkRange)
+          self.bookmarks[startIndex] = None
+          return
+      while 1:
+        currentIndex = (startIndex + endIndex) / 2
+        prevBookmarkRange = self.bookmarks[currentIndex][0]
+        nextBookmarkRange = self.bookmarks[currentIndex + 1][0]
+        if bookmarksOverlap(bookmarkRange, prevBookmarkRange):
+          self.bookmarks[currentIndex] = None
+          helpRemoveBookmarks(bookmarkRange, startIndex, currentIndex - 1)
+        if bookmarksOverlap(bookmarkRange, nextBookmarkRange):
+          self.bookmarks[currentIndex + 1] = None
+          helpRemoveBookmarks(bookmarkRange, currentIndex + 2, endIndex)
+
     app.log.debug()
     upperRow, _, lowerRow, _ = self.startAndEnd()
-    for row in range(upperRow, lowerRow + 1):
-      bookmark = self.bookmarks[row]
-      if bookmark:
-        bookmarkWasRemoved = True
-        bookmarkRange, bookmarkData = bookmark
-        try:
-          self.bookmarkSets.remove(bookmarkRange)
-        except ValueError:
-          pass
-        for row in bookmarkRange:
-          self.bookmarks[row] = None
-    return bookmarkWasRemoved
+    numBookmarks = len(self.bookmarks)
+    bookmarkRange = (upperRow, lowerRow, 0, numBookmarks - 1)
+    helpRemoveBookmarks(bookmarkRange, low)
+    self.bookmarks = [b for b in self.bookmarks if b]
+    return len(self.bookmarks) != numBookmarks
 
   def backspace(self):
     app.log.info('backspace', self.penRow > self.markerRow)
