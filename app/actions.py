@@ -444,6 +444,7 @@ class Actions(app.mutator.Mutator):
     at the bottom of the document if there is less than
     a page left. Does not select any text and removes all
     existing highlights.
+
     Args:
       None.
 
@@ -459,6 +460,7 @@ class Actions(app.mutator.Mutator):
     at the top of the document if there is less than
     a page left. Does not select any text and removes all
     existing highlights.
+
     Args:
       None.
 

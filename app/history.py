@@ -28,14 +28,15 @@ pathToHistory = app.prefs.prefs['userData'].get('historyPath')
 
 def loadUserHistory(filePath, historyPath=pathToHistory):
   """
-  Retrieves the user's complete edit history for all files
+  Retrieves the user's complete edit history for all files.
+
   Args:
     filePath (str): The absolute path to the file.
     historyPath (str): Defaults to pathToHistory.
       The path to the user's saved history.
 
   Returns:
-    None
+    None.
   """
   global userHistory, pathToHistory
   pathToHistory = historyPath
@@ -46,6 +47,7 @@ def loadUserHistory(filePath, historyPath=pathToHistory):
 def saveUserHistory(fileInfo, fileHistory, historyPath=pathToHistory):
   """
   Saves the user's file history by writing to a pickle file.
+
   Args:
     fileInfo (tuple): Contains (filePath, lastChecksum, lastFileSize).
     fileHistory (dict): The history of the file that the user wants to save.
@@ -53,7 +55,7 @@ def saveUserHistory(fileInfo, fileHistory, historyPath=pathToHistory):
       The path to the user's saved history.
 
   Returns:
-    None
+    None.
   """
   global userHistory, pathToHistory
   filePath, lastChecksum, lastFileSize = fileInfo
@@ -71,6 +73,13 @@ def saveUserHistory(fileInfo, fileHistory, historyPath=pathToHistory):
 
 def getFileHistory(filePath, data=None):
   """
+  Takes in an file path and an optimal data
+  argument and checks for the current file's history.
+  It stores the current time in the file history and
+  returns the file history. The second argument can be
+  passed in if a file's data has already been read
+  so that you do not have to read the file again.
+
   Args:
     filePath (str): The absolute path to the file.
     data (str): Defaults to None. This is the data
@@ -86,6 +95,10 @@ def getFileHistory(filePath, data=None):
 
 def getFileInfo(filePath, data=None):
   """
+  Returns the hash value and size of the specified file.
+  The second argument can be passed in if a file's data has
+  already been read so that you do not have to read the file again.
+
   Args:
     filePath (str): The absolute path to the file.
     data (str): Defaults to None. This is the data
@@ -94,15 +107,16 @@ def getFileInfo(filePath, data=None):
   Returns:
     A tuple containing the checksum and size of the file.
   """
-  try:
-    checksum = calculateChecksum(filePath, data)
-    fileSize = os.stat(filePath).st_size
-    return (checksum, fileSize)
-  except:
-    return (None, 0)
+  checksum = calculateChecksum(filePath, data)
+  fileSize = calculateFileSize(filePath)
+  return (checksum, fileSize)
 
 def calculateChecksum(filePath, data=None):
   """
+  Calculates the hash value of the specified file.
+  The second argument can be passed in if a file's data has
+  already been read so that you do not have to read the file again.
+
   Args:
     filePath (str): The absolute path to the file.
     data (str): Defaults to None. This is the data
@@ -113,16 +127,40 @@ def calculateChecksum(filePath, data=None):
   """
   app.log.info("Calculate checksum of the current file")
   hasher = hashlib.sha512()
-  if data:
-    hasher.update(data)
-  else:
-    with open(filePath, 'rb') as file:
-      hasher.update(file.read())
-  return hasher.hexdigest()
+  try:
+    if data:
+      hasher.update(data)
+    else:
+      with open(filePath, 'rb') as file:
+        hasher.update(file.read())
+    return hasher.hexdigest()
+  except:
+    return None
+
+def calculateFileSize(filePath):
+  """
+  Calculates the size of the specified value.
+
+  Args:
+    filePath (str): The absolute path to the file.
+
+  Returns:
+    The size of the file in bytes.
+  """
+  try:
+    return os.stat(filePath).st_size
+  except:
+    return 0
 
 def clearUserHistory():
   """
   Clears user history for all files.
+
+  Args:
+    None.
+
+  Returns:
+    None.
   """
   global userHistory, pathToHistory
   userHistory = {}
