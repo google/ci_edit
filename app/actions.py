@@ -112,7 +112,6 @@ class Actions(app.mutator.Mutator):
     bookmarkData = {
       'cursor': cursor,
       'marker': marker,
-      'path': self.fullPath,
       'pen': pen,
       'selectionMode': selectionMode,
     }
@@ -121,11 +120,21 @@ class Actions(app.mutator.Mutator):
     return (bookmarkRange, bookmarkData)
 
   def bookmarksOverlap(self, bookmarkRange1, bookmarkRange2):
-      if (bookmarkRange1[-1] >= bookmarkRange2[0] and
-          bookmarkRange1[0] <= bookmarkRange2[-1]):
-        return True
-      else:
-        return False
+    """
+    Returns whether the two sorted bookmark ranges overlap.
+    
+    Args:
+      bookmarkRange1 (tuple): a sorted tuple of row numbers.
+      bookmarkRange2 (tuple): a sorted tuple of row numbers.
+
+    Returns:
+      True if the ranges overlap. Otherwise, returns False.
+    """
+    if (bookmarkRange1[-1] >= bookmarkRange2[0] and
+        bookmarkRange1[0] <= bookmarkRange2[-1]):
+      return True
+    else:
+      return False
 
   def bookmarkAdd(self):
     """
@@ -180,7 +189,7 @@ class Actions(app.mutator.Mutator):
     bookmark = None
     _, _, lowerRow, _ = self.startAndEnd()
     numBookmarks = len(self.bookmarks)
-    tempBookmark = ((lowerRow,), "")
+    tempBookmark = ((lowerRow,float('inf')),)
     index = bisect.bisect(self.bookmarks, tempBookmark)
     if numBookmarks:
       bookmark =  self.bookmarkGoto(self.bookmarks[index % numBookmarks])
@@ -201,8 +210,8 @@ class Actions(app.mutator.Mutator):
     bookmark = None
     upperRow, _, _, _ = self.startAndEnd()
     numBookmarks = len(self.bookmarks)
-    tempBookmark = ((upperRow,), "")
-    index = bisect.bisect(self.bookmarks, tempBookmark)
+    tempBookmark = ((upperRow,),)
+    index = bisect.bisect_left(self.bookmarks, tempBookmark)
     if numBookmarks:
       bookmark =  self.bookmarkGoto(self.bookmarks[index - 1])
     else:
@@ -727,7 +736,6 @@ class Actions(app.mutator.Mutator):
 
     # Restore file bookmarks
     self.bookmarks = self.fileHistory.setdefault('bookmarks', [])
-    self.bookmarkSets = self.fileHistory.setdefault('bookmarkSets', [])
 
     # Store the file's info.
     self.lastChecksum, self.lastFileSize = app.history.getFileInfo(
@@ -781,7 +789,6 @@ class Actions(app.mutator.Mutator):
         self.fileHistory['marker'] = (self.markerRow, self.markerCol)
         self.fileHistory['selectionMode'] = self.selectionMode
         self.fileHistory['bookmarks'] = self.bookmarks
-        self.fileHistory['bookmarkSets'] = self.bookmarkSets
         self.linesToData()
         if self.fileEncoding is None:
           file = io.open(self.fullPath, 'wb+')
