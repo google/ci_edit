@@ -1065,7 +1065,7 @@ class Actions(app.mutator.Mutator):
     if not self.parser:
       self.parser = app.parser.Parser()
     start = time.time()
-    self.parser.parse(self.data, self.rootGrammar)
+    self.parser.parse(self.data, self.rootGrammar, 0)
     self.parserTime = time.time() - start
 
   def doSelectionMode(self, mode):
