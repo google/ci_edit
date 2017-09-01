@@ -487,7 +487,8 @@ class Actions(app.mutator.Mutator):
     Returns:
       None.
     """
-    self.doSelectionMode(app.selectable.kSelectionCharacter)
+    if self.selectionMode == app.selectable.kSelectionNone:
+      self.doSelectionMode(app.selectable.kSelectionCharacter)
     self.__cursorPageDown()
 
   def cursorSelectPageUp(self):
@@ -507,7 +508,8 @@ class Actions(app.mutator.Mutator):
     Returns:
       None.
     """
-    self.doSelectionMode(app.selectable.kSelectionCharacter)
+    if self.selectionMode == app.selectable.kSelectionNone:
+      self.doSelectionMode(app.selectable.kSelectionCharacter)
     self.__cursorPageUp()
 
   def cursorScrollToMiddle(self):
