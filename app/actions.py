@@ -149,16 +149,9 @@ class Actions(app.mutator.Mutator):
     Returns:
       None
     """
-    bookmarkRange, bookmarkData = self.dataToBookmark()
-    for row in bookmarkRange:
-      existingBookmark = self.bookmarks[row]
-      if existingBookmark:
-        try:
-          self.bookmarkSets.remove(existingBookmark[0])
-        except ValueError:
-          pass
-      self.bookmarks[row] = (bookmarkRange, bookmarkData)
-    bisect.insort(self.bookmarkSets, bookmarkRange)
+    newBookmark = self.dataToBookmark()
+    self.bookmarkRemove()
+    bisect.insort(self.bookmarks, newBookmark)
 
   def bookmarkGoto(self, bookmark):
     """
