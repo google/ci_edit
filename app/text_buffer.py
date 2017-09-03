@@ -29,6 +29,7 @@ class TextBuffer(app.actions.Actions):
     self.lineLimitIndicator = 0
     self.highlightRe = None
     self.fileHistory = {}
+    self.fileEncoding = None
     self.lastChecksum = None
     self.lastFileSize = 0
 

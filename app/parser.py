@@ -97,7 +97,14 @@ class Parser:
     node = gl[index]
     return node, offset - node.begin, gl[index + 1].begin - offset
 
-  def parse(self, data, grammar):
+  def parse(self, data, grammar, changedRow):
+    """
+      Args:
+        changedRow is the first row (which is line number - 1) in data that is
+            has changed since the previous parse of this data. Pass zero to
+            parse the entire document. If changedRow >= len(data) then no parse
+            is done.
+    """
     app.log.parser('grammar', grammar['name'])
     self.data = data
     node = ParserNode()

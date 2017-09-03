@@ -117,6 +117,8 @@ prefs = {
     'regex_string': stringColorIndex,
     'doc_block_comment': commentColorIndex,
     'html_block_comment': commentColorIndex,
+    'html_element': keywordsColorIndex,
+    'html_element_end': keywordsColorIndex,
     'found_find': foundColorIndex,
     'line_number': 168,
     'line_number_current': 146,
@@ -359,22 +361,40 @@ prefs = {
       'types': ['Array', 'boolean', 'string', 'Object'],
     },
     'html': {
+      'begin': kNonMatchingRegex,
+      'end': kNonMatchingRegex,
+      'errors': ['</br>', '</hr>', '</img>', '</input>',],
       'indent': '  ',
       'keywords': [
-        'body', 'button', 'div', 'head', 'html', 'href', 'img', 'input',
-        'script', 'select', 'span', 'style',
+        #'body', 'button', 'div', 'head', 'html', 'href', 'img', 'input',
+        #'script', 'select', 'span', 'style',
       ],
       'special': [
         r'&.{1,5}?;', '<if\s+expr="[^"]*[^>]*>', '</if>',
       ],
       'contains': [
         'quoted_string1', 'quoted_string2', 'css', 'html_block_comment', 'js',
+        'html_element', 'html_element_end',
       ],
     },
     'html_block_comment': {
       'begin': '<!--',
       'end': '-->',
       'indent': '  ',
+    },
+    'html_element': {
+      'begin': '<\\w+',
+      'contains': ['html_element_attribute',],
+      'end': '>',
+      'special': ['\\w+',],
+    },
+    'html_element_attribute': {
+      'begin': '\\??="',
+      'end': '"',
+    },
+    'html_element_end': {
+      'begin': '</\w+',
+      'end': '>',
     },
     'java': {
       'indent': '  ',
