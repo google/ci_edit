@@ -29,6 +29,7 @@ class Controller:
     self.commandSet = None
     self.textBuffer = None
     self.name = name
+    self.savedCh = -1
 
   def changeToConfirmClose(self):
     self.host.changeFocusTo(self.host.confirmClose)
