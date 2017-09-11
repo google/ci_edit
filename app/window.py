@@ -503,7 +503,10 @@ class StatusLine(ViewWindow):
     if len(statusLine):
       rightSide += ' |'
     if app.prefs.startup.get('showLogWindow'):
-      rightSide += ' %s | %s |' % (tb.cursorGrammarName(),
+      savedCh = self.host.controller.controller.savedCh
+      rightSide += '%d | %s | %s | %s |' % (savedCh, 
+          app.curses_util.cursesKeyName(savedCh),
+          tb.cursorGrammarName(),
           tb.selectionModeName())
     rightSide += ' %4d,%2d | %3d%%,%3d%%' % (
         self.host.cursorRow+1, self.host.cursorCol + 1,
