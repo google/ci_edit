@@ -1161,7 +1161,13 @@ class Actions(app.mutator.Mutator):
     if not self.parser:
       self.parser = app.parser.Parser()
     start = time.time()
-    self.parser.parse(self.data, self.rootGrammar, 0)
+    self.parser.parse(self.data, self.rootGrammar,
+        # TODO(dschuyler): start later than scrollRow.
+        self.view.scrollRow,
+        #self.upperChangedRow,
+        self.view.scrollRow + self.view.rows + 1)
+    self.sentUpperChangedRow = self.view.scrollRow
+    self.upperChangedRow = len(self.lines)
     self.parserTime = time.time() - start
 
   def doSelectionMode(self, mode):
