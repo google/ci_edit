@@ -100,24 +100,27 @@ class Parser:
     node = self.parserNodes[rowIndex + index]
     return node, offset - node.begin, remaining
 
-  def parse(self, data, grammar, changedRow, endRow):
+  def parse(self, data, grammar, beginRow, endRow):
     """
       Args:
-        data The file contents. The document.
-        grammar The initial grammar (often determined by the file extension).
-            If |changedRow| is not zero then grammar is ignored.
-        changedRow is the first row (which is line number - 1) in data that is
-            has changed since the previous parse of this data. Pass zero to
-            parse the entire document. If changedRow >= len(data) then no parse
+        data (string): The file contents. The document.
+        grammar (object): The initial grammar (often determined by the file
+            extension). If |beginRow| is not zero then grammar is ignored.
+        beginRow (int): is the first row (which is line number - 1) in data that
+            is has changed since the previous parse of this data. Pass zero to
+            parse the entire document. If beginRow >= len(data) then no parse
             is done.
+        endRow (int): The last row to parse. This stops the parser from going
+            over the entire if, for example, only 100 rows out of a million rows
+            are needed (which can save a lot of cpu time).
     """
     app.log.parser('grammar', grammar['name'])
     self.data = data
     self.endRow = endRow
-    if changedRow > 0 and len(self.rows):
-      if changedRow < len(self.rows):
-        self.parserNodes = self.parserNodes[:self.rows[changedRow]]
-        self.rows = self.rows[:changedRow]
+    if beginRow > 0 and len(self.rows):
+      if beginRow < len(self.rows):
+        self.parserNodes = self.parserNodes[:self.rows[beginRow]]
+        self.rows = self.rows[:beginRow]
     else:
       node = ParserNode()
       node.grammar = grammar
