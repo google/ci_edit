@@ -218,6 +218,7 @@ def color_content():
 
 def color_pair(a):
   testLog(a)
+  return 1
 
 def curs_set(a):
   testLog(a)

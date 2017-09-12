@@ -31,5 +31,5 @@ two
 #include "test.h"
 void blah();
 """
-    self.parser.parse(test, app.prefs.grammars['cpp'])
+    self.parser.parse(test, app.prefs.grammars['cpp'], 0, 99999)
     #self.assertEqual(selectable.selection(), (0, 0, 0, 0))
