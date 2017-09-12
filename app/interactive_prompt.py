@@ -146,7 +146,7 @@ class InteractivePrompt(app.controller.Controller):
       if self.host.textBuffer.bookmarkRemove():
         return {}, 'Removed bookmark'
       else:
-        return {}, 'No bookmarks'
+        return {}, 'No bookmarks to remove'
     else:
       self.host.textBuffer.bookmarkAdd()
       return {}, 'Added bookmark'
