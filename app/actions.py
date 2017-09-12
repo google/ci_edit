@@ -116,7 +116,7 @@ class Actions(app.mutator.Mutator):
       'selectionMode': selectionMode,
     }
     upperRow, _, lowerRow, _ = self.startAndEnd()
-    bookmarkRange = tuple(row for row in range(upperRow, lowerRow + 1))
+    bookmarkRange = (upperRow, lowerRow)
     return (bookmarkRange, bookmarkData)
 
   def bookmarksOverlap(self, bookmarkRange1, bookmarkRange2):
@@ -130,11 +130,8 @@ class Actions(app.mutator.Mutator):
     Returns:
       True if the ranges overlap. Otherwise, returns False.
     """
-    if (bookmarkRange1[-1] >= bookmarkRange2[0] and
-        bookmarkRange1[0] <= bookmarkRange2[-1]):
-      return True
-    else:
-      return False
+    return (bookmarkRange1[-1] >= bookmarkRange2[0] and
+            bookmarkRange1[0] <= bookmarkRange2[-1])
 
   def bookmarkAdd(self):
     """
@@ -169,7 +166,6 @@ class Actions(app.mutator.Mutator):
     penRow, penCol = bookmarkData['pen']
     markerRow, markerCol = bookmarkData['marker']
     selectionMode = bookmarkData['selectionMode']
-    self.__skipCursorScroll = True
     self.cursorMoveAndMark(penRow - self.penRow, penCol - self.penCol,
         markerRow - self.markerRow, markerCol - self.markerCol,
         selectionMode - self.selectionMode)
@@ -186,15 +182,14 @@ class Actions(app.mutator.Mutator):
       None.
     """
     app.log.debug()
+    if not len(self.bookmarks):
+      self.setMessage("No bookmarks to jump to")
+      return
     bookmark = None
     _, _, lowerRow, _ = self.startAndEnd()
-    numBookmarks = len(self.bookmarks)
     tempBookmark = ((lowerRow,float('inf')),)
     index = bisect.bisect(self.bookmarks, tempBookmark)
-    if numBookmarks:
-      bookmark =  self.bookmarkGoto(self.bookmarks[index % numBookmarks])
-    else:
-      self.setMessage("No bookmarks to jump to")
+    self.bookmarkGoto(self.bookmarks[index % len(self.bookmarks)])
 
   def bookmarkPrior(self):
     """
@@ -207,15 +202,14 @@ class Actions(app.mutator.Mutator):
       None.
     """
     app.log.debug()
+    if not len(self.bookmarks):
+      self.setMessage("No bookmarks to jump to")
+      return
     bookmark = None
     upperRow, _, _, _ = self.startAndEnd()
-    numBookmarks = len(self.bookmarks)
     tempBookmark = ((upperRow,),)
     index = bisect.bisect_left(self.bookmarks, tempBookmark)
-    if numBookmarks:
-      bookmark =  self.bookmarkGoto(self.bookmarks[index - 1])
-    else:
-      self.setMessage("No bookmarks to jump to")
+    bookmark = self.bookmarkGoto(self.bookmarks[index - 1])
 
   def bookmarkRemove(self):
     """
