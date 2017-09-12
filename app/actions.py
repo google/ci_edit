@@ -182,7 +182,7 @@ class Actions(app.mutator.Mutator):
       self.setMessage("No bookmarks to jump to")
       return
     _, _, lowerRow, _ = self.startAndEnd()
-    tempBookmark = ((lowerRow,float('inf')),)
+    tempBookmark = ((lowerRow, float('inf')),)
     index = bisect.bisect(self.bookmarks, tempBookmark)
     self.bookmarkGoto(self.bookmarks[index % len(self.bookmarks)])
 
