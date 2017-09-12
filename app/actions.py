@@ -181,7 +181,6 @@ class Actions(app.mutator.Mutator):
     if not len(self.bookmarks):
       self.setMessage("No bookmarks to jump to")
       return
-    bookmark = None
     _, _, lowerRow, _ = self.startAndEnd()
     tempBookmark = ((lowerRow,float('inf')),)
     index = bisect.bisect(self.bookmarks, tempBookmark)
@@ -201,7 +200,6 @@ class Actions(app.mutator.Mutator):
     if not len(self.bookmarks):
       self.setMessage("No bookmarks to jump to")
       return
-    bookmark = None
     upperRow, _, _, _ = self.startAndEnd()
     tempBookmark = ((upperRow,),)
     index = bisect.bisect_left(self.bookmarks, tempBookmark)
