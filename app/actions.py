@@ -105,15 +105,11 @@ class Actions(app.mutator.Mutator):
       are the rows that the bookmark affects.
       bookmarkData is a dictionary that contains the cursor data.
     """
-    cursor = (self.view.cursorRow, self.view.cursorCol)
-    pen = (self.penRow, self.penCol)
-    marker = (self.markerRow, self.markerCol)
-    selectionMode = self.selectionMode
     bookmarkData = {
-      'cursor': cursor,
-      'marker': marker,
-      'pen': pen,
-      'selectionMode': selectionMode,
+      'cursor': (self.view.cursorRow, self.view.cursorCol),
+      'marker': (self.markerRow, self.markerCol),
+      'pen': (self.penRow, self.penCol),
+      'selectionMode': self.selectionMode,
     }
     upperRow, _, lowerRow, _ = self.startAndEnd()
     bookmarkRange = (upperRow, lowerRow)
