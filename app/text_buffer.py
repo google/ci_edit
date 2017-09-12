@@ -26,8 +26,12 @@ class TextBuffer(app.actions.Actions):
   """The TextBuffer adds the drawing/rendering to the BackingTextBuffer."""
   def __init__(self):
     app.actions.Actions.__init__(self)
-    self.lineLimitIndicator = app.prefs.editor['lineLimitIndicator']
+    self.lineLimitIndicator = 0
     self.highlightRe = None
+    self.fileHistory = {}
+    self.fileEncoding = None
+    self.lastChecksum = None
+    self.lastFileSize = 0
 
   def checkScrollToCursor(self, window):
     """Move the selected view rectangle so that the cursor is visible."""
@@ -59,9 +63,12 @@ class TextBuffer(app.actions.Actions):
   def draw(self, window):
     if self.view.rows <= 0 or self.view.cols <= 0:
       return
-    if self.shouldReparse:
+    if 1:
       self.parseGrammars()
-      self.shouldReparse = False
+    else:
+      if self.shouldReparse:
+        self.parseGrammars()
+        self.shouldReparse = False
     if self.view.hasCaptiveCursor:
       self.checkScrollToCursor(window)
     rows, cols = window.rows, window.cols
@@ -124,6 +131,8 @@ class TextBuffer(app.actions.Actions):
           node, preceding, remaining = self.parser.grammarAtIndex(
               startRow + i, k, grammarIndex)
           grammarIndex += 1
+          if remaining == 0:
+            continue
           line = self.lines[startRow + i]
           assert remaining >= 0, remaining
           remaining = min(len(line) - k, remaining)

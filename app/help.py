@@ -96,7 +96,7 @@ Within the Goto line prompt:
 
   'version': \
 """
-  Version (build iteration): v27
+  Version (build iteration): v28
   See LICENSE for license information
   See readme.md for an introduction
   Both files may be found in "%s"

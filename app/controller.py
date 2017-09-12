@@ -17,6 +17,7 @@
 import app.log
 import curses
 import curses.ascii
+import app.curses_util
 
 
 class Controller:
@@ -81,7 +82,7 @@ class Controller:
     app.log.info('base controller focus()')
     pass
 
-  def exitConfirmationPrompt(self, ignore=1):
+  def confirmationPromptFinish(self, ignore=1):
     self.host.userIntent = 'edit'
     self.changeToHostWindow()
 
@@ -98,9 +99,10 @@ class Controller:
 
   def closeFile(self):
     app.log.info()
-    app.buffer_manager.buffers.closeTextBuffer(self.host.textBuffer)
-    self.host.setTextBuffer(app.buffer_manager.buffers.newTextBuffer())
-    self.exitConfirmationPrompt()
+    self.closeHostFile()
+    #app.buffer_manager.buffers.closeTextBuffer(self.host.textBuffer)
+    #self.host.setTextBuffer(app.buffer_manager.buffers.newTextBuffer())
+    self.confirmationPromptFinish()
 
   def closeOrConfirmClose(self):
     """If the file is clean, close it. If it is dirty, prompt the user
@@ -146,8 +148,6 @@ class Controller:
     app.log.debug()
     tb = self.host.textBuffer
     self.host.userIntent = 'quit'
-    app.history.set(['files', tb.fullPath, 'cursor'],
-        (self.host.textBuffer.penRow, self.host.textBuffer.penCol))
     if tb.isDirty():
       self.changeToConfirmQuit()
       return
@@ -209,7 +209,7 @@ class MainController:
       self.commandDefault = self.controller.commandDefault
       commandSet = self.controller.commandSet.copy()
       commandSet.update({
-        curses.KEY_F2: self.nextController,
+        app.curses_util.KEY_F2: self.nextController,
       })
       self.controller.commandSet = commandSet
 

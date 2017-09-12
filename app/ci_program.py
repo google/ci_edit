@@ -32,6 +32,7 @@ import cProfile
 import pstats
 import cPickle as pickle
 import curses
+import locale
 import StringIO
 import time
 import traceback
@@ -86,10 +87,7 @@ class CiProgram:
     self.setUpPalette()
     if 1:
       rows, cols = self.cursesScreen.getmaxyx()
-      # TODO(dschuyler): Is there any benefit to creating a window to overlay
-      # the screen or should the screen be used directly?
-      cursesWindow = curses.newwin(rows, cols)
-      #cursesWindow = self.cursesScreen
+      cursesWindow = self.cursesScreen
       cursesWindow.leaveok(1)  # Don't update cursor position.
       cursesWindow.scrollok(0)
       cursesWindow.timeout(10)
@@ -201,7 +199,7 @@ class CiProgram:
     """A second init-like function. Called after command line arguments are
     parsed."""
     if self.showLogWindow:
-      self.debugWindow = app.window.StaticWindow(self)
+      self.debugWindow = app.window.ViewWindow(self)
       #self.zOrder += [self.debugWindow]
       self.logWindow = app.window.LogWindow(self)
       #self.zOrder += [self.logWindow]
@@ -470,15 +468,12 @@ class CiProgram:
         elif i == '--help':
           userMessage(app.help.docs['command line'])
           self.quitNow()
-          return
         elif i == '--version':
           userMessage(app.help.docs['version'])
           self.quitNow()
-          return
         elif i.startswith('--'):
           userMessage("unknown command line argument", i)
           self.quitNow()
-          return
         continue
       if i == '-':
         readStdin = True
@@ -550,10 +545,9 @@ class CiProgram:
 
   def run(self):
     self.parseArgs()
-    homePath = os.path.expanduser('~/.ci_edit')
+    homePath = app.prefs.prefs['userData'].get('homePath')
     self.makeHomeDirs(homePath)
     app.bookmarks.loadUserBookmarks(os.path.join(homePath, 'bookmarks.dat'))
-    app.history.loadUserHistory(os.path.join(homePath, 'history.dat'))
     app.curses_util.hackCursesFixes()
     self.startup()
     if app.prefs.startup.get('profile'):
@@ -567,7 +561,6 @@ class CiProgram:
       app.log.info(output.getvalue())
     else:
       self.commandLoop()
-    app.history.saveUserHistory()
     app.bookmarks.saveUserBookmarks()
 
   def setUpPalette(self):
@@ -594,6 +587,7 @@ def wrapped_ci(cursesScreen):
       app.log.error(i[:-1])
 
 def run_ci():
+  locale.setlocale(locale.LC_ALL, '')
   try:
     # Reduce the delay waiting for escape sequences.
     os.environ.setdefault('ESCDELAY', '1')

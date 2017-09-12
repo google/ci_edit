@@ -138,7 +138,7 @@ class InteractiveOpener(app.controller.Controller):
           lines.append(i)
       if len(lines) == 1 and os.path.isfile(os.path.join(dirPath, fileName)):
         self.host.setTextBuffer(app.buffer_manager.buffers.loadTextBuffer(
-            os.path.join(dirPath, fileName)))
+            os.path.join(dirPath, fileName), self.host))
       else:
         self.host.textBuffer.lines = [
             os.path.abspath(os.path.expanduser(dirPath))+":"] + lines
@@ -176,10 +176,10 @@ class InteractiveOpener(app.controller.Controller):
           app.buffer_manager.buffers.getValidTextBuffer(self.priorTextBuffer))
     else:
       app.log.info('non-dir\n\n', expandedPath)
-      app.log.info('non-dir\n\n',
-          app.buffer_manager.buffers.loadTextBuffer(expandedPath).lines[0])
-      self.host.setTextBuffer(
-          app.buffer_manager.buffers.loadTextBuffer(expandedPath))
+      textBuffer = app.buffer_manager.buffers.loadTextBuffer(expandedPath,
+          self.host)
+      app.log.info('non-dir\n\n', textBuffer.lines[0])
+      self.host.setTextBuffer(textBuffer)
 
 
 class InteractivePrediction(app.controller.Controller):
@@ -258,8 +258,9 @@ class InteractivePrediction(app.controller.Controller):
           app.buffer_manager.buffers.getValidTextBuffer(textBuffer))
     else:
       expandedPath = os.path.abspath(os.path.expanduser(fullPath))
-      self.host.setTextBuffer(
-          app.buffer_manager.buffers.loadTextBuffer(expandedPath))
+      textBuffer = app.buffer_manager.buffers.loadTextBuffer(expandedPath,
+          self.host)
+      self.host.setTextBuffer(textBuffer)
     self.items = None
 
 

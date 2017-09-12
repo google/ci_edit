@@ -68,7 +68,9 @@ KEY_DELETE = curses.KEY_DC
 KEY_HOME = curses.KEY_HOME
 KEY_END = curses.KEY_END
 KEY_PAGE_DOWN = curses.KEY_NPAGE
+KEY_SHIFT_PAGE_DOWN = curses.KEY_SNEXT
 KEY_PAGE_UP = curses.KEY_PPAGE
+KEY_SHIFT_PAGE_UP = curses.KEY_SPREVIOUS
 KEY_BTAB = curses.KEY_BTAB
 
 KEY_ALT_A = 165
@@ -131,6 +133,9 @@ KEY_LEFT = curses.KEY_LEFT
 KEY_SHIFT_LEFT = curses.KEY_SLEFT
 KEY_RIGHT = curses.KEY_RIGHT
 KEY_SHIFT_RIGHT = curses.KEY_SRIGHT
+
+KEY_MOUSE = curses.KEY_MOUSE
+KEY_RESIZE = curses.KEY_RESIZE
 
 def mouseButtonName(buttonState):
   """Curses debugging. Prints readable name for state of mouse buttons."""

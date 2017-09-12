@@ -69,8 +69,10 @@ def mainWindowCommands(controller, textBuffer):
     KEY_ESCAPE: textBuffer.normalize,
     KEY_F1: controller.info,
     KEY_BTAB: textBuffer.unindent,
-    KEY_PAGE_UP: textBuffer.cursorPageUp,
-    KEY_PAGE_DOWN: textBuffer.cursorPageDown,
+    KEY_PAGE_UP: textBuffer.cursorNeutralPageUp,
+    KEY_PAGE_DOWN: textBuffer.cursorNeutralPageDown,
+    KEY_SHIFT_PAGE_UP: textBuffer.cursorSelectPageUp,
+    KEY_SHIFT_PAGE_DOWN: textBuffer.cursorSelectPageDown,
 
     CTRL_F: controller.changeToFind,
     CTRL_G: controller.changeToGoto,
@@ -110,7 +112,7 @@ class ConfirmClose(app.controller.Controller):
       ord('Y'): self.saveOrChangeToSaveAs,
     })
     self.commandSet = commandSet
-    self.commandDefault = self.exitConfirmationPrompt
+    self.commandDefault = self.confirmationPromptFinish
 
 
 class ConfirmOverwrite(app.controller.Controller):
@@ -126,7 +128,7 @@ class ConfirmOverwrite(app.controller.Controller):
       ord('Y'): self.overwriteHostFile,
     })
     self.commandSet = commandSet
-    self.commandDefault = self.exitConfirmationPrompt
+    self.commandDefault = self.confirmationPromptFinish
 
 
 class InteractiveFind(app.editor.InteractiveFind):
@@ -146,6 +148,7 @@ class InteractiveFind(app.editor.InteractiveFind):
       CTRL_F: self.findNext,
       CTRL_G: self.findNext,
       CTRL_J: self.changeToHostWindow,
+      CTRL_O: self.changeToFileOpen,
       CTRL_P: self.changeToPrediction,
       CTRL_R: self.findPrior,
       KEY_DOWN: self.findNext,
@@ -199,6 +202,7 @@ class InteractiveOpener(app.editor.InteractiveOpener):
       CTRL_J: self.createOrOpen,
       CTRL_N: self.createOrOpen,
       CTRL_O: self.createOrOpen,
+      CTRL_P: self.changeToPrediction,
       CTRL_Q: self.saveEventChangeToHostWindow,
     })
     self.commandSet = commandSet
@@ -220,6 +224,7 @@ class InteractivePrediction(app.editor.InteractivePrediction):
       CTRL_G: self.changeToGoto,
       CTRL_J: self.selectItem,
       CTRL_N: self.nextItem,
+      CTRL_O: self.changeToFileOpen,
       CTRL_P: self.priorItem,
       CTRL_Q: self.saveEventChangeToHostWindow,
       KEY_DOWN: self.nextItem,
@@ -263,7 +268,7 @@ class InteractiveQuit(app.controller.Controller):
       ord('Y'): self.saveOrChangeToSaveAs,
     })
     self.commandSet = commandSet
-    self.commandDefault = self.exitConfirmationPrompt
+    self.commandDefault = self.confirmationPromptFinish
 
 
 class InteractiveSaveAs(app.controller.Controller):

@@ -24,6 +24,7 @@ baudrate
 btab
 chgat
 chr
+codecs
 col
 cols
 contextlib
@@ -61,6 +62,8 @@ getyx
 gid
 gmem
 goto
+hashlib
+hexdigest
 hglobal
 hinstance
 hmenu
@@ -138,6 +141,7 @@ startswith
 str
 sys
 termios
+timeit
 tiocgwinsz
 traceback
 uid

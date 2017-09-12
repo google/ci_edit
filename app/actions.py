@@ -23,6 +23,7 @@ import app.prefs
 import app.selectable
 import curses.ascii
 import difflib
+import io
 import os
 import re
 import sys
@@ -381,7 +382,18 @@ class Actions(app.mutator.Mutator):
     self.cursorMove(0, lineLen - self.penCol)
     self.redo()
 
-  def cursorPageDown(self):
+  def __cursorPageDown(self):
+    """
+    Moves the view and cursor down by a page or stops
+    at the bottom of the document if there is less than
+    a page left.
+
+    Args:
+      None.
+
+    Returns:
+      None.
+    """
     if self.penRow == len(self.lines):
       return
     maxRow, maxCol = self.view.rows, self.view.cols
@@ -400,7 +412,18 @@ class Actions(app.mutator.Mutator):
         self.cursorColDelta(self.penRow + penRowDelta), 0, 0)
     self.redo()
 
-  def cursorPageUp(self):
+  def __cursorPageUp(self):
+    """
+    Moves the view and cursor up by a page or stops
+    at the top of the document if there is less than
+    a page left.
+
+    Args:
+      None.
+
+    Returns:
+      None.
+    """
     if self.penRow == 0:
       return
     maxRow, maxCol = self.view.rows, self.view.cols
@@ -414,6 +437,80 @@ class Actions(app.mutator.Mutator):
     self.cursorMoveScroll(penRowDelta,
         self.cursorColDelta(self.penRow + penRowDelta), 0, 0)
     self.redo()
+
+  def cursorNeutralPageDown(self):
+    """
+    Moves the view and cursor down by a page or stops
+    at the bottom of the document if there is less than
+    a page left. Does not select any text and removes all
+    existing highlights.
+
+    Args:
+      None.
+
+    Returns:
+      None.
+    """
+    self.doSelectionMode(app.selectable.kSelectionNone)
+    self.__cursorPageDown()
+
+  def cursorNeutralPageUp(self):
+    """
+    Moves the view and cursor up by a page or stops
+    at the top of the document if there is less than
+    a page left. Does not select any text and removes all
+    existing highlights.
+
+    Args:
+      None.
+
+    Returns:
+      None.
+    """
+    self.doSelectionMode(app.selectable.kSelectionNone)
+    self.__cursorPageUp()
+
+  def cursorSelectPageDown(self):
+    """
+    Moves the view and cursor down by a page or stops
+    at the bottom of the document if there is less than
+    a page left. If no text is highlighted, then all
+    text between the original position and the new position
+    will be highlighted. If text is already highlighted,
+    then all text between the new cursor position and
+    the other end of the currently highlighted text
+    will be highlighted.
+
+    Args:
+      None.
+
+    Returns:
+      None.
+    """
+    if self.selectionMode == app.selectable.kSelectionNone:
+      self.doSelectionMode(app.selectable.kSelectionCharacter)
+    self.__cursorPageDown()
+
+  def cursorSelectPageUp(self):
+    """
+    Moves the view and cursor up by a page or stops
+    at the top of the document if there is less than
+    a page left. If no text is highlighted, then all
+    text between the original position and the new position
+    will be highlighted. If text is already highlighted,
+    then all text between the new cursor position and
+    the other end of the previously highlighted text
+    will be highlighted.
+
+    Args:
+      None.
+
+    Returns:
+      None.
+    """
+    if self.selectionMode == app.selectable.kSelectionNone:
+      self.doSelectionMode(app.selectable.kSelectionCharacter)
+    self.__cursorPageUp()
 
   def cursorScrollToMiddle(self):
     maxRow, maxCol = self.view.rows, self.view.cols
@@ -521,25 +618,32 @@ class Actions(app.mutator.Mutator):
   def fileLoad(self):
     app.log.info('fileLoad', self.fullPath)
     file = None
-    try:
-      file = open(self.fullPath, 'r')
-      self.setMessage('Opened existing file')
+    if not os.path.exists(self.fullPath):
+      self.setMessage('Creating new file')
+    else:
+      try:
+        file = io.open(self.fullPath)
+        data = file.read()
+        self.fileEncoding = file.encoding
+        self.setMessage('Opened existing file')
+      except:
+        try:
+          file = io.open(self.fullPath, 'rb')
+          data = file.read()
+          self.fileEncoding = None  # i.e. binary.
+          self.setMessage('Opened file as a binary file')
+        except:
+          app.log.info('error opening file', self.fullPath)
+          self.setMessage('error opening file', self.fullPath)
+          return
       self.isReadOnly = not os.access(self.fullPath, os.W_OK)
       self.fileStat = os.stat(self.fullPath)
-    except:
-      try:
-        # Create a new file.
-        self.setMessage('Creating new file')
-      except:
-        app.log.info('error opening file', self.fullPath)
-        self.setMessage('error opening file', self.fullPath)
-        return
     self.relativePath = os.path.relpath(self.fullPath, os.getcwd())
     app.log.info('fullPath', self.fullPath)
     app.log.info('cwd', os.getcwd())
     app.log.info('relativePath', self.relativePath)
     if file:
-      self.fileFilter(file.read())
+      self.fileFilter(data)
       file.close()
     else:
       self.data = ""
@@ -550,30 +654,108 @@ class Actions(app.mutator.Mutator):
       self.dataToLines()
     else:
       self.parser = None
+    app.history.loadUserHistory(self.fullPath)
+    self.restoreUserHistory()
+
+  def restoreUserHistory(self):
+    """
+    This function restores all stored history of the file into the TextBuffer
+    object. If there does not exist a stored history of the file, it will
+    initialize the variables to default values.
+
+    Args:
+      None.
+
+    Returns:
+      None.
+    """
+    # Restore the file history.
+    self.fileHistory = app.history.getFileHistory(self.fullPath, self.data)
+
+    # Restore all positions and values of variables.
+    self.view.cursorRow, self.view.cursorCol = self.fileHistory.setdefault(
+        'cursor', (0, 0))
+    self.penRow, self.penCol = self.fileHistory.setdefault('pen', (0, 0))
+    self.view.scrollRow, self.view.scrollCol =  self.fileHistory.setdefault(
+        'scroll', (0, 0))
+    self.view.scrollRow, self.view.scrollCol = self.optimalScrollPosition(
+        self.penRow, self.penCol)
+    self.doSelectionMode(self.fileHistory.setdefault('selectionMode',
+        app.selectable.kSelectionNone))
+    self.markerRow, self.markerCol = self.fileHistory.setdefault('marker',
+        (0, 0))
+    self.redoChain = self.fileHistory.setdefault('redoChain', [])
+    self.savedAtRedoIndex = self.fileHistory.setdefault('savedAtRedoIndex', 0)
+    self.redoIndex = self.savedAtRedoIndex
+
+    # Store the file's info.
+    self.lastChecksum, self.lastFileSize = app.history.getFileInfo(
+        self.fullPath)
+
+  def optimalScrollPosition(self, row, col):
+    """
+    Calculates the optimal position for the view.
+
+    Args:
+      row (int): The cursor's row position.
+      col (int): The cursor's column position.
+
+    Returns:
+      A tuple of (row, col) representing where
+      the view should be placed.
+    """
+    optimalRowRatio = app.prefs.editor['optimalCursorRow']
+    optimalColRatio = app.prefs.editor['optimalCursorCol']
+    maxRows = self.view.rows
+    maxCols = self.view.cols
+    scrollRow = self.view.scrollRow
+    scrollCol = self.view.scrollCol
+    if not (scrollRow <= row < scrollRow + maxRows and
+        scrollCol <= col < scrollCol + maxCols):
+      # Use optimal position preferences set in default_prefs.py
+      # or $HOME/.ci_edit/prefs/editor.py
+      scrollRow = max(0, min(len(self.lines) - 1,
+        row - int(optimalRowRatio * (maxRows - 1))))
+      if col < maxCols:
+        scrollCol = 0
+      else:
+        scrollCol = max(0, col - int(optimalColRatio * (maxCols - 1)))
+    return (scrollRow, scrollCol)
+
 
   def linesToData(self):
     self.data = self.doLinesToData(self.lines)
 
   def fileWrite(self):
-    app.history.set(
-        ['files', self.fullPath, 'pen'], (self.penRow, self.penCol))
     # Preload the message with an error that should be overwritten.
     self.setMessage('Error saving file')
     try:
       try:
         if app.prefs.editor['onSaveStripTrailingSpaces']:
           self.stripTrailingWhiteSpace()
+        # Save user data that applies to read-only files into history.
+        self.fileHistory['pen'] = (self.penRow, self.penCol)
+        self.fileHistory['cursor'] = (self.view.cursorRow, self.view.cursorCol)
+        self.fileHistory['scroll'] = (self.view.scrollRow, self.view.scrollCol)
+        self.fileHistory['marker'] = (self.markerRow, self.markerCol)
+        self.fileHistory['selectionMode'] = self.selectionMode
         self.linesToData()
-        file = open(self.fullPath, 'w+')
+        if self.fileEncoding is None:
+          file = io.open(self.fullPath, 'wb+')
+        else:
+          file = io.open(self.fullPath, 'w+', encoding=self.fileEncoding)
         file.seek(0)
         file.truncate()
         file.write(self.data)
         file.close()
+        # Save user data that applies to writable files.
+        self.savedAtRedoIndex = self.redoIndex
+        self.fileHistory['redoChain'] = self.redoChain
+        self.fileHistory['savedAtRedoIndex'] = self.savedAtRedoIndex
         # Hmm, could this be hard coded to False here?
         self.isReadOnly = not os.access(self.fullPath, os.W_OK)
         self.fileStat = os.stat(self.fullPath)
         self.setMessage('File saved')
-        self.savedAtRedoIndex = self.redoIndex
       except Exception as e:
         type_, value, tb = sys.exc_info()
         self.setMessage(
@@ -585,6 +767,11 @@ class Actions(app.mutator.Mutator):
           app.log.info(i)
     except:
       app.log.info('except had exception')
+    app.history.saveUserHistory((self.fullPath, self.lastChecksum,
+        self.lastFileSize), self.fileHistory)
+    # Store the file's new info
+    self.lastChecksum, self.lastFileSize = app.history.getFileInfo(
+        self.fullPath)
 
   def selectText(self, row, col, length, mode):
     row = max(0, min(row, len(self.lines) - 1))
@@ -592,12 +779,7 @@ class Actions(app.mutator.Mutator):
     scrollRow = self.view.scrollRow
     scrollCol = self.view.scrollCol
     maxRow, maxCol = self.view.rows, self.view.cols
-    if not (self.view.scrollRow < row <= self.view.scrollRow + maxRow):
-      optimalCursorRow = app.prefs.editor['optimalCursorRow'] * self.view.rows
-      scrollRow = max(row - int(optimalCursorRow), 0)
-    if not (self.view.scrollCol < col <= self.view.scrollCol + maxCol):
-      optimalCursorCol = app.prefs.editor['optimalCursorCol'] * self.view.cols
-      scrollCol = max(col - int(optimalCursorCol), 0)
+    scrollRow, scrollCol = self.optimalScrollPosition(row, col)
     self.doSelectionMode(app.selectable.kSelectionNone)
     self.view.scrollRow = scrollRow
     self.view.scrollCol = scrollCol
@@ -816,11 +998,8 @@ class Actions(app.mutator.Mutator):
       self.redo()
 
   def insertPrintable(self, ch):
-    #app.log.info('insertPrintable')
     if curses.ascii.isprint(ch):
       self.insert(chr(ch))
-    # else:
-    #   self.insert("\xfe%02x"%(ch,))
 
   def joinLines(self):
     """join the next line onto the current line."""
@@ -982,7 +1161,13 @@ class Actions(app.mutator.Mutator):
     if not self.parser:
       self.parser = app.parser.Parser()
     start = time.time()
-    self.parser.parse(self.data, self.rootGrammar)
+    self.parser.parse(self.data, self.rootGrammar,
+        # TODO(dschuyler): start later than scrollRow.
+        self.view.scrollRow,
+        #self.upperChangedRow,
+        self.view.scrollRow + self.view.rows + 1)
+    self.sentUpperChangedRow = self.view.scrollRow
+    self.upperChangedRow = len(self.lines)
     self.parserTime = time.time() - start
 
   def doSelectionMode(self, mode):

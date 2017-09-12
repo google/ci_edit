@@ -14,6 +14,7 @@
 
 import app.log
 import re
+import os
 
 commentColorIndex = 2
 defaultColorIndex = 18
@@ -116,6 +117,8 @@ prefs = {
     'regex_string': stringColorIndex,
     'doc_block_comment': commentColorIndex,
     'html_block_comment': commentColorIndex,
+    'html_element': keywordsColorIndex,
+    'html_element_end': keywordsColorIndex,
     'found_find': foundColorIndex,
     'line_number': 168,
     'line_number_current': 146,
@@ -148,7 +151,7 @@ prefs = {
     'lineLimitIndicator': 80,
     'onSaveStripTrailingSpaces': True,
     'optimalCursorRow': 0.28,  # Ratio of rows: 0 top, 0.5 middle, 1.0 bottom.
-    'optimalCursorCol': 0.28,  # Ratio of columns: 0 left, 1.0 right.
+    'optimalCursorCol': 0.98,  # Ratio of columns: 0 left, 1.0 right.
     'palette': 'default',
     'showLineNumbers': True,
     'showStatusLine': True,
@@ -232,8 +235,10 @@ prefs = {
     'bash': {
       'indent': '  ',
       'keywords': [
-        'break', 'case', 'continue', 'do', 'done', 'exit', 'fi', 'if', 'for',
-        'return', 'switch', 'then', 'while',
+        'basename', 'break', 'case', 'chmod', 'continue', 'cp',
+        'dirname', 'do', 'done', 'echo', 'else', 'exit',
+        'fi', 'find', 'if', 'for',
+        'ln', 'mkdir', 'read', 'return', 'rm', 'sleep', 'switch', 'then', 'while',
       ],
       'contains': ['c_string1', 'c_string2', 'pound_comment'],
     },
@@ -300,6 +305,7 @@ prefs = {
       'escaped': r"\\'",
       'indent': '  ',
       'single_line': True,
+      'special': __special_string_escapes + [r"\\\\"],
     },
     'c_raw_string2': {
       'begin': '[uU]?[rR]"',
@@ -307,6 +313,7 @@ prefs = {
       'escaped': r'\\"',
       'indent': '  ',
       'single_line': True,
+      'special': __special_string_escapes + [r"\\\\"],
     },
     'c_string1': {
       'begin': "'(?!'')",
@@ -354,20 +361,40 @@ prefs = {
       'types': ['Array', 'boolean', 'string', 'Object'],
     },
     'html': {
+      'begin': '',
+      'end': kNonMatchingRegex,
+      'errors': ['</br>', '</hr>', '</img>', '</input>',],
       'indent': '  ',
       'keywords': [
-        'body', 'button', 'div', 'head', 'html', 'href', 'img', 'input',
-        'script', 'select', 'span', 'style',
+        #'body', 'button', 'div', 'head', 'html', 'href', 'img', 'input',
+        #'script', 'select', 'span', 'style',
       ],
-      'special': [r'&.{1,5}?;',],
+      'special': [
+        r'&.{1,5}?;', '<if\s+expr="[^"]*[^>]*>', '</if>',
+      ],
       'contains': [
         'quoted_string1', 'quoted_string2', 'css', 'html_block_comment', 'js',
+        'html_element', 'html_element_end',
       ],
     },
     'html_block_comment': {
       'begin': '<!--',
       'end': '-->',
       'indent': '  ',
+    },
+    'html_element': {
+      'begin': '<\\w+',
+      'contains': ['html_element_attribute',],
+      'end': '>',
+      'special': ['\\w+',],
+    },
+    'html_element_attribute': {
+      'begin': '\\??="',
+      'end': '"',
+    },
+    'html_element_end': {
+      'begin': '</\w+',
+      'end': '>',
     },
     'java': {
       'indent': '  ',
@@ -524,5 +551,10 @@ prefs = {
       ],
       "backgroundIndexes": [231, 229, 14, 221,   255, 254, 253, 225],
     },
+  },
+  'userData': {
+    'homePath': os.path.expanduser('~/.ci_edit'),
+    'historyPath': os.path.join(os.path.expanduser('~/.ci_edit'),
+        'history.dat'),
   },
 }

@@ -27,9 +27,12 @@ import curses
 mainCursesWindow = None
 
 
-class StaticWindow:
-  """A static window does not get focus.
-  parent is responsible for the order in which this window is updated, relative
+class ViewWindow:
+  """A view window is a base window that does not get focus or have TextBuffer.
+  See class ActiveWindow for a window that can get focus.
+  See class Window for a window that can get focus and have a TextBuffer.
+
+  arg: parent is responsible for the order in which this window is updated, relative
   to its siblings."""
   def __init__(self, parent):
     self.parent = parent
@@ -44,7 +47,9 @@ class StaticWindow:
     self.writeLineRow = 0
 
   def addStr(self, row, col, text, colorPair):
-    """Overwrite text a row, column with text."""
+    """Overwrite text at row, column with text. The caller is responsible for
+    avoiding overdraw.
+    """
     if 0:
       if 0:
         if row < 0 or col >= self.cols:
@@ -61,7 +66,8 @@ class StaticWindow:
         assert col >= 0, col
         assert len(text) <= self.cols, "%d, %d" % (len(text), self.cols)
     try:
-      mainCursesWindow.addstr(self.top + row, self.left + col, text, colorPair)
+      mainCursesWindow.addstr(self.top + row, self.left + col,
+          text.encode('utf-8'), colorPair)
     except curses.error: pass
 
   def changeFocusTo(self, changeTo):
@@ -74,7 +80,8 @@ class StaticWindow:
     """Paint text a row, column with colorPair.
       fyi, I thought this may be faster than using addStr to paint over the text
       with a different colorPair. It looks like there isn't a significant
-      performance difference between chgat and addstr."""
+      performance difference between chgat and addstr.
+    """
     mainCursesWindow.chgat(self.top + row, self.left + col, count, colorPair)
 
   def presentModal(self, changeTo, paneRow, paneCol):
@@ -158,6 +165,9 @@ class StaticWindow:
     self.rows -= rows
 
   def setParent(self, parent, layerIndex):
+    """Setting the parent will cause the the window to refresh (i.e. if self
+    was hidden with hide() it will no longer be hidden).
+    """
     if self.parent:
       try: self.parent.zOrder.remove(self)
       except: pass
@@ -176,16 +186,16 @@ class StaticWindow:
     text = str(text)[:self.cols]
     text = text + ' ' * max(0, self.cols - len(text))
     try:
-      mainCursesWindow.addstr(self.top + self.writeLineRow, self.left, text,
-          color)
+      mainCursesWindow.addstr(self.top + self.writeLineRow, self.left,
+          text.encode('utf-8'), color)
     except curses.error: pass
     self.writeLineRow += 1
 
 
-class ActiveWindow(StaticWindow):
+class ActiveWindow(ViewWindow):
   """An ActiveWindow may have focus and a controller."""
   def __init__(self, parent, controller=None):
-    StaticWindow.__init__(self, parent)
+    ViewWindow.__init__(self, parent)
     self.controller = controller
     self.isFocusable = True
     self.shouldShowCursor = False
@@ -245,7 +255,7 @@ class Window(ActiveWindow):
     self.cursorRow = self.textBuffer.penRow
     self.cursorCol = self.textBuffer.penCol
     self.textBuffer.draw(self)
-    StaticWindow.refresh(self)
+    ViewWindow.refresh(self)
     if self.hasFocus:
       self.parent.debugDraw(self)
       self.shouldShowCursor = (self.cursorRow >= self.scrollRow and
@@ -267,11 +277,11 @@ class LabeledLine(Window):
     self.host = parent
     self.setTextBuffer(app.text_buffer.TextBuffer())
     self.label = label
-    self.leftColumn = StaticWindow(self)
+    self.leftColumn = ViewWindow(self)
 
   def refresh(self):
     self.leftColumn.addStr(0, 0, self.label,
-        app.prefs.color['default'])
+        app.color.get('keyword'))
     Window.refresh(self)
 
   def reshape(self, rows, cols, top, left):
@@ -296,10 +306,10 @@ class LabeledLine(Window):
     Window.unfocus(self)
 
 
-class Menu(StaticWindow):
+class Menu(ViewWindow):
   """"""
   def __init__(self, host):
-    StaticWindow.__init__(self, host)
+    ViewWindow.__init__(self, host)
     self.host = host
     self.controller = None
     self.lines = []
@@ -332,16 +342,16 @@ class Menu(StaticWindow):
     self.writeLineRow = 0
     for i in self.lines[:maxRow]:
       self.writeLine(" "+i, color);
-    StaticWindow.refresh(self)
+    ViewWindow.refresh(self)
 
   def setController(self, controllerClass):
     self.controller = controllerClass(self.host)
     self.controller.setTextBuffer(self.textBuffer)
 
 
-class LineNumbers(StaticWindow):
+class LineNumbers(ViewWindow):
   def __init__(self, host):
-    StaticWindow.__init__(self, host)
+    ViewWindow.__init__(self, host)
     self.host = host
 
   def drawLineNumbers(self):
@@ -399,9 +409,9 @@ class LineNumbers(StaticWindow):
     self.drawLineNumbers()
 
 
-class LogWindow(StaticWindow):
+class LogWindow(ViewWindow):
   def __init__(self, parent):
-    StaticWindow.__init__(self, parent)
+    ViewWindow.__init__(self, parent)
     self.lines = app.log.getLines()
     self.refreshCounter = 0
 
@@ -417,7 +427,7 @@ class LogWindow(StaticWindow):
       if len(i) and i[-1] == '-':
         color = colorB
       self.writeLine(i, color);
-    StaticWindow.refresh(self)
+    ViewWindow.refresh(self)
 
 
 class InteractiveFind(Window):
@@ -439,10 +449,10 @@ class InteractiveFind(Window):
     self.replaceLine.reshape(1, cols, top, left)
 
 
-class MessageLine(StaticWindow):
+class MessageLine(ViewWindow):
   """The message line appears at the bottom of the screen."""
   def __init__(self, host):
-    StaticWindow.__init__(self, host)
+    ViewWindow.__init__(self, host)
     self.host = host
     self.message = None
     self.renderedMessage = None
@@ -456,11 +466,11 @@ class MessageLine(StaticWindow):
       self.blank(app.color.get('message_line'))
 
 
-class StatusLine(StaticWindow):
+class StatusLine(ViewWindow):
   """The status line appears at the bottom of the screen. It shows the current
   line and column the cursor is on."""
   def __init__(self, host):
-    StaticWindow.__init__(self, host)
+    ViewWindow.__init__(self, host)
     self.host = host
 
   def refresh(self):
@@ -504,9 +514,9 @@ class StatusLine(StaticWindow):
     self.addStr(0, 0, statusLine[:self.cols], color)
 
 
-class TopInfo(StaticWindow):
+class TopInfo(ViewWindow):
   def __init__(self, host):
-    StaticWindow.__init__(self, host)
+    ViewWindow.__init__(self, host)
     self.host = host
     self.borrowedRows = 0
     self.lines = []
@@ -579,7 +589,7 @@ class TopInfo(StaticWindow):
 
   def reshape(self, rows, cols, top, left):
     self.borrowedRows = 0
-    StaticWindow.reshape(self, rows, cols, top, left)
+    ViewWindow.reshape(self, rows, cols, top, left)
 
 
 class InputWindow(Window):
@@ -597,7 +607,7 @@ class InputWindow(Window):
     self.showMessageLine = True
     self.showRightColumn = True
     self.showTopInfo = True
-    self.topRows = 0
+    self.topRows = 2 # Number of lines in default TopInfo status.
     self.controller = app.controller.MainController(self)
     self.controller.add(app.cu_editor.CuaPlusEdit(self))
     # What does the user appear to want: edit, quit, or something else?
@@ -652,11 +662,11 @@ class InputWindow(Window):
       if not self.showLineNumbers:
         self.lineNumberColumn.hide()
     if 1:
-      self.logoCorner = StaticWindow(self)
+      self.logoCorner = ViewWindow(self)
       self.logoCorner.name = 'Logo'
       self.logoCorner.setParent(self, 0)
     if 1:
-      self.rightColumn = StaticWindow(self)
+      self.rightColumn = ViewWindow(self)
       self.rightColumn.name = 'Right'
       self.rightColumn.setParent(self, 0)
       if not self.showRightColumn:
@@ -680,7 +690,7 @@ class InputWindow(Window):
 
   def startup(self):
     for f in app.prefs.startup.get('cliFiles', []):
-      app.buffer_manager.buffers.loadTextBuffer(f['path'])
+      app.buffer_manager.buffers.loadTextBuffer(f['path'], self)
     if app.prefs.startup.get('readStdin'):
       app.buffer_manager.buffers.readStdin()
     tb = app.buffer_manager.buffers.topBuffer()
@@ -787,21 +797,10 @@ class InputWindow(Window):
   def setTextBuffer(self, textBuffer):
     app.log.info('setTextBuffer')
     #self.normalize()
-    if self.textBuffer is not None:
-      app.history.set(['files', self.textBuffer.fullPath, 'cursor'],
-          (self.textBuffer.penRow, self.textBuffer.penCol))
-    # TODO(dschuyler): Do we need to restore positions and selections here?
-    self.controller.setTextBuffer(textBuffer)
+    textBuffer.lineLimitIndicator = app.prefs.editor['lineLimitIndicator']
+    textBuffer.debugRedo = app.prefs.startup.get('debugRedo')
     Window.setTextBuffer(self, textBuffer)
-    self.textBuffer.debugRedo = app.prefs.startup.get('debugRedo')
-    # Restore cursor position.
-    cursor = app.history.get(['files', textBuffer.fullPath, 'cursor'], (0, 0))
-    if not len(textBuffer.lines):
-      row = col = 0
-    else:
-      row = max(0, min(cursor[0], len(textBuffer.lines)-1))
-      col = max(0, min(cursor[1], len(textBuffer.lines[row])))
-    textBuffer.selectText(row, col, 0, app.selectable.kSelectionNone)
+    self.controller.setTextBuffer(textBuffer)
 
   def unfocus(self):
     if self.showMessageLine:
