@@ -154,6 +154,7 @@ class InteractiveFind(app.editor.InteractiveFind):
       KEY_DOWN: self.findNext,
       KEY_UP: self.findPrior,
     })
+    self.commandPaste = textBuffer.editPasteData
     self.commandSet = commandSet
     self.commandDefault = self.textBuffer.insertPrintable
 
@@ -183,6 +184,7 @@ class InteractiveGoto(app.editor.InteractiveGoto):
       ord('t'): self.gotoTop,
       ord('T'): self.gotoTop,
     })
+    self.commandPaste = textBuffer.editPasteData
     self.commandSet = commandSet
     self.commandDefault = self.textBuffer.insertPrintable
 
@@ -205,6 +207,7 @@ class InteractiveOpener(app.editor.InteractiveOpener):
       CTRL_P: self.changeToPrediction,
       CTRL_Q: self.saveEventChangeToHostWindow,
     })
+    self.commandPaste = textBuffer.editPasteData
     self.commandSet = commandSet
     self.commandDefault = self.textBuffer.insertPrintable
 
@@ -230,6 +233,7 @@ class InteractivePrediction(app.editor.InteractivePrediction):
       KEY_DOWN: self.nextItem,
       KEY_UP: self.priorItem,
     })
+    self.commandPaste = textBuffer.editPasteData
     self.commandSet = commandSet
     self.commandDefault = self.textBuffer.insertPrintable
 
@@ -310,6 +314,7 @@ class CuaEdit(app.controller.Controller):
 
   def setTextBuffer(self, textBuffer):
     app.controller.Controller.setTextBuffer(self, textBuffer)
+    self.commandPaste = textBuffer.editPasteData
     self.commandSet = mainWindowCommands(self, textBuffer)
     self.commandDefault = self.textBuffer.insertPrintable
 

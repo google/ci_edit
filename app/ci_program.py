@@ -70,6 +70,8 @@ class CiProgram:
     curses.meta(1)
     # Access ^c before shell does.
     curses.raw()
+    # Enable Bracketed Paste Mode.
+    print '\033[?2004;h'
     #curses.start_color()
     curses.use_default_colors()
     if 0:
@@ -132,6 +134,7 @@ class CiProgram:
       # (A performance optimization).
       cmdList = []
       mouseEvents = []
+      terminalPasteEvents = []
       cursesWindow = app.window.mainCursesWindow
       while not len(cmdList):
         for i in range(5):
@@ -147,7 +150,21 @@ class CiProgram:
               keySequence.append(n)
               n = cursesWindow.getch()
             #app.log.info('sequence\n', keySequence)
-            ch = tuple(keySequence)
+            paste_begin = app.curses_util.BRACKETED_PASTE_BEGIN
+            if tuple(keySequence[:len(paste_begin)]) == paste_begin:
+              ch = app.curses_util.BRACKETED_PASTE
+              keySequence = keySequence[len(paste_begin):]
+              paste_end = app.curses_util.BRACKETED_PASTE_END
+              while tuple(keySequence[-len(paste_end):]) != paste_end:
+                #app.log.info('waiting in paste mode')
+                n = cursesWindow.getch()
+                while n != curses.ERR:
+                  keySequence.append(n)
+                  n = cursesWindow.getch()
+              keySequence = keySequence[:-(1 + len(paste_end))]
+              terminalPasteEvents.append(''.join([chr(i) for i in keySequence]))
+            else:
+              ch = tuple(keySequence)
             if not ch:
               # The sequence was empty, so it looks like this Escape wasn't
               # really the start of a sequence and is instead a stand-alone
@@ -169,10 +186,14 @@ class CiProgram:
           if cmd == curses.KEY_RESIZE:
             self.handleScreenResize(window)
             continue
-          window.controller.doCommand(cmd)
-          if cmd == curses.KEY_MOUSE:
-            self.handleMouse(mouseEvents[0])
-            mouseEvents = mouseEvents[1:]
+          if cmd == app.curses_util.BRACKETED_PASTE:
+            window.controller.handleTerminalPaste(terminalPasteEvents[0])
+            terminalPasteEvents = terminalPasteEvents[1:]
+          else:
+            window.controller.doCommand(cmd)
+            if cmd == curses.KEY_MOUSE:
+              self.handleMouse(mouseEvents[0])
+              mouseEvents = mouseEvents[1:]
           window = self.focusedWindow
           window.controller.onChange()
 
@@ -595,6 +616,8 @@ def run_ci():
   finally:
     app.log.flush()
     app.log.writeToFile('~/.ci_edit/recentLog')
+    # Disable Bracketed Paste Mode.
+    print '\033[?2004l'
   global userConsoleMessage
   if userConsoleMessage:
     print userConsoleMessage

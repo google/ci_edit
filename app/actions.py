@@ -571,9 +571,12 @@ class Actions(app.mutator.Mutator):
   def editPaste(self):
     data = app.clipboard.paste()
     if data is not None:
-      self.editPasteLines(tuple(self.doDataToLines(data)))
+      self.editPasteData(data)
     else:
       app.log.info('clipboard empty')
+
+  def editPasteData(self, data):
+    self.editPasteLines(tuple(self.doDataToLines(data)))
 
   def editPasteLines(self, clip):
       if self.selectionMode != app.selectable.kSelectionNone:
