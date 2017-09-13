@@ -361,7 +361,7 @@ prefs = {
       'types': ['Array', 'boolean', 'string', 'Object'],
     },
     'html': {
-      'begin': '',
+      'begin': '<html>',
       'end': kNonMatchingRegex,
       'errors': ['</br>', '</hr>', '</img>', '</input>',],
       'indent': '  ',
