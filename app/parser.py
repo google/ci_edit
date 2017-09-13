@@ -145,7 +145,9 @@ class Parser:
         topNode.grammar is not self.parserNodes[-2].grammar):
       beginRegex = topNode.grammar.get('begin')
       if beginRegex is not None:
-        cursor += re.match(beginRegex, self.data[cursor:]).regs[0][1]
+        sre = re.match(beginRegex, self.data[cursor:])
+        if sre is not None:
+          cursor += sre.regs[0][1]
     while self.endRow > len(self.rows):
       if not leash:
         app.log.error('grammar likely caught in a loop')
