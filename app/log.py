@@ -74,6 +74,14 @@ def caller(*args):
   screenLog += lines
   fullLog += lines
 
+def exception(e):
+  error(e)
+  errorType, value, tracebackInfo = sys.exc_info()
+  out = traceback.format_exception(errorType, value, tracebackInfo)
+  for i in out:
+    error(i[:-1])
+
+
 def stack():
   global fullLog, screenLog
   stack = inspect.stack()[1:]
