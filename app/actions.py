@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import app.bookmarks
 import app.buffer_manager
 import app.clipboard
 import app.log
@@ -21,6 +20,7 @@ import app.mutator
 import app.parser
 import app.prefs
 import app.selectable
+import bisect
 import curses.ascii
 import difflib
 import io
@@ -92,30 +92,158 @@ class Actions(app.mutator.Mutator):
         self.getText(upperRow, upperCol, lowerRow, lowerCol)))
       self.redo()
 
-  def bookmarkAdd(self):
-    app.bookmarks.add(self.fullPath, self.penRow, self.penCol, 0,
-        app.selectable.kSelectionNone)
+  def dataToBookmark(self):
+    """
+    Grabs all the cursor data and returns a bookmark.
 
-  def bookmarkGoto(self):
+    Args:
+      None.
+
+    Returns:
+      A bookmark in the form of (bookmarkRange, bookmarkData).
+      bookmarkRange is an ordered tuple in which its elements
+      are the rows that the bookmark affects.
+      bookmarkData is a dictionary that contains the cursor data.
+    """
+    bookmarkData = {
+      'cursor': (self.view.cursorRow, self.view.cursorCol),
+      'marker': (self.markerRow, self.markerCol),
+      'pen': (self.penRow, self.penCol),
+      'selectionMode': self.selectionMode,
+    }
+    upperRow, _, lowerRow, _ = self.startAndEnd()
+    bookmarkRange = (upperRow, lowerRow)
+    return (bookmarkRange, bookmarkData)
+
+  def bookmarksOverlap(self, bookmarkRange1, bookmarkRange2):
+    """
+    Returns whether the two sorted bookmark ranges overlap.
+    
+    Args:
+      bookmarkRange1 (tuple): a sorted tuple of row numbers.
+      bookmarkRange2 (tuple): a sorted tuple of row numbers.
+
+    Returns:
+      True if the ranges overlap. Otherwise, returns False.
+    """
+    return (bookmarkRange1[-1] >= bookmarkRange2[0] and
+            bookmarkRange1[0] <= bookmarkRange2[-1])
+
+  def bookmarkAdd(self):
+    """
+    Adds a bookmark at the cursor's location. If multiple lines are 
+    selected, all existing bookmarks in those lines are overwritten 
+    with the new bookmark.
+
+    Args:
+      None.
+
+    Returns:
+      None.
+    """
+    newBookmark = self.dataToBookmark()
+    self.bookmarkRemove()
+    bisect.insort(self.bookmarks, newBookmark)
+
+  def bookmarkGoto(self, bookmark):
+    """
+    Goes to the bookmark that is passed in.
+
+    Args:
+      bookmark (tuple): contains bookmarkRange and bookmarkData. More info can
+        be found in the dataToBookmark function.
+
+    Returns:
+      None.
+    """
     app.log.debug()
-    bookmark = app.bookmarks.get(self.view.bookmarkIndex)
-    if bookmark:
-      self.selectText(bookmark['row'], bookmark['col'], bookmark['length'],
-          bookmark['mode'])
+    bookmarkRange, bookmarkData = bookmark
+    cursorRow, cursorCol = bookmarkData['cursor']
+    penRow, penCol = bookmarkData['pen']
+    markerRow, markerCol = bookmarkData['marker']
+    selectionMode = bookmarkData['selectionMode']
+    self.cursorMoveAndMark(penRow - self.penRow, penCol - self.penCol,
+        markerRow - self.markerRow, markerCol - self.markerCol,
+        selectionMode - self.selectionMode)
+    self.redo()
 
   def bookmarkNext(self):
+    """
+    Goes to the closest bookmark after the cursor.
+
+    Args:
+      None.
+
+    Returns:
+      None.
+    """
     app.log.debug()
-    self.view.bookmarkIndex += 1
-    self.bookmarkGoto()
+    if not len(self.bookmarks):
+      self.setMessage("No bookmarks to jump to")
+      return
+    _, _, lowerRow, _ = self.startAndEnd()
+    tempBookmark = ((lowerRow, float('inf')),)
+    index = bisect.bisect(self.bookmarks, tempBookmark)
+    self.bookmarkGoto(self.bookmarks[index % len(self.bookmarks)])
 
   def bookmarkPrior(self):
+    """
+    Goes to the closest bookmark before the cursor.
+
+    Args:
+      None.
+
+    Returns:
+      None.
+    """
     app.log.debug()
-    self.view.bookmarkIndex -= 1
-    self.bookmarkGoto()
+    if not len(self.bookmarks):
+      self.setMessage("No bookmarks to jump to")
+      return
+    upperRow, _, _, _ = self.startAndEnd()
+    tempBookmark = ((upperRow,),)
+    index = bisect.bisect_left(self.bookmarks, tempBookmark)
+    bookmark = self.bookmarkGoto(self.bookmarks[index - 1])
 
   def bookmarkRemove(self):
+    """
+    Removes bookmarks in all selected lines.
+
+    Args:
+      None.
+
+    Returns:
+      None.
+    """
+    def helpRemoveBookmarks(bookmarkRange, startIndex, endIndex):
+      if endIndex < startIndex:
+        return
+      if startIndex == endIndex:
+        currentBookmarkRange = self.bookmarks[startIndex][0]
+        if self.bookmarksOverlap(bookmarkRange, currentBookmarkRange):
+          self.bookmarks[startIndex] = None
+        return
+      currentIndex = (startIndex + endIndex) / 2
+      prevBookmarkRange = self.bookmarks[currentIndex][0]
+      nextBookmarkRange = self.bookmarks[currentIndex + 1][0]
+      if self.bookmarksOverlap(bookmarkRange, prevBookmarkRange):
+        self.bookmarks[currentIndex] = None
+      if bookmarkRange[0] < prevBookmarkRange[0]: 
+        helpRemoveBookmarks(bookmarkRange, startIndex, currentIndex - 1)
+      if self.bookmarksOverlap(bookmarkRange, nextBookmarkRange):
+        self.bookmarks[currentIndex + 1] = None
+      if bookmarkRange[-1] > nextBookmarkRange[-1]:
+        helpRemoveBookmarks(bookmarkRange, currentIndex + 2, endIndex)
+
     app.log.debug()
-    return app.bookmarks.remove(self.view.bookmarkIndex)
+    upperRow, _, lowerRow, _ = self.startAndEnd()
+    numBookmarks = len(self.bookmarks)
+    bookmarkRange = (upperRow, lowerRow)
+    if self.bookmarks:
+      helpRemoveBookmarks(bookmarkRange, 0, numBookmarks - 1)
+      self.bookmarks = [b for b in self.bookmarks if b]
+    return len(self.bookmarks) != numBookmarks
+
 
   def backspace(self):
     app.log.info('backspace', self.penRow > self.markerRow)
@@ -657,6 +785,8 @@ class Actions(app.mutator.Mutator):
       self.dataToLines()
     else:
       self.parser = None
+
+    # Restore all user history.
     app.history.loadUserHistory(self.fullPath)
     self.restoreUserHistory()
 
@@ -690,6 +820,9 @@ class Actions(app.mutator.Mutator):
     self.redoChain = self.fileHistory.setdefault('redoChain', [])
     self.savedAtRedoIndex = self.fileHistory.setdefault('savedAtRedoIndex', 0)
     self.redoIndex = self.savedAtRedoIndex
+
+    # Restore file bookmarks
+    self.bookmarks = self.fileHistory.setdefault('bookmarks', [])
 
     # Store the file's info.
     self.lastChecksum, self.lastFileSize = app.history.getFileInfo(
@@ -742,6 +875,7 @@ class Actions(app.mutator.Mutator):
         self.fileHistory['scroll'] = (self.view.scrollRow, self.view.scrollCol)
         self.fileHistory['marker'] = (self.markerRow, self.markerCol)
         self.fileHistory['selectionMode'] = self.selectionMode
+        self.fileHistory['bookmarks'] = self.bookmarks
         self.linesToData()
         if self.fileEncoding is None:
           file = io.open(self.fullPath, 'wb+')

@@ -568,7 +568,6 @@ class CiProgram:
     self.parseArgs()
     homePath = app.prefs.prefs['userData'].get('homePath')
     self.makeHomeDirs(homePath)
-    app.bookmarks.loadUserBookmarks(os.path.join(homePath, 'bookmarks.dat'))
     app.curses_util.hackCursesFixes()
     self.startup()
     if app.prefs.startup.get('profile'):
@@ -582,7 +581,6 @@ class CiProgram:
       app.log.info(output.getvalue())
     else:
       self.commandLoop()
-    app.bookmarks.saveUserBookmarks()
 
   def setUpPalette(self):
     def applyPalette(name):
