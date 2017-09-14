@@ -512,6 +512,36 @@ class Actions(app.mutator.Mutator):
       self.selectionCharacter()
     self.__cursorPageUp()
 
+  def cursorAltSelectPageDown(self):
+    """
+    DESCRIPTION HERE
+
+    Args:
+      None.
+
+    Returns:
+      None.
+    """
+    if self.selectionMode != app.selectable.kSelectionBlock:
+      self.selectionBlock()
+    self.__cursorPageDown()
+
+  def cursorAltSelectPageUp(self):
+    """
+    DESCRIPTION HERE
+
+    Args:
+      None.
+
+    Returns:
+      None.
+    """
+    if self.selectionMode != app.selectable.kSelectionBlock:
+      self.selectionBlock()
+    self.__cursorPageUp()
+
+
+
   def cursorScrollToMiddle(self):
     maxRow, maxCol = self.view.rows, self.view.cols
     rowDelta = min(max(0, len(self.lines)-maxRow),

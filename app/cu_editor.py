@@ -73,6 +73,8 @@ def mainWindowCommands(controller, textBuffer):
     KEY_PAGE_DOWN: textBuffer.cursorNeutralPageDown,
     KEY_SHIFT_PAGE_UP: textBuffer.cursorSelectPageUp,
     KEY_SHIFT_PAGE_DOWN: textBuffer.cursorSelectPageDown,
+    KEY_ALT_SHIFT_PAGE_UP: textBuffer.cursorAltSelectPageUp,
+    KEY_ALT_SHIFT_PAGE_DOWN: textBuffer.cursorAltSelectPageDown,
 
     CTRL_F: controller.changeToFind,
     CTRL_G: controller.changeToGoto,
