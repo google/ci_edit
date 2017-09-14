@@ -118,7 +118,7 @@ class Actions(app.mutator.Mutator):
   def bookmarksOverlap(self, bookmarkRange1, bookmarkRange2):
     """
     Returns whether the two sorted bookmark ranges overlap.
-    
+
     Args:
       bookmarkRange1 (tuple): a sorted tuple of row numbers.
       bookmarkRange2 (tuple): a sorted tuple of row numbers.
@@ -131,8 +131,8 @@ class Actions(app.mutator.Mutator):
 
   def bookmarkAdd(self):
     """
-    Adds a bookmark at the cursor's location. If multiple lines are 
-    selected, all existing bookmarks in those lines are overwritten 
+    Adds a bookmark at the cursor's location. If multiple lines are
+    selected, all existing bookmarks in those lines are overwritten
     with the new bookmark.
 
     Args:
@@ -156,7 +156,6 @@ class Actions(app.mutator.Mutator):
     Returns:
       None.
     """
-    app.log.debug()
     bookmarkRange, bookmarkData = bookmark
     cursorRow, cursorCol = bookmarkData['cursor']
     penRow, penCol = bookmarkData['pen']
@@ -177,7 +176,6 @@ class Actions(app.mutator.Mutator):
     Returns:
       None.
     """
-    app.log.debug()
     if not len(self.bookmarks):
       self.setMessage("No bookmarks to jump to")
       return
@@ -196,7 +194,6 @@ class Actions(app.mutator.Mutator):
     Returns:
       None.
     """
-    app.log.debug()
     if not len(self.bookmarks):
       self.setMessage("No bookmarks to jump to")
       return
@@ -215,35 +212,31 @@ class Actions(app.mutator.Mutator):
     Returns:
       None.
     """
-    def helpRemoveBookmarks(bookmarkRange, startIndex, endIndex):
-      if endIndex < startIndex:
-        return
-      if startIndex == endIndex:
-        currentBookmarkRange = self.bookmarks[startIndex][0]
-        if self.bookmarksOverlap(bookmarkRange, currentBookmarkRange):
-          self.bookmarks[startIndex] = None
-        return
-      currentIndex = (startIndex + endIndex) / 2
-      prevBookmarkRange = self.bookmarks[currentIndex][0]
-      nextBookmarkRange = self.bookmarks[currentIndex + 1][0]
-      if self.bookmarksOverlap(bookmarkRange, prevBookmarkRange):
-        self.bookmarks[currentIndex] = None
-      if bookmarkRange[0] < prevBookmarkRange[0]: 
-        helpRemoveBookmarks(bookmarkRange, startIndex, currentIndex - 1)
-      if self.bookmarksOverlap(bookmarkRange, nextBookmarkRange):
-        self.bookmarks[currentIndex + 1] = None
-      if bookmarkRange[-1] > nextBookmarkRange[-1]:
-        helpRemoveBookmarks(bookmarkRange, currentIndex + 2, endIndex)
-
-    app.log.debug()
+    def removeOverlaps(rangeList, needle):
+      # Find the left-hand index.
+      begin = bisect.bisect_left(rangeList, needle)
+      if begin and needle[0][0] <= rangeList[begin-1][0][1]:
+        begin -= 1
+      # Find the right-hand index.
+      low = begin
+      index = begin
+      high = len(rangeList)
+      offset = needle[0][1]
+      while True:
+        index = (high + low) / 2
+        if low == high:
+          break
+        if offset >= rangeList[index][0][1]:
+          low = index + 1
+        elif offset < rangeList[index][0][0]:
+          high = index
+        else:
+          index += 1
+          break
+      return rangeList[:begin] + rangeList[index:]
     upperRow, _, lowerRow, _ = self.startAndEnd()
-    numBookmarks = len(self.bookmarks)
-    bookmarkRange = (upperRow, lowerRow)
-    if self.bookmarks:
-      helpRemoveBookmarks(bookmarkRange, 0, numBookmarks - 1)
-      self.bookmarks = [b for b in self.bookmarks if b]
-    return len(self.bookmarks) != numBookmarks
-
+    needle = ((upperRow, lowerRow),)
+    self.bookmarks = removeOverlaps(self.bookmarks, needle)
 
   def backspace(self):
     app.log.info('backspace', self.penRow > self.markerRow)
