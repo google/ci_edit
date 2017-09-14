@@ -451,7 +451,7 @@ class Actions(app.mutator.Mutator):
     Returns:
       None.
     """
-    self.doSelectionMode(app.selectable.kSelectionNone)
+    self.selectionNone()
     self.__cursorPageDown()
 
   def cursorNeutralPageUp(self):
@@ -467,7 +467,7 @@ class Actions(app.mutator.Mutator):
     Returns:
       None.
     """
-    self.doSelectionMode(app.selectable.kSelectionNone)
+    self.selectionNone()
     self.__cursorPageUp()
 
   def cursorSelectPageDown(self):
@@ -487,10 +487,8 @@ class Actions(app.mutator.Mutator):
     Returns:
       None.
     """
-    # Selection mode must be kSelectionCharacter
-    # or else weird behaviors will occur.
     if self.selectionMode != app.selectable.kSelectionCharacter:
-      self.doSelectionMode(app.selectable.kSelectionCharacter)
+      self.selectionCharacter()
     self.__cursorPageDown()
 
   def cursorSelectPageUp(self):
@@ -510,10 +508,8 @@ class Actions(app.mutator.Mutator):
     Returns:
       None.
     """
-    # Selection mode must be kSelectionCharacter
-    # or else weird behaviors will occur.
     if self.selectionMode != app.selectable.kSelectionCharacter:
-      self.doSelectionMode(app.selectable.kSelectionCharacter)
+      self.selectionCharacter()
     self.__cursorPageUp()
 
   def cursorScrollToMiddle(self):
