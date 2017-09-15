@@ -210,33 +210,35 @@ class Actions(app.mutator.Mutator):
       None.
 
     Returns:
-      None.
+      (boolean) Whether any bookmarks were removed.
     """
-    def removeOverlaps(rangeList, needle):
-      # Find the left-hand index.
-      begin = bisect.bisect_left(rangeList, needle)
-      if begin and needle[0][0] <= rangeList[begin-1][0][1]:
-        begin -= 1
-      # Find the right-hand index.
-      low = begin
-      index = begin
-      high = len(rangeList)
-      offset = needle[0][1]
-      while True:
-        index = (high + low) / 2
-        if low == high:
-          break
-        if offset >= rangeList[index][0][1]:
-          low = index + 1
-        elif offset < rangeList[index][0][0]:
-          high = index
-        else:
-          index += 1
-          break
-      return rangeList[:begin] + rangeList[index:]
     upperRow, _, lowerRow, _ = self.startAndEnd()
+    rangeList = self.bookmarks
     needle = ((upperRow, lowerRow),)
-    self.bookmarks = removeOverlaps(self.bookmarks, needle)
+    # Find the left-hand index.
+    begin = bisect.bisect_left(rangeList, needle)
+    if begin and needle[0][0] <= rangeList[begin-1][0][1]:
+      begin -= 1
+    # Find the right-hand index.
+    low = begin
+    index = begin
+    high = len(rangeList)
+    offset = needle[0][1]
+    while True:
+      index = (high + low) / 2
+      if low == high:
+        break
+      if offset >= rangeList[index][0][1]:
+        low = index + 1
+      elif offset < rangeList[index][0][0]:
+        high = index
+      else:
+        index += 1
+        break
+    if begin == index:
+      return False
+    self.bookmarks = rangeList[:begin] + rangeList[index:]
+    return True
 
   def backspace(self):
     app.log.info('backspace', self.penRow > self.markerRow)
