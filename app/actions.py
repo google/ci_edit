@@ -561,12 +561,10 @@ class Actions(app.mutator.Mutator):
         self.cursorColDelta(self.penRow + penRowDelta), 0, 0)
     self.redo()
 
-  def cursorNeutralPageDown(self):
+  def cursorSelectNonePageDown(self):
     """
-    Moves the view and cursor down by a page or stops
-    at the bottom of the document if there is less than
-    a page left. Does not select any text and removes all
-    existing highlights.
+    Performs a page down. This function does not 
+    select any text and removes all existing highlights.
 
     Args:
       None.
@@ -574,15 +572,13 @@ class Actions(app.mutator.Mutator):
     Returns:
       None.
     """
-    self.doSelectionMode(app.selectable.kSelectionNone)
+    self.selectionNone()
     self.__cursorPageDown()
 
-  def cursorNeutralPageUp(self):
+  def cursorSelectNonePageUp(self):
     """
-    Moves the view and cursor up by a page or stops
-    at the top of the document if there is less than
-    a page left. Does not select any text and removes all
-    existing highlights.
+    Performs a page up. This function does not 
+    select any text and removes all existing highlights.
 
     Args:
       None.
@@ -590,19 +586,14 @@ class Actions(app.mutator.Mutator):
     Returns:
       None.
     """
-    self.doSelectionMode(app.selectable.kSelectionNone)
+    self.selectionNone()
     self.__cursorPageUp()
 
-  def cursorSelectPageDown(self):
+  def cursorSelectCharacterPageDown(self):
     """
-    Moves the view and cursor down by a page or stops
-    at the bottom of the document if there is less than
-    a page left. If no text is highlighted, then all
-    text between the original position and the new position
-    will be highlighted. If text is already highlighted,
-    then all text between the new cursor position and
-    the other end of the currently highlighted text
-    will be highlighted.
+    Performs a page down. This function selects
+    all characters between the previous and current
+    cursor position.
 
     Args:
       None.
@@ -610,20 +601,14 @@ class Actions(app.mutator.Mutator):
     Returns:
       None.
     """
-    if self.selectionMode == app.selectable.kSelectionNone:
-      self.doSelectionMode(app.selectable.kSelectionCharacter)
+    self.selectionCharacter()
     self.__cursorPageDown()
 
-  def cursorSelectPageUp(self):
+  def cursorSelectCharacterPageUp(self):
     """
-    Moves the view and cursor up by a page or stops
-    at the top of the document if there is less than
-    a page left. If no text is highlighted, then all
-    text between the original position and the new position
-    will be highlighted. If text is already highlighted,
-    then all text between the new cursor position and
-    the other end of the previously highlighted text
-    will be highlighted.
+    Performs a page up. This function selects
+    all characters between the previous and current
+    cursor position.
 
     Args:
       None.
@@ -631,8 +616,34 @@ class Actions(app.mutator.Mutator):
     Returns:
       None.
     """
-    if self.selectionMode == app.selectable.kSelectionNone:
-      self.doSelectionMode(app.selectable.kSelectionCharacter)
+    self.selectionCharacter()
+    self.__cursorPageUp()
+
+  def cursorSelectBlockPageDown(self):
+    """
+    Performs a page down. This function sets
+    the selection mode to "block."
+
+    Args:
+      None.
+
+    Returns:
+      None.
+    """
+    self.selectionBlock()
+    self.__cursorPageDown()
+
+  def cursorSelectBlockPageUp(self):
+    """
+    Performs a page up. This function sets
+    the selection mode to "block."
+    Args:
+      None.
+
+    Returns:
+      None.
+    """
+    self.selectionBlock()
     self.__cursorPageUp()
 
   def cursorScrollToMiddle(self):
