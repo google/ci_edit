@@ -521,7 +521,7 @@ class Actions(app.mutator.Mutator):
       penRowDelta = numLines - self.penRow - 1
     if numLines <= maxRow:
       scrollRowDelta = -self.view.scrollRow
-    elif numLines <= 2*maxRow + self.view.scrollRow:
+    elif numLines <= 2 * maxRow + self.view.scrollRow:
       scrollRowDelta = numLines - self.view.scrollRow - maxRow
     self.cursorMoveScroll(penRowDelta,
         self.cursorColDelta(self.penRow + penRowDelta), scrollRowDelta, 0)
@@ -1235,7 +1235,6 @@ class Actions(app.mutator.Mutator):
     self.performDelete()
     self.redoAddChange(('i', text))
     self.redo()
-    maxRow, maxCol = self.view.rows, self.view.cols
 
   def insertPrintable(self, ch):
     if curses.ascii.isprint(ch):
