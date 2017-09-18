@@ -817,8 +817,6 @@ class Actions(app.mutator.Mutator):
     self.penRow, self.penCol = self.fileHistory.setdefault('pen', (0, 0))
     self.view.scrollRow, self.view.scrollCol =  self.fileHistory.setdefault(
         'scroll', (0, 0))
-    self.view.scrollRow, self.view.scrollCol = self.optimalScrollPosition(
-        self.penRow, self.penCol)
     self.doSelectionMode(self.fileHistory.setdefault('selectionMode',
         app.selectable.kSelectionNone))
     self.markerRow, self.markerCol = self.fileHistory.setdefault('marker',
@@ -836,120 +834,61 @@ class Actions(app.mutator.Mutator):
 
   def getOptimalScrollPosition(self, row=None, col=None):
     """
-    Calculates the optimal position for the view.
-
     Args:
-      row (int): The cursor's row position.
-      col (int): The cursor's column position.
+      None.
 
     Returns:
-      A tuple of (row, col) representing where
-      the view should be placed.
+      A tuple of (scrollRow, scrollCol) representing where
+      the view's optimal position should be.
     """
-    optimalRowRatio = app.prefs.editor['optimalCursorRow']
-    optimalColRatio = app.prefs.editor['optimalCursorCol']
-    maxRows = self.view.rows
-    maxCols = self.view.cols
-    scrollRow = self.view.scrollRow
-    scrollCol = self.view.scrollCol
-    top, left, bottom, right = self.startAndEnd()
-    height = bottom - top + 1
-    length = right - left + 1
-    extraRows = maxRows - height
-    extraCols = maxCols - length
-    if extraRows > 0:
-        scrollRow = max(0, min(len(self.lines) - 1,
-          top - int(optimalRowRatio * (maxRows - 1))))
-    else:
-      scrollRow = top
-    if extraCols > 0:
-      if not (scrollCol <= left and right < scrollCol + maxCols):
-        if right < maxCols:
-          scrollCol = 0
-        else:
-          scrollCol = max(0, min(right,
-            left - int(optimalColRatio * (maxCols - 1))))
-    else:
-      scrollCol = left
+    scrollRow = self.getOptimalScrollRowPosition()
+    scrollCol = self.getOptimalScrollColPosition()
     return (scrollRow, scrollCol)
 
-  def getOptimalScrollRowPosition(self, row=None, col=None):
+  def getOptimalScrollRowPosition(self):
     """
-    Calculates the optimal scroll row position for current selection.
-
     Args:
-      row (int): The cursor's row position.
-      col (int): The cursor's column position.
+      None.
 
     Returns:
-      A tuple of (row, col) representing where
-      the view should be placed.
+      The optimal scroll row position for current selection.
     """
     optimalRowRatio = app.prefs.editor['optimalCursorRow']
-    optimalColRatio = app.prefs.editor['optimalCursorCol']
     maxRows = self.view.rows
-    maxCols = self.view.cols
     scrollRow = self.view.scrollRow
-    scrollCol = self.view.scrollCol
-    top, left, bottom, right = self.startAndEnd()
+    top, _, bottom, _ = self.startAndEnd()
     height = bottom - top + 1
-    length = right - left + 1
     extraRows = maxRows - height
-    extraCols = maxCols - length
     if extraRows > 0:
-        scrollRow = max(0, min(len(self.lines) - 1,
-          top - int(optimalRowRatio * (maxRows - 1))))
+      scrollRow = max(0, min(len(self.lines) - 1,
+        top - int(optimalRowRatio * (maxRows - 1))))
     else:
       scrollRow = top
-    if extraCols > 0:
-      if not (scrollCol <= left and right < scrollCol + maxCols):
-        if right < maxCols:
-          scrollCol = 0
-        else:
-          scrollCol = max(0, min(right,
-            left - int(optimalColRatio * (maxCols - 1))))
-    else:
-      scrollCol = left
-    return (scrollRow, scrollCol)
+    return scrollRow
 
-  def getOptimalScrollColPosition(self, row=None, col=None):
+  def getOptimalScrollColPosition(self):
     """
-    Calculates the optimal scroll column position for current selection.
-
     Args:
-      row (int): The cursor's row position.
-      col (int): The cursor's column position.
+      None.
 
     Returns:
-      A tuple of (row, col) representing where
-      the view should be placed.
+      The optimal scroll column position for current selection.
     """
-    optimalRowRatio = app.prefs.editor['optimalCursorRow']
     optimalColRatio = app.prefs.editor['optimalCursorCol']
-    maxRows = self.view.rows
     maxCols = self.view.cols
-    scrollRow = self.view.scrollRow
     scrollCol = self.view.scrollCol
-    top, left, bottom, right = self.startAndEnd()
-    height = bottom - top + 1
+    _, left, _, right = self.startAndEnd()
     length = right - left + 1
-    extraRows = maxRows - height
     extraCols = maxCols - length
-    if extraRows > 0:
-        scrollRow = max(0, min(len(self.lines) - 1,
-          top - int(optimalRowRatio * (maxRows - 1))))
-    else:
-      scrollRow = top
     if extraCols > 0:
-      if not (scrollCol <= left and right < scrollCol + maxCols):
-        if right < maxCols:
-          scrollCol = 0
-        else:
-          scrollCol = max(0, min(right,
-            left - int(optimalColRatio * (maxCols - 1))))
+      if right < maxCols:
+        scrollCol = 0
+      else:
+        scrollCol = max(0, min(right,
+          left - int(optimalColRatio * (maxCols - 1))))
     else:
       scrollCol = left
-    return (scrollRow, scrollCol)
+    return scrollCol
 
   def checkSelectionInView():
     """
@@ -1566,5 +1505,7 @@ class Actions(app.mutator.Mutator):
     if not self.__useOptimalScroll:
       self.__useOptimalScroll = True
       return
-    self.view.scrollRow, self.view.scrollCol = self.optimalScrollPosition(
-        self.penRow, self.penCol)
+    if not self.checkSelectionInViewVertically():
+      self.view.scrollRow = self.getOptimalScrollRowPosition()
+    if not self.checkSelectionInViewHorizontally():
+      self.view.scrollCol = self.getOptimalScrollColPosition()
