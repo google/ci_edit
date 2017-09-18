@@ -41,7 +41,7 @@ class Actions(app.mutator.Mutator):
     # |__skipUpdateScroll| is False if you do not want the program
     # to automatically set the view to the optimal scroll position.
     self.__skipUpdateScroll = False
-    # |__skipCursorScroll| is True if you want to set the scroll 
+    # |__skipCursorScroll| is True if you want to set the scroll
     # view to the optimal cursor position on the next update.
     self.__skipCursorScroll = False
 
@@ -332,7 +332,7 @@ class Actions(app.mutator.Mutator):
     change = self.getCursorMoveAndMark(rowDelta, colDelta, markRowDelta,
                                        markColDelta, selectionModeDelta)
     self.redoAddChange(change)
- 
+
   def cursorMoveScroll(self, rowDelta, colDelta,
       scrollRowDelta, scrollColDelta):
     self.updateScrollPosition(scrollRowDelta, scrollColDelta)
@@ -567,7 +567,7 @@ class Actions(app.mutator.Mutator):
 
   def cursorSelectNonePageDown(self):
     """
-    Performs a page down. This function does not 
+    Performs a page down. This function does not
     select any text and removes all existing highlights.
 
     Args:
@@ -581,7 +581,7 @@ class Actions(app.mutator.Mutator):
 
   def cursorSelectNonePageUp(self):
     """
-    Performs a page up. This function does not 
+    Performs a page up. This function does not
     select any text and removes all existing highlights.
 
     Args:
@@ -856,16 +856,6 @@ class Actions(app.mutator.Mutator):
     maxCols = self.view.cols
     scrollRow = self.view.scrollRow
     scrollCol = self.view.scrollCol
-    # if not (scrollRow <= row < scrollRow + maxRows and
-    #     scrollCol <= col < scrollCol + maxCols):
-    #   # Use optimal position preferences set in default_prefs.py
-    #   # or $HOME/.ci_edit/prefs/editor.py
-    #   scrollRow = max(0, min(len(self.lines) - 1,
-    #     row - int(optimalRowRatio * (maxRows - 1))))
-    #   if col < maxCols:
-    #     scrollCol = 0
-    #   else:
-    #     scrollCol = max(0, col - int(optimalColRatio * (maxCols - 1)))
     top, left, bottom, right = self.startAndEnd()
     height = bottom - top + 1
     length = right - left + 1
@@ -882,7 +872,7 @@ class Actions(app.mutator.Mutator):
         if right < maxCols:
           scrollCol = 0
         else:
-          scrollCol = max(0, min(right, 
+          scrollCol = max(0, min(right,
             left - int(optimalColRatio * (maxCols - 1))))
     else:
       scrollCol = left
@@ -1452,11 +1442,11 @@ class Actions(app.mutator.Mutator):
     self.__skipUpdateScroll to True or make sure the cursor is on the screen.
 
     Args:
-      scrollRowDelta (int): Default to None. The number of rows 
+      scrollRowDelta (int): Default to None. The number of rows
                                  down to move the view.
-      scrollColDelta (int): Default to None. The number of rows 
+      scrollColDelta (int): Default to None. The number of rows
                                  right to move the view.
-    
+
     Returns:
       None
     """
@@ -1467,6 +1457,5 @@ class Actions(app.mutator.Mutator):
     if self.__skipUpdateScroll:
       self.__skipUpdateScroll = False
       return
-    else:
-      self.view.scrollRow, self.view.scrollCol = self.optimalScrollPosition(
-          self.penRow, self.penCol)
+    self.view.scrollRow, self.view.scrollCol = self.optimalScrollPosition(
+        self.penRow, self.penCol)
