@@ -171,6 +171,7 @@ class Actions(app.mutator.Mutator):
         markerRow - self.markerRow, markerCol - self.markerCol,
         selectionMode - self.selectionMode)
     self.redo()
+    self.__useOptimalScroll = True
 
   def bookmarkNext(self):
     """
