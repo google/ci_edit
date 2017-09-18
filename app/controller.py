@@ -26,6 +26,7 @@ class Controller:
   def __init__(self, host, name):
     self.host = host
     self.commandDefault = None
+    self.commandPaste = None
     self.commandSet = None
     self.textBuffer = None
     self.name = name
@@ -77,6 +78,10 @@ class Controller:
       cmd()
     else:
       self.commandDefault(ch)
+
+  def handleTerminalPaste(self, text):
+    if self.commandPaste is not None:
+      self.commandPaste(text)
 
   def focus(self):
     app.log.info('base controller focus()')
@@ -201,6 +206,9 @@ class MainController:
 
   def doCommand(self, ch):
     self.controller.doCommand(ch)
+
+  def handleTerminalPaste(self, text):
+    self.controller.handleTerminalPaste(text)
 
   def focus(self):
     app.log.info('MainController.focus')

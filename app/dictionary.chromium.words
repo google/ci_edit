@@ -20,6 +20,7 @@ autolaunch
 backend
 breakpad
 browsertest
+cbd
 checkboxes
 chromevox
 codereview
@@ -40,6 +41,7 @@ futf
 gdoc
 gdraw
 gmock
+gn
 gni
 goma
 grd
@@ -68,6 +70,7 @@ uma
 unittests
 vlog
 vox
+vpd
 webstore
 wildcard
 xtb

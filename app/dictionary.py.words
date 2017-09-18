@@ -16,6 +16,7 @@
 abspath
 addstr
 app
+argparse
 argtypes
 ascii
 atime
@@ -82,6 +83,7 @@ ismount
 isprint
 isupper
 iteritems
+itertools
 keyname
 klipper
 kwargs
@@ -104,6 +106,7 @@ multiline
 mvwin
 ndiff
 newwin
+normpath
 noutrefresh
 npage
 ord
@@ -131,6 +134,7 @@ sel
 sep
 setattr
 setdefault
+shutil
 sigwinch
 sizeof
 sleft
@@ -140,6 +144,7 @@ sright
 startswith
 str
 sys
+tempfile
 termios
 timeit
 tiocgwinsz

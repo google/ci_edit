@@ -69,10 +69,12 @@ def mainWindowCommands(controller, textBuffer):
     KEY_ESCAPE: textBuffer.normalize,
     KEY_F1: controller.info,
     KEY_BTAB: textBuffer.unindent,
-    KEY_PAGE_UP: textBuffer.cursorNeutralPageUp,
-    KEY_PAGE_DOWN: textBuffer.cursorNeutralPageDown,
-    KEY_SHIFT_PAGE_UP: textBuffer.cursorSelectPageUp,
-    KEY_SHIFT_PAGE_DOWN: textBuffer.cursorSelectPageDown,
+    KEY_PAGE_UP: textBuffer.cursorSelectNonePageUp,
+    KEY_PAGE_DOWN: textBuffer.cursorSelectNonePageDown,
+    KEY_SHIFT_PAGE_UP: textBuffer.cursorSelectCharacterPageUp,
+    KEY_SHIFT_PAGE_DOWN: textBuffer.cursorSelectCharacterPageDown,
+    KEY_ALT_SHIFT_PAGE_UP: textBuffer.cursorSelectBlockPageUp,
+    KEY_ALT_SHIFT_PAGE_DOWN: textBuffer.cursorSelectBlockPageDown,
 
     CTRL_F: controller.changeToFind,
     CTRL_G: controller.changeToGoto,
@@ -154,6 +156,7 @@ class InteractiveFind(app.editor.InteractiveFind):
       KEY_DOWN: self.findNext,
       KEY_UP: self.findPrior,
     })
+    self.commandPaste = textBuffer.editPasteData
     self.commandSet = commandSet
     self.commandDefault = self.textBuffer.insertPrintable
 
@@ -183,6 +186,7 @@ class InteractiveGoto(app.editor.InteractiveGoto):
       ord('t'): self.gotoTop,
       ord('T'): self.gotoTop,
     })
+    self.commandPaste = textBuffer.editPasteData
     self.commandSet = commandSet
     self.commandDefault = self.textBuffer.insertPrintable
 
@@ -205,6 +209,7 @@ class InteractiveOpener(app.editor.InteractiveOpener):
       CTRL_P: self.changeToPrediction,
       CTRL_Q: self.saveEventChangeToHostWindow,
     })
+    self.commandPaste = textBuffer.editPasteData
     self.commandSet = commandSet
     self.commandDefault = self.textBuffer.insertPrintable
 
@@ -230,6 +235,7 @@ class InteractivePrediction(app.editor.InteractivePrediction):
       KEY_DOWN: self.nextItem,
       KEY_UP: self.priorItem,
     })
+    self.commandPaste = textBuffer.editPasteData
     self.commandSet = commandSet
     self.commandDefault = self.textBuffer.insertPrintable
 
@@ -310,6 +316,7 @@ class CuaEdit(app.controller.Controller):
 
   def setTextBuffer(self, textBuffer):
     app.controller.Controller.setTextBuffer(self, textBuffer)
+    self.commandPaste = textBuffer.editPasteData
     self.commandSet = mainWindowCommands(self, textBuffer)
     self.commandDefault = self.textBuffer.insertPrintable
 
