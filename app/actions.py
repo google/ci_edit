@@ -832,7 +832,7 @@ class Actions(app.mutator.Mutator):
     self.lastChecksum, self.lastFileSize = app.history.getFileInfo(
         self.fullPath)
 
-  def getOptimalScrollPosition(self, row=None, col=None):
+  def getOptimalScrollPosition(self):
     """
     Args:
       None.
@@ -890,7 +890,7 @@ class Actions(app.mutator.Mutator):
       scrollCol = left
     return scrollCol
 
-  def checkSelectionInView():
+  def checkSelectionInView(self):
     """
     If there is no selection, checks if the cursor is in the view.
 
@@ -904,7 +904,7 @@ class Actions(app.mutator.Mutator):
     return (self.checkSelectionInViewHorizontally() and
             self.checkSelectionInViewVertically())
 
-  def checkSelectionInViewHorizontally():
+  def checkSelectionInViewHorizontally(self):
     """
     Args:
       None.
@@ -916,7 +916,7 @@ class Actions(app.mutator.Mutator):
     return (self.view.scrollCol <= left and
             right < self.view.scrollCol + self.view.cols)
 
-  def checkSelectionInViewVertically():
+  def checkSelectionInViewVertically(self):
     """
     Args:
       None.
