@@ -38,12 +38,10 @@ class Actions(app.mutator.Mutator):
     app.mutator.Mutator.__init__(self)
     self.view = None
     self.rootGrammar = app.prefs.getGrammar(None)
-    # |__skipUpdateScroll| is False if you do not want the program
+    # |__useOptimalScroll| is False if you do not want the program
     # to automatically set the view to the optimal scroll position.
-    self.__skipUpdateScroll = False
-    # |__skipCursorScroll| is True if you want to set the scroll
-    # view to the optimal cursor position on the next update.
-    self.__skipCursorScroll = False
+    # This variable will reset to True on the next screen update.
+    self.__useOptimalScroll = True
 
   def setView(self, view):
     self.view = view
@@ -310,9 +308,7 @@ class Actions(app.mutator.Mutator):
       colDelta = -self.penCol
     self.goalCol = self.penCol + colDelta
     maxRow, maxCol = self.view.rows, self.view.cols
-    if self.__skipCursorScroll:
-      self.__skipCursorScroll = False
-    else:
+    if not self.__useOptimalScroll:
       scrollRowDelta = 0
       if self.view.scrollRow > self.penRow + rowDelta:
         scrollRowDelta = self.penRow + rowDelta - self.view.scrollRow
@@ -562,7 +558,7 @@ class Actions(app.mutator.Mutator):
       scrollRowDelta = -self.view.scrollRow
     cursorColDelta = self.cursorColDelta(self.penRow + penRowDelta)
     self.cursorMoveScroll(penRowDelta, cursorColDelta, scrollRowDelta, 0)
-    self.__skipUpdateScroll = True
+    self.__useOptimalScroll = False
     self.redo()
 
   def cursorSelectNonePageDown(self):
@@ -838,7 +834,7 @@ class Actions(app.mutator.Mutator):
     self.lastChecksum, self.lastFileSize = app.history.getFileInfo(
         self.fullPath)
 
-  def optimalScrollPosition(self, row=None, col=None):
+  def getOptimalScrollPosition(self, row=None, col=None):
     """
     Calculates the optimal position for the view.
 
@@ -862,7 +858,6 @@ class Actions(app.mutator.Mutator):
     extraRows = maxRows - height
     extraCols = maxCols - length
     if extraRows > 0:
-      if not (scrollRow <= top and bottom < scrollRow + maxRows):
         scrollRow = max(0, min(len(self.lines) - 1,
           top - int(optimalRowRatio * (maxRows - 1))))
     else:
@@ -878,6 +873,121 @@ class Actions(app.mutator.Mutator):
       scrollCol = left
     return (scrollRow, scrollCol)
 
+  def getOptimalScrollRowPosition(self, row=None, col=None):
+    """
+    Calculates the optimal scroll row position for current selection.
+
+    Args:
+      row (int): The cursor's row position.
+      col (int): The cursor's column position.
+
+    Returns:
+      A tuple of (row, col) representing where
+      the view should be placed.
+    """
+    optimalRowRatio = app.prefs.editor['optimalCursorRow']
+    optimalColRatio = app.prefs.editor['optimalCursorCol']
+    maxRows = self.view.rows
+    maxCols = self.view.cols
+    scrollRow = self.view.scrollRow
+    scrollCol = self.view.scrollCol
+    top, left, bottom, right = self.startAndEnd()
+    height = bottom - top + 1
+    length = right - left + 1
+    extraRows = maxRows - height
+    extraCols = maxCols - length
+    if extraRows > 0:
+        scrollRow = max(0, min(len(self.lines) - 1,
+          top - int(optimalRowRatio * (maxRows - 1))))
+    else:
+      scrollRow = top
+    if extraCols > 0:
+      if not (scrollCol <= left and right < scrollCol + maxCols):
+        if right < maxCols:
+          scrollCol = 0
+        else:
+          scrollCol = max(0, min(right,
+            left - int(optimalColRatio * (maxCols - 1))))
+    else:
+      scrollCol = left
+    return (scrollRow, scrollCol)
+
+  def getOptimalScrollColPosition(self, row=None, col=None):
+    """
+    Calculates the optimal scroll column position for current selection.
+
+    Args:
+      row (int): The cursor's row position.
+      col (int): The cursor's column position.
+
+    Returns:
+      A tuple of (row, col) representing where
+      the view should be placed.
+    """
+    optimalRowRatio = app.prefs.editor['optimalCursorRow']
+    optimalColRatio = app.prefs.editor['optimalCursorCol']
+    maxRows = self.view.rows
+    maxCols = self.view.cols
+    scrollRow = self.view.scrollRow
+    scrollCol = self.view.scrollCol
+    top, left, bottom, right = self.startAndEnd()
+    height = bottom - top + 1
+    length = right - left + 1
+    extraRows = maxRows - height
+    extraCols = maxCols - length
+    if extraRows > 0:
+        scrollRow = max(0, min(len(self.lines) - 1,
+          top - int(optimalRowRatio * (maxRows - 1))))
+    else:
+      scrollRow = top
+    if extraCols > 0:
+      if not (scrollCol <= left and right < scrollCol + maxCols):
+        if right < maxCols:
+          scrollCol = 0
+        else:
+          scrollCol = max(0, min(right,
+            left - int(optimalColRatio * (maxCols - 1))))
+    else:
+      scrollCol = left
+    return (scrollRow, scrollCol)
+
+  def checkSelectionInView():
+    """
+    If there is no selection, checks if the cursor is in the view.
+
+    Args:
+      None.
+
+    Returns:
+      True if selection is in view. Otherwise, False.
+    """
+    top, left, bottom, right = self.startAndEnd()
+    return (self.checkSelectionInViewHorizontally() and
+            self.checkSelectionInViewVertically())
+
+  def checkSelectionInViewHorizontally():
+    """
+    Args:
+      None.
+
+    Returns:
+      True if selection's left and right side is in view. Otherwise, False.
+    """
+    _, left, _, right = self.startAndEnd()
+    return (self.view.scrollCol <= left and
+            right < self.view.scrollCol + self.view.cols)
+
+  def checkSelectionInViewVertically():
+    """
+    Args:
+      None.
+
+    Returns:
+      True if selection's top and bottom side is in view. Otherwise, False.
+    """
+    top, _, bottom, _ = self.startAndEnd()
+    return (self.view.scrollRow <= top and
+            bottom < self.view.scrollRow + self.view.rows)
 
   def linesToData(self):
     self.data = self.doLinesToData(self.lines)
@@ -943,7 +1053,6 @@ class Actions(app.mutator.Mutator):
         0, 0)
     self.redo()
     self.doSelectionMode(mode)
-    self.__skipCursorScroll = True
     self.cursorMove(0, -length)
     self.redo()
 
@@ -1260,7 +1369,7 @@ class Actions(app.mutator.Mutator):
   def scrollUp(self):
     if self.view.scrollRow == 0:
       if not self.view.hasCaptiveCursor:
-        self.__skipUpdateScroll = True
+        self.__useOptimalScroll = False
       return
     maxRow, maxCol = self.view.rows, self.view.cols
     cursorDelta = 0
@@ -1272,7 +1381,7 @@ class Actions(app.mutator.Mutator):
           self.cursorColDelta(self.penRow + cursorDelta), 0, 0)
       self.redo()
     else:
-      self.__skipUpdateScroll = True
+      self.__useOptimalScroll = False
 
   def mouseWheelUp(self, shift, ctrl, alt):
     if not shift:
@@ -1283,7 +1392,7 @@ class Actions(app.mutator.Mutator):
     maxRow, maxCol = self.view.rows, self.view.cols
     if self.view.scrollRow + maxRow >= len(self.lines):
       if not self.view.hasCaptiveCursor:
-        self.__skipUpdateScroll = True
+        self.__useOptimalScroll = False
       return
     cursorDelta = 0
     if self.penRow <= self.view.scrollRow + 1:
@@ -1294,7 +1403,7 @@ class Actions(app.mutator.Mutator):
           self.cursorColDelta(self.penRow + cursorDelta), 0, 0)
       self.redo()
     else:
-      self.__skipUpdateScroll = True
+      self.__useOptimalScroll = False
 
   def nextSelectionMode(self):
     next = self.selectionMode + 1
@@ -1439,7 +1548,7 @@ class Actions(app.mutator.Mutator):
     None, then the selected view rectangle will be moved so that the
     cursor is visible. If you do not want this function to automatically
     set the view to the defined optimal position, then you must set
-    self.__skipUpdateScroll to True or make sure the cursor is on the screen.
+    self.__useOptimalScroll to False or make sure the cursor is on the screen.
 
     Args:
       scrollRowDelta (int): Default to None. The number of rows
@@ -1454,8 +1563,8 @@ class Actions(app.mutator.Mutator):
       self.view.scrollRow += scrollRowDelta
       self.view.scrollCol += scrollColDelta
       return
-    if self.__skipUpdateScroll:
-      self.__skipUpdateScroll = False
+    if not self.__useOptimalScroll:
+      self.__useOptimalScroll = True
       return
     self.view.scrollRow, self.view.scrollCol = self.optimalScrollPosition(
         self.penRow, self.penCol)
