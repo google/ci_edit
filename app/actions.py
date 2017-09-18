@@ -832,19 +832,45 @@ class Actions(app.mutator.Mutator):
       A tuple of (scrollRow, scrollCol) representing the closest values
       that the view's position must be in order to see the cursor.
     """
-    maxRow, maxCol = self.view.rows, self.view.cols
+    scrollRow = self.getBasicScrollRowPosition()
+    scrollCol = self.getBasicScrollColPosition()
+    return (scrollRow, scrollCol)
+
+  def getBasicScrollRowPosition(self):
+    """
+    Args:
+      None.
+
+    Returns:
+      The scroll row position that will allow the cursor
+      to be seen on the screen. This value minimizes the number of rows
+      that the view needs to move from its current row.
+    """
+    maxRow = self.view.rows
     scrollRow = self.view.scrollRow
     if self.view.scrollRow > self.penRow:
       scrollRow = self.penRow
     elif self.penRow >= self.view.scrollRow + maxRow:
       scrollRow = self.penRow - maxRow + 1
+    return scrollRow
+
+  def getBasicScrollColPosition(self):
+    """
+    Args:
+      None.
+
+    Returns:
+      The scroll col position that will allow the cursor to be seen
+      on the screen. This value minimizes the number of columns
+      that the view needs to move from its current column.
+    """
+    maxCol = self.view.cols
     scrollCol = self.view.scrollCol
     if self.view.scrollCol > self.penCol:
       scrollCol = self.penCol
     elif self.penCol >= self.view.scrollCol + maxCol:
       scrollCol = self.penCol - maxCol + 1
-    return (scrollRow, scrollCol)
-
+    return scrollCol
 
   def getOptimalScrollPosition(self):
     """
@@ -1499,11 +1525,11 @@ class Actions(app.mutator.Mutator):
     """
     This function updates the view's scroll position using the optional
     scrollRowDelta and scrollColDelta arguments. If either of them is
-    None, then the selected view rectangle will be moved so that the
-    current selection is at the optimal scroll position. If you want the
-    scroll position to move the minimum amount, set self.__useOptimalScroll
-    to False. Scroll position is not automatically updated if
-    self.__skipUpdateScroll is True.
+    None, then if self.__useOptimalScroll is True, the selected view
+    rectangle will be moved so that the current selection is at the
+    optimal scroll position. If you want the scroll position to move
+    the minimum amount, set self.__useOptimalScroll to False. Scroll position
+    is not automatically updated if self.__skipUpdateScroll is True.
 
     Args:
       scrollRowDelta (int): Default to None. The number of rows
