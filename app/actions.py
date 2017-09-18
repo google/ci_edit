@@ -1236,10 +1236,6 @@ class Actions(app.mutator.Mutator):
     self.redoAddChange(('i', text))
     self.redo()
     maxRow, maxCol = self.view.rows, self.view.cols
-    deltaCol = self.penCol - self.view.scrollCol - maxCol + 1
-    if deltaCol > 0:
-      self.cursorMoveScroll(0, 0, 0, deltaCol);
-      self.redo()
 
   def insertPrintable(self, ch):
     if curses.ascii.isprint(ch):
