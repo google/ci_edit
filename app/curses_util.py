@@ -30,6 +30,8 @@ BRACKETED_PASTE_BEGIN = (91, 50, 48, 48, 126)
 BRACKETED_PASTE_END = (91, 50, 48, 49, 126)
 BRACKETED_PASTE = ('terminal_paste',)  # Pseudo event type.
 
+UNICODE_INPUT = ('unicode_input',)  # Pseudo event type.
+
 CTRL_AT = '^@'  # 0x00
 CTRL_SPACE = '^@'  # 0x00
 CTRL_A = '^A'  # 0x01

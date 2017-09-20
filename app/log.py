@@ -44,7 +44,7 @@ def parseLines(frame, channel, *args):
   for i in args[1:]:
     if not len(prior) or prior[-1] != '\n':
       msg += ' '
-    prior = str(i)
+    prior = unicode(i)
     msg += prior
   return msg.split("\n")
 

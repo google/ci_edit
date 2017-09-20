@@ -563,7 +563,7 @@ class Actions(app.mutator.Mutator):
 
   def cursorSelectNonePageDown(self):
     """
-    Performs a page down. This function does not 
+    Performs a page down. This function does not
     select any text and removes all existing highlights.
 
     Args:
@@ -577,7 +577,7 @@ class Actions(app.mutator.Mutator):
 
   def cursorSelectNonePageUp(self):
     """
-    Performs a page up. This function does not 
+    Performs a page up. This function does not
     select any text and removes all existing highlights.
 
     Args:
@@ -1140,9 +1140,14 @@ class Actions(app.mutator.Mutator):
       self.cursorMoveScroll(0, 0, 0, deltaCol);
       self.redo()
 
-  def insertPrintable(self, ch):
+  def insertPrintable(self, ch, meta):
+    app.log.info(ch, meta)
     if curses.ascii.isprint(ch):
       self.insert(chr(ch))
+    elif ch is app.curses_util.BRACKETED_PASTE:
+      self.editPasteData(meta)
+    elif ch is app.curses_util.UNICODE_INPUT:
+      self.insert(meta)
 
   def joinLines(self):
     """join the next line onto the current line."""
@@ -1387,7 +1392,7 @@ class Actions(app.mutator.Mutator):
 
   def test(self):
     app.log.info('test')
-    self.insertPrintable(0x00)
+    self.insertPrintable(0x00, None)
 
   def stripTrailingWhiteSpace(self):
     self.compoundChangeBegin()

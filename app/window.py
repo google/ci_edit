@@ -66,6 +66,7 @@ class ViewWindow:
         assert col >= 0, col
         assert len(text) <= self.cols, "%d, %d" % (len(text), self.cols)
     try:
+      # TODO(dschuyler): locale.getpreferredencoding()
       mainCursesWindow.addstr(self.top + row, self.left + col,
           text.encode('utf-8'), colorPair)
     except curses.error: pass
@@ -183,7 +184,7 @@ class ViewWindow:
 
   def writeLine(self, text, color):
     """Simple line writer for static windows."""
-    text = str(text)[:self.cols]
+    text = unicode(text)[:self.cols]
     text = text + ' ' * max(0, self.cols - len(text))
     try:
       mainCursesWindow.addstr(self.top + self.writeLineRow, self.left,

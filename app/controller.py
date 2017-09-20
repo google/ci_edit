@@ -26,7 +26,6 @@ class Controller:
   def __init__(self, host, name):
     self.host = host
     self.commandDefault = None
-    self.commandPaste = None
     self.commandSet = None
     self.textBuffer = None
     self.name = name
@@ -68,7 +67,7 @@ class Controller:
   def changeToSaveAs(self):
     self.host.changeFocusTo(self.host.interactiveSaveAs)
 
-  def doCommand(self, ch):
+  def doCommand(self, ch, meta):
     # Check the commandSet for the input with both its string and integer
     # representation.
     self.savedCh = ch
@@ -77,11 +76,7 @@ class Controller:
     if cmd:
       cmd()
     else:
-      self.commandDefault(ch)
-
-  def handleTerminalPaste(self, text):
-    if self.commandPaste is not None:
-      self.commandPaste(text)
+      self.commandDefault(ch, meta)
 
   def focus(self):
     app.log.info('base controller focus()')
@@ -204,11 +199,8 @@ class MainController:
     self.controllerList.append(controller)
     self.controller = controller
 
-  def doCommand(self, ch):
-    self.controller.doCommand(ch)
-
-  def handleTerminalPaste(self, text):
-    self.controller.handleTerminalPaste(text)
+  def doCommand(self, ch, meta):
+    self.controller.doCommand(ch, meta)
 
   def focus(self):
     app.log.info('MainController.focus')
