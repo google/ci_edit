@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import io
 import inspect
 import os
 import sys
@@ -145,7 +146,7 @@ def wrapper(function, shouldWrite=True):
 
 def writeToFile(path):
   fullPath = os.path.expanduser(os.path.expandvars(path))
-  with open(fullPath, 'w+') as out:
+  with io.open(fullPath, 'w+') as out:
     out.write("\n".join(fullLog)+"\n")
 
 def flush():
