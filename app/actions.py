@@ -1034,7 +1034,7 @@ class Actions(app.mutator.Mutator):
     self.doSelectionMode(mode)
     self.cursorMove(0, -length)
     self.redo()
-    self.__useOptimalScroll = True
+    self.view.scrollRow, self.view.scrollCol = self.getOptimalScrollPosition()
 
   def find(self, searchFor, direction=0):
     """direction is -1 for findPrior, 0 for at pen, 1 for findNext."""
@@ -1520,8 +1520,7 @@ class Actions(app.mutator.Mutator):
     self.cursorMoveAndMark(0, -indentationLength, 0, -indentationLength, 0)
     self.redo()
 
-
-  def updateScrollPosition(self, scrollRowDelta=None, scrollColDelta=None):
+  def updateScrollPosition(self, scrollRowDelta, scrollColDelta):
     """
     This function updates the view's scroll position using the optional
     scrollRowDelta and scrollColDelta arguments. If either of them is
@@ -1540,6 +1539,8 @@ class Actions(app.mutator.Mutator):
     Returns:
       None
     """
+    assert scrollRowDelta is not None
+    assert scrollColDelta is not None
     if not (scrollRowDelta is None or scrollColDelta is None):
       self.view.scrollRow += scrollRowDelta
       self.view.scrollCol += scrollColDelta
