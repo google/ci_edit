@@ -171,7 +171,7 @@ class Actions(app.mutator.Mutator):
         markerRow - self.markerRow, markerCol - self.markerCol,
         selectionMode - self.selectionMode)
     self.redo()
-    self.__useOptimalScroll = True
+    self.view.scrollRow, self.view.scrollCol = self.getOptimalScrollPosition()
 
   def bookmarkNext(self):
     """
@@ -835,8 +835,10 @@ class Actions(app.mutator.Mutator):
     scrollRow = self.view.scrollRow
     scrollCol = self.view.scrollCol
     if self.__skipUpdateScroll:
+      #app.log.info('__skipUpdateScroll')
       self.__skipUpdateScroll = False
     else:
+      #app.log.info()
       # Row.
       maxRow = self.view.rows
       if self.view.scrollRow > self.penRow:
@@ -862,18 +864,17 @@ class Actions(app.mutator.Mutator):
     """
     top, left, bottom, right = self.startAndEnd()
     # Row.
-    optimalRowRatio = app.prefs.editor['optimalCursorRow']
     maxRows = self.view.rows
     scrollRow = self.view.scrollRow
     height = bottom - top + 1
     extraRows = maxRows - height
     if extraRows > 0:
+      optimalRowRatio = app.prefs.editor['optimalCursorRow']
       scrollRow = max(0, min(len(self.lines) - 1,
         top - int(optimalRowRatio * (maxRows - 1))))
     else:
       scrollRow = top
     # Column.
-    optimalColRatio = app.prefs.editor['optimalCursorCol']
     maxCols = self.view.cols
     scrollCol = self.view.scrollCol
     length = right - left + 1
@@ -882,6 +883,7 @@ class Actions(app.mutator.Mutator):
       if right < maxCols:
         scrollCol = 0
       else:
+        optimalColRatio = app.prefs.editor['optimalCursorCol']
         scrollCol = max(0, min(right,
           left - int(optimalColRatio * (maxCols - 1))))
     else:
@@ -992,7 +994,8 @@ class Actions(app.mutator.Mutator):
     self.doSelectionMode(mode)
     self.cursorMove(0, -length)
     self.redo()
-    self.view.scrollRow, self.view.scrollCol = self.getOptimalScrollPosition()
+    if not self.checkSelectionInView():
+      self.view.scrollRow, self.view.scrollCol = self.getOptimalScrollPosition()
 
   def find(self, searchFor, direction=0):
     """direction is -1 for findPrior, 0 for at pen, 1 for findNext."""
@@ -1195,7 +1198,7 @@ class Actions(app.mutator.Mutator):
     self.redo()
 
   def insertPrintable(self, ch, meta):
-    app.log.info(ch, meta)
+    #app.log.info(ch, meta)
     if curses.ascii.isprint(ch):
       self.insert(chr(ch))
     elif ch is app.curses_util.BRACKETED_PASTE:
@@ -1497,17 +1500,6 @@ class Actions(app.mutator.Mutator):
     Returns:
       None
     """
-    assert scrollRowDelta is not None
-    assert scrollColDelta is not None
-    if not (scrollRowDelta is None or scrollColDelta is None):
-      self.view.scrollRow += scrollRowDelta
-      self.view.scrollCol += scrollColDelta
-      return
-    if self.__skipUpdateScroll:
-      self.__skipUpdateScroll = False
-      return
-    if self.__useOptimalScroll:
-      self.__useOptimalScroll = False
-      self.view.scrollRow, self.view.scrollCol = self.getOptimalScrollPosition()
-    else:
-      self.view.scrollRow, self.view.scrollCol = self.getBasicScrollPosition()
+    #app.log.info(scrollRowDelta, scrollColDelta)
+    self.view.scrollRow += scrollRowDelta
+    self.view.scrollCol += scrollColDelta
