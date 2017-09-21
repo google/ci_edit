@@ -832,45 +832,24 @@ class Actions(app.mutator.Mutator):
       A tuple of (scrollRow, scrollCol) representing the closest values
       that the view's position must be in order to see the cursor.
     """
-    scrollRow = self.getBasicScrollRowPosition()
-    scrollCol = self.getBasicScrollColPosition()
-    return (scrollRow, scrollCol)
-
-  def getBasicScrollRowPosition(self):
-    """
-    Args:
-      None.
-
-    Returns:
-      The scroll row position that will allow the cursor
-      to be seen on the screen. This value minimizes the number of rows
-      that the view needs to move from its current row.
-    """
-    maxRow = self.view.rows
     scrollRow = self.view.scrollRow
-    if self.view.scrollRow > self.penRow:
-      scrollRow = self.penRow
-    elif self.penRow >= self.view.scrollRow + maxRow:
-      scrollRow = self.penRow - maxRow + 1
-    return scrollRow
-
-  def getBasicScrollColPosition(self):
-    """
-    Args:
-      None.
-
-    Returns:
-      The scroll col position that will allow the cursor to be seen
-      on the screen. This value minimizes the number of columns
-      that the view needs to move from its current column.
-    """
-    maxCol = self.view.cols
     scrollCol = self.view.scrollCol
-    if self.view.scrollCol > self.penCol:
-      scrollCol = self.penCol
-    elif self.penCol >= self.view.scrollCol + maxCol:
-      scrollCol = self.penCol - maxCol + 1
-    return scrollCol
+    if self.__skipUpdateScroll:
+      self.__skipUpdateScroll = False
+    else:
+      # Row.
+      maxRow = self.view.rows
+      if self.view.scrollRow > self.penRow:
+        scrollRow = self.penRow
+      elif self.penRow >= self.view.scrollRow + maxRow:
+        scrollRow = self.penRow - maxRow + 1
+      # Column.
+      maxCol = self.view.cols
+      if self.view.scrollCol > self.penCol:
+        scrollCol = self.penCol
+      elif self.penCol >= self.view.scrollCol + maxCol:
+        scrollCol = self.penCol - maxCol + 1
+    return (scrollRow, scrollCol)
 
   def getOptimalScrollPosition(self):
     """
@@ -881,22 +860,11 @@ class Actions(app.mutator.Mutator):
       A tuple of (scrollRow, scrollCol) representing where
       the view's optimal position should be.
     """
-    scrollRow = self.getOptimalScrollRowPosition()
-    scrollCol = self.getOptimalScrollColPosition()
-    return (scrollRow, scrollCol)
-
-  def getOptimalScrollRowPosition(self):
-    """
-    Args:
-      None.
-
-    Returns:
-      The optimal scroll row position for current selection.
-    """
+    top, left, bottom, right = self.startAndEnd()
+    # Row.
     optimalRowRatio = app.prefs.editor['optimalCursorRow']
     maxRows = self.view.rows
     scrollRow = self.view.scrollRow
-    top, _, bottom, _ = self.startAndEnd()
     height = bottom - top + 1
     extraRows = maxRows - height
     if extraRows > 0:
@@ -904,20 +872,10 @@ class Actions(app.mutator.Mutator):
         top - int(optimalRowRatio * (maxRows - 1))))
     else:
       scrollRow = top
-    return scrollRow
-
-  def getOptimalScrollColPosition(self):
-    """
-    Args:
-      None.
-
-    Returns:
-      The optimal scroll column position for current selection.
-    """
+    # Column.
     optimalColRatio = app.prefs.editor['optimalCursorCol']
     maxCols = self.view.cols
     scrollCol = self.view.scrollCol
-    _, left, _, right = self.startAndEnd()
     length = right - left + 1
     extraCols = maxCols - length
     if extraCols > 0:
@@ -928,7 +886,7 @@ class Actions(app.mutator.Mutator):
           left - int(optimalColRatio * (maxCols - 1))))
     else:
       scrollCol = left
-    return scrollCol
+    return (scrollRow, scrollCol)
 
   def checkSelectionInView(self):
     """
