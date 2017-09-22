@@ -890,7 +890,7 @@ class Actions(app.mutator.Mutator):
       scrollCol = left
     return (scrollRow, scrollCol)
 
-  def checkSelectionInView(self):
+  def isSelectionInView(self):
     """
     If there is no selection, checks if the cursor is in the view.
 
@@ -901,32 +901,11 @@ class Actions(app.mutator.Mutator):
       True if selection is in view. Otherwise, False.
     """
     top, left, bottom, right = self.startAndEnd()
-    return (self.checkSelectionInViewHorizontally() and
-            self.checkSelectionInViewVertically())
-
-  def checkSelectionInViewHorizontally(self):
-    """
-    Args:
-      None.
-
-    Returns:
-      True if selection's left and right side is in view. Otherwise, False.
-    """
-    _, left, _, right = self.startAndEnd()
-    return (self.view.scrollCol <= left and
+    horizontally = (self.view.scrollCol <= left and
             right < self.view.scrollCol + self.view.cols)
-
-  def checkSelectionInViewVertically(self):
-    """
-    Args:
-      None.
-
-    Returns:
-      True if selection's top and bottom side is in view. Otherwise, False.
-    """
-    top, _, bottom, _ = self.startAndEnd()
-    return (self.view.scrollRow <= top and
+    vertically = (self.view.scrollRow <= top and
             bottom < self.view.scrollRow + self.view.rows)
+    return horizontally and vertically
 
   def linesToData(self):
     self.data = self.doLinesToData(self.lines)
@@ -994,7 +973,7 @@ class Actions(app.mutator.Mutator):
     self.doSelectionMode(mode)
     self.cursorMove(0, -length)
     self.redo()
-    if not self.checkSelectionInView():
+    if not self.isSelectionInView():
       self.view.scrollRow, self.view.scrollCol = self.getOptimalScrollPosition()
 
   def find(self, searchFor, direction=0):
