@@ -220,8 +220,6 @@ class Mutator(app.selectable.Selectable):
         self.redoChain[self.redoIndex][0] == 'm')
 
   def __redoStep(self, change):
-    if self.upperChangedRow > self.penRow:
-      self.upperChangedRow = self.penRow
     if change[0] == 'b':
       line = self.lines[self.penRow]
       self.penCol -= len(change[1])
@@ -258,9 +256,10 @@ class Mutator(app.selectable.Selectable):
           lines.append(ii[2:])
         elif ii[0] == '-':
           index += 1
-      app.log.info('ld', self.lines == lines)
       self.lines = lines
-      self.upperChangedRow = 0
+      firstChangedRow = change[1][0] if type(change[1][0]) is type(0) else 0
+      if self.upperChangedRow > firstChangedRow:
+        self.upperChangedRow = firstChangedRow
     elif change[0] == 'm':  # Redo move
       self.__redoMove(change)
     elif change[0] == 'ml':
@@ -448,7 +447,6 @@ class Mutator(app.selectable.Selectable):
       if self.upperChangedRow > self.penRow:
         self.upperChangedRow = self.penRow
     elif change[0] == 'ld':  # Undo line diff.
-      app.log.info('ld')
       lines = []
       index = 0
       for ii in change[1]:
@@ -461,7 +459,9 @@ class Mutator(app.selectable.Selectable):
         elif ii[0] == '-':
           lines.append(ii[2:])
       self.lines = lines
-      self.upperChangedRow = 0
+      firstChangedRow = change[1][0] if type(change[1][0]) is type(0) else 0
+      if self.upperChangedRow > firstChangedRow:
+        self.upperChangedRow = firstChangedRow
     elif change[0] == 'm':
       self.__undoMove(change)
       return True
