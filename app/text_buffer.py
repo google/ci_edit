@@ -32,6 +32,7 @@ class TextBuffer(app.actions.Actions):
     self.fileEncoding = None
     self.lastChecksum = None
     self.lastFileSize = 0
+    self.bookmarks = []
 
   def checkScrollToCursor(self, window):
     """Move the selected view rectangle so that the cursor is visible."""
@@ -57,8 +58,7 @@ class TextBuffer(app.actions.Actions):
           self.penCol, self.view.scrollCol, maxCol, self)
     assert not rows
     assert not cols
-    self.view.scrollRow += rows
-    self.view.scrollCol += cols
+    self.updateScrollPosition(rows, cols)
 
   def draw(self, window):
     if self.view.rows <= 0 or self.view.cols <= 0:

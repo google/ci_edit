@@ -67,7 +67,7 @@ class Controller:
   def changeToSaveAs(self):
     self.host.changeFocusTo(self.host.interactiveSaveAs)
 
-  def doCommand(self, ch):
+  def doCommand(self, ch, meta):
     # Check the commandSet for the input with both its string and integer
     # representation.
     self.savedCh = ch
@@ -76,7 +76,7 @@ class Controller:
     if cmd:
       cmd()
     else:
-      self.commandDefault(ch)
+      self.commandDefault(ch, meta)
 
   def focus(self):
     app.log.info('base controller focus()')
@@ -199,8 +199,8 @@ class MainController:
     self.controllerList.append(controller)
     self.controller = controller
 
-  def doCommand(self, ch):
-    self.controller.doCommand(ch)
+  def doCommand(self, ch, meta):
+    self.controller.doCommand(ch, meta)
 
   def focus(self):
     app.log.info('MainController.focus')

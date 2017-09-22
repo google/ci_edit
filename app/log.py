@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import io
 import inspect
 import os
 import sys
@@ -44,7 +45,7 @@ def parseLines(frame, channel, *args):
   for i in args[1:]:
     if not len(prior) or prior[-1] != '\n':
       msg += ' '
-    prior = str(i)
+    prior = unicode(i)
     msg += prior
   return msg.split("\n")
 
@@ -73,6 +74,14 @@ def caller(*args):
   lines = parseLines(inspect.stack()[1], "caller", *msg)
   screenLog += lines
   fullLog += lines
+
+def exception(e):
+  error(e)
+  errorType, value, tracebackInfo = sys.exc_info()
+  out = traceback.format_exception(errorType, value, tracebackInfo)
+  for i in out:
+    error(i[:-1])
+
 
 def stack():
   global fullLog, screenLog
@@ -137,7 +146,7 @@ def wrapper(function, shouldWrite=True):
 
 def writeToFile(path):
   fullPath = os.path.expanduser(os.path.expandvars(path))
-  with open(fullPath, 'w+') as out:
+  with io.open(fullPath, 'w+') as out:
     out.write("\n".join(fullLog)+"\n")
 
 def flush():

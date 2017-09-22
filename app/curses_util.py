@@ -25,6 +25,13 @@ import curses.ascii
 # Strings are found using the cursesKeyName() function.
 # Constants are found using the curses.getch() function.
 
+# Tuple events are preceded by an escape (27).
+BRACKETED_PASTE_BEGIN = (91, 50, 48, 48, 126)
+BRACKETED_PASTE_END = (91, 50, 48, 49, 126)
+BRACKETED_PASTE = ('terminal_paste',)  # Pseudo event type.
+
+UNICODE_INPUT = ('unicode_input',)  # Pseudo event type.
+
 CTRL_AT = '^@'  # 0x00
 CTRL_SPACE = '^@'  # 0x00
 CTRL_A = '^A'  # 0x01
@@ -69,8 +76,10 @@ KEY_HOME = curses.KEY_HOME
 KEY_END = curses.KEY_END
 KEY_PAGE_DOWN = curses.KEY_NPAGE
 KEY_SHIFT_PAGE_DOWN = curses.KEY_SNEXT
+KEY_ALT_SHIFT_PAGE_DOWN = 'kNXT4'
 KEY_PAGE_UP = curses.KEY_PPAGE
 KEY_SHIFT_PAGE_UP = curses.KEY_SPREVIOUS
+KEY_ALT_SHIFT_PAGE_UP = 'kPRV4'
 KEY_BTAB = curses.KEY_BTAB
 
 KEY_ALT_A = 165

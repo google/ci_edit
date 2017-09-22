@@ -70,6 +70,8 @@ class CiProgram:
     curses.meta(1)
     # Access ^c before shell does.
     curses.raw()
+    # Enable Bracketed Paste Mode.
+    print '\033[?2004;h'
     #curses.start_color()
     curses.use_default_colors()
     if 0:
@@ -132,10 +134,13 @@ class CiProgram:
       # (A performance optimization).
       cmdList = []
       mouseEvents = []
+      terminalPasteEvents = []
+      unicodeEvents = []
       cursesWindow = app.window.mainCursesWindow
       while not len(cmdList):
         for i in range(5):
           ch = cursesWindow.getch()
+          #ch = cursesWindow.get_wch()
           if ch == curses.ascii.ESC:
             # Some keys are sent from the terminal as a sequence of bytes
             # beginning with an Escape character. To help reason about these
@@ -147,12 +152,48 @@ class CiProgram:
               keySequence.append(n)
               n = cursesWindow.getch()
             #app.log.info('sequence\n', keySequence)
-            ch = tuple(keySequence)
+            # Check for Bracketed Paste Mode begin.
+            paste_begin = app.curses_util.BRACKETED_PASTE_BEGIN
+            if tuple(keySequence[:len(paste_begin)]) == paste_begin:
+              ch = app.curses_util.BRACKETED_PASTE
+              keySequence = keySequence[len(paste_begin):]
+              paste_end = app.curses_util.BRACKETED_PASTE_END
+              while tuple(keySequence[-len(paste_end):]) != paste_end:
+                #app.log.info('waiting in paste mode')
+                n = cursesWindow.getch()
+                while n != curses.ERR:
+                  keySequence.append(n)
+                  n = cursesWindow.getch()
+              keySequence = keySequence[:-(1 + len(paste_end))]
+              terminalPasteEvents.append(''.join([chr(i) for i in keySequence]))
+            else:
+              ch = tuple(keySequence)
             if not ch:
               # The sequence was empty, so it looks like this Escape wasn't
               # really the start of a sequence and is instead a stand-alone
               # Escape. Just forward the esc.
               ch = curses.ascii.ESC
+          elif 160 <= ch < 257:
+            # Start of utf-8 character.
+            u = None
+            if (ch & 0xe0) == 0xc0:
+              # Two byte utf-8.
+              b = cursesWindow.getch()
+              u = (chr(ch) + chr(b)).decode("utf-8")
+            elif (ch & 0xf0) == 0xe0:
+              # Three byte utf-8.
+              b = cursesWindow.getch()
+              c = cursesWindow.getch()
+              u = (chr(ch) + chr(b) + chr(c)).decode("utf-8")
+            elif (ch & 0xf8) == 0xf0:
+              # Four byte utf-8.
+              b = cursesWindow.getch()
+              c = cursesWindow.getch()
+              d = cursesWindow.getch()
+              u = (chr(ch) + chr(b) + chr(c) + chr(d)).decode("utf-8")
+            assert u is not None
+            unicodeEvents.append(u)
+            ch = app.curses_util.UNICODE_INPUT
           if ch != curses.ERR:
             self.ch = ch
             if ch == curses.KEY_MOUSE:
@@ -169,7 +210,14 @@ class CiProgram:
           if cmd == curses.KEY_RESIZE:
             self.handleScreenResize(window)
             continue
-          window.controller.doCommand(cmd)
+          meta = None
+          if cmd == app.curses_util.BRACKETED_PASTE:
+            meta = terminalPasteEvents[0]
+            terminalPasteEvents = terminalPasteEvents[1:]
+          elif cmd == app.curses_util.UNICODE_INPUT:
+            meta = unicodeEvents[0]
+            unicodeEvents = unicodeEvents[1:]
+          window.controller.doCommand(cmd, meta)
           if cmd == curses.KEY_MOUSE:
             self.handleMouse(mouseEvents[0])
             mouseEvents = mouseEvents[1:]
@@ -547,7 +595,6 @@ class CiProgram:
     self.parseArgs()
     homePath = app.prefs.prefs['userData'].get('homePath')
     self.makeHomeDirs(homePath)
-    app.bookmarks.loadUserBookmarks(os.path.join(homePath, 'bookmarks.dat'))
     app.curses_util.hackCursesFixes()
     self.startup()
     if app.prefs.startup.get('profile'):
@@ -561,7 +608,6 @@ class CiProgram:
       app.log.info(output.getvalue())
     else:
       self.commandLoop()
-    app.bookmarks.saveUserBookmarks()
 
   def setUpPalette(self):
     def applyPalette(name):
@@ -595,6 +641,8 @@ def run_ci():
   finally:
     app.log.flush()
     app.log.writeToFile('~/.ci_edit/recentLog')
+    # Disable Bracketed Paste Mode.
+    print '\033[?2004l'
   global userConsoleMessage
   if userConsoleMessage:
     print userConsoleMessage
