@@ -149,18 +149,24 @@ class Mutator(app.selectable.Selectable):
         assert self.markerRow >= to
         self.markerRow += count
     self.lines = self.lines[:to] + lines + self.lines[to:]
+    if self.upperChangedRow > to:
+      self.upperChangedRow = to
 
   def __doVerticalInsert(self, change):
     text, row, endRow, col = change[1]
     for i in range(row, endRow + 1):
       line = self.lines[i]
       self.lines[i] = line[:col] + text + line[col:]
+    if self.upperChangedRow > row:
+      self.upperChangedRow = row
 
   def __doVerticalDelete(self, change):
     text, row, endRow, col = change[1]
     for i in range(row, endRow + 1):
       line = self.lines[i]
       self.lines[i] = line[:col] + line[col + len(text):]
+    if self.upperChangedRow > row:
+      self.upperChangedRow = row
 
   def __redoMove(self, change):
     assert self.penRow + change[1][0] >= 0, "%s %s"%(
@@ -182,6 +188,7 @@ class Mutator(app.selectable.Selectable):
     if self.stallNextRedo:
       self.stallNextRedo = False
       return
+
     if self.processTempChange:
       if self.debugRedo:
         app.log.info('processTempChange', repr(change))
@@ -213,6 +220,8 @@ class Mutator(app.selectable.Selectable):
         self.redoChain[self.redoIndex][0] == 'm')
 
   def __redoStep(self, change):
+    if self.upperChangedRow > self.penRow:
+      self.upperChangedRow = self.penRow
     if change[0] == 'b':
       line = self.lines[self.penRow]
       self.penCol -= len(change[1])
@@ -232,6 +241,8 @@ class Mutator(app.selectable.Selectable):
       self.lines[self.penRow] = line[:x] + change[1] + line[x:]
       self.penCol += len(change[1])
       self.goalCol = self.penCol
+      if self.upperChangedRow > self.penRow:
+        self.upperChangedRow = self.penRow
     elif change[0] == 'j':  # Redo join lines.
       self.lines[self.penRow] += self.lines[self.penRow + 1]
       del self.lines[self.penRow + 1]
@@ -249,6 +260,7 @@ class Mutator(app.selectable.Selectable):
           index += 1
       app.log.info('ld', self.lines == lines)
       self.lines = lines
+      self.upperChangedRow = 0
     elif change[0] == 'm':  # Redo move
       self.__redoMove(change)
     elif change[0] == 'ml':
@@ -426,11 +438,15 @@ class Mutator(app.selectable.Selectable):
       self.penCol -= len(change[1])
       self.lines[self.penRow] = line[:x - len(change[1])] + line[x:]
       self.goalCol = self.penCol
+      if self.upperChangedRow > self.penRow:
+        self.upperChangedRow = self.penRow
     elif change[0] == 'j':
       # Join lines.
       line = self.lines[self.penRow]
       self.lines.insert(self.penRow + 1, line[self.penCol:])
       self.lines[self.penRow] = line[:self.penCol]
+      if self.upperChangedRow > self.penRow:
+        self.upperChangedRow = self.penRow
     elif change[0] == 'ld':  # Undo line diff.
       app.log.info('ld')
       lines = []
@@ -445,6 +461,7 @@ class Mutator(app.selectable.Selectable):
         elif ii[0] == '-':
           lines.append(ii[2:])
       self.lines = lines
+      self.upperChangedRow = 0
     elif change[0] == 'm':
       self.__undoMove(change)
       return True
@@ -462,6 +479,8 @@ class Mutator(app.selectable.Selectable):
       self.lines[self.penRow] += self.lines[self.penRow + change[1][0]]
       for i in range(change[1][0]):
         del self.lines[self.penRow + 1]
+      if self.upperChangedRow > self.penRow:
+        self.upperChangedRow = self.penRow
     elif change[0] == 'v':  # undo paste
       clip = change[1]
       row = self.penRow

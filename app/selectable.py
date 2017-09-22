@@ -85,6 +85,7 @@ class Selectable(BaseLineBuffer):
     self.markerRow = 0
     self.markerCol = 0
     self.selectionMode = kSelectionNone
+    self.upperChangedRow = 0
 
   def debug(self):
     return "(Selectable: line count %d, pen %d,%d, marker %d,%d, mode %s)"%(
@@ -137,6 +138,8 @@ class Selectable(BaseLineBuffer):
     self.doDelete(upperRow, upperCol, lowerRow, lowerCol)
 
   def doDelete(self, upperRow, upperCol, lowerRow, lowerCol):
+    if self.upperChangedRow > upperRow:
+      self.upperChangedRow = upperRow
     if self.selectionMode == kSelectionBlock:
       for i in range(upperRow, lowerRow+1):
         line = self.lines[i]
@@ -173,7 +176,10 @@ class Selectable(BaseLineBuffer):
     lines = list(lines)
     if selectionMode == kSelectionAll:
       self.lines = lines
+      self.upperChangedRow = 0
       return
+    if self.upperChangedRow > row:
+      self.upperChangedRow = row
     if (selectionMode == kSelectionNone or
         selectionMode == kSelectionCharacter or
         selectionMode == kSelectionWord):

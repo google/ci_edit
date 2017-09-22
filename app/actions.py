@@ -1347,10 +1347,10 @@ class Actions(app.mutator.Mutator):
     start = time.time()
     self.parser.parse(self.data, self.rootGrammar,
         # TODO(dschuyler): start later than scrollRow.
-        self.view.scrollRow,
-        #self.upperChangedRow,
+        #self.view.scrollRow,
+        self.upperChangedRow,
         self.view.scrollRow + self.view.rows + 1)
-    self.sentUpperChangedRow = self.view.scrollRow
+    self.sentUpperChangedRow = self.upperChangedRow
     self.upperChangedRow = len(self.lines)
     self.parserTime = time.time() - start
 

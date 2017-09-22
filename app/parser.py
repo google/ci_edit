@@ -129,7 +129,8 @@ class Parser:
       self.parserNodes = [node]
       self.rows = [0]
     startTime = time.time()
-    self.__buildGrammarList()
+    if self.endRow > len(self.rows):
+      self.__buildGrammarList()
     totalTime = time.time() - startTime
     if app.log.enabledChannels.get('parser', False):
       self.debugLog(app.log.parser, data)
