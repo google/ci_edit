@@ -141,6 +141,8 @@ class Mutator(app.selectable.Selectable):
         assert self.markerRow < to + count
         assert self.markerRow >= count
         self.markerRow -= count
+      if self.upperChangedRow > begin:
+        self.upperChangedRow = begin
     else:
       assert end > to
       assert self.penRow >= to
@@ -148,9 +150,9 @@ class Mutator(app.selectable.Selectable):
       if self.selectionMode != app.selectable.kSelectionNone:
         assert self.markerRow >= to
         self.markerRow += count
+      if self.upperChangedRow > to:
+        self.upperChangedRow = to
     self.lines = self.lines[:to] + lines + self.lines[to:]
-    if self.upperChangedRow > to:
-      self.upperChangedRow = to
 
   def __doVerticalInsert(self, change):
     text, row, endRow, col = change[1]
@@ -220,15 +222,19 @@ class Mutator(app.selectable.Selectable):
         self.redoChain[self.redoIndex][0] == 'm')
 
   def __redoStep(self, change):
-    if change[0] == 'b':
+    if change[0] == 'b':  # Redo backspace.
       line = self.lines[self.penRow]
       self.penCol -= len(change[1])
       x = self.penCol
       self.lines[self.penRow] = line[:x] + line[x + len(change[1]):]
+      if self.upperChangedRow > self.penRow:
+        self.upperChangedRow = self.penRow
     elif change[0] == 'd':
       line = self.lines[self.penRow]
       x = self.penCol
       self.lines[self.penRow] = line[:x] + line[x + len(change[1]):]
+      if self.upperChangedRow > self.penRow:
+        self.upperChangedRow = self.penRow
     elif change[0] == 'dr':  # Redo delete range.
       self.doDelete(*change[1])
     elif change[0] == 'ds':  # Redo delete selection.
@@ -244,6 +250,8 @@ class Mutator(app.selectable.Selectable):
     elif change[0] == 'j':  # Redo join lines.
       self.lines[self.penRow] += self.lines[self.penRow + 1]
       del self.lines[self.penRow + 1]
+      if self.upperChangedRow > self.penRow:
+        self.upperChangedRow = self.penRow
     elif change[0] == 'ld':  # Redo line diff.
       lines = []
       index = 0
@@ -273,6 +281,8 @@ class Mutator(app.selectable.Selectable):
       self.lines[self.penRow] = line[:self.penCol]
       for i in range(max(change[1][0] - 1, 0)):
         self.lines.insert(self.penRow + 1, "")
+      if self.upperChangedRow > self.penRow:
+        self.upperChangedRow = self.penRow
       self.__redoMove(change[1][1])
     elif change[0] == 'v':  # Redo paste.
       self.insertLines(change[1])
@@ -284,6 +294,8 @@ class Mutator(app.selectable.Selectable):
         line = self.lines[i]
         x = self.penCol
         self.lines[self.penRow] = line[:x] + line[x + len(change[1]):]
+      if self.upperChangedRow > row:
+        self.upperChangedRow = row
     elif change[0] == 'vd':  # Redo vertical delete.
       app.log.info('do vd')
       self.__doVerticalDelete(change)
@@ -423,10 +435,14 @@ class Mutator(app.selectable.Selectable):
       x = self.penCol
       self.lines[self.penRow] = line[:x] + change[1] + line[x:]
       self.penCol += len(change[1])
+      if self.upperChangedRow > self.penRow:
+        self.upperChangedRow = self.penRow
     elif change[0] == 'd':
       line = self.lines[self.penRow]
       x = self.penCol
       self.lines[self.penRow] = line[:x] + change[1] + line[x:]
+      if self.upperChangedRow > self.penRow:
+        self.upperChangedRow = self.penRow
     elif change[0] == 'dr':  # Undo delete range.
       self.insertLinesAt(change[1][0], change[1][1], change[2])
     elif change[0] == 'ds':  # Undo delete selection.
@@ -495,6 +511,8 @@ class Mutator(app.selectable.Selectable):
             self.lines[row + len(clip)-1][len(clip[-1]):])
         delLineCount = len(clip[1:-1])
         del self.lines[row + 1:row + 1 + delLineCount + 1]
+      if self.upperChangedRow > row:
+        self.upperChangedRow = row
     elif change[0] == 'vb':
       row = min(self.markerRow, self.penRow)
       endRow = max(self.markerRow, self.penRow)
@@ -503,6 +521,8 @@ class Mutator(app.selectable.Selectable):
         x = self.penCol
         self.lines[self.penRow] = line[:x] + change[1] + line[x:]
       self.penCol += len(change[1])
+      if self.upperChangedRow > row:
+        self.upperChangedRow = row
     elif change[0] == 'vd': # Undo vertical delete
       app.log.info('undo vd', change[1])
       self.__doVerticalInsert(change)
