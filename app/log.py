@@ -109,6 +109,19 @@ def parser(*args):
 def startup(*args):
   channel('startup', *args)
 
+def quick(*args):
+  global fullLog, screenLog
+  msg = str(args[0])
+  prior = msg
+  for i in args[1:]:
+    if not len(prior) or prior[-1] != '\n':
+      msg += ' '
+    prior = unicode(i)
+    msg += prior
+  lines = msg.split("\n")
+  screenLog += lines
+  fullLog += lines
+
 def debug(*args):
   global enabledChannels, fullLog, screenLog
   if 'debug' in enabledChannels:
