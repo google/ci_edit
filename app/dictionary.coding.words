@@ -61,6 +61,8 @@ buf
 bugzilla
 bzip
 calc
+canonicalize
+canonicalized
 cfg
 cgi
 changelist
@@ -125,6 +127,7 @@ fn
 formatter
 freebsd
 ftp
+functor
 gaia
 ge
 getter

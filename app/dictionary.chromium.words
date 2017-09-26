@@ -14,6 +14,8 @@
 
 
 # Chromium (May be specific to Chromium development)
+appcache
+appcaches
 arraysize
 asan
 autolaunch
@@ -46,10 +48,12 @@ gni
 goma
 grd
 gtest
+gtestjs
 gurl
 hotword
 hwid
 jstemplate
+lso
 nacl
 nav
 newtabpage
@@ -63,10 +67,12 @@ presubmit
 pylint
 remora
 safebrowsing
+spdy
 stringprintf
 tbr
 tryserver
 uma
+unittest
 unittests
 vlog
 vox
