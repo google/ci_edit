@@ -76,7 +76,7 @@ class InteractiveOpener(app.controller.Controller):
     """Find the first file that starts with the pattern."""
     dirPath, fileName = os.path.split(self.lines[0])
     foundOnce = ''
-    app.log.debug('tabComplete\n', dirPath, '\n', fileName)
+    #app.log.debug('tabComplete\n', dirPath, '\n', fileName)
     for i in os.listdir(os.path.expandvars(os.path.expanduser(dirPath)) or '.'):
       if i.startswith(fileName):
         if foundOnce:
@@ -132,7 +132,7 @@ class InteractiveOpener(app.controller.Controller):
     path = os.path.expanduser(os.path.expandvars(self.textBuffer.lines[0]))
     dirPath, fileName = os.path.split(path)
     dirPath = dirPath or '.'
-    app.log.info('O.onChange', dirPath, fileName)
+    #app.log.info('O.onChange', dirPath, fileName)
     if os.path.isdir(dirPath):
       lines = []
       for i in os.listdir(dirPath):
@@ -155,7 +155,7 @@ class InteractiveOpener(app.controller.Controller):
     fileName = ''
     if len(input) > 0 and input[-1] != os.sep:
       dirPath, fileName = os.path.split(path)
-    app.log.info('\n\nO.onChange\n', path, '\n', dirPath, fileName)
+    #app.log.info('\n\nO.onChange\n', path, '\n', dirPath, fileName)
     if os.path.isdir(dirPath):
       lines = []
       for i in os.listdir(dirPath):

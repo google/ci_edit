@@ -148,7 +148,7 @@ class ViewWindow:
     self.resizeTo(rows, cols)
 
   def resizeTo(self, rows, cols):
-    app.log.detail(rows, cols, self)
+    #app.log.detail(rows, cols, self)
     assert rows >=0, rows
     assert cols >=0, cols
     self.rows = rows

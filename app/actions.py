@@ -38,11 +38,6 @@ class Actions(app.mutator.Mutator):
     app.mutator.Mutator.__init__(self)
     self.view = None
     self.rootGrammar = app.prefs.getGrammar(None)
-    # |__useOptimalScroll| is True if you want the program to set the selection
-    # to the optimal position in the next update. If False, program will set
-    # the program to the basic scroll position instead.
-    self.__useOptimalScroll = True
-
     #|__skipUpdateScroll| is True if you want to skip the next scroll update
     self.__skipUpdateScroll = False
 
@@ -311,7 +306,6 @@ class Actions(app.mutator.Mutator):
     if self.penCol + colDelta < 0:  # Catch cursor at beginning of line.
       colDelta = -self.penCol
     self.goalCol = self.penCol + colDelta
-    self.__useOptimalScroll = False
     return ('m', (rowDelta, colDelta,
         markRowDelta, markColDelta, selectionModeDelta))
 
@@ -1347,8 +1341,6 @@ class Actions(app.mutator.Mutator):
       self.parser = app.parser.Parser()
     start = time.time()
     self.parser.parse(self.data, self.rootGrammar,
-        # TODO(dschuyler): start later than scrollRow.
-        #self.view.scrollRow,
         self.upperChangedRow,
         self.view.scrollRow + self.view.rows + 1)
     self.sentUpperChangedRow = self.upperChangedRow
@@ -1467,22 +1459,14 @@ class Actions(app.mutator.Mutator):
   def updateScrollPosition(self, scrollRowDelta, scrollColDelta):
     """
     This function updates the view's scroll position using the optional
-    scrollRowDelta and scrollColDelta arguments. If either of them is
-    None, then if self.__useOptimalScroll is True, the selected view
-    rectangle will be moved so that the current selection is at the
-    optimal scroll position. If you want the scroll position to move
-    the minimum amount, set self.__useOptimalScroll to False. Scroll position
-    is not automatically updated if self.__skipUpdateScroll is True.
+    scrollRowDelta and scrollColDelta arguments.
 
     Args:
-      scrollRowDelta (int): Default to None. The number of rows
-                                 down to move the view.
-      scrollColDelta (int): Default to None. The number of rows
-                                 right to move the view.
+      scrollRowDelta (int): The number of rows down to move the view.
+      scrollColDelta (int): The number of rows right to move the view.
 
     Returns:
       None
     """
-    #app.log.info(scrollRowDelta, scrollColDelta)
     self.view.scrollRow += scrollRowDelta
     self.view.scrollCol += scrollColDelta
