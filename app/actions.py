@@ -738,6 +738,7 @@ class Actions(app.mutator.Mutator):
   def fileFilter(self, data):
     self.data = data
     self.dataToLines()
+    self.upperChangedRow = 0
     self.savedAtRedoIndex = self.redoIndex
 
   def setFilePath(self, path):

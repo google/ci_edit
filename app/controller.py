@@ -39,7 +39,7 @@ class Controller:
   def changeToConfirmQuit(self):
     self.host.changeFocusTo(self.host.interactiveQuit)
 
-  def changeToHostWindow(self, ignored=1):
+  def changeToHostWindow(self, *args):
     self.host.changeFocusTo(self.host)
 
   def changeToFileOpen(self):
@@ -82,7 +82,7 @@ class Controller:
     app.log.info('base controller focus()')
     pass
 
-  def confirmationPromptFinish(self, ignore=1):
+  def confirmationPromptFinish(self, *args):
     self.host.userIntent = 'edit'
     self.changeToHostWindow()
 
@@ -170,7 +170,7 @@ class Controller:
   def onChange(self):
     pass
 
-  def saveEventChangeToHostWindow(self, ignored=1):
+  def saveEventChangeToHostWindow(self, *args):
     curses.ungetch(self.savedCh)
     self.host.changeFocusTo(self.host)
 
