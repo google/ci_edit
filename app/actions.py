@@ -241,7 +241,7 @@ class Actions(app.mutator.Mutator):
     return True
 
   def backspace(self):
-    app.log.info('backspace', self.penRow > self.markerRow)
+    #app.log.info('backspace', self.penRow > self.markerRow)
     if self.selectionMode != app.selectable.kSelectionNone:
       self.performDelete()
     elif self.penCol == 0:
@@ -258,7 +258,7 @@ class Actions(app.mutator.Mutator):
     self.performDelete()
     self.redoAddChange(('n', (1, self.getCursorMove(1, -self.penCol))))
     self.redo()
-    if 1: # todo: if indent on CR
+    if 1:  # TODO(dschuyler): if indent on CR
       line = self.lines[self.penRow - 1]
       commonIndent = 2
       indent = 0
@@ -267,10 +267,13 @@ class Actions(app.mutator.Mutator):
       if len(line):
         if line[-1] in [':', '[', '{']:
           indent += commonIndent
+        # Good idea or bad idea?
+        #elif indent >= 2 and line.lstrip()[:6] == 'return':
+        #  indent -= commonIndent
         elif line.count('(') > line.count(')'):
           indent += commonIndent * 2
       if indent:
-        self.redoAddChange(('i', ' '*indent));
+        self.redoAddChange(('i', ' ' * indent));
         self.redo()
 
   def cursorColDelta(self, toRow):
@@ -1423,10 +1426,13 @@ class Actions(app.mutator.Mutator):
     self.compoundChangeEnd()
 
   def unindent(self):
-    if self.selectionMode == app.selectable.kSelectionNone:
-      pass
-    else:
+    if self.selectionMode != app.selectable.kSelectionNone:
       self.unindentLines()
+    else:
+      d = len(self.lines[self.penRow]) - len(self.lines[self.penRow].lstrip())
+      # d is the count of leading spaces.
+      if d == self.penCol:
+        self.unindentLines()
 
   def unindentLines(self):
     indentation = app.prefs.editor['indentation']
