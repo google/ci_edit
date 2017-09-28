@@ -31,10 +31,13 @@ class ViewWindow:
   """A view window is a base window that does not get focus or have TextBuffer.
   See class ActiveWindow for a window that can get focus.
   See class Window for a window that can get focus and have a TextBuffer.
-
-  arg: parent is responsible for the order in which this window is updated, relative
-  to its siblings."""
+  """
   def __init__(self, parent):
+    """
+    Args:
+      parent is responsible for the order in which this window is updated,
+      relative to its siblings.
+    """
     self.parent = parent
     self.zOrder = []
     self.isFocusable = False
@@ -528,7 +531,7 @@ class TopInfo(ViewWindow):
       return
     tb = self.host.textBuffer
     lines = []
-    # TODO: Make dynamic topinfo work properly
+    # TODO: Make dynamic topInfo work properly
     if len(tb.lines):
       lineCursor = self.host.scrollRow
       line = ""
@@ -797,7 +800,8 @@ class InputWindow(Window):
   def setTextBuffer(self, textBuffer):
     app.log.info('setTextBuffer')
     if self.textBuffer is not None:
-      self.savedScrollPositions[self.textBuffer.fullPath] = (self.scrollRow, self.scrollCol)
+      self.savedScrollPositions[self.textBuffer.fullPath] = (
+          self.scrollRow, self.scrollCol)
     #self.normalize()
     textBuffer.lineLimitIndicator = app.prefs.editor['lineLimitIndicator']
     textBuffer.debugRedo = app.prefs.startup.get('debugRedo')
@@ -807,7 +811,7 @@ class InputWindow(Window):
     if savedScroll is not None:
       self.scrollRow, self.scrollCol = savedScroll
     else:
-      self.scrollRow, self.scrollCol = self.textBuffer.getOptimalScrollPosition()
+      self.textBuffer.scrollToOptimalScrollPosition()
 
   def unfocus(self):
     if self.showMessageLine:

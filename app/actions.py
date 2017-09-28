@@ -164,7 +164,7 @@ class Actions(app.mutator.Mutator):
         markerRow - self.markerRow, markerCol - self.markerCol,
         selectionMode - self.selectionMode)
     self.redo()
-    self.view.scrollRow, self.view.scrollCol = self.getOptimalScrollPosition()
+    self.scrollToOptimalScrollPosition()
 
   def bookmarkNext(self):
     """
@@ -615,6 +615,7 @@ class Actions(app.mutator.Mutator):
     """
     Performs a page up. This function sets
     the selection mode to "block."
+
     Args:
       None.
 
@@ -840,7 +841,7 @@ class Actions(app.mutator.Mutator):
     self.view.scrollRow = scrollRow
     self.view.scrollCol = scrollCol
 
-  def getOptimalScrollPosition(self):
+  def scrollToOptimalScrollPosition(self):
     """
     Args:
       None.
@@ -875,7 +876,8 @@ class Actions(app.mutator.Mutator):
           left - int(optimalColRatio * (maxCols - 1))))
     else:
       scrollCol = left
-    return (scrollRow, scrollCol)
+    self.view.scrollRow = scrollRow
+    self.view.scrollCol = scrollCol
 
   def isSelectionInView(self):
     """
@@ -961,7 +963,7 @@ class Actions(app.mutator.Mutator):
     self.cursorMove(0, -length)
     self.redo()
     if not self.isSelectionInView():
-      self.view.scrollRow, self.view.scrollCol = self.getOptimalScrollPosition()
+      self.scrollToOptimalScrollPosition()
 
   def find(self, searchFor, direction=0):
     """direction is -1 for findPrior, 0 for at pen, 1 for findNext."""
