@@ -789,7 +789,6 @@ class InputWindow(Window):
     self.host.quitNow()
 
   def refresh(self):
-    self.scrollRow, self.scrollCol = self.textBuffer.getBasicScrollPosition()
     self.topInfo.onChange()
     self.drawLogoCorner()
     self.drawRightEdge()

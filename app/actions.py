@@ -38,8 +38,6 @@ class Actions(app.mutator.Mutator):
     app.mutator.Mutator.__init__(self)
     self.view = None
     self.rootGrammar = app.prefs.getGrammar(None)
-    #|__skipUpdateScroll| is True if you want to skip the next scroll update
-    self.__skipUpdateScroll = False
 
   def setView(self, view):
     self.view = view
@@ -327,6 +325,7 @@ class Actions(app.mutator.Mutator):
       self.cursorMove(1, self.cursorColDelta(self.penRow + 1))
       self.redo()
       self.goalCol = savedGoal
+      self.updateBasicScrollPosition()
 
   def cursorMoveLeft(self):
     if self.penCol > 0:
@@ -335,6 +334,7 @@ class Actions(app.mutator.Mutator):
     elif self.penRow > 0:
       self.cursorMove(-1, len(self.lines[self.penRow - 1]))
       self.redo()
+    self.updateBasicScrollPosition()
 
   def cursorMoveRight(self):
     if not self.lines:
@@ -345,6 +345,7 @@ class Actions(app.mutator.Mutator):
     elif self.penRow + 1 < len(self.lines):
       self.cursorMove(1, -len(self.lines[self.penRow]))
       self.redo()
+    self.updateBasicScrollPosition()
 
   def cursorMoveUp(self):
     if self.penRow > 0:
@@ -357,6 +358,7 @@ class Actions(app.mutator.Mutator):
         self.cursorMove(-1, lineLen - self.penCol)
         self.redo()
       self.goalCol = savedGoal
+      self.updateBasicScrollPosition()
 
   def cursorMoveSubwordLeft(self):
     self.doCursorMoveLeftTo(app.selectable.kReSubwordBoundaryRvr)
@@ -698,17 +700,18 @@ class Actions(app.mutator.Mutator):
     self.editPasteLines(tuple(self.doDataToLines(data)))
 
   def editPasteLines(self, clip):
-      if self.selectionMode != app.selectable.kSelectionNone:
-        self.performDelete()
-      self.redoAddChange(('v', clip))
-      self.redo()
-      rowDelta = len(clip) - 1
-      if rowDelta == 0:
-        endCol = self.penCol + len(clip[0])
-      else:
-        endCol = len(clip[-1])
-      self.cursorMove(rowDelta, endCol - self.penCol)
-      self.redo()
+    if self.selectionMode != app.selectable.kSelectionNone:
+      self.performDelete()
+    self.redoAddChange(('v', clip))
+    self.redo()
+    rowDelta = len(clip) - 1
+    if rowDelta == 0:
+      endCol = self.penCol + len(clip[0])
+    else:
+      endCol = len(clip[-1])
+    self.cursorMove(rowDelta, endCol - self.penCol)
+    self.redo()
+    self.updateBasicScrollPosition()
 
   def doLinesToData(self, data):
     def encode(line):
@@ -818,35 +821,33 @@ class Actions(app.mutator.Mutator):
     self.lastChecksum, self.lastFileSize = app.history.getFileInfo(
         self.fullPath)
 
-  def getBasicScrollPosition(self):
+  def updateBasicScrollPosition(self):
     """
+    Sets scrollRow, scrollCol to the closest values that the view's position
+    must be in order to see the cursor.
+
     Args:
       None.
 
     Returns:
-      A tuple of (scrollRow, scrollCol) representing the closest values
-      that the view's position must be in order to see the cursor.
+      None.
     """
     scrollRow = self.view.scrollRow
     scrollCol = self.view.scrollCol
-    if self.__skipUpdateScroll:
-      #app.log.info('__skipUpdateScroll')
-      self.__skipUpdateScroll = False
-    else:
-      #app.log.info()
-      # Row.
-      maxRow = self.view.rows
-      if self.view.scrollRow > self.penRow:
-        scrollRow = self.penRow
-      elif self.penRow >= self.view.scrollRow + maxRow:
-        scrollRow = self.penRow - maxRow + 1
-      # Column.
-      maxCol = self.view.cols
-      if self.view.scrollCol > self.penCol:
-        scrollCol = self.penCol
-      elif self.penCol >= self.view.scrollCol + maxCol:
-        scrollCol = self.penCol - maxCol + 1
-    return (scrollRow, scrollCol)
+    # Row.
+    maxRow = self.view.rows
+    if self.view.scrollRow > self.penRow:
+      scrollRow = self.penRow
+    elif self.penRow >= self.view.scrollRow + maxRow:
+      scrollRow = self.penRow - maxRow + 1
+    # Column.
+    maxCol = self.view.cols
+    if self.view.scrollCol > self.penCol:
+      scrollCol = self.penCol
+    elif self.penCol >= self.view.scrollCol + maxCol:
+      scrollCol = self.penCol - maxCol + 1
+    self.view.scrollRow = scrollRow
+    self.view.scrollCol = scrollCol
 
   def getOptimalScrollPosition(self):
     """
@@ -1149,6 +1150,7 @@ class Actions(app.mutator.Mutator):
       self.indentLines()
     self.cursorMoveAndMark(0, indentationLength, 0, indentationLength, 0)
     self.redo()
+    self.updateBasicScrollPosition()
 
   def indentLines(self):
     """
@@ -1225,6 +1227,7 @@ class Actions(app.mutator.Mutator):
       self.cursorMoveAndMark(0, 0, row - self.markerRow, col - self.markerCol,
           0)
       self.redo()
+      self.updateBasicScrollPosition()
       return
     # If not block selection, restrict col to the chars on the line.
     col = min(col, len(self.lines[row]))
@@ -1254,6 +1257,7 @@ class Actions(app.mutator.Mutator):
     self.cursorMoveAndMark(row - self.penRow, col - self.penCol,
         0, markerCol, 0)
     self.redo()
+    self.updateBasicScrollPosition()
     inLine = paneCol < len(self.lines[row])
     if self.selectionMode == app.selectable.kSelectionLine:
       self.cursorMoveAndMark(*self.extendSelection())
@@ -1283,8 +1287,6 @@ class Actions(app.mutator.Mutator):
 
   def scrollUp(self):
     if self.view.scrollRow == 0:
-      if not self.view.hasCaptiveCursor:
-        self.__skipUpdateScroll = True
       return
     maxRow, maxCol = self.view.rows, self.view.cols
     cursorDelta = 0
@@ -1295,8 +1297,7 @@ class Actions(app.mutator.Mutator):
       self.cursorMoveScroll(cursorDelta,
           self.cursorColDelta(self.penRow + cursorDelta), 0, 0)
       self.redo()
-    else:
-      self.__skipUpdateScroll = True
+      self.updateBasicScrollPosition()
 
   def mouseWheelUp(self, shift, ctrl, alt):
     if not shift:
@@ -1306,8 +1307,6 @@ class Actions(app.mutator.Mutator):
   def scrollDown(self):
     maxRow, maxCol = self.view.rows, self.view.cols
     if self.view.scrollRow + maxRow >= len(self.lines):
-      if not self.view.hasCaptiveCursor:
-        self.__skipUpdateScroll = True
       return
     cursorDelta = 0
     if self.penRow <= self.view.scrollRow + 1:
@@ -1317,8 +1316,7 @@ class Actions(app.mutator.Mutator):
       self.cursorMoveScroll(cursorDelta,
           self.cursorColDelta(self.penRow + cursorDelta), 0, 0)
       self.redo()
-    else:
-      self.__skipUpdateScroll = True
+      self.updateBasicScrollPosition()
 
   def nextSelectionMode(self):
     next = self.selectionMode + 1
@@ -1394,6 +1392,7 @@ class Actions(app.mutator.Mutator):
         self.selectionLine()
         self.cursorMoveAndMark(*self.extendSelection())
         self.redo()
+        self.updateBasicScrollPosition()
       else:
         # TODO(dschuyler): reverted to above to fix line selection in the line
         # numbers column. To be investigated further.
