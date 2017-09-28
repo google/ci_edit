@@ -1160,6 +1160,10 @@ class Actions(app.mutator.Mutator):
     indentation = app.prefs.editor['indentation']
     self.verticalInsert(row, endRow, col, indentation)
 
+  def verticalDelete(self, row, endRow, col, text):
+    self.redoAddChange(('vd', (text, row, endRow, col)))
+    self.redo()
+
   def verticalInsert(self, row, endRow, col, text):
     self.redoAddChange(('vi', (text, row, endRow, col)))
     self.redo()
@@ -1429,10 +1433,14 @@ class Actions(app.mutator.Mutator):
     if self.selectionMode != app.selectable.kSelectionNone:
       self.unindentLines()
     else:
-      d = len(self.lines[self.penRow]) - len(self.lines[self.penRow].lstrip())
-      # d is the count of leading spaces.
-      if d == self.penCol:
-        self.unindentLines()
+      indentation = app.prefs.editor['indentation']
+      indentationLength = len(indentation)
+      line = self.lines[self.penRow]
+      start = self.penCol - indentationLength
+      if indentation == line[start:self.penCol]:
+        self.verticalDelete(self.penRow, self.penRow, start, indentation)
+        self.cursorMoveAndMark(0, -indentationLength, 0, -indentationLength, 0)
+        self.redo()
 
   def unindentLines(self):
     indentation = app.prefs.editor['indentation']
@@ -1445,11 +1453,9 @@ class Actions(app.mutator.Mutator):
       if (len(line) < indentationLength or
           (line[:indentationLength] != indentation)):
         if i > begin:
-          self.redoAddChange(('vd', (indentation, row + begin, row + i - 1, 0)))
-          self.redo()
+          self.verticalDelete(row + begin, row + i - 1, 0, indentation)
         begin = i + 1
-    self.redoAddChange(('vd', (indentation, row + begin, endRow, 0)))
-    self.redo()
+    self.verticalDelete(row + begin, endRow, 0, indentation)
     self.cursorMoveAndMark(0, -indentationLength, 0, -indentationLength, 0)
     self.redo()
     self.compoundChangeEnd()
