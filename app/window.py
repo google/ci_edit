@@ -602,6 +602,7 @@ class InputWindow(Window):
     self.host = host
     self.showFooter = True
     self.useInteractiveFind = True
+    self.savedScrollPositions = {}
     self.showLineNumbers = app.prefs.editor.get(
         'showLineNumbers', True)
     self.showMessageLine = True
@@ -796,11 +797,18 @@ class InputWindow(Window):
 
   def setTextBuffer(self, textBuffer):
     app.log.info('setTextBuffer')
+    if self.textBuffer is not None:
+      self.savedScrollPositions[self.textBuffer.fullPath] = (self.scrollRow, self.scrollCol)
     #self.normalize()
     textBuffer.lineLimitIndicator = app.prefs.editor['lineLimitIndicator']
     textBuffer.debugRedo = app.prefs.startup.get('debugRedo')
     Window.setTextBuffer(self, textBuffer)
     self.controller.setTextBuffer(textBuffer)
+    savedScroll = self.savedScrollPositions.get(self.textBuffer.fullPath)
+    if savedScroll is not None:
+      self.scrollRow, self.scrollCol = savedScroll
+    else:
+      self.scrollRow, self.scrollCol = self.textBuffer.getOptimalScrollPosition()
 
   def unfocus(self):
     if self.showMessageLine:
