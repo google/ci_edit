@@ -58,6 +58,7 @@ getcwd
 getenv
 getmaxyx
 getmouse
+getpreferredencoding
 getvalue
 getyx
 gid
@@ -73,6 +74,7 @@ iglob
 ignorecase
 init
 ino
+insort
 inventwithpython
 isdigit
 isdir
