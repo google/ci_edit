@@ -432,15 +432,6 @@ class Actions(app.mutator.Mutator):
       self.selectionCharacter()
     self.cursorMoveLeft()
 
-  def cursorSelectLineDown(self):
-    """Set line selection and extend selection one row down."""
-    self.selectionLine()
-    if self.lines and self.penRow + 1 < len(self.lines):
-      self.cursorMove(1, -self.penCol)
-      self.redo()
-      self.cursorMoveAndMark(*self.extendSelection())
-      self.redo()
-
   def cursorSelectRight(self):
     if self.selectionMode == app.selectable.kSelectionNone:
       self.selectionCharacter()
