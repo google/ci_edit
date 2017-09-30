@@ -20,6 +20,7 @@ if os.getenv('CI_EDIT_USE_FAKE_CURSES'):
   sys.path = ['test_fake'] + sys.path
 
 
+import app.background
 import app.bookmarks
 import app.curses_util
 import app.help
@@ -210,6 +211,11 @@ class CiProgram:
           if cmd == curses.KEY_RESIZE:
             self.handleScreenResize(window)
             continue
+          # TODO(dschuyler): this is just a test to send numbers to bg.
+          if ord('0') <= cmd <= ord('9'):
+            self.bg.put(cmd)
+          while self.bg.hasMessage():
+            app.log.info('bg', self.bg.get())
           meta = None
           if cmd == app.curses_util.BRACKETED_PASTE:
             meta = terminalPasteEvents[0]
@@ -597,6 +603,7 @@ class CiProgram:
     homePath = app.prefs.prefs['userData'].get('homePath')
     self.makeHomeDirs(homePath)
     app.curses_util.hackCursesFixes()
+    self.bg = app.background.startupBackground()
     self.startup()
     if app.prefs.startup.get('profile'):
       profile = cProfile.Profile()

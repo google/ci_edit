@@ -217,3 +217,7 @@ def hackCursesFixes():
     def windowChangedHandler(signum, frame):
       curses.ungetch(curses.KEY_RESIZE)
     signal.signal(signal.SIGWINCH, windowChangedHandler)
+  def wakeGetch(signum, frame):
+    curses.ungetch(0)
+  signal.signal(signal.SIGALRM, wakeGetch)
+  signal.signal(signal.SIGHUP, wakeGetch)
