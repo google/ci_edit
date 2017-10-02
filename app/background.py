@@ -31,11 +31,9 @@ class BackgroundThread:
 
 def background(input, output):
   while True:
-    message = input.get()
-    if type(message) is type(0):
-      output.put((True, message * 2))
-    else:
-      output.put((False,))
+    program, message = input.get()
+    assert len(message)
+    program.executeCommandList(message)
     #os.kill(0, signal.SIGHUP)
     os.kill(0, signal.SIGALRM)
 

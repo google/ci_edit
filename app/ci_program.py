@@ -102,9 +102,8 @@ class CiProgram:
 
   def commandLoop(self):
     # At startup, focus the main window (just to start somewhere).
-    window = self.zOrder[-1]
-    window.focus()
-    self.focusedWindow = window
+    self.focusedWindow = self.zOrder[-1]
+    self.focusedWindow.focus()
     # Track the time needed to handle commands and render the UI.
     # (A performance measurement).
     self.mainLoopTime = 0
@@ -117,6 +116,9 @@ class CiProgram:
     # This is the 'main loop'. Execution doesn't leave this loop until the
     # application is closing down.
     while not self.exiting:
+      while self.bg.hasMessage():
+        #app.log.info('bg', self.bg.get())
+        pass
       if 0:
         profile = cProfile.Profile()
         profile.enable()
@@ -135,13 +137,11 @@ class CiProgram:
       # (A performance optimization).
       cmdList = []
       mouseEvents = []
-      terminalPasteEvents = []
-      unicodeEvents = []
       cursesWindow = app.window.mainCursesWindow
       while not len(cmdList):
         for i in range(5):
+          eventInfo = None
           ch = cursesWindow.getch()
-          #ch = cursesWindow.get_wch()
           if ch == curses.ascii.ESC:
             # Some keys are sent from the terminal as a sequence of bytes
             # beginning with an Escape character. To help reason about these
@@ -166,7 +166,7 @@ class CiProgram:
                   keySequence.append(n)
                   n = cursesWindow.getch()
               keySequence = keySequence[:-(1 + len(paste_end))]
-              terminalPasteEvents.append(''.join([chr(i) for i in keySequence]))
+              eventInfo = ''.join([chr(i) for i in keySequence])
             else:
               ch = tuple(keySequence)
             if not ch:
@@ -193,42 +193,37 @@ class CiProgram:
               d = cursesWindow.getch()
               u = (chr(ch) + chr(b) + chr(c) + chr(d)).decode("utf-8")
             assert u is not None
-            unicodeEvents.append(u)
+            eventInfo = u
             ch = app.curses_util.UNICODE_INPUT
-          if ch != curses.ERR:
+          if ch == 0:
+            # bg response.
+            self.refresh()
+          elif ch != curses.ERR:
             self.ch = ch
             if ch == curses.KEY_MOUSE:
               # On Ubuntu, Gnome terminal, curses.getmouse() may only be called
               # once for each KEY_MOUSE. Subsequent calls will throw an
               # exception. So getmouse is (only) called here and other parts of
-              # the code use the mouseEvents list instead of calling getmouse.
+              # the code use the eventInfo list instead of calling getmouse.
               self.debugMouseEvent = curses.getmouse()
-              mouseEvents.append((self.debugMouseEvent, time.time()))
-            cmdList.append(ch)
+              eventInfo = (self.debugMouseEvent, time.time())
+            cmdList.append((ch, eventInfo))
       start = time.time()
       if len(cmdList):
-        for cmd in cmdList:
-          if cmd == curses.KEY_RESIZE:
-            self.handleScreenResize(window)
-            continue
-          # TODO(dschuyler): this is just a test to send numbers to bg.
-          if ord('0') <= cmd <= ord('9'):
-            self.bg.put(cmd)
-          while self.bg.hasMessage():
-            app.log.info('bg', self.bg.get())
-          meta = None
-          if cmd == app.curses_util.BRACKETED_PASTE:
-            meta = terminalPasteEvents[0]
-            terminalPasteEvents = terminalPasteEvents[1:]
-          elif cmd == app.curses_util.UNICODE_INPUT:
-            meta = unicodeEvents[0]
-            unicodeEvents = unicodeEvents[1:]
-          window.controller.doCommand(cmd, meta)
-          if cmd == curses.KEY_MOUSE:
-            self.handleMouse(mouseEvents[0])
-            mouseEvents = mouseEvents[1:]
-          window = self.focusedWindow
-          window.controller.onChange()
+        if 0:
+          self.bg.put((self, cmdList))
+        else:
+          self.executeCommandList(cmdList)
+
+  def executeCommandList(self, cmdList):
+    for cmd, eventInfo in cmdList:
+      if cmd == curses.KEY_RESIZE:
+        self.handleScreenResize(self.focusedWindow)
+        continue
+      self.focusedWindow.controller.doCommand(cmd, eventInfo)
+      if cmd == curses.KEY_MOUSE:
+        self.handleMouse(eventInfo)
+      self.focusedWindow.controller.onChange()
 
   def changeFocusTo(self, changeTo):
     self.focusedWindow.controller.onChange()
