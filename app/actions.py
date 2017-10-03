@@ -708,6 +708,18 @@ class Actions(app.mutator.Mutator):
     self.redo()
     self.updateBasicScrollPosition()
 
+  def editRedo(self):
+    """Undo a set of redo nodes."""
+    self.redo()
+    if not self.isSelectionInView():
+      self.scrollToOptimalScrollPosition()
+
+  def editUndo(self):
+    """Undo a set of redo nodes."""
+    self.undo()
+    if not self.isSelectionInView():
+       self.scrollToOptimalScrollPosition()
+
   def doLinesToData(self, data):
     def encode(line):
       return chr(int(line.groups()[0], 16))

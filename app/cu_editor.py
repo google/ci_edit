@@ -34,8 +34,8 @@ def initCommandSet(editText, textBuffer):
     CTRL_V: textBuffer.editPaste,
     CTRL_W: editText.closeOrConfirmClose,
     CTRL_X: textBuffer.editCut,
-    CTRL_Y: textBuffer.redo,
-    CTRL_Z: textBuffer.undo,
+    CTRL_Y: textBuffer.editRedo,
+    CTRL_Z: textBuffer.editUndo,
 
     KEY_BACKSPACE1: textBuffer.backspace,
     KEY_BACKSPACE2: textBuffer.backspace,
