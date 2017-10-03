@@ -27,6 +27,7 @@ a = b/c;
 a = b  / c;
 
 a =  /.*/;
+ /as/
 
 function foo() {
   if or while or switch

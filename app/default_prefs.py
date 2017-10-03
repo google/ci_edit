@@ -115,6 +115,7 @@ prefs = {
     'c_string2': stringColorIndex,
     'debug_window': defaultColorIndex,
     'regex_string': stringColorIndex,
+    'regex_string2': stringColorIndex,
     'doc_block_comment': commentColorIndex,
     'html_block_comment': commentColorIndex,
     'html_element': keywordsColorIndex,
@@ -420,7 +421,7 @@ prefs = {
       ],
       'contains': [
         'c_string1', 'c_string2', 'doc_block_comment', 'cpp_block_comment',
-        'cpp_line_comment', 'regex_string',
+        'cpp_line_comment', 'regex_string', 'regex_string2',
       ],
     },
     'keyword': {
@@ -514,7 +515,17 @@ prefs = {
       'end': '"',
     },
     'regex_string': {
-      'begin': r"(?<=[\n=:;([{,])(?:\s*)/(?![/*])",
+      #'begin': r"(?<=[\n=:;([{,])(?:\s*)/(?![/*])",
+      'begin': r"(?<=[\n=:;([{,])/(?![/*])",
+      'end': "/",
+      'escaped': r'\\.',
+      'indent': '  ',
+      'special': __special_string_escapes + [r"\\/"],
+      'single_line': True,
+    },
+    'regex_string2': {
+      #'begin': r"(?<=[\n=:;([{,])(?:\s*)/(?![/*])",
+      'begin': r"(?<=[\n=:;([{,]\s)/(?![/*])",
       'end': "/",
       'escaped': r'\\.',
       'indent': '  ',
