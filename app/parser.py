@@ -50,7 +50,7 @@ class Parser:
     self.endNode.begin = sys.maxint
     self.endNode.col = sys.maxint
     self.parserNodes = []
-    self.rows = []
+    self.rows = []  # Row parserNodes index.
     app.log.parser('__init__')
 
   def grammarIndexFromRowCol(self, row, col):

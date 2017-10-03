@@ -170,7 +170,7 @@ class Selectable(BaseLineBuffer):
     self.insertLinesAt(self.penRow, self.penCol, lines,
         self.selectionMode)
 
-  def insertLinesAt(self, row, col, lines, selectionMode=kSelectionNone):
+  def insertLinesAt(self, row, col, lines, selectionMode):
     if len(lines) == 0:
       return
     lines = list(lines)

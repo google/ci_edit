@@ -444,7 +444,8 @@ class Mutator(app.selectable.Selectable):
       if self.upperChangedRow > self.penRow:
         self.upperChangedRow = self.penRow
     elif change[0] == 'dr':  # Undo delete range.
-      self.insertLinesAt(change[1][0], change[1][1], change[2])
+      self.insertLinesAt(change[1][0], change[1][1], change[2],
+          kSelectionCharacter)
     elif change[0] == 'ds':  # Undo delete selection.
       self.insertLines(change[1])
     elif change[0] == 'i':
