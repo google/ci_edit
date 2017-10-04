@@ -112,6 +112,8 @@ class CiProgram:
       # When running a timing of the application startup, push a CTRL_Q onto the
       # curses event messages to simulate a full startup with a GUI render.
       curses.ungetch(17)
+    else:
+      curses.ungetch(-2)  # TODO(dschuyler): is -2 a good choice?
     start = time.time()
     # This is the 'main loop'. Execution doesn't leave this loop until the
     # application is closing down.
@@ -214,6 +216,7 @@ class CiProgram:
           self.bg.put((self, cmdList))
         else:
           self.executeCommandList(cmdList)
+          self.render()
 
   def executeCommandList(self, cmdList):
     for cmd, eventInfo in cmdList:
@@ -471,7 +474,7 @@ class CiProgram:
       curses.resizeterm(rows, cols)
     self.layout()
     window.controller.onChange()
-    self.refresh()
+    self.render()
     self.top, self.left = app.window.mainCursesWindow.getyx()
     self.rows, self.cols = app.window.mainCursesWindow.getmaxyx()
     self.layout()
@@ -555,29 +558,39 @@ class CiProgram:
     self.exiting = True
 
   def refresh(self):
-    """Repaint stacked windows, furthest to nearest."""
+    """Repaint stacked windows, furthest to nearest in the main thread."""
     # Ask curses to hold the back buffer until curses refresh().
     cursesWindow = app.window.mainCursesWindow
     cursesWindow.noutrefresh()
     curses.curs_set(0)
+    drawList, cursor = app.render.frame.grabFrame()
+    if 0:
+      for i in drawList:
+        cursesWindow.addstr(*i)
+    else:
+      for i in drawList:
+        try:
+          cursesWindow.addstr(*i)
+        except:
+          app.log.error('failed to draw', repr(i))
+    if cursor is not None:
+      curses.curs_set(1)
+      try:
+        cursesWindow.leaveok(0)  # Do update cursor position.
+        cursesWindow.move(cursor[0], cursor[1])
+        # Calling refresh will draw the cursor.
+        cursesWindow.refresh()
+        cursesWindow.leaveok(1)  # Don't update cursor position.
+      except:
+        pass
+
+  def render(self):
+    """Repaint stacked windows, furthest to nearest in the background thread."""
     if self.showLogWindow:
-      self.logWindow.refresh()
+      self.logWindow.render()
     for i,k in enumerate(self.zOrder):
       #app.log.info("[[%d]] %r"%(i, k))
-      k.refresh()
-    if k.shouldShowCursor:
-      curses.curs_set(1)
-      if 1:
-        try:
-          cursesWindow.leaveok(0)  # Do update cursor position.
-          cursesWindow.move(
-              k.top + k.cursorRow - k.scrollRow,
-              k.left + k.cursorCol - k.scrollCol)
-          # Calling refresh will draw the cursor.
-          cursesWindow.refresh()
-          cursesWindow.leaveok(1)  # Don't update cursor position.
-        except:
-          pass
+      k.render()
 
   def makeHomeDirs(self, homePath):
     try:

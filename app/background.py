@@ -34,6 +34,8 @@ def background(input, output):
     program, message = input.get()
     assert len(message)
     program.executeCommandList(message)
+    program.render()
+    #while self.doWork() and input.empty():
     #os.kill(0, signal.SIGHUP)
     os.kill(0, signal.SIGALRM)
 
