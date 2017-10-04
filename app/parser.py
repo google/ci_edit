@@ -34,7 +34,7 @@ class ParserNode:
     self.begin = None  # Offset from start of file.
 
   def debugLog(self, out, indent, data):
-    out('%sParserNode %16s prior %4s %4d %s' % (indent,
+    out('%sParserNode %26s prior %4s %4d %s' % (indent,
         self.grammar.get('name', 'None'),
         self.prior, self.begin, repr(data[self.begin:self.begin+15])[1:-1]))
 
@@ -190,11 +190,14 @@ class Parser:
         child.begin = cursor + reg[1]
         child.prior = self.parserNodes[self.parserNodes[-1].prior].prior
         cursor = child.begin
-        if subdata[reg[0]:reg[1]] == '\n':
+        if subdata[reg[1] - 1:reg[1]] == '\n':
           # This 'end' ends with a new line.
           self.rows.append(len(self.parserNodes))
       elif index < newGrammarIndexLimit:
         # A new grammar within this grammar (a 'contains').
+        if subdata[reg[0]:reg[0] + 1] == '\n':
+          # This 'begin' begins with a new line.
+          self.rows.append(len(self.parserNodes))
         child.grammar = self.parserNodes[-1].grammar.get(
             'matchGrammars', [])[index]
         child.begin = cursor + reg[0]
