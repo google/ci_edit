@@ -172,7 +172,7 @@ class ViewWindow:
     """Simple line writer for static windows."""
     text = unicode(text)[:self.cols]
     text = text + ' ' * max(0, self.cols - len(text))
-    app.render.frame.addstr(self.top + self.writeLineRow, self.left,
+    app.render.frame.addStr(self.top + self.writeLineRow, self.left,
         text.encode('utf-8'), color)
     self.writeLineRow += 1
 

@@ -24,8 +24,9 @@ class Frame:
     self.cursor = cursor
 
   def grabFrame(self):
-    r = self.drawList
+    r = self.drawList, self.cursor
     self.drawList = []
-    return r, self.cursor
+    self.cursor = None
+    return r
 
 frame = Frame()

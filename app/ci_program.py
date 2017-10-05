@@ -118,20 +118,21 @@ class CiProgram:
     # This is the 'main loop'. Execution doesn't leave this loop until the
     # application is closing down.
     while not self.exiting:
-      while self.bg.hasMessage():
-        #app.log.info('bg', self.bg.get())
-        pass
-      if 0:
-        profile = cProfile.Profile()
-        profile.enable()
-        self.refresh()
-        profile.disable()
-        output = StringIO.StringIO()
-        stats = pstats.Stats(profile, stream=output).sort_stats('cumulative')
-        stats.print_stats()
-        app.log.info(output.getvalue())
+      if 1:
+        while self.bg.hasMessage():
+          self.refresh(*self.bg.get())
       else:
-        self.refresh()
+        if 0:
+          profile = cProfile.Profile()
+          profile.enable()
+          self.refresh()
+          profile.disable()
+          output = StringIO.StringIO()
+          stats = pstats.Stats(profile, stream=output).sort_stats('cumulative')
+          stats.print_stats()
+          app.log.info(output.getvalue())
+        else:
+          self.refresh()
       self.mainLoopTime = time.time() - start
       if self.mainLoopTime > self.mainLoopTimePeak:
         self.mainLoopTimePeak = self.mainLoopTime
@@ -143,6 +144,8 @@ class CiProgram:
       while not len(cmdList):
         for i in range(5):
           eventInfo = None
+          if self.exiting:
+            return
           ch = cursesWindow.getch()
           if ch == curses.ascii.ESC:
             # Some keys are sent from the terminal as a sequence of bytes
@@ -199,7 +202,8 @@ class CiProgram:
             ch = app.curses_util.UNICODE_INPUT
           if ch == 0:
             # bg response.
-            self.refresh()
+            while self.bg.hasMessage():
+              self.refresh(*self.bg.get())
           elif ch != curses.ERR:
             self.ch = ch
             if ch == curses.KEY_MOUSE:
@@ -212,7 +216,8 @@ class CiProgram:
             cmdList.append((ch, eventInfo))
       start = time.time()
       if len(cmdList):
-        if 0:
+        if 10:
+          app.log.info(len(cmdList))
           self.bg.put((self, cmdList))
         else:
           self.executeCommandList(cmdList)
@@ -557,22 +562,19 @@ class CiProgram:
     app.log.info()
     self.exiting = True
 
-  def refresh(self):
+  def refresh(self, drawList, cursor):
     """Repaint stacked windows, furthest to nearest in the main thread."""
     # Ask curses to hold the back buffer until curses refresh().
     cursesWindow = app.window.mainCursesWindow
     cursesWindow.noutrefresh()
     curses.curs_set(0)
-    drawList, cursor = app.render.frame.grabFrame()
-    if 0:
-      for i in drawList:
+    #drawList, cursor = app.render.frame.grabFrame()
+    for i in drawList:
+      try:
         cursesWindow.addstr(*i)
-    else:
-      for i in drawList:
-        try:
-          cursesWindow.addstr(*i)
-        except:
-          app.log.error('failed to draw', repr(i))
+      except:
+        #app.log.error('failed to draw', repr(i))
+        pass
     if cursor is not None:
       curses.curs_set(1)
       try:
