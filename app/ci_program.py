@@ -521,6 +521,9 @@ class CiProgram:
         elif i == '--version':
           userMessage(app.help.docs['version'])
           self.quitNow()
+        elif i == '--clearHistory':
+          app.history.clearUserHistory()
+          self.quitNow()
         elif i.startswith('--'):
           userMessage("unknown command line argument", i)
           self.quitNow()
