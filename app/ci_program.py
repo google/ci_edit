@@ -592,7 +592,6 @@ class CiProgram:
       self.dirPrefs = os.path.join(homePath, 'prefs')
       if not os.path.isdir(self.dirPrefs):
         os.makedirs(self.dirPrefs)
-      app.history.path = os.path.join(homePath, app.history.path)
     except Exception, e:
       app.log.error('exception in makeHomeDirs')
 
