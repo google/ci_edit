@@ -108,31 +108,30 @@ class CiProgram:
     # (A performance measurement).
     self.mainLoopTime = 0
     self.mainLoopTimePeak = 0
+    cursesWindow = app.window.mainCursesWindow
     if app.prefs.startup['timeStartup']:
       # When running a timing of the application startup, push a CTRL_Q onto the
       # curses event messages to simulate a full startup with a GUI render.
       curses.ungetch(17)
-    else:
-      curses.ungetch(-2)  # TODO(dschuyler): is -2 a good choice?
     start = time.time()
+    self.bg.put((self, []))
+    #frame = self.bg.get()
     # This is the 'main loop'. Execution doesn't leave this loop until the
     # application is closing down.
     while not self.exiting:
-      if 1:
-        while self.bg.hasMessage():
-          self.refresh(*self.bg.get())
+      if 0:
+        profile = cProfile.Profile()
+        profile.enable()
+        self.refresh(frame[0], frame[1])
+        profile.disable()
+        output = StringIO.StringIO()
+        stats = pstats.Stats(profile, stream=output).sort_stats('cumulative')
+        stats.print_stats()
+        app.log.info(output.getvalue())
       else:
-        if 0:
-          profile = cProfile.Profile()
-          profile.enable()
-          self.refresh()
-          profile.disable()
-          output = StringIO.StringIO()
-          stats = pstats.Stats(profile, stream=output).sort_stats('cumulative')
-          stats.print_stats()
-          app.log.info(output.getvalue())
-        else:
-          self.refresh()
+        while self.bg.hasMessage():
+          frame = self.bg.get()
+          self.refresh(frame[0], frame[1])
       self.mainLoopTime = time.time() - start
       if self.mainLoopTime > self.mainLoopTimePeak:
         self.mainLoopTimePeak = self.mainLoopTime
@@ -140,7 +139,6 @@ class CiProgram:
       # (A performance optimization).
       cmdList = []
       mouseEvents = []
-      cursesWindow = app.window.mainCursesWindow
       while not len(cmdList):
         for i in range(5):
           eventInfo = None
@@ -202,8 +200,11 @@ class CiProgram:
             ch = app.curses_util.UNICODE_INPUT
           if ch == 0:
             # bg response.
+            frame = None
             while self.bg.hasMessage():
-              self.refresh(*self.bg.get())
+              frame = self.bg.get()
+            if frame is not None:
+              self.refresh(frame[0], frame[1])
           elif ch != curses.ERR:
             self.ch = ch
             if ch == curses.KEY_MOUSE:

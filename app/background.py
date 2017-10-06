@@ -45,7 +45,7 @@ def background(input, output):
     if not tb.parser:
       block = True
       continue
-    block = len(tb.parser.rows) == len(tb.lines)
+    block = len(tb.parser.rows) >= len(tb.lines)
     if not block:
       tb.parseGrammars()
     #while self.doWork() and input.empty():
