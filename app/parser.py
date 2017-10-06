@@ -119,7 +119,6 @@ class Parser:
     self.endRow = endRow
     if beginRow > 0 and len(self.rows):
       if beginRow < len(self.rows):
-        beginRow -= 1
         self.parserNodes = self.parserNodes[:self.rows[beginRow]]
         self.rows = self.rows[:beginRow]
     else:
