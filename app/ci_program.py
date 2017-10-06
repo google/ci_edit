@@ -530,6 +530,9 @@ class CiProgram:
         elif i == '--version':
           userMessage(app.help.docs['version'])
           self.quitNow()
+        elif i == '--clearHistory':
+          app.history.clearUserHistory()
+          self.quitNow()
         elif i.startswith('--'):
           userMessage("unknown command line argument", i)
           self.quitNow()
@@ -605,7 +608,6 @@ class CiProgram:
       self.dirPrefs = os.path.join(homePath, 'prefs')
       if not os.path.isdir(self.dirPrefs):
         os.makedirs(self.dirPrefs)
-      app.history.path = os.path.join(homePath, app.history.path)
     except Exception, e:
       app.log.error('exception in makeHomeDirs')
 
