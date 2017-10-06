@@ -242,7 +242,7 @@ class Window(ActiveWindow):
     if self.hasFocus:
       self.parent.debugDraw(self)
       if (self.cursorRow >= self.scrollRow and
-          self.cursorRow < self.scrollRow+self.rows):
+          self.cursorRow < self.scrollRow + self.rows):
         app.render.frame.setCursor((
             self.top + self.cursorRow - self.scrollRow,
             self.left + self.cursorCol - self.scrollCol))
