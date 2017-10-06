@@ -518,7 +518,7 @@ class CiProgram:
         elif i == '--parser':
           app.log.channelEnable('parser', True)
         elif i == '--startup':
-          app.log.channelEnable('startup', logStartup)
+          app.log.channelEnable('startup', True)
         elif i == '--timeStartup':
           timeStartup = True
         elif i == '--':
