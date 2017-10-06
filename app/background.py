@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import app.render
 import os
 import Queue
 import signal
@@ -30,12 +31,26 @@ class BackgroundThread:
 
 
 def background(input, output):
+  block = True
   while True:
-    program, message = input.get()
-    assert len(message)
-    program.executeCommandList(message)
-    #os.kill(0, signal.SIGHUP)
+    try:
+      program, message = input.get(block)
+      program.executeCommandList(message)
+    except Queue.Empty, e:
+      pass
+    program.render()
+    output.put(app.render.frame.grabFrame())
     os.kill(0, signal.SIGALRM)
+    tb = program.focusedWindow.textBuffer
+    if not tb.parser:
+      block = True
+      continue
+    block = len(tb.parser.rows) >= len(tb.lines)
+    if not block:
+      tb.parseGrammars()
+    #while self.doWork() and input.empty():
+    #os.kill(0, signal.SIGHUP)
+    #os.kill(0, signal.SIGALRM)
 
 def startupBackground():
   toBackground = Queue.Queue()

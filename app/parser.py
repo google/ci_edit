@@ -119,7 +119,6 @@ class Parser:
     self.endRow = endRow
     if beginRow > 0 and len(self.rows):
       if beginRow < len(self.rows):
-        beginRow -= 1
         self.parserNodes = self.parserNodes[:self.rows[beginRow]]
         self.rows = self.rows[:beginRow]
     else:
@@ -139,7 +138,7 @@ class Parser:
 
   def __buildGrammarList(self):
     # An arbitrary limit to avoid run-away looping.
-    leash = 100000
+    leash = 50
     topNode = self.parserNodes[-1]
     cursor = topNode.begin
     # If we are at the start of a grammar, skip the 'begin' part of the grammar.
@@ -152,7 +151,7 @@ class Parser:
           cursor += sre.regs[0][1]
     while self.endRow > len(self.rows):
       if not leash:
-        app.log.error('grammar likely caught in a loop')
+        #app.log.error('grammar likely caught in a loop')
         break
       leash -= 1
       subdata = self.data[cursor:]

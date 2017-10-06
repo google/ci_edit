@@ -275,6 +275,7 @@ class Actions(app.mutator.Mutator):
       if indent:
         self.redoAddChange(('i', ' ' * indent));
         self.redo()
+    self.updateBasicScrollPosition()
 
   def cursorColDelta(self, toRow):
     if toRow >= len(self.lines):
@@ -1352,7 +1353,8 @@ class Actions(app.mutator.Mutator):
     start = time.time()
     self.parser.parse(self.data, self.rootGrammar,
         self.upperChangedRow,
-        self.view.scrollRow + self.view.rows + 1)
+        len(self.lines))
+        #self.view.scrollRow + self.view.rows + 1)
     self.sentUpperChangedRow = self.upperChangedRow
     self.upperChangedRow = len(self.lines)
     self.parserTime = time.time() - start
@@ -1421,6 +1423,7 @@ class Actions(app.mutator.Mutator):
     """split the line into two at current column."""
     self.redoAddChange(('n', (1,)))
     self.redo()
+    self.updateBasicScrollPosition()
 
   def swapPenAndMarker(self):
     app.log.info('swapPenAndMarker')

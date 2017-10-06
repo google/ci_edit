@@ -108,28 +108,30 @@ class CiProgram:
     # (A performance measurement).
     self.mainLoopTime = 0
     self.mainLoopTimePeak = 0
+    cursesWindow = app.window.mainCursesWindow
     if app.prefs.startup['timeStartup']:
       # When running a timing of the application startup, push a CTRL_Q onto the
       # curses event messages to simulate a full startup with a GUI render.
       curses.ungetch(17)
     start = time.time()
+    self.bg.put((self, []))
+    #frame = self.bg.get()
     # This is the 'main loop'. Execution doesn't leave this loop until the
     # application is closing down.
     while not self.exiting:
-      while self.bg.hasMessage():
-        #app.log.info('bg', self.bg.get())
-        pass
       if 0:
         profile = cProfile.Profile()
         profile.enable()
-        self.refresh()
+        self.refresh(frame[0], frame[1])
         profile.disable()
         output = StringIO.StringIO()
         stats = pstats.Stats(profile, stream=output).sort_stats('cumulative')
         stats.print_stats()
         app.log.info(output.getvalue())
       else:
-        self.refresh()
+        while self.bg.hasMessage():
+          frame = self.bg.get()
+          self.refresh(frame[0], frame[1])
       self.mainLoopTime = time.time() - start
       if self.mainLoopTime > self.mainLoopTimePeak:
         self.mainLoopTimePeak = self.mainLoopTime
@@ -137,10 +139,11 @@ class CiProgram:
       # (A performance optimization).
       cmdList = []
       mouseEvents = []
-      cursesWindow = app.window.mainCursesWindow
       while not len(cmdList):
         for i in range(5):
           eventInfo = None
+          if self.exiting:
+            return
           ch = cursesWindow.getch()
           if ch == curses.ascii.ESC:
             # Some keys are sent from the terminal as a sequence of bytes
@@ -197,7 +200,11 @@ class CiProgram:
             ch = app.curses_util.UNICODE_INPUT
           if ch == 0:
             # bg response.
-            self.refresh()
+            frame = None
+            while self.bg.hasMessage():
+              frame = self.bg.get()
+            if frame is not None:
+              self.refresh(frame[0], frame[1])
           elif ch != curses.ERR:
             self.ch = ch
             if ch == curses.KEY_MOUSE:
@@ -210,10 +217,12 @@ class CiProgram:
             cmdList.append((ch, eventInfo))
       start = time.time()
       if len(cmdList):
-        if 0:
+        if 10:
+          app.log.info(len(cmdList))
           self.bg.put((self, cmdList))
         else:
           self.executeCommandList(cmdList)
+          self.render()
 
   def executeCommandList(self, cmdList):
     for cmd, eventInfo in cmdList:
@@ -471,7 +480,7 @@ class CiProgram:
       curses.resizeterm(rows, cols)
     self.layout()
     window.controller.onChange()
-    self.refresh()
+    self.render()
     self.top, self.left = app.window.mainCursesWindow.getyx()
     self.rows, self.cols = app.window.mainCursesWindow.getmaxyx()
     self.layout()
@@ -509,7 +518,7 @@ class CiProgram:
         elif i == '--parser':
           app.log.channelEnable('parser', True)
         elif i == '--startup':
-          app.log.channelEnable('startup', logStartup)
+          app.log.channelEnable('startup', True)
         elif i == '--timeStartup':
           timeStartup = True
         elif i == '--':
@@ -557,30 +566,37 @@ class CiProgram:
     app.log.info()
     self.exiting = True
 
-  def refresh(self):
-    """Repaint stacked windows, furthest to nearest."""
+  def refresh(self, drawList, cursor):
+    """Repaint stacked windows, furthest to nearest in the main thread."""
     # Ask curses to hold the back buffer until curses refresh().
     cursesWindow = app.window.mainCursesWindow
     cursesWindow.noutrefresh()
     curses.curs_set(0)
+    #drawList, cursor = app.render.frame.grabFrame()
+    for i in drawList:
+      try:
+        cursesWindow.addstr(*i)
+      except:
+        #app.log.error('failed to draw', repr(i))
+        pass
+    if cursor is not None:
+      curses.curs_set(1)
+      try:
+        cursesWindow.leaveok(0)  # Do update cursor position.
+        cursesWindow.move(cursor[0], cursor[1])
+        # Calling refresh will draw the cursor.
+        cursesWindow.refresh()
+        cursesWindow.leaveok(1)  # Don't update cursor position.
+      except:
+        pass
+
+  def render(self):
+    """Repaint stacked windows, furthest to nearest in the background thread."""
     if self.showLogWindow:
-      self.logWindow.refresh()
+      self.logWindow.render()
     for i,k in enumerate(self.zOrder):
       #app.log.info("[[%d]] %r"%(i, k))
-      k.refresh()
-    if k.shouldShowCursor:
-      curses.curs_set(1)
-      if 1:
-        try:
-          cursesWindow.leaveok(0)  # Do update cursor position.
-          cursesWindow.move(
-              k.top + k.cursorRow - k.scrollRow,
-              k.left + k.cursorCol - k.scrollCol)
-          # Calling refresh will draw the cursor.
-          cursesWindow.refresh()
-          cursesWindow.leaveok(1)  # Don't update cursor position.
-        except:
-          pass
+      k.render()
 
   def makeHomeDirs(self, homePath):
     try:
