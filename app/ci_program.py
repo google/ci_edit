@@ -21,7 +21,6 @@ if os.getenv('CI_EDIT_USE_FAKE_CURSES'):
 
 
 import app.background
-import app.bookmarks
 import app.curses_util
 import app.help
 import app.history
