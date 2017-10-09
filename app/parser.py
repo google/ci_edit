@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import app.background
 import app.log
 import app.selectable
 import app.prefs
@@ -138,7 +139,7 @@ class Parser:
 
   def __buildGrammarList(self):
     # An arbitrary limit to avoid run-away looping.
-    leash = 50
+    leash = 50000
     topNode = self.parserNodes[-1]
     cursor = topNode.begin
     # If we are at the start of a grammar, skip the 'begin' part of the grammar.
@@ -154,16 +155,20 @@ class Parser:
         #app.log.error('grammar likely caught in a loop')
         break
       leash -= 1
+      if app.background.bg.hasUserEvent():
+        break
       subdata = self.data[cursor:]
       found = self.parserNodes[-1].grammar.get('matchRe').search(subdata)
       if not found:
-        app.log.info('parser exit, match not found')
+        #app.log.info('parser exit, match not found')
         # todo(dschuyler): mark parent grammars as unterminated (if they expect
         # be terminated). e.g. unmatched string quote or xml tag.
         break
-      newGrammarIndexLimit = 2 + len(self.parserNodes[-1].grammar.get('contains', []))
-      keywordIndexLimit = newGrammarIndexLimit + len(self.parserNodes[-1].grammar.get(
-          'keywords', []))
+      newGrammarIndexLimit = \
+          2 + len(self.parserNodes[-1].grammar.get('contains', []))
+      keywordIndexLimit = \
+          newGrammarIndexLimit + len(self.parserNodes[-1].grammar.get(
+              'keywords', []))
       index = -1
       for i,k in enumerate(found.groups()):
         if k is not None:

@@ -26,6 +26,9 @@ class BackgroundThread:
   def hasMessage(self):
     return not self.fromBackground.empty()
 
+  def hasUserEvent(self):
+    return not self.toBackground.empty()
+
   def put(self, data):
     self.toBackground.put(data)
 
@@ -34,23 +37,36 @@ def background(input, output):
   block = True
   while True:
     try:
-      program, message = input.get(block)
-      program.executeCommandList(message)
-    except Queue.Empty, e:
-      pass
-    program.render()
-    output.put(app.render.frame.grabFrame())
-    os.kill(0, signal.SIGALRM)
-    tb = program.focusedWindow.textBuffer
-    if not tb.parser:
-      block = True
-      continue
-    block = len(tb.parser.rows) >= len(tb.lines)
-    if not block:
-      tb.parseGrammars()
-    #while self.doWork() and input.empty():
-    #os.kill(0, signal.SIGHUP)
-    #os.kill(0, signal.SIGALRM)
+      try:
+        program, message = input.get(block)
+        program.executeCommandList(message)
+        program.render()
+        output.put(app.render.frame.grabFrame())
+        os.kill(0, signal.SIGALRM)
+      except Queue.Empty, e:
+        pass
+      #if not input.empty():
+      #  continue
+      tb = program.focusedWindow.textBuffer
+      if not tb.parser:
+        block = True
+        continue
+      block = len(tb.parser.rows) >= len(tb.lines)
+      if not block:
+        tb.linesToData()
+        tb.parser.parse(tb.data, tb.rootGrammar,
+            len(tb.parser.rows),
+            len(tb.lines))
+        #tb.parseGrammars()
+        block = len(tb.parser.rows) >= len(tb.lines)
+        if block:
+          program.render()
+          output.put(app.render.frame.grabFrame())
+          os.kill(0, signal.SIGALRM)
+      #os.kill(0, signal.SIGHUP)
+    except Exception, e:
+      app.log.error('bg thread exception')
+      app.log.exception(e)
 
 def startupBackground():
   toBackground = Queue.Queue()
@@ -63,4 +79,6 @@ def startupBackground():
   result = BackgroundThread()
   result.toBackground = toBackground
   result.fromBackground = fromBackground
+  global bg
+  bg = result
   return result

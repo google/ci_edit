@@ -16,6 +16,7 @@ import io
 import inspect
 import os
 import sys
+import time
 import traceback
 
 
@@ -23,6 +24,7 @@ screenLog = ["--- screen log ---"]
 fullLog = ["--- begin log ---"]
 enabledChannels = {'meta': True, 'mouse': True, 'startup': True}
 shouldWritePrintLog = False
+startTime = time.time()
 
 if os.getenv('CI_EDIT_USE_FAKE_CURSES'):
   enabledChannels = {
@@ -139,6 +141,10 @@ def error(*args):
   global fullLog
   lines = parseLines(inspect.stack()[1], 'error', *args)
   fullLog += lines
+
+def when(*args):
+  args = (time.time() - startTime,) + args
+  channel('info', *args)
 
 def wrapper(function, shouldWrite=True):
   global shouldWritePrintLog
