@@ -1346,15 +1346,18 @@ class Actions(app.mutator.Mutator):
     self.view.normalize()
 
   def parseGrammars(self):
-    # Reset the self.data to get recent changes in self.lines.
-    self.linesToData()
     if not self.parser:
       self.parser = app.parser.Parser()
+    end = self.view.scrollRow + self.view.rows + 1
+    # If there is a huge gap, leave it to the background parsing.
+    if self.upperChangedRow - len(self.parser.rows) > 500:
+      self.sentUpperChangedRow = self.upperChangedRow
+      return
+    # Reset the self.data to get recent changes in self.lines.
+    self.linesToData()
     start = time.time()
     self.parser.parse(self.data, self.rootGrammar,
-        self.upperChangedRow,
-        len(self.lines))
-        #self.view.scrollRow + self.view.rows + 1)
+        self.upperChangedRow, end)
     self.sentUpperChangedRow = self.upperChangedRow
     self.upperChangedRow = len(self.lines)
     self.parserTime = time.time() - start
@@ -1426,7 +1429,6 @@ class Actions(app.mutator.Mutator):
     self.updateBasicScrollPosition()
 
   def swapPenAndMarker(self):
-    app.log.info('swapPenAndMarker')
     self.cursorMoveAndMark(self.markerRow - self.penRow,
         self.markerCol - self.penCol,
         self.penRow - self.markerRow,
@@ -1434,7 +1436,6 @@ class Actions(app.mutator.Mutator):
     self.redo()
 
   def test(self):
-    app.log.info('test')
     self.insertPrintable(0x00, None)
 
   def stripTrailingWhiteSpace(self):
