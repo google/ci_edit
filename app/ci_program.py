@@ -628,6 +628,8 @@ class CiProgram:
       app.log.info(output.getvalue())
     else:
       self.commandLoop()
+    self.bg.put((self, 'quit'))
+    self.bg.join()
 
   def setUpPalette(self):
     def applyPalette(name):

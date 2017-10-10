@@ -19,7 +19,7 @@ import signal
 import threading
 
 
-class BackgroundThread:
+class BackgroundThread(threading.Thread):
   def get(self):
     return self.fromBackground.get()
 
@@ -39,6 +39,9 @@ def background(input, output):
     try:
       try:
         program, message = input.get(block)
+        if message == 'quit':
+          app.log.info('bg received quit message')
+          return
         program.executeCommandList(message)
         program.render()
         output.put(app.render.frame.grabFrame())
@@ -69,16 +72,13 @@ def background(input, output):
       app.log.exception(e)
 
 def startupBackground():
+  global bg
   toBackground = Queue.Queue()
   fromBackground = Queue.Queue()
-  bg = threading.Thread(
+  bg = BackgroundThread(
       target=background, args=(toBackground, fromBackground))
   bg.setName('ci_edit_bg')
-  bg.setDaemon(True)
   bg.start()
-  result = BackgroundThread()
-  result.toBackground = toBackground
-  result.fromBackground = fromBackground
-  global bg
-  bg = result
-  return result
+  bg.toBackground = toBackground
+  bg.fromBackground = fromBackground
+  return bg
