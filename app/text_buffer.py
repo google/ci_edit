@@ -264,14 +264,13 @@ class TextBuffer(app.actions.Actions):
     if 1:
       # Highlight space ending lines.
       for i in range(rowLimit):
-        line = self.lines[startRow + i][startCol:]
-        offset = 0
-        if startRow + i == self.penRow:
-          offset = self.penCol - startCol
-          line = line[offset:]
+        line = self.lines[startRow + i]
+        if startRow + i == self.penRow and self.penCol == len(line):
+          continue
+        line = line[startCol:]
         for k in app.selectable.kReEndSpaces.finditer(line):
           for f in k.regs:
-            window.addStr(top + i, left + offset + f[0], line[f[0]:f[1]],
+            window.addStr(top + i, left + f[0], line[f[0]:f[1]],
                 app.color.get(colors['trailing_space'] + colorDelta))
     if 0:
       lengthLimit = self.lineLimitIndicator
