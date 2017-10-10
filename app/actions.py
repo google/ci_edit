@@ -780,7 +780,7 @@ class Actions(app.mutator.Mutator):
       self.fileFilter(data)
       file.close()
     else:
-      self.data = ""
+      self.data = unicode("")
     self.fileExtension = os.path.splitext(self.fullPath)[1]
     self.rootGrammar = app.prefs.getGrammar(self.fileExtension)
     if self.data:
@@ -947,14 +947,10 @@ class Actions(app.mutator.Mutator):
         self.fileStat = os.stat(self.fullPath)
         self.setMessage('File saved')
       except Exception as e:
-        type_, value, tb = sys.exc_info()
         self.setMessage(
             'Error writing file. The file did not save properly.',
             color=3)
-        app.log.info('error writing file')
-        out = traceback.format_exception(type_, value, tb)
-        for i in out:
-          app.log.info(i)
+        app.log.exception('error writing file')
     except:
       app.log.info('except had exception')
     app.history.saveUserHistory((self.fullPath, self.lastChecksum,
