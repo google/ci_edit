@@ -83,7 +83,7 @@ class Parser:
         grammarNext(). |proceeding| and |remaining| are relative to the |col|
         parameter.
     """
-    finalResult = (self.emptyNode, 0, sys.maxint)
+    finalResult = (self.emptyNode, -col, sys.maxint)
     if row + 1 >= len(self.rows):
       return finalResult
     nextRowIndex = self.rows[row + 1]
