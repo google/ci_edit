@@ -69,6 +69,7 @@ def background(input, output):
       app.log.exception(e)
 
 def startupBackground():
+  global bg
   toBackground = Queue.Queue()
   fromBackground = Queue.Queue()
   bg = threading.Thread(
@@ -79,6 +80,5 @@ def startupBackground():
   result = BackgroundThread()
   result.toBackground = toBackground
   result.fromBackground = fromBackground
-  global bg
   bg = result
   return result
