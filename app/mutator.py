@@ -320,7 +320,7 @@ class Mutator(app.selectable.Selectable):
       app.log.info('redoAddChange', change)
     # When the redoChain is trimmed we may lose the saved at.
     # Trim only when there is a non-trivial action.
-    if change[0] == 'm' and self.redoIndex != len(self.redoChain):
+    if change[0] == 'm':
       newTrivialChange = True
     else:
       # Trim and combine main redoChain with tempChange
