@@ -119,7 +119,7 @@ class InteractivePrompt(app.controller.Controller):
   def setTextBuffer(self, textBuffer):
     app.controller.Controller.setTextBuffer(self, textBuffer)
     self.textBuffer = textBuffer
-    self.textBuffer.lines = [""]
+    self.textBuffer.lines = [unicode("")]
     self.commands = {
       'bm': self.bookmarkCommand,
       'build': self.buildCommand,

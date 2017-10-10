@@ -39,7 +39,7 @@ class BufferManager:
 
   def newTextBuffer(self):
     textBuffer = app.text_buffer.TextBuffer()
-    textBuffer.lines = [""]
+    textBuffer.lines = [unicode("")]
     textBuffer.savedAtRedoIndex = 0
     self.buffers.append(textBuffer)
     app.log.info(textBuffer)

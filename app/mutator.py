@@ -280,7 +280,7 @@ class Mutator(app.selectable.Selectable):
       self.lines.insert(self.penRow + 1, line[self.penCol:])
       self.lines[self.penRow] = line[:self.penCol]
       for i in range(max(change[1][0] - 1, 0)):
-        self.lines.insert(self.penRow + 1, "")
+        self.lines.insert(self.penRow + 1, uncode(""))
       if self.upperChangedRow > self.penRow:
         self.upperChangedRow = self.penRow
       self.__redoMove(change[1][1])
@@ -320,7 +320,7 @@ class Mutator(app.selectable.Selectable):
       app.log.info('redoAddChange', change)
     # When the redoChain is trimmed we may lose the saved at.
     # Trim only when there is a non-trivial action.
-    if change[0] == 'm' and self.redoIndex != len(self.redoChain):
+    if change[0] == 'm':
       newTrivialChange = True
     else:
       # Trim and combine main redoChain with tempChange

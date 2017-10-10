@@ -58,7 +58,7 @@ kSelectionModeNames = [
 
 class BaseLineBuffer:
   def __init__(self):
-    self.lines = [""]
+    self.lines = [unicode("")]
     self.message = ('New buffer', 0)
 
   def setMessage(self, *args, **dict):
@@ -155,7 +155,7 @@ class Selectable(BaseLineBuffer):
           lowerRow == len(self.lines) and lowerCol == len(self.lines[-1])):
         del self.lines[upperRow:lowerRow]
         if not len(self.lines):
-          self.lines.append("")
+          self.lines.append(unicode(""))
       else:
         self.lines[upperRow] = (self.lines[upperRow][:upperCol] +
             self.lines[lowerRow][lowerCol:])

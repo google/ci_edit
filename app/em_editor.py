@@ -53,7 +53,7 @@ class EditText(app.controller.Controller):
     app.controller.Controller.__init__(self, prg, host, 'EditText')
     self.document = None
     self.textBuffer = textBuffer
-    textBuffer.lines = [""]
+    textBuffer.lines = [unicode("")]
     self.commandSet = {
       KEY_F1: self.info,
       CTRL_A: textBuffer.selectionAll,
