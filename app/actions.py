@@ -1185,6 +1185,7 @@ class Actions(app.mutator.Mutator):
     self.performDelete()
     self.redoAddChange(('i', text))
     self.redo()
+    self.updateBasicScrollPosition()
 
   def insertPrintable(self, ch, meta):
     #app.log.info(ch, meta)
