@@ -181,6 +181,7 @@ class Mutator(app.selectable.Selectable):
     self.markerRow += change[1][2]
     self.markerCol += change[1][3]
     self.selectionMode += change[1][4]
+    self.updateBasicScrollPosition()
 
   def redo(self):
     """Replay the next action on the redoChain."""
@@ -533,3 +534,6 @@ class Mutator(app.selectable.Selectable):
     else:
       app.log.info('ERROR: unknown undo.')
     return False
+
+  def updateBasicScrollPosition(self):
+    pass
