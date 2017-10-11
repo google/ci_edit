@@ -181,7 +181,6 @@ class Mutator(app.selectable.Selectable):
     self.markerRow += change[1][2]
     self.markerCol += change[1][3]
     self.selectionMode += change[1][4]
-    self.updateBasicScrollPosition()
 
   def redo(self):
     """Replay the next action on the redoChain."""
@@ -198,12 +197,14 @@ class Mutator(app.selectable.Selectable):
       self.processTempChange = False
       change = self.tempChange
       self.__redoMove(change)
+      self.updateBasicScrollPosition()
       return
     if self.tempChange:
       self.__undoMove(self.tempChange)
       self.tempChange = None
     while self.__redoOne():
       pass
+    self.updateBasicScrollPosition()
 
   def __redoOne(self):
     if self.redoIndex < len(self.redoChain):
