@@ -197,12 +197,14 @@ class Mutator(app.selectable.Selectable):
       self.processTempChange = False
       change = self.tempChange
       self.__redoMove(change)
+      self.updateBasicScrollPosition()
       return
     if self.tempChange:
       self.__undoMove(self.tempChange)
       self.tempChange = None
     while self.__redoOne():
       pass
+    self.updateBasicScrollPosition()
 
   def __redoOne(self):
     if self.redoIndex < len(self.redoChain):
@@ -280,7 +282,7 @@ class Mutator(app.selectable.Selectable):
       self.lines.insert(self.penRow + 1, line[self.penCol:])
       self.lines[self.penRow] = line[:self.penCol]
       for i in range(max(change[1][0] - 1, 0)):
-        self.lines.insert(self.penRow + 1, uncode(""))
+        self.lines.insert(self.penRow + 1, unicode(""))
       if self.upperChangedRow > self.penRow:
         self.upperChangedRow = self.penRow
       self.__redoMove(change[1][1])
@@ -533,3 +535,6 @@ class Mutator(app.selectable.Selectable):
     else:
       app.log.info('ERROR: unknown undo.')
     return False
+
+  def updateBasicScrollPosition(self):
+    pass

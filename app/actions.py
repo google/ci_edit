@@ -329,7 +329,6 @@ class Actions(app.mutator.Mutator):
       self.cursorMove(1, self.cursorColDelta(self.penRow + 1))
       self.redo()
       self.goalCol = savedGoal
-      self.updateBasicScrollPosition()
 
   def cursorMoveLeft(self):
     if self.penCol > 0:
@@ -338,7 +337,6 @@ class Actions(app.mutator.Mutator):
     elif self.penRow > 0:
       self.cursorMove(-1, len(self.lines[self.penRow - 1]))
       self.redo()
-    self.updateBasicScrollPosition()
 
   def cursorMoveRight(self):
     if not self.lines:
@@ -349,7 +347,6 @@ class Actions(app.mutator.Mutator):
     elif self.penRow + 1 < len(self.lines):
       self.cursorMove(1, -len(self.lines[self.penRow]))
       self.redo()
-    self.updateBasicScrollPosition()
 
   def cursorMoveUp(self):
     if self.penRow > 0:
@@ -362,7 +359,6 @@ class Actions(app.mutator.Mutator):
         self.cursorMove(-1, lineLen - self.penCol)
         self.redo()
       self.goalCol = savedGoal
-      self.updateBasicScrollPosition()
 
   def cursorMoveSubwordLeft(self):
     self.doCursorMoveLeftTo(app.selectable.kReSubwordBoundaryRvr)
@@ -636,7 +632,7 @@ class Actions(app.mutator.Mutator):
     self.cursorMoveScroll(0, 0, rowDelta, 0)
 
   def cursorStartOfLine(self):
-    self.cursorMoveScroll(0, -self.penCol, 0, -self.view.scrollCol)
+    self.cursorMove(0, -self.penCol)
     self.redo()
 
   def cursorUp(self):
@@ -707,7 +703,6 @@ class Actions(app.mutator.Mutator):
       endCol = len(clip[-1])
     self.cursorMove(rowDelta, endCol - self.penCol)
     self.redo()
-    self.updateBasicScrollPosition()
 
   def editRedo(self):
     """Undo a set of redo nodes."""
@@ -818,9 +813,10 @@ class Actions(app.mutator.Mutator):
         app.selectable.kSelectionNone))
     self.markerRow, self.markerCol = self.fileHistory.setdefault('marker',
         (0, 0))
-    self.redoChain = self.fileHistory.setdefault('redoChain', [])
-    self.savedAtRedoIndex = self.fileHistory.setdefault('savedAtRedoIndex', 0)
-    self.redoIndex = self.savedAtRedoIndex
+    if app.prefs.editor['saveUndo']:
+      self.redoChain = self.fileHistory.setdefault('redoChain', [])
+      self.savedAtRedoIndex = self.fileHistory.setdefault('savedAtRedoIndex', 0)
+      self.redoIndex = self.savedAtRedoIndex
 
     # Restore file bookmarks
     self.bookmarks = self.fileHistory.setdefault('bookmarks', [])
@@ -905,7 +901,13 @@ class Actions(app.mutator.Mutator):
     Returns:
       True if selection is in view. Otherwise, False.
     """
-    top, left, bottom, right = self.startAndEnd()
+    return self.isInView(*self.startAndEnd())
+
+  def isInView(self, top, left, bottom, right):
+    """
+    Returns:
+      True if selection is in view. Otherwise, False.
+    """
     horizontally = (self.view.scrollCol <= left and
             right < self.view.scrollCol + self.view.cols)
     vertically = (self.view.scrollRow <= top and
@@ -940,8 +942,9 @@ class Actions(app.mutator.Mutator):
         file.close()
         # Save user data that applies to writable files.
         self.savedAtRedoIndex = self.redoIndex
-        self.fileHistory['redoChain'] = self.redoChain
-        self.fileHistory['savedAtRedoIndex'] = self.savedAtRedoIndex
+        if app.prefs.editor['saveUndo']:
+          self.fileHistory['redoChain'] = self.redoChain
+          self.fileHistory['savedAtRedoIndex'] = self.savedAtRedoIndex
         # Hmm, could this be hard coded to False here?
         self.isReadOnly = not os.access(self.fullPath, os.W_OK)
         self.fileStat = os.stat(self.fullPath)
@@ -965,16 +968,15 @@ class Actions(app.mutator.Mutator):
     scrollRow = self.view.scrollRow
     scrollCol = self.view.scrollCol
     maxRow, maxCol = self.view.rows, self.view.cols
+    endCol = col + length
+    inView = self.isInView(row, endCol, row, endCol)
     self.doSelectionMode(app.selectable.kSelectionNone)
-    self.cursorMoveScroll(
-        row - self.penRow,
-        col + length - self.penCol,
-        0, 0)
+    self.cursorMove( row - self.penRow, endCol - self.penCol)
     self.redo()
     self.doSelectionMode(mode)
     self.cursorMove(0, -length)
     self.redo()
-    if not self.isSelectionInView():
+    if not inView:
       self.scrollToOptimalScrollPosition()
 
   def find(self, searchFor, direction=0):
@@ -1155,7 +1157,6 @@ class Actions(app.mutator.Mutator):
       self.indentLines()
     self.cursorMoveAndMark(0, indentationLength, 0, indentationLength, 0)
     self.redo()
-    self.updateBasicScrollPosition()
 
   def indentLines(self):
     """
@@ -1237,7 +1238,6 @@ class Actions(app.mutator.Mutator):
       self.cursorMoveAndMark(0, 0, row - self.markerRow, col - self.markerCol,
           0)
       self.redo()
-      self.updateBasicScrollPosition()
       return
     # If not block selection, restrict col to the chars on the line.
     col = min(col, len(self.lines[row]))
@@ -1263,11 +1263,9 @@ class Actions(app.mutator.Mutator):
           markerCol = 1
         elif col >= self.markerCol and row > self.penRow:
           markerCol = -1
-
     self.cursorMoveAndMark(row - self.penRow, col - self.penCol,
         0, markerCol, 0)
     self.redo()
-    self.updateBasicScrollPosition()
     inLine = paneCol < len(self.lines[row])
     if self.selectionMode == app.selectable.kSelectionLine:
       self.cursorMoveAndMark(*self.extendSelection())
@@ -1307,7 +1305,6 @@ class Actions(app.mutator.Mutator):
       self.cursorMoveScroll(cursorDelta,
           self.cursorColDelta(self.penRow + cursorDelta), 0, 0)
       self.redo()
-      self.updateBasicScrollPosition()
 
   def mouseWheelUp(self, shift, ctrl, alt):
     if not shift:
@@ -1326,7 +1323,6 @@ class Actions(app.mutator.Mutator):
       self.cursorMoveScroll(cursorDelta,
           self.cursorColDelta(self.penRow + cursorDelta), 0, 0)
       self.redo()
-      self.updateBasicScrollPosition()
 
   def nextSelectionMode(self):
     next = self.selectionMode + 1
@@ -1406,7 +1402,6 @@ class Actions(app.mutator.Mutator):
         self.selectionLine()
         self.cursorMoveAndMark(*self.extendSelection())
         self.redo()
-        self.updateBasicScrollPosition()
       else:
         # TODO(dschuyler): reverted to above to fix line selection in the line
         # numbers column. To be investigated further.
