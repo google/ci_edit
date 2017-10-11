@@ -818,9 +818,10 @@ class Actions(app.mutator.Mutator):
         app.selectable.kSelectionNone))
     self.markerRow, self.markerCol = self.fileHistory.setdefault('marker',
         (0, 0))
-    self.redoChain = self.fileHistory.setdefault('redoChain', [])
-    self.savedAtRedoIndex = self.fileHistory.setdefault('savedAtRedoIndex', 0)
-    self.redoIndex = self.savedAtRedoIndex
+    if app.prefs.editor['saveUndo']:
+      self.redoChain = self.fileHistory.setdefault('redoChain', [])
+      self.savedAtRedoIndex = self.fileHistory.setdefault('savedAtRedoIndex', 0)
+      self.redoIndex = self.savedAtRedoIndex
 
     # Restore file bookmarks
     self.bookmarks = self.fileHistory.setdefault('bookmarks', [])
@@ -940,8 +941,9 @@ class Actions(app.mutator.Mutator):
         file.close()
         # Save user data that applies to writable files.
         self.savedAtRedoIndex = self.redoIndex
-        self.fileHistory['redoChain'] = self.redoChain
-        self.fileHistory['savedAtRedoIndex'] = self.savedAtRedoIndex
+        if app.prefs.editor['saveUndo']:
+          self.fileHistory['redoChain'] = self.redoChain
+          self.fileHistory['savedAtRedoIndex'] = self.savedAtRedoIndex
         # Hmm, could this be hard coded to False here?
         self.isReadOnly = not os.access(self.fullPath, os.W_OK)
         self.fileStat = os.stat(self.fullPath)
