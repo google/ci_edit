@@ -185,6 +185,10 @@ prefs = {
       'ext': ['.css', '_css.html'],
       'grammar': 'css',
     },
+    'grd': {
+      'ext': ['.grd', '.grdp'],
+      'grammar': 'grd',
+    },
     'html': {
       'ext': ['.htm', '.html'],
       'grammar': 'html',
@@ -361,6 +365,9 @@ prefs = {
       ],
       'types': ['Array', 'boolean', 'string', 'Object'],
     },
+    'grd': {
+      'keywords': [ 'flattenhtml', 'allowexternalscript' ],
+    },
     'html': {
       'begin': '<html>',
       'end': kNonMatchingRegex,
@@ -415,6 +422,7 @@ prefs = {
         'arguments', 'break', 'case', 'class', 'const', 'continue', 'default',
         'document', 'else', 'false', 'for', 'function', 'if', 'let', 'of',
         'return', 'switch', 'this', 'true', 'var', 'while',
+        'instanceof', 'static', 'yield', 'super', 'delete',
        ],
       'special': [
         '\bsetTimeout\b', '\brequestCallback\b', '\bconsole\b', '\bwindow\b',
