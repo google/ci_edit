@@ -119,6 +119,7 @@ prefs = {
     'html_block_comment': commentColorIndex,
     'html_element': keywordsColorIndex,
     'html_element_end': keywordsColorIndex,
+    'js_string': stringColorIndex,
     'found_find': foundColorIndex,
     'line_number': 168,
     'line_number_current': 146,
@@ -429,8 +430,16 @@ prefs = {
       ],
       'contains': [
         'c_string1', 'c_string2', 'doc_block_comment', 'cpp_block_comment',
-        'cpp_line_comment', 'regex_string',
+        'cpp_line_comment', 'regex_string', 'js_string',
       ],
+    },
+    'js_string': {
+      'begin': r"`",
+      'end': r"`",
+      'escaped': r"\\`",
+      'indent': '  ',
+      'special': __special_string_escapes + [r"\\`", r"(?<!\\)\$\{[^}]*\}"],
+      'single_line': False,
     },
     'keyword': {
       'spelling': False,

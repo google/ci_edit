@@ -26,6 +26,8 @@ namespace is not a keyword
 a = b/c;
 a = b  / c;
 
+a = `one \${o} two ${three} fo\nu\`r`;
+
 a =  /.*/;
  /as/
 
