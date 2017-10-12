@@ -638,9 +638,7 @@ class CiProgram:
       foreground = palette['foregroundIndexes']
       background = palette['backgroundIndexes']
       cycle = len(foreground)
-      userMessage('curses.COLORS', curses.COLORS)
       for i in range(1, curses.COLORS):
-        userMessage('i', i)
         curses.init_pair(i, foreground[i % cycle], background[i / cycle])
     try:
       applyPalette(app.prefs.editor['palette'])
