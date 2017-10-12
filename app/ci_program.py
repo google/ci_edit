@@ -649,10 +649,14 @@ def wrapped_ci(cursesScreen):
     prg = CiProgram(cursesScreen)
     prg.run()
   except Exception, e:
+    userMessage('---------------------------------------')
+    userMessage('Super sorry, something went very wrong.')
+    userMessage('Please create a New Issue and paste this info there.\n')
     errorType, value, tracebackInfo = sys.exc_info()
     out = traceback.format_exception(errorType, value, tracebackInfo)
     for i in out:
-      app.log.error(i[:-1])
+      userMessage(i[:-1])
+      #app.log.error(i[:-1])
 
 def run_ci():
   locale.setlocale(locale.LC_ALL, '')
