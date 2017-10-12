@@ -43,6 +43,7 @@ def userMessage(*args):
   global userConsoleMessage
   if not userConsoleMessage:
     userConsoleMessage = ''
+  args = [str(i) for i in args]
   userConsoleMessage += ' '.join(args) + '\n'
 
 
@@ -637,12 +638,17 @@ class CiProgram:
       foreground = palette['foregroundIndexes']
       background = palette['backgroundIndexes']
       cycle = len(foreground)
+      userMessage('curses.COLORS', curses.COLORS)
       for i in range(1, curses.COLORS):
+        userMessage('i', i)
         curses.init_pair(i, foreground[i % cycle], background[i / cycle])
     try:
       applyPalette(app.prefs.editor['palette'])
     except:
-      applyPalette('default')
+      try:
+        applyPalette('default')
+      except:
+        pass
 
 def wrapped_ci(cursesScreen):
   try:
