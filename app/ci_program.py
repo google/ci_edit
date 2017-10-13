@@ -637,16 +637,26 @@ class CiProgram:
       palette = app.prefs.palette[name]
       foreground = palette['foregroundIndexes']
       background = palette['backgroundIndexes']
-      cycle = len(foreground)
       for i in range(1, curses.COLORS):
-        curses.init_pair(i, foreground[i % cycle], background[i / cycle])
-    try:
-      applyPalette(app.prefs.editor['palette'])
-    except:
+        curses.init_pair(i, foreground[i], background[i])
+    def twoTries(primary, fallback):
       try:
-        applyPalette('default')
+        applyPalette(primary)
       except:
-        pass
+        try:
+          applyPalette(fallback)
+        except:
+          pass
+    if curses.COLORS == 8:
+      app.prefs.prefs['color'] = app.prefs.color8
+      app.prefs.color = app.prefs.color8
+      app.color.colors = 8
+      twoTries(app.prefs.editor['palette8'], 'default8')
+    elif curses.COLORS == 256:
+      app.prefs.prefs['color'] = app.prefs.color256
+      app.prefs.color = app.prefs.color256
+      app.color.colors = 256
+      twoTries(app.prefs.editor['palette'], 'default')
 
 def wrapped_ci(cursesScreen):
   try:

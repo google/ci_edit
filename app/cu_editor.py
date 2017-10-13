@@ -342,7 +342,7 @@ class CuaPlusEdit(CuaEdit):
 
       KEY_F2: textBuffer.bookmarkNext,
       KEY_F3: textBuffer.findAgain,
-      #KEY_F4: self.prg.paletteWindow.focus,
+      #KEY_F4: self.changeToPaletteWindow,
       KEY_SHIFT_F2: textBuffer.bookmarkPrior,
       KEY_SHIFT_F3: textBuffer.findBack,
     })

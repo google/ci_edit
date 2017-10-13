@@ -45,7 +45,7 @@ class Parser:
   def __init__(self):
     self.data = ""
     self.emptyNode = ParserNode()
-    self.emptyNode.grammar = {}
+    self.emptyNode.grammar = None
     self.endNode = ParserNode()
     self.endNode.grammar = {}
     self.endNode.begin = sys.maxint
@@ -116,6 +116,7 @@ class Parser:
             are needed (which can save a lot of cpu time).
     """
     app.log.parser('grammar', grammar['name'])
+    self.emptyNode.grammar = grammar
     self.data = data
     self.endRow = endRow
     if beginRow > 0 and len(self.rows):
