@@ -131,6 +131,9 @@ class CiProgram:
       else:
         while self.bg.hasMessage():
           frame = self.bg.get()
+          if type(frame) == type("") and frame == 'quit':
+            self.exiting = True
+            return
           self.refresh(frame[0], frame[1])
       self.mainLoopTime = time.time() - start
       if self.mainLoopTime > self.mainLoopTimePeak:
@@ -218,7 +221,7 @@ class CiProgram:
       start = time.time()
       if len(cmdList):
         if 10:
-          app.log.info(len(cmdList))
+          #app.log.info(len(cmdList))
           self.bg.put((self, cmdList))
         else:
           self.executeCommandList(cmdList)

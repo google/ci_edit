@@ -70,6 +70,8 @@ def background(input, output):
     except Exception, e:
       app.log.error('bg thread exception')
       app.log.exception(e)
+      output.put('quit')
+      os.kill(0, signal.SIGALRM)
 
 def startupBackground():
   global bg
@@ -78,6 +80,7 @@ def startupBackground():
   bg = BackgroundThread(
       target=background, args=(toBackground, fromBackground))
   bg.setName('ci_edit_bg')
+  bg.setDaemon(True)
   bg.start()
   bg.toBackground = toBackground
   bg.fromBackground = fromBackground
