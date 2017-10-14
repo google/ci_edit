@@ -407,8 +407,8 @@ class LogWindow(ViewWindow):
     app.log.meta(" " * 10, self.renderCounter, "- screen refresh -")
     maxRow, maxCol = self.rows, self.cols
     self.writeLineRow = 0
-    colorA = app.color.get(0)
-    colorB = app.color.get(96)
+    colorA = app.color.get('default')
+    colorB = app.color.get('highlight')
     for i in self.lines[-maxRow:]:
       color = colorA
       if len(i) and i[-1] == '-':

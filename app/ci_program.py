@@ -43,6 +43,7 @@ def userMessage(*args):
   global userConsoleMessage
   if not userConsoleMessage:
     userConsoleMessage = ''
+  args = [str(i) for i in args]
   userConsoleMessage += ' '.join(args) + '\n'
 
 
@@ -636,23 +637,40 @@ class CiProgram:
       palette = app.prefs.palette[name]
       foreground = palette['foregroundIndexes']
       background = palette['backgroundIndexes']
-      cycle = len(foreground)
       for i in range(1, curses.COLORS):
-        curses.init_pair(i, foreground[i % cycle], background[i / cycle])
-    try:
-      applyPalette(app.prefs.editor['palette'])
-    except:
-      applyPalette('default')
+        curses.init_pair(i, foreground[i], background[i])
+    def twoTries(primary, fallback):
+      try:
+        applyPalette(primary)
+      except:
+        try:
+          applyPalette(fallback)
+        except:
+          pass
+    if curses.COLORS == 8:
+      app.prefs.prefs['color'] = app.prefs.color8
+      app.prefs.color = app.prefs.color8
+      app.color.colors = 8
+      twoTries(app.prefs.editor['palette8'], 'default8')
+    elif curses.COLORS == 256:
+      app.prefs.prefs['color'] = app.prefs.color256
+      app.prefs.color = app.prefs.color256
+      app.color.colors = 256
+      twoTries(app.prefs.editor['palette'], 'default')
 
 def wrapped_ci(cursesScreen):
   try:
     prg = CiProgram(cursesScreen)
     prg.run()
   except Exception, e:
+    userMessage('---------------------------------------')
+    userMessage('Super sorry, something went very wrong.')
+    userMessage('Please create a New Issue and paste this info there.\n')
     errorType, value, tracebackInfo = sys.exc_info()
     out = traceback.format_exception(errorType, value, tracebackInfo)
     for i in out:
-      app.log.error(i[:-1])
+      userMessage(i[:-1])
+      #app.log.error(i[:-1])
 
 def run_ci():
   locale.setlocale(locale.LC_ALL, '')

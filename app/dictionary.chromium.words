@@ -40,6 +40,7 @@ eap
 eslint
 filemanager
 futf
+gclient
 gdoc
 gdraw
 gmock

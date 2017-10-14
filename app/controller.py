@@ -55,6 +55,9 @@ class Controller:
   def changeToGoto(self):
     self.host.changeFocusTo(self.host.interactiveGoto)
 
+  def changeToPaletteWindow(self):
+    self.host.changeFocusTo(self.host.host.paletteWindow)
+
   def changeToPrediction(self):
     self.host.changeFocusTo(self.host.interactivePrediction)
 
