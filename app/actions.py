@@ -947,6 +947,11 @@ class Actions(app.mutator.Mutator):
           self.fileHistory['savedAtRedoIndex'] = self.savedAtRedoIndex
         # Hmm, could this be hard coded to False here?
         self.isReadOnly = not os.access(self.fullPath, os.W_OK)
+        app.history.saveUserHistory((self.fullPath, self.lastChecksum,
+            self.lastFileSize), self.fileHistory)
+        # Store the file's new info
+        self.lastChecksum, self.lastFileSize = app.history.getFileInfo(
+            self.fullPath)
         self.fileStat = os.stat(self.fullPath)
         self.setMessage('File saved')
       except Exception as e:
@@ -956,11 +961,6 @@ class Actions(app.mutator.Mutator):
         app.log.exception('error writing file')
     except:
       app.log.info('except had exception')
-    app.history.saveUserHistory((self.fullPath, self.lastChecksum,
-        self.lastFileSize), self.fileHistory)
-    # Store the file's new info
-    self.lastChecksum, self.lastFileSize = app.history.getFileInfo(
-        self.fullPath)
 
   def selectText(self, row, col, length, mode):
     row = max(0, min(row, len(self.lines) - 1))
