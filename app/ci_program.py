@@ -104,6 +104,8 @@ class CiProgram:
     # At startup, focus the main window (just to start somewhere).
     self.focusedWindow = self.zOrder[-1]
     self.focusedWindow.focus()
+    # Cache the thread setting.
+    useBgThread = app.prefs.editor['useBgThread']
     # Track the time needed to handle commands and render the UI.
     # (A performance measurement).
     self.mainLoopTime = 0
@@ -114,12 +116,24 @@ class CiProgram:
       # curses event messages to simulate a full startup with a GUI render.
       curses.ungetch(17)
     start = time.time()
-    self.bg.put((self, []))
+    if useBgThread:
+      self.bg.put((self, []))
     #frame = self.bg.get()
     # This is the 'main loop'. Execution doesn't leave this loop until the
     # application is closing down.
     while not self.exiting:
-      if 0:
+      if useBgThread:
+        while self.bg.hasMessage():
+          frame = self.bg.get()
+          if type(frame) == type("") and frame == 'quit':
+            self.exiting = True
+            return
+          self.refresh(frame[0], frame[1])
+      elif 1:
+        self.render()
+        frame = app.render.frame.grabFrame()
+        self.refresh(frame[0], frame[1])
+      else:
         profile = cProfile.Profile()
         profile.enable()
         self.refresh(frame[0], frame[1])
@@ -128,10 +142,6 @@ class CiProgram:
         stats = pstats.Stats(profile, stream=output).sort_stats('cumulative')
         stats.print_stats()
         app.log.info(output.getvalue())
-      else:
-        while self.bg.hasMessage():
-          frame = self.bg.get()
-          self.refresh(frame[0], frame[1])
       self.mainLoopTime = time.time() - start
       if self.mainLoopTime > self.mainLoopTimePeak:
         self.mainLoopTimePeak = self.mainLoopTime
@@ -198,7 +208,7 @@ class CiProgram:
             assert u is not None
             eventInfo = u
             ch = app.curses_util.UNICODE_INPUT
-          if ch == 0:
+          if ch == 0 and useBgThread:
             # bg response.
             frame = None
             while self.bg.hasMessage():
@@ -217,8 +227,7 @@ class CiProgram:
             cmdList.append((ch, eventInfo))
       start = time.time()
       if len(cmdList):
-        if 10:
-          app.log.info(len(cmdList))
+        if useBgThread:
           self.bg.put((self, cmdList))
         else:
           self.executeCommandList(cmdList)
@@ -517,6 +526,8 @@ class CiProgram:
           app.log.channelEnable('error', True)
         elif i == '--parser':
           app.log.channelEnable('parser', True)
+        elif i == '--singleThread':
+          app.prefs.editor['useBgThread'] = False
         elif i == '--startup':
           app.log.channelEnable('startup', True)
         elif i == '--timeStartup':
@@ -616,7 +627,8 @@ class CiProgram:
     homePath = app.prefs.prefs['userData'].get('homePath')
     self.makeHomeDirs(homePath)
     app.curses_util.hackCursesFixes()
-    self.bg = app.background.startupBackground()
+    if app.prefs.editor['useBgThread']:
+      self.bg = app.background.startupBackground()
     self.startup()
     if app.prefs.startup.get('profile'):
       profile = cProfile.Profile()
@@ -629,8 +641,9 @@ class CiProgram:
       app.log.info(output.getvalue())
     else:
       self.commandLoop()
-    self.bg.put((self, 'quit'))
-    self.bg.join()
+    if app.prefs.editor['useBgThread']:
+      self.bg.put((self, 'quit'))
+      self.bg.join()
 
   def setUpPalette(self):
     def applyPalette(name):

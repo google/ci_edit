@@ -156,7 +156,7 @@ class Parser:
         #app.log.error('grammar likely caught in a loop')
         break
       leash -= 1
-      if app.background.bg.hasUserEvent():
+      if app.prefs.editor['useBgThread'] and app.background.bg.hasUserEvent():
         break
       subdata = self.data[cursor:]
       found = self.parserNodes[-1].grammar.get('matchRe').search(subdata)

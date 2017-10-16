@@ -131,7 +131,7 @@ for k,v in prefs['grammar'].items():
   markers += v.get('special', [])
   # Index [-1]
   markers.append(r'\n')
-  app.log.startup('markers', v['name'], markers)
+  #app.log.startup('markers', v['name'], markers)
   v['matchRe'] = re.compile(joinReList(markers))
   v['matchGrammars'] = matchGrammars
 # Reset the re.cache for user regexes.
