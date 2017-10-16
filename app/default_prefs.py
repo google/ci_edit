@@ -208,7 +208,7 @@ prefs = {
     'optimalCursorCol': 0.98,  # Ratio of columns: 0 left, 1.0 right.
     'palette': 'default',
     'palette8': 'default8',
-    'saveUndo': False,
+    'saveUndo': True,
     'showLineNumbers': True,
     'showStatusLine': True,
     'showTopInfo': True,
