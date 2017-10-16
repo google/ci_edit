@@ -178,7 +178,7 @@ class Controller:
     self.host.changeFocusTo(self.host)
 
   def setTextBuffer(self, textBuffer):
-    app.log.info(textBuffer)
+    #app.log.info(textBuffer)
     self.textBuffer = textBuffer
 
   def unfocus(self):
