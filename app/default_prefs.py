@@ -212,6 +212,7 @@ prefs = {
     'showLineNumbers': True,
     'showStatusLine': True,
     'showTopInfo': True,
+    'useBgThread': True,
   },
   'fileType': {
     'bash': {
