@@ -58,6 +58,7 @@ getcwd
 getenv
 getmaxyx
 getmouse
+getpid
 getpreferredencoding
 getvalue
 getyx
@@ -91,6 +92,7 @@ klipper
 kwargs
 leaveok
 len
+lft
 listdir
 lpcstr
 lpvoid
@@ -111,6 +113,7 @@ newwin
 normpath
 noutrefresh
 npage
+nxt
 ord
 os
 pbcopy
@@ -118,6 +121,7 @@ pbpaste
 pid
 popen
 ppage
+prv
 pstats
 pyperclip
 pythonpath
@@ -130,6 +134,7 @@ relpath
 repr
 resizeterm
 restype
+rit
 rsplit
 scrollok
 sel
@@ -137,10 +142,15 @@ sep
 setattr
 setdefault
 shutil
+sigalrm
+sighup
+sigusr
 sigwinch
 sizeof
 sleft
+snext
 splitext
+sprevious
 sre
 sright
 startswith

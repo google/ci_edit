@@ -219,5 +219,4 @@ def hackCursesFixes():
     signal.signal(signal.SIGWINCH, windowChangedHandler)
   def wakeGetch(signum, frame):
     curses.ungetch(0)
-  signal.signal(signal.SIGALRM, wakeGetch)
-  signal.signal(signal.SIGHUP, wakeGetch)
+  signal.signal(signal.SIGUSR1, wakeGetch)
