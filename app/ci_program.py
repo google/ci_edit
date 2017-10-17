@@ -539,11 +539,14 @@ class CiProgram:
         elif i == '--help':
           userMessage(app.help.docs['command line'])
           self.quitNow()
-        elif i == '--version':
-          userMessage(app.help.docs['version'])
+        elif i == '--keys':
+          userMessage(app.help.docs['key bindings'])
           self.quitNow()
         elif i == '--clearHistory':
           app.history.clearUserHistory()
+          self.quitNow()
+        elif i == '--version':
+          userMessage(app.help.docs['version'])
           self.quitNow()
         elif i.startswith('--'):
           userMessage("unknown command line argument", i)
