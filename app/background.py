@@ -35,6 +35,8 @@ class BackgroundThread(threading.Thread):
 
 def background(input, output):
   block = True
+  pid = os.getpid()
+  signalNumber = signal.SIGUSR1
   while True:
     try:
       try:
@@ -45,7 +47,7 @@ def background(input, output):
         program.executeCommandList(message)
         program.render()
         output.put(app.render.frame.grabFrame())
-        os.kill(0, signal.SIGALRM)
+        os.kill(pid, signalNumber)
       except Queue.Empty, e:
         pass
       #if not input.empty():
@@ -65,13 +67,12 @@ def background(input, output):
         if block:
           program.render()
           output.put(app.render.frame.grabFrame())
-          os.kill(0, signal.SIGALRM)
-      #os.kill(0, signal.SIGHUP)
+          os.kill(pid, signalNumber)
     except Exception, e:
       app.log.error('bg thread exception')
       app.log.exception(e)
       output.put('quit')
-      os.kill(0, signal.SIGALRM)
+      os.kill(pid, signalNumber)
 
 def startupBackground():
   global bg
