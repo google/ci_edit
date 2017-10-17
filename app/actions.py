@@ -1291,7 +1291,10 @@ class Actions(app.mutator.Mutator):
   def mouseWheelDown(self, shift, ctrl, alt):
     if not shift:
       self.selectionNone()
-    self.scrollUp()
+    if app.prefs.editor['naturalScrollDirection']:
+      self.scrollUp()
+    else:
+      self.scrollDown()
 
   def scrollUp(self):
     if self.view.scrollRow == 0:
@@ -1309,7 +1312,10 @@ class Actions(app.mutator.Mutator):
   def mouseWheelUp(self, shift, ctrl, alt):
     if not shift:
       self.selectionNone()
-    self.scrollDown()
+    if app.prefs.editor['naturalScrollDirection']:
+      self.scrollDown()
+    else:
+      self.scrollUp()
 
   def scrollDown(self):
     maxRow, maxCol = self.view.rows, self.view.cols
