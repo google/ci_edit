@@ -486,6 +486,14 @@ class Actions(app.mutator.Mutator):
     self.cursorMove(0, lineLen - self.penCol)
     self.redo()
 
+  def cursorSelectToStartOfLine(self):
+    self.selectionCharacter()
+    self.cursorStartOfLine()
+
+  def cursorSelectToEndOfLine(self):
+    self.selectionCharacter()
+    self.cursorEndOfLine()
+
   def __cursorPageDown(self):
     """
     Moves the view and cursor down by a page or stops
@@ -971,7 +979,7 @@ class Actions(app.mutator.Mutator):
     endCol = col + length
     inView = self.isInView(row, endCol, row, endCol)
     self.doSelectionMode(app.selectable.kSelectionNone)
-    self.cursorMove( row - self.penRow, endCol - self.penCol)
+    self.cursorMove(row - self.penRow, endCol - self.penCol)
     self.redo()
     self.doSelectionMode(mode)
     self.cursorMove(0, -length)
