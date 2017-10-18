@@ -30,6 +30,7 @@ cn
 cpu
 cua
 da
+dbs
 ddd
 dll
 dns
@@ -72,6 +73,7 @@ ld
 lgtm
 lldb
 llvm
+lru
 lsb
 lte
 ltr

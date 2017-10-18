@@ -22,16 +22,6 @@ import sys
 import time
 
 importStartTime = time.time()
-
-commentColorIndex = 2
-defaultColorIndex = 18
-foundColorIndex = 32
-keywordsColorIndex = 21
-selectedColor = 64  # Active find is a selection.
-specialsColorIndex = 20
-stringColorIndex = 5
-outsideOfBufferColorIndex = 211
-
 kNonMatchingRegex = r'^\b$'
 kReNonMatching = re.compile(kNonMatchingRegex)
 prefs = app.default_prefs.prefs
@@ -58,6 +48,9 @@ if 1:
       except Exception, e:
         app.log.startup('failed to parse', prefsPath)
         app.log.startup('error', e)
+
+color8 = app.default_prefs.color8
+color256 = app.default_prefs.color256
 
 builtInColorSchemes = {
   'dark': {},
@@ -138,7 +131,7 @@ for k,v in prefs['grammar'].items():
   markers += v.get('special', [])
   # Index [-1]
   markers.append(r'\n')
-  app.log.startup('markers', markers)
+  #app.log.startup('markers', v['name'], markers)
   v['matchRe'] = re.compile(joinReList(markers))
   v['matchGrammars'] = matchGrammars
 # Reset the re.cache for user regexes.
@@ -162,7 +155,7 @@ def init():
   defaultColor = prefs['color']['default']
   defaultKeywordsColor = prefs['color']['keyword']
   defaultSpecialsColor = prefs['color']['special']
-  for k,v in prefs['grammar'].items():
+  for k,v in grammars.items():
     # Colors.
     v['colorIndex'] = prefs['color'].get(k, defaultColor)
     if 0:

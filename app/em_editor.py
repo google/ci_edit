@@ -53,17 +53,16 @@ class EditText(app.controller.Controller):
     app.controller.Controller.__init__(self, prg, host, 'EditText')
     self.document = None
     self.textBuffer = textBuffer
-    textBuffer.lines = [""]
+    textBuffer.lines = [unicode("")]
     self.commandSet = {
-      curses.KEY_F1: self.info,
+      KEY_F1: self.info,
       CTRL_A: textBuffer.selectionAll,
-      curses.KEY_BACKSPACE: textBuffer.backspace,
-      127: textBuffer.backspace,
 
       CTRL_C: textBuffer.editCopy,
-
       CTRL_H: textBuffer.backspace,
-      curses.ascii.DEL: textBuffer.backspace,
+      KEY_BACKSPACE1: textBuffer.backspace,
+      KEY_BACKSPACE2: textBuffer.backspace,
+      KEY_BACKSPACE3: textBuffer.backspace,
 
       CTRL_Q: self.prg.quit,
       CTRL_S: self.saveDocument,
@@ -72,10 +71,10 @@ class EditText(app.controller.Controller):
       CTRL_Y: textBuffer.redo,
       CTRL_Z: textBuffer.undo,
 
-      # curses.KEY_DOWN: textBuffer.cursorDown,
-      curses.KEY_LEFT: textBuffer.cursorLeft,
-      curses.KEY_RIGHT: textBuffer.cursorRight,
-      # curses.KEY_UP: textBuffer.cursorUp,
+      # KEY_DOWN: textBuffer.cursorDown,
+      KEY_LEFT: textBuffer.cursorLeft,
+      KEY_RIGHT: textBuffer.cursorRight,
+      # KEY_UP: textBuffer.cursorUp,
     }
 
   def focus(self):
@@ -103,8 +102,8 @@ class InteractiveOpener(EditText):
     app.log.info('xxxxx', self.document)
     commandSet = self.commandSet.copy()
     commandSet.update({
-      curses.ascii.ESC: self.changeToInputWindow,
-      curses.KEY_F1: self.info,
+      KEY_ESCAPE: self.changeToInputWindow,
+      KEY_F1: self.info,
       CTRL_I: self.tabCompleteExtend,
       CTRL_J: self.createOrOpen,
       CTRL_N: self.createOrOpen,
@@ -221,15 +220,15 @@ class InteractiveFind(EditText):
     EditText.__init__(self, prg, host, textBuffer)
     self.document = host.host
     self.commandSet.update({
-      curses.ascii.ESC: self.changeToInputWindow,
-      curses.KEY_F1: self.info,
+      KEY_ESCAPE: self.changeToInputWindow,
+      KEY_F1: self.info,
       CTRL_F: self.findNext,
       CTRL_J: self.changeToInputWindow,
       CTRL_R: self.findPrior,
       #CTRL_S: self.replacementTextEdit,
-      curses.KEY_DOWN: self.findNext,
-      curses.KEY_MOUSE: self.saveEventChangeToInputWindow,
-      curses.KEY_UP: self.findPrior,
+      KEY_DOWN: self.findNext,
+      KEY_MOUSE: self.saveEventChangeToInputWindow,
+      KEY_UP: self.findPrior,
     })
     self.height = 1
 
@@ -285,10 +284,10 @@ class InteractiveGoto(EditText):
     self.document = host.host
     commandSet = self.commandSet.copy()
     commandSet.update({
-      curses.ascii.ESC: self.changeToInputWindow,
-      curses.KEY_F1: self.info,
+      KEY_ESCAPE: self.changeToInputWindow,
+      KEY_F1: self.info,
       CTRL_J: self.changeToInputWindow,
-      curses.KEY_MOUSE: self.saveEventChangeToInputWindow,
+      KEY_MOUSE: self.saveEventChangeToInputWindow,
       ord('b'): self.gotoBottom,
       ord('h'): self.gotoHalfway,
       ord('t'): self.gotoTop,
@@ -349,20 +348,21 @@ class CiEdit(app.controller.Controller):
       CTRL_A: textBuffer.cursorStartOfLine,
 
       CTRL_B: textBuffer.cursorLeft,
-      curses.KEY_LEFT: self.cursorLeft,
+      KEY_LEFT: self.cursorLeft,
 
       CTRL_C: self.editCopy,
-
-      CTRL_H: self.backspace,
-      curses.ascii.DEL: self.backspace,
-      curses.KEY_BACKSPACE: self.backspace,
 
       CTRL_D: self.delete,
 
       CTRL_E: self.cursorEndOfLine,
 
       CTRL_F: self.cursorRight,
-      curses.KEY_RIGHT: self.cursorRight,
+      KEY_RIGHT: self.cursorRight,
+
+      CTRL_H: self.backspace,
+      KEY_BACKSPACE1: self.backspace,
+      KEY_BACKSPACE2: self.backspace,
+      KEY_BACKSPACE3: self.backspace,
 
       CTRL_J: self.carriageReturn,
 
@@ -371,12 +371,12 @@ class CiEdit(app.controller.Controller):
       CTRL_L: self.win.refresh,
 
       CTRL_N: self.cursorDown,
-      curses.KEY_DOWN: self.cursorDown,
+      KEY_DOWN: self.cursorDown,
 
       CTRL_O: self.splitLine,
 
       CTRL_P: self.cursorUp,
-      curses.KEY_UP: self.cursorUp,
+      KEY_UP: self.cursorUp,
 
       CTRL_V: self.editPaste,
       CTRL_X: self.editCut,
@@ -470,21 +470,25 @@ class CuaEdit(app.controller.Controller):
   def setTextBuffer(self, textBuffer):
     self.textBuffer = textBuffer
     self.commandSet_Main = {
-      curses.ascii.ESC: textBuffer.selectionNone,
-      curses.KEY_DC: textBuffer.delete,
-      curses.KEY_MOUSE: self.prg.handleMouse,
-      curses.KEY_RESIZE: self.prg.handleScreenResize,
+      KEY_ESCAPE: textBuffer.selectionNone,
+      KEY_DELETE: textBuffer.delete,
+      KEY_MOUSE: self.prg.handleMouse,
+      KEY_RESIZE: self.prg.handleScreenResize,
 
-      curses.KEY_F1: self.info,
-      curses.KEY_F3: self.testPalette,
-      curses.KEY_F4: self.showPalette,
-      curses.KEY_F5: self.hidePalette,
+      KEY_F1: self.info,
+      KEY_F3: self.testPalette,
+      KEY_F4: self.showPalette,
+      KEY_F5: self.hidePalette,
 
-      curses.KEY_BTAB: textBuffer.unindent,
-      curses.KEY_HOME: textBuffer.cursorStartOfLine,
-      curses.KEY_END: textBuffer.cursorEndOfLine,
-      curses.KEY_PPAGE: textBuffer.cursorPageUp,
-      curses.KEY_NPAGE: textBuffer.cursorPageDown,
+      KEY_BTAB: textBuffer.unindent,
+      KEY_HOME: textBuffer.cursorStartOfLine,
+      KEY_END: textBuffer.cursorEndOfLine,
+      KEY_PAGE_UP: textBuffer.cursorSelectNonePageUp,
+      KEY_PAGE_DOWN: textBuffer.cursorSelectNonePageDown,
+      KEY_SHIFT_PAGE_UP: textBuffer.cursorSelectCharacterPageUp,
+      KEY_SHIFT_PAGE_DOWN: textBuffer.cursorSelectCharacterPageDown,
+      KEY_ALT_SHIFT_PAGE_UP: textBuffer.cursorSelectBlockPageUp,
+      KEY_ALT_SHIFT_PAGE_DOWN: textBuffer.cursorSelectBlockPageDown,
 
       CTRL_A: textBuffer.selectionAll,
 
@@ -496,9 +500,10 @@ class CuaEdit(app.controller.Controller):
 
       CTRL_G: self.switchToGoto,
 
-      #CTRL_H: textBuffer.backspace,
-      curses.ascii.DEL: textBuffer.backspace,
-      curses.KEY_BACKSPACE: textBuffer.backspace,
+      # CTRL_H: textBuffer.backspace,
+      KEY_BACKSPACE1: textBuffer.backspace,
+      KEY_BACKSPACE2: textBuffer.backspace,
+      KEY_BACKSPACE3: textBuffer.backspace,
 
       CTRL_I: textBuffer.indent,
 
@@ -514,12 +519,12 @@ class CuaEdit(app.controller.Controller):
       CTRL_Y: textBuffer.redo,
       CTRL_Z: textBuffer.undo,
 
-      curses.KEY_DOWN: textBuffer.cursorDown,
-      curses.KEY_LEFT: textBuffer.cursorLeft,
-      curses.KEY_RIGHT: textBuffer.cursorRight,
-      curses.KEY_SLEFT: textBuffer.cursorSelectLeft,
-      curses.KEY_SRIGHT: textBuffer.cursorSelectRight,
-      curses.KEY_UP: textBuffer.cursorUp,
+      KEY_DOWN: textBuffer.cursorDown,
+      KEY_LEFT: textBuffer.cursorLeft,
+      KEY_RIGHT: textBuffer.cursorRight,
+      KEY_SHIFT_LEFT: textBuffer.cursorSelectLeft,
+      KEY_SHIFT_RIGHT: textBuffer.cursorSelectRight,
+      KEY_UP: textBuffer.cursorUp,
 
       KEY_SHIFT_DOWN: textBuffer.cursorSelectDown,
       KEY_SHIFT_UP: textBuffer.cursorSelectUp,
@@ -603,23 +608,24 @@ class EmacsEdit:
     app.log.info('EmacsEdit.setTextBuffer')
     self.textBuffer = textBuffer
     self.commandSet_Main = {
-      curses.KEY_F1: self.info,
+      KEY_F1: self.info,
 
       CTRL_A: textBuffer.cursorStartOfLine,
 
       CTRL_B: textBuffer.cursorLeft,
-      curses.KEY_LEFT: textBuffer.cursorLeft,
-
-      CTRL_H: textBuffer.backspace,
-      curses.ascii.DEL: textBuffer.backspace,
-      curses.KEY_BACKSPACE: textBuffer.backspace,
+      KEY_LEFT: textBuffer.cursorLeft,
 
       CTRL_D: textBuffer.delete,
 
       CTRL_E: textBuffer.cursorEndOfLine,
 
       CTRL_F: textBuffer.cursorRight,
-      curses.KEY_RIGHT: textBuffer.cursorRight,
+      KEY_RIGHT: textBuffer.cursorRight,
+
+      # CTRL_H: textbuffer.backspace,
+      KEY_BACKSPACE1: textBuffer.backspace,
+      KEY_BACKSPACE2: textBuffer.backspace,
+      KEY_BACKSPACE3: textBuffer.backspace,
 
       CTRL_J: textBuffer.carriageReturn,
 
@@ -628,12 +634,12 @@ class EmacsEdit:
       CTRL_L: self.host.refresh,
 
       CTRL_N: textBuffer.cursorDown,
-      curses.KEY_DOWN: textBuffer.cursorDown,
+      KEY_DOWN: textBuffer.cursorDown,
 
       CTRL_O: textBuffer.splitLine,
 
       CTRL_P: textBuffer.cursorUp,
-      curses.KEY_UP: textBuffer.cursorUp,
+      KEY_UP: textBuffer.cursorUp,
 
       CTRL_X: self.switchToCommandSetX,
       CTRL_Y: textBuffer.redo,
@@ -684,7 +690,7 @@ class VimEdit:
       ord('l'): textBuffer.cursorRight,
     }
     self.commandSet_Insert = {
-      curses.ascii.ESC: self.switchToCommandSetNormal,
+      KEY_ESCAPE: self.switchToCommandSetNormal,
     }
 
   def switchToCommandSetInsert(self, ignored=1):

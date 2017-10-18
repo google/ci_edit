@@ -1,4 +1,4 @@
-# Copyright 2016 Google Inc.
+# Copyright 2017 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,24 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import app.parser
-import app.prefs
-import unittest
+class Frame:
+  def __init__(self):
+    self.cursor = None
+    self.drawList = []
 
+  def addStr(self, row, col, text, style):
+    self.drawList.append((row, col, text, style))
 
-class ParserTestCases(unittest.TestCase):
-  def setUp(self):
-    self.parser = app.parser.Parser()
+  def setCursor(self, cursor):
+    self.cursor = cursor
 
-  def tearDown(self):
-    self.parser = None
+  def grabFrame(self):
+    r = self.drawList, self.cursor
+    self.drawList = []
+    self.cursor = None
+    return r
 
-  def test_parse(self):
-    test = """/* first comment */
-two
-// second comment
-#include "test.h"
-void blah();
-"""
-    self.parser.parse(test, app.prefs.grammars['cpp'], 0, 99999)
-    #self.assertEqual(selectable.selection(), (0, 0, 0, 0))
+frame = Frame()

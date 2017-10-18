@@ -18,6 +18,7 @@ import app.controller
 import app.cu_editor
 import app.editor
 import app.history
+import app.render
 import app.text_buffer
 import sys
 import curses
@@ -31,10 +32,13 @@ class ViewWindow:
   """A view window is a base window that does not get focus or have TextBuffer.
   See class ActiveWindow for a window that can get focus.
   See class Window for a window that can get focus and have a TextBuffer.
-
-  arg: parent is responsible for the order in which this window is updated, relative
-  to its siblings."""
+  """
   def __init__(self, parent):
+    """
+    Args:
+      parent is responsible for the order in which this window is updated,
+      relative to its siblings.
+    """
     self.parent = parent
     self.zOrder = []
     self.isFocusable = False
@@ -50,24 +54,8 @@ class ViewWindow:
     """Overwrite text at row, column with text. The caller is responsible for
     avoiding overdraw.
     """
-    if 0:
-      if 0:
-        if row < 0 or col >= self.cols:
-          return
-        if col < 0:
-          text = text[col * -1:]
-          col = 0
-        if len(text) > self.cols:
-          text = text[:self.cols]
-      else:
-        assert row >= 0, row
-        assert row < self.rows, "%d, %d" % (row, self.rows)
-        assert col <= self.cols, "%d, %d" % (col, self.cols)
-        assert col >= 0, col
-        assert len(text) <= self.cols, "%d, %d" % (len(text), self.cols)
-    try:
-      mainCursesWindow.addstr(self.top + row, self.left + col, text, colorPair)
-    except curses.error: pass
+    app.render.frame.addStr(self.top + row, self.left + col,
+        text.encode('utf-8'), colorPair)
 
   def changeFocusTo(self, changeTo):
     self.parent.changeFocusTo(changeTo)
@@ -89,7 +77,7 @@ class ViewWindow:
   def blank(self, colorPair):
     """Clear the window."""
     for i in range(self.rows):
-      self.addStr(i, 0, ' ' * self.cols, colorPair)
+      self.addStr(i, 0, ' ' * (self.cols - 1), colorPair)
 
   def contains(self, row, col):
     """Determine whether the position at row, col lay within this window."""
@@ -136,17 +124,17 @@ class ViewWindow:
     self.top += top
     self.left += left
 
-  def refresh(self):
+  def render(self):
     """Redraw window."""
     for child in self.zOrder:
-      child.refresh()
+      child.render()
 
   def reshape(self, rows, cols, top, left):
     self.moveTo(top, left)
     self.resizeTo(rows, cols)
 
   def resizeTo(self, rows, cols):
-    app.log.detail(rows, cols, self)
+    #app.log.detail(rows, cols, self)
     assert rows >=0, rows
     assert cols >=0, cols
     self.rows = rows
@@ -182,12 +170,10 @@ class ViewWindow:
 
   def writeLine(self, text, color):
     """Simple line writer for static windows."""
-    text = str(text)[:self.cols]
+    text = unicode(text)[:self.cols]
     text = text + ' ' * max(0, self.cols - len(text))
-    try:
-      mainCursesWindow.addstr(self.top + self.writeLineRow, self.left, text,
-          color)
-    except curses.error: pass
+    app.render.frame.addStr(self.top + self.writeLineRow, self.left,
+        text.encode('utf-8'), color)
     self.writeLineRow += 1
 
 
@@ -197,7 +183,6 @@ class ActiveWindow(ViewWindow):
     ViewWindow.__init__(self, parent)
     self.controller = controller
     self.isFocusable = True
-    self.shouldShowCursor = False
 
   def focus(self):
     app.log.info(self)
@@ -226,7 +211,6 @@ class Window(ActiveWindow):
     self.cursorCol = 0
     self.hasCaptiveCursor = app.prefs.editor['captiveCursor']
     self.hasFocus = False
-    self.shouldShowCursor = True
     self.textBuffer = None
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
@@ -250,15 +234,20 @@ class Window(ActiveWindow):
   def mouseWheelUp(self, shift, ctrl, alt):
     self.textBuffer.mouseWheelUp(shift, ctrl, alt)
 
-  def refresh(self):
+  def render(self):
     self.cursorRow = self.textBuffer.penRow
     self.cursorCol = self.textBuffer.penCol
     self.textBuffer.draw(self)
-    ViewWindow.refresh(self)
+    ViewWindow.render(self)
     if self.hasFocus:
       self.parent.debugDraw(self)
-      self.shouldShowCursor = (self.cursorRow >= self.scrollRow and
-          self.cursorRow < self.scrollRow+self.rows)
+      if (self.cursorRow >= self.scrollRow and
+          self.cursorRow < self.scrollRow + self.rows):
+        app.render.frame.setCursor((
+            self.top + self.cursorRow - self.scrollRow,
+            self.left + self.cursorCol - self.scrollCol))
+      else:
+        app.render.frame.setCursor(None)
 
   def setTextBuffer(self, textBuffer):
     textBuffer.setView(self)
@@ -278,10 +267,10 @@ class LabeledLine(Window):
     self.label = label
     self.leftColumn = ViewWindow(self)
 
-  def refresh(self):
+  def render(self):
     self.leftColumn.addStr(0, 0, self.label,
-        app.prefs.color['default'])
-    Window.refresh(self)
+        app.color.get('keyword'))
+    Window.render(self)
 
   def reshape(self, rows, cols, top, left):
     labelWidth = len(self.label)
@@ -313,7 +302,6 @@ class Menu(ViewWindow):
     self.controller = None
     self.lines = []
     self.commands = []
-    self.shouldShowCursor = False
 
   def addItem(self, label, command):
     self.lines.append(label)
@@ -335,13 +323,13 @@ class Menu(ViewWindow):
         longest = len(i)
     self.reshape(len(self.lines), longest + 2, left, top)
 
-  def refresh(self):
+  def render(self):
     color = app.color.get('context_menu')
     maxRow, maxCol = self.rows, self.cols
     self.writeLineRow = 0
     for i in self.lines[:maxRow]:
       self.writeLine(" "+i, color);
-    ViewWindow.refresh(self)
+    ViewWindow.render(self)
 
   def setController(self, controllerClass):
     self.controller = controllerClass(self.host)
@@ -404,7 +392,7 @@ class LineNumbers(ViewWindow):
   def mouseWheelUp(self, shift, ctrl, alt):
     self.host.mouseWheelUp(shift, ctrl, alt)
 
-  def refresh(self):
+  def render(self):
     self.drawLineNumbers()
 
 
@@ -412,21 +400,21 @@ class LogWindow(ViewWindow):
   def __init__(self, parent):
     ViewWindow.__init__(self, parent)
     self.lines = app.log.getLines()
-    self.refreshCounter = 0
+    self.renderCounter = 0
 
-  def refresh(self):
-    self.refreshCounter += 1
-    app.log.meta(" " * 10, self.refreshCounter, "- screen refresh -")
+  def render(self):
+    self.renderCounter += 1
+    app.log.meta(" " * 10, self.renderCounter, "- screen refresh -")
     maxRow, maxCol = self.rows, self.cols
     self.writeLineRow = 0
-    colorA = app.color.get(0)
-    colorB = app.color.get(96)
+    colorA = app.color.get('default')
+    colorB = app.color.get('highlight')
     for i in self.lines[-maxRow:]:
       color = colorA
       if len(i) and i[-1] == '-':
         color = colorB
       self.writeLine(i, color);
-    ViewWindow.refresh(self)
+    ViewWindow.render(self)
 
 
 class InteractiveFind(Window):
@@ -456,7 +444,7 @@ class MessageLine(ViewWindow):
     self.message = None
     self.renderedMessage = None
 
-  def refresh(self):
+  def render(self):
     if self.message:
       if self.message != self.renderedMessage:
         self.writeLineRow = 0
@@ -472,7 +460,7 @@ class StatusLine(ViewWindow):
     ViewWindow.__init__(self, host)
     self.host = host
 
-  def refresh(self):
+  def render(self):
     maxRow, maxCol = self.rows, self.cols
     tb = self.host.textBuffer
     statusLine = ''
@@ -526,7 +514,7 @@ class TopInfo(ViewWindow):
       return
     tb = self.host.textBuffer
     lines = []
-    # TODO: Make dynamic topinfo work properly
+    # TODO: Make dynamic topInfo work properly
     if len(tb.lines):
       lineCursor = self.host.scrollRow
       line = ""
@@ -575,7 +563,7 @@ class TopInfo(ViewWindow):
       self.host.layout()
       self.borrowedRows = infoRows
 
-  def refresh(self):
+  def render(self):
     """Render the context information at the top of the window."""
     lines = self.lines[-self.mode:]
     lines.reverse()
@@ -596,17 +584,17 @@ class InputWindow(Window):
   def __init__(self, host):
     assert(host)
     Window.__init__(self, host)
-    self.bookmarkIndex = 0
     self.bottomRows = 1  # Not including status line.
     self.host = host
     self.showFooter = True
     self.useInteractiveFind = True
+    self.savedScrollPositions = {}
     self.showLineNumbers = app.prefs.editor.get(
         'showLineNumbers', True)
     self.showMessageLine = True
     self.showRightColumn = True
     self.showTopInfo = True
-    self.topRows = 0
+    self.topRows = 2 # Number of lines in default TopInfo status.
     self.controller = app.controller.MainController(self)
     self.controller.add(app.cu_editor.CuaPlusEdit(self))
     # What does the user appear to want: edit, quit, or something else?
@@ -759,7 +747,7 @@ class InputWindow(Window):
     for i in range(logo.rows):
       logo.addStr(i, 0, ' ' * logo.cols, color)
     logo.addStr(0, 1, 'ci'[:self.cols], color)
-    logo.refresh()
+    logo.render()
 
   def drawRightEdge(self):
     """Draw makers to indicate text extending past the right edge of the
@@ -786,20 +774,27 @@ class InputWindow(Window):
   def quitNow(self):
     self.host.quitNow()
 
-  def refresh(self):
-    self.textBuffer.updateScrollPosition()
+  def render(self):
     self.topInfo.onChange()
     self.drawLogoCorner()
     self.drawRightEdge()
-    Window.refresh(self)
+    Window.render(self)
 
   def setTextBuffer(self, textBuffer):
     app.log.info('setTextBuffer')
+    if self.textBuffer is not None:
+      self.savedScrollPositions[self.textBuffer.fullPath] = (
+          self.scrollRow, self.scrollCol)
     #self.normalize()
     textBuffer.lineLimitIndicator = app.prefs.editor['lineLimitIndicator']
     textBuffer.debugRedo = app.prefs.startup.get('debugRedo')
     Window.setTextBuffer(self, textBuffer)
     self.controller.setTextBuffer(textBuffer)
+    savedScroll = self.savedScrollPositions.get(self.textBuffer.fullPath)
+    if savedScroll is not None:
+      self.scrollRow, self.scrollCol = savedScroll
+    else:
+      self.textBuffer.scrollToOptimalScrollPosition()
 
   def unfocus(self):
     if self.showMessageLine:
@@ -816,7 +811,7 @@ class PaletteWindow(ActiveWindow):
     self.controller = app.controller.MainController(self)
     self.controller.add(app.cu_editor.PaletteDialogController(self))
 
-  def refresh(self):
+  def render(self):
     width = 16
     rows = 16
     for i in range(width):

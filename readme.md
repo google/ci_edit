@@ -3,14 +3,14 @@
 ci_edit is a text editor. It can help you view or edit text files.
 
 ci_edit runs in the command line (also called the terminal). To start using
-ci_edit, download ci_edit and open (execute) ci.py.
+ci_edit, download ci_edit and open (execute) `ci.py`.
 
 
 ## What ci_edit can do for you
 
 Many other command line text editors require learning a different set of mouse
 and keyboard commands. Many of us use a graphical editor (GUI) that supports
-a common set of commands like ctrl+q to quit (that is, hold the control key and
+a common set of commands like `ctrl+q` to quit (that is, hold the control key and
 press Q). Here are a few common commands:
 
   - ctrl+q    to quit the program
@@ -26,7 +26,7 @@ common in command line editors.
 So, what if you'd like to edit a file in the terminal window but don't want to
 recall how to save or quit in an unfamiliar editor? This is where ci_edit
 shines, because ci_edit does support those familiar key sequences. You already
-know how to save in ci_edit, it's ctrl+s. Simple.
+know how to save in ci_edit, it's `ctrl+s`. Simple.
 
 This version of ci_edit still doesn't have all the intended features, but it's
 a start. It's has the necessary features of a basic text editor and a few fancy
@@ -35,28 +35,30 @@ extras. Those fancy extras stay out of your way until you want them.
 
 ### Installation (Linux / Mac OS)
 
-* Change directory `cd` to the downloaded directory (or local repository):
-  `ci_edit`. (Or use the path to "install.sh" in the command below).
+* Execute the install script with root privileges.  Either change directory
+  `cd` to the downloaded directory (or local repository): `ci_edit`, or use
+  the path to the installation file (i.e. `./[PATH_TO_FILE]/install.sh`).
 
 ```
 $ sudo ./install.sh
 ```
 
 * **Note:** This script creates a copy of the repository in the directory
-  `/opt/ci_edit`; the **update**, overwrites that copy.  Then a symbolic
-  link is created in the directory `/usr/local/bin`, which is generally
+  `/opt/ci_edit/`; the **update**, overwrites that copy.  Then a symbolic
+  link is created in the directory `/usr/local/bin/`, which is generally
   designated for user programs not managed by the distribution package manager
 
 ### Usage
 
 * This command opens the text editor from any directory.  The execution command
-  for the editor can be specified by user choice
+  for the editor can be specified by user choice during installation or
+  manually.
 
 ```
 $ we
 ```
 
-* to edit a file by name
+* To edit a file (such as `README.md`) by name:
 
 ```
 $ we README.md
@@ -73,12 +75,12 @@ more users are happy users for a longer time.
 # Features of ci_edit
 
 - runs on nCurses
-  - This means that it can use used in the terminal window just  like vim,
+  - This means that it can use used in the terminal window just like vim,
     emacs, and pine.
 - cut/copy/paste
-  - Using common GUI editor keyboard short-cuts: ctrl+x, ctrl+c, and ctrl+v!
+  - Using common GUI editor keyboard short-cuts: `ctrl+x`, `ctrl+c`, and `ctrl+v`!
 - sensible save and quit
-  - Using GUI editor keyboard short-cuts: ctrl+s and ctrl+q respectively.
+  - Using GUI editor keyboard short-cuts: `ctrl+s` and `ctrl+q` respectively.
 - syntax highlighting
   - keywords an such are displayed in different colors.
 - nested grammars
@@ -89,7 +91,7 @@ more users are happy users for a longer time.
   - Regular expression search forward and backward.
 - line numbers
   - Shown on the left side.
-- go to line with ctrl+g
+- go to line with `ctrl+g`
   - Jump to a line number or the top, bottom, or middle of the document
 - unlimited undo/redo
   - Or at least within the limits of disk space to page to
@@ -116,7 +118,7 @@ more users are happy users for a longer time.
 - strips/trims trailing white-space on each line
   - Each time the file is saved
 - resume at last edit position
-  - The cursor location is stored within ~/.ci_edit/
+  - The cursor location is stored within `~/.ci_edit/`
 - search and replace
   - Control the scope of the replacement with the current selection
 - execute sub-processes

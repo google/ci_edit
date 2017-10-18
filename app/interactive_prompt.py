@@ -119,7 +119,7 @@ class InteractivePrompt(app.controller.Controller):
   def setTextBuffer(self, textBuffer):
     app.controller.Controller.setTextBuffer(self, textBuffer)
     self.textBuffer = textBuffer
-    self.textBuffer.lines = [""]
+    self.textBuffer.lines = [unicode("")]
     self.commands = {
       'bm': self.bookmarkCommand,
       'build': self.buildCommand,
@@ -146,7 +146,7 @@ class InteractivePrompt(app.controller.Controller):
       if self.host.textBuffer.bookmarkRemove():
         return {}, 'Removed bookmark'
       else:
-        return {}, 'No bookmarks'
+        return {}, 'No bookmarks to remove'
     else:
       self.host.textBuffer.bookmarkAdd()
       return {}, 'Added bookmark'
@@ -216,7 +216,8 @@ class InteractivePrompt(app.controller.Controller):
           command = self.commands.get(cmd, self.unknownCommand)
           results, message = command(cmdLine, self.host)
           tb.setMessage(message)
-    except:
+    except Exception, e:
+      app.log.exception(e)
       tb.setMessage('Execution threw an error.')
     self.changeToHostWindow()
 

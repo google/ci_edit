@@ -12,7 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
+
+
 # Install File Description:
 #
 # This is an init (install) script that first copies or updates the editor
@@ -29,24 +30,31 @@ if [ "$(id -u)" != "0" ]; then
     [[ "$0" = "$BASH_SOURCE" ]] && exit 1 || return 1
 fi
 
-# Split path to this install script into an array.
-IFS='/' SRC_PATH=($0)
-# Remove this file name.
-unset SRC_PATH[-1]
-# Grab the directory name.
-APP_DIR="${SRC_PATH[-1]}"
-# Joint path back together.
-SRC_PATH="${SRC_PATH[*]}"
+# Source path to find current directory and to copy application to /opt/.
+SRC_PATH=$(dirname "$0")  # Path from which install was executed.
+SRC_PATH=$(cd "$SRC_PATH" && pwd)  # absolute path
+if [ -z "$SRC_PATH" ]; then
+    # Exit if for some reason, the path is empty string.
+    [[ "$0" = "$BASH_SOURCE" ]] && exit 1 || return 1
+fi
+
+# Grab current directory name to use as subdirectory for the installed app.
+APP_DIR=$(basename "$SRC_PATH")
+# Path for sym link to executable ci.py.
 BIN_PATH="/usr/local/bin"
+# Location of install directory.
 APP_PATH="/opt"
+# Full install directory.
 INSTALL_DIR="${APP_PATH}/${APP_DIR}"
 
 echo "* *********************************************************** *"
 echo "*                                                             *"
 echo "*   installation steps:                                       *"
 echo "*                                                             *"
-echo "*   (1) copies (or updates) ci_edit directory to the path:    *"
-echo "*       '$INSTALL_DIR'"
+echo "*   (1) copies (or updates) '$APP_DIR' directory to the path: *"
+echo "*       '$INSTALL_DIR'                                        *"
+echo "*       NOTE: update will use the command:                    *"
+echo "*       $ rm -rf $INSTALL_DIR                                 *"
 echo "*                                                             *"
 echo "*   (2) creates (or updates) the execution command:           *"
 echo "*       (a) this will be a sym link to the install directory  *"
@@ -82,15 +90,19 @@ else
 fi
 
 # Go over board to avoid "rm -rf /"; e.g. APP_PATH is set above, testing anyway.
-if [[ -z "$APP_PATH" || -z "${APP_DIR}" || "$INSTALL_DIR" -eq "/" ]]; then
+if [[ -z "$APP_PATH" || -z "${APP_DIR}" || "$INSTALL_DIR" == "/" ]]; then
   echo "Something is incorrect about the install directory. Exiting."
   exit -1
 fi
 # Yes, this is redundant with the above. User safety is top priority.
-if [[ -n "$APP_PATH" && -n "${APP_DIR}" && "$INSTALL_DIR" -ne "/" ]]; then
-  rm -rf "$INSTALL_DIR"
+# Only continues to delete if directory exists and is not root '/'
+if [[ -n "$APP_PATH" && -n "${APP_DIR}" && "$INSTALL_DIR" != "/" ]]; then
+    rm -rf "$INSTALL_DIR"
 fi
 
+# Create the directory if not already existing /opt/.
+mkdir -p /opt/
+# Copies Source to /opt/$INSTALL_DIR.
 cp -Rv "$SRC_PATH" "$INSTALL_DIR"
 # Make installed directories usable by all users.
 find "$INSTALL_DIR" -type d -exec chmod +rx {} \;

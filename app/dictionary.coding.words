@@ -61,6 +61,8 @@ buf
 bugzilla
 bzip
 calc
+canonicalize
+canonicalized
 cfg
 cgi
 changelist
@@ -125,6 +127,7 @@ fn
 formatter
 freebsd
 ftp
+functor
 gaia
 ge
 getter
@@ -153,6 +156,7 @@ ip
 ipsum
 ipv
 iter
+iterable
 jpeg
 jpg
 json
@@ -168,6 +172,7 @@ loopback
 lorem
 makefile
 makefiles
+minified
 mixin
 mixins
 mozilla

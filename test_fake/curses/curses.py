@@ -218,6 +218,7 @@ def color_content():
 
 def color_pair(a):
   testLog(a)
+  return 1
 
 def curs_set(a):
   testLog(a)
@@ -260,8 +261,8 @@ def newwin(*args):
   testLog(*args)
   return FakeCursesWindow(args[0], args[1])
 
-def raw():
-  pass
+def raw(*args):
+  testLog(*args)
 
 def resizeterm():
   pass
@@ -269,14 +270,14 @@ def resizeterm():
 def start_color():
   pass
 
-def ungetch():
-  pass
+def ungetch(*args):
+  testLog(*args)
 
 def use_default_colors():
   pass
 
-def get_pair(a):
-  pass
+def get_pair(*args):
+  testLog(*args)
 
 def wrapper(fun, *args, **kw):
   standardScreen = StandardScreen()

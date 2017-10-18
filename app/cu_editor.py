@@ -34,8 +34,8 @@ def initCommandSet(editText, textBuffer):
     CTRL_V: textBuffer.editPaste,
     CTRL_W: editText.closeOrConfirmClose,
     CTRL_X: textBuffer.editCut,
-    CTRL_Y: textBuffer.redo,
-    CTRL_Z: textBuffer.undo,
+    CTRL_Y: textBuffer.editRedo,
+    CTRL_Z: textBuffer.editUndo,
 
     KEY_BACKSPACE1: textBuffer.backspace,
     KEY_BACKSPACE2: textBuffer.backspace,
@@ -69,8 +69,12 @@ def mainWindowCommands(controller, textBuffer):
     KEY_ESCAPE: textBuffer.normalize,
     KEY_F1: controller.info,
     KEY_BTAB: textBuffer.unindent,
-    KEY_PAGE_UP: textBuffer.cursorPageUp,
-    KEY_PAGE_DOWN: textBuffer.cursorPageDown,
+    KEY_PAGE_UP: textBuffer.cursorSelectNonePageUp,
+    KEY_PAGE_DOWN: textBuffer.cursorSelectNonePageDown,
+    KEY_SHIFT_PAGE_UP: textBuffer.cursorSelectCharacterPageUp,
+    KEY_SHIFT_PAGE_DOWN: textBuffer.cursorSelectCharacterPageDown,
+    KEY_ALT_SHIFT_PAGE_UP: textBuffer.cursorSelectBlockPageUp,
+    KEY_ALT_SHIFT_PAGE_DOWN: textBuffer.cursorSelectBlockPageDown,
 
     CTRL_F: controller.changeToFind,
     CTRL_G: controller.changeToGoto,
@@ -146,6 +150,7 @@ class InteractiveFind(app.editor.InteractiveFind):
       CTRL_F: self.findNext,
       CTRL_G: self.findNext,
       CTRL_J: self.changeToHostWindow,
+      CTRL_O: self.changeToFileOpen,
       CTRL_P: self.changeToPrediction,
       CTRL_R: self.findPrior,
       KEY_DOWN: self.findNext,
@@ -199,6 +204,7 @@ class InteractiveOpener(app.editor.InteractiveOpener):
       CTRL_J: self.createOrOpen,
       CTRL_N: self.createOrOpen,
       CTRL_O: self.createOrOpen,
+      CTRL_P: self.changeToPrediction,
       CTRL_Q: self.saveEventChangeToHostWindow,
     })
     self.commandSet = commandSet
@@ -220,6 +226,7 @@ class InteractivePrediction(app.editor.InteractivePrediction):
       CTRL_G: self.changeToGoto,
       CTRL_J: self.selectItem,
       CTRL_N: self.nextItem,
+      CTRL_O: self.changeToFileOpen,
       CTRL_P: self.priorItem,
       CTRL_Q: self.saveEventChangeToHostWindow,
       KEY_DOWN: self.nextItem,
@@ -335,7 +342,7 @@ class CuaPlusEdit(CuaEdit):
 
       KEY_F2: textBuffer.bookmarkNext,
       KEY_F3: textBuffer.findAgain,
-      #KEY_F4: self.prg.paletteWindow.focus,
+      #KEY_F4: self.changeToPaletteWindow,
       KEY_SHIFT_F2: textBuffer.bookmarkPrior,
       KEY_SHIFT_F3: textBuffer.findBack,
     })

@@ -25,6 +25,13 @@ import curses.ascii
 # Strings are found using the cursesKeyName() function.
 # Constants are found using the curses.getch() function.
 
+# Tuple events are preceded by an escape (27).
+BRACKETED_PASTE_BEGIN = (91, 50, 48, 48, 126)
+BRACKETED_PASTE_END = (91, 50, 48, 49, 126)
+BRACKETED_PASTE = ('terminal_paste',)  # Pseudo event type.
+
+UNICODE_INPUT = ('unicode_input',)  # Pseudo event type.
+
 CTRL_AT = '^@'  # 0x00
 CTRL_SPACE = '^@'  # 0x00
 CTRL_A = '^A'  # 0x01
@@ -68,7 +75,11 @@ KEY_DELETE = curses.KEY_DC
 KEY_HOME = curses.KEY_HOME
 KEY_END = curses.KEY_END
 KEY_PAGE_DOWN = curses.KEY_NPAGE
+KEY_SHIFT_PAGE_DOWN = curses.KEY_SNEXT
+KEY_ALT_SHIFT_PAGE_DOWN = 'kNXT4'
 KEY_PAGE_UP = curses.KEY_PPAGE
+KEY_SHIFT_PAGE_UP = curses.KEY_SPREVIOUS
+KEY_ALT_SHIFT_PAGE_UP = 'kPRV4'
 KEY_BTAB = curses.KEY_BTAB
 
 KEY_ALT_A = 165
@@ -131,6 +142,9 @@ KEY_LEFT = curses.KEY_LEFT
 KEY_SHIFT_LEFT = curses.KEY_SLEFT
 KEY_RIGHT = curses.KEY_RIGHT
 KEY_SHIFT_RIGHT = curses.KEY_SRIGHT
+
+KEY_MOUSE = curses.KEY_MOUSE
+KEY_RESIZE = curses.KEY_RESIZE
 
 def mouseButtonName(buttonState):
   """Curses debugging. Prints readable name for state of mouse buttons."""
@@ -203,3 +217,6 @@ def hackCursesFixes():
     def windowChangedHandler(signum, frame):
       curses.ungetch(curses.KEY_RESIZE)
     signal.signal(signal.SIGWINCH, windowChangedHandler)
+  def wakeGetch(signum, frame):
+    curses.ungetch(0)
+  signal.signal(signal.SIGUSR1, wakeGetch)

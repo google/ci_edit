@@ -17,6 +17,7 @@
 import app.log
 import curses
 import curses.ascii
+import app.curses_util
 
 
 class Controller:
@@ -38,7 +39,7 @@ class Controller:
   def changeToConfirmQuit(self):
     self.host.changeFocusTo(self.host.interactiveQuit)
 
-  def changeToHostWindow(self, ignored=1):
+  def changeToHostWindow(self, *args):
     self.host.changeFocusTo(self.host)
 
   def changeToFileOpen(self):
@@ -54,6 +55,9 @@ class Controller:
   def changeToGoto(self):
     self.host.changeFocusTo(self.host.interactiveGoto)
 
+  def changeToPaletteWindow(self):
+    self.host.changeFocusTo(self.host.host.paletteWindow)
+
   def changeToPrediction(self):
     self.host.changeFocusTo(self.host.interactivePrediction)
 
@@ -66,7 +70,7 @@ class Controller:
   def changeToSaveAs(self):
     self.host.changeFocusTo(self.host.interactiveSaveAs)
 
-  def doCommand(self, ch):
+  def doCommand(self, ch, meta):
     # Check the commandSet for the input with both its string and integer
     # representation.
     self.savedCh = ch
@@ -75,13 +79,13 @@ class Controller:
     if cmd:
       cmd()
     else:
-      self.commandDefault(ch)
+      self.commandDefault(ch, meta)
 
   def focus(self):
     app.log.info('base controller focus()')
     pass
 
-  def confirmationPromptFinish(self, ignore=1):
+  def confirmationPromptFinish(self, *args):
     self.host.userIntent = 'edit'
     self.changeToHostWindow()
 
@@ -169,12 +173,12 @@ class Controller:
   def onChange(self):
     pass
 
-  def saveEventChangeToHostWindow(self, ignored=1):
+  def saveEventChangeToHostWindow(self, *args):
     curses.ungetch(self.savedCh)
     self.host.changeFocusTo(self.host)
 
   def setTextBuffer(self, textBuffer):
-    app.log.info(textBuffer)
+    #app.log.info(textBuffer)
     self.textBuffer = textBuffer
 
   def unfocus(self):
@@ -198,8 +202,8 @@ class MainController:
     self.controllerList.append(controller)
     self.controller = controller
 
-  def doCommand(self, ch):
-    self.controller.doCommand(ch)
+  def doCommand(self, ch, meta):
+    self.controller.doCommand(ch, meta)
 
   def focus(self):
     app.log.info('MainController.focus')
@@ -208,7 +212,7 @@ class MainController:
       self.commandDefault = self.controller.commandDefault
       commandSet = self.controller.commandSet.copy()
       commandSet.update({
-        curses.KEY_F2: self.nextController,
+        app.curses_util.KEY_F2: self.nextController,
       })
       self.controller.commandSet = commandSet
 

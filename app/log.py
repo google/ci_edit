@@ -12,9 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import io
 import inspect
 import os
 import sys
+import time
 import traceback
 
 
@@ -22,6 +24,7 @@ screenLog = ["--- screen log ---"]
 fullLog = ["--- begin log ---"]
 enabledChannels = {'meta': True, 'mouse': True, 'startup': True}
 shouldWritePrintLog = False
+startTime = time.time()
 
 if os.getenv('CI_EDIT_USE_FAKE_CURSES'):
   enabledChannels = {
@@ -44,7 +47,7 @@ def parseLines(frame, channel, *args):
   for i in args[1:]:
     if not len(prior) or prior[-1] != '\n':
       msg += ' '
-    prior = str(i)
+    prior = unicode(i)
     msg += prior
   return msg.split("\n")
 
@@ -74,6 +77,14 @@ def caller(*args):
   screenLog += lines
   fullLog += lines
 
+def exception(e):
+  error(e)
+  errorType, value, tracebackInfo = sys.exc_info()
+  out = traceback.format_exception(errorType, value, tracebackInfo)
+  for i in out:
+    error(i[:-1])
+
+
 def stack():
   global fullLog, screenLog
   stack = inspect.stack()[1:]
@@ -100,6 +111,19 @@ def parser(*args):
 def startup(*args):
   channel('startup', *args)
 
+def quick(*args):
+  global fullLog, screenLog
+  msg = str(args[0])
+  prior = msg
+  for i in args[1:]:
+    if not len(prior) or prior[-1] != '\n':
+      msg += ' '
+    prior = unicode(i)
+    msg += prior
+  lines = msg.split("\n")
+  screenLog += lines
+  fullLog += lines
+
 def debug(*args):
   global enabledChannels, fullLog, screenLog
   if 'debug' in enabledChannels:
@@ -117,6 +141,10 @@ def error(*args):
   global fullLog
   lines = parseLines(inspect.stack()[1], 'error', *args)
   fullLog += lines
+
+def when(*args):
+  args = (time.time() - startTime,) + args
+  channel('info', *args)
 
 def wrapper(function, shouldWrite=True):
   global shouldWritePrintLog
@@ -137,7 +165,7 @@ def wrapper(function, shouldWrite=True):
 
 def writeToFile(path):
   fullPath = os.path.expanduser(os.path.expandvars(path))
-  with open(fullPath, 'w+') as out:
+  with io.open(fullPath, 'w+') as out:
     out.write("\n".join(fullLog)+"\n")
 
 def flush():

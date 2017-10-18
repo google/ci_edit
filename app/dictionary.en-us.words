@@ -96,6 +96,7 @@ accelerating
 acceleration
 accelerator
 accelerators
+accelerometer
 accent
 accented
 accents
@@ -146,6 +147,7 @@ accounts
 accreditation
 accrue
 accrued
+accruing
 acct
 accumulate
 accumulated
@@ -405,6 +407,7 @@ aggregation
 aggressive
 aggressively
 aggressiveness
+agile
 agnostic
 ago
 agog
@@ -581,6 +584,7 @@ ambiguities
 ambiguity
 ambiguous
 ambit
+ambitious
 ambler
 ambrosia
 ambulance
@@ -819,6 +823,7 @@ approximation
 approximations
 apps
 apricot
+april
 apropos
 apt
 aptly
@@ -1200,6 +1205,7 @@ awn
 awoken
 awry
 ax
+axe
 axed
 axes
 axial
@@ -2030,6 +2036,7 @@ bun
 bunch
 bundle
 bundled
+bundler
 bundles
 bundling
 bung
@@ -2192,8 +2199,11 @@ cancelable
 canceled
 canceler
 canceling
+cancellable
 cancellation
 cancellations
+canceller
+cancelling
 cancels
 cancer
 candidate
@@ -2510,6 +2520,9 @@ checkers
 checking
 checklist
 checklists
+checkmark
+checkmarked
+checkmarks
 checkout
 checkouts
 checkpoint
@@ -2815,6 +2828,7 @@ coalesced
 coalesces
 coalescing
 coarse
+coarsely
 coast
 coastal
 coax
@@ -3243,6 +3257,7 @@ confirmed
 confirming
 confirms
 conflate
+conflated
 conflating
 conflict
 conflicted
@@ -3483,6 +3498,7 @@ converge
 converged
 convergence
 convergent
+converging
 conversation
 conversational
 converse
@@ -3695,6 +3711,7 @@ crackle
 cracks
 craft
 crafted
+crafter
 crafting
 crafts
 crag
@@ -3836,6 +3853,7 @@ cubic
 cubit
 cubs
 cuckoo
+cucumber
 cud
 cuddle
 cue
@@ -4081,6 +4099,7 @@ decelerate
 decelerates
 decelerating
 deceleration
+december
 decent
 deceptive
 decibel
@@ -4759,6 +4778,7 @@ diseases
 disembodied
 disengage
 disengaging
+disfavored
 disguise
 disguised
 disguising
@@ -4976,6 +4996,8 @@ done
 dong
 dongle
 donor
+donut
+donuts
 doodle
 doom
 doomed
@@ -5801,6 +5823,7 @@ excel
 excellence
 excellency
 excellent
+excellently
 except
 excepted
 excepting
@@ -5927,6 +5950,7 @@ expiring
 expiry
 explain
 explained
+explainer
 explaining
 explains
 explanation
@@ -6170,6 +6194,7 @@ featured
 featureless
 features
 featuring
+february
 fed
 federal
 federated
@@ -6303,6 +6328,7 @@ finders
 finding
 finds
 fine
+finely
 finer
 fines
 finessed
@@ -6711,6 +6737,7 @@ freshness
 fret
 fricative
 friction
+friday
 fried
 friedcake
 friend
@@ -6964,6 +6991,7 @@ gestured
 gestures
 get
 gets
+getters
 getting
 ghee
 ghetto
@@ -7458,6 +7486,7 @@ harvesting
 harvests
 has
 hash
+hashable
 hashed
 hashes
 hashing
@@ -8677,6 +8706,7 @@ invalidated
 invalidates
 invalidating
 invalidation
+invalidations
 invalidity
 invalidly
 invaluable
@@ -8816,6 +8846,7 @@ jaguar
 jailed
 jam
 jams
+january
 japan
 japans
 jar
@@ -8903,6 +8934,7 @@ judicious
 jug
 juggle
 jukebox
+july
 jumbo
 jump
 jumped
@@ -8910,6 +8942,7 @@ jumping
 jumps
 jumpy
 jun
+june
 jungle
 junior
 juniper
@@ -9977,6 +10010,7 @@ meant
 meantime
 meanwhile
 meas
+measurable
 measure
 measured
 measurement
@@ -10280,6 +10314,9 @@ mistakenly
 mistakes
 mister
 misty
+mistype
+mistyped
+mistyping
 misunderstanding
 misunderstandings
 misuse
@@ -10379,6 +10416,7 @@ monarch
 monarchies
 monarchs
 monarchy
+monday
 monetary
 monetize
 monetizing
@@ -10895,6 +10933,7 @@ novel
 novels
 novelties
 novelty
+november
 novice
 now
 nowadays
@@ -11048,6 +11087,7 @@ octave
 octaves
 octet
 octets
+october
 octogenarian
 odd
 oddball
@@ -11123,6 +11163,8 @@ ones
 oneself
 onetime
 ongoing
+onion
+onions
 online
 only
 onomatopoeia
@@ -11644,6 +11686,7 @@ passphrase
 passphrases
 passport
 passports
+passthrough
 password
 passwords
 past
@@ -11660,6 +11703,8 @@ pasting
 pastor
 pastoral
 pastrami
+pastries
+pastry
 pasts
 pat
 patch
@@ -12173,6 +12218,7 @@ pol
 polar
 polarity
 pole
+poles
 polestar
 police
 polices
@@ -12187,6 +12233,7 @@ politically
 politics
 polka
 poll
+pollable
 pollard
 polled
 polling
@@ -12506,7 +12553,9 @@ prettify
 prettifying
 pretty
 prevail
+prevailed
 prevailing
+prevails
 prevent
 preventable
 prevented
@@ -13291,6 +13340,10 @@ receivers
 receives
 receiving
 recent
+recenter
+recentered
+recentering
+recenters
 recently
 reception
 rechargeable
@@ -13943,6 +13996,7 @@ resolvable
 resolve
 resolved
 resolver
+resolvers
 resolves
 resolving
 resonance
@@ -14438,6 +14492,8 @@ salvos
 samba
 same
 sameness
+samosa
+samosas
 sample
 sampled
 sampler
@@ -14447,7 +14503,9 @@ sampling
 sanctioned
 sand
 sandbox
+sandboxed
 sandboxes
+sandboxing
 sandwich
 sandwiched
 sandy
@@ -14486,6 +14544,7 @@ satisfying
 saturate
 saturated
 saturation
+saturday
 satyric
 sauce
 sausage
@@ -14498,6 +14557,7 @@ saver
 saves
 saving
 savings
+savory
 savoy
 savvy
 saw
@@ -14640,6 +14700,7 @@ scrubbing
 scrubby
 scrubs
 scruple
+se
 sea
 seal
 sealed
@@ -14650,6 +14711,7 @@ seamlessly
 seamy
 sear
 search
+searchability
 searched
 searcher
 searches
@@ -14798,6 +14860,7 @@ separation
 separator
 separators
 sepia
+september
 septuagenarian
 seq
 sequel
@@ -15631,6 +15694,8 @@ spheres
 spherical
 sphinx
 spice
+spiced
+spices
 spicy
 spider
 spiel
@@ -15960,6 +16025,8 @@ storms
 story
 stove
 stow
+straddle
+straddled
 straddling
 straight
 straightforward
@@ -16241,6 +16308,7 @@ sumo
 sums
 sun
 sunburst
+sunday
 sundry
 sunflower
 sunflowers
@@ -16907,6 +16975,7 @@ thunderbolt
 thundering
 thunderstorm
 thunk
+thursday
 thus
 thwart
 thy
@@ -17352,6 +17421,7 @@ tripped
 tripping
 trips
 triptych
+tristate
 trivia
 trivial
 trivially
@@ -17381,6 +17451,7 @@ truncated
 truncates
 truncating
 truncation
+truncations
 trundler
 trunk
 trust
@@ -17403,6 +17474,7 @@ tuberculosis
 tubes
 tubular
 tuck
+tuesday
 tug
 tugs
 tulip
@@ -17512,6 +17584,7 @@ u
 uber
 ugh
 uglier
+uglify
 ugliness
 ugly
 uh
@@ -18121,6 +18194,7 @@ vectors
 veg
 veges
 vegetable
+vegetables
 vegetarian
 vehicle
 veil
@@ -18487,6 +18561,7 @@ wedding
 wedge
 wedged
 wedges
+wednesday
 wee
 weed
 weeded

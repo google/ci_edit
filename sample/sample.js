@@ -22,11 +22,14 @@
 namespace is not a keyword
 // line comment @param
 <!-- not a comment -->
-
+ if while for
 a = b/c;
 a = b  / c;
 
+a = `one \${o} two ${three} fo\nu\`r`;
+
 a =  /.*/;
+ /as/
 
 function foo() {
   if or while or switch
