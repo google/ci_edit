@@ -260,12 +260,12 @@ class Actions(app.mutator.Mutator):
     self.redo()
     if 1:  # TODO(dschuyler): if indent on CR
       line = self.lines[self.penRow - 1]
-      commonIndent = 2
+      commonIndent = len(app.prefs.editor['indentation'])
       indent = 0
       while indent < len(line) and line[indent] == ' ':
         indent += 1
       if len(line):
-        if line[-1] in [':', '[', '{']:
+        if line.rstrip()[-1] in [':', '[', '{']:
           indent += commonIndent
         # Good idea or bad idea?
         #elif indent >= 2 and line.lstrip()[:6] == 'return':
