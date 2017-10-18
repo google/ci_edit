@@ -362,6 +362,10 @@ class CiProgram:
     # Display some of the redo chain.
     redoColorA = app.color.get(100)
     self.debugWindow.writeLine(
+        "procTemp %d temp %r"
+        %(textBuffer.processTempChange, textBuffer.tempChange,),
+        redoColorA)
+    self.debugWindow.writeLine(
         "redoIndex %3d savedAt %3d depth %3d"
         %(textBuffer.redoIndex, textBuffer.savedAtRedoIndex,
           len(textBuffer.redoChain)),
