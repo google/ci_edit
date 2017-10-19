@@ -265,7 +265,8 @@ class Actions(app.mutator.Mutator):
       while indent < len(line) and line[indent] == ' ':
         indent += 1
       if len(line):
-        if line.rstrip()[-1] in [':', '[', '{']:
+        stripped = line.rstrip()
+        if stripped and line[-1] in [':', '[', '{']:
           indent += commonIndent
         # Good idea or bad idea?
         #elif indent >= 2 and line.lstrip()[:6] == 'return':
