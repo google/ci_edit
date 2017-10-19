@@ -56,7 +56,8 @@ class Parser:
 
   def grammarIndexFromRowCol(self, row, col):
     """
-    returns index. |index| may then be passed to grammarNext().
+    Returns:
+        index. |index| may then be passed to grammarAtIndex().
     """
     if row + 1 >= len(self.rows): # or self.rows[row + 1] > len(self.parserNodes):
       # This file is too large. There's other ways to handle this, but for now
@@ -79,23 +80,22 @@ class Parser:
   def grammarAtIndex(self, row, col, index):
     """
     Call grammarIndexFromRowCol() to get the index parameter.
-    returns (node, preceding, remaining). |index| may then be passed to
-        grammarNext(). |proceeding| and |remaining| are relative to the |col|
-        parameter.
+
+    Returns:
+        node, preceding, remaining). |proceeding| and |remaining| are relative
+        to the |col| parameter.
     """
     finalResult = (self.emptyNode, col, sys.maxint)
-    if row + 1 >= len(self.rows):
-      return finalResult
-    nextRowIndex = self.rows[row + 1]
-    if col >= self.parserNodes[nextRowIndex].begin:
+    if row >= len(self.rows):
       return finalResult
     rowIndex = self.rows[row]
     if rowIndex + index >= len(self.parserNodes):
       return finalResult
-    if index >= nextRowIndex - rowIndex:
-      return finalResult
     offset = self.parserNodes[rowIndex].begin + col
-    remaining = self.parserNodes[rowIndex + index + 1].begin - offset
+    nextOffset = sys.maxint
+    if rowIndex + index + 1 < len(self.parserNodes):
+      nextOffset = self.parserNodes[rowIndex + index + 1].begin
+    remaining = nextOffset - offset
     if remaining < 0:
       return finalResult
     node = self.parserNodes[rowIndex + index]
