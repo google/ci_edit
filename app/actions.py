@@ -260,12 +260,13 @@ class Actions(app.mutator.Mutator):
     self.redo()
     if 1:  # TODO(dschuyler): if indent on CR
       line = self.lines[self.penRow - 1]
-      commonIndent = 2
+      commonIndent = len(app.prefs.editor['indentation'])
       indent = 0
       while indent < len(line) and line[indent] == ' ':
         indent += 1
       if len(line):
-        if line[-1] in [':', '[', '{']:
+        stripped = line.rstrip()
+        if stripped and line[-1] in [':', '[', '{']:
           indent += commonIndent
         # Good idea or bad idea?
         #elif indent >= 2 and line.lstrip()[:6] == 'return':
@@ -485,6 +486,14 @@ class Actions(app.mutator.Mutator):
     lineLen = len(self.lines[self.penRow])
     self.cursorMove(0, lineLen - self.penCol)
     self.redo()
+
+  def cursorSelectToStartOfLine(self):
+    self.selectionCharacter()
+    self.cursorStartOfLine()
+
+  def cursorSelectToEndOfLine(self):
+    self.selectionCharacter()
+    self.cursorEndOfLine()
 
   def __cursorPageDown(self):
     """
@@ -971,7 +980,7 @@ class Actions(app.mutator.Mutator):
     endCol = col + length
     inView = self.isInView(row, endCol, row, endCol)
     self.doSelectionMode(app.selectable.kSelectionNone)
-    self.cursorMove( row - self.penRow, endCol - self.penCol)
+    self.cursorMove(row - self.penRow, endCol - self.penCol)
     self.redo()
     self.doSelectionMode(mode)
     self.cursorMove(0, -length)
