@@ -1004,7 +1004,7 @@ class Actions(app.mutator.Mutator):
 
   def findPlainText(self, text):
     searchFor = re.escape(text)
-    self.findRe = re.compile('()'+searchFor)
+    self.findRe = re.compile('()^' + searchFor)
     self.findCurrentPattern(0)
 
   def findReplaceFlags(self, tokens):
