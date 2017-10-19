@@ -132,6 +132,7 @@ class TextBuffer(app.actions.Actions):
         while k < endCol:
           node, preceding, remaining = self.parser.grammarAtIndex(
               startRow + i, k, grammarIndex)
+          app.log.info('r', startRow + i, 'c', k, 'g', grammarIndex, node.grammar['name'], 'b', node.begin, 'p', preceding, 'r', remaining)
           grammarIndex += 1
           if remaining == 0:
             continue

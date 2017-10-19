@@ -158,7 +158,9 @@ class InteractiveOpener(app.controller.Controller):
     #app.log.info('\n\nO.onChange\n', path, '\n', dirPath, fileName)
     if os.path.isdir(dirPath):
       lines = []
-      for i in os.listdir(dirPath):
+      contents = os.listdir(dirPath)
+      contents.sort()
+      for i in contents:
         if os.path.isdir(i):
           i += '/'
         lines.append(i)
