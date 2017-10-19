@@ -199,6 +199,7 @@ prefs = {
   },
   'editor': {
     'captiveCursor': False,
+    'naturalScrollDirection': True,
     'colorScheme': 'default',
     'findIgnoreCase': True,
     'indentation': '  ',

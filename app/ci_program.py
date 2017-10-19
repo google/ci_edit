@@ -33,6 +33,7 @@ import pstats
 import cPickle as pickle
 import curses
 import locale
+import io
 import StringIO
 import time
 import traceback
@@ -44,7 +45,7 @@ def userMessage(*args):
   if not userConsoleMessage:
     userConsoleMessage = ''
   args = [str(i) for i in args]
-  userConsoleMessage += ' '.join(args) + '\n'
+  userConsoleMessage += unicode(' '.join(args) + '\n')
 
 
 class CiProgram:
@@ -361,6 +362,10 @@ class CiProgram:
     # Display some of the redo chain.
     redoColorA = app.color.get(100)
     self.debugWindow.writeLine(
+        "procTemp %d temp %r"
+        %(textBuffer.processTempChange, textBuffer.tempChange,),
+        redoColorA)
+    self.debugWindow.writeLine(
         "redoIndex %3d savedAt %3d depth %3d"
         %(textBuffer.redoIndex, textBuffer.savedAtRedoIndex,
           len(textBuffer.redoChain)),
@@ -538,11 +543,14 @@ class CiProgram:
         elif i == '--help':
           userMessage(app.help.docs['command line'])
           self.quitNow()
-        elif i == '--version':
-          userMessage(app.help.docs['version'])
+        elif i == '--keys':
+          userMessage(app.help.docs['key bindings'])
           self.quitNow()
         elif i == '--clearHistory':
           app.history.clearUserHistory()
+          self.quitNow()
+        elif i == '--version':
+          userMessage(app.help.docs['version'])
           self.quitNow()
         elif i.startswith('--'):
           userMessage("unknown command line argument", i)
@@ -698,6 +706,10 @@ def run_ci():
     print '\033[?2004l'
   global userConsoleMessage
   if userConsoleMessage:
+    fullPath = os.path.expanduser(os.path.expandvars(
+        '~/.ci_edit/userConsoleMessage'))
+    with io.open(fullPath, 'w+') as f:
+      f.write(userConsoleMessage)
     print userConsoleMessage
 
 if __name__ == '__main__':
