@@ -942,7 +942,7 @@ class Actions(app.mutator.Mutator):
         self.fileHistory['bookmarks'] = self.bookmarks
         self.linesToData()
         if self.fileEncoding is None:
-          file = io.open(self.fullPath, 'wb+')
+          file = io.open(self.fullPath, 'w+', encoding='UTF-8')
         else:
           file = io.open(self.fullPath, 'w+', encoding=self.fileEncoding)
         file.seek(0)
