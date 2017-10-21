@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import app.log
+import bisect
 import glob
 import io
 import os
@@ -28,7 +29,7 @@ class OsDictionary:
     try:
       self.file = io.open(path, 'r')
       self.fileLength = self.file.seek(0, 2)  # Seek to end of file.
-      self.pageSize = 4096  # Arbitrary.
+      self.pageSize = 1024 * 8  # Arbitrary.
       # Add one to pick up any partial page at the end.
       self.filePages = self.fileLength / self.pageSize + 1
     except:
@@ -75,7 +76,9 @@ class OsDictionary:
       if word > words[-1].lower():
         low = page
         continue
-      if word in [i.lower() for i in words]:
+      lowerWords = [i.lower() for i in words]
+      index = bisect.bisect_left(lowerWords, word)
+      if lowerWords[index] == word:
         self.cache[word] = True
         return True
       self.cache[word] = False
