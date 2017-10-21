@@ -14,11 +14,75 @@
 
 import app.log
 import glob
+import io
 import os
 import re
 
 
 grammarWords = {}
+
+
+class OsDictionary:
+  def __init__(self):
+    path = '/usr/share/dict/words'
+    try:
+      self.file = io.open(path, 'r')
+      self.fileLength = self.file.seek(0, 2)  # Seek to end of file.
+      self.pageSize = 4096  # Arbitrary.
+      # Add one to pick up any partial page at the end.
+      self.filePages = self.fileLength / self.pageSize + 1
+    except:
+      self.file = None
+    self.cache = {}
+    self.knownOffsets = []
+
+  def check(self, word):
+    if self.file is None:
+      return False
+    word = word.lower()
+    r = self.cache.get(word)
+    if r is not None:
+      return r
+    high = self.filePages
+    low = 0
+    leash = 20  # Way more than should be necessary.
+    while True:
+      if not leash:
+        # There's likely a bug in this function if we hit this.
+        app.log.info('spelling leash', page, word)
+        return False
+      leash -= 1
+      page = low + (high - low) / 2
+      self.file.seek(page * self.pageSize)
+      # Add 100 to catch any words that straddle a page.
+      size = min(self.pageSize + 100, self.fileLength - page * self.pageSize)
+      if not size:
+        self.cache[word] = False
+        return False
+      chunk = self.file.read(size)
+      try:
+        chunk = chunk[chunk.index('\n'):chunk.rfind('\n')]
+      except:
+        self.cache[word] = False
+        return False
+      if not chunk:
+        self.cache[word] = False
+        return False
+      words = chunk.split()
+      if word < words[0].lower():
+        high = page
+        continue
+      if word > words[-1].lower():
+        low = page
+        continue
+      if word in [i.lower() for i in words]:
+        self.cache[word] = True
+        return True
+      self.cache[word] = False
+      return False
+
+osDictionary = OsDictionary()
+
 
 def loadWords(dirPath):
   global grammarWords
@@ -84,5 +148,8 @@ def isCorrect(word, grammarName):
         for i in range(len(word), 0, -1):
           if word[:i] in words and word[i:] in words:
             return True
+  if 1:  # Experimental.
+    # Fallback to the OS dictionary.
+    return osDictionary.check(word)
   #app.log.info(grammarName, word)
   return False
