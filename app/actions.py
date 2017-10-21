@@ -260,12 +260,13 @@ class Actions(app.mutator.Mutator):
     self.redo()
     if 1:  # TODO(dschuyler): if indent on CR
       line = self.lines[self.penRow - 1]
-      commonIndent = 2
+      commonIndent = len(app.prefs.editor['indentation'])
       indent = 0
       while indent < len(line) and line[indent] == ' ':
         indent += 1
       if len(line):
-        if line[-1] in [':', '[', '{']:
+        stripped = line.rstrip()
+        if stripped and line[-1] in [':', '[', '{']:
           indent += commonIndent
         # Good idea or bad idea?
         #elif indent >= 2 and line.lstrip()[:6] == 'return':
@@ -485,6 +486,14 @@ class Actions(app.mutator.Mutator):
     lineLen = len(self.lines[self.penRow])
     self.cursorMove(0, lineLen - self.penCol)
     self.redo()
+
+  def cursorSelectToStartOfLine(self):
+    self.selectionCharacter()
+    self.cursorStartOfLine()
+
+  def cursorSelectToEndOfLine(self):
+    self.selectionCharacter()
+    self.cursorEndOfLine()
 
   def __cursorPageDown(self):
     """
@@ -933,7 +942,7 @@ class Actions(app.mutator.Mutator):
         self.fileHistory['bookmarks'] = self.bookmarks
         self.linesToData()
         if self.fileEncoding is None:
-          file = io.open(self.fullPath, 'wb+')
+          file = io.open(self.fullPath, 'w+', encoding='UTF-8')
         else:
           file = io.open(self.fullPath, 'w+', encoding=self.fileEncoding)
         file.seek(0)
@@ -947,6 +956,11 @@ class Actions(app.mutator.Mutator):
           self.fileHistory['savedAtRedoIndex'] = self.savedAtRedoIndex
         # Hmm, could this be hard coded to False here?
         self.isReadOnly = not os.access(self.fullPath, os.W_OK)
+        app.history.saveUserHistory((self.fullPath, self.lastChecksum,
+            self.lastFileSize), self.fileHistory)
+        # Store the file's new info
+        self.lastChecksum, self.lastFileSize = app.history.getFileInfo(
+            self.fullPath)
         self.fileStat = os.stat(self.fullPath)
         self.setMessage('File saved')
       except Exception as e:
@@ -956,11 +970,6 @@ class Actions(app.mutator.Mutator):
         app.log.exception('error writing file')
     except:
       app.log.info('except had exception')
-    app.history.saveUserHistory((self.fullPath, self.lastChecksum,
-        self.lastFileSize), self.fileHistory)
-    # Store the file's new info
-    self.lastChecksum, self.lastFileSize = app.history.getFileInfo(
-        self.fullPath)
 
   def selectText(self, row, col, length, mode):
     row = max(0, min(row, len(self.lines) - 1))
@@ -971,7 +980,7 @@ class Actions(app.mutator.Mutator):
     endCol = col + length
     inView = self.isInView(row, endCol, row, endCol)
     self.doSelectionMode(app.selectable.kSelectionNone)
-    self.cursorMove( row - self.penRow, endCol - self.penCol)
+    self.cursorMove(row - self.penRow, endCol - self.penCol)
     self.redo()
     self.doSelectionMode(mode)
     self.cursorMove(0, -length)
@@ -995,7 +1004,7 @@ class Actions(app.mutator.Mutator):
 
   def findPlainText(self, text):
     searchFor = re.escape(text)
-    self.findRe = re.compile('()'+searchFor)
+    self.findRe = re.compile('()^' + searchFor)
     self.findCurrentPattern(0)
 
   def findReplaceFlags(self, tokens):
@@ -1291,7 +1300,10 @@ class Actions(app.mutator.Mutator):
   def mouseWheelDown(self, shift, ctrl, alt):
     if not shift:
       self.selectionNone()
-    self.scrollUp()
+    if app.prefs.editor['naturalScrollDirection']:
+      self.scrollUp()
+    else:
+      self.scrollDown()
 
   def scrollUp(self):
     if self.view.scrollRow == 0:
@@ -1309,7 +1321,10 @@ class Actions(app.mutator.Mutator):
   def mouseWheelUp(self, shift, ctrl, alt):
     if not shift:
       self.selectionNone()
-    self.scrollDown()
+    if app.prefs.editor['naturalScrollDirection']:
+      self.scrollDown()
+    else:
+      self.scrollUp()
 
   def scrollDown(self):
     maxRow, maxCol = self.view.rows, self.view.cols

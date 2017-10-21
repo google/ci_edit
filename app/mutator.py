@@ -190,7 +190,6 @@ class Mutator(app.selectable.Selectable):
     if self.stallNextRedo:
       self.stallNextRedo = False
       return
-
     if self.processTempChange:
       if self.debugRedo:
         app.log.info('processTempChange', repr(change))
@@ -202,6 +201,7 @@ class Mutator(app.selectable.Selectable):
     if self.tempChange:
       self.__undoMove(self.tempChange)
       self.tempChange = None
+      self.updateBasicScrollPosition()
     while self.__redoOne():
       pass
     self.updateBasicScrollPosition()
@@ -369,6 +369,7 @@ class Mutator(app.selectable.Selectable):
         self.stallNextRedo = True
         self.processTempChange = False
         self.tempChange = None
+        self.updateBasicScrollPosition()
         return
       self.processTempChange = True
       self.tempChange = change

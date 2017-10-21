@@ -15,6 +15,7 @@
 import app.log
 import app.history
 import app.text_buffer
+import io
 import os
 import sys
 
@@ -117,8 +118,11 @@ class BufferManager:
     os.dup2(newStdin.fileno(), stdinFd)
     # Create a text buffer to read from alternate stream.
     textBuffer = self.newTextBuffer()
-    with os.fdopen(newFd, "r") as fileInput:
-      textBuffer.fileFilter(fileInput.read())
+    try:
+      with io.open(newFd, "r") as fileInput:
+        textBuffer.fileFilter(fileInput.read())
+    except Exception, e:
+      app.log.exception(e)
     app.log.info('finished reading from stdin')
     return textBuffer
 

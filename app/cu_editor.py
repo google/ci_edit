@@ -44,6 +44,8 @@ def initCommandSet(editText, textBuffer):
     KEY_DELETE: textBuffer.delete,
     KEY_HOME: textBuffer.cursorStartOfLine,
     KEY_END: textBuffer.cursorEndOfLine,
+    KEY_SHOME: textBuffer.cursorSelectToStartOfLine,
+    KEY_SEND: textBuffer.cursorSelectToEndOfLine,
 
     # KEY_DOWN: textBuffer.cursorDown,
     KEY_LEFT: textBuffer.cursorLeft,
