@@ -179,9 +179,9 @@ class ViewWindow:
 
 class ActiveWindow(ViewWindow):
   """An ActiveWindow may have focus and a controller."""
-  def __init__(self, parent, controller=None):
+  def __init__(self, parent):
     ViewWindow.__init__(self, parent)
-    self.controller = controller
+    self.controller = None
     self.isFocusable = True
 
   def focus(self):
@@ -205,7 +205,7 @@ class ActiveWindow(ViewWindow):
 class Window(ActiveWindow):
   """A Window holds a TextBuffer and a controller that operates on the
   TextBuffer."""
-  def __init__(self, parent, controller=None):
+  def __init__(self, parent):
     ActiveWindow.__init__(self, parent)
     self.cursorRow = 0
     self.cursorCol = 0
@@ -260,8 +260,8 @@ class Window(ActiveWindow):
 class LabeledLine(Window):
   """A single line with a label. This is akin to a line prompt or gui modal
       dialog. It's used for things like 'find' and 'goto line'."""
-  def __init__(self, parent, label, controller=None):
-    Window.__init__(self, parent, controller)
+  def __init__(self, parent, label):
+    Window.__init__(self, parent)
     self.host = parent
     self.setTextBuffer(app.text_buffer.TextBuffer())
     self.label = label
