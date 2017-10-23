@@ -194,12 +194,10 @@ class MainController:
     self.commandDefault = None
     self.commandSet = None
     self.controllers = {}
-    self.controllerList = []
     self.controller = None
 
   def add(self, controller):
     self.controllers[controller.name] = controller
-    self.controllerList.append(controller)
     self.controller = controller
 
   def doCommand(self, ch, meta):
@@ -229,8 +227,8 @@ class MainController:
       app.log.info('MainController.nextController emacs')
       self.controller = self.controllers['emacs']
     elif self.controller is self.controllers['emacs']:
-      app.log.info('MainController.nextController vim')
-      self.controller = self.controllers['vim']
+      app.log.info('MainController.nextController vi')
+      self.controller = self.controllers['vi']
     else:
       app.log.info('MainController.nextController cua')
       self.controller = self.controllers['cua']

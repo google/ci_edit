@@ -17,9 +17,11 @@ import app.color
 import app.controller
 import app.cu_editor
 import app.editor
+import app.em_editor
 import app.history
 import app.render
 import app.text_buffer
+import app.vi_editor
 import sys
 import curses
 
@@ -594,8 +596,10 @@ class InputWindow(Window):
     self.showMessageLine = True
     self.showRightColumn = True
     self.showTopInfo = True
-    self.topRows = 2 # Number of lines in default TopInfo status.
+    self.topRows = 2  # Number of lines in default TopInfo status.
     self.controller = app.controller.MainController(self)
+    self.controller.add(app.em_editor.EmacsEdit(self))
+    self.controller.add(app.vi_editor.ViEdit(self))
     self.controller.add(app.cu_editor.CuaPlusEdit(self))
     # What does the user appear to want: edit, quit, or something else?
     self.userIntent = 'edit'
