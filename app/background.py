@@ -19,7 +19,16 @@ import signal
 import threading
 
 
+# The instance of the background thread.
+bg = None
+
+
 class BackgroundThread(threading.Thread):
+  def __init__(self, *args, **keywords):
+    threading.Thread.__init__(self, *args, **keywords)
+    self.toBackground = None
+    self.fromBackground = None
+
   def get(self):
     return self.fromBackground.get()
 
@@ -33,24 +42,24 @@ class BackgroundThread(threading.Thread):
     self.toBackground.put(data)
 
 
-def background(input, output):
+def background(inputQueue, outputQueue):
   block = True
   pid = os.getpid()
   signalNumber = signal.SIGUSR1
   while True:
     try:
       try:
-        program, message = input.get(block)
+        program, message = inputQueue.get(block)
         if message == 'quit':
           app.log.info('bg received quit message')
           return
         program.executeCommandList(message)
         program.render()
-        output.put(app.render.frame.grabFrame())
+        outputQueue.put(app.render.frame.grabFrame())
         os.kill(pid, signalNumber)
       except Queue.Empty as e:
         app.log.exception(e)
-      #if not input.empty():
+      #if not inputQueue.empty():
       #  continue
       tb = program.focusedWindow.textBuffer
       if not tb.parser:
@@ -66,12 +75,12 @@ def background(input, output):
         block = len(tb.parser.rows) >= len(tb.lines)
         if block:
           program.render()
-          output.put(app.render.frame.grabFrame())
+          outputQueue.put(app.render.frame.grabFrame())
           os.kill(pid, signalNumber)
     except Exception as e:
       app.log.error('bg thread exception')
       app.log.exception(e)
-      output.put('quit')
+      outputQueue.put('quit')
       os.kill(pid, signalNumber)
 
 def startupBackground():

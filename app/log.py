@@ -153,7 +153,7 @@ def wrapper(function, shouldWrite=True):
   try:
     try:
       r = function()
-    except BaseException as e:
+    except BaseException:
       shouldWritePrintLog = True
       errorType, value, tracebackInfo = sys.exc_info()
       out = traceback.format_exception(errorType, value, tracebackInfo)
@@ -171,4 +171,4 @@ def writeToFile(path):
 def flush():
   global fullLog
   if shouldWritePrintLog:
-    print "\n".join(fullLog)
+    sys.stdout.write("\n".join(fullLog) + "\n")

@@ -226,7 +226,7 @@ class InteractivePrompt(app.controller.Controller):
             tb.editPasteLines(tuple(lines))
         else:
           command = self.commands.get(cmd, self.unknownCommand)
-          results, message = command(cmdLine, self.host)
+          message = command(cmdLine, self.host)[1]
           tb.setMessage(message)
     except Exception as e:
       app.log.exception(e)
@@ -294,7 +294,7 @@ class InteractivePrompt(app.controller.Controller):
           ''' %s/foo/bar/''' % (cmdLine,)
     separator = sre.groups()[0]
     try:
-      a, find, replace, flags = cmdLine.split(separator, 3)
+      _, find, replace, flags = cmdLine.split(separator, 3)
     except:
       return lines, '''Separator punctuation missing, there should be''' \
           ''' three '%s'.''' % (separator,)

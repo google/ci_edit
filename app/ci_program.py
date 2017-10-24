@@ -54,6 +54,7 @@ class CiProgram:
   In some aspects, the program acts as a top level window, even though it's not
   exactly a window."""
   def __init__(self, cursesScreen):
+    self.clicks = 0
     self.debugMouseEvent = (0, 0, 0, 0, 0)
     self.exiting = False
     self.modalUi = None
@@ -67,13 +68,13 @@ class CiProgram:
     curses.mousemask(-1)
     curses.mouseinterval(0)
     # Enable mouse tracking in xterm.
-    print '\033[?1002;h'
-    #print '\033[?1005;h'
+    sys.stdout.write('\033[?1002;h')
+    #sys.stdout.write('\033[?1005;h')
     curses.meta(1)
     # Access ^c before shell does.
     curses.raw()
     # Enable Bracketed Paste Mode.
-    print '\033[?2004;h'
+    sys.stdout.write('\033[?2004;h')
     #curses.start_color()
     curses.use_default_colors()
     if 0:
@@ -90,7 +91,7 @@ class CiProgram:
         app.log.detail("color", i, ": ", curses.color_content(i))
     self.setUpPalette()
     if 1:
-      rows, cols = self.cursesScreen.getmaxyx()
+      #rows, cols = self.cursesScreen.getmaxyx()
       cursesWindow = self.cursesScreen
       cursesWindow.leaveok(1)  # Don't update cursor position.
       cursesWindow.scrollok(0)
@@ -149,7 +150,6 @@ class CiProgram:
       # Gather several commands into a batch before doing a redraw.
       # (A performance optimization).
       cmdList = []
-      mouseEvents = []
       while not len(cmdList):
         for i in range(5):
           eventInfo = None
@@ -370,7 +370,6 @@ class CiProgram:
         %(textBuffer.redoIndex, textBuffer.savedAtRedoIndex,
           len(textBuffer.redoChain)),
         redoColorA)
-    lenChain = textBuffer.redoIndex
     redoColorB = app.color.get(101)
     for i in range(textBuffer.redoIndex - 5, textBuffer.redoIndex):
       text = i >= 0 and textBuffer.redoChain[i] or ''
@@ -404,7 +403,7 @@ class CiProgram:
     """Mouse handling is a special case. The getch() curses function will
     signal the existence of a mouse event, but the event must be fetched and
     parsed separately."""
-    (id, mouseCol, mouseRow, mouseZ, bState) = info[0]
+    (_, mouseCol, mouseRow, _, bState) = info[0]
     app.log.mouse()
     eventTime = info[1]
     rapidClickTimeout = .5
@@ -613,8 +612,7 @@ class CiProgram:
     """Repaint stacked windows, furthest to nearest in the background thread."""
     if self.showLogWindow:
       self.logWindow.render()
-    for i,k in enumerate(self.zOrder):
-      #app.log.info("[[%d]] %r"%(i, k))
+    for k in self.zOrder:
       k.render()
 
   def makeHomeDirs(self, homePath):
@@ -683,7 +681,7 @@ def wrapped_ci(cursesScreen):
   try:
     prg = CiProgram(cursesScreen)
     prg.run()
-  except Exception as e:
+  except Exception:
     userMessage('---------------------------------------')
     userMessage('Super sorry, something went very wrong.')
     userMessage('Please create a New Issue and paste this info there.\n')
@@ -703,14 +701,14 @@ def run_ci():
     app.log.flush()
     app.log.writeToFile('~/.ci_edit/recentLog')
     # Disable Bracketed Paste Mode.
-    print '\033[?2004l'
+    sys.stdout.write('\033[?2004l')
   global userConsoleMessage
   if userConsoleMessage:
     fullPath = os.path.expanduser(os.path.expandvars(
         '~/.ci_edit/userConsoleMessage'))
     with io.open(fullPath, 'w+') as f:
       f.write(userConsoleMessage)
-    print userConsoleMessage
+    sys.stdout.write(userConsoleMessage + '\n')
 
 if __name__ == '__main__':
   run_ci()

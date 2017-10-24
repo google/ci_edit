@@ -52,9 +52,6 @@ class ViEdit(app.controller.Controller):
     app.log.info('ViEdit Command set main')
     app.log.info(repr(self))
 
-  def onChange(self):
-    pass
-
   def focus(self):
     app.log.info('VimEdit.focus')
     if not self.commandDefault:

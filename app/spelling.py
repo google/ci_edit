@@ -50,7 +50,7 @@ class OsDictionary:
     while True:
       if not leash:
         # There's likely a bug in this function if we hit this.
-        app.log.info('spelling leash', page, word)
+        app.log.info('spelling leash', word)
         return False
       leash -= 1
       page = low + (high - low) / 2

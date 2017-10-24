@@ -237,7 +237,7 @@ class InteractivePrediction(app.controller.Controller):
     return (len(app.buffer_manager.buffers.buffers) - 2) % len(self.items)
 
   def onChange(self):
-    input = self.textBuffer.lines[0]
+    #input = self.textBuffer.lines[0]
     clip = []
     limit = max(5, self.host.cols-10)
     for i,item in enumerate(self.items):
