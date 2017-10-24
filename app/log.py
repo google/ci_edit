@@ -153,7 +153,7 @@ def wrapper(function, shouldWrite=True):
   try:
     try:
       r = function()
-    except BaseException, e:
+    except BaseException as e:
       shouldWritePrintLog = True
       errorType, value, tracebackInfo = sys.exc_info()
       out = traceback.format_exception(errorType, value, tracebackInfo)

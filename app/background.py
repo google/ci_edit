@@ -48,8 +48,8 @@ def background(input, output):
         program.render()
         output.put(app.render.frame.grabFrame())
         os.kill(pid, signalNumber)
-      except Queue.Empty, e:
-        pass
+      except Queue.Empty as e:
+        app.log.exception(e)
       #if not input.empty():
       #  continue
       tb = program.focusedWindow.textBuffer
@@ -68,7 +68,7 @@ def background(input, output):
           program.render()
           output.put(app.render.frame.grabFrame())
           os.kill(pid, signalNumber)
-    except Exception, e:
+    except Exception as e:
       app.log.error('bg thread exception')
       app.log.exception(e)
       output.put('quit')
