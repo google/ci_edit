@@ -627,8 +627,8 @@ class CiProgram:
       self.dirPrefs = os.path.join(homePath, 'prefs')
       if not os.path.isdir(self.dirPrefs):
         os.makedirs(self.dirPrefs)
-    except Exception, e:
-      app.log.error('exception in makeHomeDirs')
+    except Exception as e:
+      app.log.exception(e)
 
   def run(self):
     self.parseArgs()
@@ -683,7 +683,7 @@ def wrapped_ci(cursesScreen):
   try:
     prg = CiProgram(cursesScreen)
     prg.run()
-  except Exception, e:
+  except Exception as e:
     userMessage('---------------------------------------')
     userMessage('Super sorry, something went very wrong.')
     userMessage('Please create a New Issue and paste this info there.\n')

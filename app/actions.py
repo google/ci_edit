@@ -155,8 +155,8 @@ class Actions(app.mutator.Mutator):
     Returns:
       None.
     """
-    bookmarkRange, bookmarkData = bookmark
-    cursorRow, cursorCol = bookmarkData['cursor']
+    bookmarkData = bookmark[1]
+    #cursorRow, cursorCol = bookmarkData['cursor']
     penRow, penCol = bookmarkData['pen']
     markerRow, markerCol = bookmarkData['marker']
     selectionMode = bookmarkData['selectionMode']
@@ -200,7 +200,7 @@ class Actions(app.mutator.Mutator):
     upperRow, _, _, _ = self.startAndEnd()
     tempBookmark = ((upperRow,),)
     index = bisect.bisect_left(self.bookmarks, tempBookmark)
-    bookmark = self.bookmarkGoto(self.bookmarks[index - 1])
+    self.bookmarkGoto(self.bookmarks[index - 1])
 
   def bookmarkRemove(self):
     """
@@ -419,7 +419,7 @@ class Actions(app.mutator.Mutator):
 
   def cursorSelectDownScroll(self):
     """Move the line below the selection to above the selection."""
-    upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
+    upperRow, _, lowerRow, _ = self.startAndEnd()
     if lowerRow + 1 >= len(self.lines):
       return
     begin = lowerRow + 1
@@ -473,7 +473,7 @@ class Actions(app.mutator.Mutator):
 
   def cursorSelectUpScroll(self):
     """Move the line above the selection to below the selection."""
-    upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
+    upperRow, _, lowerRow, _ = self.startAndEnd()
     if upperRow == 0:
       return
     begin = upperRow - 1
@@ -509,7 +509,7 @@ class Actions(app.mutator.Mutator):
     """
     if self.penRow == len(self.lines):
       return
-    maxRow, maxCol = self.view.rows, self.view.cols
+    maxRow = self.view.rows
     penRowDelta = maxRow
     scrollRowDelta = maxRow
     numLines = len(self.lines)
@@ -537,7 +537,7 @@ class Actions(app.mutator.Mutator):
     """
     if self.penRow == 0:
       return
-    maxRow, maxCol = self.view.rows, self.view.cols
+    maxRow = self.view.rows
     penRowDelta = -maxRow
     scrollRowDelta = -maxRow
     if self.penRow < maxRow:
@@ -635,8 +635,8 @@ class Actions(app.mutator.Mutator):
     self.__cursorPageUp()
 
   def cursorScrollToMiddle(self):
-    maxRow, maxCol = self.view.rows, self.view.cols
-    rowDelta = min(max(0, len(self.lines)-maxRow),
+    maxRow = self.view.rows
+    rowDelta = min(max(0, len(self.lines) - maxRow),
                    max(0, self.penRow - maxRow / 2)) - self.view.scrollRow
     self.cursorMoveScroll(0, 0, rowDelta, 0)
 
@@ -755,22 +755,22 @@ class Actions(app.mutator.Mutator):
 
   def fileLoad(self):
     app.log.info('fileLoad', self.fullPath)
-    file = None
+    inputFile = None
     if not os.path.exists(self.fullPath):
       self.setMessage('Creating new file')
     else:
       try:
-        file = io.open(self.fullPath)
-        data = file.read()
-        self.fileEncoding = file.encoding
+        inputFile = io.open(self.fullPath)
+        data = inputFile.read()
+        self.fileEncoding = inputFile.encoding
         self.setMessage('Opened existing file')
-      except:
+      except Exception:
         try:
-          file = io.open(self.fullPath, 'rb')
-          data = file.read()
+          inputFile = io.open(self.fullPath, 'rb')
+          data = inputFile.read()
           self.fileEncoding = None  # i.e. binary.
           self.setMessage('Opened file as a binary file')
-        except:
+        except Exception:
           app.log.info('error opening file', self.fullPath)
           self.setMessage('error opening file', self.fullPath)
           return
@@ -780,9 +780,9 @@ class Actions(app.mutator.Mutator):
     app.log.info('fullPath', self.fullPath)
     app.log.info('cwd', os.getcwd())
     app.log.info('relativePath', self.relativePath)
-    if file:
+    if inputFile:
       self.fileFilter(data)
-      file.close()
+      inputFile.close()
     else:
       self.data = unicode("")
     self.fileExtension = os.path.splitext(self.fullPath)[1]
@@ -942,13 +942,13 @@ class Actions(app.mutator.Mutator):
         self.fileHistory['bookmarks'] = self.bookmarks
         self.linesToData()
         if self.fileEncoding is None:
-          file = io.open(self.fullPath, 'w+', encoding='UTF-8')
+          outputFile = io.open(self.fullPath, 'w+', encoding='UTF-8')
         else:
-          file = io.open(self.fullPath, 'w+', encoding=self.fileEncoding)
-        file.seek(0)
-        file.truncate()
-        file.write(self.data)
-        file.close()
+          outputFile = io.open(self.fullPath, 'w+', encoding=self.fileEncoding)
+        outputFile.seek(0)
+        outputFile.truncate()
+        outputFile.write(self.data)
+        outputFile.close()
         # Save user data that applies to writable files.
         self.savedAtRedoIndex = self.redoIndex
         if app.prefs.editor['saveUndo']:
@@ -967,16 +967,14 @@ class Actions(app.mutator.Mutator):
         self.setMessage(
             'Error writing file. The file did not save properly.',
             color=3)
-        app.log.exception('error writing file')
-    except:
+        app.log.error('error writing file')
+        app.log.exception(e)
+    except Exception:
       app.log.info('except had exception')
 
   def selectText(self, row, col, length, mode):
     row = max(0, min(row, len(self.lines) - 1))
     col = max(0, min(col, len(self.lines[row])))
-    scrollRow = self.view.scrollRow
-    scrollCol = self.view.scrollCol
-    maxRow, maxCol = self.view.rows, self.view.cols
     endCol = col + length
     inView = self.isInView(row, endCol, row, endCol)
     self.doSelectionMode(app.selectable.kSelectionNone)
@@ -1041,7 +1039,7 @@ class Actions(app.mutator.Mutator):
     if len(splitCmd) < 4:
       self.setMessage('An exchange needs three ' + separator + ' separators')
       return
-    start, find, replace, flags = splitCmd
+    _, find, replace, flags = splitCmd
     self.linesToData()
     data = self.findReplaceText(find, replace, flags, self.data)
     self.applyDocumentUpdate(data)

@@ -17,9 +17,11 @@ import app.color
 import app.controller
 import app.cu_editor
 import app.editor
+import app.em_editor
 import app.history
 import app.render
 import app.text_buffer
+import app.vi_editor
 import sys
 import curses
 
@@ -179,9 +181,9 @@ class ViewWindow:
 
 class ActiveWindow(ViewWindow):
   """An ActiveWindow may have focus and a controller."""
-  def __init__(self, parent, controller=None):
+  def __init__(self, parent):
     ViewWindow.__init__(self, parent)
-    self.controller = controller
+    self.controller = None
     self.isFocusable = True
 
   def focus(self):
@@ -205,7 +207,7 @@ class ActiveWindow(ViewWindow):
 class Window(ActiveWindow):
   """A Window holds a TextBuffer and a controller that operates on the
   TextBuffer."""
-  def __init__(self, parent, controller=None):
+  def __init__(self, parent):
     ActiveWindow.__init__(self, parent)
     self.cursorRow = 0
     self.cursorCol = 0
@@ -260,8 +262,8 @@ class Window(ActiveWindow):
 class LabeledLine(Window):
   """A single line with a label. This is akin to a line prompt or gui modal
       dialog. It's used for things like 'find' and 'goto line'."""
-  def __init__(self, parent, label, controller=None):
-    Window.__init__(self, parent, controller)
+  def __init__(self, parent, label):
+    Window.__init__(self, parent)
     self.host = parent
     self.setTextBuffer(app.text_buffer.TextBuffer())
     self.label = label
@@ -594,8 +596,10 @@ class InputWindow(Window):
     self.showMessageLine = True
     self.showRightColumn = True
     self.showTopInfo = True
-    self.topRows = 2 # Number of lines in default TopInfo status.
+    self.topRows = 2  # Number of lines in default TopInfo status.
     self.controller = app.controller.MainController(self)
+    self.controller.add(app.em_editor.EmacsEdit(self))
+    self.controller.add(app.vi_editor.ViEdit(self))
     self.controller.add(app.cu_editor.CuaPlusEdit(self))
     # What does the user appear to want: edit, quit, or something else?
     self.userIntent = 'edit'

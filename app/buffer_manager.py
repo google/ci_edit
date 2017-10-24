@@ -121,7 +121,7 @@ class BufferManager:
     try:
       with io.open(newFd, "r") as fileInput:
         textBuffer.fileFilter(fileInput.read())
-    except Exception, e:
+    except Exception as e:
       app.log.exception(e)
     app.log.info('finished reading from stdin')
     return textBuffer

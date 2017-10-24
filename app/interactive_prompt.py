@@ -123,8 +123,11 @@ class InteractivePrompt(app.controller.Controller):
     self.commands = {
       'bm': self.bookmarkCommand,
       'build': self.buildCommand,
+      'cua': self.changeToCuaMode,
+      'emacs': self.changeToEmacsMode,
       'make': self.makeCommand,
       #'split': self.splitCommand,  # Experimental wip.
+      'vim': self.changeToVimNormalMode,
     }
     self.filters = {
       'format': self.formatCommand,
@@ -153,6 +156,15 @@ class InteractivePrompt(app.controller.Controller):
 
   def buildCommand(self, cmdLine, view):
     return {}, 'building things'
+
+  def changeToCuaMode(self, cmdLine, view):
+    return {}, 'CUA mode'
+
+  def changeToEmacsMode(self, cmdLine, view):
+    return {}, 'Emacs mode'
+
+  def changeToVimNormalMode(self, cmdLine, view):
+    return {}, 'Vim normal mode'
 
   def focus(self):
     app.log.info('InteractivePrompt.focus')
@@ -216,7 +228,7 @@ class InteractivePrompt(app.controller.Controller):
           command = self.commands.get(cmd, self.unknownCommand)
           results, message = command(cmdLine, self.host)
           tb.setMessage(message)
-    except Exception, e:
+    except Exception as e:
       app.log.exception(e)
       tb.setMessage('Execution threw an error.')
     self.changeToHostWindow()
@@ -227,7 +239,7 @@ class InteractivePrompt(app.controller.Controller):
           stdin=subprocess.PIPE, stdout=subprocess.PIPE,
           stderr=subprocess.STDOUT, shell=True);
       return process.communicate(input)[0], ''
-    except Exception, e:
+    except Exception as e:
       return '', 'Error running shell command\n' + e
 
   def pipeExecute(self, commands, input):
@@ -250,7 +262,7 @@ class InteractivePrompt(app.controller.Controller):
               stderr=subprocess.STDOUT);
         prior.communicate(input)
         return process.communicate()[0], ''
-    except Exception, e:
+    except Exception as e:
       return '', 'Error running shell command\n' + e
 
   def info(self):

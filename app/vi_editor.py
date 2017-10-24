@@ -24,12 +24,36 @@ import re
 import text_buffer
 
 
-class ViEdit:
+class ViEdit(app.controller.Controller):
   """Vi is a common Unix editor. This mapping supports some common vi/vim
   commands."""
   def __init__(self, host):
-    self.host = host
+    app.controller.Controller.__init__(self, host, 'ViEdit')
     self.commandDefault = None
+
+  def setTextBuffer(self, textBuffer):
+    app.controller.Controller.setTextBuffer(self, textBuffer)
+    normalCommandSet = {
+      ord('^'): textBuffer.cursorStartOfLine,
+      ord('$'): textBuffer.cursorEndOfLine,
+      ord('h'): textBuffer.cursorLeft,
+      ord('i'): self.switchToCommandSetInsert,
+      ord('j'): textBuffer.cursorDown,
+      ord('k'): textBuffer.cursorUp,
+      ord('l'): textBuffer.cursorRight,
+    }
+    self.commandSet = normalCommandSet
+    self.commandSet_Insert = {
+      curses.ascii.ESC: self.switchToCommandSetNormal,
+    }
+    self.commandDefault = self.textBuffer.insertPrintable
+
+  def info(self):
+    app.log.info('ViEdit Command set main')
+    app.log.info(repr(self))
+
+  def onChange(self):
+    pass
 
   def focus(self):
     app.log.info('VimEdit.focus')
@@ -39,22 +63,6 @@ class ViEdit:
 
   def onChange(self):
     pass
-
-  def setTextBuffer(self, textBuffer):
-    app.log.info('VimEdit.setTextBuffer');
-    self.textBuffer = textBuffer
-    self.commandSet_Normal = {
-      ord('^'): textBuffer.cursorStartOfLine,
-      ord('$'): textBuffer.cursorEndOfLine,
-      ord('h'): textBuffer.cursorLeft,
-      ord('i'): self.switchToCommandSetInsert,
-      ord('j'): textBuffer.cursorDown,
-      ord('k'): textBuffer.cursorUp,
-      ord('l'): textBuffer.cursorRight,
-    }
-    self.commandSet_Insert = {
-      curses.ascii.ESC: self.switchToCommandSetNormal,
-    }
 
   def switchToCommandSetInsert(self, ignored=1):
     app.log.info('insert mode')

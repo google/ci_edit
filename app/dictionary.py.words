@@ -141,6 +141,7 @@ sel
 sep
 setattr
 setdefault
+setlocale
 shutil
 sigalrm
 sighup

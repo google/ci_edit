@@ -45,7 +45,7 @@ if 1:
         prefs['editor'].update(editorPrefs)
         app.log.startup('Updated editor prefs from', prefsPath)
         app.log.startup('as', prefs['editor'])
-      except Exception, e:
+      except Exception as e:
         app.log.startup('failed to parse', prefsPath)
         app.log.startup('error', e)
 
