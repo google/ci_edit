@@ -19,6 +19,7 @@ appcaches
 arraysize
 asan
 autolaunch
+axs
 backend
 breakpad
 browsertest
