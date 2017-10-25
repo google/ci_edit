@@ -214,6 +214,9 @@ class CiProgram:
             frame = None
             while self.bg.hasMessage():
               frame = self.bg.get()
+              if frame == 'quit':
+                self.exiting = True
+                return
             if frame is not None:
               self.refresh(frame[0], frame[1])
           elif ch != curses.ERR:
