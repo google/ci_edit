@@ -79,7 +79,7 @@ class ViewWindow:
   def blank(self, colorPair):
     """Clear the window."""
     for i in range(self.rows):
-      self.addStr(i, 0, ' ' * (self.cols - 1), colorPair)
+      self.addStr(i, 0, ' ' * self.cols, colorPair)
 
   def contains(self, row, col):
     """Determine whether the position at row, col lay within this window."""
