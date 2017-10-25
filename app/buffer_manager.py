@@ -33,9 +33,9 @@ class BufferManager:
     self.untrackBuffer_(textBuffer)
 
   def getUnsavedBuffer(self):
-    for buffer in self.buffers:
-      if buffer.isDirty():
-        return buffer
+    for fileBuffer in self.buffers:
+      if fileBuffer.isDirty():
+        return fileBuffer
     return None
 
   def newTextBuffer(self):
@@ -126,14 +126,14 @@ class BufferManager:
     app.log.info('finished reading from stdin')
     return textBuffer
 
-  def untrackBuffer_(self, buffer):
-    app.log.debug(buffer.fullPath)
-    self.buffers.remove(buffer)
+  def untrackBuffer_(self, fileBuffer):
+    app.log.debug(fileBuffer.fullPath)
+    self.buffers.remove(fileBuffer)
 
-  def renameBuffer(self, buffer, fullPath):
+  def renameBuffer(self, fileBuffer, fullPath):
     # TODO(dschuyler): this can be phased out. It was from a time when the
     # buffer manager needed to know if a path changed.
-    buffer.fullPath = fullPath
+    fileBuffer.fullPath = fullPath
 
   def fileClose(self, path):
     pass

@@ -281,7 +281,6 @@ class TextBuffer(app.actions.Actions):
           line = self.lines[startRow + i]
           if len(line) < lengthLimit or startCol > lengthLimit:
             continue
-          length = min(endCol, len(line) - lengthLimit)
           window.addStr(top + i, left + lengthLimit - startCol,
               line[lengthLimit:endCol], app.color.get(96 + colorDelta))
     if self.findRe is not None:

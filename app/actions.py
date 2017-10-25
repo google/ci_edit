@@ -1306,7 +1306,7 @@ class Actions(app.mutator.Mutator):
   def scrollUp(self):
     if self.view.scrollRow == 0:
       return
-    maxRow, maxCol = self.view.rows, self.view.cols
+    maxRow = self.view.rows
     cursorDelta = 0
     if self.penRow >= self.view.scrollRow + maxRow - 2:
       cursorDelta = self.view.scrollRow + maxRow - 2 - self.penRow
@@ -1325,7 +1325,7 @@ class Actions(app.mutator.Mutator):
       self.scrollUp()
 
   def scrollDown(self):
-    maxRow, maxCol = self.view.rows, self.view.cols
+    maxRow = self.view.rows
     if self.view.scrollRow + maxRow >= len(self.lines):
       return
     cursorDelta = 0
@@ -1338,9 +1338,9 @@ class Actions(app.mutator.Mutator):
       self.redo()
 
   def nextSelectionMode(self):
-    next = self.selectionMode + 1
-    next %= app.selectable.kSelectionModeCount
-    self.doSelectionMode(next)
+    nextMode = self.selectionMode + 1
+    nextMode %= app.selectable.kSelectionModeCount
+    self.doSelectionMode(nextMode)
     app.log.info('nextSelectionMode', self.selectionMode)
 
   def noOp(self, ignored):

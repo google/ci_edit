@@ -120,8 +120,7 @@ for k,v in prefs['grammar'].items():
       app.log.startup('Available grammars:')
       for k,v in grammars.items():
         app.log.startup('  ', k, ':', len(v))
-      print 'missing grammar for "' + grammarName + '" in prefs.py'
-      sys.exit(1)
+      raise Exception('missing grammar for "' + grammarName + '" in prefs.py')
     markers.append(g['begin'])
     matchGrammars.append(g)
   # Index [2+len(contains)..]

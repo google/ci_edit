@@ -134,6 +134,7 @@ relpath
 repr
 resizeterm
 restype
+rfind
 rit
 rsplit
 scrollok
@@ -142,6 +143,7 @@ sep
 setattr
 setdefault
 setlocale
+shome
 shutil
 sigalrm
 sighup

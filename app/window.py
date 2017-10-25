@@ -56,6 +56,8 @@ class ViewWindow:
     """Overwrite text at row, column with text. The caller is responsible for
     avoiding overdraw.
     """
+    #app.log.check_le(row, self.rows)
+    #app.log.check_le(col, self.cols)
     app.render.frame.addStr(self.top + row, self.left + col,
         text.encode('utf-8'), colorPair)
 
@@ -79,7 +81,7 @@ class ViewWindow:
   def blank(self, colorPair):
     """Clear the window."""
     for i in range(self.rows):
-      self.addStr(i, 0, ' ' * (self.cols - 1), colorPair)
+      self.addStr(i, 0, ' ' * self.cols, colorPair)
 
   def contains(self, row, col):
     """Determine whether the position at row, col lay within this window."""
@@ -94,8 +96,10 @@ class ViewWindow:
 
   def hide(self):
     """Remove window from the render list."""
-    try: self.parent.zOrder.remove(self)
-    except ValueError: app.log.detail(repr(self) + 'not found in zOrder')
+    try:
+      self.parent.zOrder.remove(self)
+    except ValueError:
+      app.log.detail(repr(self) + 'not found in zOrder')
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
     pass
@@ -158,16 +162,20 @@ class ViewWindow:
     was hidden with hide() it will no longer be hidden).
     """
     if self.parent:
-      try: self.parent.zOrder.remove(self)
-      except: pass
+      try:
+        self.parent.zOrder.remove(self)
+      except Exception:
+        pass
     self.parent = parent
     if parent:
       self.parent.zOrder.insert(layerIndex, self)
 
   def show(self):
     """Show window and bring it to the top layer."""
-    try: self.parent.zOrder.remove(self)
-    except: pass
+    try:
+      self.parent.zOrder.remove(self)
+    except Exception:
+      pass
     self.parent.zOrder.append(self)
 
   def writeLine(self, text, color):
@@ -189,8 +197,10 @@ class ActiveWindow(ViewWindow):
   def focus(self):
     app.log.info(self)
     self.hasFocus = True
-    try: self.parent.zOrder.remove(self)
-    except ValueError: app.log.detail(repr(self) + 'not found in zOrder')
+    try:
+      self.parent.zOrder.remove(self)
+    except ValueError:
+      app.log.detail(repr(self) + 'not found in zOrder')
     self.parent.zOrder.append(self)
     self.controller.focus()
 
@@ -297,7 +307,8 @@ class LabeledLine(Window):
 
 
 class Menu(ViewWindow):
-  """"""
+  """Work in progress on a context menu.
+  """
   def __init__(self, host):
     ViewWindow.__init__(self, host)
     self.host = host
@@ -327,9 +338,8 @@ class Menu(ViewWindow):
 
   def render(self):
     color = app.color.get('context_menu')
-    maxRow, maxCol = self.rows, self.cols
     self.writeLineRow = 0
-    for i in self.lines[:maxRow]:
+    for i in self.lines[:self.rows]:
       self.writeLine(" "+i, color);
     ViewWindow.render(self)
 
@@ -344,14 +354,13 @@ class LineNumbers(ViewWindow):
     self.host = host
 
   def drawLineNumbers(self):
-    maxRow, maxCol = self.rows, self.cols
-    textBuffer = self.host.textBuffer
-    limit = min(maxRow, len(textBuffer.lines)-self.host.scrollRow)
+    limit = min(self.rows,
+        len(self.host.textBuffer.lines) - self.host.scrollRow)
     color = app.color.get('line_number')
     for i in range(limit):
       self.addStr(i, 0, ' %5d ' % (self.host.scrollRow + i + 1), color)
     color = app.color.get('outside_document')
-    for i in range(limit, maxRow):
+    for i in range(limit, self.rows):
       self.addStr(i, 0, '       ', color)
     cursorAt = self.host.cursorRow - self.host.scrollRow
     if 0 <= cursorAt < limit:
@@ -407,11 +416,10 @@ class LogWindow(ViewWindow):
   def render(self):
     self.renderCounter += 1
     app.log.meta(" " * 10, self.renderCounter, "- screen refresh -")
-    maxRow, maxCol = self.rows, self.cols
     self.writeLineRow = 0
     colorA = app.color.get('default')
     colorB = app.color.get('highlight')
-    for i in self.lines[-maxRow:]:
+    for i in self.lines[-self.rows:]:
       color = colorA
       if len(i) and i[-1] == '-':
         color = colorB
@@ -450,7 +458,7 @@ class MessageLine(ViewWindow):
     if self.message:
       if self.message != self.renderedMessage:
         self.writeLineRow = 0
-        self.writeLine(self.message[0], app.color.get('message_line'))
+        self.writeLine(self.message, app.color.get('message_line'))
     else:
       self.blank(app.color.get('message_line'))
 
@@ -463,7 +471,6 @@ class StatusLine(ViewWindow):
     self.host = host
 
   def render(self):
-    maxRow, maxCol = self.rows, self.cols
     tb = self.host.textBuffer
     statusLine = ''
     if tb.message:
@@ -498,7 +505,8 @@ class StatusLine(ViewWindow):
         self.host.cursorRow+1, self.host.cursorCol + 1,
         rowPercentage,
         colPercentage)
-    statusLine += ' ' * (maxCol - len(statusLine) - len(rightSide)) + rightSide
+    statusLine += \
+        ' ' * (self.cols - len(statusLine) - len(rightSide)) + rightSide
     color = app.color.get('status_line')
     self.addStr(0, 0, statusLine[:self.cols], color)
 

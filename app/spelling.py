@@ -32,7 +32,7 @@ class OsDictionary:
       self.pageSize = 1024 * 8  # Arbitrary.
       # Add one to pick up any partial page at the end.
       self.filePages = self.fileLength / self.pageSize + 1
-    except:
+    except IOError:
       self.file = None
     self.cache = {}
     self.knownOffsets = []
@@ -47,41 +47,40 @@ class OsDictionary:
     high = self.filePages
     low = 0
     leash = 20  # Way more than should be necessary.
-    while True:
-      if not leash:
-        # There's likely a bug in this function if we hit this.
-        app.log.info('spelling leash', page, word)
-        return False
-      leash -= 1
-      page = low + (high - low) / 2
-      self.file.seek(page * self.pageSize)
-      # Add 100 to catch any words that straddle a page.
-      size = min(self.pageSize + 100, self.fileLength - page * self.pageSize)
-      if not size:
+    try:
+      while True:
+        if not leash:
+          # There's likely a bug in this function if we hit this.
+          app.log.info('spelling leash', word)
+          return False
+        leash -= 1
+        page = low + (high - low) / 2
+        self.file.seek(page * self.pageSize)
+        # Add 100 to catch any words that straddle a page.
+        size = min(self.pageSize + 100, self.fileLength - page * self.pageSize)
+        if not size:
+          self.cache[word] = False
+          return False
+        chunk = self.file.read(size)
+        chunk = chunk[chunk.find('\n'):chunk.rfind('\n')]
+        if not chunk:
+          self.cache[word] = False
+          return False
+        words = chunk.split()
+        if word < words[0].lower():
+          high = page
+          continue
+        if word > words[-1].lower():
+          low = page
+          continue
+        lowerWords = [i.lower() for i in words]
+        index = bisect.bisect_left(lowerWords, word)
+        if lowerWords[index] == word:
+          self.cache[word] = True
+          return True
         self.cache[word] = False
         return False
-      chunk = self.file.read(size)
-      try:
-        chunk = chunk[chunk.index('\n'):chunk.rfind('\n')]
-      except:
-        self.cache[word] = False
-        return False
-      if not chunk:
-        self.cache[word] = False
-        return False
-      words = chunk.split()
-      if word < words[0].lower():
-        high = page
-        continue
-      if word > words[-1].lower():
-        low = page
-        continue
-      lowerWords = [i.lower() for i in words]
-      index = bisect.bisect_left(lowerWords, word)
-      if lowerWords[index] == word:
-        self.cache[word] = True
-        return True
-      self.cache[word] = False
+    except IOError:
       return False
 
 osDictionary = OsDictionary()

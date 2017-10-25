@@ -191,8 +191,6 @@ class Mutator(app.selectable.Selectable):
       self.stallNextRedo = False
       return
     if self.processTempChange:
-      if self.debugRedo:
-        app.log.info('processTempChange', repr(change))
       self.processTempChange = False
       change = self.tempChange
       self.__redoMove(change)
@@ -497,7 +495,7 @@ class Mutator(app.selectable.Selectable):
       # Undo split lines.
       self.__undoMove(change[1][1])
       self.lines[self.penRow] += self.lines[self.penRow + change[1][0]]
-      for i in range(change[1][0]):
+      for _ in range(change[1][0]):
         del self.lines[self.penRow + 1]
       if self.upperChangedRow > self.penRow:
         self.upperChangedRow = self.penRow
@@ -520,7 +518,7 @@ class Mutator(app.selectable.Selectable):
     elif change[0] == 'vb':
       row = min(self.markerRow, self.penRow)
       endRow = max(self.markerRow, self.penRow)
-      for i in range(row, endRow + 1):
+      for _ in range(row, endRow + 1):
         line = self.lines[self.penRow]
         x = self.penCol
         self.lines[self.penRow] = line[:x] + change[1] + line[x:]
