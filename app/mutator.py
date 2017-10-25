@@ -73,6 +73,7 @@ class Mutator(app.selectable.Selectable):
       self.redoIndex = self.__compoundChange.pop(0)
       self.redoChain = self.redoChain[:self.redoIndex]
       changes = tuple(self.__compoundChange)
+      self.__compoundChange = None
       change = changes[0]
       # Combine changes. Assumes d, i, n, and m consist of only 1 change.
       if len(self.redoChain):
@@ -81,6 +82,7 @@ class Mutator(app.selectable.Selectable):
           if change[0] in ('d', 'i'):
             change = (change[0], self.redoChain[-1][0][1] + change[1])
             self.redoChain[-1] = (change,)
+            return
           elif change[0] == 'n':
             newMouseChange = change[2]
             newCarriageReturns = change[1]
@@ -89,6 +91,7 @@ class Mutator(app.selectable.Selectable):
             change = (change[0], oldCarriageReturns + newCarriageReturns,
                       ('m', addVectors(newMouseChange[1], oldMouseChange[1])))
             self.redoChain[-1] = (change,)
+            return
           elif change[0] == 'm':
             change = (change[0], addVectors(self.redoChain[-1][0][1],
                       change[1]))
@@ -97,10 +100,9 @@ class Mutator(app.selectable.Selectable):
               self.redoChain.pop()
             else:
               self.redoChain[-1] = (change,)
-      else:
-        self.redoChain.append(changes)
-        self.redoIndex += 1
-    self.__compoundChange = None
+            return
+      self.redoChain.append(changes)
+      self.redoIndex += 1
 
 
   def getPenOffset(self, row, col):
@@ -263,7 +265,6 @@ class Mutator(app.selectable.Selectable):
     elif change[0] == 'ds':  # Redo delete selection.
       self.doDeleteSelection()
     elif change[0] == 'i':  # Redo insert.
-      # import pdb; pdb.set_trace()
       line = self.lines[self.penRow]
       x = self.penCol
       self.lines[self.penRow] = line[:x] + change[1] + line[x:]
