@@ -81,7 +81,6 @@ class Mutator(app.selectable.Selectable):
           if change[0] in ('d', 'i'):
             change = (change[0], self.redoChain[-1][0][1] + change[1])
             self.redoChain[-1] = (change,)
-            return
           elif change[0] == 'n':
             newMouseChange = change[2]
             newCarriageReturns = change[1]
@@ -90,16 +89,17 @@ class Mutator(app.selectable.Selectable):
             change = (change[0], oldCarriageReturns + newCarriageReturns,
                       ('m', addVectors(newMouseChange[1], oldMouseChange[1])))
             self.redoChain[-1] = (change,)
-            return
           elif change[0] == 'm':
             change = (change[0], addVectors(self.redoChain[-1][0][1],
                       change[1]))
-            self.redoChain.pop()
-            if change not in noOpInstructions:
+            if change in noOpInstructions:
+              self.redoIndex -= 1
+              self.redoChain.pop()
+            else:
               self.redoChain[-1] = (change,)
-              return
-      self.redoChain.append(changes)
-      self.redoIndex += 1
+      else:
+        self.redoChain.append(changes)
+        self.redoIndex += 1
     self.__compoundChange = None
 
 
