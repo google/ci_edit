@@ -932,7 +932,9 @@ class Actions(app.mutator.Mutator):
     try:
       try:
         if app.prefs.editor['onSaveStripTrailingSpaces']:
+          self.compoundChangeBegin()
           self.stripTrailingWhiteSpace()
+          self.compoundChangeEnd()
         # Save user data that applies to read-only files into history.
         self.fileHistory['pen'] = (self.penRow, self.penCol)
         self.fileHistory['cursor'] = (self.view.cursorRow, self.view.cursorCol)
@@ -1444,11 +1446,9 @@ class Actions(app.mutator.Mutator):
     self.insertPrintable(0x00, None)
 
   def stripTrailingWhiteSpace(self):
-    self.compoundChangeBegin()
     for i in range(len(self.lines)):
       for found in app.selectable.kReEndSpaces.finditer(self.lines[i]):
         self.performDeleteRange(i, found.regs[0][0], i, found.regs[0][1])
-    self.compoundChangeEnd()
 
   def unindent(self):
     if self.selectionMode != app.selectable.kSelectionNone:
@@ -1468,7 +1468,6 @@ class Actions(app.mutator.Mutator):
     indentationLength = len(indentation)
     row = min(self.markerRow, self.penRow)
     endRow = max(self.markerRow, self.penRow)
-    self.compoundChangeBegin()
     begin = 0
     for i,line in enumerate(self.lines[row:endRow + 1]):
       if (len(line) < indentationLength or
@@ -1479,7 +1478,6 @@ class Actions(app.mutator.Mutator):
     self.verticalDelete(row + begin, endRow, 0, indentation)
     self.cursorMoveAndMark(0, -indentationLength, 0, -indentationLength, 0)
     self.redo()
-    self.compoundChangeEnd()
 
   def updateScrollPosition(self, scrollRowDelta, scrollColDelta):
     """

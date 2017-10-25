@@ -65,21 +65,17 @@ class Mutator(app.selectable.Selectable):
 
   def compoundChangeBegin(self):
     app.log.info('compoundChangeBegin')
-    assert self.__compoundChange is None
     self.__compoundChange = [self.redoIndex] # Save index.
 
   def compoundChangeEnd(self):
     app.log.info('compoundChangeEnd')
-    assert self.__compoundChange is not None
-    oldRedoIndex = self.__compoundChange.pop(0)
-    changes = tuple(self.__compoundChange)
-    self.__compoundChange = None
-    if changes:
-      self.redoIndex = oldRedoIndex
+    if self.__compoundChange and len(self.__compoundChange) != 1:
+      self.redoIndex = self.__compoundChange.pop(0)
       self.redoChain = self.redoChain[:self.redoIndex]
+      changes = tuple(self.__compoundChange)
       change = changes[0]
+      # Combine changes. Assumes d, i, n, and m consist of only 1 change.
       if len(self.redoChain):
-        # Combine changes. Assumes d, i, n, and m consist of only 1 change.
         if (self.redoChain[-1][0][0] == change[0] and
             len(self.redoChain[-1]) == 1):
           if change[0] in ('d', 'i'):
@@ -104,6 +100,7 @@ class Mutator(app.selectable.Selectable):
               return
       self.redoChain.append(changes)
       self.redoIndex += 1
+    self.__compoundChange = None
 
 
   def getPenOffset(self, row, col):
@@ -343,7 +340,7 @@ class Mutator(app.selectable.Selectable):
       app.log.info('redoAddChange', change)
     # When the redoChain is trimmed we may lose the saved at.
     # Trim only when there is a non-trivial action.
-    if change[0] == 'm':
+    if change[0] == 'm' and not self.__compoundChange:
       newTrivialChange = True
     else:
       # Accumulating changes together as a unit.
@@ -355,8 +352,8 @@ class Mutator(app.selectable.Selectable):
       self.redoChain = self.redoChain[:self.redoIndex]
       if self.tempChange:
         self.__compoundChange.pop()
-        if (len(self.redoChain) and self.redoChain[-1][0][0] and
-            len(self.redoChain[-1] == 1) == 'm'):
+        if (len(self.redoChain) and self.redoChain[-1][0][0] == 'm' and
+            len(self.redoChain[-1]) == 1):
           combinedChange = ('m', addVectors(self.tempChange[1],
               self.redoChain[-1][0][1]))
           if combinedChange in noOpInstructions:
