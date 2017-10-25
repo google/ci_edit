@@ -456,7 +456,7 @@ class MessageLine(ViewWindow):
     if self.message:
       if self.message != self.renderedMessage:
         self.writeLineRow = 0
-        self.writeLine(self.message[0], app.color.get('message_line'))
+        self.writeLine(self.message, app.color.get('message_line'))
     else:
       self.blank(app.color.get('message_line'))
 
