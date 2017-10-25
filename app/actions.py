@@ -256,7 +256,7 @@ class Actions(app.mutator.Mutator):
 
   def carriageReturn(self):
     self.performDelete()
-    self.redoAddChange(('n', (1, self.getCursorMove(1, -self.penCol))))
+    self.redoAddChange(('n', 1, self.getCursorMove(1, -self.penCol)))
     self.redo()
     if 1:  # TODO(dschuyler): if indent on CR
       line = self.lines[self.penRow - 1]

@@ -76,10 +76,12 @@ class Controller:
     self.savedCh = ch
     cmd = (self.commandSet.get(ch) or
           self.commandSet.get(app.curses_util.cursesKeyName(ch)))
+    self.textBuffer.compoundChangeBegin()
     if cmd:
       cmd()
     else:
       self.commandDefault(ch, meta)
+    self.textBuffer.compoundChangeEnd()
 
   def focus(self):
     app.log.info('base controller focus()')
