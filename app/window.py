@@ -56,6 +56,8 @@ class ViewWindow:
     """Overwrite text at row, column with text. The caller is responsible for
     avoiding overdraw.
     """
+    #app.log.check_le(row, self.rows)
+    #app.log.check_le(col, self.cols)
     app.render.frame.addStr(self.top + row, self.left + col,
         text.encode('utf-8'), colorPair)
 
