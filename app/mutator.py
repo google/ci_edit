@@ -239,12 +239,11 @@ class Mutator(app.selectable.Selectable):
         self.__redoChange(change)
       # Stop redoing if we redo a non-trivial action
       if not (changes[0][0] == 'm' and len(changes) == 1):
+        self.shouldReparse = True
         break
     self.updateBasicScrollPosition()
 
   def __redoChange(self, change):
-    if change[0] != 'm':
-      self.shouldReparse = True
     if change[0] == 'b':  # Redo backspace.
       line = self.lines[self.penRow]
       self.penCol -= len(change[1])
