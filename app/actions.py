@@ -703,14 +703,12 @@ class Actions(app.mutator.Mutator):
   def editPasteLines(self, clip):
     if self.selectionMode != app.selectable.kSelectionNone:
       self.performDelete()
-    self.redoAddChange(('v', clip))
-    self.redo()
     rowDelta = len(clip) - 1
     if rowDelta == 0:
       endCol = self.penCol + len(clip[0])
     else:
       endCol = len(clip[-1])
-    self.cursorMove(rowDelta, endCol - self.penCol)
+    self.redoAddChange(('v', clip, rowDelta, endCol - self.penCol))
     self.redo()
 
   def editRedo(self):

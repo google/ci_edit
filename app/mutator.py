@@ -286,6 +286,8 @@ class Mutator(app.selectable.Selectable):
       self.__redoMove(change[1][1])
     elif change[0] == 'v':  # Redo paste.
       self.insertLines(change[1])
+      self.penRow += change[2] # rowDelta
+      self.penCol += change[3] # colDelta
     elif change[0] == 'vb':
       self.penCol -= len(change[1])
       row = min(self.markerRow, self.penRow)
@@ -501,6 +503,8 @@ class Mutator(app.selectable.Selectable):
         self.upperChangedRow = self.penRow
     elif change[0] == 'v':  # undo paste
       clip = change[1]
+      self.penRow -= change[2] # rowDelta
+      self.penCol -= change[3] # colDelta
       row = self.penRow
       col = self.penCol
       app.log.info('len clip', len(clip))
