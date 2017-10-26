@@ -108,6 +108,17 @@ Within the Goto line prompt:
   * Affects goto: prompt, not the document.\
 """,
 
+  'tips': [
+"""Welcome to ci_edit.""",
+"",
+"""Tips: press ctrl+q to quit, ctrl+s (aka ^s) to save, ^a select all,""",
+"""      ^z cut, ^x cut, ^c copy, ^v paste, ^f find, ^o open file, ^w close,""",
+"""      ^g goto line. ^e and ^p are need more explanation, see help.md file.""",
+"",
+#"""What do you think of the help text above?""",
+#"""Please add feedback to https://github.com/google/ci_edit/issues/107""",
+],
+
   'version': \
 """\
   Version (build iteration): v31
@@ -117,4 +128,9 @@ Within the Goto line prompt:
   Please give the gift of feedback and bug reports at
     https://github.com/google/ci_edit/issues\
 """ % (dirPath,),
+
+  'welcome': \
+"""\
+Welcome to the ci_edit text editor.\
+""",
 }
