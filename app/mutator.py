@@ -344,15 +344,15 @@ class Mutator(app.selectable.Selectable):
     if change[0] == 'm' and not self.__compoundChange:
       newTrivialChange = True
     else:
-      # Accumulating changes together as a unit.
-      self.__compoundChange.append(change)
+      if self.__compoundChange is not None and not self.tempChange:
+        # Accumulating changes together as a unit.
+        self.__compoundChange.append(change)
       # Trim and combine main redoChain with tempChange
       # if there is a non-trivial action.
       if self.redoIndex < self.savedAtRedoIndex:
         self.savedAtRedoIndex = -1
       self.redoChain = self.redoChain[:self.redoIndex]
       if self.tempChange:
-        self.__compoundChange.pop()
         if (len(self.redoChain) and self.redoChain[-1][0][0] == 'm' and
             len(self.redoChain[-1]) == 1):
           combinedChange = ('m', addVectors(self.tempChange[1],
@@ -370,7 +370,7 @@ class Mutator(app.selectable.Selectable):
       if self.tempChange:
         # Combine new change with the existing tempChange.
         change = (change[0], addVectors(self.tempChange[1], change[1]))
-        self.undoChange(self.tempChange)
+        self.__undoChange(self.tempChange)
         self.__tempChange = change
       if change in noOpInstructions:
         self.stallNextRedo = True
