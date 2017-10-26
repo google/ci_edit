@@ -225,28 +225,21 @@ class Mutator(app.selectable.Selectable):
       return
     if self.processTempChange:
       self.processTempChange = False
-      change = self.tempChange
-      self.__redoMove(change)
+      self.__redoMove(self.tempChange)
       self.updateBasicScrollPosition()
       return
     if self.tempChange:
       self.__undoMove(self.tempChange)
       self.tempChange = None
       self.updateBasicScrollPosition()
-    if self.redoIndex < len(self.redoChain):
+    while self.redoIndex < len(self.redoChain):
       changes = self.redoChain[self.redoIndex]
       self.redoIndex += 1
-      if type(changes[0]) == tuple:
-        for change in changes:
-          self.__redoChange(change)
-      else:
-        # Single change for when we are creating a compound change.
-        self.__redoChange(changes)
-      # Redo again if next edit is a cursor move.
-      if (self.redoIndex < len(self.redoChain) and
-          self.redoChain[self.redoIndex][0][0] == 'm' and
-          len(self.redoChain[self.redoIndex]) == 1):
-        self.__redoChange(self.redoChain[self.redoIndex][0])
+      for change in changes:
+        self.__redoChange(change)
+      # Stop redoing if we redo a non-trivial action
+      if not (changes[0][0] == 'm' and len(changes) == 1):
+        break
     self.updateBasicScrollPosition()
 
   def __redoChange(self, change):
@@ -408,31 +401,27 @@ class Mutator(app.selectable.Selectable):
 
   def undo(self):
     """Undo a set of redo nodes."""
-    while 1:
-      assert 0 <= self.redoIndex <= len(self.redoChain)
-      # If tempChange is active, undo it first to fix cursor position.
-      if self.tempChange:
-        self.__undoMove(self.tempChange)
-        self.tempChange = None
-        return True
-      if self.redoIndex > 0:
-        self.redoIndex -= 1
-        changes = self.redoChain[self.redoIndex]
-        if changes[0][0] != 'm' or len(changes) != 1:
-          self.shouldReparse = True
-        if self.debugRedo:
-          app.log.info('undo', self.redoIndex, repr(changes))
+    # import pdb; pdb.set_trace()
+    assert 0 <= self.redoIndex <= len(self.redoChain)
+    # If tempChange is active, undo it first to fix cursor position.
+    if self.tempChange:
+      self.__undoMove(self.tempChange)
+      self.tempChange = None
+    while self.redoIndex > 0:
+      if self.debugRedo:
+        app.log.info('undo', self.redoIndex, repr(changes))
+      self.redoIndex -= 1
+      changes = self.redoChain[self.redoIndex]
+      if changes[0][0] == 'm' and len(changes) == 1:
         # Undo if the last edit was a cursor move.
-        if (self.redoIndex > 0 and
-            self.redoChain[self.redoIndex][0][0] == 'm' and
-            len(self.redoChain[self.redoIndex]) == 1):
-          self.__undoChange(self.redoChain[self.redoIndex][0])
-          self.redoIndex -= 1
+        self.__undoChange(changes[0])
+      else:
+        self.shouldReparse = True
         # Undo previous non-trivial edit
         for change in reversed(changes):
           self.__undoChange(change)
-      break
-    assert self.tempChange == None
+        break
+
     self.processTempChange = False
 
 
@@ -488,7 +477,6 @@ class Mutator(app.selectable.Selectable):
         self.upperChangedRow = firstChangedRow
     elif change[0] == 'm':
       self.__undoMove(change)
-      return True
     elif change[0] == 'ml':
       # Undo move lines
       begin, end, to = change[1]
@@ -539,7 +527,6 @@ class Mutator(app.selectable.Selectable):
       self.__doVerticalDelete(change)
     else:
       app.log.info('ERROR: unknown undo.')
-    return False
 
   def updateBasicScrollPosition(self):
     pass
