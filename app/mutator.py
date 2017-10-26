@@ -36,6 +36,9 @@ class Mutator(app.selectable.Selectable):
   def __init__(self):
     app.selectable.Selectable.__init__(self)
     self.__compoundChange = None
+    # |__oldRedoIndex| is used to store the redo index before an action occurs,
+    # so we know where to insert the compound change.
+    self.__oldRedoIndex = 0
     self.debugRedo = False
     self.findRe = None
     self.findBackRe = None
@@ -65,15 +68,16 @@ class Mutator(app.selectable.Selectable):
 
   def compoundChangeBegin(self):
     app.log.info('compoundChangeBegin')
-    self.__compoundChange = [self.redoIndex] # Save index.
+    self.__compoundChange = []
+    self.__oldRedoIndex = self.redoIndex
 
   def compoundChangeEnd(self):
     app.log.info('compoundChangeEnd')
-    if self.__compoundChange and len(self.__compoundChange) != 1:
-      self.redoIndex = self.__compoundChange.pop(0)
+    x = self.__compoundChange
+    if self.__compoundChange:
+      self.redoIndex = self.__oldRedoIndex
       self.redoChain = self.redoChain[:self.redoIndex]
       changes = tuple(self.__compoundChange)
-      self.__compoundChange = None
       change = changes[0]
       # Combine changes. Assumes d, i, n, and m consist of only 1 change.
       if len(self.redoChain):
@@ -103,6 +107,7 @@ class Mutator(app.selectable.Selectable):
             return
       self.redoChain.append(changes)
       self.redoIndex += 1
+    self.__compoundChange = None
 
 
   def getPenOffset(self, row, col):
@@ -341,18 +346,17 @@ class Mutator(app.selectable.Selectable):
       app.log.info('redoAddChange', change)
     # When the redoChain is trimmed we may lose the saved at.
     # Trim only when there is a non-trivial action.
+    # A trivial change is a standalone cursor move.
     if change[0] == 'm' and not self.__compoundChange:
       newTrivialChange = True
     else:
-      if self.__compoundChange is not None and not self.tempChange:
-        # Accumulating changes together as a unit.
-        self.__compoundChange.append(change)
       # Trim and combine main redoChain with tempChange
       # if there is a non-trivial action.
       if self.redoIndex < self.savedAtRedoIndex:
         self.savedAtRedoIndex = -1
       self.redoChain = self.redoChain[:self.redoIndex]
       if self.tempChange:
+        # If previous action was a cursor move, we can merge it with tempChange.
         if (len(self.redoChain) and self.redoChain[-1][0][0] == 'm' and
             len(self.redoChain[-1]) == 1):
           combinedChange = ('m', addVectors(self.tempChange[1],
@@ -360,11 +364,13 @@ class Mutator(app.selectable.Selectable):
           if combinedChange in noOpInstructions:
             self.redoChain.pop()
             self.redoIndex -= 1
+            self.__oldRedoIndex -= 1
           else:
             self.redoChain[-1] = (combinedChange,)
         else:
           self.redoChain.append((self.tempChange,))
           self.redoIndex += 1
+          self.__oldRedoIndex += 1
         self.tempChange = None
     if newTrivialChange:
       if self.tempChange:
@@ -381,6 +387,8 @@ class Mutator(app.selectable.Selectable):
       self.processTempChange = True
       self.tempChange = change
     else:
+      # Accumulating changes together as a unit.
+      self.__compoundChange.append(change)
       self.redoChain.append((change,))
     if self.debugRedo:
       app.log.info('--- redoIndex', self.redoIndex)
