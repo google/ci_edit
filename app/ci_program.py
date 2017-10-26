@@ -679,6 +679,8 @@ class CiProgram:
       app.prefs.color = app.prefs.color256
       app.color.colors = 256
       twoTries(app.prefs.editor['palette'], 'default')
+    else:
+      raise Exception('unknown palette color count ' + repr(curses.COLORS))
 
 def wrapped_ci(cursesScreen):
   try:
