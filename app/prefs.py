@@ -73,7 +73,7 @@ if colorSchemeName == 'custom':
       except:
         app.log.startup('failed to parse', prefsPath)
 elif colorSchemeName in builtInColorSchemes:
-    prefs['color'].update(builtInColorSchemes[colorSchemeName])
+  prefs['color'].update(builtInColorSchemes[colorSchemeName])
 
 
 color = prefs['color']
