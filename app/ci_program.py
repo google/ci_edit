@@ -118,9 +118,11 @@ class CiProgram:
       # curses event messages to simulate a full startup with a GUI render.
       curses.ungetch(17)
     start = time.time()
+    # The first render, to get something on the screen.
     if useBgThread:
       self.bg.put((self, []))
-    #frame = self.bg.get()
+    else:
+      self.render()
     # This is the 'main loop'. Execution doesn't leave this loop until the
     # application is closing down.
     while not self.exiting:
@@ -132,7 +134,6 @@ class CiProgram:
             return
           self.refresh(frame[0], frame[1])
       elif 1:
-        self.render()
         frame = app.render.frame.grabFrame()
         self.refresh(frame[0], frame[1])
       else:
