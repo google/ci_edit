@@ -36,7 +36,7 @@ Within Find:
 
 Within Goto:
 
-  return       Go to the line,column specified
+  return       Go to the line, column specified
   esc          Return to main window
   t            Jump to top of buffer
   h            Jump to halfway point of buffer

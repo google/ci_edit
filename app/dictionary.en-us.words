@@ -96,6 +96,7 @@ accelerating
 acceleration
 accelerator
 accelerators
+accelerometer
 accent
 accented
 accents
@@ -406,6 +407,7 @@ aggregation
 aggressive
 aggressively
 aggressiveness
+agile
 agnostic
 ago
 agog
@@ -615,6 +617,7 @@ amplifiers
 amplify
 amplitude
 amt
+amusements
 amusing
 amusingly
 an
@@ -821,6 +824,7 @@ approximation
 approximations
 apps
 apricot
+april
 apropos
 apt
 aptly
@@ -931,6 +935,7 @@ ascension
 ascent
 ascents
 ascertain
+ascertaining
 ash
 ashamedly
 aside
@@ -1041,6 +1046,7 @@ attaching
 attachment
 attachments
 attack
+attacked
 attacker
 attackers
 attacks
@@ -1202,6 +1208,7 @@ awn
 awoken
 awry
 ax
+axe
 axed
 axes
 axial
@@ -2195,8 +2202,11 @@ cancelable
 canceled
 canceler
 canceling
+cancellable
 cancellation
 cancellations
+canceller
+cancelling
 cancels
 cancer
 candidate
@@ -2513,6 +2523,9 @@ checkers
 checking
 checklist
 checklists
+checkmark
+checkmarked
+checkmarks
 checkout
 checkouts
 checkpoint
@@ -2818,6 +2831,7 @@ coalesced
 coalesces
 coalescing
 coarse
+coarsely
 coast
 coastal
 coax
@@ -3487,6 +3501,7 @@ converge
 converged
 convergence
 convergent
+converging
 conversation
 conversational
 converse
@@ -3629,6 +3644,7 @@ cote
 cots
 couches
 cougar
+coughing
 could
 coulomb
 council
@@ -3699,6 +3715,7 @@ crackle
 cracks
 craft
 crafted
+crafter
 crafting
 crafts
 crag
@@ -3742,6 +3759,7 @@ creatives
 creator
 creators
 creature
+creatures
 cred
 credential
 credentialed
@@ -3840,6 +3858,7 @@ cubic
 cubit
 cubs
 cuckoo
+cucumber
 cud
 cuddle
 cue
@@ -4085,6 +4104,7 @@ decelerate
 decelerates
 decelerating
 deceleration
+december
 decent
 deceptive
 decibel
@@ -4237,6 +4257,8 @@ degraded
 degrades
 degree
 degrees
+deigned
+deigning
 deity
 delay
 delayed
@@ -4981,6 +5003,8 @@ done
 dong
 dongle
 donor
+donut
+donuts
 doodle
 doom
 doomed
@@ -5584,6 +5608,7 @@ entering
 enterprise
 enterprises
 enters
+entertained
 entertainment
 enthusiasm
 enthusiast
@@ -5806,6 +5831,7 @@ excel
 excellence
 excellency
 excellent
+excellently
 except
 excepted
 excepting
@@ -5932,6 +5958,7 @@ expiring
 expiry
 explain
 explained
+explainer
 explaining
 explains
 explanation
@@ -6175,6 +6202,7 @@ featured
 featureless
 features
 featuring
+february
 fed
 federal
 federated
@@ -6190,6 +6218,7 @@ feeding
 feeds
 feel
 feeling
+feelings
 feels
 fees
 feet
@@ -6308,6 +6337,7 @@ finders
 finding
 finds
 fine
+finely
 finer
 fines
 finessed
@@ -6716,6 +6746,7 @@ freshness
 fret
 fricative
 friction
+friday
 fried
 friedcake
 friend
@@ -6969,6 +7000,7 @@ gestured
 gestures
 get
 gets
+getters
 getting
 ghee
 ghetto
@@ -7036,6 +7068,7 @@ globalization
 globalize
 globalizes
 globally
+globals
 globbing
 globe
 globetrotter
@@ -8683,6 +8716,7 @@ invalidated
 invalidates
 invalidating
 invalidation
+invalidations
 invalidity
 invalidly
 invaluable
@@ -8822,6 +8856,7 @@ jaguar
 jailed
 jam
 jams
+january
 japan
 japans
 jar
@@ -8909,6 +8944,7 @@ judicious
 jug
 juggle
 jukebox
+july
 jumbo
 jump
 jumped
@@ -8916,6 +8952,7 @@ jumping
 jumps
 jumpy
 jun
+june
 jungle
 junior
 juniper
@@ -9983,6 +10020,7 @@ meant
 meantime
 meanwhile
 meas
+measurable
 measure
 measured
 measurement
@@ -10286,6 +10324,9 @@ mistakenly
 mistakes
 mister
 misty
+mistype
+mistyped
+mistyping
 misunderstanding
 misunderstandings
 misuse
@@ -10385,6 +10426,7 @@ monarch
 monarchies
 monarchs
 monarchy
+monday
 monetary
 monetize
 monetizing
@@ -10711,6 +10753,7 @@ neon
 nephew
 nerd
 nerds
+nerves
 nest
 nested
 nesting
@@ -10761,6 +10804,7 @@ nick
 nickname
 nicknames
 niece
+nieces
 nifty
 night
 nightly
@@ -10901,6 +10945,7 @@ novel
 novels
 novelties
 novelty
+november
 novice
 now
 nowadays
@@ -11054,6 +11099,7 @@ octave
 octaves
 octet
 octets
+october
 octogenarian
 odd
 oddball
@@ -11129,6 +11175,8 @@ ones
 oneself
 onetime
 ongoing
+onion
+onions
 online
 only
 onomatopoeia
@@ -11650,6 +11698,7 @@ passphrase
 passphrases
 passport
 passports
+passthrough
 password
 passwords
 past
@@ -11666,6 +11715,8 @@ pasting
 pastor
 pastoral
 pastrami
+pastries
+pastry
 pasts
 pat
 patch
@@ -12179,6 +12230,7 @@ pol
 polar
 polarity
 pole
+poles
 polestar
 police
 polices
@@ -12193,6 +12245,7 @@ politically
 politics
 polka
 poll
+pollable
 pollard
 polled
 polling
@@ -12429,6 +12482,8 @@ prejudicial
 prelim
 preliminary
 preload
+preloaded
+preloading
 prelude
 premature
 prematurely
@@ -12512,7 +12567,9 @@ prettify
 prettifying
 pretty
 prevail
+prevailed
 prevailing
+prevails
 prevent
 preventable
 prevented
@@ -13297,6 +13354,10 @@ receivers
 receives
 receiving
 recent
+recenter
+recentered
+recentering
+recenters
 recently
 reception
 rechargeable
@@ -13949,6 +14010,7 @@ resolvable
 resolve
 resolved
 resolver
+resolvers
 resolves
 resolving
 resonance
@@ -14444,6 +14506,8 @@ salvos
 samba
 same
 sameness
+samosa
+samosas
 sample
 sampled
 sampler
@@ -14453,7 +14517,9 @@ sampling
 sanctioned
 sand
 sandbox
+sandboxed
 sandboxes
+sandboxing
 sandwich
 sandwiched
 sandy
@@ -14492,6 +14558,7 @@ satisfying
 saturate
 saturated
 saturation
+saturday
 satyric
 sauce
 sausage
@@ -14504,6 +14571,7 @@ saver
 saves
 saving
 savings
+savory
 savoy
 savvy
 saw
@@ -14646,6 +14714,7 @@ scrubbing
 scrubby
 scrubs
 scruple
+se
 sea
 seal
 sealed
@@ -14805,6 +14874,7 @@ separation
 separator
 separators
 sepia
+september
 septuagenarian
 seq
 sequel
@@ -15204,6 +15274,7 @@ sir
 sirs
 sis
 sister
+sisters
 sit
 site
 sited
@@ -15638,6 +15709,8 @@ spheres
 spherical
 sphinx
 spice
+spiced
+spices
 spicy
 spider
 spiel
@@ -15967,6 +16040,8 @@ storms
 story
 stove
 stow
+straddle
+straddled
 straddling
 straight
 straightforward
@@ -16248,6 +16323,7 @@ sumo
 sums
 sun
 sunburst
+sunday
 sundry
 sunflower
 sunflowers
@@ -16556,6 +16632,7 @@ talking
 talks
 tall
 taller
+tallest
 tally
 tallying
 talon
@@ -16914,6 +16991,7 @@ thunderbolt
 thundering
 thunderstorm
 thunk
+thursday
 thus
 thwart
 thy
@@ -17412,6 +17490,7 @@ tuberculosis
 tubes
 tubular
 tuck
+tuesday
 tug
 tugs
 tulip
@@ -18131,6 +18210,7 @@ vectors
 veg
 veges
 vegetable
+vegetables
 vegetarian
 vehicle
 veil
@@ -18497,6 +18577,7 @@ wedding
 wedge
 wedged
 wedges
+wednesday
 wee
 weed
 weeded

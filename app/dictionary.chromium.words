@@ -14,9 +14,12 @@
 
 
 # Chromium (May be specific to Chromium development)
+appcache
+appcaches
 arraysize
 asan
 autolaunch
+axs
 backend
 breakpad
 browsertest
@@ -38,6 +41,7 @@ eap
 eslint
 filemanager
 futf
+gclient
 gdoc
 gdraw
 gmock
@@ -46,10 +50,12 @@ gni
 goma
 grd
 gtest
+gtestjs
 gurl
 hotword
 hwid
 jstemplate
+lso
 nacl
 nav
 newtabpage
@@ -63,10 +69,12 @@ presubmit
 pylint
 remora
 safebrowsing
+spdy
 stringprintf
 tbr
 tryserver
 uma
+unittest
 unittests
 vlog
 vox

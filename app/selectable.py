@@ -22,8 +22,9 @@ kReEndSpaces = re.compile(r'\s+$')
 kReNumbers = re.compile('0x[0-9a-fA-F]+|\d+')
 kReStrings = re.compile(
     r"(\"\"\".*?(?<!\\)\"\"\")|('''.*?(?<!\\)''')|(\".*?(?<!\\)\")|('.*?(?<!\\)')")
+# The first group is a hack to allow upper case pluralized, e.g. URLs.
 kReSubwords = re.compile(
-    '(?:[A-Z][a-z]+)|(?:[A-Z]+(?![a-z]))|(?:[a-z]+)')
+    r'(?:[A-Z]{2,}s\b)|(?:[A-Z][a-z]+)|(?:[A-Z]+(?![a-z]))|(?:[a-z]+)')
 kReSubwordBoundaryFwd = re.compile(
     '(?:[_-]?[A-Z][a-z-]+)|(?:[_-]?[A-Z]+(?![a-z]))|(?:[_-]?[a-z]+)|(?:\W+)')
 kReSubwordBoundaryRvr = re.compile(
@@ -58,7 +59,7 @@ kSelectionModeNames = [
 
 class BaseLineBuffer:
   def __init__(self):
-    self.lines = [""]
+    self.lines = [unicode("")]
     self.message = ('New buffer', 0)
 
   def setMessage(self, *args, **dict):
@@ -85,6 +86,7 @@ class Selectable(BaseLineBuffer):
     self.markerRow = 0
     self.markerCol = 0
     self.selectionMode = kSelectionNone
+    self.upperChangedRow = 0
 
   def debug(self):
     return "(Selectable: line count %d, pen %d,%d, marker %d,%d, mode %s)"%(
@@ -137,6 +139,8 @@ class Selectable(BaseLineBuffer):
     self.doDelete(upperRow, upperCol, lowerRow, lowerCol)
 
   def doDelete(self, upperRow, upperCol, lowerRow, lowerCol):
+    if self.upperChangedRow > upperRow:
+      self.upperChangedRow = upperRow
     if self.selectionMode == kSelectionBlock:
       for i in range(upperRow, lowerRow+1):
         line = self.lines[i]
@@ -152,7 +156,7 @@ class Selectable(BaseLineBuffer):
           lowerRow == len(self.lines) and lowerCol == len(self.lines[-1])):
         del self.lines[upperRow:lowerRow]
         if not len(self.lines):
-          self.lines.append("")
+          self.lines.append(unicode(""))
       else:
         self.lines[upperRow] = (self.lines[upperRow][:upperCol] +
             self.lines[lowerRow][lowerCol:])
@@ -167,13 +171,16 @@ class Selectable(BaseLineBuffer):
     self.insertLinesAt(self.penRow, self.penCol, lines,
         self.selectionMode)
 
-  def insertLinesAt(self, row, col, lines, selectionMode=kSelectionNone):
+  def insertLinesAt(self, row, col, lines, selectionMode):
     if len(lines) == 0:
       return
     lines = list(lines)
     if selectionMode == kSelectionAll:
       self.lines = lines
+      self.upperChangedRow = 0
       return
+    if self.upperChangedRow > row:
+      self.upperChangedRow = row
     if (selectionMode == kSelectionNone or
         selectionMode == kSelectionCharacter or
         selectionMode == kSelectionWord):

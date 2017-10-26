@@ -61,6 +61,8 @@ buf
 bugzilla
 bzip
 calc
+canonicalize
+canonicalized
 cfg
 cgi
 changelist
@@ -125,6 +127,8 @@ fn
 formatter
 freebsd
 ftp
+func
+functor
 gaia
 ge
 getter
@@ -141,6 +145,7 @@ htm
 https
 hxx
 idr
+iff
 ifndef
 img
 ini
@@ -186,6 +191,7 @@ num
 oauth
 obj
 objc
+oob
 openbsd
 patcher
 pid
@@ -226,6 +232,7 @@ runtime
 rv
 serializable
 sha
+sig
 signin
 skia
 solaris
@@ -276,6 +283,7 @@ utf
 vpn
 vpns
 waitable
+wasm
 wb
 webkit
 websocket

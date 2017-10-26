@@ -34,8 +34,8 @@ def initCommandSet(editText, textBuffer):
     CTRL_V: textBuffer.editPaste,
     CTRL_W: editText.closeOrConfirmClose,
     CTRL_X: textBuffer.editCut,
-    CTRL_Y: textBuffer.redo,
-    CTRL_Z: textBuffer.undo,
+    CTRL_Y: textBuffer.editRedo,
+    CTRL_Z: textBuffer.editUndo,
 
     KEY_BACKSPACE1: textBuffer.backspace,
     KEY_BACKSPACE2: textBuffer.backspace,
@@ -44,6 +44,8 @@ def initCommandSet(editText, textBuffer):
     KEY_DELETE: textBuffer.delete,
     KEY_HOME: textBuffer.cursorStartOfLine,
     KEY_END: textBuffer.cursorEndOfLine,
+    KEY_SHOME: textBuffer.cursorSelectToStartOfLine,
+    KEY_SEND: textBuffer.cursorSelectToEndOfLine,
 
     # KEY_DOWN: textBuffer.cursorDown,
     KEY_LEFT: textBuffer.cursorLeft,
@@ -342,7 +344,7 @@ class CuaPlusEdit(CuaEdit):
 
       KEY_F2: textBuffer.bookmarkNext,
       KEY_F3: textBuffer.findAgain,
-      #KEY_F4: self.prg.paletteWindow.focus,
+      #KEY_F4: self.changeToPaletteWindow,
       KEY_SHIFT_F2: textBuffer.bookmarkPrior,
       KEY_SHIFT_F3: textBuffer.findBack,
     })

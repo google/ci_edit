@@ -15,6 +15,7 @@
 import app.prefs
 import curses
 
+colors = 256
 cache__ = {}
 
 def reset():
@@ -27,7 +28,7 @@ def get(colorType):
   if r is not None:
     return r
   if type(colorType) == type(0):
-    colorIndex = colorType
+    colorIndex = min(colors - 1, colorType)
   else:
     colorIndex = app.prefs.color[colorType]
   color = curses.color_pair(colorIndex)

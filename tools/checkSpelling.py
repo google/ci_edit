@@ -32,7 +32,7 @@ filePattern = (len(sys.argv) > 2 and sys.argv[2]) or "*.*"
 
 
 kReIgnoreDirs = re.compile(r'''/\.git/''')
-kReIgnoreFiles = re.compile(r'''\.pyc$''')
+kReIgnoreFiles = re.compile(r'''\.pyc$|.pyo$''')
 assert kReIgnoreDirs.search('/apple/.git/orange')
 assert kReIgnoreFiles.search('/apple.pyc')
 app.spelling.loadWords(os.path.join(ciEditDir, 'app'))

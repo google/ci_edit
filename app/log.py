@@ -16,6 +16,7 @@ import io
 import inspect
 import os
 import sys
+import time
 import traceback
 
 
@@ -23,6 +24,7 @@ screenLog = ["--- screen log ---"]
 fullLog = ["--- begin log ---"]
 enabledChannels = {'meta': True, 'mouse': True, 'startup': True}
 shouldWritePrintLog = False
+startTime = time.time()
 
 if os.getenv('CI_EDIT_USE_FAKE_CURSES'):
   enabledChannels = {
@@ -82,8 +84,32 @@ def exception(e):
   for i in out:
     error(i[:-1])
 
+def check_failed(prefix, a, op, b):
+  stack('failed %s %r %s %r' % (prefix, a, op, b))
+  raise Exception('fatal error')
 
-def stack():
+def check_ge(a, b):
+  if a >= b:
+    return
+  check_failed('check_ge', a, '>=', b)
+
+def check_gt(a, b):
+  if a > b:
+    return
+  check_failed('check_lt', a, '<', b)
+
+def check_le(a, b):
+  if a <= b:
+    return
+  check_failed('check_le', a, '<=', b)
+
+def check_lt(a, b):
+  if a < b:
+    return
+  check_failed('check_lt', a, '<', b)
+
+
+def stack(*args):
   global fullLog, screenLog
   stack = inspect.stack()[1:]
   stack.reverse()
@@ -92,6 +118,9 @@ def stack():
         frame[2], frame[3])]
     screenLog += line
     fullLog += line
+  if len(args):
+    screenLog.append("stack    " + repr(args[0]))
+    fullLog.append("stack    " + repr(args[0]))
 
 def info(*args):
   channel('info', *args)
@@ -108,6 +137,19 @@ def parser(*args):
 
 def startup(*args):
   channel('startup', *args)
+
+def quick(*args):
+  global fullLog, screenLog
+  msg = str(args[0])
+  prior = msg
+  for i in args[1:]:
+    if not len(prior) or prior[-1] != '\n':
+      msg += ' '
+    prior = unicode(i)
+    msg += prior
+  lines = msg.split("\n")
+  screenLog += lines
+  fullLog += lines
 
 def debug(*args):
   global enabledChannels, fullLog, screenLog
@@ -127,6 +169,10 @@ def error(*args):
   lines = parseLines(inspect.stack()[1], 'error', *args)
   fullLog += lines
 
+def when(*args):
+  args = (time.time() - startTime,) + args
+  channel('info', *args)
+
 def wrapper(function, shouldWrite=True):
   global shouldWritePrintLog
   shouldWritePrintLog = shouldWrite
@@ -134,7 +180,7 @@ def wrapper(function, shouldWrite=True):
   try:
     try:
       r = function()
-    except BaseException, e:
+    except BaseException:
       shouldWritePrintLog = True
       errorType, value, tracebackInfo = sys.exc_info()
       out = traceback.format_exception(errorType, value, tracebackInfo)
@@ -152,4 +198,4 @@ def writeToFile(path):
 def flush():
   global fullLog
   if shouldWritePrintLog:
-    print "\n".join(fullLog)
+    sys.stdout.write("\n".join(fullLog) + "\n")

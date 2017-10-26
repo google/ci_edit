@@ -15,6 +15,7 @@
 import app.log
 import app.history
 import app.text_buffer
+import io
 import os
 import sys
 
@@ -32,14 +33,14 @@ class BufferManager:
     self.untrackBuffer_(textBuffer)
 
   def getUnsavedBuffer(self):
-    for buffer in self.buffers:
-      if buffer.isDirty():
-        return buffer
+    for fileBuffer in self.buffers:
+      if fileBuffer.isDirty():
+        return fileBuffer
     return None
 
   def newTextBuffer(self):
     textBuffer = app.text_buffer.TextBuffer()
-    textBuffer.lines = [""]
+    textBuffer.lines = [unicode("")]
     textBuffer.savedAtRedoIndex = 0
     self.buffers.append(textBuffer)
     app.log.info(textBuffer)
@@ -117,19 +118,22 @@ class BufferManager:
     os.dup2(newStdin.fileno(), stdinFd)
     # Create a text buffer to read from alternate stream.
     textBuffer = self.newTextBuffer()
-    with os.fdopen(newFd, "r") as fileInput:
-      textBuffer.fileFilter(fileInput.read())
+    try:
+      with io.open(newFd, "r") as fileInput:
+        textBuffer.fileFilter(fileInput.read())
+    except Exception as e:
+      app.log.exception(e)
     app.log.info('finished reading from stdin')
     return textBuffer
 
-  def untrackBuffer_(self, buffer):
-    app.log.debug(buffer.fullPath)
-    self.buffers.remove(buffer)
+  def untrackBuffer_(self, fileBuffer):
+    app.log.debug(fileBuffer.fullPath)
+    self.buffers.remove(fileBuffer)
 
-  def renameBuffer(self, buffer, fullPath):
+  def renameBuffer(self, fileBuffer, fullPath):
     # TODO(dschuyler): this can be phased out. It was from a time when the
     # buffer manager needed to know if a path changed.
-    buffer.fullPath = fullPath
+    fileBuffer.fullPath = fullPath
 
   def fileClose(self, path):
     pass

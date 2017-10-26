@@ -13,8 +13,11 @@
 # limitations under the License.
 
 
+# These constants have specific values.
 COLORS = 256
 
+
+# These constants have arbitrary values.
 KEY_ALT_A = 0
 KEY_ALT_B = 1
 KEY_ALT_C = 2
@@ -84,6 +87,8 @@ KEY_SPREVIOUS = 65
 KEY_SR = 66
 KEY_SRIGHT = 67
 KEY_UP = 68
+KEY_SEND = 69
+KEY_SHOME = 70
 
 
 A_BOLD = 1000
@@ -107,7 +112,5 @@ BUTTON4_RELEASED = 16
 BUTTON_ALT = 17
 BUTTON_CTRL = 18
 BUTTON_SHIFT = 19
-COLORS = 20
-COLORS256 = 21
 ERR = 22
 REPORT_MOUSE_POSITION = 23

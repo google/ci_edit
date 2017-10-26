@@ -58,6 +58,8 @@ getcwd
 getenv
 getmaxyx
 getmouse
+getpid
+getpreferredencoding
 getvalue
 getyx
 gid
@@ -73,6 +75,7 @@ iglob
 ignorecase
 init
 ino
+insort
 inventwithpython
 isdigit
 isdir
@@ -89,6 +92,7 @@ klipper
 kwargs
 leaveok
 len
+lft
 listdir
 lpcstr
 lpvoid
@@ -109,6 +113,7 @@ newwin
 normpath
 noutrefresh
 npage
+nxt
 ord
 os
 pbcopy
@@ -116,6 +121,7 @@ pbpaste
 pid
 popen
 ppage
+prv
 pstats
 pyperclip
 pythonpath
@@ -128,17 +134,26 @@ relpath
 repr
 resizeterm
 restype
+rfind
+rit
 rsplit
 scrollok
 sel
 sep
 setattr
 setdefault
+setlocale
+shome
 shutil
+sigalrm
+sighup
+sigusr
 sigwinch
 sizeof
 sleft
+snext
 splitext
+sprevious
 sre
 sright
 startswith

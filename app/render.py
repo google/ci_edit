@@ -12,16 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-behaviour
-cancelled
-colour
-copiable
-favour
-favourite
-grey
-honour
-humour
-humoured
-neighbour
-neighbourhood
-travelled
+class Frame:
+  def __init__(self):
+    self.cursor = None
+    self.drawList = []
+
+  def addStr(self, row, col, text, style):
+    self.drawList.append((row, col, text, style))
+
+  def setCursor(self, cursor):
+    self.cursor = cursor
+
+  def grabFrame(self):
+    r = self.drawList, self.cursor
+    self.drawList = []
+    self.cursor = None
+    return r
+
+frame = Frame()

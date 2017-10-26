@@ -39,7 +39,7 @@ class Controller:
   def changeToConfirmQuit(self):
     self.host.changeFocusTo(self.host.interactiveQuit)
 
-  def changeToHostWindow(self, ignored=1):
+  def changeToHostWindow(self, *args):
     self.host.changeFocusTo(self.host)
 
   def changeToFileOpen(self):
@@ -54,6 +54,9 @@ class Controller:
 
   def changeToGoto(self):
     self.host.changeFocusTo(self.host.interactiveGoto)
+
+  def changeToPaletteWindow(self):
+    self.host.changeFocusTo(self.host.host.paletteWindow)
 
   def changeToPrediction(self):
     self.host.changeFocusTo(self.host.interactivePrediction)
@@ -82,7 +85,7 @@ class Controller:
     app.log.info('base controller focus()')
     pass
 
-  def confirmationPromptFinish(self, ignore=1):
+  def confirmationPromptFinish(self, *args):
     self.host.userIntent = 'edit'
     self.changeToHostWindow()
 
@@ -170,12 +173,12 @@ class Controller:
   def onChange(self):
     pass
 
-  def saveEventChangeToHostWindow(self, ignored=1):
+  def saveEventChangeToHostWindow(self, *args):
     curses.ungetch(self.savedCh)
     self.host.changeFocusTo(self.host)
 
   def setTextBuffer(self, textBuffer):
-    app.log.info(textBuffer)
+    #app.log.info(textBuffer)
     self.textBuffer = textBuffer
 
   def unfocus(self):
@@ -191,12 +194,10 @@ class MainController:
     self.commandDefault = None
     self.commandSet = None
     self.controllers = {}
-    self.controllerList = []
     self.controller = None
 
   def add(self, controller):
     self.controllers[controller.name] = controller
-    self.controllerList.append(controller)
     self.controller = controller
 
   def doCommand(self, ch, meta):
@@ -226,8 +227,8 @@ class MainController:
       app.log.info('MainController.nextController emacs')
       self.controller = self.controllers['emacs']
     elif self.controller is self.controllers['emacs']:
-      app.log.info('MainController.nextController vim')
-      self.controller = self.controllers['vim']
+      app.log.info('MainController.nextController vi')
+      self.controller = self.controllers['vi']
     else:
       app.log.info('MainController.nextController cua')
       self.controller = self.controllers['cua']

@@ -68,8 +68,8 @@ def saveUserHistory(fileInfo, fileHistory, historyPath=pathToHistory):
       with open(historyPath, 'wb') as file:
         pickle.dump(userHistory, file)
       app.log.info('wrote pickle')
-  except Exception, e:
-    app.log.error('exception')
+  except Exception as e:
+    app.log.exception(e)
 
 def getFileHistory(filePath, data=None):
   """

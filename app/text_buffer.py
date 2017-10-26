@@ -72,6 +72,8 @@ class TextBuffer(app.actions.Actions):
     if self.view.hasCaptiveCursor:
       self.checkScrollToCursor(window)
     rows, cols = window.rows, window.cols
+    colorDelta = 32 * 4
+    #colorDelta = 4
     if 0:
       for i in range(rows):
         window.addStr(i, 0, '?' * cols, app.color.get(120))
@@ -88,19 +90,19 @@ class TextBuffer(app.actions.Actions):
         # Draw both sides.
         self.drawTextArea(window, 0, 0, splitRow, splitCol, 0)
         self.drawTextArea(window, 0, splitCol, splitRow, cols - splitCol,
-            32 * 4)
+            colorDelta)
       else:
         # Draw only right side.
         assert splitCol <= 0
         self.drawTextArea(window, 0, splitCol, splitRow, cols - splitCol,
-            32 * 4)
+            colorDelta)
     else:
       # Draw debug checker board.
       splitRow = rows / 2
       splitCol = 17
       self.drawTextArea(window, 0, 0, splitRow, splitCol, 0)
-      self.drawTextArea(window, 0, splitCol, splitRow, cols-splitCol, 192)
-      self.drawTextArea(window, splitRow, 0, rows - splitRow, splitCol, 192)
+      self.drawTextArea(window, 0, splitCol, splitRow, cols-splitCol, colorDelta)
+      self.drawTextArea(window, splitRow, 0, rows - splitRow, splitCol, colorDelta)
       self.drawTextArea(window, splitRow, splitCol, rows - splitRow,
           cols-splitCol, 0)
     # Blank screen past the end of the buffer.
@@ -137,8 +139,7 @@ class TextBuffer(app.actions.Actions):
           assert remaining >= 0, remaining
           remaining = min(len(line) - k, remaining)
           length = min(endCol - k, remaining)
-          color = app.color.get(node.grammar.get(
-              'colorIndex', app.prefs.defaultColorIndex) + colorDelta)
+          color = app.color.get(node.grammar['colorIndex'] + colorDelta)
           if length <= 0:
             window.addStr(top + i, left + k - startCol, ' ' * (endCol - k),
                 color)
@@ -264,14 +265,13 @@ class TextBuffer(app.actions.Actions):
     if 1:
       # Highlight space ending lines.
       for i in range(rowLimit):
-        line = self.lines[startRow + i][startCol:]
-        offset = 0
-        if startRow + i == self.penRow:
-          offset = self.penCol - startCol
-          line = line[offset:]
+        line = self.lines[startRow + i]
+        if startRow + i == self.penRow and self.penCol == len(line):
+          continue
+        line = line[startCol:]
         for k in app.selectable.kReEndSpaces.finditer(line):
           for f in k.regs:
-            window.addStr(top + i, left + offset + f[0], line[f[0]:f[1]],
+            window.addStr(top + i, left + f[0], line[f[0]:f[1]],
                 app.color.get(colors['trailing_space'] + colorDelta))
     if 0:
       lengthLimit = self.lineLimitIndicator
@@ -281,7 +281,6 @@ class TextBuffer(app.actions.Actions):
           line = self.lines[startRow + i]
           if len(line) < lengthLimit or startCol > lengthLimit:
             continue
-          length = min(endCol, len(line) - lengthLimit)
           window.addStr(top + i, left + lengthLimit - startCol,
               line[lengthLimit:endCol], app.color.get(96 + colorDelta))
     if self.findRe is not None:

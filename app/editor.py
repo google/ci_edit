@@ -58,7 +58,9 @@ class InteractiveOpener(app.controller.Controller):
     self.priorTextBuffer = self.host.textBuffer
     self.commandDefault = self.textBuffer.insertPrintable
     self.textBuffer.selectionAll()
-    self.textBuffer.editPasteLines((self.host.textBuffer.fullPath,))
+    path = os.path.dirname(self.host.textBuffer.fullPath)
+    path += os.path.sep
+    self.textBuffer.editPasteLines((path,))
     # Create a new text buffer to display dir listing.
     self.host.setTextBuffer(text_buffer.TextBuffer())
 
@@ -74,7 +76,7 @@ class InteractiveOpener(app.controller.Controller):
     """Find the first file that starts with the pattern."""
     dirPath, fileName = os.path.split(self.lines[0])
     foundOnce = ''
-    app.log.debug('tabComplete\n', dirPath, '\n', fileName)
+    #app.log.debug('tabComplete\n', dirPath, '\n', fileName)
     for i in os.listdir(os.path.expandvars(os.path.expanduser(dirPath)) or '.'):
       if i.startswith(fileName):
         if foundOnce:
@@ -130,7 +132,7 @@ class InteractiveOpener(app.controller.Controller):
     path = os.path.expanduser(os.path.expandvars(self.textBuffer.lines[0]))
     dirPath, fileName = os.path.split(path)
     dirPath = dirPath or '.'
-    app.log.info('O.onChange', dirPath, fileName)
+    #app.log.info('O.onChange', dirPath, fileName)
     if os.path.isdir(dirPath):
       lines = []
       for i in os.listdir(dirPath):
@@ -153,10 +155,12 @@ class InteractiveOpener(app.controller.Controller):
     fileName = ''
     if len(input) > 0 and input[-1] != os.sep:
       dirPath, fileName = os.path.split(path)
-    app.log.info('\n\nO.onChange\n', path, '\n', dirPath, fileName)
+    #app.log.info('\n\nO.onChange\n', path, '\n', dirPath, fileName)
     if os.path.isdir(dirPath):
       lines = []
-      for i in os.listdir(dirPath):
+      contents = os.listdir(dirPath)
+      contents.sort()
+      for i in contents:
         if os.path.isdir(i):
           i += '/'
         lines.append(i)
@@ -222,7 +226,10 @@ class InteractivePrediction(app.controller.Controller):
     file, ext = os.path.splitext(fileName)
     # TODO(dschuyler): rework this ignore list.
     ignoreExt = set(('.pyc', '.pyo', '.o', '.obj', '.tgz', '.zip', '.tar',))
-    for i in os.listdir(os.path.expandvars(os.path.expanduser(dirPath)) or '.'):
+    contents = os.listdir(
+        os.path.expandvars(os.path.expanduser(dirPath)) or '.')
+    contents.sort()
+    for i in contents:
       f, e = os.path.splitext(i)
       if file == f and ext != e and e not in ignoreExt:
         self.items.append((None, os.path.join(dirPath, i), '='))
@@ -230,7 +237,7 @@ class InteractivePrediction(app.controller.Controller):
     return (len(app.buffer_manager.buffers.buffers) - 2) % len(self.items)
 
   def onChange(self):
-    input = self.textBuffer.lines[0]
+    #input = self.textBuffer.lines[0]
     clip = []
     limit = max(5, self.host.cols-10)
     for i,item in enumerate(self.items):

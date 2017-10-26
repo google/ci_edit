@@ -60,8 +60,12 @@ __c_primitive_types = [
 __english_contraction = \
     r"(\"(\\\"|[^\"])*?\")|(?<![adegIlnotuwy])('(\\\'|[^'])*?')"
 
+__chrome_extension = r'''\b[a-z]{32}\b'''
+__sha_1 = r'''\b[a-z0-9]{40}\b'''
+
 __special_string_escapes = [
   r'\\\\', r'\\b', r'\\f', r'\\n', r'\\r', r'\\t', r'\\v', r'\\0[0-7]{0,3}',
+  __chrome_extension, __sha_1,
 ]
 
 __common_numbers = [
@@ -94,57 +98,112 @@ numberTest('+0.2e-15', (0, 8))
 numberTest('02factor', None)
 numberTest('02f', (0, 3))
 
+color8 = {
+  '_pre_selection': 1,
+  'bracket': 1,
+  'c': 0,
+  'c_preprocessor': 1,
+  'c_raw_string1': 3,
+  'c_raw_string2': 3,
+  'c_string1': 3,
+  'c_string2': 3,
+  'context_menu': 1,
+  'cpp_block_comment': 2,
+  'cpp_line_comment': 2,
+  'debug_window': 1,
+  'default': 0,
+  'doc_block_comment': 3,
+  'found_find': 1,
+  'highlight': 3,
+  'html_block_comment': 2,
+  'html_element': 1,
+  'html_element_end': 1,
+  'js_string': 3,
+  'keyword': 1,
+  'line_number': 7,
+  'line_number_current': 6,
+  'line_overflow': 7,
+  'logo': 7,
+  'matching_bracket': 1,
+  'matching_find': 1,
+  'message_line': 3,
+  'misspelling': 3,
+  'number': 1,
+  'outside_document': 7,
+  'pound_comment': 3,
+  'py_raw_string1': 2,
+  'py_raw_string2': 2,
+  'py_string1': 2,
+  'py_string2': 2,
+  'quoted_string2': 2,
+  'regex_string': 2,
+  'right_column': 6,
+  'selected': 5,
+  'special': 1,
+  'status_line': 7,
+  'text': 0,
+  'top_info': 7,
+  'trailing_space': 1,
+}
+
+color256 = {
+  '_pre_selection': stringColorIndex,
+  'bracket': 6,
+  'c': defaultColorIndex,
+  'c_preprocessor': 1,
+  'c_raw_string1': stringColorIndex,
+  'c_raw_string2': stringColorIndex,
+  'c_string1': stringColorIndex,
+  'c_string2': stringColorIndex,
+  'context_menu': 201,
+  'cpp_block_comment': commentColorIndex,
+  'cpp_line_comment': commentColorIndex,
+  'debug_window': defaultColorIndex,
+  'default': defaultColorIndex,
+  'doc_block_comment': commentColorIndex,
+  'found_find': foundColorIndex,
+  'highlight': 96,
+  'html_block_comment': commentColorIndex,
+  'html_element': keywordsColorIndex,
+  'html_element_end': keywordsColorIndex,
+  'js_string': stringColorIndex,
+  'keyword': keywordsColorIndex,
+  'line_number': 168,
+  'line_number_current': 146,
+  'line_overflow': 105,
+  'logo': 168,
+  'matching_bracket': 201,
+  'matching_find': 9,
+  'message_line': 3,
+  'misspelling': 9,
+  'number': 31,
+  'outside_document': outsideOfBufferColorIndex,
+  'pound_comment': commentColorIndex,
+  'py_raw_string1': stringColorIndex,
+  'py_raw_string2': stringColorIndex,
+  'py_string1': stringColorIndex,
+  'py_string2': stringColorIndex,
+  'quoted_string2': stringColorIndex,
+  'regex_string': stringColorIndex,
+  'right_column': outsideOfBufferColorIndex,
+  'selected': selectedColor,
+  'special': specialsColorIndex,
+  'status_line': 168,
+  'text': defaultColorIndex,
+  'top_info': 168,
+  'trailing_space': 180,
+}
+
+
 # These prefs are not fully working.
 prefs = {
   'color': {
-    '_pre_selection': stringColorIndex,
-    'bracket': 6,
-    'default': defaultColorIndex,
-    'number': 31,
-    'text': defaultColorIndex,
-    'keyword': keywordsColorIndex,
-    'special': specialsColorIndex,
-    'c': defaultColorIndex,
-    'context_menu': 201,
-    'cpp_block_comment': commentColorIndex,
-    'cpp_line_comment': commentColorIndex,
-    'c_preprocessor': 1,
-    'c_raw_string1': stringColorIndex,
-    'c_raw_string2': stringColorIndex,
-    'c_string1': stringColorIndex,
-    'c_string2': stringColorIndex,
-    'debug_window': defaultColorIndex,
-    'regex_string': stringColorIndex,
-    'doc_block_comment': commentColorIndex,
-    'html_block_comment': commentColorIndex,
-    'html_element': keywordsColorIndex,
-    'html_element_end': keywordsColorIndex,
-    'found_find': foundColorIndex,
-    'line_number': 168,
-    'line_number_current': 146,
-    'line_overflow': 105,
-    'logo': 168,
-    'matching_bracket': 201,
-    'matching_find': 9,
-    'message_line': 3,
-    'misspelling': 9,
-    'outside_document': outsideOfBufferColorIndex,
-    'pound_comment': commentColorIndex,
-    'py_raw_string1': stringColorIndex,
-    'py_raw_string2': stringColorIndex,
-    'py_string1': stringColorIndex,
-    'py_string2': stringColorIndex,
-    'right_column': outsideOfBufferColorIndex,
-    'selected': selectedColor,
-    'status_line': 168,
-    'top_info': 168,
-    'trailing_space': 180,
-    'quoted_string2': stringColorIndex,
   },
   'devTest': {
   },
   'editor': {
     'captiveCursor': False,
+    'naturalScrollDirection': True,
     'colorScheme': 'default',
     'findIgnoreCase': True,
     'indentation': '  ',
@@ -153,9 +212,12 @@ prefs = {
     'optimalCursorRow': 0.28,  # Ratio of rows: 0 top, 0.5 middle, 1.0 bottom.
     'optimalCursorCol': 0.98,  # Ratio of columns: 0 left, 1.0 right.
     'palette': 'default',
+    'palette8': 'default8',
+    'saveUndo': False,
     'showLineNumbers': True,
     'showStatusLine': True,
     'showTopInfo': True,
+    'useBgThread': True,
   },
   'fileType': {
     'bash': {
@@ -183,6 +245,10 @@ prefs = {
     'css': {
       'ext': ['.css', '_css.html'],
       'grammar': 'css',
+    },
+    'grd': {
+      'ext': ['.grd', '.grdp'],
+      'grammar': 'grd',
     },
     'html': {
       'ext': ['.htm', '.html'],
@@ -274,7 +340,7 @@ prefs = {
       'indent': '  ',
       'keywords': [],
       'special': [
-        r'\bNOTE:', r'TODO\([^)]+\)',
+        r'\bNOTE:', r'TODO\([^)]+\)', __chrome_extension, __sha_1,
       ],
     },
     'cpp_line_comment': {
@@ -284,7 +350,7 @@ prefs = {
       'indent': '  ',
       'keywords': [],
       'special': [
-        r'\bNOTE:', r'TODO\([^)]+\)',
+        r'\bNOTE:', r'TODO\([^)]+\)', __chrome_extension, __sha_1,
       ],
     },
     'c_preprocessor': {
@@ -360,6 +426,9 @@ prefs = {
       ],
       'types': ['Array', 'boolean', 'string', 'Object'],
     },
+    'grd': {
+      'keywords': [ 'flattenhtml', 'allowexternalscript' ],
+    },
     'html': {
       'begin': '<html>',
       'end': kNonMatchingRegex,
@@ -414,14 +483,23 @@ prefs = {
         'arguments', 'break', 'case', 'class', 'const', 'continue', 'default',
         'document', 'else', 'false', 'for', 'function', 'if', 'let', 'of',
         'return', 'switch', 'this', 'true', 'var', 'while',
+        'instanceof', 'static', 'yield', 'super', 'delete',
        ],
       'special': [
         '\bsetTimeout\b', '\brequestCallback\b', '\bconsole\b', '\bwindow\b',
       ],
       'contains': [
         'c_string1', 'c_string2', 'doc_block_comment', 'cpp_block_comment',
-        'cpp_line_comment', 'regex_string',
+        'cpp_line_comment', 'regex_string', 'js_string',
       ],
+    },
+    'js_string': {
+      'begin': r"`",
+      'end': r"`",
+      'escaped': r"\\`",
+      'indent': '  ',
+      'special': __special_string_escapes + [r"\\`", r"(?<!\\)\$\{[^}]*\}"],
+      'single_line': False,
     },
     'keyword': {
       'spelling': False,
@@ -526,30 +604,45 @@ prefs = {
     },
     'text': {
       'indent': '  ',
+      'special': [__sha_1,],
       'contains': ['quoted_string1', 'quoted_string2'],
     },
   },
   'palette': {
+    # Note: index 0 of each palette is not set, it remains as the system entry.
     "test": {
-      "foregroundIndexes": [
-        18
-      ],
+      # Same foreground color in all 256 slots.
+      "foregroundIndexes": [18] * 256,
+      # Separate background color in every slot.
       "backgroundIndexes": [i for i in range(0, 256)],
     },
     "dark": {
+      # This series repeats 8 times (32 * 8 = 256).
       "foregroundIndexes": [
         14,  202,  39,   39,   39,   39,  39,  39,
         39,  39, 39, 39,   12, 13, 14,  15,
         202, 14, 14, 202, 202,  202, 22, 23,  24, 25, 26, 27,   28, 29, 30,  57,
-      ],
-      "backgroundIndexes": [232, 229, 6, 221,   245, 244, 243, 225],
+      ] * 8,
+      # Each of the foreground colors repeat 8 times (32 * 8 = 256).
+      "backgroundIndexes":
+        [232] * 32 + [229] * 32 +   [6] * 32 + [221] * 32 +
+        [245] * 32 + [244] * 32 + [243] * 32 + [225] * 32,
+    },
+    "default8": {
+      # With only 8 colors, make a custom pair for each slot.
+      "foregroundIndexes": [0, 4, 2, 3, 4, 5, 6, 0],
+      "backgroundIndexes": [1, 7, 7, 7, 7, 7, 7, 7],
     },
     "default": {
+      # This series repeats 8 times (32 * 8 = 256).
       "foregroundIndexes": [
         18,  1,  2,   3,   4,   5,  6,  7,   8,  9, 10, 11,   12, 13, 14,  15,
         94, 134, 0, 240, 138,  21, 22, 23,  24, 25, 26, 27,   28, 29, 30,  57,
-      ],
-      "backgroundIndexes": [231, 229, 14, 221,   255, 254, 253, 225],
+      ] * 8,
+      # Each of the foreground colors repeat 8 times (32 * 8 = 256).
+      "backgroundIndexes":
+        [231] * 32 + [229] * 32 +  [14] * 32 + [221] * 32 +
+        [255] * 32 + [254] * 32 + [253] * 32 + [225] * 32,
     },
   },
   'userData': {

@@ -13,40 +13,47 @@
 # limitations under the License.
 
 import os
+import sys
 
 dirPath = os.path.split(os.path.abspath(os.path.dirname(
     __file__)))[0]
 
 docs = {
   'command line': \
-"""Command line help
-ci [args] [file...]
+"""\
+Command line help
+%s [args] [file...]
 
-  -          Read from standard in.
-  --         Treat remaining arguments as file names.
-  --log      Show logging and debug info
-  --help     This help message and exit.
-  --test     Run unit tests and exit.
-  --version  Print version information and exit.
-""",
+  -               Read from standard in.
+  --              Treat remaining arguments as file names.
+  --clearHistory  Cleanup the file (and undo) into in ~/.ci_edit/.
+  --log           Display logging and debug info.
+  --help          Print this help message then exit.
+  --keys          Print key bindings then exit.
+  --singleThread  Do not use a background thread for parsing.
+  --test          Run unit tests and exit.
+  --version       Print version and license information then exit.\
+""" % (sys.argv[0],),
 
   'key bindings': \
-"""Key Bindings
+"""\
+Key Bindings
 
 Within the main text window:
 
   ctrl+a       Select all
   ctrl+c       Copy
   ctrl+e       Execute prompt (e:)
-  ctrl+f       Find prompt
-  ctrl+g       Go to line prompt
+  ctrl+f       Find prompt (find:)
+  ctrl+g       Go to line prompt (goto:)
   ctrl+l       Select current line (subsequent select next line)
-  ctrl+o       Open file prompt.
-  ctrl+e       Prediction prompt (p:)
+  ctrl+o       Open file prompt (open:)
+  ctrl+p       Prediction prompt (p:)
   ctrl+q       Quit (exit editor)
   ctrl+r       Reverse find
   ctrl+s       Save file
   ctrl+v       Paste
+  ctrl+w       Close document
   ctrl+x       Cut
   ctrl+y       Redo
   ctrl+z       Undo
@@ -59,18 +66,22 @@ Within the Find prompt:
 
   return       Exit Find
   esc          Exit Find
-  ctrl+a       Select all
-  ctrl+c       Copy
+  ctrl+a       Select all*
+  ctrl+c       Copy*
   ctrl+f       Find next
   ctrl+g       Find next
-  ctrl+l       Select whole line
+  ctrl+l       Select whole line*
+  ctrl+o       Switch to Open prompt (open:)
+  ctrl+p       Switch to Prediction prompt (p:)
   ctrl+q       Quit (exit editor)
   ctrl+r       Reverse find
   ctrl+s       Save file
-  ctrl+v       Paste
-  ctrl+x       Cut
-  ctrl+y       Redo
-  ctrl+z       Undo
+  ctrl+v       Paste*
+  ctrl+x       Cut*
+  ctrl+y       Redo*
+  ctrl+z       Undo*
+
+  * Affects find: prompt, not the document.
 
 Within the Goto line prompt:
 
@@ -83,25 +94,28 @@ Within the Goto line prompt:
   t            Jump to top of document
   return       Exit Goto
   esc          Exit Goto
-  ctrl+a       Select all
-  ctrl+c       Copy
-  ctrl+l       Select whole line
+  ctrl+a       Select all*
+  ctrl+c       Copy*
+  ctrl+l       Select whole line*
+  ctrl+p       Prediction prompt (p:)
   ctrl+q       Quit (exit editor)
   ctrl+s       Save file
-  ctrl+v       Paste
-  ctrl+x       Cut
-  ctrl+y       Redo
-  ctrl+z       Undo
+  ctrl+v       Paste*
+  ctrl+x       Cut*
+  ctrl+y       Redo*
+  ctrl+z       Undo*
+
+  * Affects goto: prompt, not the document.\
 """,
 
   'version': \
-"""
-  Version (build iteration): v30
+"""\
+  Version (build iteration): v31
   See LICENSE for license information
   See readme.md for an introduction
   Both files may be found in "%s"
   (Release build)
   Please give the gift of feedback and bug reports at
-    https://github.com/google/ci_edit/issues
+    https://github.com/google/ci_edit/issues\
 """ % (dirPath,),
 }

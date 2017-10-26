@@ -26,36 +26,39 @@ import app.curses_util
 import inspect
 import os
 import sys
+import time
 import traceback
+import types
 
 
-kNoOpsPerFlush = 5  # TODO: match to value in commandLoop().
+waitingForRefresh = True
+
+
 class FakeInput:
   def __init__(self, display):
     self.fakeDisplay = display
     self.inputs = []
     self.inputsIndex = -1
-    self.flushCounter = kNoOpsPerFlush
 
   def setInputs(self, cmdList):
     self.inputs = cmdList
     self.inputsIndex = -1
-    self.flushCounter = kNoOpsPerFlush
 
   def next(self):
+    global waitingForRefresh
     while self.inputsIndex + 1 < len(self.inputs):
       self.inputsIndex += 1
       cmd = self.inputs[self.inputsIndex]
-      if type(cmd) == type(testLog):
-        if self.flushCounter:
-          self.inputsIndex -= 1
-          self.flushCounter -= 1
+      if type(cmd) == types.FunctionType:
+        if waitingForRefresh:
+          #time.sleep(0.1)
           return ERR
         cmd(self.fakeDisplay)
-        self.flushCounter = kNoOpsPerFlush
-      elif type(cmd) == type('a') and len(cmd) == 1:
+      elif type(cmd) == types.StringType and len(cmd) == 1:
+        waitingForRefresh = True
         return ord(cmd)
       else:
+        waitingForRefresh = True
         return cmd
     return ERR
 
@@ -209,6 +212,10 @@ class StandardScreen(FakeCursesWindow):
     global fakeDisplay
     return (fakeDisplay.rows, fakeDisplay.cols)
 
+  def refresh(self):
+    waitingForRefresh = False
+    testLog()
+
 
 def can_change_color():
   testLog()
@@ -261,8 +268,8 @@ def newwin(*args):
   testLog(*args)
   return FakeCursesWindow(args[0], args[1])
 
-def raw():
-  pass
+def raw(*args):
+  testLog(*args)
 
 def resizeterm():
   pass
@@ -270,14 +277,14 @@ def resizeterm():
 def start_color():
   pass
 
-def ungetch():
-  pass
+def ungetch(*args):
+  testLog(*args)
 
 def use_default_colors():
   pass
 
-def get_pair(a):
-  pass
+def get_pair(*args):
+  testLog(*args)
 
 def wrapper(fun, *args, **kw):
   standardScreen = StandardScreen()
