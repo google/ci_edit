@@ -94,6 +94,9 @@ class ViewWindow:
   def debugDraw(self, win):
     self.parent.debugDraw(win)
 
+  def debugUndoDraw(self, win):
+    self.parent.debugUndoDraw(win)
+
   def hide(self):
     """Remove window from the render list."""
     try:
@@ -253,6 +256,7 @@ class Window(ActiveWindow):
     ViewWindow.render(self)
     if self.hasFocus:
       self.parent.debugDraw(self)
+      self.parent.debugUndoDraw(self)
       if (self.cursorRow >= self.scrollRow and
           self.cursorRow < self.scrollRow + self.rows):
         app.render.frame.setCursor((
