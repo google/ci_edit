@@ -113,7 +113,8 @@ class TextBuffer(app.actions.Actions):
       window.addStr(i, 0, ' ' * cols, color)
     # Draw text beyond document.
     endOfText += 1
-    for i in tipRows:
+    endOfText = max(endOfText, rows - len(tipRows))
+    for i in tipRows[:rows - endOfText]:
       if endOfText == rows:
         break
       window.addStr(endOfText, 0, i, color)
