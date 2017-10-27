@@ -249,10 +249,12 @@ class CiProgram:
       self.focusedWindow.controller.onChange()
 
   def changeFocusTo(self, changeTo):
+    changeTo.textBuffer.compoundChangeBegin()
     self.focusedWindow.controller.onChange()
     self.focusedWindow.unfocus()
     self.focusedWindow = changeTo
     self.focusedWindow.focus()
+    changeTo.textBuffer.compoundChangeEnd()
 
   def normalize(self):
     self.presentModal(None)
