@@ -111,14 +111,15 @@ class TextBuffer(app.actions.Actions):
     tipRows = app.help.docs['tips']
     for i in range(endOfText, rows):
       window.addStr(i, 0, ' ' * cols, color)
-    # Draw text beyond document.
-    endOfText += 1
-    endOfText = max(endOfText, rows - len(tipRows))
-    for i in tipRows[:rows - endOfText]:
-      if endOfText == rows:
-        break
-      window.addStr(endOfText, 0, i, color)
+    if 0:
+      # Draw text beyond document.
       endOfText += 1
+      endOfText = max(endOfText, rows - len(tipRows))
+      for i in tipRows[:rows - endOfText]:
+        if endOfText == rows:
+          break
+        window.addStr(endOfText, 0, i, color)
+        endOfText += 1
 
   def drawTextArea(self, window, top, left, rows, cols, colorDelta):
     startRow = self.view.scrollRow + top
