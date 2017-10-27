@@ -350,7 +350,7 @@ class TextBuffer(app.actions.Actions):
         elif self.selectionMode == app.selectable.kSelectionLine:
           if not (lowerRow < startRow or upperRow >= endRow):
             # There is an overlap.
-            for i in range(start, end + 1):
+            for i in range(start, min(maxRow, end + 1)):
               line = self.lines[startRow + i][selStartCol:endCol]
               window.addStr(top + i, selStartCol,
                   line + ' ' * (maxCol - len(line)), colorSelected)

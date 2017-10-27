@@ -130,13 +130,12 @@ class Parser:
       node.prior = None
       self.parserNodes = [node]
       self.rows = [0]
-    startTime = time.time()
+    #startTime = time.time()
     if self.endRow > len(self.rows):
       self.__buildGrammarList()
-    totalTime = time.time() - startTime
     if app.log.enabledChannels.get('parser', False):
       self.debugLog(app.log.parser, data)
-    app.log.startup('parsing took', totalTime)
+    #app.log.startup('parsing took', time.time() - startTime)
 
   def __buildGrammarList(self):
     # An arbitrary limit to avoid run-away looping.
