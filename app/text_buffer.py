@@ -111,10 +111,11 @@ class TextBuffer(app.actions.Actions):
     tipRows = app.help.docs['tips']
     for i in range(endOfText, rows):
       window.addStr(i, 0, ' ' * cols, color)
-    if 0:
+    if endOfText < rows - len(tipRows):
       # Draw text beyond document.
       endOfText += 1
       endOfText = max(endOfText, rows - len(tipRows))
+      app.log.info(endOfText, rows, len(tipRows), rows - endOfText, window)
       for i in tipRows[:rows - endOfText]:
         if endOfText == rows:
           break
