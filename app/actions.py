@@ -826,6 +826,7 @@ class Actions(app.mutator.Mutator):
       self.redoChain = self.fileHistory.setdefault('redoChain', [])
       self.savedAtRedoIndex = self.fileHistory.setdefault('savedAtRedoIndex', 0)
       self.redoIndex = self.savedAtRedoIndex
+      self.__oldRedoIndex = self.savedAtRedoIndex
 
     # Restore file bookmarks
     self.bookmarks = self.fileHistory.setdefault('bookmarks', [])
@@ -932,9 +933,8 @@ class Actions(app.mutator.Mutator):
     try:
       try:
         if app.prefs.editor['onSaveStripTrailingSpaces']:
-          self.compoundChangeBegin()
           self.stripTrailingWhiteSpace()
-          self.compoundChangeEnd()
+          self.compoundChangeReset()
         # Save user data that applies to read-only files into history.
         self.fileHistory['pen'] = (self.penRow, self.penCol)
         self.fileHistory['cursor'] = (self.view.cursorRow, self.view.cursorCol)

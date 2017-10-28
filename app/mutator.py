@@ -35,7 +35,7 @@ class Mutator(app.selectable.Selectable):
   """Track and enact changes to a body of text."""
   def __init__(self):
     app.selectable.Selectable.__init__(self)
-    self.__compoundChange = None
+    self.__compoundChange = []
     # |__oldRedoIndex| is used to store the redo index before an action occurs,
     # so we know where to insert the compound change.
     self.__oldRedoIndex = 0
@@ -66,48 +66,44 @@ class Mutator(app.selectable.Selectable):
     self.savedAtRedoIndex = 0
     self.shouldReparse = False
 
-  def compoundChangeBegin(self):
-    app.log.info('compoundChangeBegin')
-    self.__compoundChange = []
-    self.__oldRedoIndex = self.redoIndex
-
-  def compoundChangeEnd(self):
-    app.log.info('compoundChangeEnd')
-    x = self.__compoundChange
+  def compoundChangeReset(self):
+    app.log.info('compoundChangeReset')
     if self.__compoundChange:
       self.redoIndex = self.__oldRedoIndex
       self.redoChain = self.redoChain[:self.redoIndex]
       changes = tuple(self.__compoundChange)
       change = changes[0]
+      handledChange = False
       # Combine changes. Assumes d, i, n, and m consist of only 1 change.
-      if len(self.redoChain):
-        if (self.redoChain[-1][0][0] == change[0] and
-            len(self.redoChain[-1]) == 1):
-          if change[0] in ('d', 'i'):
-            change = (change[0], self.redoChain[-1][0][1] + change[1])
+      if (len(self.redoChain) and self.redoChain[-1][0][0] == change[0] and
+          len(self.redoChain[-1]) == 1):
+        if change[0] in ('d', 'i'):
+          change = (change[0], self.redoChain[-1][0][1] + change[1])
+          self.redoChain[-1] = (change,)
+          handledChange = True
+        elif change[0] == 'n':
+          newMouseChange = change[2]
+          newCarriageReturns = change[1]
+          oldMouseChange = self.redoChain[-1][0][2]
+          oldCarriageReturns = self.redoChain[-1][0][1]
+          change = (change[0], oldCarriageReturns + newCarriageReturns,
+                    ('m', addVectors(newMouseChange[1], oldMouseChange[1])))
+          self.redoChain[-1] = (change,)
+          handledChange = True
+        elif change[0] == 'm':
+          change = (change[0], addVectors(self.redoChain[-1][0][1],
+                    change[1]))
+          if change in noOpInstructions:
+            self.redoIndex -= 1
+            self.redoChain.pop()
+          else:
             self.redoChain[-1] = (change,)
-            return
-          elif change[0] == 'n':
-            newMouseChange = change[2]
-            newCarriageReturns = change[1]
-            oldMouseChange = self.redoChain[-1][0][2]
-            oldCarriageReturns = self.redoChain[-1][0][1]
-            change = (change[0], oldCarriageReturns + newCarriageReturns,
-                      ('m', addVectors(newMouseChange[1], oldMouseChange[1])))
-            self.redoChain[-1] = (change,)
-            return
-          elif change[0] == 'm':
-            change = (change[0], addVectors(self.redoChain[-1][0][1],
-                      change[1]))
-            if change in noOpInstructions:
-              self.redoIndex -= 1
-              self.redoChain.pop()
-            else:
-              self.redoChain[-1] = (change,)
-            return
-      self.redoChain.append(changes)
-      self.redoIndex += 1
-    self.__compoundChange = None
+          handledChange = True
+      if not handledChange:
+        self.redoChain.append(changes)
+        self.redoIndex += 1
+    self.__compoundChange = []
+    self.__oldRedoIndex = self.redoIndex
 
 
   def getPenOffset(self, row, col):
@@ -380,8 +376,7 @@ class Mutator(app.selectable.Selectable):
       self.tempChange = change
     else:
       # Accumulating changes together as a unit.
-      if self.__compoundChange is not None:
-        self.__compoundChange.append(change)
+      self.__compoundChange.append(change)
       self.redoChain.append((change,))
     if self.debugRedo:
       app.log.info('--- redoIndex', self.redoIndex)
