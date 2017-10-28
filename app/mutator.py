@@ -380,7 +380,8 @@ class Mutator(app.selectable.Selectable):
       self.tempChange = change
     else:
       # Accumulating changes together as a unit.
-      self.__compoundChange.append(change)
+      if self.__compoundChange is not None:
+        self.__compoundChange.append(change)
       self.redoChain.append((change,))
     if self.debugRedo:
       app.log.info('--- redoIndex', self.redoIndex)
