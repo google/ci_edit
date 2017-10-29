@@ -19,6 +19,7 @@ appcaches
 arraysize
 asan
 autolaunch
+axs
 backend
 breakpad
 browsertest
@@ -33,6 +34,7 @@ crosh
 cryptohome
 darkconnect
 dcheck
+dlog
 doesnt
 dont
 dsc
@@ -62,6 +64,8 @@ notreached
 onc
 oobe
 pak
+pcheck
+plog
 powerwash
 ppapi
 presubmit

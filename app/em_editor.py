@@ -49,10 +49,11 @@ def test_parseInt():
 
 class EditText(app.controller.Controller):
   """An EditText is a base class for one-line controllers."""
-  def __init__(self, prg, host, textBuffer):
-    app.controller.Controller.__init__(self, prg, host, 'EditText')
+  def __init__(self, host):
+    app.controller.Controller.__init__(self, host, 'EditText')
     self.document = None
-    self.textBuffer = textBuffer
+
+  def setTextBuffer(self, textBuffer):
     textBuffer.lines = [unicode("")]
     self.commandSet = {
       KEY_F1: self.info,
@@ -459,142 +460,11 @@ class CiEdit(app.controller.Controller):
     self.selectionCharacter()
 
 
-class CuaEdit(app.controller.Controller):
-  """Keyboard mappings for CUA. CUA is the Cut/Copy/Paste paradigm."""
-  def __init__(self, prg, host):
-    app.controller.Controller.__init__(self, prg, None, 'CuaEdit')
-    self.prg = prg
-    self.host = host
-    app.log.info('CuaEdit.__init__')
-
-  def setTextBuffer(self, textBuffer):
-    self.textBuffer = textBuffer
-    self.commandSet_Main = {
-      KEY_ESCAPE: textBuffer.selectionNone,
-      KEY_DELETE: textBuffer.delete,
-      KEY_MOUSE: self.prg.handleMouse,
-      KEY_RESIZE: self.prg.handleScreenResize,
-
-      KEY_F1: self.info,
-      KEY_F3: self.testPalette,
-      KEY_F4: self.showPalette,
-      KEY_F5: self.hidePalette,
-
-      KEY_BTAB: textBuffer.unindent,
-      KEY_HOME: textBuffer.cursorStartOfLine,
-      KEY_END: textBuffer.cursorEndOfLine,
-      KEY_PAGE_UP: textBuffer.cursorSelectNonePageUp,
-      KEY_PAGE_DOWN: textBuffer.cursorSelectNonePageDown,
-      KEY_SHIFT_PAGE_UP: textBuffer.cursorSelectCharacterPageUp,
-      KEY_SHIFT_PAGE_DOWN: textBuffer.cursorSelectCharacterPageDown,
-      KEY_ALT_SHIFT_PAGE_UP: textBuffer.cursorSelectBlockPageUp,
-      KEY_ALT_SHIFT_PAGE_DOWN: textBuffer.cursorSelectBlockPageDown,
-
-      CTRL_A: textBuffer.selectionAll,
-
-      CTRL_C: textBuffer.editCopy,
-
-      CTRL_E: textBuffer.nextSelectionMode,
-
-      CTRL_F: self.switchToFind,
-
-      CTRL_G: self.switchToGoto,
-
-      # CTRL_H: textBuffer.backspace,
-      KEY_BACKSPACE1: textBuffer.backspace,
-      KEY_BACKSPACE2: textBuffer.backspace,
-      KEY_BACKSPACE3: textBuffer.backspace,
-
-      CTRL_I: textBuffer.indent,
-
-      CTRL_J: textBuffer.carriageReturn,
-
-      CTRL_N: textBuffer.cursorDown,
-
-      CTRL_O: self.switchToCommandSetInteractiveOpen,
-      CTRL_Q: self.prg.quit,
-      CTRL_S: textBuffer.fileWrite,
-      CTRL_V: textBuffer.editPaste,
-      CTRL_X: textBuffer.editCut,
-      CTRL_Y: textBuffer.redo,
-      CTRL_Z: textBuffer.undo,
-
-      KEY_DOWN: textBuffer.cursorDown,
-      KEY_LEFT: textBuffer.cursorLeft,
-      KEY_RIGHT: textBuffer.cursorRight,
-      KEY_SHIFT_LEFT: textBuffer.cursorSelectLeft,
-      KEY_SHIFT_RIGHT: textBuffer.cursorSelectRight,
-      KEY_UP: textBuffer.cursorUp,
-
-      KEY_SHIFT_DOWN: textBuffer.cursorSelectDown,
-      KEY_SHIFT_UP: textBuffer.cursorSelectUp,
-
-      KEY_CTRL_DOWN: textBuffer.cursorDownScroll,
-      KEY_CTRL_SHIFT_DOWN: textBuffer.cursorSelectDownScroll,
-      KEY_CTRL_LEFT: textBuffer.cursorMoveWordLeft,
-      KEY_CTRL_SHIFT_LEFT: textBuffer.cursorSelectWordLeft,
-      KEY_CTRL_RIGHT: textBuffer.cursorMoveWordRight,
-      KEY_CTRL_SHIFT_RIGHT: textBuffer.cursorSelectWordRight,
-      KEY_CTRL_UP: textBuffer.cursorUpScroll,
-      KEY_CTRL_SHIFT_UP: textBuffer.cursorSelectUpScroll,
-    }
-
-  def focus(self):
-    self.commandDefault = self.textBuffer.insertPrintable
-    self.commandSet = self.commandSet_Main
-
-  def info(self):
-    app.log.info('CuaEdit Command set main')
-    app.log.info(repr(self))
-
-  def onChange(self):
-    pass
-
-  def switchToCommandSetInteractiveOpen(self):
-    self.prg.changeTo = self.host.headerLine
-
-  def switchToFind(self):
-    self.prg.changeTo = self.host.interactiveFind
-
-  def switchToGoto(self):
-    self.prg.changeTo = self.host.interactiveGoto
-
-  def showPalette(self):
-    self.prg.paletteWindow.focus()
-
-  def hidePalette(self):
-    self.prg.paletteWindow.hide()
-
-  def testPalette(self):
-    self.prg.shiftPalette()
-
-
-class CuaPlusEdit(CuaEdit):
-  """Keyboard mappings for CUA, plus some extra."""
-  def __init__(self, prg, host):
-    CuaEdit.__init__(self, prg, host)
-    app.log.info('CuaPlusEdit.__init__')
-
-  def info(self):
-    app.log.info('CuaPlusEdit Command set main')
-    app.log.info(repr(self))
-
-  def setTextBuffer(self, textBuffer):
-    app.log.info('CuaPlusEdit.__init__')
-    CuaEdit.setTextBuffer(self, textBuffer)
-    commandSet = self.commandSet_Main.copy()
-    commandSet.update({
-      CTRL_E: textBuffer.nextSelectionMode,
-    })
-    self.commandSet_Main = commandSet
-
-
-class EmacsEdit:
+class EmacsEdit(app.controller.Controller):
   """Emacs is a common Unix based text editor. This keyboard mapping is similar
   to basic Emacs commands."""
-  def __init__(self, prg, host):
-    self.prg = prg
-    self.host = host
+  def __init__(self, host):
+    app.controller.Controller.__init__(self, host, 'EditText')
 
   def focus(self):
     app.log.info('EmacsEdit.focus')
@@ -622,7 +492,7 @@ class EmacsEdit:
       CTRL_F: textBuffer.cursorRight,
       KEY_RIGHT: textBuffer.cursorRight,
 
-      # CTRL_H: textbuffer.backspace,
+      # CTRL_H: textBuffer.backspace,
       KEY_BACKSPACE1: textBuffer.backspace,
       KEY_BACKSPACE2: textBuffer.backspace,
       KEY_BACKSPACE3: textBuffer.backspace,
@@ -658,48 +528,3 @@ class EmacsEdit:
   def switchToCommandSetX(self):
     self.log('emacs x')
     self.commandSet = self.commandSet_X
-
-
-class VimEdit:
-  """Vim is a common Unix editor. This mapping supports some common vi/vim
-  commands."""
-  def __init__(self, prg, host):
-    self.prg = prg
-    self.host = host
-    self.commandDefault = None
-
-  def focus(self):
-    app.log.info('VimEdit.focus')
-    if not self.commandDefault:
-      self.commandDefault = self.textBuffer.noOp
-      self.commandSet = self.commandSet_Normal
-
-  def onChange(self):
-    pass
-
-  def setTextBuffer(self, textBuffer):
-    app.log.info('VimEdit.setTextBuffer');
-    self.textBuffer = textBuffer
-    self.commandSet_Normal = {
-      ord('^'): textBuffer.cursorStartOfLine,
-      ord('$'): textBuffer.cursorEndOfLine,
-      ord('h'): textBuffer.cursorLeft,
-      ord('i'): self.switchToCommandSetInsert,
-      ord('j'): textBuffer.cursorDown,
-      ord('k'): textBuffer.cursorUp,
-      ord('l'): textBuffer.cursorRight,
-    }
-    self.commandSet_Insert = {
-      KEY_ESCAPE: self.switchToCommandSetNormal,
-    }
-
-  def switchToCommandSetInsert(self, ignored=1):
-    app.log.info('insert mode')
-    self.commandDefault = self.textBuffer.insertPrintable
-    self.commandSet = self.commandSet_Insert
-
-  def switchToCommandSetNormal(self, ignored=1):
-    app.log.info('normal mode')
-    self.commandDefault = self.textBuffer.noOp
-    self.commandSet = self.commandSet_Normal
-

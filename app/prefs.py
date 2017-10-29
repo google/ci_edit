@@ -45,7 +45,7 @@ if 1:
         prefs['editor'].update(editorPrefs)
         app.log.startup('Updated editor prefs from', prefsPath)
         app.log.startup('as', prefs['editor'])
-      except Exception, e:
+      except Exception as e:
         app.log.startup('failed to parse', prefsPath)
         app.log.startup('error', e)
 
@@ -73,7 +73,7 @@ if colorSchemeName == 'custom':
       except:
         app.log.startup('failed to parse', prefsPath)
 elif colorSchemeName in builtInColorSchemes:
-    prefs['color'].update(builtInColorSchemes[colorSchemeName])
+  prefs['color'].update(builtInColorSchemes[colorSchemeName])
 
 
 color = prefs['color']
@@ -120,8 +120,7 @@ for k,v in prefs['grammar'].items():
       app.log.startup('Available grammars:')
       for k,v in grammars.items():
         app.log.startup('  ', k, ':', len(v))
-      print 'missing grammar for "' + grammarName + '" in prefs.py'
-      sys.exit(1)
+      raise Exception('missing grammar for "' + grammarName + '" in prefs.py')
     markers.append(g['begin'])
     matchGrammars.append(g)
   # Index [2+len(contains)..]

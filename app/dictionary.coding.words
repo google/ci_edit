@@ -51,6 +51,7 @@ argc
 args
 argv
 ascii
+asm
 async
 attr
 attrs
@@ -104,6 +105,7 @@ emacs
 enablement
 endian
 endif
+enums
 env
 eof
 eol
@@ -127,6 +129,7 @@ fn
 formatter
 freebsd
 ftp
+func
 functor
 gaia
 ge
@@ -144,6 +147,7 @@ htm
 https
 hxx
 idr
+iff
 ifndef
 img
 ini
@@ -152,6 +156,7 @@ inlined
 inlines
 inlining
 intl
+intrinsics
 ip
 ipsum
 ipv
@@ -189,6 +194,9 @@ num
 oauth
 obj
 objc
+oob
+opcode
+opcodes
 openbsd
 patcher
 pid
@@ -229,7 +237,10 @@ runtime
 rv
 serializable
 sha
+sig
+sigbus
 signin
+sigtrap
 skia
 solaris
 sql
@@ -241,6 +252,7 @@ stdin
 stdout
 stl
 str
+stringified
 struct
 stty
 stylesheet
@@ -249,8 +261,10 @@ svg
 svn
 syncable
 sys
+syscall
 sysex
 tar
+templated
 templatizer
 templatizers
 tgz
@@ -279,6 +293,7 @@ utf
 vpn
 vpns
 waitable
+wasm
 wb
 webkit
 websocket
@@ -287,6 +302,7 @@ whitelist
 whitespace
 wi
 wifi
+wildcards
 xss
 xterm
 xy

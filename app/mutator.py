@@ -190,10 +190,7 @@ class Mutator(app.selectable.Selectable):
     if self.stallNextRedo:
       self.stallNextRedo = False
       return
-
     if self.processTempChange:
-      if self.debugRedo:
-        app.log.info('processTempChange', repr(change))
       self.processTempChange = False
       change = self.tempChange
       self.__redoMove(change)
@@ -202,6 +199,7 @@ class Mutator(app.selectable.Selectable):
     if self.tempChange:
       self.__undoMove(self.tempChange)
       self.tempChange = None
+      self.updateBasicScrollPosition()
     while self.__redoOne():
       pass
     self.updateBasicScrollPosition()
@@ -369,6 +367,7 @@ class Mutator(app.selectable.Selectable):
         self.stallNextRedo = True
         self.processTempChange = False
         self.tempChange = None
+        self.updateBasicScrollPosition()
         return
       self.processTempChange = True
       self.tempChange = change
@@ -447,7 +446,7 @@ class Mutator(app.selectable.Selectable):
         self.upperChangedRow = self.penRow
     elif change[0] == 'dr':  # Undo delete range.
       self.insertLinesAt(change[1][0], change[1][1], change[2],
-          kSelectionCharacter)
+          app.selectable.kSelectionCharacter)
     elif change[0] == 'ds':  # Undo delete selection.
       self.insertLines(change[1])
     elif change[0] == 'i':
@@ -496,7 +495,7 @@ class Mutator(app.selectable.Selectable):
       # Undo split lines.
       self.__undoMove(change[1][1])
       self.lines[self.penRow] += self.lines[self.penRow + change[1][0]]
-      for i in range(change[1][0]):
+      for _ in range(change[1][0]):
         del self.lines[self.penRow + 1]
       if self.upperChangedRow > self.penRow:
         self.upperChangedRow = self.penRow
@@ -519,7 +518,7 @@ class Mutator(app.selectable.Selectable):
     elif change[0] == 'vb':
       row = min(self.markerRow, self.penRow)
       endRow = max(self.markerRow, self.penRow)
-      for i in range(row, endRow + 1):
+      for _ in range(row, endRow + 1):
         line = self.lines[self.penRow]
         x = self.penCol
         self.lines[self.penRow] = line[:x] + change[1] + line[x:]

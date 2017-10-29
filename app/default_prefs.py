@@ -60,8 +60,12 @@ __c_primitive_types = [
 __english_contraction = \
     r"(\"(\\\"|[^\"])*?\")|(?<![adegIlnotuwy])('(\\\'|[^'])*?')"
 
+__chrome_extension = r'''\b[a-z]{32}\b'''
+__sha_1 = r'''\b[a-z0-9]{40}\b'''
+
 __special_string_escapes = [
   r'\\\\', r'\\b', r'\\f', r'\\n', r'\\r', r'\\t', r'\\v', r'\\0[0-7]{0,3}',
+  __chrome_extension, __sha_1,
 ]
 
 __common_numbers = [
@@ -300,7 +304,8 @@ prefs = {
         'basename', 'break', 'case', 'chmod', 'continue', 'cp',
         'dirname', 'do', 'done', 'echo', 'else', 'exit',
         'fi', 'find', 'if', 'for',
-        'ln', 'mkdir', 'read', 'return', 'rm', 'sleep', 'switch', 'then', 'while',
+        'ln', 'mkdir', 'read', 'return', 'rm', 'sleep', 'switch', 'then',
+        'while',
       ],
       'contains': ['c_string1', 'c_string2', 'pound_comment'],
     },
@@ -336,7 +341,7 @@ prefs = {
       'indent': '  ',
       'keywords': [],
       'special': [
-        r'\bNOTE:', r'TODO\([^)]+\)',
+        r'\bNOTE:', r'TODO\([^)]+\)', __chrome_extension, __sha_1,
       ],
     },
     'cpp_line_comment': {
@@ -346,7 +351,7 @@ prefs = {
       'indent': '  ',
       'keywords': [],
       'special': [
-        r'\bNOTE:', r'TODO\([^)]+\)',
+        r'\bNOTE:', r'TODO\([^)]+\)', __chrome_extension, __sha_1,
       ],
     },
     'c_preprocessor': {
@@ -600,6 +605,7 @@ prefs = {
     },
     'text': {
       'indent': '  ',
+      'special': [__sha_1,],
       'contains': ['quoted_string1', 'quoted_string2'],
     },
   },

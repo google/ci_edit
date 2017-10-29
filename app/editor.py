@@ -158,7 +158,9 @@ class InteractiveOpener(app.controller.Controller):
     #app.log.info('\n\nO.onChange\n', path, '\n', dirPath, fileName)
     if os.path.isdir(dirPath):
       lines = []
-      for i in os.listdir(dirPath):
+      contents = os.listdir(dirPath)
+      contents.sort()
+      for i in contents:
         if os.path.isdir(i):
           i += '/'
         lines.append(i)
@@ -224,7 +226,10 @@ class InteractivePrediction(app.controller.Controller):
     file, ext = os.path.splitext(fileName)
     # TODO(dschuyler): rework this ignore list.
     ignoreExt = set(('.pyc', '.pyo', '.o', '.obj', '.tgz', '.zip', '.tar',))
-    for i in os.listdir(os.path.expandvars(os.path.expanduser(dirPath)) or '.'):
+    contents = os.listdir(
+        os.path.expandvars(os.path.expanduser(dirPath)) or '.')
+    contents.sort()
+    for i in contents:
       f, e = os.path.splitext(i)
       if file == f and ext != e and e not in ignoreExt:
         self.items.append((None, os.path.join(dirPath, i), '='))
@@ -232,7 +237,7 @@ class InteractivePrediction(app.controller.Controller):
     return (len(app.buffer_manager.buffers.buffers) - 2) % len(self.items)
 
   def onChange(self):
-    input = self.textBuffer.lines[0]
+    #input = self.textBuffer.lines[0]
     clip = []
     limit = max(5, self.host.cols-10)
     for i,item in enumerate(self.items):

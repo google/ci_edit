@@ -54,6 +54,7 @@ class CiProgram:
   In some aspects, the program acts as a top level window, even though it's not
   exactly a window."""
   def __init__(self, cursesScreen):
+    self.clicks = 0
     self.debugMouseEvent = (0, 0, 0, 0, 0)
     self.exiting = False
     self.modalUi = None
@@ -67,13 +68,13 @@ class CiProgram:
     curses.mousemask(-1)
     curses.mouseinterval(0)
     # Enable mouse tracking in xterm.
-    print '\033[?1002;h'
-    #print '\033[?1005;h'
+    sys.stdout.write('\033[?1002;h\n')
+    #sys.stdout.write('\033[?1005;h\n')
     curses.meta(1)
     # Access ^c before shell does.
     curses.raw()
     # Enable Bracketed Paste Mode.
-    print '\033[?2004;h'
+    sys.stdout.write('\033[?2004;h\n')
     #curses.start_color()
     curses.use_default_colors()
     if 0:
@@ -90,7 +91,7 @@ class CiProgram:
         app.log.detail("color", i, ": ", curses.color_content(i))
     self.setUpPalette()
     if 1:
-      rows, cols = self.cursesScreen.getmaxyx()
+      #rows, cols = self.cursesScreen.getmaxyx()
       cursesWindow = self.cursesScreen
       cursesWindow.leaveok(1)  # Don't update cursor position.
       cursesWindow.scrollok(0)
@@ -117,9 +118,11 @@ class CiProgram:
       # curses event messages to simulate a full startup with a GUI render.
       curses.ungetch(17)
     start = time.time()
+    # The first render, to get something on the screen.
     if useBgThread:
       self.bg.put((self, []))
-    #frame = self.bg.get()
+    else:
+      self.render()
     # This is the 'main loop'. Execution doesn't leave this loop until the
     # application is closing down.
     while not self.exiting:
@@ -131,7 +134,6 @@ class CiProgram:
             return
           self.refresh(frame[0], frame[1])
       elif 1:
-        self.render()
         frame = app.render.frame.grabFrame()
         self.refresh(frame[0], frame[1])
       else:
@@ -149,7 +151,6 @@ class CiProgram:
       # Gather several commands into a batch before doing a redraw.
       # (A performance optimization).
       cmdList = []
-      mouseEvents = []
       while not len(cmdList):
         for i in range(5):
           eventInfo = None
@@ -214,6 +215,9 @@ class CiProgram:
             frame = None
             while self.bg.hasMessage():
               frame = self.bg.get()
+              if frame == 'quit':
+                self.exiting = True
+                return
             if frame is not None:
               self.refresh(frame[0], frame[1])
           elif ch != curses.ERR:
@@ -268,11 +272,11 @@ class CiProgram:
     parsed."""
     if self.showLogWindow:
       self.debugWindow = app.window.ViewWindow(self)
-      #self.zOrder += [self.debugWindow]
+      self.debugUndoWindow = app.window.ViewWindow(self)
       self.logWindow = app.window.LogWindow(self)
-      #self.zOrder += [self.logWindow]
     else:
       self.debugWindow = None
+      self.debugUndoWindow = None
       self.logWindow = None
       self.paletteWindow = None
     self.paletteWindow = app.window.PaletteWindow(self)
@@ -291,8 +295,10 @@ class CiProgram:
       debugRows = 20
       self.debugWindow.reshape(debugRows, debugWidth, 0,
           inputWidth + 1)
-      self.logWindow.reshape(rows - debugRows, debugWidth, debugRows,
+      self.debugUndoWindow.reshape(rows - debugRows, debugWidth, debugRows,
           inputWidth + 1)
+      self.logWindow.reshape(rows - debugRows, inputWidth, debugRows, 0)
+      rows = debugRows
     else:
       inputWidth = cols
     count = len(self.zOrder)
@@ -359,23 +365,36 @@ class CiProgram:
         "bState %s %d"
         %(app.curses_util.mouseButtonName(bState), bState),
             color)
+
+  def debugUndoDraw(self, win):
+    """Draw real-time debug information to the screen."""
+    if not self.debugUndoWindow:
+      return
+    textBuffer = win.textBuffer
+    y, x = win.top, win.left
+    maxRow, maxCol = win.rows, win.cols
+    self.debugUndoWindow.writeLineRow = 0
     # Display some of the redo chain.
     redoColorA = app.color.get(100)
-    self.debugWindow.writeLine(
+    self.debugUndoWindow.writeLine(
+        "procTemp %d temp %r"
+        %(textBuffer.processTempChange, textBuffer.tempChange,),
+        redoColorA)
+    self.debugUndoWindow.writeLine(
         "redoIndex %3d savedAt %3d depth %3d"
         %(textBuffer.redoIndex, textBuffer.savedAtRedoIndex,
           len(textBuffer.redoChain)),
         redoColorA)
-    lenChain = textBuffer.redoIndex
     redoColorB = app.color.get(101)
-    for i in range(textBuffer.redoIndex - 5, textBuffer.redoIndex):
+    split = 8
+    for i in range(textBuffer.redoIndex - split, textBuffer.redoIndex):
       text = i >= 0 and textBuffer.redoChain[i] or ''
-      self.debugWindow.writeLine(text, redoColorB)
+      self.debugUndoWindow.writeLine(text, redoColorB)
     redoColorC = app.color.get(1)
-    for i in range(textBuffer.redoIndex, textBuffer.redoIndex + 4):
+    for i in range(textBuffer.redoIndex, textBuffer.redoIndex + split - 1):
       text = (i < len(textBuffer.redoChain) and
           textBuffer.redoChain[i] or '')
-      self.debugWindow.writeLine(text, redoColorC)
+      self.debugUndoWindow.writeLine(text, redoColorC)
 
   def debugWindowOrder(self):
     app.log.info('debugWindowOrder')
@@ -400,7 +419,7 @@ class CiProgram:
     """Mouse handling is a special case. The getch() curses function will
     signal the existence of a mouse event, but the event must be fetched and
     parsed separately."""
-    (id, mouseCol, mouseRow, mouseZ, bState) = info[0]
+    (_, mouseCol, mouseRow, _, bState) = info[0]
     app.log.mouse()
     eventTime = info[1]
     rapidClickTimeout = .5
@@ -609,8 +628,7 @@ class CiProgram:
     """Repaint stacked windows, furthest to nearest in the background thread."""
     if self.showLogWindow:
       self.logWindow.render()
-    for i,k in enumerate(self.zOrder):
-      #app.log.info("[[%d]] %r"%(i, k))
+    for k in self.zOrder:
       k.render()
 
   def makeHomeDirs(self, homePath):
@@ -623,8 +641,8 @@ class CiProgram:
       self.dirPrefs = os.path.join(homePath, 'prefs')
       if not os.path.isdir(self.dirPrefs):
         os.makedirs(self.dirPrefs)
-    except Exception, e:
-      app.log.error('exception in makeHomeDirs')
+    except Exception as e:
+      app.log.exception(e)
 
   def run(self):
     self.parseArgs()
@@ -674,12 +692,14 @@ class CiProgram:
       app.prefs.color = app.prefs.color256
       app.color.colors = 256
       twoTries(app.prefs.editor['palette'], 'default')
+    else:
+      raise Exception('unknown palette color count ' + repr(curses.COLORS))
 
 def wrapped_ci(cursesScreen):
   try:
     prg = CiProgram(cursesScreen)
     prg.run()
-  except Exception, e:
+  except Exception:
     userMessage('---------------------------------------')
     userMessage('Super sorry, something went very wrong.')
     userMessage('Please create a New Issue and paste this info there.\n')
@@ -699,14 +719,14 @@ def run_ci():
     app.log.flush()
     app.log.writeToFile('~/.ci_edit/recentLog')
     # Disable Bracketed Paste Mode.
-    print '\033[?2004l'
+    sys.stdout.write('\033[?2004l\n')
   global userConsoleMessage
   if userConsoleMessage:
     fullPath = os.path.expanduser(os.path.expandvars(
         '~/.ci_edit/userConsoleMessage'))
     with io.open(fullPath, 'w+') as f:
       f.write(userConsoleMessage)
-    print userConsoleMessage
+    sys.stdout.write(userConsoleMessage + '\n')
 
 if __name__ == '__main__':
   run_ci()
