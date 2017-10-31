@@ -108,19 +108,8 @@ class TextBuffer(app.actions.Actions):
     # Blank screen past the end of the buffer.
     color = app.color.get('outside_document')
     endOfText = min(max(len(self.lines) - self.view.scrollRow, 0), rows)
-    tipRows = app.help.docs['tips']
     for i in range(endOfText, rows):
       window.addStr(i, 0, ' ' * cols, color)
-    if endOfText < rows - len(tipRows):
-      # Draw text beyond document.
-      endOfText += 1
-      endOfText = max(endOfText, rows - len(tipRows))
-      app.log.info(endOfText, rows, len(tipRows), rows - endOfText, window)
-      for i in tipRows[:rows - endOfText]:
-        if endOfText == rows:
-          break
-        window.addStr(endOfText, 0, i, color)
-        endOfText += 1
 
   def drawTextArea(self, window, top, left, rows, cols, colorDelta):
     startRow = self.view.scrollRow + top

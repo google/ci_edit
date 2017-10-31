@@ -15,6 +15,7 @@
 import app.default_prefs
 import app.log
 import curses
+import io
 import json
 import os
 import re
@@ -49,6 +50,20 @@ if 1:
         app.log.startup('failed to parse', prefsPath)
         app.log.startup('error', e)
 
+if 1:
+  # Check the user home directory for status preferences.
+  prefsPath = os.path.expanduser(os.path.expandvars(
+      "~/.ci_edit/prefs/status.json"))
+  if os.path.isfile(prefsPath) and os.access(prefsPath, os.R_OK):
+    with open(prefsPath, 'r') as f:
+      try:
+        statusPrefs = json.loads(f.read())
+        prefs['status'].update(statusPrefs)
+        app.log.startup('Updated editor prefs from', prefsPath)
+      except Exception as e:
+        app.log.startup('failed to parse', prefsPath)
+        app.log.startup('error', e)
+
 color8 = app.default_prefs.color8
 color256 = app.default_prefs.color256
 
@@ -65,7 +80,7 @@ if colorSchemeName == 'custom':
   prefsPath = os.path.expanduser(os.path.expandvars(
       "~/.ci_edit/prefs/color_scheme.json"))
   if os.path.isfile(prefsPath) and os.access(prefsPath, os.R_OK):
-    with open(prefsPath, 'r') as f:
+    with io.open(prefsPath, 'r') as f:
       try:
         colorScheme = json.loads(f.read())
         app.log.startup(colorScheme)
@@ -80,6 +95,7 @@ color = prefs['color']
 editor = prefs['editor']
 devTest = prefs['devTest']
 palette = prefs['palette']
+status = prefs.get('status', {})
 
 
 grammars = {}
@@ -169,6 +185,20 @@ def getGrammar(fileExtension):
     return grammars.get('none')
   fileType = extensions.get(fileExtension, 'text')
   return grammars.get(fileType)
+
+def save(category, label, value):
+  app.log.info(category, label, value)
+  global prefs
+  prefs.setdefault(category, {})
+  prefs[category][label] = value
+  prefsPath = os.path.expanduser(os.path.expandvars(
+      "~/.ci_edit/prefs/%s.json" % (category,)))
+  with open(prefsPath, 'w') as f:
+    try:
+      f.write(json.dumps(prefs[category]))
+    except Exception as e:
+      app.log.error('error writing prefs')
+      app.log.exception(e)
 
 app.log.startup('prefs.py import time', time.time() - importStartTime)
 

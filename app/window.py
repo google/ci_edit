@@ -473,9 +473,28 @@ class StatusLine(ViewWindow):
   def __init__(self, host):
     ViewWindow.__init__(self, host)
     self.host = host
+    self.showTipCountdown = 0 if app.prefs.status.get('seenTips') else 5
 
   def render(self):
     tb = self.host.textBuffer
+    color = app.color.get('status_line')
+    if self.showTipCountdown:
+      tipRows = app.help.docs['tips']
+      if len(tipRows) + 1 < self.rows:
+        for i in range(self.rows):
+          self.addStr(i, 0, ' ' * self.cols, color)
+        for i,k in enumerate(tipRows):
+          self.addStr(i + 1, 4, k, color)
+        invert = curses.A_REVERSE if self.showTipCountdown % 2 else 0
+        self.addStr(1, 40,
+            "(This will disappear in %d keystrokes)" % (self.showTipCountdown,),
+            color | invert)
+        self.showTipCountdown -= 1
+        if not self.showTipCountdown:
+          self.host.statusLineCount = 1
+          self.host.layout()
+          app.prefs.save('status', 'seenTips', True)
+
     statusLine = ''
     if tb.message:
       statusLine = tb.message[0]
@@ -511,8 +530,7 @@ class StatusLine(ViewWindow):
         colPercentage)
     statusLine += \
         ' ' * (self.cols - len(statusLine) - len(rightSide)) + rightSide
-    color = app.color.get('status_line')
-    self.addStr(0, 0, statusLine[:self.cols], color)
+    self.addStr(self.rows - 1, 0, statusLine[:self.cols], color)
 
 
 class TopInfo(ViewWindow):
@@ -608,6 +626,8 @@ class InputWindow(Window):
     self.showMessageLine = True
     self.showRightColumn = True
     self.showTopInfo = True
+    self.statusLineCount = 0 if app.prefs.status.get('seenTips') else 8
+
     self.topRows = 2  # Number of lines in default TopInfo status.
     self.controller = app.controller.MainController(self)
     self.controller.add(app.em_editor.EmacsEdit(self))
@@ -726,6 +746,7 @@ class InputWindow(Window):
       rows -= topRows
     rows -= bottomRows
     bottomFirstRow = top + rows
+
     self.confirmClose.reshape(bottomRows, cols, bottomFirstRow, left)
     self.confirmOverwrite.reshape(bottomRows, cols, bottomFirstRow, left)
     self.interactiveOpen.reshape(bottomRows, cols, bottomFirstRow, left)
@@ -740,9 +761,11 @@ class InputWindow(Window):
     if 1:
       self.interactiveGoto.reshape(bottomRows, cols, bottomFirstRow,
           left)
+
     if self.showFooter and rows > 0:
-      self.statusLine.reshape(1, cols, bottomFirstRow - 1, left)
-      rows -= 1
+      self.statusLine.reshape(self.statusLineCount, cols, bottomFirstRow - self.statusLineCount,
+          left)
+      rows -= self.statusLineCount
     if self.showLineNumbers and cols > lineNumbersCols:
       self.lineNumberColumn.reshape(rows, lineNumbersCols, top, left)
       cols -= lineNumbersCols

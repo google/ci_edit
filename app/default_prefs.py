@@ -646,6 +646,7 @@ prefs = {
         [255] * 32 + [254] * 32 + [253] * 32 + [225] * 32,
     },
   },
+  'status': {},
   'userData': {
     'homePath': os.path.expanduser('~/.ci_edit'),
     'historyPath': os.path.join(os.path.expanduser('~/.ci_edit'),
