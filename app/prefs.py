@@ -161,7 +161,7 @@ def init():
 
 def getGrammar(fileExtension):
   if fileExtension is None:
-    return grammars.get('none')
+    return grammars.get('text')
   fileType = extensions.get(fileExtension, 'text')
   return grammars.get(fileType)
 
