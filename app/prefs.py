@@ -34,35 +34,23 @@ def joinReWordList(reList):
   return r"(\b"+r"\b)|(\b".join(reList)+r"\b)"
 
 
-if 1:
-  # Check the user home directory for editor preferences.
+def loadPrefs(fileName, category):
+  prefs.setdefault(category, {})
+  # Check the user home directory for preferences.
   prefsPath = os.path.expanduser(os.path.expandvars(
-      "~/.ci_edit/prefs/editor.json"))
+      "~/.ci_edit/prefs/%s.json" % (fileName,)))
   if os.path.isfile(prefsPath) and os.access(prefsPath, os.R_OK):
     with open(prefsPath, 'r') as f:
       try:
-        editorPrefs = json.loads(f.read())
-        app.log.startup(editorPrefs)
-        prefs['editor'].update(editorPrefs)
+        additionalPrefs = json.loads(f.read())
+        app.log.startup(additionalPrefs)
+        prefs[category].update(additionalPrefs)
         app.log.startup('Updated editor prefs from', prefsPath)
-        app.log.startup('as', prefs['editor'])
+        app.log.startup('as', prefs[category])
       except Exception as e:
         app.log.startup('failed to parse', prefsPath)
         app.log.startup('error', e)
-
-if 1:
-  # Check the user home directory for status preferences.
-  prefsPath = os.path.expanduser(os.path.expandvars(
-      "~/.ci_edit/prefs/status.json"))
-  if os.path.isfile(prefsPath) and os.access(prefsPath, os.R_OK):
-    with open(prefsPath, 'r') as f:
-      try:
-        statusPrefs = json.loads(f.read())
-        prefs['status'].update(statusPrefs)
-        app.log.startup('Updated editor prefs from', prefsPath)
-      except Exception as e:
-        app.log.startup('failed to parse', prefsPath)
-        app.log.startup('error', e)
+  return prefs[category]
 
 color8 = app.default_prefs.color8
 color256 = app.default_prefs.color256
@@ -77,25 +65,16 @@ colorSchemeName = prefs['editor']['colorScheme']
 if colorSchemeName == 'custom':
   # Check the user home directory for a color scheme preference. If found load
   # it to replace the default color scheme.
-  prefsPath = os.path.expanduser(os.path.expandvars(
-      "~/.ci_edit/prefs/color_scheme.json"))
-  if os.path.isfile(prefsPath) and os.access(prefsPath, os.R_OK):
-    with io.open(prefsPath, 'r') as f:
-      try:
-        colorScheme = json.loads(f.read())
-        app.log.startup(colorScheme)
-        prefs['color'].update(colorScheme)
-      except:
-        app.log.startup('failed to parse', prefsPath)
+  prefs['color'].update(loadPrefs('color_scheme', 'color'))
 elif colorSchemeName in builtInColorSchemes:
   prefs['color'].update(builtInColorSchemes[colorSchemeName])
 
 
 color = prefs['color']
-editor = prefs['editor']
+editor = loadPrefs('editor', 'editor')
 devTest = prefs['devTest']
 palette = prefs['palette']
-status = prefs.get('status', {})
+status = loadPrefs('status', 'status')
 
 
 grammars = {}
