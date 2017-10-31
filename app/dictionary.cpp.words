@@ -14,12 +14,16 @@
 
 atexit
 calloc
+cassert
 ceil
 cmath
 cout
+cstream
+cstring
 endl
 extern
 intptr
+intrinsics
 iomanip
 iostream
 lu
@@ -29,6 +33,8 @@ memcpy
 memset
 multimap
 npos
+ostream
+ostringstream
 printf
 rbegin
 refcounted
@@ -42,3 +48,4 @@ strerror
 toupper
 uint
 va
+wchar

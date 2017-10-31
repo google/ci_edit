@@ -34,6 +34,7 @@ crosh
 cryptohome
 darkconnect
 dcheck
+dlog
 doesnt
 dont
 dsc
@@ -63,6 +64,8 @@ notreached
 onc
 oobe
 pak
+pcheck
+plog
 powerwash
 ppapi
 presubmit

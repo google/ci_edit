@@ -51,6 +51,7 @@ argc
 args
 argv
 ascii
+asm
 async
 attr
 attrs
@@ -104,6 +105,7 @@ emacs
 enablement
 endian
 endif
+enums
 env
 eof
 eol
@@ -154,6 +156,7 @@ inlined
 inlines
 inlining
 intl
+intrinsics
 ip
 ipsum
 ipv
@@ -192,6 +195,8 @@ oauth
 obj
 objc
 oob
+opcode
+opcodes
 openbsd
 patcher
 pid
@@ -233,7 +238,9 @@ rv
 serializable
 sha
 sig
+sigbus
 signin
+sigtrap
 skia
 solaris
 sql
@@ -245,6 +252,7 @@ stdin
 stdout
 stl
 str
+stringified
 struct
 stty
 stylesheet
@@ -253,8 +261,10 @@ svg
 svn
 syncable
 sys
+syscall
 sysex
 tar
+templated
 templatizer
 templatizers
 tgz
@@ -292,6 +302,7 @@ whitelist
 whitespace
 wi
 wifi
+wildcards
 xss
 xterm
 xy

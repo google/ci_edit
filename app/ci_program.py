@@ -273,11 +273,11 @@ class CiProgram:
     parsed."""
     if self.showLogWindow:
       self.debugWindow = app.window.ViewWindow(self)
-      #self.zOrder += [self.debugWindow]
+      self.debugUndoWindow = app.window.ViewWindow(self)
       self.logWindow = app.window.LogWindow(self)
-      #self.zOrder += [self.logWindow]
     else:
       self.debugWindow = None
+      self.debugUndoWindow = None
       self.logWindow = None
       self.paletteWindow = None
     self.paletteWindow = app.window.PaletteWindow(self)
@@ -296,8 +296,10 @@ class CiProgram:
       debugRows = 20
       self.debugWindow.reshape(debugRows, debugWidth, 0,
           inputWidth + 1)
-      self.logWindow.reshape(rows - debugRows, debugWidth, debugRows,
+      self.debugUndoWindow.reshape(rows - debugRows, debugWidth, debugRows,
           inputWidth + 1)
+      self.logWindow.reshape(rows - debugRows, inputWidth, debugRows, 0)
+      rows = debugRows
     else:
       inputWidth = cols
     count = len(self.zOrder)
@@ -364,26 +366,36 @@ class CiProgram:
         "bState %s %d"
         %(app.curses_util.mouseButtonName(bState), bState),
             color)
+
+  def debugUndoDraw(self, win):
+    """Draw real-time debug information to the screen."""
+    if not self.debugUndoWindow:
+      return
+    textBuffer = win.textBuffer
+    y, x = win.top, win.left
+    maxRow, maxCol = win.rows, win.cols
+    self.debugUndoWindow.writeLineRow = 0
     # Display some of the redo chain.
     redoColorA = app.color.get(100)
-    self.debugWindow.writeLine(
+    self.debugUndoWindow.writeLine(
         "procTemp %d temp %r"
         %(textBuffer.processTempChange, textBuffer.tempChange,),
         redoColorA)
-    self.debugWindow.writeLine(
+    self.debugUndoWindow.writeLine(
         "redoIndex %3d savedAt %3d depth %3d"
         %(textBuffer.redoIndex, textBuffer.savedAtRedoIndex,
           len(textBuffer.redoChain)),
         redoColorA)
     redoColorB = app.color.get(101)
-    for i in range(textBuffer.redoIndex - 5, textBuffer.redoIndex):
+    split = 8
+    for i in range(textBuffer.redoIndex - split, textBuffer.redoIndex):
       text = i >= 0 and textBuffer.redoChain[i] or ''
-      self.debugWindow.writeLine(text, redoColorB)
+      self.debugUndoWindow.writeLine(text, redoColorB)
     redoColorC = app.color.get(1)
-    for i in range(textBuffer.redoIndex, textBuffer.redoIndex + 4):
+    for i in range(textBuffer.redoIndex, textBuffer.redoIndex + split - 1):
       text = (i < len(textBuffer.redoChain) and
           textBuffer.redoChain[i] or '')
-      self.debugWindow.writeLine(text, redoColorC)
+      self.debugUndoWindow.writeLine(text, redoColorC)
 
   def debugWindowOrder(self):
     app.log.info('debugWindowOrder')

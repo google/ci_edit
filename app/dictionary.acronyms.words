@@ -49,6 +49,7 @@ fyis
 gb
 gbs
 gc
+gcc
 gcs
 gdb
 gif
@@ -127,6 +128,7 @@ oss
 osx
 pb
 pbs
+pc
 pdf
 pdfs
 pgo
@@ -135,8 +137,8 @@ qa
 rc
 rcs
 rgb
-rgbs
 rgba
+rgbs
 rsa
 rtc
 rtl

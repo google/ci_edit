@@ -304,7 +304,8 @@ prefs = {
         'basename', 'break', 'case', 'chmod', 'continue', 'cp',
         'dirname', 'do', 'done', 'echo', 'else', 'exit',
         'fi', 'find', 'if', 'for',
-        'ln', 'mkdir', 'read', 'return', 'rm', 'sleep', 'switch', 'then', 'while',
+        'ln', 'mkdir', 'read', 'return', 'rm', 'sleep', 'switch', 'then',
+        'while',
       ],
       'contains': ['c_string1', 'c_string2', 'pound_comment'],
     },
@@ -644,6 +645,9 @@ prefs = {
         [231] * 32 + [229] * 32 +  [14] * 32 + [221] * 32 +
         [255] * 32 + [254] * 32 + [253] * 32 + [225] * 32,
     },
+  },
+  'status': {
+    'showTips': True,
   },
   'userData': {
     'homePath': os.path.expanduser('~/.ci_edit'),

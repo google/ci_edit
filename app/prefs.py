@@ -15,6 +15,7 @@
 import app.default_prefs
 import app.log
 import curses
+import io
 import json
 import os
 import re
@@ -33,21 +34,23 @@ def joinReWordList(reList):
   return r"(\b"+r"\b)|(\b".join(reList)+r"\b)"
 
 
-if 1:
-  # Check the user home directory for editor preferences.
+def loadPrefs(fileName, category):
+  prefs.setdefault(category, {})
+  # Check the user home directory for preferences.
   prefsPath = os.path.expanduser(os.path.expandvars(
-      "~/.ci_edit/prefs/editor.json"))
+      "~/.ci_edit/prefs/%s.json" % (fileName,)))
   if os.path.isfile(prefsPath) and os.access(prefsPath, os.R_OK):
     with open(prefsPath, 'r') as f:
       try:
-        editorPrefs = json.loads(f.read())
-        app.log.startup(editorPrefs)
-        prefs['editor'].update(editorPrefs)
+        additionalPrefs = json.loads(f.read())
+        app.log.startup(additionalPrefs)
+        prefs[category].update(additionalPrefs)
         app.log.startup('Updated editor prefs from', prefsPath)
-        app.log.startup('as', prefs['editor'])
+        app.log.startup('as', prefs[category])
       except Exception as e:
         app.log.startup('failed to parse', prefsPath)
         app.log.startup('error', e)
+  return prefs[category]
 
 color8 = app.default_prefs.color8
 color256 = app.default_prefs.color256
@@ -62,24 +65,16 @@ colorSchemeName = prefs['editor']['colorScheme']
 if colorSchemeName == 'custom':
   # Check the user home directory for a color scheme preference. If found load
   # it to replace the default color scheme.
-  prefsPath = os.path.expanduser(os.path.expandvars(
-      "~/.ci_edit/prefs/color_scheme.json"))
-  if os.path.isfile(prefsPath) and os.access(prefsPath, os.R_OK):
-    with open(prefsPath, 'r') as f:
-      try:
-        colorScheme = json.loads(f.read())
-        app.log.startup(colorScheme)
-        prefs['color'].update(colorScheme)
-      except:
-        app.log.startup('failed to parse', prefsPath)
+  prefs['color'].update(loadPrefs('color_scheme', 'color'))
 elif colorSchemeName in builtInColorSchemes:
   prefs['color'].update(builtInColorSchemes[colorSchemeName])
 
 
 color = prefs['color']
-editor = prefs['editor']
+editor = loadPrefs('editor', 'editor')
 devTest = prefs['devTest']
 palette = prefs['palette']
+status = loadPrefs('status', 'status')
 
 
 grammars = {}
@@ -166,9 +161,23 @@ def init():
 
 def getGrammar(fileExtension):
   if fileExtension is None:
-    return grammars.get('none')
+    return grammars.get('text')
   fileType = extensions.get(fileExtension, 'text')
   return grammars.get(fileType)
+
+def save(category, label, value):
+  app.log.info(category, label, value)
+  global prefs
+  prefs.setdefault(category, {})
+  prefs[category][label] = value
+  prefsPath = os.path.expanduser(os.path.expandvars(
+      "~/.ci_edit/prefs/%s.json" % (category,)))
+  with open(prefsPath, 'w') as f:
+    try:
+      f.write(json.dumps(prefs[category]))
+    except Exception as e:
+      app.log.error('error writing prefs')
+      app.log.exception(e)
 
 app.log.startup('prefs.py import time', time.time() - importStartTime)
 

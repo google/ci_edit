@@ -1429,6 +1429,9 @@ class Actions(app.mutator.Mutator):
     if col < len(self.lines[self.penRow]):
       self.cursorSelectWordRight()
 
+  def toggleShowTips(self):
+    self.view.toggleShowTips()
+
   def splitLine(self):
     """split the line into two at current column."""
     self.redoAddChange(('n', (1,)))

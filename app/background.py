@@ -75,6 +75,7 @@ def background(inputQueue, outputQueue):
           outputQueue.put(app.render.frame.grabFrame())
           os.kill(pid, signalNumber)
     except Exception as e:
+      app.log.exception(e)
       app.log.error('bg thread exception', e)
       outputQueue.put('quit')
       os.kill(pid, signalNumber)
