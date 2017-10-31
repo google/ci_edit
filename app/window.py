@@ -473,27 +473,18 @@ class StatusLine(ViewWindow):
   def __init__(self, host):
     ViewWindow.__init__(self, host)
     self.host = host
-    self.showTipCountdown = 0 if app.prefs.status.get('seenTips') else 5
 
   def render(self):
     tb = self.host.textBuffer
     color = app.color.get('status_line')
-    if self.showTipCountdown:
+    if self.host.showTips:
       tipRows = app.help.docs['tips']
       if len(tipRows) + 1 < self.rows:
         for i in range(self.rows):
           self.addStr(i, 0, ' ' * self.cols, color)
         for i,k in enumerate(tipRows):
           self.addStr(i + 1, 4, k, color)
-        invert = curses.A_REVERSE if self.showTipCountdown % 2 else 0
-        self.addStr(1, 40,
-            "(This will disappear in %d keystrokes)" % (self.showTipCountdown,),
-            color | invert)
-        self.showTipCountdown -= 1
-        if not self.showTipCountdown:
-          self.host.statusLineCount = 1
-          self.host.layout()
-          app.prefs.save('status', 'seenTips', True)
+        self.addStr(1, 40, "(Press F1 to show/hide tips)", color | curses.A_REVERSE)
 
     statusLine = ''
     if tb.message:
@@ -697,6 +688,8 @@ class InputWindow(Window):
     if self.showMessageLine:
       self.messageLine = MessageLine(self)
       self.messageLine.setParent(self, 0)
+    self.showTips = app.prefs.status.get('showTips')
+    self.statusLineCount = 8 if self.showTips else 1
 
   if 0:
     def splitWindow(self):
@@ -763,8 +756,8 @@ class InputWindow(Window):
           left)
 
     if self.showFooter and rows > 0:
-      self.statusLine.reshape(self.statusLineCount, cols, bottomFirstRow - self.statusLineCount,
-          left)
+      self.statusLine.reshape(self.statusLineCount, cols,
+          bottomFirstRow - self.statusLineCount, left)
       rows -= self.statusLineCount
     if self.showLineNumbers and cols > lineNumbersCols:
       self.lineNumberColumn.reshape(rows, lineNumbersCols, top, left)
@@ -834,6 +827,12 @@ class InputWindow(Window):
       self.scrollRow, self.scrollCol = savedScroll
     else:
       self.textBuffer.scrollToOptimalScrollPosition()
+
+  def toggleShowTips(self):
+    self.showTips = not self.showTips
+    self.statusLineCount = 8 if self.showTips else 1
+    self.layout()
+    app.prefs.save('status', 'showTips', self.showTips)
 
   def unfocus(self):
     if self.showMessageLine:
