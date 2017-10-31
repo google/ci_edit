@@ -36,9 +36,9 @@ class Mutator(app.selectable.Selectable):
   def __init__(self):
     app.selectable.Selectable.__init__(self)
     self.__compoundChange = []
-    # |__oldRedoIndex| is used to store the redo index before an action occurs,
+    # |oldRedoIndex| is used to store the redo index before an action occurs,
     # so we know where to insert the compound change.
-    self.__oldRedoIndex = 0
+    self.oldRedoIndex = 0
     self.debugRedo = False
     self.findRe = None
     self.findBackRe = None
@@ -69,7 +69,7 @@ class Mutator(app.selectable.Selectable):
   def compoundChangeReset(self):
     app.log.info('compoundChangeReset')
     if self.__compoundChange:
-      self.redoIndex = self.__oldRedoIndex
+      self.redoIndex = self.oldRedoIndex
       self.redoChain = self.redoChain[:self.redoIndex]
       changes = tuple(self.__compoundChange)
       change = changes[0]
@@ -103,7 +103,7 @@ class Mutator(app.selectable.Selectable):
         self.redoChain.append(changes)
         self.redoIndex += 1
     self.__compoundChange = []
-    self.__oldRedoIndex = self.redoIndex
+    self.oldRedoIndex = self.redoIndex
 
 
   def getPenOffset(self, row, col):
@@ -352,13 +352,13 @@ class Mutator(app.selectable.Selectable):
           if combinedChange in noOpInstructions:
             self.redoChain.pop()
             self.redoIndex -= 1
-            self.__oldRedoIndex -= 1
+            self.oldRedoIndex -= 1
           else:
             self.redoChain[-1] = (combinedChange,)
         else:
           self.redoChain.append((self.tempChange,))
           self.redoIndex += 1
-          self.__oldRedoIndex += 1
+          self.oldRedoIndex += 1
         self.tempChange = None
     if newTrivialChange:
       if self.tempChange:
@@ -396,7 +396,6 @@ class Mutator(app.selectable.Selectable):
 
   def undo(self):
     """Undo a set of redo nodes."""
-    # import pdb; pdb.set_trace()
     assert 0 <= self.redoIndex <= len(self.redoChain)
     # If tempChange is active, undo it first to fix cursor position.
     if self.tempChange:
