@@ -647,7 +647,7 @@ prefs = {
     },
   },
   'status': {
-    'showTips': True,
+    'showTips': False,
   },
   'userData': {
     'homePath': os.path.expanduser('~/.ci_edit'),
