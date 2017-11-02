@@ -160,8 +160,6 @@ def init():
   app.log.info('prefs init')
 
 def getGrammar(fileExtension):
-  if fileExtension is None:
-    return grammars.get('text')
   fileType = extensions.get(fileExtension, 'text')
   return grammars.get(fileType)
 

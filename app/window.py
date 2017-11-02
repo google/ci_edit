@@ -207,10 +207,6 @@ class ActiveWindow(ViewWindow):
     self.parent.zOrder.append(self)
     self.controller.focus()
 
-  def setController(self, controllerClass):
-    self.controller = controllerClass(self.host)
-    self.controller.setTextBuffer(self.textBuffer)
-
   def unfocus(self):
     app.log.info(self)
     self.hasFocus = False
@@ -279,7 +275,9 @@ class LabeledLine(Window):
   def __init__(self, parent, label):
     Window.__init__(self, parent)
     self.host = parent
-    self.setTextBuffer(app.text_buffer.TextBuffer())
+    tb = app.text_buffer.TextBuffer()
+    tb.rootGrammar = app.prefs.grammars['none']
+    self.setTextBuffer(tb)
     self.label = label
     self.leftColumn = ViewWindow(self)
 
@@ -295,6 +293,7 @@ class LabeledLine(Window):
     self.leftColumn.reshape(rows, labelWidth, top, left)
 
   def setController(self, controllerClass):
+    app.log.caller('                        ',self.textBuffer)
     self.controller = controllerClass(self.host)
     self.controller.setTextBuffer(self.textBuffer)
 
@@ -348,6 +347,7 @@ class Menu(ViewWindow):
     ViewWindow.render(self)
 
   def setController(self, controllerClass):
+    app.log.info('                        ',self.textBuffer)
     self.controller = controllerClass(self.host)
     self.controller.setTextBuffer(self.textBuffer)
 
@@ -484,7 +484,8 @@ class StatusLine(ViewWindow):
           self.addStr(i, 0, ' ' * self.cols, color)
         for i,k in enumerate(tipRows):
           self.addStr(i + 1, 4, k, color)
-        self.addStr(1, 40, "(Press F1 to show/hide tips)", color | curses.A_REVERSE)
+        self.addStr(1, 40, "(Press F1 to show/hide tips)",
+            color | curses.A_REVERSE)
 
     statusLine = ''
     if tb.message:
