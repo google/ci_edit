@@ -66,8 +66,8 @@ class Mutator(app.selectable.Selectable):
     self.savedAtRedoIndex = 0
     self.shouldReparse = False
 
-  def compoundChangeReset(self):
-    app.log.info('compoundChangeReset')
+  def compoundChangePush(self):
+    app.log.info('compoundChangePush')
     if self.__compoundChange:
       self.redoIndex = self.oldRedoIndex
       self.redoChain = self.redoChain[:self.redoIndex]
@@ -82,12 +82,12 @@ class Mutator(app.selectable.Selectable):
           self.redoChain[-1] = (change,)
           handledChange = True
         elif change[0] == 'n':
-          newMouseChange = change[2]
+          newCursorChange = change[2]
           newCarriageReturns = change[1]
-          oldMouseChange = self.redoChain[-1][0][2]
+          oldCursorChange = self.redoChain[-1][0][2]
           oldCarriageReturns = self.redoChain[-1][0][1]
           change = (change[0], oldCarriageReturns + newCarriageReturns,
-                    ('m', addVectors(newMouseChange[1], oldMouseChange[1])))
+                    ('m', addVectors(newCursorChange[1], oldCursorChange[1])))
           self.redoChain[-1] = (change,)
           handledChange = True
         elif change[0] == 'm':

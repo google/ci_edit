@@ -253,7 +253,7 @@ class CiProgram:
     self.focusedWindow.unfocus()
     self.focusedWindow = changeTo
     self.focusedWindow.focus()
-    self.focusedWindow.textBuffer.compoundChangeReset()
+    self.focusedWindow.textBuffer.compoundChangePush()
 
   def normalize(self):
     self.presentModal(None)

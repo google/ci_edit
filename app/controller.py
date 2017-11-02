@@ -80,7 +80,7 @@ class Controller:
       cmd()
     else:
       self.commandDefault(ch, meta)
-    self.textBuffer.compoundChangeReset()
+    self.textBuffer.compoundChangePush()
 
   def focus(self):
     app.log.info('base controller focus()')
