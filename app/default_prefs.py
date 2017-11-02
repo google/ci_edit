@@ -453,17 +453,17 @@ prefs = {
       'indent': '  ',
     },
     'html_element': {
-      'begin': '<\\w+',
+      'begin': r'<[\w-]+',  # The '-' is used by Polymer.
       'contains': ['html_element_attribute',],
       'end': '>',
-      'special': ['\\w+',],
+      'special': [r'\w+',],
     },
     'html_element_attribute': {
       'begin': '\\??="',
       'end': '"',
     },
     'html_element_end': {
-      'begin': '</\w+',
+      'begin': r'</\w+',
       'end': '>',
     },
     'java': {
