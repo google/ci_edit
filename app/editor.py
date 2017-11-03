@@ -233,6 +233,21 @@ class InteractivePrediction(app.controller.Controller):
       f, e = os.path.splitext(i)
       if file == f and ext != e and e not in ignoreExt:
         self.items.append((None, os.path.join(dirPath, i), '='))
+    if 1:
+      app.log.info()
+      # Chromium specific hack.
+      if currentFile.endswith('-extracted.js'):
+        chromiumPath = currentFile[:-len('-extracted.js')] + '.html'
+        app.log.info(chromiumPath)
+        if os.path.isfile(chromiumPath):
+          app.log.info()
+          self.items.append((None, chromiumPath, '='))
+      elif currentFile.endswith('.html'):
+        app.log.info()
+        chromiumPath = currentFile[:-len('.html')] + '-extracted.js'
+        if os.path.isfile(chromiumPath):
+          app.log.info()
+          self.items.append((None, chromiumPath, '='))
     # Suggest item.
     return (len(app.buffer_manager.buffers.buffers) - 2) % len(self.items)
 
