@@ -256,7 +256,7 @@ class Actions(app.mutator.Mutator):
 
   def carriageReturn(self):
     self.performDelete()
-    self.redoAddChange(('n', (1, self.getCursorMove(1, -self.penCol))))
+    self.redoAddChange(('n', 1, self.getCursorMove(1, -self.penCol)))
     self.redo()
     if 1:  # TODO(dschuyler): if indent on CR
       line = self.lines[self.penRow - 1]
@@ -823,9 +823,10 @@ class Actions(app.mutator.Mutator):
     self.markerRow, self.markerCol = self.fileHistory.setdefault('marker',
         (0, 0))
     if app.prefs.editor['saveUndo']:
-      self.redoChain = self.fileHistory.setdefault('redoChain', [])
-      self.savedAtRedoIndex = self.fileHistory.setdefault('savedAtRedoIndex', 0)
+      self.redoChain = self.fileHistory.setdefault('redoChainCompound', [])
+      self.savedAtRedoIndex = self.fileHistory.setdefault('savedAtRedoIndexCompound', 0)
       self.redoIndex = self.savedAtRedoIndex
+      self.oldRedoIndex = self.savedAtRedoIndex
 
     # Restore file bookmarks
     self.bookmarks = self.fileHistory.setdefault('bookmarks', [])
@@ -933,6 +934,7 @@ class Actions(app.mutator.Mutator):
       try:
         if app.prefs.editor['onSaveStripTrailingSpaces']:
           self.stripTrailingWhiteSpace()
+          self.compoundChangePush()
         # Save user data that applies to read-only files into history.
         self.fileHistory['pen'] = (self.penRow, self.penCol)
         self.fileHistory['cursor'] = (self.view.cursorRow, self.view.cursorCol)
@@ -952,8 +954,8 @@ class Actions(app.mutator.Mutator):
         # Save user data that applies to writable files.
         self.savedAtRedoIndex = self.redoIndex
         if app.prefs.editor['saveUndo']:
-          self.fileHistory['redoChain'] = self.redoChain
-          self.fileHistory['savedAtRedoIndex'] = self.savedAtRedoIndex
+          self.fileHistory['redoChainCompound'] = self.redoChain
+          self.fileHistory['savedAtRedoIndexCompound'] = self.savedAtRedoIndex
         # Hmm, could this be hard coded to False here?
         self.isReadOnly = not os.access(self.fullPath, os.W_OK)
         app.history.saveUserHistory((self.fullPath, self.lastChecksum,
@@ -1447,11 +1449,9 @@ class Actions(app.mutator.Mutator):
     self.insertPrintable(0x00, None)
 
   def stripTrailingWhiteSpace(self):
-    self.compoundChangeBegin()
     for i in range(len(self.lines)):
       for found in app.selectable.kReEndSpaces.finditer(self.lines[i]):
         self.performDeleteRange(i, found.regs[0][0], i, found.regs[0][1])
-    self.compoundChangeEnd()
 
   def unindent(self):
     if self.selectionMode != app.selectable.kSelectionNone:
@@ -1471,7 +1471,6 @@ class Actions(app.mutator.Mutator):
     indentationLength = len(indentation)
     row = min(self.markerRow, self.penRow)
     endRow = max(self.markerRow, self.penRow)
-    self.compoundChangeBegin()
     begin = 0
     for i,line in enumerate(self.lines[row:endRow + 1]):
       if (len(line) < indentationLength or
@@ -1482,7 +1481,6 @@ class Actions(app.mutator.Mutator):
     self.verticalDelete(row + begin, endRow, 0, indentation)
     self.cursorMoveAndMark(0, -indentationLength, 0, -indentationLength, 0)
     self.redo()
-    self.compoundChangeEnd()
 
   def updateScrollPosition(self, scrollRowDelta, scrollColDelta):
     """
