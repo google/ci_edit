@@ -391,7 +391,7 @@ class LineNumbers(ViewWindow):
 
   def mouseMoved(self, paneRow, paneCol, shift, ctrl, alt):
     app.log.info(paneRow, paneCol, shift)
-    self.host.textBuffer.mouseClick(paneRow, paneCol, True, ctrl, alt)
+    self.host.textBuffer.mouseClick(paneRow, paneCol - self.cols, True, ctrl, alt)
 
   def mouseRelease(self, paneRow, paneCol, shift, ctrl, alt):
     app.log.info(paneRow, paneCol, shift)

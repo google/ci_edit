@@ -321,8 +321,7 @@ class Actions(app.mutator.Mutator):
   def cursorMoveScroll(self, rowDelta, colDelta,
       scrollRowDelta, scrollColDelta):
     self.updateScrollPosition(scrollRowDelta, scrollColDelta)
-    self.redoAddChange(('m', (rowDelta, colDelta,
-        0,0, 0)))
+    self.redoAddChange(('m', (rowDelta, colDelta, 0, 0, 0)))
 
   def cursorMoveDown(self):
     if self.penRow + 1 < len(self.lines):
@@ -1275,7 +1274,6 @@ class Actions(app.mutator.Mutator):
     self.cursorMoveAndMark(row - self.penRow, col - self.penCol,
         0, markerCol, 0)
     self.redo()
-    inLine = paneCol < len(self.lines[row])
     if self.selectionMode == app.selectable.kSelectionLine:
       self.cursorMoveAndMark(*self.extendSelection())
       self.redo()
@@ -1284,7 +1282,7 @@ class Actions(app.mutator.Mutator):
          (self.penRow == self.markerRow and
           self.penCol < self.markerCol)):
         self.cursorSelectWordLeft()
-      elif inLine:
+      elif paneCol < len(self.lines[row]):
         self.cursorSelectWordRight()
 
   def mouseTripleClick(self, paneRow, paneCol, shift, ctrl, alt):
@@ -1293,8 +1291,7 @@ class Actions(app.mutator.Mutator):
     self.selectLineAt(self.view.scrollRow + paneRow)
 
   def scrollWindow(self, rows, cols):
-    self.cursorMoveScroll(rows, self.cursorColDelta(self.penRow - rows),
-        -1, 0)
+    self.cursorMoveScroll(rows, self.cursorColDelta(self.penRow - rows), -1, 0)
     self.redo()
 
   def mouseWheelDown(self, shift, ctrl, alt):

@@ -115,14 +115,14 @@ class Selectable(BaseLineBuffer):
     if selectionMode == kSelectionAll:
       lines = self.lines[:]
     elif selectionMode == kSelectionBlock:
-      for i in range(upperRow, lowerRow+1):
+      for i in range(upperRow, lowerRow + 1):
         lines.append(self.lines[i][upperCol:lowerCol])
     elif (selectionMode == kSelectionCharacter or
         selectionMode == kSelectionWord):
       if upperRow == lowerRow:
         lines.append(self.lines[upperRow][upperCol:lowerCol])
       else:
-        for i in range(upperRow, lowerRow+1):
+        for i in range(upperRow, lowerRow + 1):
           if i == upperRow:
             lines.append(self.lines[i][upperCol:])
           elif i == lowerRow:
@@ -142,7 +142,7 @@ class Selectable(BaseLineBuffer):
     if self.upperChangedRow > upperRow:
       self.upperChangedRow = upperRow
     if self.selectionMode == kSelectionBlock:
-      for i in range(upperRow, lowerRow+1):
+      for i in range(upperRow, lowerRow + 1):
         line = self.lines[i]
         self.lines[i] = line[:upperCol] + line[lowerCol:]
     elif (self.selectionMode == kSelectionNone or

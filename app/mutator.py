@@ -402,10 +402,10 @@ class Mutator(app.selectable.Selectable):
       self.__undoMove(self.tempChange)
       self.tempChange = None
     while self.redoIndex > 0:
-      if self.debugRedo:
-        app.log.info('undo', self.redoIndex, repr(changes))
       self.redoIndex -= 1
       changes = self.redoChain[self.redoIndex]
+      if self.debugRedo:
+        app.log.info('undo', self.redoIndex, repr(changes))
       if changes[0][0] == 'm' and len(changes) == 1:
         # Undo if the last edit was a cursor move.
         self.__undoChange(changes[0])

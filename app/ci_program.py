@@ -366,6 +366,10 @@ class CiProgram:
         "bState %s %d"
         %(app.curses_util.mouseButtonName(bState), bState),
             color)
+    self.debugWindow.writeLine(
+        "startAndEnd %r"
+        %(textBuffer.startAndEnd(),),
+            color)
 
   def debugUndoDraw(self, win):
     """Draw real-time debug information to the screen."""
