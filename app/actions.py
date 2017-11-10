@@ -1240,7 +1240,15 @@ class Actions(app.mutator.Mutator):
     app.log.info(' mouse release', paneRow, paneCol)
     if not self.lines:
       return
-    row = max(0, min(self.view.scrollRow + paneRow, len(self.lines) - 1))
+    virtualRow = self.view.scrollRow + paneRow
+    if virtualRow >= len(self.lines):
+      # Off the bottom of document.
+      lastLine = len(self.lines) - 1
+      self.cursorMove(lastLine - self.penRow,
+          len(self.lines[lastLine]) - self.penCol)
+      self.redo()
+      return
+    row = max(0, min(virtualRow, len(self.lines)))
     col = max(0, self.view.scrollCol + paneCol)
     if self.selectionMode == app.selectable.kSelectionBlock:
       self.cursorMoveAndMark(0, 0, row - self.markerRow, col - self.markerCol,
