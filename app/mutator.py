@@ -247,7 +247,7 @@ class Mutator(app.selectable.Selectable):
       self.lines[self.penRow] = line[:x] + line[x + len(change[1]):]
       if self.upperChangedRow > self.penRow:
         self.upperChangedRow = self.penRow
-    elif change[0] == 'd':
+    elif change[0] == 'd':  # Redo delete character.
       line = self.lines[self.penRow]
       x = self.penCol
       self.lines[self.penRow] = line[:x] + line[x + len(change[1]):]
@@ -265,7 +265,7 @@ class Mutator(app.selectable.Selectable):
       self.goalCol = self.penCol
       if self.upperChangedRow > self.penRow:
         self.upperChangedRow = self.penRow
-    elif change[0] == 'j':  # Redo join lines.
+    elif change[0] == 'j':  # Redo join lines (delete \n).
       self.lines[self.penRow] += self.lines[self.penRow + 1]
       del self.lines[self.penRow + 1]
       if self.upperChangedRow > self.penRow:
@@ -288,12 +288,10 @@ class Mutator(app.selectable.Selectable):
         self.upperChangedRow = firstChangedRow
     elif change[0] == 'm':  # Redo move
       self.__redoMove(change)
-    elif change[0] == 'ml':
-      # Redo move lines
+    elif change[0] == 'ml':  # Redo move lines
       begin, end, to = change[1]
       self.__doMoveLines(begin, end, to)
-    elif change[0] == 'n':
-      # Redo split lines.
+    elif change[0] == 'n':  # Redo split lines (insert \n).
       line = self.lines[self.penRow]
       self.lines.insert(self.penRow + 1, line[self.penCol:])
       self.lines[self.penRow] = line[:self.penCol]
@@ -304,7 +302,7 @@ class Mutator(app.selectable.Selectable):
       self.__redoMove(change[2])
     elif change[0] == 'v':  # Redo paste.
       self.insertLines(change[1])
-    elif change[0] == 'vb':
+    elif change[0] == 'vb':  # Redo vertical backspace.
       self.penCol -= len(change[1])
       row = min(self.markerRow, self.penRow)
       rowEnd = max(self.markerRow, self.penRow)
