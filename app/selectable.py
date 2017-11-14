@@ -149,21 +149,14 @@ class Selectable(BaseLineBuffer):
         self.selectionMode == kSelectionAll or
         self.selectionMode == kSelectionCharacter or
         self.selectionMode == kSelectionWord):
-      if upperRow == lowerRow and len(self.lines) > 1:
-        line = self.lines[upperRow]
-        self.lines[upperRow] = line[:upperCol] + line[lowerCol:]
-      elif upperCol == 0 and lowerCol == 0 or (
-          lowerRow == len(self.lines) and lowerCol == len(self.lines[-1])):
-        del self.lines[upperRow:lowerRow]
-        if not len(self.lines):
-          self.lines.append(unicode(""))
-      else:
-        self.lines[upperRow] = (self.lines[upperRow][:upperCol] +
-            self.lines[lowerRow][lowerCol:])
-        upperRow += 1
-        del self.lines[upperRow:lowerRow+1]
+      upperLine = self.lines[upperRow]
+      lowerLine = self.lines[lowerRow]
+      self.lines[upperRow] = upperLine[:upperCol] + lowerLine[lowerCol:]
+      if upperRow != lowerRow:
+        del self.lines[upperRow + 1:lowerRow + 1]
     elif self.selectionMode == kSelectionLine:
-      if lowerRow+1 == len(self.lines):
+      if lowerRow + 1 == len(self.lines):
+        assert False
         self.lines.append('')
       del self.lines[upperRow:lowerRow+1]
 
@@ -274,7 +267,7 @@ class Selectable(BaseLineBuffer):
     elif self.selectionMode == kSelectionAll:
       upperRow = 0
       upperCol = 0
-      lowerRow = len(self.lines)
+      lowerRow = len(self.lines) - 1
       lowerCol = lowerRow and len(self.lines[-1])
     elif self.selectionMode == kSelectionBlock:
       upperRow = min(self.markerRow, self.penRow)

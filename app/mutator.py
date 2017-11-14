@@ -438,7 +438,7 @@ class Mutator(app.selectable.Selectable):
           app.selectable.kSelectionCharacter)
     elif change[0] == 'ds':  # Undo delete selection.
       self.insertLines(change[1])
-    elif change[0] == 'i':
+    elif change[0] == 'i':  # Undo insert.
       line = self.lines[self.penRow]
       x = self.penCol
       self.penCol -= len(change[1])
@@ -446,8 +446,7 @@ class Mutator(app.selectable.Selectable):
       self.goalCol = self.penCol
       if self.upperChangedRow > self.penRow:
         self.upperChangedRow = self.penRow
-    elif change[0] == 'j':
-      # Join lines.
+    elif change[0] == 'j':  # Undo join lines.
       line = self.lines[self.penRow]
       self.lines.insert(self.penRow + 1, line[self.penCol:])
       self.lines[self.penRow] = line[:self.penCol]
