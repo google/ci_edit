@@ -680,8 +680,6 @@ class Actions(app.mutator.Mutator):
   def editCopy(self):
     text = self.getSelectedText()
     if len(text):
-      if self.selectionMode == app.selectable.kSelectionLine:
-        text = text + ('',)
       data = self.doLinesToData(text)
       app.clipboard.copy(data)
 
@@ -1415,17 +1413,17 @@ class Actions(app.mutator.Mutator):
     self.doSelectionMode(app.selectable.kSelectionWord)
 
   def selectLineAt(self, row):
-    if row < len(self.lines):
-      if 1:
-        self.cursorMove(row - self.penRow, 0)
-        self.redo()
-        self.selectionLine()
-        self.cursorMoveAndMark(*self.extendSelection())
-        self.redo()
-      else:
-        # TODO(dschuyler): reverted to above to fix line selection in the line
-        # numbers column. To be investigated further.
-        self.selectText(row, 0, 0, app.selectable.kSelectionLine)
+    if row + 1 < len(self.lines):
+      self.cursorMoveAndMark((row + 1) - self.penRow, -self.penCol,
+          row - self.markerRow, -self.markerCol,
+          app.selectable.kSelectionLine - self.selectionMode)
+      self.redo()
+    else:
+      self.cursorMoveAndMark(row - self.penRow,
+          len(self.lines[row]) - self.penCol,
+          row - self.penRow, -self.markerCol,
+          app.selectable.kSelectionLine - self.selectionMode)
+      self.redo()
 
   def selectWordAt(self, row, col):
     """row and col may be from a mouse click and may not actually land in the
