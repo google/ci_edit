@@ -117,6 +117,7 @@ class Selectable(BaseLineBuffer):
         lines.append(self.lines[i][upperCol:lowerCol])
     elif (selectionMode == kSelectionAll or
         selectionMode == kSelectionCharacter or
+        selectionMode == kSelectionLine or
         selectionMode == kSelectionWord):
       if upperRow == lowerRow:
         lines.append(self.lines[upperRow][upperCol:lowerCol])
@@ -128,9 +129,6 @@ class Selectable(BaseLineBuffer):
             lines.append(self.lines[i][:lowerCol])
           else:
             lines.append(self.lines[i])
-    elif selectionMode == kSelectionLine:
-      for i in range(upperRow, lowerRow+1):
-        lines.append(self.lines[i])
     return tuple(lines)
 
   def doDeleteSelection(self):
@@ -163,14 +161,18 @@ class Selectable(BaseLineBuffer):
     if len(lines) == 0:
       return
     lines = list(lines)
-    if selectionMode == kSelectionAll:
-      self.lines = lines
-      self.upperChangedRow = 0
-      return
     if self.upperChangedRow > row:
       self.upperChangedRow = row
-    if (selectionMode == kSelectionNone or
+    if selectionMode == kSelectionBlock:
+      for i, line in enumerate(lines):
+        self.lines[row+i] = (
+            self.lines[row+i][:col] + line +
+            self.lines[row+i][col:])
+        self.lines.insert(row, line)
+    elif (selectionMode == kSelectionNone or
+        selectionMode == kSelectionAll or
         selectionMode == kSelectionCharacter or
+        selectionMode == kSelectionLine or
         selectionMode == kSelectionWord):
       lines.reverse()
       firstLine = self.lines[row]
@@ -185,19 +187,6 @@ class Selectable(BaseLineBuffer):
             lines[0] + firstLine[col:])
         for line in lines[1:-1]:
           self.lines.insert(currentRow, line)
-    elif selectionMode == kSelectionBlock:
-      for i, line in enumerate(lines):
-        self.lines[row+i] = (
-            self.lines[row+i][:col] + line +
-            self.lines[row+i][col:])
-    elif selectionMode == kSelectionLine:
-      app.log.detail('insertLines', row, len(lines))
-      lines.reverse()
-      if (row == len(self.lines)-1 and
-          len(self.lines[-1]) == 0):
-        self.lines = self.lines[:-1]
-      for line in lines:
-        self.lines.insert(row, line)
     else:
       app.log.info('selection mode not recognized', selectionMode)
 
@@ -268,22 +257,9 @@ class Selectable(BaseLineBuffer):
       upperCol = min(self.markerCol, self.penCol)
       lowerRow = max(self.markerRow, self.penRow)
       lowerCol = max(self.markerCol, self.penCol)
-    elif self.selectionMode == kSelectionCharacter:
-      upperRow = self.markerRow
-      upperCol = self.markerCol
-      lowerRow = self.penRow
-      lowerCol = self.penCol
-      if upperRow == lowerRow and upperCol > lowerCol:
-        upperCol, lowerCol = lowerCol, upperCol
-      elif upperRow > lowerRow:
-        upperRow, lowerRow = lowerRow, upperRow
-        upperCol, lowerCol = lowerCol, upperCol
-    elif self.selectionMode == kSelectionLine:
-      upperRow = min(self.markerRow, self.penRow)
-      upperCol = 0
-      lowerRow = max(self.markerRow, self.penRow)
-      lowerCol = 0
-    elif self.selectionMode == kSelectionWord:
+    elif (self.selectionMode == kSelectionCharacter or
+        self.selectionMode == kSelectionLine or
+        self.selectionMode == kSelectionWord):
       upperRow = self.markerRow
       upperCol = self.markerCol
       lowerRow = self.penRow

@@ -310,6 +310,7 @@ class TextBuffer(app.actions.Actions):
               window.addStr(top + i, selStartCol, line, colorSelected)
         elif (self.selectionMode == app.selectable.kSelectionAll or
             self.selectionMode == app.selectable.kSelectionCharacter or
+            self.selectionMode == app.selectable.kSelectionLine or
             self.selectionMode == app.selectable.kSelectionWord):
           if not (lowerRow < startRow or upperRow >= endRow):
             # There is an overlap.
@@ -338,10 +339,3 @@ class TextBuffer(app.actions.Actions):
                 # Middle of multi-line selection.
                 window.addStr(top + i, left, line[startCol:endCol],
                     colorSelected)
-        elif self.selectionMode == app.selectable.kSelectionLine:
-          if not (lowerRow < startRow or upperRow >= endRow):
-            # There is an overlap.
-            for i in range(start, min(maxRow, end + 1)):
-              line = self.lines[startRow + i][selStartCol:endCol]
-              window.addStr(top + i, selStartCol,
-                  line + ' ' * (maxCol - len(line)), colorSelected)
