@@ -88,21 +88,11 @@ class Selectable(BaseLineBuffer):
     self.selectionMode = kSelectionNone
     self.upperChangedRow = 0
 
-  def debug(self):
-    return "(Selectable: line count %d, pen %d,%d, marker %d,%d, mode %s)"%(
-        len(self.lines), self.penRow, self.penCol, self.markerRow,
-        self.markerCol, self.selectionModeName())
-
   def selection(self):
     return (self.penRow, self.penCol, self.markerRow, self.markerCol)
 
   def selectionModeName(self):
     return kSelectionModeNames[self.selectionMode]
-
-  def setSelection(self, other):
-    (self.penRow, self.penCol, self.markerRow, self.markerCol,
-        self.markerEndRow, self.markerEndCol,
-        self.selectionMode) = other
 
   def getSelectedText(self):
     upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
