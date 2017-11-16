@@ -18,6 +18,7 @@ cassert
 ceil
 cmath
 cout
+cplusplus
 cstream
 cstring
 endl
@@ -40,12 +41,14 @@ rbegin
 refcounted
 setprecision
 setw
+snprintf
 std
 stddef
 stdint
 stdlib
 strerror
 toupper
+typename
 uint
 va
 wchar
