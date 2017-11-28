@@ -113,6 +113,7 @@ color8 = {
   'debug_window': 1,
   'default': 0,
   'doc_block_comment': 3,
+  'error': 9,
   'found_find': 1,
   'highlight': 3,
   'html_block_comment': 2,
@@ -161,6 +162,7 @@ color256 = {
   'debug_window': defaultColorIndex,
   'default': defaultColorIndex,
   'doc_block_comment': commentColorIndex,
+  'error': 9,
   'found_find': foundColorIndex,
   'highlight': 96,
   'html_block_comment': commentColorIndex,
@@ -402,6 +404,9 @@ prefs = {
     'css': {
       'begin': '<style',
       'end': '</style>',
+      'error': [
+        r'#(?:[^;]{1,2}|[^;]{5}|[^;]{7}|[^;]{9,})\b',
+      ],
       'indent': '  ',
       'keywords': [
         'absolute', 'attr', 'block', 'border-box', 'calc', 'center', 'default',
@@ -413,6 +418,7 @@ prefs = {
       'special': [
         r'@apply\b', r'\d+deg\b', r'\d+em\b', r'\d+px\b',
         r'\d+rem\b', r'[\w-]+:',
+        r'#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3,4})'
       ],
       'contains': ['cpp_block_comment'],
     },
@@ -427,6 +433,9 @@ prefs = {
         r'@return\b', r'\bNOTE:', r'TODO\([^)]+\)',
       ],
       'types': ['Array', 'boolean', 'string', 'Object'],
+    },
+    'error': {
+      'spelling': False,
     },
     'grd': {
       'keywords': [ 'flattenhtml', 'allowexternalscript' ],

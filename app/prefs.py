@@ -88,6 +88,7 @@ for k,v in prefs['grammar'].items():
   # keywords re.
   v['keywordsRe'] = re.compile(
       joinReWordList(v.get('keywords', []) + v.get('types', [])))
+  v['errorsRe'] = re.compile(joinReList(v.get('error', [])))
   v['specialsRe'] = re.compile(joinReList(v.get('special', [])))
   # contains and end re.
   matchGrammars = []
@@ -119,9 +120,11 @@ for k,v in prefs['grammar'].items():
     markers.append(g['begin'])
     matchGrammars.append(g)
   # Index [2+len(contains)..]
+  markers += v.get('error', [])
+  # Index [2+len(contains)+len(error)..]
   for keyword in v.get('keywords', []):
     markers.append(r'\b' + keyword + r'\b')
-  # Index [2+len(contains)+len(keywords)..]
+  # Index [2+len(contains)+len(error)+len(keywords)..]
   markers += v.get('special', [])
   # Index [-1]
   markers.append(r'\n')

@@ -15,6 +15,7 @@
 # This is a list of non-English words that are commonly found in programming
 # source code files.
 a
+aarrggbb
 ab
 abc
 abcd
@@ -58,6 +59,8 @@ attrs
 auth
 backtrace
 baz
+bbggrr
+bgr
 bool
 buf
 bugzilla
@@ -235,6 +238,8 @@ remoting
 renderer
 rhs
 ro
+rrggbb
+rrggbbaa
 rtti
 runtime
 rv
