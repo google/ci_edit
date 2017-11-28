@@ -60,6 +60,7 @@ class CiProgram:
     self.modalUi = None
     self.modeStack = []
     self.priorClick = 0
+    self.savedMouseButton1Down = False
     self.savedMouseWindow = None
     self.savedMouseX = -1
     self.savedMouseY = -1
@@ -445,13 +446,22 @@ class CiProgram:
     mouseCol -= window.left
     app.log.mouse(mouseRow, mouseCol)
     app.log.mouse("\n", window)
+    button1WasDown = self.savedMouseButton1Down
+    self.savedMouseButton1Down = False
     #app.log.info('bState', app.curses_util.mouseButtonName(bState))
     if bState & curses.BUTTON1_RELEASED:
-      app.log.mouse(bState, curses.BUTTON1_RELEASED)
-      if self.priorClick + rapidClickTimeout <= eventTime:
-        window.mouseRelease(mouseRow, mouseCol, bState&curses.BUTTON_SHIFT,
-            bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
+      if button1WasDown:
+        app.log.mouse(bState, curses.BUTTON1_RELEASED)
+        if self.priorClick + rapidClickTimeout <= eventTime:
+          window.mouseRelease(mouseRow, mouseCol, bState&curses.BUTTON_SHIFT,
+              bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
+      else:
+        # Some terminals (linux?) send BUTTON1_RELEASED after moving the mouse.
+        # Specifically if the terminal doesn't use button 4 for mouse movement.
+        # Mouse drag or mouse wheel movement done.
+        pass
     elif bState & curses.BUTTON1_PRESSED:
+      self.savedMouseButton1Down = True
       if (self.priorClick + rapidClickTimeout > eventTime and
           self.clickedNearby(mouseRow, mouseCol)):
         self.clicks += 1
@@ -474,30 +484,31 @@ class CiProgram:
     elif bState & curses.BUTTON2_PRESSED:
       window.mouseWheelUp(bState&curses.BUTTON_SHIFT,
           bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
-    elif bState & curses.BUTTON4_PRESSED:
+    elif bState & (curses.BUTTON4_PRESSED | curses.REPORT_MOUSE_POSITION):
+      # Notes from testing:
+      # Mac seems to send BUTTON4_PRESSED during mouse move; followed by
+      #   BUTTON4_RELEASED.
+      # Linux seems to send REPORT_MOUSE_POSITION during mouse move; followed by
+      #   BUTTON1_RELEASED.
       if self.savedMouseX == mouseCol and self.savedMouseY == mouseRow:
-        window.mouseWheelDown(bState&curses.BUTTON_SHIFT,
-            bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
+        if bState & curses.REPORT_MOUSE_POSITION:
+          # This is a hack for dtterm mouse wheel on Mac OS X.
+          window.mouseWheelUp(bState&curses.BUTTON_SHIFT,
+              bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
+        else:
+          # This is the normal case:
+          window.mouseWheelDown(bState&curses.BUTTON_SHIFT,
+              bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
       else:
         if self.savedMouseWindow and self.savedMouseWindow is not window:
           mouseRow += window.top - self.savedMouseWindow.top
           mouseCol += window.left - self.savedMouseWindow.left
           window = self.savedMouseWindow
-        window.mouseMoved(mouseRow, mouseCol, bState&curses.BUTTON_SHIFT,
-            bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
-    elif bState & curses.REPORT_MOUSE_POSITION:
-      #app.log.mouse('REPORT_MOUSE_POSITION')
-      if self.savedMouseX == mouseCol and self.savedMouseY == mouseRow:
-        # This is a hack for dtterm on Mac OS X.
-        window.mouseWheelUp(bState&curses.BUTTON_SHIFT,
-            bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
-      else:
-        if self.savedMouseWindow and self.savedMouseWindow is not window:
-          mouseRow += window.top - self.savedMouseWindow.top
-          mouseCol += window.left - self.savedMouseWindow.left
-          window = self.savedMouseWindow
-        window.mouseMoved(mouseRow, mouseCol, bState&curses.BUTTON_SHIFT,
-            bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
+        window.mouseMoved(mouseRow, mouseCol, bState & curses.BUTTON_SHIFT,
+            bState & curses.BUTTON_CTRL, bState & curses.BUTTON_ALT)
+    elif bState & curses.BUTTON4_RELEASED:
+      # Mouse drag or mouse wheel movement done.
+      pass
     else:
       app.log.mouse('got bState', app.curses_util.mouseButtonName(bState),
           bState)
