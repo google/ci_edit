@@ -284,13 +284,19 @@ prefs = {
     #   'continued': None or string,
     #       Prefixed used when continuing to another line,
     #   'end': None or regex,
+    #   'error': None or list of string.
     #   'escaped': None or regex,
     #   'indent': None or string,
-    #   'keywords': None or list of string,
+    #   'keywords': None or list of string. Matches whole words only (wraps
+    #       values in \b).
     #   'single_line': Boolean, Whether entire grammar must be on a single line,
+    #   'special': None or list of string.
     #   'type': text or binary. default: text.
     #   'contains': other grammars that may be contained within this grammar.
     # }
+    # The entries for 'error', 'keywords', and 'special' are very similar.
+    # Other than 'keywords' being wrapped in \b markers, the difference between
+    # them is just how they are drawn (color and style).
     '_pre': {
       'contains': ['_pre_selection'],
       'spelling': False,
