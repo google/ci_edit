@@ -50,6 +50,25 @@ class PerformanceTestCases(unittest.TestCase):
     self.assertGreater(b, a * 2)
     self.assertGreater(c, a * 2)
 
+  def test_default_parameter(self):
+    setup  = '''def withDefault(a, b=None):\n'''
+    setup += '''  if b is not None: return b\n'''
+    setup += '''  return a*a\n'''
+    setup += '''def withoutDefault(a, b):\n'''
+    setup += '''  if b is -1: return b\n'''
+    setup += '''  return a*b\n'''
+    a = timeit(
+        '''withDefault(5);''' * 100,
+        setup=setup,
+        number=10000)
+    b = timeit(
+        '''withoutDefault(5, 0);''' * 100,
+        setup=setup,
+        number=10000)
+    # Assert that neither too much faster than the other
+    self.assertGreater(a, b * 0.9)
+    self.assertGreater(b, a * 0.9)
+
   def test_insert1(self):
     return  # Remove to enable test (disabled due to running time).
     # This tests a performance assumption. If this test fails, the program

@@ -64,7 +64,6 @@ class SelectableTestCases(unittest.TestCase):
     selectable.lines = ['one two', '', 'five']
     selectable.penRow = 1
     selectable.selectionMode = app.selectable.kSelectionLine
-    app.log.debug('selectable', selectable.debug())
     app.log.debug('selectable.extendSelection', selectable.extendSelection())
     self.assertEqual(selectable.extendSelection(), (0, 0, 0, 0, 0))
     selectable.penRow = 3
@@ -135,7 +134,6 @@ class SelectableTestCases(unittest.TestCase):
     selectable.lines = ['one two', '', 'five']
     selectable.penRow = 1
     selectable.selectionMode = app.selectable.kSelectionLine
-    app.log.debug('selectable', selectable.debug())
     app.log.debug('selectable.extendSelection', selectable.extendSelection())
     self.assertEqual(selectable.extendSelection(), (0, 0, 0, 0, 0))
     selectable.penRow = 3
