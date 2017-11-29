@@ -342,6 +342,7 @@ class CuaPlusEdit(CuaEdit):
       CTRL_E: self.changeToPrompt,
       CTRL_P: self.changeToPrediction,
 
+      KEY_F1: textBuffer.toggleShowTips,
       KEY_F2: textBuffer.bookmarkNext,
       KEY_F3: textBuffer.findAgain,
       #KEY_F4: self.changeToPaletteWindow,

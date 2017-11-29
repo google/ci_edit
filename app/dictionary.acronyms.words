@@ -14,6 +14,8 @@
 
 
 # Acronyms (acronyms that match trademarks are not a challenge to said marks)
+acl
+adt
 afaict
 afaik
 afk
@@ -49,6 +51,7 @@ fyis
 gb
 gbs
 gc
+gcc
 gcs
 gdb
 gif
@@ -81,6 +84,7 @@ ipcs
 ips
 iso
 ja
+jni
 kb
 kbs
 kde
@@ -103,6 +107,7 @@ mb
 mbs
 mdn
 mit
+mmx
 mr
 msb
 msbs
@@ -113,6 +118,7 @@ mvc
 mx
 nasa
 nb
+ncsa
 nl
 nls
 ns
@@ -127,16 +133,18 @@ oss
 osx
 pb
 pbs
+pc
 pdf
 pdfs
 pgo
+pgp
 php
 qa
 rc
 rcs
 rgb
-rgbs
 rgba
+rgbs
 rsa
 rtc
 rtl
@@ -146,6 +154,7 @@ sgml
 sgmls
 sk
 sl
+sms
 sr
 ssid
 ssl
@@ -175,9 +184,11 @@ usb
 usbs
 utc
 utcs
+vr
 wep
 wip
 www
+wx
 xl
 xml
 xmls

@@ -94,6 +94,9 @@ class ViewWindow:
   def debugDraw(self, win):
     self.parent.debugDraw(win)
 
+  def debugUndoDraw(self, win):
+    self.parent.debugUndoDraw(win)
+
   def hide(self):
     """Remove window from the render list."""
     try:
@@ -204,10 +207,6 @@ class ActiveWindow(ViewWindow):
     self.parent.zOrder.append(self)
     self.controller.focus()
 
-  def setController(self, controllerClass):
-    self.controller = controllerClass(self.host)
-    self.controller.setTextBuffer(self.textBuffer)
-
   def unfocus(self):
     app.log.info(self)
     self.hasFocus = False
@@ -253,6 +252,7 @@ class Window(ActiveWindow):
     ViewWindow.render(self)
     if self.hasFocus:
       self.parent.debugDraw(self)
+      self.parent.debugUndoDraw(self)
       if (self.cursorRow >= self.scrollRow and
           self.cursorRow < self.scrollRow + self.rows):
         app.render.frame.setCursor((
@@ -275,7 +275,9 @@ class LabeledLine(Window):
   def __init__(self, parent, label):
     Window.__init__(self, parent)
     self.host = parent
-    self.setTextBuffer(app.text_buffer.TextBuffer())
+    tb = app.text_buffer.TextBuffer()
+    tb.rootGrammar = app.prefs.grammars['none']
+    self.setTextBuffer(tb)
     self.label = label
     self.leftColumn = ViewWindow(self)
 
@@ -291,6 +293,7 @@ class LabeledLine(Window):
     self.leftColumn.reshape(rows, labelWidth, top, left)
 
   def setController(self, controllerClass):
+    app.log.caller('                        ',self.textBuffer)
     self.controller = controllerClass(self.host)
     self.controller.setTextBuffer(self.textBuffer)
 
@@ -344,6 +347,7 @@ class Menu(ViewWindow):
     ViewWindow.render(self)
 
   def setController(self, controllerClass):
+    app.log.info('                        ',self.textBuffer)
     self.controller = controllerClass(self.host)
     self.controller.setTextBuffer(self.textBuffer)
 
@@ -387,7 +391,7 @@ class LineNumbers(ViewWindow):
 
   def mouseMoved(self, paneRow, paneCol, shift, ctrl, alt):
     app.log.info(paneRow, paneCol, shift)
-    self.host.textBuffer.mouseClick(paneRow, paneCol, True, ctrl, alt)
+    self.host.textBuffer.mouseClick(paneRow, paneCol - self.cols, True, ctrl, alt)
 
   def mouseRelease(self, paneRow, paneCol, shift, ctrl, alt):
     app.log.info(paneRow, paneCol, shift)
@@ -472,6 +476,17 @@ class StatusLine(ViewWindow):
 
   def render(self):
     tb = self.host.textBuffer
+    color = app.color.get('status_line')
+    if self.host.showTips:
+      tipRows = app.help.docs['tips']
+      if len(tipRows) + 1 < self.rows:
+        for i in range(self.rows):
+          self.addStr(i, 0, ' ' * self.cols, color)
+        for i,k in enumerate(tipRows):
+          self.addStr(i + 1, 4, k, color)
+        self.addStr(1, 40, "(Press F1 to show/hide tips)",
+            color | curses.A_REVERSE)
+
     statusLine = ''
     if tb.message:
       statusLine = tb.message[0]
@@ -507,8 +522,7 @@ class StatusLine(ViewWindow):
         colPercentage)
     statusLine += \
         ' ' * (self.cols - len(statusLine) - len(rightSide)) + rightSide
-    color = app.color.get('status_line')
-    self.addStr(0, 0, statusLine[:self.cols], color)
+    self.addStr(self.rows - 1, 0, statusLine[:self.cols], color)
 
 
 class TopInfo(ViewWindow):
@@ -604,6 +618,8 @@ class InputWindow(Window):
     self.showMessageLine = True
     self.showRightColumn = True
     self.showTopInfo = True
+    self.statusLineCount = 0 if app.prefs.status.get('seenTips') else 8
+
     self.topRows = 2  # Number of lines in default TopInfo status.
     self.controller = app.controller.MainController(self)
     self.controller.add(app.em_editor.EmacsEdit(self))
@@ -673,6 +689,8 @@ class InputWindow(Window):
     if self.showMessageLine:
       self.messageLine = MessageLine(self)
       self.messageLine.setParent(self, 0)
+    self.showTips = app.prefs.status.get('showTips')
+    self.statusLineCount = 8 if self.showTips else 1
 
   if 0:
     def splitWindow(self):
@@ -722,6 +740,7 @@ class InputWindow(Window):
       rows -= topRows
     rows -= bottomRows
     bottomFirstRow = top + rows
+
     self.confirmClose.reshape(bottomRows, cols, bottomFirstRow, left)
     self.confirmOverwrite.reshape(bottomRows, cols, bottomFirstRow, left)
     self.interactiveOpen.reshape(bottomRows, cols, bottomFirstRow, left)
@@ -736,9 +755,11 @@ class InputWindow(Window):
     if 1:
       self.interactiveGoto.reshape(bottomRows, cols, bottomFirstRow,
           left)
+
     if self.showFooter and rows > 0:
-      self.statusLine.reshape(1, cols, bottomFirstRow - 1, left)
-      rows -= 1
+      self.statusLine.reshape(self.statusLineCount, cols,
+          bottomFirstRow - self.statusLineCount, left)
+      rows -= self.statusLineCount
     if self.showLineNumbers and cols > lineNumbersCols:
       self.lineNumberColumn.reshape(rows, lineNumbersCols, top, left)
       cols -= lineNumbersCols
@@ -807,6 +828,12 @@ class InputWindow(Window):
       self.scrollRow, self.scrollCol = savedScroll
     else:
       self.textBuffer.scrollToOptimalScrollPosition()
+
+  def toggleShowTips(self):
+    self.showTips = not self.showTips
+    self.statusLineCount = 8 if self.showTips else 1
+    self.layout()
+    app.prefs.save('status', 'showTips', self.showTips)
 
   def unfocus(self):
     if self.showMessageLine:

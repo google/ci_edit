@@ -178,6 +178,8 @@ achieving
 acid
 acknowledge
 acknowledged
+acknowledgement
+acknowledgements
 acknowledges
 acknowledging
 acknowledgment
@@ -756,6 +758,7 @@ apogee
 apologetic
 apologies
 apologize
+apology
 apostrophe
 apostrophes
 app
@@ -764,6 +767,7 @@ apparel
 apparent
 apparently
 appeal
+appealed
 appealing
 appeals
 appear
@@ -1648,6 +1652,7 @@ blast
 blaster
 blasts
 blat
+blatant
 blaze
 bldg
 bled
@@ -4461,6 +4466,8 @@ destructing
 destruction
 destructive
 destructively
+destructor
+destructors
 destructs
 detach
 detachable
@@ -4772,6 +4779,7 @@ discretionary
 discriminate
 discriminating
 discrimination
+discriminator
 discriminatory
 discs
 discuss
@@ -5866,6 +5874,7 @@ excursionist
 excuse
 exec
 executable
+executables
 execute
 executed
 executes
@@ -6841,6 +6850,8 @@ fut
 future
 futures
 fuzz
+fuzzer
+fuzzers
 fuzzily
 fuzzing
 fuzzy
@@ -8366,6 +8377,7 @@ initial
 initialization
 initialize
 initialized
+initializer
 initializes
 initializing
 initially
@@ -8487,6 +8499,7 @@ instantiate
 instantiated
 instantiates
 instantiating
+instantiations
 instantly
 instants
 instate
@@ -10093,6 +10106,7 @@ meow
 mercenaries
 merchandise
 merchant
+merchantability
 merchantable
 merchants
 mercurial
@@ -12502,6 +12516,7 @@ prepared
 prepares
 preparing
 prepend
+prepended
 preponderance
 preposition
 prepositional
@@ -13495,6 +13510,7 @@ rediscovery
 redistribute
 redistributing
 redistribution
+redistributions
 redistributors
 redness
 redo
@@ -13563,6 +13579,7 @@ reflector
 reflects
 reflex
 reflexive
+reflow
 reflowed
 refocus
 refocused
@@ -14952,6 +14969,7 @@ severe
 severed
 severely
 severest
+severities
 severity
 sew
 sex
@@ -16659,6 +16677,7 @@ tape
 taper
 tapes
 taping
+tappable
 tapped
 tapping
 taps

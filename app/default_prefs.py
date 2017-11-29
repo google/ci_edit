@@ -113,6 +113,7 @@ color8 = {
   'debug_window': 1,
   'default': 0,
   'doc_block_comment': 3,
+  'error': 9,
   'found_find': 1,
   'highlight': 3,
   'html_block_comment': 2,
@@ -161,6 +162,7 @@ color256 = {
   'debug_window': defaultColorIndex,
   'default': defaultColorIndex,
   'doc_block_comment': commentColorIndex,
+  'error': 9,
   'found_find': foundColorIndex,
   'highlight': 96,
   'html_block_comment': commentColorIndex,
@@ -213,7 +215,7 @@ prefs = {
     'optimalCursorCol': 0.98,  # Ratio of columns: 0 left, 1.0 right.
     'palette': 'default',
     'palette8': 'default8',
-    'saveUndo': False,
+    'saveUndo': True,
     'showLineNumbers': True,
     'showStatusLine': True,
     'showTopInfo': True,
@@ -282,13 +284,19 @@ prefs = {
     #   'continued': None or string,
     #       Prefixed used when continuing to another line,
     #   'end': None or regex,
+    #   'error': None or list of string.
     #   'escaped': None or regex,
     #   'indent': None or string,
-    #   'keywords': None or list of string,
+    #   'keywords': None or list of string. Matches whole words only (wraps
+    #       values in \b).
     #   'single_line': Boolean, Whether entire grammar must be on a single line,
+    #   'special': None or list of string.
     #   'type': text or binary. default: text.
     #   'contains': other grammars that may be contained within this grammar.
     # }
+    # The entries for 'error', 'keywords', and 'special' are very similar.
+    # Other than 'keywords' being wrapped in \b markers, the difference between
+    # them is just how they are drawn (color and style).
     '_pre': {
       'contains': ['_pre_selection'],
       'spelling': False,
@@ -304,7 +312,8 @@ prefs = {
         'basename', 'break', 'case', 'chmod', 'continue', 'cp',
         'dirname', 'do', 'done', 'echo', 'else', 'exit',
         'fi', 'find', 'if', 'for',
-        'ln', 'mkdir', 'read', 'return', 'rm', 'sleep', 'switch', 'then', 'while',
+        'ln', 'mkdir', 'read', 'return', 'rm', 'sleep', 'switch', 'then',
+        'while',
       ],
       'contains': ['c_string1', 'c_string2', 'pound_comment'],
     },
@@ -361,6 +370,7 @@ prefs = {
         r'^\s*#\s*?define\b', r'^\s*#\s*?defined\b', r'^\s*#\s*?elif\b',
         r'^\s*#\s*?else\b',
         r'^\s*#\s*?endif\b', r'^\s*#\s*?if\b', r'^\s*#\s*ifdef\b',
+        r'^\s*#\s*?elif\b',
         r'^\s*#\s*?ifndef\b', r'^\s*#\s*?include\b', r'^\s*#\s*?undef\b',
       ],
       #'contains': ['file_path_quoted', 'file_path_bracketed'],
@@ -402,6 +412,21 @@ prefs = {
       'end': '</style>',
       'indent': '  ',
       'keywords': [
+        'background-color', 'color', 'diplay',
+        'font-family', 'font-size',
+        'height', 'max-height', 'min-height',
+        'width', 'max-width', 'min-width',
+      ],
+      'contains': ['cpp_block_comment', 'css_value'],
+    },
+    'css_value': {
+      'begin': ':',
+      'end': ';',
+      'error': [
+        r'#(?:[^;]{1,2}|[^;]{5}|[^;]{7}|[^;]{9,})\b',
+      ],
+      'indent': '  ',
+      'keywords': [
         'absolute', 'attr', 'block', 'border-box', 'calc', 'center', 'default',
         'ease', 'hidden',
         'inherit', 'left', 'none',
@@ -409,10 +434,10 @@ prefs = {
         'transform', 'translate[XYZ]?', 'transparent', 'var',
       ],
       'special': [
-        r'@apply\b', r'\d+deg\b', r'\d+em\b', r'\d+px\b',
-        r'\d+rem\b', r'[\w-]+:',
+        r'@apply\b', r'\d+deg\b', r'\d+em\b', r'\d+px\b', r'\d+rem\b',
+        r'#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3,4})'
       ],
-      'contains': ['cpp_block_comment'],
+      'contains': ['cpp_block_comment',],
     },
     'doc_block_comment': {
       'begin': r'/\*\*',
@@ -425,6 +450,9 @@ prefs = {
         r'@return\b', r'\bNOTE:', r'TODO\([^)]+\)',
       ],
       'types': ['Array', 'boolean', 'string', 'Object'],
+    },
+    'error': {
+      'spelling': False,
     },
     'grd': {
       'keywords': [ 'flattenhtml', 'allowexternalscript' ],
@@ -452,17 +480,17 @@ prefs = {
       'indent': '  ',
     },
     'html_element': {
-      'begin': '<\\w+',
+      'begin': r'<[\w-]+',  # The '-' is used by Polymer.
       'contains': ['html_element_attribute',],
       'end': '>',
-      'special': ['\\w+',],
+      'special': [r'\w+',],
     },
     'html_element_attribute': {
       'begin': '\\??="',
       'end': '"',
     },
     'html_element_end': {
-      'begin': '</\w+',
+      'begin': r'</\w+',
       'end': '>',
     },
     'java': {
@@ -644,6 +672,9 @@ prefs = {
         [231] * 32 + [229] * 32 +  [14] * 32 + [221] * 32 +
         [255] * 32 + [254] * 32 + [253] * 32 + [225] * 32,
     },
+  },
+  'status': {
+    'showTips': False,
   },
   'userData': {
     'homePath': os.path.expanduser('~/.ci_edit'),

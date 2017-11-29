@@ -64,32 +64,25 @@ class Actions(app.mutator.Mutator):
       self.selectionNone()
 
   def performDeleteRange(self, upperRow, upperCol, lowerRow, lowerCol):
-    app.log.info(upperRow, upperCol, lowerRow, lowerCol)
     if upperRow == self.penRow == lowerRow:
-      app.log.info()
       if upperCol < self.penCol:
-        app.log.info()
         col = upperCol - self.penCol
         if lowerCol <= self.penCol:
           col = upperCol - lowerCol
-        app.log.info(col)
         self.cursorMove(0, col)
         self.redo()
     elif upperRow <= self.penRow < lowerRow:
-      app.log.info()
       self.cursorMove(upperRow - self.penRow, upperCol - self.penCol)
       self.redo()
     elif self.penRow == lowerRow:
-      app.log.info()
       col = upperCol - lowerCol
       self.cursorMove(upperRow - self.penRow, col)
       self.redo()
-    if 1:
-      self.redoAddChange((
-        'dr',
-        (upperRow, upperCol, lowerRow, lowerCol),
-        self.getText(upperRow, upperCol, lowerRow, lowerCol)))
-      self.redo()
+    self.redoAddChange((
+      'dr',
+      (upperRow, upperCol, lowerRow, lowerCol),
+      self.getText(upperRow, upperCol, lowerRow, lowerCol)))
+    self.redo()
 
   def dataToBookmark(self):
     """
@@ -256,7 +249,7 @@ class Actions(app.mutator.Mutator):
 
   def carriageReturn(self):
     self.performDelete()
-    self.redoAddChange(('n', (1, self.getCursorMove(1, -self.penCol))))
+    self.redoAddChange(('n', 1, self.getCursorMove(1, -self.penCol)))
     self.redo()
     if 1:  # TODO(dschuyler): if indent on CR
       line = self.lines[self.penRow - 1]
@@ -321,8 +314,7 @@ class Actions(app.mutator.Mutator):
   def cursorMoveScroll(self, rowDelta, colDelta,
       scrollRowDelta, scrollColDelta):
     self.updateScrollPosition(scrollRowDelta, scrollColDelta)
-    self.redoAddChange(('m', (rowDelta, colDelta,
-        0,0, 0)))
+    self.redoAddChange(('m', (rowDelta, colDelta, 0, 0, 0)))
 
   def cursorMoveDown(self):
     if self.penRow + 1 < len(self.lines):
@@ -681,8 +673,6 @@ class Actions(app.mutator.Mutator):
   def editCopy(self):
     text = self.getSelectedText()
     if len(text):
-      if self.selectionMode == app.selectable.kSelectionLine:
-        text = text + ('',)
       data = self.doLinesToData(text)
       app.clipboard.copy(data)
 
@@ -823,9 +813,10 @@ class Actions(app.mutator.Mutator):
     self.markerRow, self.markerCol = self.fileHistory.setdefault('marker',
         (0, 0))
     if app.prefs.editor['saveUndo']:
-      self.redoChain = self.fileHistory.setdefault('redoChain', [])
-      self.savedAtRedoIndex = self.fileHistory.setdefault('savedAtRedoIndex', 0)
+      self.redoChain = self.fileHistory.setdefault('redoChainCompound', [])
+      self.savedAtRedoIndex = self.fileHistory.setdefault('savedAtRedoIndexCompound', 0)
       self.redoIndex = self.savedAtRedoIndex
+      self.oldRedoIndex = self.savedAtRedoIndex
 
     # Restore file bookmarks
     self.bookmarks = self.fileHistory.setdefault('bookmarks', [])
@@ -933,6 +924,7 @@ class Actions(app.mutator.Mutator):
       try:
         if app.prefs.editor['onSaveStripTrailingSpaces']:
           self.stripTrailingWhiteSpace()
+          self.compoundChangePush()
         # Save user data that applies to read-only files into history.
         self.fileHistory['pen'] = (self.penRow, self.penCol)
         self.fileHistory['cursor'] = (self.view.cursorRow, self.view.cursorCol)
@@ -952,8 +944,8 @@ class Actions(app.mutator.Mutator):
         # Save user data that applies to writable files.
         self.savedAtRedoIndex = self.redoIndex
         if app.prefs.editor['saveUndo']:
-          self.fileHistory['redoChain'] = self.redoChain
-          self.fileHistory['savedAtRedoIndex'] = self.savedAtRedoIndex
+          self.fileHistory['redoChainCompound'] = self.redoChain
+          self.fileHistory['savedAtRedoIndexCompound'] = self.savedAtRedoIndex
         # Hmm, could this be hard coded to False here?
         self.isReadOnly = not os.access(self.fullPath, os.W_OK)
         app.history.saveUserHistory((self.fullPath, self.lastChecksum,
@@ -1239,19 +1231,33 @@ class Actions(app.mutator.Mutator):
     app.log.info(' mouse release', paneRow, paneCol)
     if not self.lines:
       return
-    row = max(0, min(self.view.scrollRow + paneRow, len(self.lines) - 1))
+    virtualRow = self.view.scrollRow + paneRow
+    if virtualRow >= len(self.lines):
+      # Off the bottom of document.
+      lastLine = len(self.lines) - 1
+      self.cursorMove(lastLine - self.penRow,
+          len(self.lines[lastLine]) - self.penCol)
+      self.redo()
+      return
+    row = max(0, min(virtualRow, len(self.lines)))
     col = max(0, self.view.scrollCol + paneCol)
     if self.selectionMode == app.selectable.kSelectionBlock:
       self.cursorMoveAndMark(0, 0, row - self.markerRow, col - self.markerCol,
           0)
       self.redo()
       return
+    markerRow = 0
     # If not block selection, restrict col to the chars on the line.
     col = min(col, len(self.lines[row]))
     # Adjust the marker column delta when the pen and marker positions
     # cross over each other.
     markerCol = 0
-    if self.selectionMode == app.selectable.kSelectionWord:
+    if self.selectionMode == app.selectable.kSelectionLine:
+      if self.penRow + 1 == self.markerRow and row > self.penRow:
+          markerRow = -1
+      elif self.penRow == self.markerRow + 1 and row < self.penRow:
+          markerRow = 1
+    elif self.selectionMode == app.selectable.kSelectionWord:
       if self.penRow == self.markerRow:
         if row == self.penRow:
           if self.penCol > self.markerCol and col < self.markerCol:
@@ -1271,9 +1277,8 @@ class Actions(app.mutator.Mutator):
         elif col >= self.markerCol and row > self.penRow:
           markerCol = -1
     self.cursorMoveAndMark(row - self.penRow, col - self.penCol,
-        0, markerCol, 0)
+        markerRow, markerCol, 0)
     self.redo()
-    inLine = paneCol < len(self.lines[row])
     if self.selectionMode == app.selectable.kSelectionLine:
       self.cursorMoveAndMark(*self.extendSelection())
       self.redo()
@@ -1282,7 +1287,7 @@ class Actions(app.mutator.Mutator):
          (self.penRow == self.markerRow and
           self.penCol < self.markerCol)):
         self.cursorSelectWordLeft()
-      elif inLine:
+      elif paneCol < len(self.lines[row]):
         self.cursorSelectWordRight()
 
   def mouseTripleClick(self, paneRow, paneCol, shift, ctrl, alt):
@@ -1291,8 +1296,7 @@ class Actions(app.mutator.Mutator):
     self.selectLineAt(self.view.scrollRow + paneRow)
 
   def scrollWindow(self, rows, cols):
-    self.cursorMoveScroll(rows, self.cursorColDelta(self.penRow - rows),
-        -1, 0)
+    self.cursorMoveScroll(rows, self.cursorColDelta(self.penRow - rows), -1, 0)
     self.redo()
 
   def mouseWheelDown(self, shift, ctrl, alt):
@@ -1408,17 +1412,17 @@ class Actions(app.mutator.Mutator):
     self.doSelectionMode(app.selectable.kSelectionWord)
 
   def selectLineAt(self, row):
-    if row < len(self.lines):
-      if 1:
-        self.cursorMove(row - self.penRow, 0)
-        self.redo()
-        self.selectionLine()
-        self.cursorMoveAndMark(*self.extendSelection())
-        self.redo()
-      else:
-        # TODO(dschuyler): reverted to above to fix line selection in the line
-        # numbers column. To be investigated further.
-        self.selectText(row, 0, 0, app.selectable.kSelectionLine)
+    if row + 1 < len(self.lines):
+      self.cursorMoveAndMark((row + 1) - self.penRow, -self.penCol,
+          row - self.markerRow, -self.markerCol,
+          app.selectable.kSelectionLine - self.selectionMode)
+      self.redo()
+    else:
+      self.cursorMoveAndMark(row - self.penRow,
+          len(self.lines[row]) - self.penCol,
+          row - self.penRow, -self.markerCol,
+          app.selectable.kSelectionLine - self.selectionMode)
+      self.redo()
 
   def selectWordAt(self, row, col):
     """row and col may be from a mouse click and may not actually land in the
@@ -1426,6 +1430,9 @@ class Actions(app.mutator.Mutator):
     self.selectText(row, col, 0, app.selectable.kSelectionWord)
     if col < len(self.lines[self.penRow]):
       self.cursorSelectWordRight()
+
+  def toggleShowTips(self):
+    self.view.toggleShowTips()
 
   def splitLine(self):
     """split the line into two at current column."""
@@ -1444,11 +1451,9 @@ class Actions(app.mutator.Mutator):
     self.insertPrintable(0x00, None)
 
   def stripTrailingWhiteSpace(self):
-    self.compoundChangeBegin()
     for i in range(len(self.lines)):
       for found in app.selectable.kReEndSpaces.finditer(self.lines[i]):
         self.performDeleteRange(i, found.regs[0][0], i, found.regs[0][1])
-    self.compoundChangeEnd()
 
   def unindent(self):
     if self.selectionMode != app.selectable.kSelectionNone:
@@ -1468,7 +1473,6 @@ class Actions(app.mutator.Mutator):
     indentationLength = len(indentation)
     row = min(self.markerRow, self.penRow)
     endRow = max(self.markerRow, self.penRow)
-    self.compoundChangeBegin()
     begin = 0
     for i,line in enumerate(self.lines[row:endRow + 1]):
       if (len(line) < indentationLength or
@@ -1479,7 +1483,6 @@ class Actions(app.mutator.Mutator):
     self.verticalDelete(row + begin, endRow, 0, indentation)
     self.cursorMoveAndMark(0, -indentationLength, 0, -indentationLength, 0)
     self.redo()
-    self.compoundChangeEnd()
 
   def updateScrollPosition(self, scrollRowDelta, scrollColDelta):
     """

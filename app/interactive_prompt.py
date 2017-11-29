@@ -206,8 +206,6 @@ class InteractivePrompt(app.controller.Controller):
         output, message = self.subExecute.get(cmdLine[0])(
             cmdLine[1:], data)
         output = tb.doDataToLines(output)
-        if tb.selectionMode == app.selectable.kSelectionLine:
-          output.append('')
         tb.editPasteLines(tuple(output))
         tb.setMessage(message)
       else:
@@ -220,8 +218,6 @@ class InteractivePrompt(app.controller.Controller):
             lines, message = filter(cmdLine, lines)
             tb.setMessage(message)
             if not len(lines):
-              lines.append('')
-            if tb.selectionMode == app.selectable.kSelectionLine:
               lines.append('')
             tb.editPasteLines(tuple(lines))
         else:

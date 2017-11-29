@@ -26,6 +26,11 @@ import unittest
 
 kTestFile = '#test_file_with_unlikely_file_name~'
 
+def notReached(display):
+  """Calling this will fail the test. It's expected that the code will not
+  reach this function."""
+  self.assertTrue(False)
+
 
 class IntentionTestCases(unittest.TestCase):
   def setUp(self):
@@ -45,67 +50,44 @@ class IntentionTestCases(unittest.TestCase):
   def tearDown(self):
     pass
 
-  def test_empty_buffer_manager(self):
-    assert self.prg
-
-  def test_open_and_quit(self):
-    def notReached(display):
-      self.assertTrue(False)
+  def runWithTestFile(self, fakeInputs):
+    self.cursesScreen.setFakeInputs(fakeInputs)
     self.assertTrue(self.prg)
     self.assertFalse(self.prg.exiting)
-    self.cursesScreen.setFakeInputs([CTRL_Q, notReached])
-    self.assertFalse(os.path.isfile(kTestFile))
-    self.prg.run()
-    self.assertTrue(self.prg.exiting)
-
-  def test_new_file_quit(self):
-    def notReached(display):
-      self.assertTrue(False)
-    def test0(display):
-      self.assertFalse(display.check(2, 7, ["        "]))
-    self.assertTrue(self.prg)
-    self.assertFalse(self.prg.exiting)
-    self.cursesScreen.setFakeInputs([test0, CTRL_Q, notReached])
     sys.argv = [kTestFile]
     self.assertFalse(os.path.isfile(kTestFile))
     self.prg.run()
     self.assertTrue(self.prg.exiting)
 
+  def test_open_and_quit(self):
+    self.runWithTestFile([CTRL_Q, notReached])
+
+  def test_new_file_quit(self):
+    def test0(display):
+      self.assertFalse(display.check(2, 7, ["        "]))
+    self.runWithTestFile([test0, CTRL_Q, notReached])
+
   def test_logo(self):
-    def notReached(display):
-      self.assertTrue(False)
     def test1(display):
       self.assertFalse(display.check(0, 0, [" ci "]))
-    self.cursesScreen.setFakeInputs([test1, CTRL_Q, notReached])
-    self.assertFalse(os.path.isfile(kTestFile))
-    self.prg.run()
+    self.runWithTestFile([test1, CTRL_Q, notReached])
 
   def test_text_contents(self):
-    def notReached(display):
-      self.assertTrue(False)
     def test0(display):
       self.assertFalse(display.check(2, 7, ["        "]))
     def testDisplay(display):
       self.assertFalse(display.check(2, 7, ["text "]))
-    self.cursesScreen.setFakeInputs([
+    self.runWithTestFile([
         test0, 't', 'e', 'x', 't', testDisplay,  CTRL_Q, 'n', notReached])
-    sys.argv = [kTestFile]
-    self.assertFalse(os.path.isfile(kTestFile))
-    self.prg.run()
 
   def test_backspace(self):
-    def notReached(display):
-      self.assertTrue(False)
     def test0(display):
       self.assertFalse(display.check(2, 7, ["        "]))
     def test1(display):
       self.assertFalse(display.check(2, 7, ["tex "]))
     def test2(display):
       self.assertFalse(display.check(2, 7, ["tet "]))
-    self.cursesScreen.setFakeInputs([
+    self.runWithTestFile([
         test0, 't', 'e', 'x', test1, KEY_BACKSPACE1, 't', test2, CTRL_Q, 'n',
         notReached])
-    sys.argv = [kTestFile]
-    self.assertFalse(os.path.isfile(kTestFile))
-    self.prg.run()
 

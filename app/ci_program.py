@@ -60,6 +60,7 @@ class CiProgram:
     self.modalUi = None
     self.modeStack = []
     self.priorClick = 0
+    self.savedMouseButton1Down = False
     self.savedMouseWindow = None
     self.savedMouseX = -1
     self.savedMouseY = -1
@@ -253,6 +254,7 @@ class CiProgram:
     self.focusedWindow.unfocus()
     self.focusedWindow = changeTo
     self.focusedWindow.focus()
+    self.focusedWindow.textBuffer.compoundChangePush()
 
   def normalize(self):
     self.presentModal(None)
@@ -272,11 +274,11 @@ class CiProgram:
     parsed."""
     if self.showLogWindow:
       self.debugWindow = app.window.ViewWindow(self)
-      #self.zOrder += [self.debugWindow]
+      self.debugUndoWindow = app.window.ViewWindow(self)
       self.logWindow = app.window.LogWindow(self)
-      #self.zOrder += [self.logWindow]
     else:
       self.debugWindow = None
+      self.debugUndoWindow = None
       self.logWindow = None
       self.paletteWindow = None
     self.paletteWindow = app.window.PaletteWindow(self)
@@ -295,8 +297,10 @@ class CiProgram:
       debugRows = 20
       self.debugWindow.reshape(debugRows, debugWidth, 0,
           inputWidth + 1)
-      self.logWindow.reshape(rows - debugRows, debugWidth, debugRows,
+      self.debugUndoWindow.reshape(rows - debugRows, debugWidth, debugRows,
           inputWidth + 1)
+      self.logWindow.reshape(rows - debugRows, inputWidth, debugRows, 0)
+      rows = debugRows
     else:
       inputWidth = cols
     count = len(self.zOrder)
@@ -363,26 +367,40 @@ class CiProgram:
         "bState %s %d"
         %(app.curses_util.mouseButtonName(bState), bState),
             color)
+    self.debugWindow.writeLine(
+        "startAndEnd %r"
+        %(textBuffer.startAndEnd(),),
+            color)
+
+  def debugUndoDraw(self, win):
+    """Draw real-time debug information to the screen."""
+    if not self.debugUndoWindow:
+      return
+    textBuffer = win.textBuffer
+    y, x = win.top, win.left
+    maxRow, maxCol = win.rows, win.cols
+    self.debugUndoWindow.writeLineRow = 0
     # Display some of the redo chain.
     redoColorA = app.color.get(100)
-    self.debugWindow.writeLine(
+    self.debugUndoWindow.writeLine(
         "procTemp %d temp %r"
         %(textBuffer.processTempChange, textBuffer.tempChange,),
         redoColorA)
-    self.debugWindow.writeLine(
+    self.debugUndoWindow.writeLine(
         "redoIndex %3d savedAt %3d depth %3d"
         %(textBuffer.redoIndex, textBuffer.savedAtRedoIndex,
           len(textBuffer.redoChain)),
         redoColorA)
     redoColorB = app.color.get(101)
-    for i in range(textBuffer.redoIndex - 5, textBuffer.redoIndex):
+    split = 8
+    for i in range(textBuffer.redoIndex - split, textBuffer.redoIndex):
       text = i >= 0 and textBuffer.redoChain[i] or ''
-      self.debugWindow.writeLine(text, redoColorB)
+      self.debugUndoWindow.writeLine(text, redoColorB)
     redoColorC = app.color.get(1)
-    for i in range(textBuffer.redoIndex, textBuffer.redoIndex + 4):
+    for i in range(textBuffer.redoIndex, textBuffer.redoIndex + split - 1):
       text = (i < len(textBuffer.redoChain) and
           textBuffer.redoChain[i] or '')
-      self.debugWindow.writeLine(text, redoColorC)
+      self.debugUndoWindow.writeLine(text, redoColorC)
 
   def debugWindowOrder(self):
     app.log.info('debugWindowOrder')
@@ -428,13 +446,22 @@ class CiProgram:
     mouseCol -= window.left
     app.log.mouse(mouseRow, mouseCol)
     app.log.mouse("\n", window)
+    button1WasDown = self.savedMouseButton1Down
+    self.savedMouseButton1Down = False
     #app.log.info('bState', app.curses_util.mouseButtonName(bState))
     if bState & curses.BUTTON1_RELEASED:
-      app.log.mouse(bState, curses.BUTTON1_RELEASED)
-      if self.priorClick + rapidClickTimeout <= eventTime:
-        window.mouseRelease(mouseRow, mouseCol, bState&curses.BUTTON_SHIFT,
-            bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
+      if button1WasDown:
+        app.log.mouse(bState, curses.BUTTON1_RELEASED)
+        if self.priorClick + rapidClickTimeout <= eventTime:
+          window.mouseRelease(mouseRow, mouseCol, bState&curses.BUTTON_SHIFT,
+              bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
+      else:
+        # Some terminals (linux?) send BUTTON1_RELEASED after moving the mouse.
+        # Specifically if the terminal doesn't use button 4 for mouse movement.
+        # Mouse drag or mouse wheel movement done.
+        pass
     elif bState & curses.BUTTON1_PRESSED:
+      self.savedMouseButton1Down = True
       if (self.priorClick + rapidClickTimeout > eventTime and
           self.clickedNearby(mouseRow, mouseCol)):
         self.clicks += 1
@@ -457,30 +484,31 @@ class CiProgram:
     elif bState & curses.BUTTON2_PRESSED:
       window.mouseWheelUp(bState&curses.BUTTON_SHIFT,
           bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
-    elif bState & curses.BUTTON4_PRESSED:
+    elif bState & (curses.BUTTON4_PRESSED | curses.REPORT_MOUSE_POSITION):
+      # Notes from testing:
+      # Mac seems to send BUTTON4_PRESSED during mouse move; followed by
+      #   BUTTON4_RELEASED.
+      # Linux seems to send REPORT_MOUSE_POSITION during mouse move; followed by
+      #   BUTTON1_RELEASED.
       if self.savedMouseX == mouseCol and self.savedMouseY == mouseRow:
-        window.mouseWheelDown(bState&curses.BUTTON_SHIFT,
-            bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
+        if bState & curses.REPORT_MOUSE_POSITION:
+          # This is a hack for dtterm mouse wheel on Mac OS X.
+          window.mouseWheelUp(bState&curses.BUTTON_SHIFT,
+              bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
+        else:
+          # This is the normal case:
+          window.mouseWheelDown(bState&curses.BUTTON_SHIFT,
+              bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
       else:
         if self.savedMouseWindow and self.savedMouseWindow is not window:
           mouseRow += window.top - self.savedMouseWindow.top
           mouseCol += window.left - self.savedMouseWindow.left
           window = self.savedMouseWindow
-        window.mouseMoved(mouseRow, mouseCol, bState&curses.BUTTON_SHIFT,
-            bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
-    elif bState & curses.REPORT_MOUSE_POSITION:
-      #app.log.mouse('REPORT_MOUSE_POSITION')
-      if self.savedMouseX == mouseCol and self.savedMouseY == mouseRow:
-        # This is a hack for dtterm on Mac OS X.
-        window.mouseWheelUp(bState&curses.BUTTON_SHIFT,
-            bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
-      else:
-        if self.savedMouseWindow and self.savedMouseWindow is not window:
-          mouseRow += window.top - self.savedMouseWindow.top
-          mouseCol += window.left - self.savedMouseWindow.left
-          window = self.savedMouseWindow
-        window.mouseMoved(mouseRow, mouseCol, bState&curses.BUTTON_SHIFT,
-            bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
+        window.mouseMoved(mouseRow, mouseCol, bState & curses.BUTTON_SHIFT,
+            bState & curses.BUTTON_CTRL, bState & curses.BUTTON_ALT)
+    elif bState & curses.BUTTON4_RELEASED:
+      # Mouse drag or mouse wheel movement done.
+      pass
     else:
       app.log.mouse('got bState', app.curses_util.mouseButtonName(bState),
           bState)

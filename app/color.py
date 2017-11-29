@@ -22,15 +22,19 @@ def reset():
   global cache__
   cache__ = {}
 
-def get(colorType):
+def get(colorType, delta=0):
   global cache__
-  r = cache__.get(colorType)
-  if r is not None:
-    return r
   if type(colorType) == type(0):
-    colorIndex = min(colors - 1, colorType)
+    colorIndex = colorType
   else:
     colorIndex = app.prefs.color[colorType]
+  colorIndex = min(colors - 1, colorIndex + delta)
+  #colorIndex = colorIndex % colors
+  r = cache__.get(colorIndex)
+  if r is not None:
+    return r
   color = curses.color_pair(colorIndex)
-  cache__[colorType] = color
+  if colorType in ('error', 'misspelling'):
+    color |= curses.A_BOLD | curses.A_REVERSE
+  cache__[colorIndex] = color
   return color

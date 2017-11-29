@@ -35,7 +35,10 @@ class Mutator(app.selectable.Selectable):
   """Track and enact changes to a body of text."""
   def __init__(self):
     app.selectable.Selectable.__init__(self)
-    self.__compoundChange = None
+    self.__compoundChange = []
+    # |oldRedoIndex| is used to store the redo index before an action occurs,
+    # so we know where to insert the compound change.
+    self.oldRedoIndex = 0
     self.debugRedo = False
     self.findRe = None
     self.findBackRe = None
@@ -63,17 +66,45 @@ class Mutator(app.selectable.Selectable):
     self.savedAtRedoIndex = 0
     self.shouldReparse = False
 
-  def compoundChangeBegin(self):
-    assert self.__compoundChange is None
+  def compoundChangePush(self):
+    app.log.info('compoundChangePush')
+    if self.__compoundChange:
+      self.redoIndex = self.oldRedoIndex
+      self.redoChain = self.redoChain[:self.redoIndex]
+      changes = tuple(self.__compoundChange)
+      change = changes[0]
+      handledChange = False
+      # Combine changes. Assumes d, i, n, and m consist of only 1 change.
+      if (len(self.redoChain) and self.redoChain[-1][0][0] == change[0] and
+          len(self.redoChain[-1]) == 1):
+        if change[0] in ('d', 'i'):
+          change = (change[0], self.redoChain[-1][0][1] + change[1])
+          self.redoChain[-1] = (change,)
+          handledChange = True
+        elif change[0] == 'n':
+          newCursorChange = change[2]
+          newCarriageReturns = change[1]
+          oldCursorChange = self.redoChain[-1][0][2]
+          oldCarriageReturns = self.redoChain[-1][0][1]
+          change = (change[0], oldCarriageReturns + newCarriageReturns,
+                    ('m', addVectors(newCursorChange[1], oldCursorChange[1])))
+          self.redoChain[-1] = (change,)
+          handledChange = True
+        elif change[0] == 'm':
+          change = (change[0], addVectors(self.redoChain[-1][0][1],
+                    change[1]))
+          if change in noOpInstructions:
+            self.redoIndex -= 1
+            self.redoChain.pop()
+          else:
+            self.redoChain[-1] = (change,)
+          handledChange = True
+      if not handledChange:
+        self.redoChain.append(changes)
+        self.redoIndex += 1
     self.__compoundChange = []
+    self.oldRedoIndex = self.redoIndex
 
-  def compoundChangeEnd(self):
-    assert self.__compoundChange is not None
-    changes = tuple(self.__compoundChange)
-    self.__compoundChange = None
-    if len(changes):
-      self.redoAddChange(('cc', changes))
-      self.redo()
 
   def getPenOffset(self, row, col):
     """inefficient test hack. wip on parser"""
@@ -184,44 +215,31 @@ class Mutator(app.selectable.Selectable):
 
   def redo(self):
     """Replay the next action on the redoChain."""
-    if self.__compoundChange is not None:
-      return
     assert 0 <= self.redoIndex <= len(self.redoChain)
     if self.stallNextRedo:
       self.stallNextRedo = False
       return
     if self.processTempChange:
       self.processTempChange = False
-      change = self.tempChange
-      self.__redoMove(change)
+      self.__redoMove(self.tempChange)
       self.updateBasicScrollPosition()
       return
     if self.tempChange:
       self.__undoMove(self.tempChange)
       self.tempChange = None
       self.updateBasicScrollPosition()
-    while self.__redoOne():
-      pass
+    while self.redoIndex < len(self.redoChain):
+      changes = self.redoChain[self.redoIndex]
+      self.redoIndex += 1
+      for change in changes:
+        self.__redoChange(change)
+      # Stop redoing if we redo a non-trivial action
+      if not (changes[0][0] == 'm' and len(changes) == 1):
+        self.shouldReparse = True
+        break
     self.updateBasicScrollPosition()
 
-  def __redoOne(self):
-    if self.redoIndex < len(self.redoChain):
-      change = self.redoChain[self.redoIndex]
-      if self.debugRedo:
-        app.log.info('redo', self.redoIndex, repr(change))
-      if change[0] != 'm':
-        self.shouldReparse = True
-      self.redoIndex += 1
-      if change[0] == 'cc':
-        for i in change[1]:
-          self.__redoStep(i)
-      else:
-        return self.__redoStep(change)
-    # Redo again if there is a move next.
-    return (self.redoIndex < len(self.redoChain) and
-        self.redoChain[self.redoIndex][0] == 'm')
-
-  def __redoStep(self, change):
+  def __redoChange(self, change):
     if change[0] == 'b':  # Redo backspace.
       line = self.lines[self.penRow]
       self.penCol -= len(change[1])
@@ -229,7 +247,7 @@ class Mutator(app.selectable.Selectable):
       self.lines[self.penRow] = line[:x] + line[x + len(change[1]):]
       if self.upperChangedRow > self.penRow:
         self.upperChangedRow = self.penRow
-    elif change[0] == 'd':
+    elif change[0] == 'd':  # Redo delete character.
       line = self.lines[self.penRow]
       x = self.penCol
       self.lines[self.penRow] = line[:x] + line[x + len(change[1]):]
@@ -247,7 +265,7 @@ class Mutator(app.selectable.Selectable):
       self.goalCol = self.penCol
       if self.upperChangedRow > self.penRow:
         self.upperChangedRow = self.penRow
-    elif change[0] == 'j':  # Redo join lines.
+    elif change[0] == 'j':  # Redo join lines (delete \n).
       self.lines[self.penRow] += self.lines[self.penRow + 1]
       del self.lines[self.penRow + 1]
       if self.upperChangedRow > self.penRow:
@@ -270,23 +288,21 @@ class Mutator(app.selectable.Selectable):
         self.upperChangedRow = firstChangedRow
     elif change[0] == 'm':  # Redo move
       self.__redoMove(change)
-    elif change[0] == 'ml':
-      # Redo move lines
+    elif change[0] == 'ml':  # Redo move lines
       begin, end, to = change[1]
       self.__doMoveLines(begin, end, to)
-    elif change[0] == 'n':
-      # Redo split lines.
+    elif change[0] == 'n':  # Redo split lines (insert \n).
       line = self.lines[self.penRow]
       self.lines.insert(self.penRow + 1, line[self.penCol:])
       self.lines[self.penRow] = line[:self.penCol]
-      for i in range(max(change[1][0] - 1, 0)):
+      for i in range(max(change[1] - 1, 0)):
         self.lines.insert(self.penRow + 1, unicode(""))
       if self.upperChangedRow > self.penRow:
         self.upperChangedRow = self.penRow
-      self.__redoMove(change[1][1])
+      self.__redoMove(change[2])
     elif change[0] == 'v':  # Redo paste.
       self.insertLines(change[1])
-    elif change[0] == 'vb':
+    elif change[0] == 'vb':  # Redo vertical backspace.
       self.penCol -= len(change[1])
       row = min(self.markerRow, self.penRow)
       rowEnd = max(self.markerRow, self.penRow)
@@ -311,16 +327,13 @@ class Mutator(app.selectable.Selectable):
     Push a change onto the end of the redoChain. Call redo() to enact the
     change.
     """
-    if self.__compoundChange is not None:
-      # Accumulating changes together as a unit.
-      self.__compoundChange.append(change)
-      return
     newTrivialChange = False
     if self.debugRedo:
       app.log.info('redoAddChange', change)
     # When the redoChain is trimmed we may lose the saved at.
     # Trim only when there is a non-trivial action.
-    if change[0] == 'm':
+    # A trivial change is a standalone cursor move.
+    if change[0] == 'm' and not self.__compoundChange:
       newTrivialChange = True
     else:
       # Trim and combine main redoChain with tempChange
@@ -329,39 +342,27 @@ class Mutator(app.selectable.Selectable):
         self.savedAtRedoIndex = -1
       self.redoChain = self.redoChain[:self.redoIndex]
       if self.tempChange:
-        if len(self.redoChain) and self.redoChain[-1][0] == 'm':
+        # If previous action was a cursor move, we can merge it with tempChange.
+        if (len(self.redoChain) and self.redoChain[-1][0][0] == 'm' and
+            len(self.redoChain[-1]) == 1):
           combinedChange = ('m', addVectors(self.tempChange[1],
-              self.redoChain[-1][1]))
+              self.redoChain[-1][0][1]))
           if combinedChange in noOpInstructions:
             self.redoChain.pop()
             self.redoIndex -= 1
+            self.oldRedoIndex -= 1
           else:
-            self.redoChain[-1] = combinedChange
+            self.redoChain[-1] = (combinedChange,)
         else:
-          self.redoChain.append(self.tempChange)
+          self.redoChain.append((self.tempChange,))
           self.redoIndex += 1
+          self.oldRedoIndex += 1
         self.tempChange = None
-    if 1: # optimizer
-      if len(self.redoChain) and self.savedAtRedoIndex != self.redoIndex:
-        if (self.redoChain[-1][0] == change[0] and
-            change[0] in ('d', 'i')):
-          change = (change[0], self.redoChain[-1][1] + change[1])
-          self.__undoOne()
-          self.redoChain.pop()
-        elif self.redoChain[-1][0] == change[0] and change[0] == 'n':
-          newMouseChange = change[1][1]
-          newCarriageReturns = change[1][0]
-          oldMouseChange = self.redoChain[-1][1][1]
-          oldCarriageReturns = self.redoChain[-1][1][0]
-          change = (change[0], (oldCarriageReturns + newCarriageReturns,
-              ('m', addVectors(newMouseChange[1], oldMouseChange[1]))))
-          self.__undoOne()
-          self.redoChain.pop()
     if newTrivialChange:
       if self.tempChange:
         # Combine new change with the existing tempChange.
         change = (change[0], addVectors(self.tempChange[1], change[1]))
-        self.__undoOne()
+        self.__undoChange(self.tempChange)
         self.__tempChange = change
       if change in noOpInstructions:
         self.stallNextRedo = True
@@ -372,15 +373,9 @@ class Mutator(app.selectable.Selectable):
       self.processTempChange = True
       self.tempChange = change
     else:
-      if len(self.redoChain) and change[0] == 'm':
-        if self.redoChain[-1][0] == 'm':
-          change = (change[0], addVectors(self.redoChain[-1][1], change[1]))
-          self.__undoOne()
-          self.redoChain.pop()
-        if change in noOpInstructions:
-          self.stallNextRedo = True
-          return
-      self.redoChain.append(change)
+      # Accumulating changes together as a unit.
+      self.__compoundChange.append(change)
+      self.redoChain.append((change,))
     if self.debugRedo:
       app.log.info('--- redoIndex', self.redoIndex)
       for i,c in enumerate(self.redoChain):
@@ -399,38 +394,30 @@ class Mutator(app.selectable.Selectable):
 
   def undo(self):
     """Undo a set of redo nodes."""
-    self.__compoundDepth = 0
-    while self.__undoOne() or self.__compoundDepth:
-      pass
-    assert self.tempChange == None
-    self.processTempChange = False
-
-  def __undoOne(self):
-    """Undo the most recent change to the buffer.
-    return whether undo should be repeated."""
     assert 0 <= self.redoIndex <= len(self.redoChain)
     # If tempChange is active, undo it first to fix cursor position.
     if self.tempChange:
       self.__undoMove(self.tempChange)
       self.tempChange = None
-      return True
-    if self.redoIndex > 0:
+    while self.redoIndex > 0:
       self.redoIndex -= 1
-      change = self.redoChain[self.redoIndex]
-      if change[0] != 'm':
-        self.shouldReparse = True
+      changes = self.redoChain[self.redoIndex]
       if self.debugRedo:
-        app.log.info('undo', self.redoIndex, repr(change))
-      if change[0] == 'cc':
-        changes = list(change[1])
-        changes.reverse()
-        for i in changes:
-          self.__undoStep(i)
+        app.log.info('undo', self.redoIndex, repr(changes))
+      if changes[0][0] == 'm' and len(changes) == 1:
+        # Undo if the last edit was a cursor move.
+        self.__undoChange(changes[0])
       else:
-        return self.__undoStep(change)
-    return False
+        self.shouldReparse = True
+        # Undo previous non-trivial edit
+        for change in reversed(changes):
+          self.__undoChange(change)
+        break
 
-  def __undoStep(self, change):
+    self.processTempChange = False
+
+
+  def __undoChange(self, change):
     if change[0] == 'b':
       line = self.lines[self.penRow]
       x = self.penCol
@@ -449,7 +436,7 @@ class Mutator(app.selectable.Selectable):
           app.selectable.kSelectionCharacter)
     elif change[0] == 'ds':  # Undo delete selection.
       self.insertLines(change[1])
-    elif change[0] == 'i':
+    elif change[0] == 'i':  # Undo insert.
       line = self.lines[self.penRow]
       x = self.penCol
       self.penCol -= len(change[1])
@@ -457,8 +444,7 @@ class Mutator(app.selectable.Selectable):
       self.goalCol = self.penCol
       if self.upperChangedRow > self.penRow:
         self.upperChangedRow = self.penRow
-    elif change[0] == 'j':
-      # Join lines.
+    elif change[0] == 'j':  # Undo join lines.
       line = self.lines[self.penRow]
       self.lines.insert(self.penRow + 1, line[self.penCol:])
       self.lines[self.penRow] = line[:self.penCol]
@@ -482,7 +468,6 @@ class Mutator(app.selectable.Selectable):
         self.upperChangedRow = firstChangedRow
     elif change[0] == 'm':
       self.__undoMove(change)
-      return True
     elif change[0] == 'ml':
       # Undo move lines
       begin, end, to = change[1]
@@ -493,9 +478,9 @@ class Mutator(app.selectable.Selectable):
         self.__doMoveLines(to, to + count, begin + count)
     elif change[0] == 'n':
       # Undo split lines.
-      self.__undoMove(change[1][1])
-      self.lines[self.penRow] += self.lines[self.penRow + change[1][0]]
-      for _ in range(change[1][0]):
+      self.__undoMove(change[2])
+      self.lines[self.penRow] += self.lines[self.penRow + change[1]]
+      for _ in range(change[1]):
         del self.lines[self.penRow + 1]
       if self.upperChangedRow > self.penRow:
         self.upperChangedRow = self.penRow
@@ -533,7 +518,6 @@ class Mutator(app.selectable.Selectable):
       self.__doVerticalDelete(change)
     else:
       app.log.info('ERROR: unknown undo.')
-    return False
 
   def updateBasicScrollPosition(self):
     pass

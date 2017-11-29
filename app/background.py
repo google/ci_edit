@@ -48,16 +48,19 @@ def background(inputQueue, outputQueue):
   signalNumber = signal.SIGUSR1
   while True:
     try:
-      program, message = inputQueue.get(block)
-      if message == 'quit':
-        app.log.info('bg received quit message')
-        return
-      program.executeCommandList(message)
-      program.render()
-      outputQueue.put(app.render.frame.grabFrame())
-      os.kill(pid, signalNumber)
-      #if not inputQueue.empty():
-      #  continue
+      try:
+        program, message = inputQueue.get(block)
+        if message == 'quit':
+          app.log.info('bg received quit message')
+          return
+        program.executeCommandList(message)
+        program.render()
+        outputQueue.put(app.render.frame.grabFrame())
+        os.kill(pid, signalNumber)
+        if not inputQueue.empty():
+          continue
+      except Queue.Empty:
+        pass
       tb = program.focusedWindow.textBuffer
       if not tb.parser:
         block = True
@@ -68,13 +71,13 @@ def background(inputQueue, outputQueue):
         tb.parser.parse(tb.data, tb.rootGrammar,
             len(tb.parser.rows),
             len(tb.lines))
-        #tb.parseGrammars()
         block = len(tb.parser.rows) >= len(tb.lines)
         if block:
           program.render()
           outputQueue.put(app.render.frame.grabFrame())
           os.kill(pid, signalNumber)
     except Exception as e:
+      app.log.exception(e)
       app.log.error('bg thread exception', e)
       outputQueue.put('quit')
       os.kill(pid, signalNumber)

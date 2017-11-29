@@ -15,6 +15,7 @@
 # This is a list of non-English words that are commonly found in programming
 # source code files.
 a
+aarrggbb
 ab
 abc
 abcd
@@ -51,11 +52,15 @@ argc
 args
 argv
 ascii
+asm
 async
 attr
 attrs
 auth
+backtrace
 baz
+bbggrr
+bgr
 bool
 buf
 bugzilla
@@ -70,6 +75,7 @@ changelog
 checkbox
 chr
 cli
+cmake
 cmd
 cntl
 codec
@@ -104,6 +110,7 @@ emacs
 enablement
 endian
 endif
+enums
 env
 eof
 eol
@@ -154,6 +161,7 @@ inlined
 inlines
 inlining
 intl
+intrinsics
 ip
 ipsum
 ipv
@@ -192,6 +200,8 @@ oauth
 obj
 objc
 oob
+opcode
+opcodes
 openbsd
 patcher
 pid
@@ -228,12 +238,17 @@ remoting
 renderer
 rhs
 ro
+rrggbb
+rrggbbaa
+rtti
 runtime
 rv
 serializable
 sha
 sig
+sigbus
 signin
+sigtrap
 skia
 solaris
 sql
@@ -245,6 +260,7 @@ stdin
 stdout
 stl
 str
+stringified
 struct
 stty
 stylesheet
@@ -253,8 +269,10 @@ svg
 svn
 syncable
 sys
+syscall
 sysex
 tar
+templated
 templatizer
 templatizers
 tgz
@@ -273,6 +291,7 @@ typedef
 ubuntu
 uchar
 uid
+uintptr
 undef
 unicode
 unix
@@ -280,6 +299,7 @@ unobserve
 unparsable
 unserializable
 utf
+vimrc
 vpn
 vpns
 waitable
@@ -292,6 +312,7 @@ whitelist
 whitespace
 wi
 wifi
+wildcards
 xss
 xterm
 xy

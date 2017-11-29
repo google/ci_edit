@@ -17,13 +17,28 @@
 <html>
 <head>
   <style>
+    color: rgb(3,5,5);
+    color: rgba(3,5,5,44.4);
+    color: rgb(3,5,5,44.4,4,55,3,33);
+    color: #f;
+    color: rgb(3,5,5);
+    color: #fa; @apply
+    color: #faf;  /* rgb */
+    color: #fafa;  /* rgba */
+    color: #fafab;
+    color: #ffaaff;  /* rrggbb */
+    color: #ffaafff;
+    color: #ffaafffa;  /* rrggbbaa */
+    color: #catsAndDogs;
+
     /* A CSS comment. */
     // Not a CSS comment.
     <!-- not a CSS comment -->
     # Not a CSS comment.
     Some non-keywords if or while or for or function
 
-    #an-id
+    #an-id {
+    }
 
     .class {
       font-size: calc(33 / 44);
@@ -41,6 +56,8 @@
 <body>
   <div  describedby="hello" href="example" hidden   actionable>
   </div>
+  <polymer-like-element hidden thing="foo">
+  </polymer-like-element>
 
   <input type="button"></input>
   /* Not an HTML comment. */
