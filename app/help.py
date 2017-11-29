@@ -121,7 +121,7 @@ Within the Goto line prompt:
 
   'version': \
 """\
-  Version (build iteration): v31
+  Version (build iteration): v32
   See LICENSE for license information
   See readme.md for an introduction
   Both files may be found in "%s"
