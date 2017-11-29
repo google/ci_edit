@@ -64,32 +64,25 @@ class Actions(app.mutator.Mutator):
       self.selectionNone()
 
   def performDeleteRange(self, upperRow, upperCol, lowerRow, lowerCol):
-    app.log.info(upperRow, upperCol, lowerRow, lowerCol)
     if upperRow == self.penRow == lowerRow:
-      app.log.info()
       if upperCol < self.penCol:
-        app.log.info()
         col = upperCol - self.penCol
         if lowerCol <= self.penCol:
           col = upperCol - lowerCol
-        app.log.info(col)
         self.cursorMove(0, col)
         self.redo()
     elif upperRow <= self.penRow < lowerRow:
-      app.log.info()
       self.cursorMove(upperRow - self.penRow, upperCol - self.penCol)
       self.redo()
     elif self.penRow == lowerRow:
-      app.log.info()
       col = upperCol - lowerCol
       self.cursorMove(upperRow - self.penRow, col)
       self.redo()
-    if 1:
-      self.redoAddChange((
-        'dr',
-        (upperRow, upperCol, lowerRow, lowerCol),
-        self.getText(upperRow, upperCol, lowerRow, lowerCol)))
-      self.redo()
+    self.redoAddChange((
+      'dr',
+      (upperRow, upperCol, lowerRow, lowerCol),
+      self.getText(upperRow, upperCol, lowerRow, lowerCol)))
+    self.redo()
 
   def dataToBookmark(self):
     """
