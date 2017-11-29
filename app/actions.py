@@ -1253,12 +1253,18 @@ class Actions(app.mutator.Mutator):
           0)
       self.redo()
       return
+    markerRow = 0
     # If not block selection, restrict col to the chars on the line.
     col = min(col, len(self.lines[row]))
     # Adjust the marker column delta when the pen and marker positions
     # cross over each other.
     markerCol = 0
-    if self.selectionMode == app.selectable.kSelectionWord:
+    if self.selectionMode == app.selectable.kSelectionLine:
+      if self.penRow + 1 == self.markerRow and row > self.penRow:
+          markerRow = -1
+      elif self.penRow == self.markerRow + 1 and row < self.penRow:
+          markerRow = 1
+    elif self.selectionMode == app.selectable.kSelectionWord:
       if self.penRow == self.markerRow:
         if row == self.penRow:
           if self.penCol > self.markerCol and col < self.markerCol:
@@ -1278,7 +1284,7 @@ class Actions(app.mutator.Mutator):
         elif col >= self.markerCol and row > self.penRow:
           markerCol = -1
     self.cursorMoveAndMark(row - self.penRow, col - self.penCol,
-        0, markerCol, 0)
+        markerRow, markerCol, 0)
     self.redo()
     if self.selectionMode == app.selectable.kSelectionLine:
       self.cursorMoveAndMark(*self.extendSelection())
