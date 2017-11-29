@@ -410,6 +410,18 @@ prefs = {
     'css': {
       'begin': '<style',
       'end': '</style>',
+      'indent': '  ',
+      'keywords': [
+        'background-color', 'color', 'diplay',
+        'font-family', 'font-size',
+        'height', 'max-height', 'min-height',
+        'width', 'max-width', 'min-width',
+      ],
+      'contains': ['cpp_block_comment', 'css_value'],
+    },
+    'css_value': {
+      'begin': ':',
+      'end': ';',
       'error': [
         r'#(?:[^;]{1,2}|[^;]{5}|[^;]{7}|[^;]{9,})\b',
       ],
@@ -422,11 +434,10 @@ prefs = {
         'transform', 'translate[XYZ]?', 'transparent', 'var',
       ],
       'special': [
-        r'@apply\b', r'\d+deg\b', r'\d+em\b', r'\d+px\b',
-        r'\d+rem\b', r'[\w-]+:',
+        r'@apply\b', r'\d+deg\b', r'\d+em\b', r'\d+px\b', r'\d+rem\b',
         r'#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3,4})'
       ],
-      'contains': ['cpp_block_comment'],
+      'contains': ['cpp_block_comment',],
     },
     'doc_block_comment': {
       'begin': r'/\*\*',
