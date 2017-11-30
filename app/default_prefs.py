@@ -412,10 +412,25 @@ prefs = {
       'end': '</style>',
       'indent': '  ',
       'keywords': [
-        'background-color', 'color', 'diplay',
+        'host', 'slotted',
+      ],
+      'special': [
+        r'#[\w-]+'
+      ],
+      'contains': ['cpp_block_comment', 'css_block'],
+    },
+    'css_block': {
+      'begin': r'\{',
+      'end': r'\}',
+      'indent': '  ',
+      'keywords': [
+        'background-color', 'color', 'display',
         'font-family', 'font-size',
         'height', 'max-height', 'min-height',
         'width', 'max-width', 'min-width',
+      ],
+      'special': [
+        r'@apply\b',
       ],
       'contains': ['cpp_block_comment', 'css_value'],
     },
