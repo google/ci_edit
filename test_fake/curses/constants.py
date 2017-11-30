@@ -15,6 +15,8 @@
 
 # These constants have specific values.
 COLORS = 256
+ERR = 0  # ERR is normally -1, but bg signal doesn't work in unit test.
+
 
 
 # These constants have arbitrary values.
@@ -112,5 +114,4 @@ BUTTON4_RELEASED = 16
 BUTTON_ALT = 17
 BUTTON_CTRL = 18
 BUTTON_SHIFT = 19
-ERR = 22
-REPORT_MOUSE_POSITION = 23
+REPORT_MOUSE_POSITION = 100

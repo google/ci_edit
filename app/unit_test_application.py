@@ -59,35 +59,53 @@ class IntentionTestCases(unittest.TestCase):
     self.prg.run()
     self.assertTrue(self.prg.exiting)
 
-  def test_open_and_quit(self):
-    self.runWithTestFile([CTRL_Q, notReached])
+  if 1:
+    def test_open_and_quit(self):
+      self.runWithTestFile([CTRL_Q, notReached])
 
-  def test_new_file_quit(self):
-    def test0(display):
-      self.assertFalse(display.check(2, 7, ["        "]))
-    self.runWithTestFile([test0, CTRL_Q, notReached])
+    def test_new_file_quit(self):
+      def test0(display):
+        self.assertFalse(display.check(2, 7, ["        "]))
+      self.runWithTestFile([test0, CTRL_Q, notReached])
 
-  def test_logo(self):
-    def test1(display):
-      self.assertFalse(display.check(0, 0, [" ci "]))
-    self.runWithTestFile([test1, CTRL_Q, notReached])
+    def test_logo(self):
+      def test1(display):
+        self.assertFalse(display.check(0, 0, [" ci "]))
+      self.runWithTestFile([test1, CTRL_Q, notReached])
 
-  def test_text_contents(self):
-    def test0(display):
-      self.assertFalse(display.check(2, 7, ["        "]))
-    def testDisplay(display):
-      self.assertFalse(display.check(2, 7, ["text "]))
-    self.runWithTestFile([
-        test0, 't', 'e', 'x', 't', testDisplay,  CTRL_Q, 'n', notReached])
+  if 1:
+    def test_find(self):
+      def displayCheck(*args):
+        def checker(display):
+          self.assertIsNone(display.check(*args))
+        return checker
+      self.runWithTestFile([CTRL_F,
+          displayCheck(-1, 0, ["find: "]), CTRL_Q, notReached])
 
-  def test_backspace(self):
-    def test0(display):
-      self.assertFalse(display.check(2, 7, ["        "]))
-    def test1(display):
-      self.assertFalse(display.check(2, 7, ["tex "]))
-    def test2(display):
-      self.assertFalse(display.check(2, 7, ["tet "]))
-    self.runWithTestFile([
-        test0, 't', 'e', 'x', test1, KEY_BACKSPACE1, 't', test2, CTRL_Q, 'n',
-        notReached])
+  if 1:
+    def test_find(self):
+      def testFindMode(display):
+        self.assertIsNone(display.check(-1, 0, ["find: "]))
+      self.runWithTestFile([CTRL_F, testFindMode, CTRL_Q, notReached])
+
+  if 1:
+    def test_text_contents(self):
+      def test0(display):
+        self.assertIsNone(display.check(2, 7, ["        "]))
+      def testDisplay(display):
+        self.assertIsNone(display.check(2, 7, ["text "]))
+      self.runWithTestFile([
+          test0, 't', 'e', 'x', 't', testDisplay,  CTRL_Q, 'n', notReached])
+
+  if 1:
+    def test_backspace(self):
+      def test0(display):
+        self.assertIsNone(display.check(2, 7, ["      "]))
+      def test1(display):
+        self.assertIsNone(display.check(2, 7, ["tex "]))
+      def test2(display):
+        self.assertIsNone(display.check(2, 7, ["tet "]))
+      self.runWithTestFile([
+          test0, 't', 'e', 'x', test1, KEY_BACKSPACE1, 't', test2, CTRL_Q, 'n',
+          notReached])
 

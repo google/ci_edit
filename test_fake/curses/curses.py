@@ -46,20 +46,18 @@ class FakeInput:
 
   def next(self):
     global waitingForRefresh
-    while self.inputsIndex + 1 < len(self.inputs):
-      self.inputsIndex += 1
-      cmd = self.inputs[self.inputsIndex]
-      if type(cmd) == types.FunctionType:
-        if waitingForRefresh:
-          #time.sleep(0.1)
-          return ERR
-        cmd(self.fakeDisplay)
-      elif type(cmd) == types.StringType and len(cmd) == 1:
-        waitingForRefresh = True
-        return ord(cmd)
-      else:
-        waitingForRefresh = True
-        return cmd
+    if not waitingForRefresh:
+      while self.inputsIndex + 1 < len(self.inputs):
+        self.inputsIndex += 1
+        cmd = self.inputs[self.inputsIndex]
+        if type(cmd) == types.FunctionType:
+          cmd(self.fakeDisplay)
+        elif type(cmd) == types.StringType and len(cmd) == 1:
+          waitingForRefresh = True
+          return ord(cmd)
+        else:
+          waitingForRefresh = True
+          return cmd
     return ERR
 
 
@@ -213,6 +211,7 @@ class StandardScreen(FakeCursesWindow):
     return (fakeDisplay.rows, fakeDisplay.cols)
 
   def refresh(self):
+    global waitingForRefresh
     waitingForRefresh = False
     testLog()
 

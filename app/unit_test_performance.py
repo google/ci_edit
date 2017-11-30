@@ -47,7 +47,7 @@ class PerformanceTestCases(unittest.TestCase):
         number=10000)
     #print "\n%s %s %s | %s %s" % (a, b, a/b, c, a/c)
     # Calling a function or member is significantly slower than direct access.
-    self.assertGreater(b, a * 2)
+    self.assertGreater(b, a * 1.7)
     self.assertGreater(c, a * 2)
 
   def test_default_parameter(self):
@@ -66,8 +66,8 @@ class PerformanceTestCases(unittest.TestCase):
         setup=setup,
         number=10000)
     # Assert that neither too much faster than the other
-    self.assertGreater(a, b * 0.9)
-    self.assertGreater(b, a * 0.9)
+    self.assertGreater(a, b * 0.87)
+    self.assertGreater(b, a * 0.77)
 
   def test_insert1(self):
     return  # Remove to enable test (disabled due to running time).
