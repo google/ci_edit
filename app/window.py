@@ -18,6 +18,7 @@ import app.controller
 import app.cu_editor
 import app.editor
 import app.em_editor
+import app.file_manager_controller
 import app.history
 import app.render
 import app.text_buffer
@@ -839,6 +840,54 @@ class InputWindow(Window):
     if self.showMessageLine:
       self.messageLine.hide()
     Window.unfocus(self)
+
+
+class FileManagerWindow(Window):
+  """This <tbd>."""
+  def __init__(self, host):
+    assert(host)
+    Window.__init__(self, host)
+    self.host = host
+    self.controller = app.file_manager_controller.FileManagerController(self)
+    self.setTextBuffer(app.text_buffer.TextBuffer())
+    self.path = '/'
+
+  def focus(self):
+    app.log.debug()
+    Window.focus(self)
+
+  def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
+    row = self.scrollRow + paneRow
+    line = self.textBuffer.lines[row]
+    if row == 0:
+      col = self.scrollCol + paneCol
+      if col >= len(line):
+        self.controller.shownDirectory = None
+        return
+      slash = line[col:].find('/')
+      self.path = line[:col + slash + 1]
+      return
+    self.path += line
+
+  def mouseWheelDown(self, shift, ctrl, alt):
+    self.textBuffer.mouseWheelDown(shift, ctrl, alt)
+
+  def mouseWheelUp(self, shift, ctrl, alt):
+    self.textBuffer.mouseWheelUp(shift, ctrl, alt)
+
+  def quitNow(self):
+    app.log.debug()
+    self.host.quitNow()
+
+  def render(self):
+    app.log.debug()
+    Window.render(self)
+
+  def setTextBuffer(self, textBuffer):
+    app.log.debug('setTextBuffer')
+    textBuffer.lineLimitIndicator = 999999
+    Window.setTextBuffer(self, textBuffer)
+    self.controller.setTextBuffer(textBuffer)
 
 
 class PaletteWindow(ActiveWindow):

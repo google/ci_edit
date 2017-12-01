@@ -284,6 +284,10 @@ class CiProgram:
     self.paletteWindow = app.window.PaletteWindow(self)
     self.inputWindow = app.window.InputWindow(self)
     self.zOrder.append(self.inputWindow)
+    if 0:
+      self.fileManagerWindow = app.window.FileManagerWindow(self)
+      self.fileManagerWindow.inputWindow = self.inputWindow
+      self.zOrder.append(self.fileManagerWindow)
     self.layout()
     self.inputWindow.startup()
 

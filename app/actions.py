@@ -836,22 +836,18 @@ class Actions(app.mutator.Mutator):
     Returns:
       None.
     """
-    scrollRow = self.view.scrollRow
-    scrollCol = self.view.scrollCol
     # Row.
     maxRow = self.view.rows
     if self.view.scrollRow > self.penRow:
-      scrollRow = self.penRow
+      self.view.scrollRow = self.penRow
     elif self.penRow >= self.view.scrollRow + maxRow:
-      scrollRow = self.penRow - maxRow + 1
+      self.view.scrollRow = self.penRow - maxRow + 1
     # Column.
     maxCol = self.view.cols
     if self.view.scrollCol > self.penCol:
-      scrollCol = self.penCol
+      self.view.scrollCol = self.penCol
     elif self.penCol >= self.view.scrollCol + maxCol:
-      scrollCol = self.penCol - maxCol + 1
-    self.view.scrollRow = scrollRow
-    self.view.scrollCol = scrollCol
+      self.view.scrollCol = self.penCol - maxCol + 1
 
   def scrollToOptimalScrollPosition(self):
     """
