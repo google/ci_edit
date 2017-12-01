@@ -26,11 +26,6 @@ import unittest
 
 kTestFile = '#test_file_with_unlikely_file_name~'
 
-def notReached(display):
-  """Calling this will fail the test. It's expected that the code will not
-  reach this function."""
-  self.assertTrue(False)
-
 
 class IntentionTestCases(unittest.TestCase):
   def setUp(self):
@@ -50,6 +45,18 @@ class IntentionTestCases(unittest.TestCase):
   def tearDown(self):
     pass
 
+  def notReached(display):
+    """Calling this will fail the test. It's expected that the code will not
+    reach this function."""
+    self.fail('Called notReached!')
+
+  def displayCheck(self, *args):
+    def checker(display, cmdIndex):
+      result = display.check(*args)
+      if result is not None:
+        self.fail(result + ' at index ' + str(cmdIndex))
+    return checker
+
   def runWithTestFile(self, fakeInputs):
     self.cursesScreen.setFakeInputs(fakeInputs)
     self.assertTrue(self.prg)
@@ -59,53 +66,31 @@ class IntentionTestCases(unittest.TestCase):
     self.prg.run()
     self.assertTrue(self.prg.exiting)
 
-  if 1:
-    def test_open_and_quit(self):
-      self.runWithTestFile([CTRL_Q, notReached])
+  def test_open_and_quit(self):
+    self.runWithTestFile([CTRL_Q, self.notReached])
 
-    def test_new_file_quit(self):
-      def test0(display):
-        self.assertFalse(display.check(2, 7, ["        "]))
-      self.runWithTestFile([test0, CTRL_Q, notReached])
+  def test_new_file_quit(self):
+    self.runWithTestFile([
+        self.displayCheck(2, 7, ["        "]), CTRL_Q, self.notReached])
 
-    def test_logo(self):
-      def test1(display):
-        self.assertFalse(display.check(0, 0, [" ci "]))
-      self.runWithTestFile([test1, CTRL_Q, notReached])
+  def test_logo(self):
+    self.runWithTestFile([
+        self.displayCheck(0, 0, [" ci "]), CTRL_Q, self.notReached])
 
-  if 1:
-    def test_find(self):
-      def displayCheck(*args):
-        def checker(display):
-          self.assertIsNone(display.check(*args))
-        return checker
-      self.runWithTestFile([CTRL_F,
-          displayCheck(-1, 0, ["find: "]), CTRL_Q, notReached])
+  def test_find(self):
+    self.runWithTestFile([
+        self.displayCheck(-1, 0, ["      "]),
+        CTRL_F, self.displayCheck(-1, 0, ["find: "]), CTRL_Q, self.notReached])
 
-  if 1:
-    def test_find(self):
-      def testFindMode(display):
-        self.assertIsNone(display.check(-1, 0, ["find: "]))
-      self.runWithTestFile([CTRL_F, testFindMode, CTRL_Q, notReached])
+  def test_text_contents(self):
+    self.runWithTestFile([
+        self.displayCheck(2, 7, ["        "]), 't', 'e', 'x', 't',
+        self.displayCheck(2, 7, ["text "]),  CTRL_Q, 'n', self.notReached])
 
-  if 1:
-    def test_text_contents(self):
-      def test0(display):
-        self.assertIsNone(display.check(2, 7, ["        "]))
-      def testDisplay(display):
-        self.assertIsNone(display.check(2, 7, ["text "]))
-      self.runWithTestFile([
-          test0, 't', 'e', 'x', 't', testDisplay,  CTRL_Q, 'n', notReached])
-
-  if 1:
-    def test_backspace(self):
-      def test0(display):
-        self.assertIsNone(display.check(2, 7, ["      "]))
-      def test1(display):
-        self.assertIsNone(display.check(2, 7, ["tex "]))
-      def test2(display):
-        self.assertIsNone(display.check(2, 7, ["tet "]))
-      self.runWithTestFile([
-          test0, 't', 'e', 'x', test1, KEY_BACKSPACE1, 't', test2, CTRL_Q, 'n',
-          notReached])
+  def test_backspace(self):
+    self.runWithTestFile([
+        self.displayCheck(2, 7, ["      "]), 't', 'e', 'x',
+        self.displayCheck(2, 7, ["tex "]), KEY_BACKSPACE1, 't',
+        self.displayCheck(2, 7, ["tet "]), CTRL_Q, 'n',
+        self.notReached])
 

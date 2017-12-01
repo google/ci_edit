@@ -51,7 +51,7 @@ class FakeInput:
         self.inputsIndex += 1
         cmd = self.inputs[self.inputsIndex]
         if type(cmd) == types.FunctionType:
-          cmd(self.fakeDisplay)
+          cmd(self.fakeDisplay, self.inputsIndex)
         elif type(cmd) == types.StringType and len(cmd) == 1:
           waitingForRefresh = True
           return ord(cmd)
