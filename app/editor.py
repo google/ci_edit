@@ -59,9 +59,6 @@ class InteractiveOpener(app.controller.Controller):
     self.commandDefault = self.textBuffer.insertPrintable
     self.textBuffer.selectionAll()
     path = os.path.dirname(self.host.textBuffer.fullPath)
-    if len(path) == 0:
-      path += '.'
-    path += os.path.sep
     self.textBuffer.editPasteLines((path,))
     # Create a new text buffer to display dir listing.
     self.host.setTextBuffer(text_buffer.TextBuffer())
