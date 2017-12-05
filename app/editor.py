@@ -59,6 +59,8 @@ class InteractiveOpener(app.controller.Controller):
     self.commandDefault = self.textBuffer.insertPrintable
     self.textBuffer.selectionAll()
     path = os.path.dirname(self.host.textBuffer.fullPath)
+    if len(path) == 0:
+      path += '.'
     path += os.path.sep
     self.textBuffer.editPasteLines((path,))
     # Create a new text buffer to display dir listing.
@@ -148,14 +150,17 @@ class InteractiveOpener(app.controller.Controller):
       self.host.textBuffer.lines = [
           os.path.abspath(os.path.expanduser(dirPath))+": not found"]
 
-  def onChange(self):
-    input = self.textBuffer.lines[0]
-    path = os.path.abspath(os.path.expanduser(os.path.expandvars(input)))
-    dirPath = path or '.'
+  def separateDirAndFile(self, input):
+    path = os.path.expanduser(os.path.expandvars(input))
+    dirPath = path
     fileName = ''
-    if len(input) > 0 and input[-1] != os.sep:
+    if len(path) > 0 and path[-1] != os.sep:
       dirPath, fileName = os.path.split(path)
-    #app.log.info('\n\nO.onChange\n', path, '\n', dirPath, fileName)
+    dirPath = os.path.abspath(dirPath)
+    return dirPath, fileName
+
+  def onChange(self):
+    dirPath, fileName = self.separateDirAndFile(self.textBuffer.lines[0])
     if os.path.isdir(dirPath):
       lines = []
       contents = os.listdir(dirPath)
@@ -170,7 +175,10 @@ class InteractiveOpener(app.controller.Controller):
     app.log.info(clip)
     self.host.textBuffer.selectionAll()
     self.host.textBuffer.editPasteLines(tuple(clip))
-    self.host.textBuffer.findPlainText(fileName)
+    if len(fileName) == 0:
+      self.host.textBuffer.cursorMoveTo(0, 0)
+    else:
+      self.host.textBuffer.findPlainText(fileName)
 
   def unfocus(self):
     expandedPath = os.path.abspath(os.path.expanduser(self.textBuffer.lines[0]))
