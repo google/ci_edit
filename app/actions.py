@@ -725,10 +725,11 @@ class Actions(app.mutator.Mutator):
     # .replace() calls to minimize the number of calls to parse().
     data = data.replace('\r\n', '\n')
     data = data.replace('\r', '\n')
-    data = data.replace('\t', ' '*8)
+    data = data.replace('\t', ' ' * 8)
     def parse(sre):
-      return "\x01%02x"%ord(sre.groups()[0])
-    data = re.sub('([\0-\x09\x0b-\x1f\x7f-\xff])', parse, data)
+      return "\x01%02x" % ord(sre.groups()[0])
+    #data = re.sub('([\0-\x09\x0b-\x1f\x7f-\xff])', parse, data)
+    data = re.sub('([\0-\x09\x0b-\x1f])', parse, data)
     return data.split('\n')
 
   def dataToLines(self):
@@ -1182,9 +1183,9 @@ class Actions(app.mutator.Mutator):
   def insertPrintable(self, ch, meta):
     #app.log.info(ch, meta)
     if curses.ascii.isprint(ch):
-      self.insert(chr(ch))
+      self.insert(unichr(ch))
     elif ch is app.curses_util.BRACKETED_PASTE:
-      self.editPasteData(meta)
+      self.editPasteData(meta.decode('utf-8'))
     elif ch is app.curses_util.UNICODE_INPUT:
       self.insert(meta)
 

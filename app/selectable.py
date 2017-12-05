@@ -155,9 +155,9 @@ class Selectable(BaseLineBuffer):
       self.upperChangedRow = row
     if selectionMode == kSelectionBlock:
       for i, line in enumerate(lines):
-        self.lines[row+i] = (
-            self.lines[row+i][:col] + line +
-            self.lines[row+i][col:])
+        self.lines[row + i] = (
+            self.lines[row + i][:col] + line +
+            self.lines[row + i][col:])
         self.lines.insert(row, line)
     elif (selectionMode == kSelectionNone or
         selectionMode == kSelectionAll or
