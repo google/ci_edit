@@ -139,7 +139,6 @@ class Mutator(app.selectable.Selectable):
   def isSafeToWrite(self):
     if not os.path.exists(self.fullPath):
       return True
-    self.isReadOnly = not os.access(self.fullPath, os.W_OK)
     s1 = os.stat(self.fullPath)
     s2 = self.fileStat
     app.log.info('st_mode', s1.st_mode, s2.st_mode)
