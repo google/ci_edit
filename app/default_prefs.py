@@ -154,7 +154,7 @@ for i in color8.values():
 
 color256 = {
   '_pre_selection': stringColorIndex,
-  'bookmark': 10,
+  'bookmark': 98,
   'bracket': 6,
   'c': defaultColorIndex,
   'c_preprocessor': 1,
