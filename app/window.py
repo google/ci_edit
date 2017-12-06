@@ -23,6 +23,7 @@ import app.history
 import app.render
 import app.text_buffer
 import app.vi_editor
+import bisect
 import os
 import sys
 import curses
@@ -362,8 +363,16 @@ class LineNumbers(ViewWindow):
   def drawLineNumbers(self):
     limit = min(self.rows,
         len(self.host.textBuffer.lines) - self.host.scrollRow)
-    color = app.color.get('line_number')
+    bookmarkList = self.host.textBuffer.bookmarks
     for i in range(limit):
+      color = app.color.get('line_number')
+      insertionPoint = bisect.bisect_left(bookmarkList, ((i,),))
+      if len(bookmarkList):
+        prevBookmarkRange = bookmarkList[insertionPoint - 1][0]
+        nextBookmarkRange = bookmarkList[insertionPoint % len(bookmarkList)][0]
+        if (prevBookmarkRange[0] <= i <= prevBookmarkRange[-1] or
+            nextBookmarkRange[0] <= i <= nextBookmarkRange[-1]):
+          color = app.color.get('bookmark')
       self.addStr(i, 0, ' %5d ' % (self.host.scrollRow + i + 1), color)
     color = app.color.get('outside_document')
     for i in range(limit, self.rows):
