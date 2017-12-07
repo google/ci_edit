@@ -31,32 +31,45 @@ import traceback
 import types
 
 
-waitingForRefresh = True
-
-
 class FakeInput:
   def __init__(self, display):
     self.fakeDisplay = display
-    self.inputs = []
-    self.inputsIndex = -1
+    self.setInputs([])
 
   def setInputs(self, cmdList):
     self.inputs = cmdList
     self.inputsIndex = -1
+    self.inBracketedPaste = False
+    self.tupleIndex = -1
+    self.waitingForRefresh = True
 
   def next(self):
-    global waitingForRefresh
-    if not waitingForRefresh:
+    if not self.waitingForRefresh:
       while self.inputsIndex + 1 < len(self.inputs):
         self.inputsIndex += 1
         cmd = self.inputs[self.inputsIndex]
         if type(cmd) == types.FunctionType:
           cmd(self.fakeDisplay, self.inputsIndex)
         elif type(cmd) == types.StringType and len(cmd) == 1:
-          waitingForRefresh = True
+          if not self.inBracketedPaste:
+            self.waitingForRefresh = True
           return ord(cmd)
+        elif (type(cmd) == types.TupleType and len(cmd) > 1 and
+            type(cmd[0]) == types.IntType):
+          if cmd == app.curses_util.BRACKETED_PASTE_BEGIN:
+            self.inBracketedPaste = True
+          self.tupleIndex += 1
+          if self.tupleIndex >= len(cmd):
+            self.tupleIndex = -1
+            if cmd == app.curses_util.BRACKETED_PASTE_END:
+              self.inBracketedPaste = False
+              self.waitingForRefresh = True
+            return ERR
+          self.inputsIndex -= 1
+          return cmd[self.tupleIndex]
         else:
-          waitingForRefresh = True
+          if not self.inBracketedPaste:
+            self.waitingForRefresh = True
           return cmd
     return ERR
 
@@ -93,7 +106,7 @@ class FakeDisplay:
 
   def check(self, row, col, lines):
     for i in range(len(lines)):
-      line = lines[i]
+      line = lines[i].decode('utf-8')
       for k in range(len(line)):
         d = self.display[row + i][col + k]
         c = line[k]
@@ -110,11 +123,12 @@ class FakeDisplay:
     print '+' + '-' * self.cols + '+'
     for line in self.get():
       print '|' + line + '|'
+      #print [ord(i) for i in line]
     print '+' + '-' * self.cols + '+'
 
   def reset(self):
     self.display = [
-        ['x' for k in range(self.cols)] for i in range(self.rows)]
+        [u'x' for k in range(self.cols)] for i in range(self.rows)]
 
 fakeDisplay = None
 fakeInput = None
@@ -136,14 +150,17 @@ class FakeCursesWindow:
 
   def addstr(self, *args):
     global fakeDisplay
-    testLog(*args)
-    cursorRow = args[0]
-    cursorCol = args[1]
-    text = args[2]
-    color = args[3]
-    for i in range(len(text)):
-      fakeDisplay.display[cursorRow][cursorCol + i] = text[i]
-    return (1, 1)
+    try:
+      testLog(*args)
+      cursorRow = args[0]
+      cursorCol = args[1]
+      text = args[2].decode('utf-8')
+      color = args[3]
+      for i in range(len(text)):
+        fakeDisplay.display[cursorRow][cursorCol + i] = text[i]
+      return (1, 1)
+    except:
+      sys.exit(1)
 
   def getch(self):
     testLog()
@@ -211,8 +228,7 @@ class StandardScreen(FakeCursesWindow):
     return (fakeDisplay.rows, fakeDisplay.cols)
 
   def refresh(self):
-    global waitingForRefresh
-    waitingForRefresh = False
+    fakeInput.waitingForRefresh = False
     testLog()
 
 

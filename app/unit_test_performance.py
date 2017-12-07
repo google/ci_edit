@@ -66,7 +66,7 @@ class PerformanceTestCases(unittest.TestCase):
         setup=setup,
         number=10000)
     # Assert that neither too much faster than the other
-    self.assertGreater(a, b * 0.87)
+    self.assertGreater(a, b * 0.84)
     self.assertGreater(b, a * 0.77)
 
   def test_insert1(self):

@@ -1,3 +1,5 @@
+# -*- coding: latin-1 -*-
+
 # Copyright 2017 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +21,7 @@ os.environ['CI_EDIT_USE_FAKE_CURSES'] = '1'
 import app.ci_program
 from app.curses_util import *
 import curses
+import inspect
 import re
 import sys
 import unittest
@@ -51,10 +54,13 @@ class IntentionTestCases(unittest.TestCase):
     self.fail('Called notReached!')
 
   def displayCheck(self, *args):
+    caller = inspect.stack()[1]
+    callerText = "\n  %s:%s:%s(): " % (
+        os.path.split(caller[1])[1], caller[2], caller[3])
     def checker(display, cmdIndex):
       result = display.check(*args)
       if result is not None:
-        self.fail(result + ' at index ' + str(cmdIndex))
+        self.fail(callerText + result + ' at index ' + str(cmdIndex))
     return checker
 
   def runWithTestFile(self, fakeInputs):
@@ -80,17 +86,26 @@ class IntentionTestCases(unittest.TestCase):
   def test_find(self):
     self.runWithTestFile([
         self.displayCheck(-1, 0, ["      "]),
-        CTRL_F, self.displayCheck(-1, 0, ["find: "]), CTRL_Q, self.notReached])
+        CTRL_F, self.displayCheck(-1, 0, ["find: "]),
+        CTRL_Q, self.notReached])
 
   def test_text_contents(self):
     self.runWithTestFile([
         self.displayCheck(2, 7, ["        "]), 't', 'e', 'x', 't',
         self.displayCheck(2, 7, ["text "]),  CTRL_Q, 'n', self.notReached])
 
+  def test_bracketed_paste(self):
+    self.runWithTestFile([
+        self.displayCheck(2, 7, ["      "]),
+        curses.ascii.ESC, app.curses_util.BRACKETED_PASTE_BEGIN,
+        't', 'e', ord('\xc3'), ord('\xa9'), 't',
+        curses.ascii.ESC, app.curses_util.BRACKETED_PASTE_END,
+        self.displayCheck(2, 7, [u'teét ']),
+        CTRL_Q, 'n', self.notReached])
+
   def test_backspace(self):
     self.runWithTestFile([
         self.displayCheck(2, 7, ["      "]), 't', 'e', 'x',
         self.displayCheck(2, 7, ["tex "]), KEY_BACKSPACE1, 't',
-        self.displayCheck(2, 7, ["tet "]), CTRL_Q, 'n',
-        self.notReached])
+        self.displayCheck(2, 7, ["tet "]), CTRL_Q, 'n', self.notReached])
 
