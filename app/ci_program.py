@@ -174,14 +174,14 @@ class CiProgram:
             if tuple(keySequence[:len(paste_begin)]) == paste_begin:
               ch = app.curses_util.BRACKETED_PASTE
               keySequence = keySequence[len(paste_begin):]
-              paste_end = app.curses_util.BRACKETED_PASTE_END
+              paste_end = (curses.ascii.ESC,) + app.curses_util.BRACKETED_PASTE_END
               while tuple(keySequence[-len(paste_end):]) != paste_end:
                 #app.log.info('waiting in paste mode')
                 n = cursesWindow.getch()
-                while n != curses.ERR:
+                if n != curses.ERR:
                   keySequence.append(n)
-                  n = cursesWindow.getch()
-              keySequence = keySequence[:-(1 + len(paste_end))]
+              keySequence = keySequence[:-(len(paste_end))]
+              #print 'keySequence', keySequence
               eventInfo = ''.join([chr(i) for i in keySequence])
             else:
               ch = tuple(keySequence)
