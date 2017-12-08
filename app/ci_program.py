@@ -130,7 +130,9 @@ class CiProgram:
       if useBgThread:
         while self.bg.hasMessage():
           frame = self.bg.get()
-          if type(frame) == type("") and frame == 'quit':
+          if frame[0] == 'exception':
+            for line in frame[1]:
+              userMessage(line[:-1])
             self.exiting = True
             return
           self.refresh(frame[0], frame[1])
@@ -216,7 +218,9 @@ class CiProgram:
             frame = None
             while self.bg.hasMessage():
               frame = self.bg.get()
-              if frame == 'quit':
+              if frame[0] == 'exception':
+                for line in frame[1]:
+                  userMessage(line[:-1])
                 self.exiting = True
                 return
             if frame is not None:

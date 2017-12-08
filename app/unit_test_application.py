@@ -70,7 +70,19 @@ class IntentionTestCases(unittest.TestCase):
     sys.argv = [kTestFile]
     self.assertFalse(os.path.isfile(kTestFile))
     self.prg.run()
+    #curses.printFakeDisplay()
+    if app.ci_program.userConsoleMessage:
+      message = app.ci_program.userConsoleMessage
+      app.ci_program.userConsoleMessage = None
+      self.fail(message)
     self.assertTrue(self.prg.exiting)
+    self.assertEqual(self.cursesScreen.fakeInput.inputsIndex,
+        len(fakeInputs) - 2)
+    if 0:
+      caller = inspect.stack()[1]
+      callerText = "  %s:%s:%s(): " % (
+          os.path.split(caller[1])[1], caller[2], caller[3])
+      print '\n-------- finished', callerText
 
   def test_open_and_quit(self):
     self.runWithTestFile([CTRL_Q, self.notReached])

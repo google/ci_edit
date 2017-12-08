@@ -16,7 +16,9 @@ import app.render
 import os
 import Queue
 import signal
+import sys
 import threading
+import traceback
 
 
 # The instance of the background thread.
@@ -79,7 +81,9 @@ def background(inputQueue, outputQueue):
     except Exception as e:
       app.log.exception(e)
       app.log.error('bg thread exception', e)
-      outputQueue.put('quit')
+      errorType, value, tracebackInfo = sys.exc_info()
+      out = traceback.format_exception(errorType, value, tracebackInfo)
+      outputQueue.put(('exception', out))
       os.kill(pid, signalNumber)
       while True:
         program, message = inputQueue.get()
