@@ -1412,10 +1412,13 @@ class Actions(app.mutator.Mutator):
 
     Args:
       row (int): the specified line of text that you want to select.
-    
+
     Returns:
       None
     """
+    if row >= len(self.lines):
+      self.selectionNone()
+      return
     if row + 1 < len(self.lines):
       self.cursorMoveAndMark((row + 1) - self.penRow, -self.penCol,
           0, -self.markerCol,
