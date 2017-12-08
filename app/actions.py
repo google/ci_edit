@@ -87,9 +87,33 @@ class Actions(app.mutator.Mutator):
       self.getText(upperRow, upperCol, lowerRow, lowerCol)))
     self.redo()
 
+  def getBookmarkColor(self):
+    """
+    Returns a new color by cycling through a predefined
+    section of the color palette.
+
+    Args:
+      None.
+
+    Returns:
+      A color (int) for a new bookmark.
+    """
+    badColors = [103, 106, 107, 111, 121, 122]
+    while 1:
+      if self.nextBookmarkColor >= app.color.get('bookmarkIndexStart') + 32:
+        self.nextBookmarkColor = app.color.get('bookmarkIndexStart')
+      if self.nextBookmarkColor in badColors:
+        self.nextBookmarkColor += 1
+      else:
+        bookmarkColor = self.nextBookmarkColor
+        self.nextBookmarkColor += 1
+        return bookmarkColor
+
   def dataToBookmark(self):
     """
-    Grabs all the cursor data and returns a bookmark.
+    Grabs all the cursor data and returns a bookmark. Also assigns a color
+    for this particular bookmark. The color is used to determine the color
+    of the bookmark's line numbers.
 
     Args:
       None.
@@ -105,6 +129,7 @@ class Actions(app.mutator.Mutator):
       'marker': (self.markerRow, self.markerCol),
       'pen': (self.penRow, self.penCol),
       'selectionMode': self.selectionMode,
+      'color': self.getBookmarkColor()
     }
     upperRow, _, lowerRow, _ = self.startAndEnd()
     bookmarkRange = (upperRow, lowerRow)

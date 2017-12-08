@@ -363,24 +363,48 @@ class LineNumbers(ViewWindow):
   def drawLineNumbers(self):
     limit = min(self.rows,
         len(self.host.textBuffer.lines) - self.host.scrollRow)
-    bookmarkList = self.host.textBuffer.bookmarks
+    cursorBookmarkColor = None
     for i in range(limit):
       color = app.color.get('line_number')
-      insertionPoint = bisect.bisect_left(bookmarkList, ((i,),))
-      if len(bookmarkList):
-        prevBookmarkRange = bookmarkList[insertionPoint - 1][0]
-        nextBookmarkRange = bookmarkList[insertionPoint % len(bookmarkList)][0]
-        if (prevBookmarkRange[0] <= i <= prevBookmarkRange[-1] or
-            nextBookmarkRange[0] <= i <= nextBookmarkRange[-1]):
-          color = app.color.get('bookmark')
+      rowBookmark = self.bookmarkForRow(i)
+      if rowBookmark:
+        color = rowBookmark[1].get('color')
+        if self.host.cursorRow == i:
+          cursorBookmarkColor = color
       self.addStr(i, 0, ' %5d ' % (self.host.scrollRow + i + 1), color)
     color = app.color.get('outside_document')
     for i in range(limit, self.rows):
       self.addStr(i, 0, '       ', color)
     cursorAt = self.host.cursorRow - self.host.scrollRow
     if 0 <= cursorAt < limit:
-      color = app.color.get('line_number_current')
+      if cursorBookmarkColor:
+        color = cursorBookmarkColor % 32 + 128
+      else:
+        color = app.color.get('line_number_current')
       self.addStr(cursorAt, 1, '%5d' % (self.host.cursorRow + 1), color)
+
+  def bookmarkForRow(self, row):
+    """
+    Checks whether the specified row lies on a bookmark or not.
+
+    Args:
+      row (int): the row number you want to check between [0, numLines - 1].
+
+    Returns:
+      The bookmark that the row is associated with or None if there isn't one.
+    """
+    bookmarkList = self.host.textBuffer.bookmarks
+    if len(bookmarkList):
+      insertionPoint = bisect.bisect_left(bookmarkList, ((row,),))
+      prevBookmark = bookmarkList[insertionPoint - 1]
+      nextBookmark = bookmarkList[insertionPoint % len(bookmarkList)]
+      prevBookmarkRange = prevBookmark[0]
+      nextBookmarkRange = nextBookmark[0]
+      if prevBookmarkRange[0] <= row <= prevBookmarkRange[-1]:
+        return prevBookmark
+      elif nextBookmarkRange[0] <= row <= nextBookmarkRange[-1]:
+        return nextBookmark
+    return None
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
     app.log.info(paneRow, paneCol, shift)
