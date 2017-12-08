@@ -384,7 +384,11 @@ class LineNumbers(ViewWindow):
         tb.selectionLine()
       self.mouseRelease(paneRow, paneCol, shift, ctrl, alt)
     else:
-      tb.selectionNone()
+      # import pdb; pdb.set_trace()
+      tb.cursorMoveAndMark(self.host.scrollRow + paneRow - tb.penRow, 0,
+                           self.host.scrollRow + paneRow - tb.markerRow, 0,
+                           app.selectable.kSelectionNone - tb.selectionMode)
+      tb.redo()
       self.mouseRelease(paneRow, paneCol, shift, ctrl, alt)
 
   def mouseDoubleClick(self, paneRow, paneCol, shift, ctrl, alt):

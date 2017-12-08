@@ -413,7 +413,6 @@ class Mutator(app.selectable.Selectable):
         for change in reversed(changes):
           self.__undoChange(change)
         break
-
     self.processTempChange = False
 
 
