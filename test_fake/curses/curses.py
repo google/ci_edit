@@ -22,6 +22,7 @@ library."""
 
 
 from .constants import *
+import ascii
 import app.curses_util
 import inspect
 import os
@@ -51,7 +52,7 @@ class FakeInput:
         if type(cmd) == types.FunctionType:
           cmd(self.fakeDisplay, self.inputsIndex)
         elif type(cmd) == types.StringType and len(cmd) == 1:
-          if not self.inBracketedPaste:
+          if (not self.inBracketedPaste) and cmd != ascii.ESC:
             self.waitingForRefresh = True
           return ord(cmd)
         elif (type(cmd) == types.TupleType and len(cmd) > 1 and
@@ -68,7 +69,7 @@ class FakeInput:
           self.inputsIndex -= 1
           return cmd[self.tupleIndex]
         else:
-          if not self.inBracketedPaste:
+          if (not self.inBracketedPaste) and cmd != ascii.ESC:
             self.waitingForRefresh = True
           return cmd
     return ERR
@@ -106,7 +107,7 @@ class FakeDisplay:
 
   def check(self, row, col, lines):
     for i in range(len(lines)):
-      line = lines[i].decode('utf-8')
+      line = lines[i]
       for k in range(len(line)):
         d = self.display[row + i][col + k]
         c = line[k]

@@ -100,7 +100,7 @@ class IntentionTestCases(unittest.TestCase):
         curses.ascii.ESC, app.curses_util.BRACKETED_PASTE_BEGIN,
         't', 'e', ord('\xc3'), ord('\xa9'), 't',
         curses.ascii.ESC, app.curses_util.BRACKETED_PASTE_END,
-        self.displayCheck(2, 7, [u'teét ']),
+        self.displayCheck(2, 7, [unicode('te\xc3\xa9t ', 'utf-8')]),
         CTRL_Q, 'n', self.notReached])
 
   def test_backspace(self):

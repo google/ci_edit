@@ -26,8 +26,8 @@ import curses.ascii
 # Constants are found using the curses.getch() function.
 
 # Tuple events are preceded by an escape (27).
-BRACKETED_PASTE_BEGIN = (91, 50, 48, 48, 126)
-BRACKETED_PASTE_END = (91, 50, 48, 49, 126)
+BRACKETED_PASTE_BEGIN = (91, 50, 48, 48, 126)  # i.e. "[200~"
+BRACKETED_PASTE_END = (91, 50, 48, 49, 126)  # i.e. "[201~"
 BRACKETED_PASTE = ('terminal_paste',)  # Pseudo event type.
 
 UNICODE_INPUT = ('unicode_input',)  # Pseudo event type.
