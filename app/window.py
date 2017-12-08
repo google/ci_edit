@@ -384,7 +384,6 @@ class LineNumbers(ViewWindow):
         tb.selectionLine()
       self.mouseRelease(paneRow, paneCol, shift, ctrl, alt)
     else:
-      # import pdb; pdb.set_trace()
       tb.cursorMoveAndMark(self.host.scrollRow + paneRow - tb.penRow, 0,
                            self.host.scrollRow + paneRow - tb.markerRow, 0,
                            app.selectable.kSelectionNone - tb.selectionMode)

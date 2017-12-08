@@ -327,17 +327,27 @@ class Mutator(app.selectable.Selectable):
     Push a change onto the end of the redoChain. Call redo() to enact the
     change.
     """
-    newTrivialChange = False
     if self.debugRedo:
       app.log.info('redoAddChange', change)
-    # When the redoChain is trimmed we may lose the saved at.
-    # Trim only when there is a non-trivial action.
-    # A trivial change is a standalone cursor move.
+    # Handle new trivial actions, which are defined as standalone cursor moves.
     if change[0] == 'm' and not self.__compoundChange:
-      newTrivialChange = True
+      if self.tempChange:
+        # Combine new change with the existing tempChange.
+        change = (change[0], addVectors(self.tempChange[1], change[1]))
+        self.__undoChange(self.tempChange)
+        self.__tempChange = change
+      if change in noOpInstructions:
+        self.stallNextRedo = True
+        self.processTempChange = False
+        self.tempChange = None
+        self.updateBasicScrollPosition()
+        return
+      self.processTempChange = True
+      self.tempChange = change
     else:
       # Trim and combine main redoChain with tempChange
       # if there is a non-trivial action.
+      # We may lose the saved at when trimming.
       if self.redoIndex < self.savedAtRedoIndex:
         self.savedAtRedoIndex = -1
       self.redoChain = self.redoChain[:self.redoIndex]
@@ -358,21 +368,6 @@ class Mutator(app.selectable.Selectable):
           self.redoIndex += 1
           self.oldRedoIndex += 1
         self.tempChange = None
-    if newTrivialChange:
-      if self.tempChange:
-        # Combine new change with the existing tempChange.
-        change = (change[0], addVectors(self.tempChange[1], change[1]))
-        self.__undoChange(self.tempChange)
-        self.__tempChange = change
-      if change in noOpInstructions:
-        self.stallNextRedo = True
-        self.processTempChange = False
-        self.tempChange = None
-        self.updateBasicScrollPosition()
-        return
-      self.processTempChange = True
-      self.tempChange = change
-    else:
       # Accumulating changes together as a unit.
       self.__compoundChange.append(change)
       self.redoChain.append((change,))
