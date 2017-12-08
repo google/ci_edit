@@ -378,6 +378,8 @@ class LineNumbers(ViewWindow):
     cursorAt = self.host.cursorRow - self.host.scrollRow
     if 0 <= cursorAt < limit:
       if cursorBookmarkColor:
+        # TODO: Need to figure out the palette and set it appropriately here.
+        # It is currently wrong and makes the line number black.
         color = cursorBookmarkColor % 32 + 128
       else:
         color = app.color.get('line_number_current')
