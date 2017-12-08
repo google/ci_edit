@@ -374,11 +374,15 @@ class LineNumbers(ViewWindow):
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
     app.log.info(paneRow, paneCol, shift)
+    import pdb; pdb.set_trace()
     if ctrl:
       app.log.info('click at', paneRow, paneCol)
       return
     self.host.changeFocusTo(self.host)
     tb = self.host.textBuffer
+    if self.host.scrollRow + paneRow >= len(tb.lines):
+      tb.selectionNone()
+      return
     if shift:
       if tb.selectionMode == app.selectable.kSelectionNone:
         tb.selectionLine()
