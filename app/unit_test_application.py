@@ -63,8 +63,17 @@ class IntentionTestCases(unittest.TestCase):
         self.fail(callerText + result + ' at index ' + str(cmdIndex))
     return checker
 
+  def cursorCheck(self, expectedRow, expectedCol):
+    caller = inspect.stack()[1]
+    callerText = "\n  %s:%s:%s(): " % (
+        os.path.split(caller[1])[1], caller[2], caller[3])
+    def checker(display, cmdIndex):
+      penRow, penCol = self.cursesScreen.getyx()
+      self.assertEqual((expectedRow, expectedCol), (penRow, penCol))
+    return checker
+
   def runWithTestFile(self, fakeInputs):
-    self.cursesScreen.setFakeInputs(fakeInputs)
+    self.cursesScreen.setFakeInputs(fakeInputs + [self.notReached,])
     self.assertTrue(self.prg)
     self.assertFalse(self.prg.exiting)
     sys.argv = [kTestFile]
@@ -75,9 +84,12 @@ class IntentionTestCases(unittest.TestCase):
       message = app.ci_program.userConsoleMessage
       app.ci_program.userConsoleMessage = None
       self.fail(message)
+    # Check that the application is closed down (don't leave it running across
+    # tests).
     self.assertTrue(self.prg.exiting)
     self.assertEqual(self.cursesScreen.fakeInput.inputsIndex,
-        len(fakeInputs) - 2)
+        len(fakeInputs) - 1)
+    # Handy for debugging.
     if 0:
       caller = inspect.stack()[1]
       callerText = "  %s:%s:%s(): " % (
@@ -85,26 +97,46 @@ class IntentionTestCases(unittest.TestCase):
       print '\n-------- finished', callerText
 
   def test_open_and_quit(self):
-    self.runWithTestFile([CTRL_Q, self.notReached])
+    self.runWithTestFile([CTRL_Q])
 
   def test_new_file_quit(self):
     self.runWithTestFile([
-        self.displayCheck(2, 7, ["        "]), CTRL_Q, self.notReached])
+        self.displayCheck(2, 7, ["        "]), CTRL_Q])
 
   def test_logo(self):
     self.runWithTestFile([
-        self.displayCheck(0, 0, [" ci "]), CTRL_Q, self.notReached])
+        self.displayCheck(0, 0, [" ci "]), CTRL_Q])
+
+  def test_whole_screen(self):
+    self.runWithTestFile([
+        self.displayCheck(0, 0, [
+            " ci     .                               ",
+            "                                        ",
+            "     1                                  ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "New buffer         |    1, 1 | 100%,100%",
+            "                                        ",
+            ]), CTRL_Q])
 
   def test_find(self):
     self.runWithTestFile([
         self.displayCheck(-1, 0, ["      "]),
         CTRL_F, self.displayCheck(-1, 0, ["find: "]),
-        CTRL_Q, self.notReached])
+        CTRL_Q])
 
   def test_text_contents(self):
     self.runWithTestFile([
         self.displayCheck(2, 7, ["        "]), 't', 'e', 'x', 't',
-        self.displayCheck(2, 7, ["text "]),  CTRL_Q, 'n', self.notReached])
+        self.displayCheck(2, 7, ["text "]),  CTRL_Q, 'n'])
 
   def test_bracketed_paste(self):
     self.runWithTestFile([
@@ -113,11 +145,74 @@ class IntentionTestCases(unittest.TestCase):
         't', 'e', ord('\xc3'), ord('\xa9'), 't',
         curses.ascii.ESC, app.curses_util.BRACKETED_PASTE_END,
         self.displayCheck(2, 7, [unicode('te\xc3\xa9t ', 'utf-8')]),
-        CTRL_Q, 'n', self.notReached])
+        CTRL_Q, 'n'])
 
   def test_backspace(self):
     self.runWithTestFile([
         self.displayCheck(2, 7, ["      "]), 't', 'e', 'x',
         self.displayCheck(2, 7, ["tex "]), KEY_BACKSPACE1, 't',
-        self.displayCheck(2, 7, ["tet "]), CTRL_Q, 'n', self.notReached])
+        self.displayCheck(2, 7, ["tet "]), CTRL_Q, 'n'])
 
+  def test_select_line(self):
+    self.runWithTestFile([
+        self.displayCheck(0, 0, [
+            " ci     .                               ",
+            "                                        ",
+            "     1                                  "]),
+        self.cursorCheck(0, 0),
+        CTRL_L,
+        CTRL_Q]);
+
+  def test_session(self):
+    self.runWithTestFile([
+        self.displayCheck(0, 0, [
+            " ci     .                               ",
+            "                                        ",
+            "     1                                  ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "New buffer         |    1, 1 | 100%,100%",
+            "                                        "]),
+        'H', 'e', 'l', 'l', 'o',
+        self.displayCheck(0, 0, [
+            " ci     *                               ",
+            "                                        ",
+            "     1 Hello                            ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                        1, 6 | 100%,100%",
+            "                                        "]),
+        CTRL_Z,
+        self.displayCheck(0, 0, [
+            " ci     .                               ",
+            "                                        ",
+            "     1                                  ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                        1, 1 | 100%,100%",
+            "                                        "]),
+        CTRL_Q])

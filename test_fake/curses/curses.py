@@ -148,6 +148,8 @@ class FakeCursesWindow:
   def __init__(self, rows, cols):
     self.rows = rows
     self.cols = cols
+    self.cursorRow = 0
+    self.cursorCol = 0
 
   def addstr(self, *args):
     global fakeDisplay
@@ -177,7 +179,7 @@ class FakeCursesWindow:
 
   def getyx(self):
     testLog()
-    return (0, 0)
+    return (self.cursorRow, self.cursorCol)
 
   def getmaxyx(self):
     testLog()
@@ -191,6 +193,8 @@ class FakeCursesWindow:
 
   def move(self, a, b):
     testLog(a, b)
+    self.cursorRow = a
+    self.cursorCol = b
 
   def noutrefresh(self):
     pass
