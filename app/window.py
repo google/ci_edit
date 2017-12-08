@@ -363,24 +363,23 @@ class LineNumbers(ViewWindow):
   def drawLineNumbers(self):
     limit = min(self.rows,
         len(self.host.textBuffer.lines) - self.host.scrollRow)
-    cursorBookmarkColor = None
+    cursorBookmarkColorIndex = None
     for i in range(limit):
       color = app.color.get('line_number')
       rowBookmark = self.bookmarkForRow(i)
+      # Use a different color if the row is associated with a bookmark.
       if rowBookmark:
-        color = rowBookmark[1].get('color')
+        color = app.color.get(rowBookmark[1].get('colorIndex'))
         if self.host.cursorRow == i:
-          cursorBookmarkColor = color
+          cursorBookmarkColorIndex = rowBookmark[1].get('colorIndex')
       self.addStr(i, 0, ' %5d ' % (self.host.scrollRow + i + 1), color)
     color = app.color.get('outside_document')
     for i in range(limit, self.rows):
       self.addStr(i, 0, '       ', color)
     cursorAt = self.host.cursorRow - self.host.scrollRow
     if 0 <= cursorAt < limit:
-      if cursorBookmarkColor:
-        # TODO: Need to figure out the palette and set it appropriately here.
-        # It is currently wrong and makes the line number black.
-        color = cursorBookmarkColor % 32 + 128
+      if cursorBookmarkColorIndex:
+        color = app.color.get(cursorBookmarkColorIndex % 32 + 128)
       else:
         color = app.color.get('line_number_current')
       self.addStr(cursorAt, 1, '%5d' % (self.host.cursorRow + 1), color)

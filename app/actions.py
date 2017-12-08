@@ -98,16 +98,16 @@ class Actions(app.mutator.Mutator):
     Returns:
       A color (int) for a new bookmark.
     """
-    badColors = [103, 106, 107, 111, 121, 122]
+    badColorIndices = [103, 106, 107, 111, 121, 122]
+    nextIndex = self.nextBookmarkColorIndex
     while 1:
-      if self.nextBookmarkColor >= app.color.get('bookmarkIndexStart') + 32:
-        self.nextBookmarkColor = app.color.get('bookmarkIndexStart')
-      if self.nextBookmarkColor in badColors:
-        self.nextBookmarkColor += 1
+      if nextIndex >= app.prefs.color['bookmarkColorIndexStart'] + 32:
+        nextIndex = app.prefs.color['bookmarkColorIndexStart']
+      if nextIndex in badColorIndices:
+        nextIndex += 1
       else:
-        bookmarkColor = self.nextBookmarkColor
-        self.nextBookmarkColor += 1
-        return bookmarkColor
+        self.nextBookmarkColorIndex = nextIndex + 1
+        return nextIndex
 
   def dataToBookmark(self):
     """
@@ -129,7 +129,7 @@ class Actions(app.mutator.Mutator):
       'marker': (self.markerRow, self.markerCol),
       'pen': (self.penRow, self.penCol),
       'selectionMode': self.selectionMode,
-      'color': self.getBookmarkColor()
+      'colorIndex': self.getBookmarkColor()
     }
     upperRow, _, lowerRow, _ = self.startAndEnd()
     bookmarkRange = (upperRow, lowerRow)

@@ -34,7 +34,7 @@ class TextBuffer(app.actions.Actions):
     self.lastChecksum = None
     self.lastFileSize = 0
     self.bookmarks = []
-    self.nextBookmarkColor = 96
+    self.nextBookmarkColorIndex = app.color.get('bookmarkColorIndexStart')
 
   def checkScrollToCursor(self, window):
     """Move the selected view rectangle so that the cursor is visible."""
