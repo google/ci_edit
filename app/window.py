@@ -1131,6 +1131,7 @@ class PaletteWindow(ActiveWindow):
     self.moveTo(8, 8)
     self.controller = app.controller.MainController(self)
     self.controller.add(app.cu_editor.PaletteDialogController(self))
+    self.textBuffer = app.text_buffer.TextBuffer()
 
   def render(self):
     width = 16

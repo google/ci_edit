@@ -370,7 +370,7 @@ class CuaPlusEdit(CuaEdit):
       KEY_F1: textBuffer.toggleShowTips,
       KEY_F2: textBuffer.bookmarkNext,
       KEY_F3: textBuffer.findAgain,
-      #KEY_F4: self.changeToPaletteWindow,
+      KEY_F4: self.changeToPaletteWindow,
       KEY_SHIFT_F2: textBuffer.bookmarkPrior,
       KEY_SHIFT_F3: textBuffer.findBack,
     })
@@ -383,10 +383,12 @@ class PaletteDialogController(app.controller.Controller):
     app.controller.Controller.__init__(self, view, 'Palette')
     self.view = view
     app.log.info('PaletteDialogController.__init__')
-    def noOp(c):
+    def noOp(c, meta):
       app.log.info('noOp in PaletteDialogController')
+    self.textBuffer = app.text_buffer.TextBuffer()
     self.commandDefault = noOp
     self.commandSet = {
+      KEY_F4: self.changeToHostWindow,
       CTRL_J: self.changeToHostWindow,
       KEY_ESCAPE: self.changeToHostWindow,
     }
