@@ -191,6 +191,7 @@ color256 = {
   'selected': selectedColor,
   'special': specialsColorIndex,
   'status_line': 168,
+  'status_line_error': 161,
   'text': defaultColorIndex,
   'top_info': 168,
   'trailing_space': 180,
