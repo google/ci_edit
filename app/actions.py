@@ -951,13 +951,15 @@ class Actions(app.mutator.Mutator):
         self.fileStat = os.stat(self.fullPath)
         self.setMessage('File saved')
       except Exception as e:
+        self.isReadOnly = not os.access(self.fullPath, os.W_OK)
+        color = app.color.get(3)
         if self.isReadOnly:
           self.setMessage("Permission error. Try modifing in sudo mode.",
-                          color=3)
+                          color=color)
         else:
           self.setMessage(
               'Error writing file. The file did not save properly.',
-              color=3)
+              color=color)
         app.log.error('error writing file')
         app.log.exception(e)
     except Exception:
