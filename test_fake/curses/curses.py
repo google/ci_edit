@@ -133,6 +133,7 @@ class FakeDisplay:
 
 fakeDisplay = None
 fakeInput = None
+mouseEvents = []
 
 def getFakeDisplay():
   return fakeDisplay
@@ -161,6 +162,10 @@ class FakeCursesWindow:
       color = args[3]
       for i in range(len(text)):
         fakeDisplay.display[cursorRow][cursorCol + i] = text[i]
+      self.cursorRow = cursorRow + len(text)
+      self.cursorCol = cursorCol + len(text[-1])
+      if len(text) > 1:
+        self.cursorCol = len(text[-1])
       return (1, 1)
     except:
       sys.exit(1)
@@ -214,18 +219,15 @@ class FakeCursesWindow:
 
 class StandardScreen(FakeCursesWindow):
   def __init__(self):
-    testLog()
     global fakeDisplay, fakeInput
+    testLog()
+    FakeCursesWindow.__init__(self, 0, 0)
     fakeDisplay = FakeDisplay()
     fakeInput = FakeInput(fakeDisplay)
     self.fakeInput = fakeInput
 
   def setFakeInputs(self, cmdList):
     self.fakeInput.setInputs(cmdList)
-
-  def getyx(self):
-    testLog()
-    return (0, 0)
 
   def getmaxyx(self):
     testLog()
@@ -260,8 +262,13 @@ def getch():
   testLog()
   return ERR
 
+def addMouseEvent(mouseEvent):
+  testLog()
+  return mouseEvents.append(mouseEvent)
+
 def getmouse():
   testLog()
+  return mouseEvents.pop()
 
 def has_colors():
   testLog()

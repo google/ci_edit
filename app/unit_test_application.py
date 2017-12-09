@@ -72,6 +72,24 @@ class IntentionTestCases(unittest.TestCase):
       self.assertEqual((expectedRow, expectedCol), (penRow, penCol))
     return checker
 
+  def addMouseInfo(self, timeStamp, mouseRow, mouseCol, bState):
+    """
+    bState may be a logical or of:
+      curses.BUTTON1_PRESSED;
+      curses.BUTTON1_RELEASED;
+      ...
+      curses.BUTTON_SHIFT
+      curses.BUTTON_CTRL
+      curses.BUTTON_ALT
+    """
+    info = (timeStamp, mouseCol, mouseRow, 0, bState)
+    caller = inspect.stack()[1]
+    callerText = "\n  %s:%s:%s(): " % (
+        os.path.split(caller[1])[1], caller[2], caller[3])
+    def createEvent(display, cmdIndex):
+      curses.addMouseEvent(info)
+    return createEvent
+
   def runWithTestFile(self, fakeInputs):
     self.cursesScreen.setFakeInputs(fakeInputs + [self.notReached,])
     self.assertTrue(self.prg)
@@ -159,9 +177,23 @@ class IntentionTestCases(unittest.TestCase):
             " ci     .                               ",
             "                                        ",
             "     1                                  "]),
-        self.cursorCheck(0, 0),
+        self.cursorCheck(2, 7),
         CTRL_L,
         CTRL_Q]);
+
+  def test_select_line_via_line_numbers(self):
+    self.runWithTestFile([
+        self.displayCheck(0, 0, [
+            " ci     .                               ",
+            "                                        ",
+            "     1                                  "]),
+        self.cursorCheck(2, 7),
+        'a', 'b', 'c', CTRL_J, 'd', 'e', CTRL_J, 'f', 'g', 'h', 'i',
+        self.cursorCheck(4, 11),
+        self.addMouseInfo(0, 3, 2, curses.BUTTON1_PRESSED),
+        curses.KEY_MOUSE,
+        CTRL_L,
+        CTRL_Q, 'n']);
 
   def test_session(self):
     self.runWithTestFile([
