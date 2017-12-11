@@ -46,7 +46,10 @@ class IntentionTestCases(unittest.TestCase):
     self.prg = app.ci_program.CiProgram(self.cursesScreen)
 
   def tearDown(self):
-    pass
+    # Disable mouse tracking in xterm.
+    sys.stdout.write('\033[?1002l\n')
+    # Disable Bracketed Paste Mode.
+    sys.stdout.write('\033[?2004l\n')
 
   def notReached(display):
     """Calling this will fail the test. It's expected that the code will not
