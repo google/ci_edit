@@ -113,7 +113,7 @@ color8 = {
   'debug_window': 1,
   'default': 0,
   'doc_block_comment': 3,
-  'error': 9,
+  'error': 7,
   'found_find': 1,
   'highlight': 3,
   'html_block_comment': 2,
@@ -142,10 +142,14 @@ color8 = {
   'selected': 5,
   'special': 1,
   'status_line': 7,
+  'status_line_error': 7,
   'text': 0,
   'top_info': 7,
   'trailing_space': 1,
 }
+
+for i in color8.values():
+  assert 0 <= i < 8, i
 
 color256 = {
   '_pre_selection': stringColorIndex,
@@ -196,6 +200,11 @@ color256 = {
   'top_info': 168,
   'trailing_space': 180,
 }
+
+for i in color8.values():
+  assert 0 <= i < 256
+
+assert color8.keys() == color256.keys()
 
 
 # These prefs are not fully working.
