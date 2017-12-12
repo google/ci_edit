@@ -201,9 +201,10 @@ color256 = {
   'trailing_space': 180,
 }
 
-for i in color8.values():
-  assert 0 <= i < 256
+for i in color256.values():
+  assert 0 <= i < 256, i
 
+# Please keep these color dictionaries in sync.
 assert color8.keys() == color256.keys()
 
 
