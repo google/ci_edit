@@ -917,6 +917,7 @@ class Actions(app.mutator.Mutator):
   def fileWrite(self):
     # Preload the message with an error that should be overwritten.
     self.setMessage('Error saving file')
+    self.isReadOnly = not os.access(self.fullPath, os.W_OK)
     try:
       try:
         if app.prefs.editor['onSaveStripTrailingSpaces']:
@@ -951,7 +952,6 @@ class Actions(app.mutator.Mutator):
         self.fileStat = os.stat(self.fullPath)
         self.setMessage('File saved')
       except Exception as e:
-        self.isReadOnly = not os.access(self.fullPath, os.W_OK)
         color = app.color.get('status_line_error')
         if self.isReadOnly:
           self.setMessage("Permission error. Try modifing in sudo mode.",
