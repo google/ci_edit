@@ -747,6 +747,7 @@ class Actions(app.mutator.Mutator):
   def fileLoad(self):
     app.log.info('fileLoad', self.fullPath)
     inputFile = None
+    self.isReadOnly = not os.access(self.fullPath, os.W_OK)
     if not os.path.exists(self.fullPath):
       self.setMessage('Creating new file')
     else:
@@ -765,7 +766,6 @@ class Actions(app.mutator.Mutator):
           app.log.info('error opening file', self.fullPath)
           self.setMessage('error opening file', self.fullPath)
           return
-      self.isReadOnly = not os.access(self.fullPath, os.W_OK)
       self.fileStat = os.stat(self.fullPath)
     self.relativePath = os.path.relpath(self.fullPath, os.getcwd())
     app.log.info('fullPath', self.fullPath)
@@ -943,8 +943,6 @@ class Actions(app.mutator.Mutator):
         if app.prefs.editor['saveUndo']:
           self.fileHistory['redoChainCompound'] = self.redoChain
           self.fileHistory['savedAtRedoIndexCompound'] = self.savedAtRedoIndex
-        # Hmm, could this be hard coded to False here?
-        self.isReadOnly = not os.access(self.fullPath, os.W_OK)
         app.history.saveUserHistory((self.fullPath, self.lastChecksum,
             self.lastFileSize), self.fileHistory)
         # Store the file's new info
@@ -953,9 +951,15 @@ class Actions(app.mutator.Mutator):
         self.fileStat = os.stat(self.fullPath)
         self.setMessage('File saved')
       except Exception as e:
-        self.setMessage(
-            'Error writing file. The file did not save properly.',
-            color=3)
+        self.isReadOnly = not os.access(self.fullPath, os.W_OK)
+        color = app.color.get('status_line_error')
+        if self.isReadOnly:
+          self.setMessage("Permission error. Try modifing in sudo mode.",
+                          color=color)
+        else:
+          self.setMessage(
+              'Error writing file. The file did not save properly.',
+              color=color)
         app.log.error('error writing file')
         app.log.exception(e)
     except Exception:

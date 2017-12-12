@@ -60,7 +60,7 @@ kSelectionModeNames = [
 class BaseLineBuffer:
   def __init__(self):
     self.lines = [unicode("")]
-    self.message = ('New buffer', 0)
+    self.message = ('New buffer', app.color.get('status_line'))
 
   def setMessage(self, *args, **dict):
     if not len(args):
@@ -75,7 +75,8 @@ class BaseLineBuffer:
       prior = str(i)
       msg += prior
     #app.log.caller("\n", msg)
-    self.message = (repr(msg)[1:-1], dict.get('color', 0))
+    self.message = (repr(msg)[1:-1],
+                    dict.get('color', app.color.get('status_line')))
 
 
 class Selectable(BaseLineBuffer):
