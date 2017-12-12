@@ -1474,16 +1474,14 @@ class Actions(app.mutator.Mutator):
     indentationLength = len(indentation)
     row = min(self.markerRow, self.penRow)
     endRow = max(self.markerRow, self.penRow)
-    begin = 0
     for i,line in enumerate(self.lines[row:endRow + 1]):
-      if (len(line) < indentationLength or
-          (line[:indentationLength] != indentation)):
-        if i > begin:
-          self.verticalDelete(row + begin, row + i - 1, 0, indentation)
-        begin = i + 1
-    self.verticalDelete(row + begin, endRow, 0, indentation)
-    self.cursorMoveAndMark(0, -indentationLength, 0, -indentationLength, 0)
-    self.redo()
+      if (len(line) >= indentationLength and
+          (line[:indentationLength] == indentation)):
+        self.verticalDelete(row + i, row + i, 0, indentation)
+        if row + i == self.penRow:
+          self.cursorMoveAndMark(0, -indentationLength, 0, -indentationLength,
+              0)
+          self.redo()
 
   def updateScrollPosition(self, scrollRowDelta, scrollColDelta):
     """
