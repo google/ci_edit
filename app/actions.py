@@ -1387,10 +1387,8 @@ class Actions(app.mutator.Mutator):
       Consecutive calls to this function will select subsequent lines.
     """
     if self.selectionMode != app.selectable.kSelectionLine:
-      self.selectLineAt(self.penRow)
-    else:
-      if self.penRow + 1 < len(self.lines):
-        self.selectLineAt(self.penRow + 1)
+      self.selectionLine()
+    self.selectLineAt(self.penRow)
 
   def selectionAll(self):
     self.doSelectionMode(app.selectable.kSelectionAll)
@@ -1413,15 +1411,27 @@ class Actions(app.mutator.Mutator):
     self.doSelectionMode(app.selectable.kSelectionWord)
 
   def selectLineAt(self, row):
+    """
+    Adds the line with the specified row to the current selection.
+
+    Args:
+      row (int): the specified line of text that you want to select.
+
+    Returns:
+      None
+    """
+    if row >= len(self.lines):
+      self.selectionNone()
+      return
     if row + 1 < len(self.lines):
       self.cursorMoveAndMark((row + 1) - self.penRow, -self.penCol,
-          row - self.markerRow, -self.markerCol,
+          0, -self.markerCol,
           app.selectable.kSelectionLine - self.selectionMode)
       self.redo()
     else:
       self.cursorMoveAndMark(row - self.penRow,
           len(self.lines[row]) - self.penCol,
-          row - self.penRow, -self.markerCol,
+          0, -self.markerCol,
           app.selectable.kSelectionLine - self.selectionMode)
       self.redo()
 
