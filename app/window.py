@@ -366,11 +366,11 @@ class LineNumbers(ViewWindow):
     cursorBookmarkColorIndex = None
     for i in range(limit):
       color = app.color.get('line_number')
-      rowBookmark = self.bookmarkForRow(i)
+      rowBookmark = self.bookmarkForRow(self.host.scrollRow + i)
       # Use a different color if the row is associated with a bookmark.
       if rowBookmark:
         color = app.color.get(rowBookmark[1].get('colorIndex'))
-        if self.host.cursorRow == i:
+        if self.host.cursorRow == self.host.scrollRow + i:
           cursorBookmarkColorIndex = rowBookmark[1].get('colorIndex')
       self.addStr(i, 0, ' %5d ' % (self.host.scrollRow + i + 1), color)
     color = app.color.get('outside_document')
