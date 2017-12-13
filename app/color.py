@@ -15,6 +15,7 @@
 import app.prefs
 import curses
 
+
 colors = 256
 cache__ = {}
 

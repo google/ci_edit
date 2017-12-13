@@ -54,21 +54,13 @@ def loadPrefs(fileName, category):
 
 color8 = app.default_prefs.color8
 color256 = app.default_prefs.color256
-
-builtInColorSchemes = {
-  'dark': {},
-  'light': {},
-  'sky': {},
-}
+prefs['color'] = color256
 
 colorSchemeName = prefs['editor']['colorScheme']
 if colorSchemeName == 'custom':
   # Check the user home directory for a color scheme preference. If found load
   # it to replace the default color scheme.
   prefs['color'].update(loadPrefs('color_scheme', 'color'))
-elif colorSchemeName in builtInColorSchemes:
-  prefs['color'].update(builtInColorSchemes[colorSchemeName])
-
 
 color = prefs['color']
 editor = loadPrefs('editor', 'editor')
