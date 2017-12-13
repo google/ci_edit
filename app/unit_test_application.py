@@ -32,6 +32,7 @@ kTestFile = '#test_file_with_unlikely_file_name~'
 
 class IntentionTestCases(unittest.TestCase):
   def setUp(self):
+    self.longMessage = True
     if True:
       # The buffer manager will retain the test file in RAM. Reset it.
       try:
@@ -68,22 +69,22 @@ class IntentionTestCases(unittest.TestCase):
 
   def cursorCheck(self, expectedRow, expectedCol):
     caller = inspect.stack()[1]
-    callerText = "\n  %s:%s:%s(): " % (
+    callerText = "in %s:%s:%s(): " % (
         os.path.split(caller[1])[1], caller[2], caller[3])
     def checker(display, cmdIndex):
       penRow, penCol = self.cursesScreen.getyx()
-      self.assertEqual((expectedRow, expectedCol), (penRow, penCol))
+      self.assertEqual((expectedRow, expectedCol), (penRow, penCol), callerText)
     return checker
 
   def selectionCheck(self, expectedPenRow, expectedPenCol, expectedMarkerRow,
       expectedMarkerCol, expectedMode):
     caller = inspect.stack()[1]
-    callerText = "\n  %s:%s:%s(): " % (
+    callerText = "in %s:%s:%s(): " % (
         os.path.split(caller[1])[1], caller[2], caller[3])
     def checker(display, cmdIndex):
       selection = self.prg.getSelection()
       self.assertEqual((expectedPenRow, expectedPenCol, expectedMarkerRow,
-          expectedMarkerCol, expectedMode), selection)
+          expectedMarkerCol, expectedMode), selection, callerText)
     return checker
 
   def addMouseInfo(self, timeStamp, mouseRow, mouseCol, bState):
@@ -97,9 +98,6 @@ class IntentionTestCases(unittest.TestCase):
       curses.BUTTON_ALT
     """
     info = (timeStamp, mouseCol, mouseRow, 0, bState)
-    caller = inspect.stack()[1]
-    callerText = "\n  %s:%s:%s(): " % (
-        os.path.split(caller[1])[1], caller[2], caller[3])
     def createEvent(display, cmdIndex):
       curses.addMouseEvent(info)
     return createEvent
@@ -185,6 +183,36 @@ class IntentionTestCases(unittest.TestCase):
         self.displayCheck(2, 7, ["tex "]), KEY_BACKSPACE1, 't',
         self.displayCheck(2, 7, ["tet "]), CTRL_Q, 'n'])
 
+  def test_cursor_moves(self):
+    self.runWithTestFile([
+        self.displayCheck(0, 0, [
+            " ci     .                               ",
+            "                                        ",
+            "     1                                  "]),
+        self.cursorCheck(2, 7),
+        't', 'e', 's', 't', CTRL_J,
+        'a', 'p', 'p', 'l', 'e', CTRL_J,
+        'o', 'r', 'a', 'n', 'g', 'e',
+        self.cursorCheck(4, 13),
+        self.selectionCheck(2, 6, 0, 0, 0),
+        KEY_UP, self.cursorCheck(3, 12), self.selectionCheck(1, 5, 0, 0, 0),
+        KEY_UP, self.cursorCheck(2, 11), self.selectionCheck(0, 4, 0, 0, 0),
+        KEY_UP, self.cursorCheck(2, 11), self.selectionCheck(0, 4, 0, 0, 0),
+        KEY_LEFT, self.cursorCheck(2, 10), self.selectionCheck(0, 3, 0, 0, 0),
+        KEY_LEFT, self.cursorCheck(2, 9), self.selectionCheck(0, 2, 0, 0, 0),
+        KEY_DOWN, self.cursorCheck(3, 9), self.selectionCheck(1, 2, 0, 0, 0),
+        KEY_DOWN, self.cursorCheck(4, 9), self.selectionCheck(2, 2, 0, 0, 0),
+        KEY_RIGHT, self.cursorCheck(4, 10), self.selectionCheck(2, 3, 0, 0, 0),
+        KEY_DOWN, self.cursorCheck(4, 10), self.selectionCheck(2, 3, 0, 0, 0),
+        KEY_HOME, self.cursorCheck(4, 7), self.selectionCheck(2, 0, 0, 0, 0),
+        KEY_END, self.cursorCheck(4, 13), self.selectionCheck(2, 6, 0, 0, 0),
+        KEY_SHIFT_UP, self.cursorCheck(3, 12), self.selectionCheck(1, 5, 2, 6, 3),
+        KEY_SHIFT_LEFT, self.cursorCheck(3, 11), self.selectionCheck(1, 4, 2, 6, 3),
+        KEY_SHIFT_RIGHT, self.cursorCheck(3, 12), self.selectionCheck(1, 5, 2, 6, 3),
+        KEY_SHIFT_RIGHT, self.cursorCheck(4, 7), self.selectionCheck(2, 0, 2, 6, 3),
+        KEY_SHIFT_RIGHT, self.cursorCheck(4, 8), self.selectionCheck(2, 1, 2, 6, 3),
+        CTRL_Q, 'n']);
+
   def test_select_line(self):
     self.runWithTestFile([
         self.displayCheck(0, 0, [
@@ -205,6 +233,9 @@ class IntentionTestCases(unittest.TestCase):
         self.selectionCheck(2, 0, 1, 0, 4),
         CTRL_L,
         self.selectionCheck(2, 6, 1, 0, 4),
+        self.addMouseInfo(0, 2, 10, curses.BUTTON1_PRESSED),
+        curses.KEY_MOUSE,
+        self.selectionCheck(2, 6, 0, 3, 2),
         CTRL_Q, 'n']);
 
   def test_select_line_via_line_numbers(self):
