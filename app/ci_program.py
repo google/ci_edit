@@ -260,6 +260,11 @@ class CiProgram:
     self.focusedWindow.focus()
     self.focusedWindow.textBuffer.compoundChangePush()
 
+  def getSelection(self):
+    """This is primarily for testing."""
+    tb = self.focusedWindow.textBuffer
+    return (tb.penRow, tb.penCol, tb.markerRow, tb.markerCol, tb.selectionMode)
+
   def normalize(self):
     self.presentModal(None)
 

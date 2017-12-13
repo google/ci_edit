@@ -75,6 +75,17 @@ class IntentionTestCases(unittest.TestCase):
       self.assertEqual((expectedRow, expectedCol), (penRow, penCol))
     return checker
 
+  def selectionCheck(self, expectedPenRow, expectedPenCol, expectedMarkerRow,
+      expectedMarkerCol, expectedMode):
+    caller = inspect.stack()[1]
+    callerText = "\n  %s:%s:%s(): " % (
+        os.path.split(caller[1])[1], caller[2], caller[3])
+    def checker(display, cmdIndex):
+      selection = self.prg.getSelection()
+      self.assertEqual((expectedPenRow, expectedPenCol, expectedMarkerRow,
+          expectedMarkerCol, expectedMode), selection)
+    return checker
+
   def addMouseInfo(self, timeStamp, mouseRow, mouseCol, bState):
     """
     bState may be a logical or of:
@@ -181,8 +192,20 @@ class IntentionTestCases(unittest.TestCase):
             "                                        ",
             "     1                                  "]),
         self.cursorCheck(2, 7),
+        't', 'e', 's', 't', CTRL_J,
+        'a', 'p', 'p', 'l', 'e', CTRL_J,
+        'o', 'r', 'a', 'n', 'g', 'e',
+        self.cursorCheck(4, 13),
+        self.selectionCheck(2, 6, 0, 0, 0),
         CTRL_L,
-        CTRL_Q]);
+        self.selectionCheck(2, 6, 2, 0, 4),
+        KEY_UP,
+        self.selectionCheck(1, 5, 2, 6, 0),
+        CTRL_L,
+        self.selectionCheck(2, 0, 1, 0, 4),
+        CTRL_L,
+        self.selectionCheck(2, 6, 1, 0, 4),
+        CTRL_Q, 'n']);
 
   def test_select_line_via_line_numbers(self):
     self.runWithTestFile([
