@@ -14,6 +14,7 @@
 
 import app.actions
 import app.color
+import app.file_stats
 import app.log
 import app.parser
 import app.prefs
@@ -33,6 +34,7 @@ class TextBuffer(app.actions.Actions):
     self.fileEncoding = None
     self.lastChecksum = None
     self.lastFileSize = 0
+    self.fileStats = app.file_stats.FileStats(self.fullPath, pollingInterval=2)
     self.bookmarks = []
 
   def checkScrollToCursor(self, window):
