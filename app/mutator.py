@@ -45,7 +45,7 @@ class Mutator(app.selectable.Selectable):
     self.findBackRe = None
     self.fileExtension = ''
     self.fullPath = ''
-    self.fileStats = app.file_stats.FileStats(self.fullPath, pollingInterval=2)
+    self.fileStats = None
     self.goalCol = 0
     self.penGrammar = None
     self.parser = None

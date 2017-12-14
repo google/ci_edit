@@ -3,7 +3,13 @@ import time
 import threading
 
 class FileStats:
-  def __init__(self, fullPath, pollingInterval=1):
+  """
+  An object to monitor the statistical information of a file. To prevent
+  synchronization issues, If you want to retrieve multiple attributes
+  consecutively, you must acquire the FileStats object lock before accessing the
+  object's stats and release it when you are are done.
+  """
+  def __init__(self, fullPath='', pollingInterval=2):
     """
     Args:
       fullPath (str): The absolute path of the file you want to keep track of.
@@ -13,21 +19,83 @@ class FileStats:
     self.fullPath = fullPath
     self.fileStats = None
     self.lock = threading.Lock()
-    self.isReadOnly = True
-    thread = threading.Thread(target=self.run)
+    self.isReadOnly = False
+    self.threadShouldExit = False
+    self.thread = self.startTracking()
+    self.updateStats()
 
   def run(self):
+    while not self.threadShouldExit:
+      self.updateStats()
+      time.sleep(self.interval)
+
+  def monitorFile(self, fullPath):
+    """
+    Stops tracking whatever file this object was monitoring before and tracks
+    the newly specified file.
+
+    Args:
+      None.
+
+    Returns:
+      None.
+    """
+    if self.thread:
+      self.threadShouldExit = True
+      self.thread.join()
+      self.threadShouldExit = False
+    self.fullPath = fullPath
+    self.thread = self.startTracking()
+    self.updateStats()
+
+  def startTracking(self):
+    """
+    Starts tracking the file whose path is specified in self.fullPath
+
+    Args:
+      None.
+
+    Returns:
+      The thread that was created to do the tracking.
+    """
+    if self.fullPath:
+      thread = threading.Thread(target=self.run)
+      thread.daemon = True # Do not continue running if main program exits.
+      thread.start()
+      return thread
+
+  def updateStats(self):
+    """
+    Update the stats of the file in memory with the stats of the file on disk.
+
+    Args:
+      None.
+
+    Returns:
+      True if the file stats were updated. False if an exception occurred and
+      the file stats could not be updated.
+    """
     try:
-      while True:
-        self.lock.acquire()
-        self.fileStats = os.stat(self.fullPath)
-        self.isReadOnly = os.access(self.fullPath, os.W_OK)
-        self.lock.release()
-        time.sleep(self.interval)
+      self.lock.acquire()
+      self.fileStats = os.stat(self.fullPath)
+      self.isReadOnly = os.access(self.fullPath, os.W_OK)
+      self.lock.release()
+      return True
     except Exception as e:
-      app.log.info("Exception occurred while running file stats thread:", e)
+      app.log.info("Exception occurred while updating file stats thread:", e)
+      self.lock.release()
+      return False
 
   def getFileSize(self):
+    """
+    Calculates the size of the monitored file.
+
+    Args:
+      None.
+
+    Returns:
+      The size of the file in bytes.
+    """
     if self.fileStats:
       return self.fileStats.st_size
     else:
@@ -35,6 +103,9 @@ class FileStats:
 
   def getFileStats(self):
     return self.fileStats
+
+  def getFullPath(self):
+    return self.fullPath
 
   def fileIsReadOnly(self):
     return self.isReadOnly
