@@ -15,13 +15,11 @@
 # limitations under the License.
 
 
-import os
-os.environ['CI_EDIT_USE_FAKE_CURSES'] = '1'
-
 import app.ci_program
 from app.curses_util import *
 import curses
 import inspect
+import os
 import re
 import sys
 import unittest

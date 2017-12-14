@@ -26,12 +26,6 @@ enabledChannels = {'meta': True, 'mouse': True, 'startup': True}
 shouldWritePrintLog = False
 startTime = time.time()
 
-if os.getenv('CI_EDIT_USE_FAKE_CURSES'):
-  enabledChannels = {
-    'error': True, 'info': True, 'meta': True, 'mouse': True, 'startup': True
-  }
-  shouldWritePrintLog = True
-
 def getLines():
   global screenLog
   return screenLog

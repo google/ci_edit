@@ -14,6 +14,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+import os
+import sys
+if not os.getenv('CI_EDIT_USE_REAL_CURSES'):
+  # Replace curses with a fake version for testing.
+  sys.path = [os.path.join(os.path.dirname(__file__), 'test_fake')] + sys.path
+  import app.log
+  app.log.enabledChannels = {
+    'error': True, 'info': True, 'meta': True, 'mouse': True, 'startup': True
+  }
+  app.log.shouldWritePrintLog = True
+
 import app.unit_test_application
 import app.unit_test_parser
 import app.unit_test_performance

@@ -13,13 +13,6 @@
 # limitations under the License.
 
 
-import os
-import sys
-if os.getenv('CI_EDIT_USE_FAKE_CURSES'):
-  # Replace curses with a fake version for testing.
-  sys.path = ['test_fake'] + sys.path
-
-
 import app.background
 import app.curses_util
 import app.help
@@ -34,7 +27,9 @@ import cPickle as pickle
 import curses
 import locale
 import io
+import os
 import StringIO
+import sys
 import time
 import traceback
 
