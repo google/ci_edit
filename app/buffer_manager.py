@@ -135,7 +135,7 @@ class BufferManager:
     # buffer manager needed to know if a path changed.
     fileBuffer.fullPath = fullPath
     # Track this file
-    fileBuffer.fileStats = app.file_stats.FileStats(fullPath, pollingInterval=2)
+    fileBuffer.fileStats.changeMonitoredFile(fullPath)
 
   def fileClose(self, path):
     pass
