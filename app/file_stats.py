@@ -1,6 +1,7 @@
 import os
 import time
 import threading
+import app.log
 
 class FileStats:
   """
@@ -27,9 +28,9 @@ class FileStats:
   def run(self):
     while not self.threadShouldExit:
       self.updateStats()
-      time.sleep(self.interval)
+      time.sleep(self.pollingInterval)
 
-  def monitorFile(self, fullPath):
+  def changeMonitoredFile(self, fullPath):
     """
     Stops tracking whatever file this object was monitoring before and tracks
     the newly specified file.
@@ -78,7 +79,7 @@ class FileStats:
     try:
       self.lock.acquire()
       self.fileStats = os.stat(self.fullPath)
-      self.isReadOnly = os.access(self.fullPath, os.W_OK)
+      self.isReadOnly = not os.access(self.fullPath, os.W_OK)
       self.lock.release()
       return True
     except Exception as e:
