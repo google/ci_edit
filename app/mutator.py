@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import app.file_stats
 import app.log
 import app.parser
 import app.prefs
@@ -44,9 +45,8 @@ class Mutator(app.selectable.Selectable):
     self.findBackRe = None
     self.fileExtension = ''
     self.fullPath = ''
-    self.fileStat = None
+    self.fileStats = app.file_stats.FileStats(self.fullPath, pollingInterval=2)
     self.goalCol = 0
-    self.isReadOnly = False
     self.penGrammar = None
     self.parser = None
     self.parserTime = .0

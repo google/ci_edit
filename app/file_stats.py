@@ -2,45 +2,53 @@ import os
 import time
 import threading
 
-def FileStats:
+class FileStats:
   def __init__(self, fullPath, pollingInterval=1):
     """
-		Args:
-		  fullPath (str): The absolute path of the file you want to keep track of.
-		  pollingInterval (int): The frequency at which you want to poll the file.
-		"""
-		self.pollingInterval = pollingInterval
-		self.fullPath = fullPath
-		self.fileStats = None
-		thread = threading.Thread(target=self.run)
+    Args:
+      fullPath (str): The absolute path of the file you want to keep track of.
+      pollingInterval (int): The frequency at which you want to poll the file.
+    """
+    self.pollingInterval = pollingInterval
+    self.fullPath = fullPath
+    self.fileStats = None
+    self.lock = threading.Lock()
+    self.isReadOnly = True
+    thread = threading.Thread(target=self.run)
 
-	def run(self):
-		try:
-			while True:
-				self.fileStats = os.stat(self.fullPath)
-				time.sleep(self.interval)
-		except Exception as e:
-			app.log.info("Exception occurred while running file stats thread:", e)
+  def run(self):
+    try:
+      while True:
+        self.lock.acquire()
+        self.fileStats = os.stat(self.fullPath)
+        self.isReadOnly = os.access(self.fullPath, os.W_OK)
+        self.lock.release()
+        time.sleep(self.interval)
+    except Exception as e:
+      app.log.info("Exception occurred while running file stats thread:", e)
 
-	def getFileSize(self):
-		if self.fileStats:
-			return self.fileStats.st_size
-		else:
-			return 0
+  def getFileSize(self):
+    if self.fileStats:
+      return self.fileStats.st_size
+    else:
+      return 0
 
-	def getFileStats():
-		return self.fileStats
+  def getFileStats(self):
+    return self.fileStats
 
-	def fileChanged(self):
-		"""
-		Compares the file's stats with the recorded stats we have in memory.
+  def fileIsReadOnly(self):
+    return self.isReadOnly
 
-		Args:
-			None.
+  def fileChanged(self):
+    """
+    Compares the file's stats with the recorded stats we have in memory.
 
-		Returns:
-			The new file stats if the file has changed. Otherwise, None.
-		"""
+    Args:
+      None.
+
+    Returns:
+      The new file stats if the file has changed. Otherwise, None.
+    """
     s1 = self.fileStats
     s2 = os.stat(self.fullPath)
     app.log.info('st_mode', s1.st_mode, s2.st_mode)
