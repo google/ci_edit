@@ -1173,6 +1173,12 @@ class Actions(app.mutator.Mutator):
   def verticalDelete(self, row, endRow, col, text):
     self.redoAddChange(('vd', (text, row, endRow, col)))
     self.redo()
+    if row <= self.markerRow <= endRow:
+      self.cursorMoveAndMark(0, 0, 0, -len(text), 0)
+      self.redo()
+    if row <= self.penRow <= endRow:
+      self.cursorMoveAndMark(0, -len(text), 0, 0, 0)
+      self.redo()
 
   def verticalInsert(self, row, endRow, col, text):
     self.redoAddChange(('vi', (text, row, endRow, col)))
@@ -1476,22 +1482,21 @@ class Actions(app.mutator.Mutator):
       start = self.penCol - indentationLength
       if indentation == line[start:self.penCol]:
         self.verticalDelete(self.penRow, self.penRow, start, indentation)
-        self.cursorMoveAndMark(0, -indentationLength, 0, -indentationLength, 0)
-        self.redo()
 
   def unindentLines(self):
     indentation = app.prefs.editor['indentation']
     indentationLength = len(indentation)
     row = min(self.markerRow, self.penRow)
     endRow = max(self.markerRow, self.penRow)
-    for i,line in enumerate(self.lines[row:endRow + 1]):
-      if (len(line) >= indentationLength and
-          (line[:indentationLength] == indentation)):
-        self.verticalDelete(row + i, row + i, 0, indentation)
-        if row + i == self.penRow:
-          self.cursorMoveAndMark(0, -indentationLength, 0, -indentationLength,
-              0)
-          self.redo()
+    begin = 0
+    for i, line in enumerate(self.lines[row:endRow + 1]):
+      if (len(line) < indentationLength or
+          line[:indentationLength] != indentation):
+        if begin < i:
+          self.verticalDelete(row + begin, row + i - 1, 0, indentation)
+        begin = i + 1
+    if begin <= i:
+      self.verticalDelete(row + begin, row + i, 0, indentation)
 
   def updateScrollPosition(self, scrollRowDelta, scrollColDelta):
     """

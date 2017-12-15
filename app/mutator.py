@@ -312,10 +312,8 @@ class Mutator(app.selectable.Selectable):
       if self.upperChangedRow > row:
         self.upperChangedRow = row
     elif change[0] == 'vd':  # Redo vertical delete.
-      app.log.info('do vd')
       self.__doVerticalDelete(change)
     elif change[0] == 'vi':  # Redo vertical insert.
-      app.log.info('do vi')
       self.__doVerticalInsert(change)
     else:
       app.log.info('ERROR: unknown redo.')
@@ -504,10 +502,8 @@ class Mutator(app.selectable.Selectable):
       if self.upperChangedRow > row:
         self.upperChangedRow = row
     elif change[0] == 'vd': # Undo vertical delete
-      app.log.info('undo vd', change[1])
       self.__doVerticalInsert(change)
     elif change[0] == 'vi':  # Undo vertical insert
-      app.log.info('undo vi', change[1])
       self.__doVerticalDelete(change)
     else:
       app.log.info('ERROR: unknown undo.')
