@@ -56,6 +56,7 @@ def background(inputQueue, outputQueue):
           app.log.info('bg received quit message')
           return
         program.executeCommandList(message)
+        program.focusedWindow.textBuffer.parseGrammars()
         program.render()
         outputQueue.put(app.render.frame.grabFrame())
         os.kill(pid, signalNumber)

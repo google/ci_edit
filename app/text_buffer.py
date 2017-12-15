@@ -63,9 +63,7 @@ class TextBuffer(app.actions.Actions):
   def draw(self, window):
     if self.view.rows <= 0 or self.view.cols <= 0:
       return
-    if 1:
-      self.parseGrammars()
-    else:
+    if not app.prefs.editor['useBgThread']:
       if self.shouldReparse:
         self.parseGrammars()
         self.shouldReparse = False

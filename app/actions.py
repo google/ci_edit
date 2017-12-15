@@ -1365,11 +1365,11 @@ class Actions(app.mutator.Mutator):
   def parseGrammars(self):
     if not self.parser:
       self.parser = app.parser.Parser()
-    end = self.view.scrollRow + self.view.rows + 1
-    # If there is a huge gap, leave it to the background parsing.
-    if self.upperChangedRow - len(self.parser.rows) > 500:
-      self.sentUpperChangedRow = self.upperChangedRow
+    scrollRow = self.view.scrollRow
+    # If there is a gap, leave it to the background parsing.
+    if self.parser.rows < scrollRow or self.upperChangedRow < scrollRow:
       return
+    end = self.view.scrollRow + self.view.rows + 1
     # Reset the self.data to get recent changes in self.lines.
     self.linesToData()
     start = time.time()
