@@ -32,10 +32,10 @@ class TextBuffer(app.actions.Actions):
     self.highlightRe = None
     self.highlightTrailingWhitespace = True
     self.fileHistory = {}
+    self.fileStats = app.file_stats.FileStats(self.fullPath)
     self.fileEncoding = None
     self.lastChecksum = None
     self.lastFileSize = 0
-    self.fileStats = app.file_stats.FileStats(self.fullPath, pollingInterval=2)
     self.bookmarks = []
     self.nextBookmarkColorPos = 0
 
