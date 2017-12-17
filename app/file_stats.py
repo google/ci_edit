@@ -14,11 +14,12 @@ class FileStats:
     """
     Args:
       fullPath (str): The absolute path of the file you want to keep track of.
-      pollingInterval (int): The frequency at which you want to poll the file.
+      pollingInterval (float): The frequency at which you want to poll the file.
     """
     self.pollingInterval = pollingInterval
     self.fullPath = fullPath
     self.fileStats = None
+    self.textBuffer = None
     self.lock = threading.Lock()
     self.isReadOnly = False
     self.threadShouldExit = False
@@ -27,13 +28,20 @@ class FileStats:
 
   def run(self):
     while not self.threadShouldExit:
-      self.updateStats()
+      oldReadOnly = self.isReadOnly
+      if (self.updateStats() and
+          self.isReadOnly != oldReadOnly and
+          self.textBuffer and
+          self.textBuffer.view.textBuffer):
+        # This call requires the view's textbuffer to be set.
+        self.textBuffer.view.topInfo.onChange()
       time.sleep(self.pollingInterval)
 
   def changeMonitoredFile(self, fullPath):
     """
     Stops tracking whatever file this object was monitoring before and tracks
-    the newly specified file.
+    the newly specified file. The text buffer should be set in order for the
+    created thread to work properly.
 
     Args:
       None.
@@ -140,3 +148,6 @@ class FileStats:
         s1.st_mtime == s2.st_mtime and
         s1.st_ctime == s2.st_ctime):
       return s2
+
+  def setTextBuffer(self, textBuffer):
+    self.textBuffer = textBuffer

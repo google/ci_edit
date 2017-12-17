@@ -91,8 +91,10 @@ class BufferManager:
       if not os.path.isfile(fullPath):
         app.log.info('creating a new file at\n ', fullPath)
       textBuffer = app.text_buffer.TextBuffer()
-      self.renameBuffer(textBuffer, fullPath)
       textBuffer.view = view
+      view.textBuffer = textBuffer
+      textBuffer.fileStats.setTextBuffer(textBuffer)
+      self.renameBuffer(textBuffer, fullPath)
       textBuffer.fileLoad()
       self.buffers.append(textBuffer)
     if 0:
