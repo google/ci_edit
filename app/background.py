@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import app.profile
 import app.render
 import os
 import Queue
@@ -52,6 +53,7 @@ def background(inputQueue, outputQueue):
     try:
       try:
         program, message = inputQueue.get(block)
+        #profile = app.profile.beginPythonProfile()
         if message == 'quit':
           app.log.info('bg received quit message')
           return
@@ -60,10 +62,12 @@ def background(inputQueue, outputQueue):
         program.render()
         outputQueue.put(app.render.frame.grabFrame())
         os.kill(pid, signalNumber)
+        #app.profile.endPythonProfile(profile)
         if not inputQueue.empty():
           continue
       except Queue.Empty:
         pass
+      #continue
       tb = program.focusedWindow.textBuffer
       if not tb.parser:
         block = True
