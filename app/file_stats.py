@@ -34,7 +34,7 @@ class FileStats:
           self.textBuffer and
           self.textBuffer.view.textBuffer):
         # This call requires the view's textbuffer to be set.
-        self.textBuffer.view.topInfo.onChange()
+        self.textBuffer.view.render()
       time.sleep(self.pollingInterval)
 
   def changeMonitoredFile(self, fullPath):
