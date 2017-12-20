@@ -99,7 +99,7 @@ class Actions(app.mutator.Mutator):
       A color (int) for a new bookmark.
     """
     if app.prefs.startup['numColors'] == 8:
-      badColorIndices = [7]
+      badColorIndices = [0, 7]
       colorSetSize = 8
     else:
       badColorIndices = [103, 106, 107, 111, 121, 122]
