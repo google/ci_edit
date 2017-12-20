@@ -85,7 +85,6 @@ class CiProgram:
       app.log.detail("color_content, after:")
       for i in range(0, curses.COLORS):
         app.log.detail("color", i, ": ", curses.color_content(i))
-    self.setUpPalette()
     if 1:
       #rows, cols = self.cursesScreen.getmaxyx()
       cursesWindow = self.cursesScreen
@@ -552,6 +551,7 @@ class CiProgram:
     readStdin = False
     takeAll = False  # Take all args as file paths.
     timeStartup = False
+    numColors = min(curses.COLORS, 256)
     for i in sys.argv[1:]:
       if not takeAll and i[:1] == '+':
         openToLine = int(i[1:])
@@ -592,6 +592,8 @@ class CiProgram:
         elif i == '--clearHistory':
           app.history.clearUserHistory()
           self.quitNow()
+        elif i == '--eightBit':
+          numColors = 8
         elif i == '--version':
           userMessage(app.help.docs['version'])
           self.quitNow()
@@ -612,6 +614,7 @@ class CiProgram:
       'profile': profile,
       'readStdin': readStdin,
       'timeStartup': timeStartup,
+      'numColors': numColors,
     }
     self.showLogWindow = showLogWindow
 
@@ -674,6 +677,7 @@ class CiProgram:
 
   def run(self):
     self.parseArgs()
+    self.setUpPalette()
     homePath = app.prefs.prefs['userData'].get('homePath')
     self.makeHomeDirs(homePath)
     app.curses_util.hackCursesFixes()
@@ -700,7 +704,7 @@ class CiProgram:
       palette = app.prefs.palette[name]
       foreground = palette['foregroundIndexes']
       background = palette['backgroundIndexes']
-      for i in range(1, curses.COLORS):
+      for i in range(1, app.prefs.startup['numColors']):
         curses.init_pair(i, foreground[i], background[i])
     def twoTries(primary, fallback):
       try:
@@ -710,18 +714,16 @@ class CiProgram:
           applyPalette(fallback)
         except:
           pass
-    if curses.COLORS == 8:
-      app.prefs.prefs['color'] = app.prefs.color8
-      app.prefs.color = app.prefs.color8
-      app.color.colors = 8
+    app.color.colors = app.prefs.startup['numColors']
+    if app.prefs.startup['numColors'] == 8:
+      app.prefs.prefs['color'] = app.prefs.color = app.prefs.color8
       twoTries(app.prefs.editor['palette8'], 'default8')
-    elif curses.COLORS == 256:
-      app.prefs.prefs['color'] = app.prefs.color256
-      app.prefs.color = app.prefs.color256
-      app.color.colors = 256
+    elif app.prefs.startup['numColors'] == 256:
+      app.prefs.prefs['color'] = app.prefs.color = app.prefs.color256
       twoTries(app.prefs.editor['palette'], 'default')
     else:
-      raise Exception('unknown palette color count ' + repr(curses.COLORS))
+      raise Exception('unknown palette color count ' +
+                      repr(app.prefs.startup['numColors']))
 
 def wrapped_ci(cursesScreen):
   try:
