@@ -204,6 +204,13 @@ class Parser:
           self.rows.append(len(self.parserNodes))
         child.grammar = self.parserNodes[-1].grammar.get(
             'matchGrammars', [])[index]
+        if child.grammar.get('end_key'):
+          # A dynamic end tag.
+          hereKey = re.search(
+              child.grammar['end_key'], subdata[reg[1]:]).groups()[0]
+          markers = child.grammar['markers']
+          markers[1] = child.grammar['end'].replace(r'\0', hereKey)
+          child.grammar['matchRe'] = re.compile(app.prefs.joinReList(markers))
         child.begin = cursor + reg[0]
         cursor += reg[1]
         child.prior = len(self.parserNodes) - 1

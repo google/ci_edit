@@ -110,6 +110,7 @@ color8 = {
   'context_menu': 1,
   'cpp_block_comment': 2,
   'cpp_line_comment': 2,
+  'cpp_string_literal': 2,
   'debug_window': 1,
   'default': 0,
   'doc_block_comment': 3,
@@ -163,6 +164,7 @@ color256 = {
   'context_menu': 201,
   'cpp_block_comment': commentColorIndex,
   'cpp_line_comment': commentColorIndex,
+  'cpp_string_literal': stringColorIndex,
   'debug_window': defaultColorIndex,
   'default': defaultColorIndex,
   'doc_block_comment': commentColorIndex,
@@ -295,6 +297,8 @@ prefs = {
     #   'continued': None or string,
     #       Prefixed used when continuing to another line,
     #   'end': None or regex,
+    #   'end_key': None or regex to determine dynamic end tag. For 'here
+    #       documents' and c++ string literals.
     #   'error': None or list of string.
     #   'escaped': None or regex,
     #   'indent': None or string,
@@ -351,7 +355,7 @@ prefs = {
       ],
       'types': __c_primitive_types,
       'contains': ['cpp_block_comment', 'cpp_line_comment', 'c_preprocessor',
-        'c_string1', 'c_string2'],
+        'cpp_string_literal', 'c_string1', 'c_string2'],
     },
     'cpp_block_comment': {
       'begin': r'/\*',
@@ -401,6 +405,13 @@ prefs = {
       'indent': '  ',
       'single_line': True,
       'special': __special_string_escapes + [r"\\\\"],
+    },
+    'cpp_string_literal': {
+      'begin': r'R"',
+      # TODO(dschuyler): backslash and whitespace are invalid in the |end_key|.
+      'end_key': r'''([^(]*)\(''',
+      'end': r'\)\0"',
+      'single_line': False,
     },
     'c_string1': {
       'begin': "'(?!'')",

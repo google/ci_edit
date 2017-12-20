@@ -28,6 +28,13 @@ namespace sample {
 #endif
 
 
+constexpr char string[] = R"foo(
+    foo: "5 apples", R"(carrot)"
+    bar: "6 bananas",
+    a lone "
+    )foo";
+
+
 /**
  * A multi-line
  * comment.
