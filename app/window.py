@@ -379,7 +379,10 @@ class LineNumbers(ViewWindow):
     cursorAt = self.host.cursorRow - self.host.scrollRow
     if 0 <= cursorAt < limit:
       if cursorBookmarkColorIndex:
-        color = app.color.get(cursorBookmarkColorIndex % 32 + 128)
+        if app.prefs.startup['numColors'] == 8:
+          color = app.color.get(cursorBookmarkColorIndex)
+        else:
+          color = app.color.get(cursorBookmarkColorIndex % 32 + 128)
       else:
         color = app.color.get('line_number_current')
       self.addStr(cursorAt, 1, '%5d' % (self.host.cursorRow + 1), color)

@@ -98,10 +98,15 @@ class Actions(app.mutator.Mutator):
     Returns:
       A color (int) for a new bookmark.
     """
-    badColorIndices = [103, 106, 107, 111, 121, 122]
+    if app.prefs.startup['numColors'] == 8:
+      badColorIndices = [7]
+      colorSetSize = 8
+    else:
+      badColorIndices = [103, 106, 107, 111, 121, 122]
+      colorSetSize = 32
     nextIndex = self.nextBookmarkColorIndex
     while 1:
-      if nextIndex >= app.prefs.color['bookmarkColorIndexStart'] + 32:
+      if nextIndex >= app.prefs.color['bookmarkColorIndexStart'] + colorSetSize:
         nextIndex = app.prefs.color['bookmarkColorIndexStart']
       if nextIndex in badColorIndices:
         nextIndex += 1
