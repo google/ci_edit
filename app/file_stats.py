@@ -1,7 +1,8 @@
+import app.background
+import app.log
 import os
 import time
 import threading
-import app.log
 
 class FileStats:
   """
@@ -16,12 +17,13 @@ class FileStats:
       fullPath (str): The absolute path of the file you want to keep track of.
       pollingInterval (float): The frequency at which you want to poll the file.
     """
-    self.pollingInterval = pollingInterval
     self.fullPath = fullPath
     self.fileStats = None
-    self.textBuffer = None
-    self.lock = threading.Lock()
     self.isReadOnly = False
+    self.pollingInterval = pollingInterval
+    self.threadSema = threading.Semaphore(0)
+    self.statsLock = threading.Lock()
+    self.textBuffer = None
     self.threadShouldExit = False
     self.thread = self.startTracking()
     self.updateStats()
@@ -33,8 +35,9 @@ class FileStats:
           self.isReadOnly != oldReadOnly and
           self.textBuffer and
           self.textBuffer.view.textBuffer):
-        # This call requires the view's textbuffer to be set.
-        self.textBuffer.view.render()
+        self.threadSema.acquire()
+        app.background.bg.put(
+            (self.textBuffer.view.host, 'refresh', self.threadSema))
       time.sleep(self.pollingInterval)
 
   def changeMonitoredFile(self, fullPath):
@@ -54,8 +57,8 @@ class FileStats:
       self.thread.join()
       self.threadShouldExit = False
     self.fullPath = fullPath
-    self.thread = self.startTracking()
     self.updateStats()
+    self.thread = self.startTracking()
 
   def startTracking(self):
     """
@@ -85,14 +88,14 @@ class FileStats:
       the file stats could not be updated.
     """
     try:
-      self.lock.acquire()
+      self.statsLock.acquire()
       self.fileStats = os.stat(self.fullPath)
       self.isReadOnly = not os.access(self.fullPath, os.W_OK)
-      self.lock.release()
+      self.statsLock.release()
       return True
     except Exception as e:
       app.log.info("Exception occurred while updating file stats thread:", e)
-      self.lock.release()
+      self.statsLock.release()
       return False
 
   def getFileSize(self):
@@ -110,12 +113,15 @@ class FileStats:
     else:
       return 0
 
+  # Not thread safe. Must acquire self.statsLock() before calling this function.
   def getFileStats(self):
     return self.fileStats
 
+  # Not thread safe. Must acquire self.statsLock() before calling this function.
   def getFullPath(self):
     return self.fullPath
 
+  # Not thread safe. Must acquire self.statsLock() before calling this function.
   def fileIsReadOnly(self):
     return self.isReadOnly
 

@@ -115,7 +115,7 @@ class CiProgram:
     start = time.time()
     # The first render, to get something on the screen.
     if useBgThread:
-      self.bg.put((self, []))
+      self.bg.put((self, [], None))
     else:
       self.render()
     # This is the 'main loop'. Execution doesn't leave this loop until the
@@ -232,7 +232,7 @@ class CiProgram:
       start = time.time()
       if len(cmdList):
         if useBgThread:
-          self.bg.put((self, cmdList))
+          self.bg.put((self, cmdList, None))
         else:
           self.executeCommandList(cmdList)
           self.render()
@@ -696,7 +696,7 @@ class CiProgram:
     else:
       self.commandLoop()
     if app.prefs.editor['useBgThread']:
-      self.bg.put((self, 'quit'))
+      self.bg.put((self, 'quit', None))
       self.bg.join()
 
   def setUpPalette(self):
