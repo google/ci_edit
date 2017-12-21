@@ -59,13 +59,14 @@ def saveUserHistory(fileInfo, fileStats,
   Returns:
     None.
   """
+  import pdb; pdb.set_trace()
   global userHistory, pathToHistory
   lastChecksum, lastFileSize = fileInfo
   try:
     if historyPath is not None:
       pathToHistory = historyPath
       userHistory.pop((lastChecksum, lastFileSize), None)
-      newChecksum, newFileSize = getFileInfo(fileStats.getFullPath(), fileStats)
+      newChecksum, newFileSize = getFileInfo(fileStats)
       userHistory[(newChecksum, newFileSize)] = fileHistory
       with open(historyPath, 'wb') as file:
         pickle.dump(userHistory, file)
@@ -76,19 +77,17 @@ def saveUserHistory(fileInfo, fileStats,
 def getFileInfo(fileStats, data=None):
   """
   Args:
-    filePath (str): The absolute path to the file.
+    fileStats (FileStats): a FileStats object of a file.
     data (str): Defaults to None. This is the data
       returned by calling read() on a file object.
 
   Returns:
-    A tuple containing the checksum and size of the file.
+    A tuple containing the (checksum, fileSize) of the file.
   """
-  try:
-    checksum = calculateChecksum(fileStats.getFullPath(), data)
-    fileSize = fileStats.getFileSize()
-    return (checksum, fileSize)
-  except:
-    return (None, 0)
+  fileInfo = fileStats.getTrackedFileInfo()
+  checksum = calculateChecksum(fileStats.fullPath, data)
+  fileSize = fileInfo['size']
+  return (checksum, fileSize)
 
 def getFileHistory(fileStats, data=None):
   """

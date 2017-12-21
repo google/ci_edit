@@ -990,7 +990,7 @@ class Actions(app.mutator.Mutator):
         self.setMessage('File saved')
       except Exception as e:
         color = app.color.get('status_line_error')
-        if self.fileStats.fileIsReadOnly():
+        if self.fileStats.getTrackedFileInfo()['isReadOnly']:
           self.setMessage("Permission error. Try modifing in sudo mode.",
                           color=color)
         else:

@@ -19,9 +19,11 @@ class FileStats:
       pollingInterval (float): The frequency at which you want to poll the file.
     """
     self.fullPath = fullPath
-    self.fileStats = None
-    self.isReadOnly = False
+    self.__fileStats = None
     self.pollingInterval = pollingInterval
+    # All necessary file info should be placed in this dictionary.
+    self.fileInfo = {'isReadOnly': False,
+                     'size': 0}
     self.threadSema = threading.Semaphore(0)
     self.statsLock = threading.Lock()
     self.textBuffer = None
@@ -31,9 +33,9 @@ class FileStats:
 
   def run(self):
     while not self.threadShouldExit:
-      oldReadOnly = self.isReadOnly
+      oldFileIsReadOnly = self.getTrackedFileInfo()['isReadOnly']
       if (self.updateStats() and
-          self.isReadOnly != oldReadOnly and
+          self.getTrackedFileInfo()['isReadOnly'] != oldFileIsReadOnly and
           self.textBuffer and
           self.textBuffer.view.textBuffer):
         app.background.bg.put(
@@ -90,8 +92,9 @@ class FileStats:
     """
     try:
       self.statsLock.acquire()
-      self.fileStats = os.stat(self.fullPath)
-      self.isReadOnly = not os.access(self.fullPath, os.W_OK)
+      self.__fileStats = os.stat(self.fullPath)
+      self.fileInfo['isReadOnly'] = not os.access(self.fullPath, os.W_OK)
+      self.fileInfo['size'] = self.__fileStats.st_size
       self.statsLock.release()
       return True
     except Exception as e:
@@ -99,32 +102,11 @@ class FileStats:
       self.statsLock.release()
       return False
 
-  def getFileSize(self):
-    """
-    Calculates the size of the monitored file.
-
-    Args:
-      None.
-
-    Returns:
-      The size of the file in bytes.
-    """
-    if self.fileStats:
-      return self.fileStats.st_size
-    else:
-      return 0
-
-  # Not thread safe. Must acquire self.statsLock() before calling this function.
-  def getFileStats(self):
-    return self.fileStats
-
-  # Not thread safe. Must acquire self.statsLock() before calling this function.
-  def getFullPath(self):
-    return self.fullPath
-
-  # Not thread safe. Must acquire self.statsLock() before calling this function.
-  def fileIsReadOnly(self):
-    return self.isReadOnly
+  def getTrackedFileInfo(self):
+    self.statsLock.acquire()
+    info = self.fileInfo
+    self.statsLock.release()
+    return info
 
   def fileChanged(self):
     """
@@ -136,7 +118,7 @@ class FileStats:
     Returns:
       The new file stats if the file has changed. Otherwise, None.
     """
-    s1 = self.fileStats
+    s1 = self.__fileStats
     s2 = os.stat(self.fullPath)
     app.log.info('st_mode', s1.st_mode, s2.st_mode)
     app.log.info('st_ino', s1.st_ino, s2.st_ino)

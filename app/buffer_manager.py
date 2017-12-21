@@ -131,6 +131,10 @@ class BufferManager:
     self.buffers.remove(fileBuffer)
 
   def renameBuffer(self, fileBuffer, fullPath):
+    """
+    For now, when you change the path of a fileBuffer, you should also be
+    updating its fileStat object, so that it tracks the new file as well.
+    """
     # TODO(dschuyler): this can be phased out. It was from a time when the
     # buffer manager needed to know if a path changed.
     fileBuffer.fullPath = fullPath
