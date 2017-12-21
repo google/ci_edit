@@ -38,6 +38,8 @@ class Actions(app.mutator.Mutator):
     app.mutator.Mutator.__init__(self)
     self.view = None
     self.rootGrammar = app.prefs.getGrammar(None)
+    self.debugUpperChangedRow = -1
+    self.parser = app.parser.Parser()
 
   def setView(self, view):
     self.view = view
@@ -1362,6 +1364,24 @@ class Actions(app.mutator.Mutator):
     self.findRe = None
     self.view.normalize()
 
+  def doParse(self, begin, end):
+    self.linesToData()
+    self.parser.parse(self.data, self.rootGrammar, begin, end)
+    self.upperChangedRow = len(self.parser.rows)
+
+  def parseDocument(self):
+    begin = min(len(self.parser.rows), self.upperChangedRow)
+    end = len(self.lines)
+    self.doParse(begin, end)
+
+  def parseScreenMaybe(self):
+    begin = min(len(self.parser.rows), self.upperChangedRow)
+    end = self.view.scrollRow + self.view.rows + 1
+    if end > begin + 100:
+      # Call doParse with an empty range.
+      end = begin
+    self.doParse(begin, end)
+
   def parseGrammars(self):
     if not self.parser:
       self.parser = app.parser.Parser()
@@ -1375,7 +1395,7 @@ class Actions(app.mutator.Mutator):
     start = time.time()
     self.parser.parse(self.data, self.rootGrammar,
         self.upperChangedRow, end)
-    self.sentUpperChangedRow = self.upperChangedRow
+    self.debugUpperChangedRow = self.upperChangedRow
     self.upperChangedRow = len(self.lines)
     self.parserTime = time.time() - start
 

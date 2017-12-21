@@ -337,8 +337,8 @@ class CiProgram:
         color)
     self.debugWindow.writeLine(
         "   pRow %3d    pCol %2d chRow %4d"
-        %(textBuffer.penRow, textBuffer.penCol, textBuffer.sentUpperChangedRow),
-        color)
+        %(textBuffer.penRow, textBuffer.penCol,
+            textBuffer.debugUpperChangedRow), color)
     self.debugWindow.writeLine(
         " mkrRow %3d  mkrCol %2d sm %d"
         %(textBuffer.markerRow, textBuffer.markerCol,

@@ -45,7 +45,7 @@ class Parser:
   def __init__(self):
     self.data = ""
     self.emptyNode = ParserNode()
-    self.emptyNode.grammar = None
+    self.emptyNode.grammar = {}
     self.endNode = ParserNode()
     self.endNode.grammar = {}
     self.endNode.begin = sys.maxint

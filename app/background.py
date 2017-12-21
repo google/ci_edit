@@ -58,7 +58,7 @@ def background(inputQueue, outputQueue):
           app.log.info('bg received quit message')
           return
         program.executeCommandList(message)
-        program.focusedWindow.textBuffer.parseGrammars()
+        program.focusedWindow.textBuffer.parseScreenMaybe()
         program.render()
         outputQueue.put(app.render.frame.grabFrame())
         os.kill(pid, signalNumber)
@@ -69,15 +69,9 @@ def background(inputQueue, outputQueue):
         pass
       #continue
       tb = program.focusedWindow.textBuffer
-      if not tb.parser:
-        block = True
-        continue
       block = len(tb.parser.rows) >= len(tb.lines)
       if not block:
-        tb.linesToData()
-        tb.parser.parse(tb.data, tb.rootGrammar,
-            len(tb.parser.rows),
-            len(tb.lines))
+        program.focusedWindow.textBuffer.parseDocument()
         block = len(tb.parser.rows) >= len(tb.lines)
         if block:
           program.render()

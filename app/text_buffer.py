@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import app.actions
+import app.color
 import app.log
 import app.parser
 import app.prefs
@@ -115,6 +116,7 @@ class TextBuffer(app.actions.Actions):
     startCol = self.view.scrollCol + left
     endCol = startCol + cols
     colors = app.prefs.color
+    defaultColor = app.prefs.prefs['color']['default']
     spellChecking = app.prefs.editor.get('spellChecking', True)
     if self.parser:
       # Highlight grammar.
@@ -137,7 +139,8 @@ class TextBuffer(app.actions.Actions):
           assert remaining >= 0, remaining
           remaining = min(len(line) - k, remaining)
           length = min(endCol - k, remaining)
-          color = app.color.get(node.grammar['colorIndex'], colorDelta)
+          color = app.color.get(node.grammar.get('colorIndex', defaultColor),
+              colorDelta)
           if length <= 0:
             window.addStr(top + i, left + k - startCol, ' ' * (endCol - k),
                 color)
@@ -164,7 +167,7 @@ class TextBuffer(app.actions.Actions):
                       wordFragment, misspellingColor)
           k += length
     else:
-      # Draw to screen.
+      # For testing, draw without parser.
       rowLimit = min(max(len(self.lines) - startRow, 0), rows)
       for i in range(rowLimit):
         line = self.lines[startRow + i][startCol:endCol]
