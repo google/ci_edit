@@ -59,7 +59,6 @@ def saveUserHistory(fileInfo, fileStats,
   Returns:
     None.
   """
-  import pdb; pdb.set_trace()
   global userHistory, pathToHistory
   lastChecksum, lastFileSize = fileInfo
   try:

@@ -1,5 +1,6 @@
 import app.background
 import app.log
+import app.prefs
 import os
 import time
 import threading
@@ -24,11 +25,16 @@ class FileStats:
     # All necessary file info should be placed in this dictionary.
     self.fileInfo = {'isReadOnly': False,
                      'size': 0}
-    self.threadSema = threading.Semaphore(0)
     self.statsLock = threading.Lock()
     self.textBuffer = None
-    self.threadShouldExit = False
-    self.thread = self.startTracking()
+    if app.prefs.editor['useBgThread']:
+      self.threadSema = threading.Semaphore(0)
+      self.threadShouldExit = False
+      self.thread = self.startTracking()
+    else:
+      self.threadSema = None
+      self.threadShouldExit = True
+      self.thread = None
     self.updateStats()
 
   def run(self):
@@ -73,7 +79,7 @@ class FileStats:
     Returns:
       The thread that was created to do the tracking.
     """
-    if self.fullPath:
+    if self.fullPath and app.prefs.editor['useBgThread']:
       thread = threading.Thread(target=self.run)
       thread.daemon = True # Do not continue running if main program exits.
       thread.start()
@@ -103,40 +109,19 @@ class FileStats:
       return False
 
   def getTrackedFileInfo(self):
-    self.statsLock.acquire()
-    info = self.fileInfo
-    self.statsLock.release()
+    """
+    Returns the most recent information about the tracked file. If running in
+    singleThread mode, this will sync the in-memory file info with the
+    file info that is on disk and then return the updated file info.
+    """
+    if app.prefs.editor['useBgThread']:
+      self.statsLock.acquire()
+      info = self.fileInfo
+      self.statsLock.release()
+    else:
+      self.updateStats()
+      info = self.fileInfo
     return info
-
-  def fileChanged(self):
-    """
-    Compares the file's stats with the recorded stats we have in memory.
-
-    Args:
-      None.
-
-    Returns:
-      The new file stats if the file has changed. Otherwise, None.
-    """
-    s1 = self.__fileStats
-    s2 = os.stat(self.fullPath)
-    app.log.info('st_mode', s1.st_mode, s2.st_mode)
-    app.log.info('st_ino', s1.st_ino, s2.st_ino)
-    app.log.info('st_dev', s1.st_dev, s2.st_dev)
-    app.log.info('st_uid', s1.st_uid, s2.st_uid)
-    app.log.info('st_gid', s1.st_gid, s2.st_gid)
-    app.log.info('st_size', s1.st_size, s2.st_size)
-    app.log.info('st_mtime', s1.st_mtime, s2.st_mtime)
-    app.log.info('st_ctime', s1.st_ctime, s2.st_ctime)
-    if (s1.st_mode == s2.st_mode and
-        s1.st_ino == s2.st_ino and
-        s1.st_dev == s2.st_dev and
-        s1.st_uid == s2.st_uid and
-        s1.st_gid == s2.st_gid and
-        s1.st_size == s2.st_size and
-        s1.st_mtime == s2.st_mtime and
-        s1.st_ctime == s2.st_ctime):
-      return s2
 
   def setTextBuffer(self, textBuffer):
     self.textBuffer = textBuffer
