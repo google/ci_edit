@@ -36,9 +36,8 @@ class FileStats:
           self.isReadOnly != oldReadOnly and
           self.textBuffer and
           self.textBuffer.view.textBuffer):
-        app.log.meta("putting on bg")
         app.background.bg.put(
-            (self.textBuffer.view.host, 'refresh', self.threadSema))
+            (self.textBuffer.view.host, 'redraw', self.threadSema))
         self.threadSema.acquire()
       time.sleep(self.pollingInterval)
 
