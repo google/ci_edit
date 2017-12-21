@@ -59,10 +59,10 @@ def background(inputQueue, outputQueue):
           return
         elif message == 'refresh':
           app.log.info('bg received refresh message')
-          assert(type(callerSema) == threading.Semaphore)
+          assert(callerSema != None)
           program.render()
           callerSema.release()
-          return
+          continue
         program.executeCommandList(message)
         program.focusedWindow.textBuffer.parseScreenMaybe()
         program.render()

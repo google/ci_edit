@@ -3,6 +3,7 @@ import app.log
 import os
 import time
 import threading
+import app.window
 
 class FileStats:
   """
@@ -35,9 +36,10 @@ class FileStats:
           self.isReadOnly != oldReadOnly and
           self.textBuffer and
           self.textBuffer.view.textBuffer):
-        self.threadSema.acquire()
+        app.log.meta("putting on bg")
         app.background.bg.put(
             (self.textBuffer.view.host, 'refresh', self.threadSema))
+        self.threadSema.acquire()
       time.sleep(self.pollingInterval)
 
   def changeMonitoredFile(self, fullPath):
