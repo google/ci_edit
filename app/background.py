@@ -46,9 +46,23 @@ class BackgroundThread(threading.Thread):
 
 
 def background(inputQueue, outputQueue):
+  def redrawProgram(program):
+    """
+    Sends a SIGUSR1 signal to the current program and draws its screen.
+
+    Args:
+      program (CiProgram): an instance of the CiProgram object.
+
+    Returns:
+      None.
+    """
+    pid = os.getpid()
+    signalNumber = signal.SIGUSR1
+    program.render()
+    outputQueue.put(app.render.frame.grabFrame())
+    os.kill(pid, signalNumber)
+
   block = True
-  pid = os.getpid()
-  signalNumber = signal.SIGUSR1
   while True:
     try:
       try:
@@ -57,17 +71,14 @@ def background(inputQueue, outputQueue):
         if message == 'quit':
           app.log.info('bg received quit message')
           return
-        elif message == 'refresh':
-          app.log.info('bg received refresh message')
+        elif message == 'redraw':
+          app.log.info('bg received redraw message')
           assert(callerSema != None)
-          program.render()
+          redrawProgram(program)
           callerSema.release()
           continue
         program.executeCommandList(message)
-        program.focusedWindow.textBuffer.parseScreenMaybe()
-        program.render()
-        outputQueue.put(app.render.frame.grabFrame())
-        os.kill(pid, signalNumber)
+        redrawProgram(program)
         #app.profile.endPythonProfile(profile)
         if not inputQueue.empty():
           continue
@@ -80,16 +91,14 @@ def background(inputQueue, outputQueue):
         program.focusedWindow.textBuffer.parseDocument()
         block = len(tb.parser.rows) >= len(tb.lines)
         if block:
-          program.render()
-          outputQueue.put(app.render.frame.grabFrame())
-          os.kill(pid, signalNumber)
+          redrawProgram(program)
     except Exception as e:
       app.log.exception(e)
       app.log.error('bg thread exception', e)
       errorType, value, tracebackInfo = sys.exc_info()
       out = traceback.format_exception(errorType, value, tracebackInfo)
       outputQueue.put(('exception', out))
-      os.kill(pid, signalNumber)
+      os.kill(os.getpid(), signal.SIGUSR1)
       while True:
         program, message = inputQueue.get()
         if message == 'quit':
