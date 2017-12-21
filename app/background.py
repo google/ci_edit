@@ -52,10 +52,16 @@ def background(inputQueue, outputQueue):
   while True:
     try:
       try:
-        program, message = inputQueue.get(block)
+        program, message, callerSema = inputQueue.get(block)
         #profile = app.profile.beginPythonProfile()
         if message == 'quit':
           app.log.info('bg received quit message')
+          return
+        elif message == 'refresh':
+          app.log.info('bg received refresh message')
+          assert(type(callerSema) == threading.Semaphore)
+          program.render()
+          callerSema.release()
           return
         program.executeCommandList(message)
         program.focusedWindow.textBuffer.parseScreenMaybe()
