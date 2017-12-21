@@ -93,7 +93,6 @@ class BufferManager:
       textBuffer = app.text_buffer.TextBuffer()
       self.renameBuffer(textBuffer, fullPath)
       textBuffer.view = view
-      textBuffer.fileLoad()
       self.buffers.append(textBuffer)
     if 0:
       self.debugLog()

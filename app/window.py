@@ -774,6 +774,7 @@ class InputWindow(Window):
     # Make this text buffer track the file its in charge of.
     tb.fileStats.setTextBuffer(tb)
     tb.fileStats.changeMonitoredFile(tb.fullPath)
+    tb.fileLoad()
     openToLine = app.prefs.startup.get('openToLine')
     if openToLine is not None:
       self.textBuffer.selectText(openToLine - 1, 0, 0,
