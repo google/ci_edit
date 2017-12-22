@@ -91,8 +91,8 @@ class BufferManager:
       if not os.path.isfile(fullPath):
         app.log.info('creating a new file at\n ', fullPath)
       textBuffer = app.text_buffer.TextBuffer()
-      self.renameBuffer(textBuffer, fullPath)
       textBuffer.view = view
+      self.renameBuffer(textBuffer, fullPath)
       # Make this text buffer track the file its in charge of.
       textBuffer.fileStats.setTextBuffer(textBuffer)
       textBuffer.fileStats.changeMonitoredFile(fullPath)
@@ -141,6 +141,7 @@ class BufferManager:
     # TODO(dschuyler): this can be phased out. It was from a time when the
     # buffer manager needed to know if a path changed.
     fileBuffer.fullPath = fullPath
+    fileBuffer.fileStats.changeMonitoredFile(fullPath)
 
   def fileClose(self, path):
     pass
