@@ -93,6 +93,10 @@ class BufferManager:
       textBuffer = app.text_buffer.TextBuffer()
       self.renameBuffer(textBuffer, fullPath)
       textBuffer.view = view
+      # Make this text buffer track the file its in charge of.
+      textBuffer.fileStats.setTextBuffer(textBuffer)
+      textBuffer.fileStats.changeMonitoredFile(fullPath)
+      textBuffer.fileLoad()
       self.buffers.append(textBuffer)
     if 0:
       self.debugLog()
