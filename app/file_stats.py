@@ -20,7 +20,7 @@ class FileStats:
       pollingInterval (float): The frequency at which you want to poll the file.
     """
     self.fullPath = fullPath
-    self.__fileStats = None
+    self.fileStats = None
     self.pollingInterval = pollingInterval
     # All necessary file info should be placed in this dictionary.
     self.fileInfo = {'isReadOnly': False,
@@ -98,9 +98,9 @@ class FileStats:
     """
     try:
       self.statsLock.acquire()
-      self.__fileStats = os.stat(self.fullPath)
+      self.fileStats = os.stat(self.fullPath)
       self.fileInfo['isReadOnly'] = not os.access(self.fullPath, os.W_OK)
-      self.fileInfo['size'] = self.__fileStats.st_size
+      self.fileInfo['size'] = self.fileStats.st_size
       self.statsLock.release()
       return True
     except Exception as e:
