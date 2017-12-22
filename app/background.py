@@ -66,16 +66,16 @@ def background(inputQueue, outputQueue):
   while True:
     try:
       try:
-        program, message, callerSema = inputQueue.get(block)
+        program, message, callerSemaphore = inputQueue.get(block)
         #profile = app.profile.beginPythonProfile()
         if message == 'quit':
           app.log.info('bg received quit message')
           return
         elif message == 'redraw':
           app.log.info('bg received redraw message')
-          assert(callerSema != None)
+          assert(callerSemaphore != None)
           redrawProgram(program)
-          callerSema.release()
+          callerSemaphore.release()
           continue
         program.executeCommandList(message)
         redrawProgram(program)

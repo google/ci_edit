@@ -6,6 +6,13 @@ import time
 import threading
 import app.window
 
+
+class FileTracker(threading.Thread):
+  def __init__(self, *args, **keywords):
+    threading.Thread.__init__(self, *args, **keywords)
+    self.shouldExit = False
+    self.semaphore = threading.Semaphore(0)
+
 class FileStats:
   """
   An object to monitor the statistical information of a file. It will
@@ -13,6 +20,7 @@ class FileStats:
   is allowed. Otherwise, you must either call updateStats() or
   getUpdatedFileInfo() to obtain the updated information from disk.
   """
+
   def __init__(self, fullPath='', pollingInterval=2):
     """
     Args:
@@ -27,26 +35,23 @@ class FileStats:
                      'size': 0}
     self.statsLock = threading.Lock()
     self.textBuffer = None
-    if app.prefs.editor['useBgThread']:
-      self.threadSema = threading.Semaphore(0)
-      self.threadShouldExit = False
-      self.thread = self.startTracking()
-    else:
-      self.threadSema = None
-      self.threadShouldExit = True
-      self.thread = None
+    self.thread = self.startTracking()
     self.updateStats()
 
   def run(self):
-    while not self.threadShouldExit:
+    while not self.thread.shouldExit:
       # Redraw the screen if the file changed READ ONLY permissions.
       oldFileIsReadOnly = self.fileInfo['isReadOnly']
       newFileIsReadOnly = self.getUpdatedFileInfo()['isReadOnly']
       program = self.textBuffer.view.host
+      turnoverTime = 0
       if newFileIsReadOnly != oldFileIsReadOnly and program:
-        app.background.bg.put((program, 'redraw', self.threadSema))
-        self.threadSema.acquire()
-      time.sleep(self.pollingInterval)
+        before = time.time()
+        app.background.bg.put((program, 'redraw', self.thread.semaphore))
+        # Wait for bg thread to finish refreshing before sleeping
+        self.thread.semaphore.acquire()
+        turnoverTime = time.time() - before
+      time.sleep(max(self.pollingInterval - turnoverTime, 0))
 
   def changeMonitoredFile(self, fullPath):
     """
@@ -61,28 +66,27 @@ class FileStats:
       None.
     """
     if self.thread:
-      self.threadShouldExit = True
-      self.thread.join()
-      self.threadShouldExit = False
+      self.thread.shouldExit = True
     self.fullPath = fullPath
     self.updateStats()
-    self.thread = self.startTracking()
+    self.startTracking()
 
   def startTracking(self):
     """
-    Starts tracking the file whose path is specified in self.fullPath
+    Starts tracking the file whose path is specified in self.fullPath. Sets
+    self.thread to this new thread.
 
     Args:
       None.
 
     Returns:
-      The thread that was created to do the tracking.
+      The thread that was created to do the tracking (FileTracker object).
     """
     if self.fullPath and app.prefs.editor['useBgThread']:
-      thread = threading.Thread(target=self.run)
-      thread.daemon = True # Do not continue running if main program exits.
-      thread.start()
-      return thread
+      self.thread = FileTracker(target=self.run)
+      self.thread.daemon = True # Do not continue running if main program exits.
+      self.thread.start()
+      return self.thread
 
   def updateStats(self):
     """
