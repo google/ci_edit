@@ -39,11 +39,11 @@ class FileStats:
 
   def run(self):
     while not self.threadShouldExit:
-      oldFileIsReadOnly = self.getTrackedFileInfo()['isReadOnly']
-      if (self.updateStats() and
-          self.getTrackedFileInfo()['isReadOnly'] != oldFileIsReadOnly and
-          self.textBuffer and
-          self.textBuffer.view.textBuffer):
+      # Redraw the screen if the file changed READ ONLY permissions.
+      oldFileIsReadOnly = self.fileInfo['isReadOnly']
+      newFileIsReadOnly = self.getUpdatedFileInfo()['isReadOnly']
+      if (newFileIsReadOnly != oldFileIsReadOnly and
+          self.textBuffer and self.textBuffer.view.textBuffer):
         app.background.bg.put(
             (self.textBuffer.view.host, 'redraw', self.threadSema))
         self.threadSema.acquire()
@@ -108,19 +108,15 @@ class FileStats:
       self.statsLock.release()
       return False
 
-  def getTrackedFileInfo(self):
+  def getUpdatedFileInfo(self):
     """
-    Returns the most recent information about the tracked file. If running in
-    singleThread mode, this will sync the in-memory file info with the
-    file info that is on disk and then return the updated file info.
+    Syncs the in-memory file information with the information on disk. It
+    then returns the newly updated file information.
     """
-    if app.prefs.editor['useBgThread']:
-      self.statsLock.acquire()
-      info = self.fileInfo
-      self.statsLock.release()
-    else:
-      self.updateStats()
-      info = self.fileInfo
+    self.updateStats()
+    self.statsLock.acquire()
+    info = self.fileInfo.copy() # Shallow copy.
+    self.statsLock.release()
     return info
 
   def setTextBuffer(self, textBuffer):

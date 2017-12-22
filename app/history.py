@@ -83,7 +83,7 @@ def getFileInfo(fileStats, data=None):
   Returns:
     A tuple containing the (checksum, fileSize) of the file.
   """
-  fileInfo = fileStats.getTrackedFileInfo()
+  fileInfo = fileStats.getUpdatedFileInfo()
   checksum = calculateChecksum(fileStats.fullPath, data)
   fileSize = fileInfo['size']
   return (checksum, fileSize)
