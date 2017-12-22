@@ -43,9 +43,9 @@ class FileStats:
       # Redraw the screen if the file changed READ ONLY permissions.
       oldFileIsReadOnly = self.fileInfo['isReadOnly']
       newFileIsReadOnly = self.getUpdatedFileInfo()['isReadOnly']
-      program = self.textBuffer.view.host
       turnoverTime = 0
-      if newFileIsReadOnly != oldFileIsReadOnly and program:
+      if newFileIsReadOnly != oldFileIsReadOnly:
+        program = self.textBuffer.view.host
         before = time.time()
         app.background.bg.put((program, 'redraw', self.thread.semaphore))
         # Wait for bg thread to finish refreshing before sleeping
