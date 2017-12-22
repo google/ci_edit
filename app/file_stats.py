@@ -8,10 +8,10 @@ import app.window
 
 class FileStats:
   """
-  An object to monitor the statistical information of a file. To prevent
-  synchronization issues, If you want to retrieve multiple attributes
-  consecutively, you must acquire the FileStats object lock before accessing the
-  object's stats and release it when you are are done.
+  An object to monitor the statistical information of a file. It will
+  automatically update the information through polling if multithreading
+  is allowed. Otherwise, you must either call updateStats() or
+  getUpdatedFileInfo() to obtain the updated information from disk.
   """
   def __init__(self, fullPath='', pollingInterval=2):
     """
@@ -42,18 +42,17 @@ class FileStats:
       # Redraw the screen if the file changed READ ONLY permissions.
       oldFileIsReadOnly = self.fileInfo['isReadOnly']
       newFileIsReadOnly = self.getUpdatedFileInfo()['isReadOnly']
-      if (newFileIsReadOnly != oldFileIsReadOnly and
-          self.textBuffer and self.textBuffer.view.textBuffer):
-        app.background.bg.put(
-            (self.textBuffer.view.host, 'redraw', self.threadSema))
+      program = self.textBuffer.view.host
+      if newFileIsReadOnly != oldFileIsReadOnly and program:
+        app.background.bg.put((program, 'redraw', self.threadSema))
         self.threadSema.acquire()
       time.sleep(self.pollingInterval)
 
   def changeMonitoredFile(self, fullPath):
     """
     Stops tracking whatever file this object was monitoring before and tracks
-    the newly specified file. The text buffer should be set in order for the
-    created thread to work properly.
+    the newly specified file. The self.textBuffer attribute must
+    be set in order for the created thread to work properly.
 
     Args:
       None.
