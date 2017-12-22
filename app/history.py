@@ -75,6 +75,10 @@ def saveUserHistory(fileInfo, fileStats,
 
 def getFileInfo(fileStats, data=None):
   """
+  Returns the hash value and size of the specified file.
+  The second argument can be passed in if a file's data has
+  already been read so that you do not have to read the file again.
+
   Args:
     fileStats (FileStats): a FileStats object of a file.
     data (str): Defaults to None. This is the data
