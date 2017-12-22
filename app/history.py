@@ -51,8 +51,8 @@ def saveUserHistory(fileInfo, fileStats,
 
   Args:
     fileInfo (tuple): Contains (lastChecksum, lastFileSize).
-    fileHistory (dict): The history of the file that the user wants to save.
     fileStats (FileStats): The FileStat object of the file to be saved.
+    fileHistory (dict): The history of the file that the user wants to save.
     historyPath (str): Defaults to pathToHistory.
       The path to the user's saved history.
 
