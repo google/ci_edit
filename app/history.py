@@ -153,4 +153,3 @@ def clearUserHistory():
     app.log.info("user history cleared")
   except Exception as e:
     app.log.error('clearUserHistory exception', e)
-
