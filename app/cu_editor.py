@@ -397,6 +397,30 @@ class CuaPlusEdit(CuaEdit):
     })
     self.commandSet = commandSet
 
+class PopupController(app.controller.Controller):
+  """
+  A controller for pop up boxes to notify the user.
+  """
+  def __init__(self, view):
+    app.controller.Controller.__init__(self, view, 'popup')
+    self.view = view
+    def noOp(c):
+      app.log.info('noOp in PopupController')
+    self.commandDefault = noOp
+    self.commandSet = {
+      ord('Y'): self.reloadBuffer,
+      ord('y'): self.reloadBuffer,
+      ord('N'): self.changeToHostWindow,
+      ord('n'): self.changeToHostWindow,
+      KEY_ESCAPE: self.changeToHostWindow,
+    }
+
+  def changeToHostWindow(self):
+    self.view.hide()
+    app.controller.Controller.changeToHostWindow(self)
+
+  def setTextBuffer(self, textBuffer):
+    self.textBuffer = textBuffer
 
 class PaletteDialogController(app.controller.Controller):
   """."""

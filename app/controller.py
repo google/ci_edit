@@ -64,6 +64,9 @@ class Controller:
   def changeToPaletteWindow(self):
     self.host.changeFocusTo(self.host.host.paletteWindow)
 
+  def changeToPopupWindow(self):
+    self.host.changeFocusTo(self.host.popupWindow)
+
   def changeToPrediction(self):
     self.host.changeFocusTo(self.host.interactivePrediction)
 
@@ -253,4 +256,3 @@ class MainController:
 
   def unfocus(self):
     self.controller.unfocus()
-

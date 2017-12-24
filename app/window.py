@@ -719,6 +719,8 @@ class InputWindow(Window):
       self.interactiveSaveAs = LabeledLine(self, "save as: ")
       self.interactiveSaveAs.setController(app.cu_editor.InteractiveSaveAs)
     if 1:
+      self.popup = Popup(self)
+    if 1:
       self.topInfo = TopInfo(self)
       self.topInfo.setParent(self, 0)
       if not self.showTopInfo:
@@ -1183,6 +1185,25 @@ class FileManagerWindow(Window):
     self.textBuffer.selectionAll()
     self.textBuffer.editPasteLines((path,))
 
+class Popup(Window):
+  def __init__(self, host):
+    assert(host)
+    Window.__init__(self, host)
+    self.host = host
+    self.controller = app.cu_editor.PopupController(self)
+    self.setTextBuffer(app.text_buffer.TextBuffer())
+    self.controller.setTextBuffer(self.textBuffer)
+
+  def render(self):
+    pass
+
+  def setTextBuffer(self, textBuffer):
+    Window.setTextBuffer(self, textBuffer)
+    self.controller.setTextBuffer(textBuffer)
+
+  def unfocus(self):
+    self.hide()
+    Window.unfocus(self)
 
 class PaletteWindow(Window):
   """A window with example foreground and background text colors."""
@@ -1201,11 +1222,3 @@ class PaletteWindow(Window):
       for k in range(rows):
         self.addStr(k, i * 5, ' %3d ' % (i + k * width,),
             app.color.get(i + k * width))
-
-  def setTextBuffer(self, textBuffer):
-    Window.setTextBuffer(self, textBuffer)
-    self.controller.setTextBuffer(textBuffer)
-
-  def unfocus(self):
-    self.hide()
-    Window.unfocus(self)
