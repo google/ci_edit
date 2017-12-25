@@ -64,7 +64,7 @@ class Controller:
   def changeToPaletteWindow(self):
     self.host.changeFocusTo(self.host.host.paletteWindow)
 
-  def changeToPopupWindow(self):
+  def changeToPopup(self):
     self.host.changeFocusTo(self.host.popupWindow)
 
   def changeToPrediction(self):

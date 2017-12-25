@@ -71,6 +71,7 @@ def mainWindowCommands(controller, textBuffer):
   commands.update({
     KEY_ESCAPE: textBuffer.normalize,
     KEY_F1: controller.info,
+    KEY_F4: controller.changeToPopup,
     KEY_BTAB: textBuffer.unindent,
     KEY_PAGE_UP: textBuffer.cursorSelectNonePageUp,
     KEY_PAGE_DOWN: textBuffer.cursorSelectNonePageDown,
@@ -421,6 +422,10 @@ class PopupController(app.controller.Controller):
 
   def setTextBuffer(self, textBuffer):
     self.textBuffer = textBuffer
+
+  def reloadBuffer(self):
+    mainBuffer = self.view.host.textBuffer
+    mainBuffer.fileLoad()
 
 class PaletteDialogController(app.controller.Controller):
   """."""

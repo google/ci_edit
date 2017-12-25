@@ -1193,9 +1193,27 @@ class Popup(Window):
     self.controller = app.cu_editor.PopupController(self)
     self.setTextBuffer(app.text_buffer.TextBuffer())
     self.controller.setTextBuffer(self.textBuffer)
+    self.message = []
 
   def render(self):
-    pass
+    width = 30
+    rows = len(self.message) + 2
+    for row in range(rows):
+      if row == 0 or row == rows - 1:
+        self.addStr(row, 0, ' ' * width)
+      else:
+        self.addStr(row, 0, '    %s    ' % self.message[row])
+
+  def setMessage(self, message):
+    """
+    Sets the Popup window's message to the given message.
+
+    message (str): A string that you want to display.
+
+    Returns:
+      None.
+    """
+    self.message = message.split("\n")
 
   def setTextBuffer(self, textBuffer):
     Window.setTextBuffer(self, textBuffer)
