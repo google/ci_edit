@@ -39,6 +39,24 @@ class TextBuffer(app.actions.Actions):
     self.bookmarks = []
     self.nextBookmarkColorPos = 0
 
+  def changeFileStats(self):
+    """
+    Stops tracking whatever file this object was monitoring before and tracks
+    the file whose absolute path is defined in self.fullPath.
+
+    Args:
+      None.
+
+    Returns:
+      None.
+    """
+    self.fileStats.cleanup()
+    self.fileStats = app.file_stats.FileStats(self.fullPath)
+    self.fileStats.setTextBuffer(self)
+    self.fileStats.updateStats()
+    if app.prefs.editor['useBgThread']:
+      self.fileStats.startTracking()
+
   def checkScrollToCursor(self, window):
     """Move the selected view rectangle so that the cursor is visible."""
     maxRow, maxCol = window.rows, window.cols

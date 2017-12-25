@@ -93,9 +93,6 @@ class BufferManager:
       textBuffer = app.text_buffer.TextBuffer()
       textBuffer.view = view
       self.renameBuffer(textBuffer, fullPath)
-      # Make this text buffer track the file its in charge of.
-      textBuffer.fileStats.setTextBuffer(textBuffer)
-      textBuffer.fileStats.changeMonitoredFile(fullPath)
       textBuffer.fileLoad()
       self.buffers.append(textBuffer)
     if 0:
@@ -141,7 +138,7 @@ class BufferManager:
     # TODO(dschuyler): this can be phased out. It was from a time when the
     # buffer manager needed to know if a path changed.
     fileBuffer.fullPath = fullPath
-    fileBuffer.fileStats.changeMonitoredFile(fullPath)
+    fileBuffer.changeFileStats() # Track this new file.
 
   def fileClose(self, path):
     pass

@@ -36,7 +36,7 @@ class FileStats:
     self.savedFileStat = None # Used to determine if file on disk has changed.
     self.statsLock = threading.Lock()
     self.textBuffer = None
-    self.thread = self.startTracking()
+    self.thread = None
     self.updateStats()
 
   def run(self):
@@ -55,24 +55,6 @@ class FileStats:
         turnoverTime = time.time() - before
       time.sleep(max(self.pollingInterval - turnoverTime, 0))
 
-  def changeMonitoredFile(self, fullPath):
-    """
-    Stops tracking whatever file this object was monitoring before and tracks
-    the newly specified file. The self.textBuffer attribute must
-    be set in order for the created thread to work properly.
-
-    Args:
-      None.
-
-    Returns:
-      None.
-    """
-    if self.thread:
-      self.thread.shouldExit = True
-    self.fullPath = fullPath
-    self.updateStats()
-    self.startTracking()
-
   def startTracking(self):
     """
     Starts tracking the file whose path is specified in self.fullPath. Sets
@@ -84,11 +66,10 @@ class FileStats:
     Returns:
       The thread that was created to do the tracking (FileTracker object).
     """
-    if self.fullPath and app.prefs.editor['useBgThread']:
-      self.thread = FileTracker(target=self.run)
-      self.thread.daemon = True # Do not continue running if main program exits.
-      self.thread.start()
-      return self.thread
+    self.thread = FileTracker(target=self.run)
+    self.thread.daemon = True # Do not continue running if main program exits.
+    self.thread.start()
+    return self.thread
 
   def updateStats(self):
     """
@@ -137,23 +118,30 @@ class FileStats:
     Returns:
       True if the file on disk has changed. Otherwise, False.
     """
-    if (self.updateStats() and self.fileStats):
-      s1 = self.fileStats
-      s2 = self.savedFileStat
-      app.log.info('st_mode', s1.st_mode, s2.st_mode)
-      app.log.info('st_ino', s1.st_ino, s2.st_ino)
-      app.log.info('st_dev', s1.st_dev, s2.st_dev)
-      app.log.info('st_uid', s1.st_uid, s2.st_uid)
-      app.log.info('st_gid', s1.st_gid, s2.st_gid)
-      app.log.info('st_size', s1.st_size, s2.st_size)
-      app.log.info('st_mtime', s1.st_mtime, s2.st_mtime)
-      app.log.info('st_ctime', s1.st_ctime, s2.st_ctime)
-      return not (s1.st_mode == s2.st_mode and
-                  s1.st_ino == s2.st_ino and
-                  s1.st_dev == s2.st_dev and
-                  s1.st_uid == s2.st_uid and
-                  s1.st_gid == s2.st_gid and
-                  s1.st_size == s2.st_size and
-                  s1.st_mtime == s2.st_mtime and
-                  s1.st_ctime == s2.st_ctime)
-    return False
+    try:
+      if (self.updateStats() and self.fileStats):
+        s1 = self.fileStats
+        s2 = self.savedFileStat
+        app.log.info('st_mode', s1.st_mode, s2.st_mode)
+        app.log.info('st_ino', s1.st_ino, s2.st_ino)
+        app.log.info('st_dev', s1.st_dev, s2.st_dev)
+        app.log.info('st_uid', s1.st_uid, s2.st_uid)
+        app.log.info('st_gid', s1.st_gid, s2.st_gid)
+        app.log.info('st_size', s1.st_size, s2.st_size)
+        app.log.info('st_mtime', s1.st_mtime, s2.st_mtime)
+        app.log.info('st_ctime', s1.st_ctime, s2.st_ctime)
+        return not (s1.st_mode == s2.st_mode and
+                    s1.st_ino == s2.st_ino and
+                    s1.st_dev == s2.st_dev and
+                    s1.st_uid == s2.st_uid and
+                    s1.st_gid == s2.st_gid and
+                    s1.st_size == s2.st_size and
+                    s1.st_mtime == s2.st_mtime and
+                    s1.st_ctime == s2.st_ctime)
+      return False
+    except Exception as e:
+      print(e)
+
+  def cleanup(self):
+    if self.thread:
+      self.thread.shouldExit = True
