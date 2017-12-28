@@ -252,6 +252,7 @@ class CiProgram:
     self.focusedWindow.controller.onChange()
     self.focusedWindow.unfocus()
     self.focusedWindow = changeTo
+    #self.focusedWindow.show()
     self.focusedWindow.focus()
     self.focusedWindow.textBuffer.compoundChangePush()
 
@@ -289,9 +290,10 @@ class CiProgram:
     self.inputWindow = app.window.InputWindow(self)
     self.zOrder.append(self.inputWindow)
     if 0:
-      self.fileManagerWindow = app.window.FileManagerWindow(self)
-      self.fileManagerWindow.inputWindow = self.inputWindow
+      self.fileManagerWindow = app.window.FileManagerWindow(self,
+          self.inputWindow)
       self.zOrder.append(self.fileManagerWindow)
+      self.inputWindow.show()
     self.layout()
     self.inputWindow.startup()
 
@@ -312,6 +314,8 @@ class CiProgram:
     else:
       inputWidth = cols
     count = len(self.zOrder)
+    if 1:  # Full screen.
+      count = 1
     eachRows = rows / count
     for i, window in enumerate(self.zOrder[:-1]):
       window.reshape(eachRows, inputWidth, eachRows * i, 0)
@@ -629,7 +633,7 @@ class CiProgram:
     # Ask curses to hold the back buffer until curses refresh().
     cursesWindow = app.window.mainCursesWindow
     cursesWindow.noutrefresh()
-    curses.curs_set(0)
+    curses.curs_set(0)  # Hide cursor.
     #drawList, cursor = app.render.frame.grabFrame()
     for i in drawList:
       try:
@@ -638,10 +642,10 @@ class CiProgram:
         #app.log.error('failed to draw', repr(i))
         pass
     if cursor is not None:
-      curses.curs_set(1)
+      curses.curs_set(1)  # Show cursor.
       try:
         cursesWindow.leaveok(0)  # Do update cursor position.
-        cursesWindow.move(cursor[0], cursor[1])
+        cursesWindow.move(cursor[0], cursor[1])  # Move cursor.
         # Calling refresh will draw the cursor.
         cursesWindow.refresh()
         cursesWindow.leaveok(1)  # Don't update cursor position.

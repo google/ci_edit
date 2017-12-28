@@ -23,6 +23,7 @@ import app.history
 import app.render
 import app.text_buffer
 import app.vi_editor
+import os
 import sys
 import curses
 
@@ -849,38 +850,167 @@ class InputWindow(Window):
     Window.unfocus(self)
 
 
-class FileManagerWindow(Window):
-  """This <tbd>."""
+class OptionsRow(ViewWindow):
   def __init__(self, host):
     assert(host)
-    Window.__init__(self, host)
+    ViewWindow.__init__(self, host)
     self.host = host
-    self.controller = app.file_manager_controller.FileManagerController(self)
-    self.setTextBuffer(app.text_buffer.TextBuffer())
-    self.path = '/'
+    self.controlList = []
 
-  def focus(self):
-    app.log.debug()
-    Window.focus(self)
+  def addToggle(self, name, reference):
+    assert type(name) == str
+    assert type(reference) == dict
+    assert name in reference
+    self.controlList.append({
+        'type': 'toggle',
+        'name': name,
+        'dict': reference,
+        'width': len(name) + len('[-]')
+        })
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
     row = self.scrollRow + paneRow
-    line = self.textBuffer.lines[row]
-    if row == 0:
-      col = self.scrollCol + paneCol
-      if col >= len(line):
-        self.controller.shownDirectory = None
-        return
-      slash = line[col:].find('/')
-      self.path = line[:col + slash + 1]
+    col = self.scrollCol + paneCol
+    offset = 0
+    for control in self.controlList:
+      width = control['width']
+      if offset <= col < offset + width:
+        if control['type'] == 'toggle':
+          control['dict'][control['name']] = not control[
+              'dict'][control['name']]
+          self.host.controller.shownDirectory = None
+          break
+      offset += width + 1
+
+  def render(self):
+    app.log.debug()
+    offset = 0
+    color = app.color.get('message_line')
+    line = ''
+    for control in self.controlList:
+      if control['dict'][control['name']]:
+        line += '[+' + control['name'] + '] '
+      else:
+        line += '[-' + control['name'] + '] '
+      offset += control['width'] + 1
+      if offset >= self.cols:
+        break
+    self.writeLineRow = 0
+    self.writeLine(line, color)
+
+
+class PathRow(ViewWindow):
+  def __init__(self, host):
+    assert(host)
+    ViewWindow.__init__(self, host)
+    self.host = host
+    self.path = ''
+
+  def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
+    row = self.scrollRow + paneRow
+    col = self.scrollCol + paneCol
+    line = self.path
+    col = self.scrollCol + paneCol
+    self.host.controller.shownDirectory = None
+    if col >= len(line):
       return
-    self.path += line
+    slash = line[col:].find('/')
+    self.path = line[:col + slash + 1]
+
+  def render(self):
+    app.log.debug()
+    offset = 0
+    color = app.color.get('message_line')
+    #self.addStr(0, 0, self.path, color)
+    self.writeLineRow = 0
+    self.writeLine(self.path, color)
+
+
+class DirectoryList(Window):
+  """This <tbd>."""
+  def __init__(self, host, inputWindow):
+    assert(host)
+    Window.__init__(self, host)
+    self.host = host
+    self.inputWindow = inputWindow
+    self.controller = app.file_manager_controller.DirectoryListController(self)
+    self.setTextBuffer(app.text_buffer.TextBuffer())
+
+  def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
+    row = self.scrollRow + paneRow
+    if row >= len(self.textBuffer.lines):
+      return
+    pathRow = self.host
+    if row == 0:  # Clicked on "./".
+      # Clear the shown directory to trigger a refresh.
+      self.controller.shownDirectory = None
+      return
+    elif row == 1:  # Clicked on "../".
+      if pathRow.path[-1] == os.path.sep:
+        pathRow.path = pathRow.path[:-1]
+      pathRow.path, _ = os.path.split(pathRow.path)
+      if len(pathRow.path) > len(os.path.sep):
+        pathRow.path += os.path.sep
+      return
+    pathRow.path += self.contents[row - 2]
 
   def mouseWheelDown(self, shift, ctrl, alt):
     self.textBuffer.mouseWheelDown(shift, ctrl, alt)
 
   def mouseWheelUp(self, shift, ctrl, alt):
     self.textBuffer.mouseWheelUp(shift, ctrl, alt)
+
+  def setTextBuffer(self, textBuffer):
+    textBuffer.lineLimitIndicator = 999999
+    Window.setTextBuffer(self, textBuffer)
+    self.controller.setTextBuffer(textBuffer)
+
+
+class FileManagerWindow(Window):
+  def __init__(self, host, inputWindow):
+    assert(host)
+    Window.__init__(self, host)
+    self.host = host
+    self.inputWindow = inputWindow
+    self.inputWindow.fileManagerWindow = self
+    self.path = ''
+    self.controller = app.file_manager_controller.FileManagerController(self)
+    self.setTextBuffer(app.text_buffer.TextBuffer())
+    self.opt = {
+      'dotFiles': True,
+      'sortUp': True,
+      'sizes': True,
+    }
+    self.optionsRow = OptionsRow(self)
+    keys = self.opt.keys()
+    keys.sort()
+    for key in keys:
+      self.optionsRow.addToggle(key, self.opt)
+    self.optionsRow.setParent(self, 0)
+    self.directoryList = DirectoryList(self, inputWindow)
+    self.directoryList.setParent(self, 0)
+
+  def reshape(self, rows, cols, top, left):
+    """Change self and sub-windows to fit within the given rectangle."""
+    app.log.detail('reshape', rows, cols, top, left)
+    self.optionsRow.reshape(1, cols, top, left)
+    top += 1
+    rows -= 1
+    Window.reshape(self, 1, cols, top, left)
+    top += 1
+    rows -= 1
+    self.directoryList.reshape(rows, cols, top, left)
+
+  def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
+    row = self.scrollRow + paneRow
+    col = self.scrollCol + paneCol
+    line = self.path
+    col = self.scrollCol + paneCol
+    self.directoryList.controller.shownDirectory = None
+    if col >= len(line):
+      return
+    slash = line[col:].find('/')
+    self.path = line[:col + slash + 1]
 
   def quitNow(self):
     app.log.debug()
@@ -889,9 +1019,13 @@ class FileManagerWindow(Window):
   def render(self):
     app.log.debug()
     Window.render(self)
+    offset = 0
+    color = app.color.get('message_line')
+    #self.addStr(0, 0, self.path, color)
+    self.writeLineRow = 0
+    self.writeLine(self.path, color)
 
   def setTextBuffer(self, textBuffer):
-    app.log.debug('setTextBuffer')
     textBuffer.lineLimitIndicator = 999999
     Window.setTextBuffer(self, textBuffer)
     self.controller.setTextBuffer(textBuffer)

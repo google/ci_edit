@@ -83,6 +83,7 @@ def mainWindowCommands(controller, textBuffer):
     CTRL_I: textBuffer.indent,
     CTRL_J: textBuffer.carriageReturn,
     CTRL_O: controller.changeToFileOpen,
+    #CTRL_O: controller.changeToFileManagerWindow,
     CTRL_R: controller.changeToFindPrior,
 
     KEY_DOWN: textBuffer.cursorDown,

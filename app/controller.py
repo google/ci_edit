@@ -36,11 +36,17 @@ class Controller:
   def changeToConfirmOverwrite(self):
     self.host.changeFocusTo(self.host.confirmOverwrite)
 
+  def changeToFileManagerWindow(self, *args):
+    self.host.changeFocusTo(self.host.fileManagerWindow)
+
   def changeToConfirmQuit(self):
     self.host.changeFocusTo(self.host.interactiveQuit)
 
   def changeToHostWindow(self, *args):
     self.host.changeFocusTo(self.host)
+
+  def changeToInputWindow(self, *args):
+    self.host.changeFocusTo(self.host.inputWindow)
 
   def changeToFileOpen(self):
     self.host.changeFocusTo(self.host.interactiveOpen)
@@ -177,6 +183,10 @@ class Controller:
   def saveEventChangeToHostWindow(self, *args):
     curses.ungetch(self.savedCh)
     self.host.changeFocusTo(self.host)
+
+  def saveEventChangeToInputWindow(self, *args):
+    curses.ungetch(self.savedCh)
+    self.host.changeFocusTo(self.host.inputWindow)
 
   def setTextBuffer(self, textBuffer):
     #app.log.info(textBuffer)

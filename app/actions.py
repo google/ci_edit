@@ -1359,6 +1359,9 @@ class Actions(app.mutator.Mutator):
   def noOp(self, ignored):
     pass
 
+  def noOpDefault(self, ignored, ignored2=None):
+    pass
+
   def normalize(self):
     self.selectionNone()
     self.findRe = None
