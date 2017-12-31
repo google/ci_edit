@@ -46,11 +46,20 @@ class FileStats:
       newFileIsReadOnly = self.getUpdatedFileInfo()['isReadOnly']
       program = self.textBuffer.view.host
       turnoverTime = 0
-      if (newFileIsReadOnly != oldFileIsReadOnly or
-          self.fileOnDiskChanged()) and program:
+      redraw = False
+      if program:
+        if newFileIsReadOnly != oldFileIsReadOnly:
+          print(1)
+          redraw = True
+        if self.fileContentOnDiskChanged():
+          print(2)
+          redraw = True
+      if redraw:
+        print(3)
         before = time.time()
+        # Send a redraw request.
         app.background.bg.put((program, 'redraw', self.thread.semaphore))
-        # Wait for bg thread to finish refreshing before sleeping
+        # Wait for bg thread to finish refreshing before sleeping.
         self.thread.semaphore.acquire()
         turnoverTime = time.time() - before
       time.sleep(max(self.pollingInterval - turnoverTime, 0))
@@ -111,6 +120,8 @@ class FileStats:
   def fileOnDiskChanged(self):
     """
     Checks whether the file on disk has changed since we last opened/saved it.
+    This includes checking its permission bits, modified time, metadata modified
+    time, file size, and other statistics.
 
     Args:
       None.
@@ -122,14 +133,12 @@ class FileStats:
       if (self.updateStats() and self.fileStats):
         s1 = self.fileStats
         s2 = self.savedFileStat
-        app.log.info('st_mode', s1.st_mode, s2.st_mode)
         app.log.info('st_ino', s1.st_ino, s2.st_ino)
         app.log.info('st_dev', s1.st_dev, s2.st_dev)
         app.log.info('st_uid', s1.st_uid, s2.st_uid)
         app.log.info('st_gid', s1.st_gid, s2.st_gid)
         app.log.info('st_size', s1.st_size, s2.st_size)
         app.log.info('st_mtime', s1.st_mtime, s2.st_mtime)
-        app.log.info('st_ctime', s1.st_ctime, s2.st_ctime)
         return not (s1.st_mode == s2.st_mode and
                     s1.st_ino == s2.st_ino and
                     s1.st_dev == s2.st_dev and
@@ -138,6 +147,26 @@ class FileStats:
                     s1.st_size == s2.st_size and
                     s1.st_mtime == s2.st_mtime and
                     s1.st_ctime == s2.st_ctime)
+      return False
+    except Exception as e:
+      print(e)
+
+  def fileContentOnDiskChanged(self):
+    """
+    Checks if a file has been modified since we last opened/saved it.
+
+    Args:
+      None.
+
+    Returns:
+      True if the file has been modified. Otherwise, False.
+    """
+    try:
+      if (self.updateStats() and self.fileStats):
+        s1 = self.fileStats
+        s2 = self.savedFileStat
+        app.log.info('st_mtime', s1.st_mtime, s2.st_mtime)
+        return not s1.st_mtime == s2.st_mtime
       return False
     except Exception as e:
       print(e)
