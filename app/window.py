@@ -719,8 +719,6 @@ class InputWindow(Window):
       self.interactiveSaveAs = LabeledLine(self, "save as: ")
       self.interactiveSaveAs.setController(app.cu_editor.InteractiveSaveAs)
     if 1:
-      self.popup = Popup(self)
-    if 1:
       self.topInfo = TopInfo(self)
       self.topInfo.setParent(self, 0)
       if not self.showTopInfo:
@@ -1185,7 +1183,7 @@ class FileManagerWindow(Window):
     self.textBuffer.selectionAll()
     self.textBuffer.editPasteLines((path,))
 
-class Popup(Window):
+class PopupWindow(Window):
   def __init__(self, host):
     assert(host)
     Window.__init__(self, host)
@@ -1200,9 +1198,9 @@ class Popup(Window):
     rows = len(self.message) + 2
     for row in range(rows):
       if row == 0 or row == rows - 1:
-        self.addStr(row, 0, ' ' * width)
+        self.addStr(row, 0, ' ' * width, app.color.get(0))
       else:
-        self.addStr(row, 0, '    %s    ' % self.message[row])
+        self.addStr(row, 0, '    %s    ' % self.message[row - 1], app.color.get(0))
 
   def setMessage(self, message):
     """

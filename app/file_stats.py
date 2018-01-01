@@ -53,6 +53,7 @@ class FileStats:
           redraw = True
         if self.fileContentOnDiskChanged():
           print(2)
+          app.background.bg.put((program, 'popup', None))
           redraw = True
       if redraw:
         print(3)

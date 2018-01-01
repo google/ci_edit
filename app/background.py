@@ -77,6 +77,14 @@ def background(inputQueue, outputQueue):
           redrawProgram(program)
           callerSemaphore.release()
           continue
+        elif message == 'popup':
+          app.log.meta('bg received popup message')
+          # assert(callerSemaphore != None)
+          pid = os.getpid()
+          signalNumber = signal.SIGUSR1
+          outputQueue.put(('popup', None))
+          os.kill(pid, signalNumber)
+          continue
         program.executeCommandList(message)
         redrawProgram(program)
         #app.profile.endPythonProfile(profile)
