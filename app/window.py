@@ -1191,11 +1191,12 @@ class PopupWindow(Window):
     self.controller = app.cu_editor.PopupController(self)
     self.setTextBuffer(app.text_buffer.TextBuffer())
     self.controller.setTextBuffer(self.textBuffer)
+    self.longestLineLength = 0
     self.message = []
 
   def render(self):
     maxRows, maxCols = self.host.rows, self.host.cols
-    cols = min(30, maxCols)
+    cols = min(self.longestLineLength + 6, maxCols)
     rows = min(len(self.message) + 2, maxRows)
     self.resizeTo(rows, cols)
     self.moveTo(maxRows / 2 - rows / 2, maxCols / 2 - cols / 2)
@@ -1203,7 +1204,12 @@ class PopupWindow(Window):
       if row == 0 or row == rows - 1:
         self.addStr(row, 0, ' ' * cols, app.color.get(70))
       else:
-        self.addStr(row, 0, '    %s    ' % self.message[row - 1], app.color.get(70))
+        lineLength = len(self.message[row - 1])
+        spacing1 = (cols - lineLength) / 2
+        spacing2 = cols - lineLength - spacing1
+        self.addStr(row,0,
+                    ' ' * spacing1 + self.message[row - 1] + ' ' * spacing2,
+                    app.color.get(70))
 
   def setMessage(self, message):
     """
@@ -1215,6 +1221,7 @@ class PopupWindow(Window):
       None.
     """
     self.message = message.split("\n")
+    self.longestLineLength = max([len(line) for line in self.message])
 
   def setTextBuffer(self, textBuffer):
     Window.setTextBuffer(self, textBuffer)

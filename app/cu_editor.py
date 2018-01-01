@@ -405,7 +405,7 @@ class PopupController(app.controller.Controller):
   def __init__(self, view):
     app.controller.Controller.__init__(self, view, 'popup')
     self.view = view
-    def noOp(c):
+    def noOp(ch, meta):
       app.log.info('noOp in PopupController')
     self.commandDefault = noOp
     self.commandSet = {
@@ -416,15 +416,16 @@ class PopupController(app.controller.Controller):
       KEY_ESCAPE: self.changeToHostWindow,
     }
 
-  def changeToHostWindow(self):
+  def changeToMainWindow(self):
     self.view.hide()
-    app.controller.Controller.changeToHostWindow(self)
+    mainProgram = self.host.host
+    mainProgram.changeFocusTo(mainProgram.inputWindow)
 
   def setTextBuffer(self, textBuffer):
     self.textBuffer = textBuffer
 
   def reloadBuffer(self):
-    mainBuffer = self.view.host.textBuffer
+    mainBuffer = self.view.host.inputWindow.textBuffer
     mainBuffer.fileLoad()
 
 class PaletteDialogController(app.controller.Controller):
