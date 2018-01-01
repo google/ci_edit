@@ -1194,13 +1194,16 @@ class PopupWindow(Window):
     self.message = []
 
   def render(self):
-    width = 30
-    rows = len(self.message) + 2
+    maxRows, maxCols = self.host.rows, self.host.cols
+    cols = min(30, maxCols)
+    rows = min(len(self.message) + 2, maxRows)
+    self.resizeTo(rows, cols)
+    self.moveTo(maxRows / 2 - rows / 2, maxCols / 2 - cols / 2)
     for row in range(rows):
       if row == 0 or row == rows - 1:
-        self.addStr(row, 0, ' ' * width, app.color.get(0))
+        self.addStr(row, 0, ' ' * cols, app.color.get(70))
       else:
-        self.addStr(row, 0, '    %s    ' % self.message[row - 1], app.color.get(0))
+        self.addStr(row, 0, '    %s    ' % self.message[row - 1], app.color.get(70))
 
   def setMessage(self, message):
     """

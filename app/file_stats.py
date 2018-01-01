@@ -49,14 +49,11 @@ class FileStats:
       redraw = False
       if program:
         if newFileIsReadOnly != oldFileIsReadOnly:
-          print(1)
           redraw = True
         if self.fileContentOnDiskChanged():
-          print(2)
           app.background.bg.put((program, 'popup', None))
           redraw = True
       if redraw:
-        print(3)
         before = time.time()
         # Send a redraw request.
         app.background.bg.put((program, 'redraw', self.thread.semaphore))
