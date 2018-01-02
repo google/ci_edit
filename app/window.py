@@ -578,7 +578,10 @@ class TopInfo(ViewWindow):
           lineCursor -= 1
     pathLine = self.host.textBuffer.fullPath
     if 1:
-      if tb.fileStats.getUpdatedFileInfo()['isReadOnly']:
+      if app.prefs.editor['useBgThread']:
+        if tb.fileStats.getFileInfo()['isReadOnly']:
+          pathLine += ' [RO]'
+      elif tb.fileStats.getUpdatedFileInfo()['isReadOnly']:
         pathLine += ' [RO]'
     if 1:
       if tb.isDirty():

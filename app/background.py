@@ -46,6 +46,8 @@ class BackgroundThread(threading.Thread):
 
 
 def background(inputQueue, outputQueue):
+  pid = os.getpid()
+  signalNumber = signal.SIGUSR1
   def redrawProgram(program):
     """
     Sends a SIGUSR1 signal to the current program and draws its screen.
@@ -56,8 +58,6 @@ def background(inputQueue, outputQueue):
     Returns:
       None.
     """
-    pid = os.getpid()
-    signalNumber = signal.SIGUSR1
     program.render()
     outputQueue.put(app.render.frame.grabFrame())
     os.kill(pid, signalNumber)
@@ -71,14 +71,10 @@ def background(inputQueue, outputQueue):
         if message == 'quit':
           app.log.info('bg received quit message')
           return
-        elif message == 'redraw':
-          app.log.info('bg received redraw message')
-          assert(callerSemaphore != None)
-          redrawProgram(program)
-          callerSemaphore.release()
-          continue
         program.executeCommandList(message)
         redrawProgram(program)
+        if callerSemaphore:
+          callerSemaphore.release()
         #app.profile.endPythonProfile(profile)
         if not inputQueue.empty():
           continue

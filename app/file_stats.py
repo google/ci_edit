@@ -47,7 +47,7 @@ class FileStats:
       if newFileIsReadOnly != oldFileIsReadOnly:
         program = self.textBuffer.view.host
         before = time.time()
-        app.background.bg.put((program, 'redraw', self.thread.semaphore))
+        app.background.bg.put((program, [], self.thread.semaphore))
         # Wait for bg thread to finish refreshing before sleeping
         self.thread.semaphore.acquire()
         turnoverTime = time.time() - before
@@ -121,6 +121,12 @@ class FileStats:
     info = self.fileInfo.copy() # Shallow copy.
     self.statsLock.release()
     return info
+
+  def getFileInfo(self):
+    """
+    Returns the current fileInfo that is stored in memory.
+    """
+    return self.fileInfo.copy()
 
   def setTextBuffer(self, textBuffer):
     self.textBuffer = textBuffer
