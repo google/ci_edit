@@ -1195,6 +1195,9 @@ class PopupWindow(Window):
     self.message = []
 
   def render(self):
+    """
+    Display a box of text in the center of the window.
+    """
     maxRows, maxCols = self.host.rows, self.host.cols
     cols = min(self.longestLineLength + 6, maxCols)
     rows = min(len(self.message) + 2, maxRows)
