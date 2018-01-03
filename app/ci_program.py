@@ -130,7 +130,6 @@ class CiProgram:
             self.exiting = True
             return
           if frame[0] == 'popup':
-            self.popupWindow.setMessage("Hi there friend\nHow are you doing today?")
             self.changeFocusTo(self.popupWindow)
           else:
             self.refresh(frame[0], frame[1])
@@ -221,7 +220,6 @@ class CiProgram:
                 self.exiting = True
                 return
               if frame[0] == 'popup':
-                self.popupWindow.setMessage("Hi there friend\nHow are you doing today?")
                 self.changeFocusTo(self.popupWindow)
               else:
                 self.refresh(frame[0], frame[1])

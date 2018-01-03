@@ -47,20 +47,24 @@ class FileStats:
       program = self.textBuffer.view.host
       turnoverTime = 0
       redraw = False
+      waitOnSemaphore = False
       if program:
         if newFileIsReadOnly != oldFileIsReadOnly:
           redraw = True
         if self.fileContentOnDiskChanged():
+          program.popupWindow.setMessage(
+              "The file on disk has changed.\nReload file?")
+          program.popupWindow.controller.callerSemaphore = self.thread.semaphore
           app.background.bg.put((program, 'popup', None))
           redraw = True
+          waitOnSemaphore = True
       if redraw:
-        before = time.time()
         # Send a redraw request.
         app.background.bg.put((program, 'redraw', self.thread.semaphore))
-        # Wait for bg thread to finish refreshing before sleeping.
         self.thread.semaphore.acquire()
-        turnoverTime = time.time() - before
-      time.sleep(max(self.pollingInterval - turnoverTime, 0))
+      if waitOnSemaphore:
+        self.thread.semaphore.acquire() # Wait for user to respond to popup.
+      time.sleep(self.pollingInterval)
 
   def startTracking(self):
     """
