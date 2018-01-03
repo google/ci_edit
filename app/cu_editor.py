@@ -411,9 +411,9 @@ class PopupController(app.controller.Controller):
     self.commandSet = {
       ord('Y'): self.reloadBuffer,
       ord('y'): self.reloadBuffer,
-      ord('N'): self.changeToHostWindow,
-      ord('n'): self.changeToHostWindow,
-      KEY_ESCAPE: self.changeToHostWindow,
+      ord('N'): self.changeToMainWindow,
+      ord('n'): self.changeToMainWindow,
+      KEY_ESCAPE: self.changeToMainWindow,
     }
 
   def changeToMainWindow(self):
