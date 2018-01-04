@@ -28,12 +28,15 @@ class FileStats:
       pollingInterval (float): The frequency at which you want to poll the file.
     """
     self.fullPath = fullPath
+    # The stats of the file since we last checked it. This should be
+    # the most updated version of the file's stats.
     self.fileStats = None
     self.pollingInterval = pollingInterval
     # All necessary file info should be placed in this dictionary.
     self.fileInfo = {'isReadOnly': False,
                      'size': 0}
-    self.savedFileStat = None # Used to determine if file on disk has changed.
+    # Used to determine if file on disk has changed since the last save
+    self.savedFileStat = None
     self.statsLock = threading.Lock()
     self.textBuffer = None
     self.thread = None
@@ -41,23 +44,22 @@ class FileStats:
 
   def run(self):
     while not self.thread.shouldExit:
-      # Redraw the screen if the file changed READ ONLY permissions.
       oldFileIsReadOnly = self.fileInfo['isReadOnly']
-      newFileIsReadOnly = self.getUpdatedFileInfo()['isReadOnly']
       program = self.textBuffer.view.host
-      turnoverTime = 0
       redraw = False
       waitOnSemaphore = False
       if program:
-        if newFileIsReadOnly != oldFileIsReadOnly:
-          redraw = True
-        if self.fileContentOnDiskChanged():
+        if self.fileContentChangedSinceCheck():
           program.popupWindow.setMessage(
               "The file on disk has changed.\nReload file?")
           program.popupWindow.controller.callerSemaphore = self.thread.semaphore
           app.background.bg.put((program, 'popup', None))
           redraw = True
           waitOnSemaphore = True
+        # Check if file read permissions have changed.
+        newFileIsReadOnly = self.fileInfo['isReadOnly']
+        if newFileIsReadOnly != oldFileIsReadOnly:
+          redraw = True
       if redraw:
         # Send a redraw request.
         app.background.bg.put((program, 'redraw', self.thread.semaphore))
@@ -119,7 +121,7 @@ class FileStats:
   def setTextBuffer(self, textBuffer):
     self.textBuffer = textBuffer
 
-  def fileOnDiskChanged(self):
+  def fileChangedSinceSave(self):
     """
     Checks whether the file on disk has changed since we last opened/saved it.
     This includes checking its permission bits, modified time, metadata modified
@@ -153,9 +155,29 @@ class FileStats:
     except Exception as e:
       print(e)
 
-  def fileContentOnDiskChanged(self):
+  def fileContentChangedSinceCheck(self):
     """
-    Checks if a file has been modified since we last opened/saved it.
+    Checks if a file has been modified since we last checked it from disk.
+
+    Args:
+      None.
+
+    Returns:
+      True if the file has been modified. Otherwise, False.
+    """
+    try:
+      s1 = self.fileStats
+      if (self.updateStats() and self.fileStats):
+        s2 = self.fileStats
+        app.log.info('st_mtime', s1.st_mtime, s2.st_mtime)
+        return not s1.st_mtime == s2.st_mtime
+      return False
+    except Exception as e:
+      print(e)
+
+  def fileContentChangedSinceSave(self):
+    """
+    Checks if a file has been modified since we last saved the file.
 
     Args:
       None.

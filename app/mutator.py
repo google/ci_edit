@@ -138,7 +138,7 @@ class Mutator(app.selectable.Selectable):
   def isSafeToWrite(self):
     if not os.path.exists(self.fullPath):
       return True
-    return not self.fileStats.fileContentOnDiskChanged()
+    return not self.fileStats.fileContentChangedSinceSave()
 
 
   def __doMoveLines(self, begin, end, to):
