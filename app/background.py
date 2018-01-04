@@ -46,7 +46,7 @@ class BackgroundThread(threading.Thread):
 
 
 def background(inputQueue, outputQueue):
-  def redrawProgram(program):
+  def redrawProgram(program, callerSemaphore):
     """
     Sends a SIGUSR1 signal to the current program and draws its screen.
 
@@ -59,7 +59,7 @@ def background(inputQueue, outputQueue):
     pid = os.getpid()
     signalNumber = signal.SIGUSR1
     program.render()
-    outputQueue.put(app.render.frame.grabFrame())
+    outputQueue.put((app.render.frame.grabFrame(), callerSemaphore))
     os.kill(pid, signalNumber)
 
   block = True
@@ -74,19 +74,18 @@ def background(inputQueue, outputQueue):
         elif message == 'redraw':
           app.log.info('bg received redraw message')
           assert(callerSemaphore != None)
-          redrawProgram(program)
-          callerSemaphore.release()
+          redrawProgram(program, callerSemaphore)
           continue
         elif message == 'popup':
           app.log.meta('bg received popup message')
           # assert(callerSemaphore != None)
           pid = os.getpid()
           signalNumber = signal.SIGUSR1
-          outputQueue.put(('popup', None))
+          outputQueue.put((('popup', None), callerSemaphore))
           os.kill(pid, signalNumber)
           continue
         program.executeCommandList(message)
-        redrawProgram(program)
+        redrawProgram(program, callerSemaphore)
         #app.profile.endPythonProfile(profile)
         if not inputQueue.empty():
           continue
@@ -99,16 +98,16 @@ def background(inputQueue, outputQueue):
         program.focusedWindow.textBuffer.parseDocument()
         block = len(tb.parser.rows) >= len(tb.lines)
         if block:
-          redrawProgram(program)
+          redrawProgram(program, callerSemaphore)
     except Exception as e:
       app.log.exception(e)
       app.log.error('bg thread exception', e)
       errorType, value, tracebackInfo = sys.exc_info()
       out = traceback.format_exception(errorType, value, tracebackInfo)
-      outputQueue.put(('exception', out))
+      outputQueue.put((('exception', out), None))
       os.kill(os.getpid(), signal.SIGUSR1)
       while True:
-        program, message = inputQueue.get()
+        program, message, callerSemaphore = inputQueue.get()
         if message == 'quit':
           app.log.info('bg received quit message')
           return

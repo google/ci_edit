@@ -53,7 +53,8 @@ class FileStats:
           program.popupWindow.setMessage(
               "The file on disk has changed.\nReload file?")
           program.popupWindow.controller.callerSemaphore = self.thread.semaphore
-          app.background.bg.put((program, 'popup', None))
+          app.background.bg.put((program, 'popup', self.thread.semaphore))
+          self.thread.semaphore.acquire() # Wait for popup to load
           redraw = True
           waitOnSemaphore = True
         # Check if file read permissions have changed.
@@ -63,7 +64,7 @@ class FileStats:
       if redraw:
         # Send a redraw request.
         app.background.bg.put((program, 'redraw', self.thread.semaphore))
-        self.thread.semaphore.acquire()
+        self.thread.semaphore.acquire() # Wait for redraw to finish
       if waitOnSemaphore:
         self.thread.semaphore.acquire() # Wait for user to respond to popup.
       time.sleep(self.pollingInterval)

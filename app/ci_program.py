@@ -123,7 +123,7 @@ class CiProgram:
     while not self.exiting:
       if useBgThread:
         while self.bg.hasMessage():
-          frame = self.bg.get()
+          frame, callerSemaphore = self.bg.get()
           if frame[0] == 'exception':
             for line in frame[1]:
               userMessage(line[:-1])
@@ -131,8 +131,11 @@ class CiProgram:
             return
           if frame[0] == 'popup':
             self.changeFocusTo(self.popupWindow)
+            callerSemaphore.release()
           else:
             self.refresh(frame[0], frame[1])
+            if callerSemaphore:
+              callerSemaphore.release()
       elif 1:
         frame = app.render.frame.grabFrame()
         self.refresh(frame[0], frame[1])
@@ -213,7 +216,7 @@ class CiProgram:
           if ch == 0 and useBgThread:
             # bg response.
             while self.bg.hasMessage():
-              frame = self.bg.get()
+              frame, callerSemaphore = self.bg.get()
               if frame[0] == 'exception':
                 for line in frame[1]:
                   userMessage(line[:-1])
@@ -221,8 +224,11 @@ class CiProgram:
                 return
               if frame[0] == 'popup':
                 self.changeFocusTo(self.popupWindow)
+                callerSemaphore.release()
               else:
                 self.refresh(frame[0], frame[1])
+                if callerSemaphore:
+                  callerSemaphore.release()
           elif ch != curses.ERR:
             self.ch = ch
             if ch == curses.KEY_MOUSE:

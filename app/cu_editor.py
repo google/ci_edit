@@ -71,7 +71,6 @@ def mainWindowCommands(controller, textBuffer):
   commands.update({
     KEY_ESCAPE: textBuffer.normalize,
     KEY_F1: controller.info,
-    KEY_F4: controller.changeToPopup,
     KEY_BTAB: textBuffer.unindent,
     KEY_PAGE_UP: textBuffer.cursorSelectNonePageUp,
     KEY_PAGE_DOWN: textBuffer.cursorSelectNonePageDown,
@@ -421,7 +420,9 @@ class PopupController(app.controller.Controller):
     self.view.hide()
     mainProgram = self.host.host
     mainProgram.changeFocusTo(mainProgram.inputWindow)
-    self.callerSemaphore.release()
+    if self.callerSemaphore:
+      self.callerSemaphore.release()
+      self.callerSemaphore = None
 
   def setTextBuffer(self, textBuffer):
     self.textBuffer = textBuffer
