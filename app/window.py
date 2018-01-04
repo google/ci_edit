@@ -1205,20 +1205,19 @@ class PopupWindow(Window):
     rows = min(len(self.message) + 4, maxRows)
     self.resizeTo(rows, cols)
     self.moveTo(maxRows / 2 - rows / 2, maxCols / 2 - cols / 2)
+    color = app.color.get('popup_window')
     for row in range(rows):
       if row == rows - 2 and self.showOptions:
         message = '/'.join(self.options)
       elif row == 0 or row >= rows - 3:
-        self.addStr(row, 0, ' ' * cols, app.color.get(70))
+        self.addStr(row, 0, ' ' * cols, color)
         continue
       else:
         message = self.message[row - 1]
       lineLength = len(message)
       spacing1 = (cols - lineLength) / 2
       spacing2 = cols - lineLength - spacing1
-      self.addStr(row, 0,
-                  ' ' * spacing1 + message + ' ' * spacing2,
-                  app.color.get(70))
+      self.addStr(row, 0, ' ' * spacing1 + message + ' ' * spacing2, color)
 
   def setMessage(self, message):
     """
