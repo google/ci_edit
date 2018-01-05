@@ -14,6 +14,7 @@
 
 import app.actions
 import app.color
+import app.file_stats
 import app.log
 import app.parser
 import app.prefs
@@ -30,6 +31,7 @@ class TextBuffer(app.actions.Actions):
     self.lineLimitIndicator = 0
     self.highlightRe = None
     self.fileHistory = {}
+    self.fileStats = app.file_stats.FileStats(self.fullPath)
     self.fileEncoding = None
     self.lastChecksum = None
     self.lastFileSize = 0

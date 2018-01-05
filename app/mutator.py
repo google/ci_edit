@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import app.file_stats
 import app.log
 import app.parser
 import app.prefs
@@ -44,9 +45,8 @@ class Mutator(app.selectable.Selectable):
     self.findBackRe = None
     self.fileExtension = ''
     self.fullPath = ''
-    self.fileStat = None
     self.goalCol = 0
-    self.isReadOnly = False
+    self.savedFileStat = None
     self.penGrammar = None
     self.parser = None
     self.parserTime = .0
@@ -139,8 +139,9 @@ class Mutator(app.selectable.Selectable):
   def isSafeToWrite(self):
     if not os.path.exists(self.fullPath):
       return True
-    s1 = os.stat(self.fullPath)
-    s2 = self.fileStat
+    self.fileStats.updateStats()
+    s1 = self.fileStats.fileStats
+    s2 = self.savedFileStat
     app.log.info('st_mode', s1.st_mode, s2.st_mode)
     app.log.info('st_ino', s1.st_ino, s2.st_ino)
     app.log.info('st_dev', s1.st_dev, s2.st_dev)
