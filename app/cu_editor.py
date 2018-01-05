@@ -17,6 +17,7 @@
 from app.curses_util import *
 import app.controller
 import app.editor
+import app.file_manager_controller
 import app.interactive_prompt
 import curses
 import text_buffer
@@ -82,8 +83,8 @@ def mainWindowCommands(controller, textBuffer):
     CTRL_G: controller.changeToGoto,
     CTRL_I: textBuffer.indent,
     CTRL_J: textBuffer.carriageReturn,
-    CTRL_O: controller.changeToFileOpen,
-    #CTRL_O: controller.changeToFileManagerWindow,
+    #CTRL_O: controller.changeToFileOpen,
+    CTRL_O: controller.changeToFileManagerWindow,
     CTRL_R: controller.changeToFindPrior,
 
     KEY_DOWN: textBuffer.cursorDown,
@@ -209,6 +210,29 @@ class InteractiveOpener(app.editor.InteractiveOpener):
       CTRL_O: self.createOrOpen,
       CTRL_P: self.changeToPrediction,
       CTRL_Q: self.saveEventChangeToHostWindow,
+    })
+    self.commandSet = commandSet
+    self.commandDefault = self.textBuffer.insertPrintable
+
+
+class FileOpener(app.file_manager_controller.FileManagerController):
+  """Open a file to edit."""
+  def __init__(self, host):
+    app.file_manager_controller.FileManagerController.__init__(self, host)
+
+  def setTextBuffer(self, textBuffer):
+    app.file_manager_controller.FileManagerController.setTextBuffer(self,
+        textBuffer)
+    commandSet = initCommandSet(self, textBuffer)
+    commandSet.update({
+      KEY_ESCAPE: self.changeToInputWindow,
+      KEY_F1: self.info,
+      CTRL_I: self.tabCompleteExtend,
+      CTRL_J: self.createOrOpen,
+      CTRL_N: self.createOrOpen,
+      CTRL_O: self.createOrOpen,
+      CTRL_P: self.changeToPrediction,
+      CTRL_Q: self.saveEventChangeToInputWindow,
     })
     self.commandSet = commandSet
     self.commandDefault = self.textBuffer.insertPrintable

@@ -199,7 +199,7 @@ class InteractiveOpener(app.controller.Controller):
 class InteractivePrediction(app.controller.Controller):
   """Make a guess about what the user desires."""
   def __init__(self, host):
-    app.controller.Controller.__init__(self, host, 'opener')
+    app.controller.Controller.__init__(self, host, 'prediction')
 
   def cancel(self):
     self.items = [(self.priorTextBuffer, self.priorTextBuffer.fullPath, '')]

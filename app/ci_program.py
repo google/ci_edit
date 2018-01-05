@@ -289,7 +289,7 @@ class CiProgram:
     self.paletteWindow = app.window.PaletteWindow(self)
     self.inputWindow = app.window.InputWindow(self)
     self.zOrder.append(self.inputWindow)
-    if 0:
+    if 1:
       self.fileManagerWindow = app.window.FileManagerWindow(self,
           self.inputWindow)
       self.zOrder.append(self.fileManagerWindow)
