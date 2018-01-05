@@ -32,9 +32,12 @@ class FileStats:
     # the most updated version of the file's stats.
     self.fileStats = None
     self.pollingInterval = pollingInterval
+    # This is updated only when self.fileInfo has been fully updated. We use
+    # this variable in order to not have to wait for the statsLock.
+    self.currentFileInfo = {'isReadOnly': False,
+                            'size': 0}
     # All necessary file info should be placed in this dictionary.
-    self.fileInfo = {'isReadOnly': False,
-                     'size': 0}
+    self.fileInfo = self.currentFileInfo.copy()
     # Used to determine if file on disk has changed since the last save
     self.savedFileStat = None
     self.statsLock = threading.Lock()
@@ -63,7 +66,7 @@ class FileStats:
           redraw = True
       if redraw:
         # Send a redraw request.
-        app.background.bg.put((program, 'redraw', self.thread.semaphore))
+        app.background.bg.put((program, [], self.thread.semaphore))
         self.thread.semaphore.acquire() # Wait for redraw to finish
       if waitOnSemaphore:
         self.thread.semaphore.acquire() # Wait for user to respond to popup.
@@ -101,6 +104,7 @@ class FileStats:
       self.fileStats = os.stat(self.fullPath)
       self.fileInfo['isReadOnly'] = not os.access(self.fullPath, os.W_OK)
       self.fileInfo['size'] = self.fileStats.st_size
+      self.currentFileInfo = self.fileInfo.copy()
       self.statsLock.release()
       return True
     except Exception as e:
@@ -118,6 +122,12 @@ class FileStats:
     info = self.fileInfo.copy() # Shallow copy.
     self.statsLock.release()
     return info
+
+  def getCurrentFileInfo(self):
+    """
+    Retrieves the current file info that we have in memory.
+    """
+    return self.currentFileInfo
 
   def setTextBuffer(self, textBuffer):
     self.textBuffer = textBuffer

@@ -845,15 +845,16 @@ class Actions(app.mutator.Mutator):
     self.penRow, self.penCol = self.fileHistory.setdefault('pen', (0, 0))
     self.view.scrollRow, self.view.scrollCol =  self.fileHistory.setdefault(
         'scroll', (0, 0))
-    self.doSelectionMode(self.fileHistory.setdefault('selectionMode',
-        app.selectable.kSelectionNone))
-    self.markerRow, self.markerCol = self.fileHistory.setdefault('marker',
-        (0, 0))
     if app.prefs.editor['saveUndo']:
       self.redoChain = self.fileHistory.setdefault('redoChainCompound', [])
       self.savedAtRedoIndex = self.fileHistory.setdefault('savedAtRedoIndexCompound', 0)
       self.redoIndex = self.savedAtRedoIndex
       self.oldRedoIndex = self.savedAtRedoIndex
+    self.tempChange = None
+    self.doSelectionMode(self.fileHistory.setdefault('selectionMode',
+        app.selectable.kSelectionNone))
+    self.markerRow, self.markerCol = self.fileHistory.setdefault('marker',
+        (0, 0))
 
     # Restore file bookmarks
     self.bookmarks = self.fileHistory.setdefault('bookmarks', [])
