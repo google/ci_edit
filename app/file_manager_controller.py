@@ -60,8 +60,6 @@ class DirectoryListController(app.controller.Controller):
         self.host.contents = []
         try:
           contents = os.listdir(dirPath)
-          lines.append('./')
-          lines.append('../')
           contents.sort(reverse=not self.host.opt['Name'])
           for i in contents:
             if not self.host.host.opt['dotFiles'] and i[0] == '.':
@@ -78,7 +76,7 @@ class DirectoryListController(app.controller.Controller):
           lines.append(unicode(e))
         #if self.host.opt['Size']:
         # Sort by size.
-        clip = lines
+        clip = ['./', '../'] + lines
       else:
         clip = [dirPath + ": not found"]
     self.host.textBuffer.selectionAll()

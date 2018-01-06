@@ -851,44 +851,57 @@ class InputWindow(Window):
 
 
 class OptionsRow(ViewWindow):
+  class ControlElement:
+    def __init__(self, type, name, reference, width=None, sep=" "):
+      self.type = type
+      self.name = name
+      self.reference = reference
+      self.width = width if width is not None else len(name)
+      self.sep = sep
+
   def __init__(self, host):
     assert(host)
     ViewWindow.__init__(self, host)
     self.host = host
     self.controlList = []
 
-  def addLabel(self, name, width=None, sep=" "):
-    assert type(name) == str
+  def addElement(self, draw, kind, name, reference, width, sep, extraWidth=0):
+    if 1:
+      assert type(name) == str
+      assert type(sep) == str
+      assert type(width) in [type(None), int]
+      assert type(extraWidth) == int
+      if reference is not None:
+        assert type(reference) == dict
+        assert name in reference
     self.controlList.append({
-        'type': 'label',
+        'draw': draw,
+        'type': kind,
         'name': name,
+        'dict': reference,
         'sep': sep,
-        'width': width if width is not None else len(name)
+        'width': width if width is not None else len(name) + extraWidth
         })
+
+  def addLabel(self, name, width=None, sep=" "):
+    def draw(control):
+      return control['name']
+    self.addElement(draw, 'label', name, None, width, sep)
 
   def addSortToggle(self, name, reference, width=None, sep=" |"):
-    assert type(name) == str
-    assert type(reference) == dict
-    assert name in reference
-    self.controlList.append({
-        'type': 'sort',
-        'name': name,
-        'dict': reference,
-        'sep': sep,
-        'width': width if width is not None else len(name) + len(' v')
-        })
+    def draw(control):
+      decoration = 'v' if control['dict'][control['name']] else '^'
+      if control['width'] < 0:
+        return '%s %s' % (control['name'], decoration)
+      return '%s %s' % (decoration, control['name'])
+    self.addElement(draw, 'sort', name, reference, width, sep, len(' v'))
 
   def addToggle(self, name, reference, width=None, sep=" "):
-    assert type(name) == str
-    assert type(reference) == dict
-    assert name in reference
-    self.controlList.append({
-        'type': 'toggle',
-        'name': name,
-        'dict': reference,
-        'sep': sep,
-        'width': width if width is not None else len(name) + len('[-]')
-        })
+    def draw(control):
+      if control['dict'][control['name']]:
+        return '[+' + control['name'] + ']'
+      return '[-' + control['name'] + ']'
+    self.addElement(draw, 'toggle', name, reference, width, sep, len('[-]'))
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
     row = self.scrollRow + paneRow
@@ -905,29 +918,15 @@ class OptionsRow(ViewWindow):
       offset += width + len(control['sep'])
 
   def render(self):
-    app.log.debug()
-    color = app.color.get('message_line')
+    color = app.color.get('top_info')
     line = ''
     for control in self.controlList:
-      label = ''
-      if control['type'] == 'label':
-        label = control['name']
-      elif control['type'] == 'sort':
-        decoration = 'v' if control['dict'][control['name']] else '^'
-        if control['width'] < 0:
-          label = '%s %s' % (control['name'], decoration)
-        else:
-          label = '%s %s' % (decoration, control['name'])
-      elif control['type'] == 'toggle':
-        if control['dict'][control['name']]:
-          label = '[+' + control['name'] + ']'
-        else:
-          label = '[-' + control['name'] + ']'
+      label = control['draw'](control)
       line += '%*s%s' % (control['width'], label, control['sep'])
       if len(line) >= self.cols:
         break
     self.writeLineRow = 0
-    self.writeLine(line, color)
+    self.writeLine(line[:self.cols], color)
 
 
 # todo remove or use this.
