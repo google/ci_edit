@@ -864,6 +864,7 @@ class OptionsRow(ViewWindow):
     ViewWindow.__init__(self, host)
     self.host = host
     self.controlList = []
+    self.group = None
 
   def addElement(self, draw, kind, name, reference, width, sep, extraWidth=0):
     if 1:
@@ -874,6 +875,8 @@ class OptionsRow(ViewWindow):
       if reference is not None:
         assert type(reference) == dict
         assert name in reference
+    if self.group is not None:
+      self.group.append(len(self.controlList))
     self.controlList.append({
         'draw': draw,
         'type': kind,
@@ -888,9 +891,11 @@ class OptionsRow(ViewWindow):
       return control['name']
     self.addElement(draw, 'label', name, None, width, sep)
 
-  def addSortToggle(self, name, reference, width=None, sep=" |"):
+  def addSortHeader(self, name, reference, width=None, sep=" |"):
     def draw(control):
       decoration = 'v' if control['dict'][control['name']] else '^'
+      if control['dict'][control['name']] is None:
+        decoration = '-'
       if control['width'] < 0:
         return '%s %s' % (control['name'], decoration)
       return '%s %s' % (decoration, control['name'])
@@ -903,14 +908,32 @@ class OptionsRow(ViewWindow):
       return '[-' + control['name'] + ']'
     self.addElement(draw, 'toggle', name, reference, width, sep, len('[-]'))
 
+  def beginGroup(self):
+    """Like a radio group, or column sort headers."""
+    self.group = []
+
+  def endGroup(self):
+    """Like a radio group, or column sort headers."""
+    pass
+
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
     row = self.scrollRow + paneRow
     col = self.scrollCol + paneCol
     offset = 0
-    for control in self.controlList:
+    for index, control in enumerate(self.controlList):
       width = abs(control['width'])
       if offset <= col < offset + width:
-        if control['type'] in ['sort', 'toggle']:
+        if control['type'] == 'sort':
+          name = control['name']
+          newValue = not control['dict'][name]
+          if index in self.group:
+            for element in self.group:
+              elementName = self.controlList[element]['name']
+              self.controlList[element]['dict'][elementName] = None
+          control['dict'][name] = newValue
+          self.host.controller.optionChanged(name, control['dict'][name])
+          break
+        if control['type'] == 'toggle':
           name = control['name']
           control['dict'][name] = not control['dict'][name]
           self.host.controller.optionChanged(name, control['dict'][name])
@@ -969,11 +992,12 @@ class DirectoryList(Window):
     self.optionsRow = OptionsRow(self)
     self.opt = {
       'Name': True,
-      'Size': True,
-      'Modified': True,
+      'Size': None,
+      'Modified': None,
     }
-    for key, size in [('Name', -40), ('Size', 15), ('Modified', 20)]:
-      self.optionsRow.addSortToggle(key, self.opt, size)
+    self.optionsRow.beginGroup()
+    for key, size in [('Name', -40), ('Size', 15), ('Modified', 24)]:
+      self.optionsRow.addSortHeader(key, self.opt, size)
     self.optionsRow.setParent(self, 0)
 
   def getPath(self):
@@ -1052,6 +1076,7 @@ class FileManagerWindow(Window):
     self.opt = {
       'dotFiles': True,
       'sizes': True,
+      'modified': True,
     }
     self.optionsRow = OptionsRow(self)
     self.optionsRow.addLabel('ci   Open File ')

@@ -16,6 +16,7 @@ from app.curses_util import *
 import app.buffer_manager
 import app.controller
 import os
+import time
 
 
 class DirectoryListController(app.controller.Controller):
@@ -60,7 +61,6 @@ class DirectoryListController(app.controller.Controller):
         self.host.contents = []
         try:
           contents = os.listdir(dirPath)
-          contents.sort(reverse=not self.host.opt['Name'])
           for i in contents:
             if not self.host.host.opt['dotFiles'] and i[0] == '.':
               continue
@@ -68,14 +68,27 @@ class DirectoryListController(app.controller.Controller):
             if os.path.isdir(fullPath):
               i += os.path.sep
             self.host.contents.append(i)
+            iSize = ''
+            iModified = ''
             if self.host.host.opt['sizes'] and os.path.isfile(fullPath):
-              i = '%-40s  %9d bytes' % (i, os.path.getsize(fullPath))
-            lines.append(i)
+              iSize = '%d bytes' % os.path.getsize(fullPath)
+            if self.host.host.opt['modified']:
+              iModified = unicode(time.strftime('%c',
+                  time.localtime(os.path.getmtime(fullPath))),)
+            lines.append('%-40s  %16s  %24s' % (i, iSize, iModified))
         except OSError as e:
-          lines.append('Error opening directory.')
+          lines = ['Error opening directory.']
           lines.append(unicode(e))
-        #if self.host.opt['Size']:
-        # Sort by size.
+        if self.host.opt['Size'] is not None:
+          # Sort by size.
+          lines.sort(reverse=not self.host.opt['Size'],
+              key=lambda x: x[40:])
+        elif self.host.opt['Modified'] is not None:
+          # Sort by size.
+          lines.sort(reverse=not self.host.opt['Modified'],
+              key=lambda x: x[40 + 17:])
+        else:
+          lines.sort(reverse=not self.host.opt['Name'], key=unicode.lower)
         clip = ['./', '../'] + lines
       else:
         clip = [dirPath + ": not found"]
