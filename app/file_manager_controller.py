@@ -137,10 +137,10 @@ class FileManagerController(app.controller.Controller):
 
   def focus(self):
     self.textBuffer.selectionAll()
-    if len(self.host.textBuffer.fullPath) == 0:
+    if len(self.host.inputWindow.textBuffer.fullPath) == 0:
       path = os.getcwd()
     else:
-      path = os.path.dirname(self.host.textBuffer.fullPath)
+      path = os.path.dirname(self.host.inputWindow.textBuffer.fullPath)
     if len(path) != 0:
       path += os.path.sep
     self.textBuffer.editPasteLines((path,))
