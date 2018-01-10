@@ -364,15 +364,26 @@ class LineNumbers(ViewWindow):
     limit = min(self.rows,
         len(self.host.textBuffer.lines) - self.host.scrollRow)
     cursorBookmarkColorIndex = None
+    visibleBookmarks = self.getVisibleBookmarks(self.host.scrollRow,
+                                                self.host.scrollRow + limit)
+    currentBookmarkIndex = 0
     for i in range(limit):
       color = app.color.get('line_number')
-      rowBookmark = self.bookmarkForRow(self.host.scrollRow + i)
+      currentRow = self.host.scrollRow + i
+      if currentBookmarkIndex < len(visibleBookmarks):
+        currentBookmark = visibleBookmarks[currentBookmarkIndex]
+      else:
+        currentBookmark = None
       # Use a different color if the row is associated with a bookmark.
-      if rowBookmark:
-        color = app.color.get(rowBookmark[1].get('colorIndex'))
-        if self.host.cursorRow == self.host.scrollRow + i:
-          cursorBookmarkColorIndex = rowBookmark[1].get('colorIndex')
-      self.addStr(i, 0, ' %5d ' % (self.host.scrollRow + i + 1), color)
+      if currentBookmark:
+        if (currentRow >= currentBookmark[0][0] and
+            currentRow <= currentBookmark[0][1]):
+          color = app.color.get(currentBookmark[1].get('colorIndex'))
+          if self.host.cursorRow == currentRow:
+            cursorBookmarkColorIndex = currentBookmark[1].get('colorIndex')
+        if currentRow + 1 > currentBookmark[0][1]:
+          currentBookmarkIndex += 1
+      self.addStr(i, 0, ' %5d ' % (currentRow + 1), color)
     color = app.color.get('outside_document')
     for i in range(limit, self.rows):
       self.addStr(i, 0, '       ', color)
@@ -387,28 +398,24 @@ class LineNumbers(ViewWindow):
         color = app.color.get('line_number_current')
       self.addStr(cursorAt, 1, '%5d' % (self.host.cursorRow + 1), color)
 
-  def bookmarkForRow(self, row):
+  def getVisibleBookmarks(self, beginRow, endRow):
     """
-    Checks whether the specified row lies on a bookmark or not.
-
     Args:
-      row (int): the row number you want to check between [0, numLines - 1].
+      beginRow (int): the index of the line number that you want the list of
+                      bookmarks to start from.
+      endRow (int): the index of the line number that you want the list of
+                    bookmarks to end at (exclusive).
 
     Returns:
-      The bookmark that the row is associated with or None if there isn't one.
+      A list containing the bookmarks that are displayed on the screen. If there
+      are no bookmarks, returns an empty list.
     """
     bookmarkList = self.host.textBuffer.bookmarks
+    beginIndex = endIndex = 0
     if len(bookmarkList):
-      insertionPoint = bisect.bisect_left(bookmarkList, ((row,),))
-      prevBookmark = bookmarkList[insertionPoint - 1]
-      nextBookmark = bookmarkList[insertionPoint % len(bookmarkList)]
-      prevBookmarkRange = prevBookmark[0]
-      nextBookmarkRange = nextBookmark[0]
-      if prevBookmarkRange[0] <= row <= prevBookmarkRange[-1]:
-        return prevBookmark
-      elif nextBookmarkRange[0] <= row <= nextBookmarkRange[-1]:
-        return nextBookmark
-    return None
+      beginIndex = bisect.bisect_left(bookmarkList, ((beginRow,),))
+      endIndex = bisect.bisect(bookmarkList, ((endRow,),))
+    return bookmarkList[beginIndex:endIndex]
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
     app.log.info(paneRow, paneCol, shift)
