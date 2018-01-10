@@ -37,6 +37,7 @@ class Actions(app.mutator.Mutator):
   def __init__(self):
     app.mutator.Mutator.__init__(self)
     self.view = None
+    self.isBinary = False
     self.rootGrammar = app.prefs.getGrammar(None)
     self.debugUpperChangedRow = -1
     self.parser = app.parser.Parser()
@@ -717,10 +718,18 @@ class Actions(app.mutator.Mutator):
     if not self.isSelectionInView():
        self.scrollToOptimalScrollPosition()
 
-  def doLinesToData(self, data):
+  def doLinesToBinaryData(self, lines):
+    # TODO(dschuyler): convert lines to binary data.
+    return ''
+
+  def doLinesToData(self, lines):
     def encode(line):
       return chr(int(line.groups()[0], 16))
-    return re.sub('\x01([0-9a-fA-F][0-9a-fA-F])', encode, "\n".join(data))
+    return re.sub('\x01([0-9a-fA-F][0-9a-fA-F])', encode, "\n".join(lines))
+
+  def doBinaryDataToLines(self, data):
+    # TODO(dschuyler): convert binary data to lines.
+    return ["Binary file.", "Editing this text won't change the file."]
 
   def doDataToLines(self, data):
     # Performance: in a 1000 line test it appears fastest to do some simple
@@ -735,7 +744,10 @@ class Actions(app.mutator.Mutator):
     return data.split('\n')
 
   def dataToLines(self):
-    self.lines = self.doDataToLines(self.data)
+    if self.isBinary:
+      self.lines = self.doBinaryDataToLines(self.data)
+    else:
+      self.lines = self.doDataToLines(self.data)
 
   def fileFilter(self, data):
     self.data = data
@@ -757,13 +769,17 @@ class Actions(app.mutator.Mutator):
       try:
         inputFile = io.open(self.fullPath)
         data = inputFile.read()
+        # Hacky detection of binary files.
+        unicode(data).decode('utf-8')
         self.fileEncoding = inputFile.encoding
         self.setMessage('Opened existing file')
+        self.isBinary = False
       except Exception:
         try:
           inputFile = io.open(self.fullPath, 'rb')
           data = inputFile.read()
-          self.fileEncoding = None  # i.e. binary.
+          self.fileEncoding = None
+          self.isBinary = True
           self.setMessage('Opened file as a binary file')
         except Exception:
           app.log.info('error opening file', self.fullPath)
@@ -912,7 +928,11 @@ class Actions(app.mutator.Mutator):
     return horizontally and vertically
 
   def linesToData(self):
-    self.data = self.doLinesToData(self.lines)
+    if self.isBinary:
+      # TODO(dschuyler): convert binary data.
+      pass #self.data = self.doLinesToBinaryData(self.lines)
+    else:
+      self.data = self.doLinesToData(self.lines)
 
   def fileWrite(self):
     # Preload the message with an error that should be overwritten.
