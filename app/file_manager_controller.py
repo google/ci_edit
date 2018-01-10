@@ -20,10 +20,7 @@ import time
 
 
 class DirectoryListController(app.controller.Controller):
-  """
-
-          Work in progress.
-
+  """Gather and prepare file directory information.
   """
   def __init__(self, host):
     app.controller.Controller.__init__(self, host, 'DirectoryListController')
@@ -117,26 +114,23 @@ class DirectoryListController(app.controller.Controller):
 
 
 class FileManagerController(app.controller.Controller):
-  """
-
-          Work in progress.
-
+  """Create or open files.
   """
   def __init__(self, host):
     app.controller.Controller.__init__(self, host, 'FileManagerController')
 
   def createOrOpen(self):
     path = self.textBuffer.lines[0]
-    if not os.path.isfile(path):
-      return
-    if not os.access(path, os.R_OK):
-      clip = [input + ":", 'Error opening file.']
-    else:
-      app.log.info('got a file', path)
+    if not os.path.isdir(path):
+      if not os.access(path, os.R_OK):
+        if os.path.isfile(path):
+          clip = [path + ":", 'Error opening file.']
+          return
       textBuffer = app.buffer_manager.buffers.loadTextBuffer(path,
           self.host.host.inputWindow)
+      assert textBuffer.parser
       self.host.host.inputWindow.setTextBuffer(textBuffer)
-      self.changeToInputWindow()
+    self.changeToInputWindow()
 
   def focus(self):
     self.textBuffer.selectionAll()
@@ -153,17 +147,17 @@ class FileManagerController(app.controller.Controller):
   def info(self):
     app.log.info('FileManagerController command set')
 
+  def maybeSlash(self, expandedPath):
+    if (self.textBuffer.lines[0] and self.textBuffer.lines[0][-1] != '/' and
+        os.path.isdir(expandedPath)):
+      self.textBuffer.insert('/')
+
   def onChange(self):
     self.host.directoryList.controller.onChange()
     app.controller.Controller.onChange(self)
 
   def optionChanged(self, name, value):
     self.host.directoryList.controller.shownDirectory = None
-
-  def maybeSlash(self, expandedPath):
-    if (self.textBuffer.lines[0] and self.textBuffer.lines[0][-1] != '/' and
-        os.path.isdir(expandedPath)):
-      self.textBuffer.insert('/')
 
   def tabCompleteExtend(self):
     """Extend the selection to match characters in common."""

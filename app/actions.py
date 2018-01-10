@@ -749,7 +749,8 @@ class Actions(app.mutator.Mutator):
   def fileLoad(self):
     app.log.info('fileLoad', self.fullPath)
     inputFile = None
-    self.isReadOnly = not os.access(self.fullPath, os.W_OK)
+    self.isReadOnly = (os.path.isfile(self.fullPath) and
+        not os.access(self.fullPath, os.W_OK))
     if not os.path.exists(self.fullPath):
       self.setMessage('Creating new file')
     else:
@@ -780,11 +781,8 @@ class Actions(app.mutator.Mutator):
       self.data = unicode("")
     self.fileExtension = os.path.splitext(self.fullPath)[1]
     self.rootGrammar = app.prefs.getGrammar(self.fileExtension)
-    if self.data:
-      self.parseGrammars()
-      self.dataToLines()
-    else:
-      self.parser = None
+    self.parseGrammars()
+    self.dataToLines()
 
     # Restore all user history.
     app.history.loadUserHistory(self.fullPath)
