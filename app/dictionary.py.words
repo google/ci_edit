@@ -58,8 +58,10 @@ getcwd
 getenv
 getmaxyx
 getmouse
+getmtime
 getpid
 getpreferredencoding
+getsize
 getvalue
 getyx
 gid
@@ -94,6 +96,7 @@ leaveok
 len
 lft
 listdir
+localtime
 lpcstr
 lpvoid
 lstrip
@@ -158,6 +161,7 @@ sre
 sright
 startswith
 str
+strftime
 sys
 tempfile
 termios
