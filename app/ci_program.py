@@ -592,7 +592,7 @@ class CiProgram:
         elif i == '--clearHistory':
           app.history.clearUserHistory()
           self.quitNow()
-        elif i == '--eightBit':
+        elif i == '--eightColors':
           numColors = 8
         elif i == '--version':
           userMessage(app.help.docs['version'])

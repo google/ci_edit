@@ -100,7 +100,6 @@ numberTest('02f', (0, 3))
 
 color8 = {
   '_pre_selection': 1,
-  'bookmarkColorIndexStart': 3,
   'bracket': 1,
   'c': 0,
   'c_preprocessor': 1,
