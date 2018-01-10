@@ -58,8 +58,8 @@ class DirectoryListController(app.controller.Controller):
         dirPath, fileName = os.path.split(path)
       if os.path.isdir(dirPath):
         lines = []
-        self.host.contents = []
         try:
+          fileLines = []
           contents = os.listdir(dirPath)
           for i in contents:
             if not self.host.host.opt['dotFiles'] and i[0] == '.':
@@ -67,28 +67,31 @@ class DirectoryListController(app.controller.Controller):
             fullPath = os.path.join(dirPath, i)
             if os.path.isdir(fullPath):
               i += os.path.sep
-            self.host.contents.append(i)
             iSize = ''
             iModified = ''
             if self.host.host.opt['sizes'] and os.path.isfile(fullPath):
               iSize = '%d bytes' % os.path.getsize(fullPath)
             if self.host.host.opt['modified']:
-              iModified = unicode(time.strftime('%c',
-                  time.localtime(os.path.getmtime(fullPath))),)
-            lines.append('%-40s  %16s  %24s' % (i, iSize, iModified))
+              iModified = os.path.getmtime(fullPath)
+            fileLines.append([i, iSize, iModified])
+          if self.host.opt['Size'] is not None:
+            # Sort by size.
+            fileLines.sort(reverse=not self.host.opt['Size'],
+                key=lambda x: x[1])
+          elif self.host.opt['Modified'] is not None:
+            # Sort by modification date.
+            fileLines.sort(reverse=not self.host.opt['Modified'],
+                key=lambda x: x[2])
+          else:
+            fileLines.sort(reverse=not self.host.opt['Name'],
+                key=lambda x: unicode.lower(x[0]))
+          lines = ['%-40s  %16s  %24s' % (
+              i[0], i[1], unicode(time.strftime('%c', time.localtime(i[2]))))
+              for i in fileLines]
+          self.host.contents = [i[0] for i in fileLines]
         except OSError as e:
           lines = ['Error opening directory.']
           lines.append(unicode(e))
-        if self.host.opt['Size'] is not None:
-          # Sort by size.
-          lines.sort(reverse=not self.host.opt['Size'],
-              key=lambda x: x[40:])
-        elif self.host.opt['Modified'] is not None:
-          # Sort by size.
-          lines.sort(reverse=not self.host.opt['Modified'],
-              key=lambda x: x[40 + 17:])
-        else:
-          lines.sort(reverse=not self.host.opt['Name'], key=unicode.lower)
         clip = ['./', '../'] + lines
       else:
         clip = [dirPath + ": not found"]
