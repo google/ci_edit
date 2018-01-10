@@ -1003,11 +1003,6 @@ class DirectoryList(Window):
   def getPath(self):
     return self.host.textBuffer.lines[0]
 
-  def setPath(self, path):
-    self.host.textBuffer.selectionAll()
-    self.host.textBuffer.editPasteLines((path,))
-    self.host.textBuffer.updateBasicScrollPosition()
-
   def reshape(self, rows, cols, top, left):
     """Change self and sub-windows to fit within the given rectangle."""
     app.log.detail('reshape', rows, cols, top, left)
@@ -1031,9 +1026,9 @@ class DirectoryList(Window):
       path = os.path.dirname(path)
       if len(path) > len(os.path.sep):
         path += os.path.sep
-      self.setPath(path)
+      self.host.setPath(path)
       return
-    self.setPath(path + self.contents[row - 2])
+    self.host.setPath(path + self.contents[row - 2])
     self.host.controller.createOrOpen()
 
   def mouseDoubleClick(self, paneRow, paneCol, shift, ctrl, alt):
@@ -1090,6 +1085,21 @@ class FileManagerWindow(Window):
     self.statusLine = StatusLine(self)
     self.statusLine.setParent(self, 0)
 
+  def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
+    row = self.scrollRow + paneRow
+    col = self.scrollCol + paneCol
+    line = self.textBuffer.lines[0]
+    col = self.scrollCol + paneCol
+    self.directoryList.controller.shownDirectory = None
+    if col >= len(line):
+      return
+    slash = line[col:].find('/')
+    self.setPath(line[:col + slash + 1])
+
+  def quitNow(self):
+    app.log.debug()
+    self.host.quitNow()
+
   def reshape(self, rows, cols, top, left):
     """Change self and sub-windows to fit within the given rectangle."""
     app.log.detail('reshape', rows, cols, top, left)
@@ -1103,25 +1113,14 @@ class FileManagerWindow(Window):
     rows -= 2
     self.directoryList.reshape(rows, cols, top, left)
 
-  def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
-    row = self.scrollRow + paneRow
-    col = self.scrollCol + paneCol
-    line = self.textBuffer.lines[0]
-    col = self.scrollCol + paneCol
-    self.directoryList.controller.shownDirectory = None
-    if col >= len(line):
-      return
-    slash = line[col:].find('/')
-    self.textBuffer.lines[0] = line[:col + slash + 1]
-
-  def quitNow(self):
-    app.log.debug()
-    self.host.quitNow()
-
   def setTextBuffer(self, textBuffer):
     textBuffer.lineLimitIndicator = 999999
     Window.setTextBuffer(self, textBuffer)
     self.controller.setTextBuffer(textBuffer)
+
+  def setPath(self, path):
+    self.textBuffer.selectionAll()
+    self.textBuffer.editPasteLines((path,))
 
 
 class PaletteWindow(ActiveWindow):
