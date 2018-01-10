@@ -100,7 +100,6 @@ numberTest('02f', (0, 3))
 
 color8 = {
   '_pre_selection': 1,
-  'bookmarkColorIndexStart': 0,
   'bracket': 1,
   'c': 0,
   'c_preprocessor': 1,
@@ -155,7 +154,6 @@ for i in color8.values():
 
 color256 = {
   '_pre_selection': stringColorIndex,
-  'bookmarkColorIndexStart': 96,
   'bracket': 6,
   'c': defaultColorIndex,
   'c_preprocessor': 1,
