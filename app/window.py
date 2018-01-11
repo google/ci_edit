@@ -23,6 +23,7 @@ import app.history
 import app.render
 import app.text_buffer
 import app.vi_editor
+import bisect
 import os
 import sys
 import curses
@@ -362,16 +363,59 @@ class LineNumbers(ViewWindow):
   def drawLineNumbers(self):
     limit = min(self.rows,
         len(self.host.textBuffer.lines) - self.host.scrollRow)
-    color = app.color.get('line_number')
+    cursorBookmarkColorIndex = None
+    visibleBookmarks = self.getVisibleBookmarks(self.host.scrollRow,
+                                                self.host.scrollRow + limit)
+    currentBookmarkIndex = 0
     for i in range(limit):
-      self.addStr(i, 0, ' %5d ' % (self.host.scrollRow + i + 1), color)
+      color = app.color.get('line_number')
+      currentRow = self.host.scrollRow + i
+      if currentBookmarkIndex < len(visibleBookmarks):
+        currentBookmark = visibleBookmarks[currentBookmarkIndex]
+      else:
+        currentBookmark = None
+      # Use a different color if the row is associated with a bookmark.
+      if currentBookmark:
+        if (currentRow >= currentBookmark[0][0] and
+            currentRow <= currentBookmark[0][1]):
+          color = app.color.get(currentBookmark[1].get('colorIndex'))
+          if self.host.cursorRow == currentRow:
+            cursorBookmarkColorIndex = currentBookmark[1].get('colorIndex')
+        if currentRow + 1 > currentBookmark[0][1]:
+          currentBookmarkIndex += 1
+      self.addStr(i, 0, ' %5d ' % (currentRow + 1), color)
     color = app.color.get('outside_document')
     for i in range(limit, self.rows):
       self.addStr(i, 0, '       ', color)
     cursorAt = self.host.cursorRow - self.host.scrollRow
     if 0 <= cursorAt < limit:
-      color = app.color.get('line_number_current')
+      if cursorBookmarkColorIndex:
+        if app.prefs.startup['numColors'] == 8:
+          color = app.color.get(cursorBookmarkColorIndex)
+        else:
+          color = app.color.get(cursorBookmarkColorIndex % 32 + 128)
+      else:
+        color = app.color.get('line_number_current')
       self.addStr(cursorAt, 1, '%5d' % (self.host.cursorRow + 1), color)
+
+  def getVisibleBookmarks(self, beginRow, endRow):
+    """
+    Args:
+      beginRow (int): the index of the line number that you want the list of
+                      bookmarks to start from.
+      endRow (int): the index of the line number that you want the list of
+                    bookmarks to end at (exclusive).
+
+    Returns:
+      A list containing the bookmarks that are displayed on the screen. If there
+      are no bookmarks, returns an empty list.
+    """
+    bookmarkList = self.host.textBuffer.bookmarks
+    beginIndex = endIndex = 0
+    if len(bookmarkList):
+      beginIndex = bisect.bisect_left(bookmarkList, ((beginRow,),))
+      endIndex = bisect.bisect(bookmarkList, ((endRow,),))
+    return bookmarkList[beginIndex:endIndex]
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
     app.log.info(paneRow, paneCol, shift)
