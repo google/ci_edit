@@ -1190,7 +1190,6 @@ class PopupWindow(Window):
     self.host = host
     self.controller = app.cu_editor.PopupController(self)
     self.setTextBuffer(app.text_buffer.TextBuffer())
-    self.controller.setTextBuffer(self.textBuffer)
     self.longestLineLength = 0
     self.message = []
     self.showOptions = True
