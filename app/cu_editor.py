@@ -385,7 +385,6 @@ class PaletteDialogController(app.controller.Controller):
     app.log.info('PaletteDialogController.__init__')
     def noOp(c, meta):
       app.log.info('noOp in PaletteDialogController')
-    self.textBuffer = app.text_buffer.TextBuffer()
     self.commandDefault = noOp
     self.commandSet = {
       KEY_F4: self.changeToHostWindow,
@@ -402,4 +401,4 @@ class PaletteDialogController(app.controller.Controller):
     app.log.info(repr(self))
 
   def setTextBuffer(self, textBuffer):
-    pass
+    self.textBuffer = textBuffer
