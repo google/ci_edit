@@ -394,8 +394,8 @@ class PaletteDialogController(app.controller.Controller):
     }
 
   def changeToHostWindow(self):
-    self.view.hide()
-    app.controller.Controller.changeToHostWindow(self)
+    mainProgram = self.host.prg
+    mainProgram.changeFocusTo(mainProgram.inputWindow)
 
   def info(self):
     app.log.info('PaletteDialogController command set')
