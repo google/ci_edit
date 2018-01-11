@@ -333,6 +333,7 @@ prefs = {
       'contains': ['c_string1', 'c_string2', 'pound_comment'],
     },
     'binary': {
+      'spelling': False,
       'type': 'binary',
     },
     'c': {
