@@ -215,6 +215,25 @@ class InteractiveOpener(app.editor.InteractiveOpener):
     self.commandDefault = self.textBuffer.insertPrintable
 
 
+class DirectoryList(app.file_manager_controller.DirectoryListController):
+  """Open a file to edit."""
+  def __init__(self, host):
+    app.file_manager_controller.DirectoryListController.__init__(self, host)
+
+  def setTextBuffer(self, textBuffer):
+    app.file_manager_controller.DirectoryListController.setTextBuffer(self,
+        textBuffer)
+    commandSet = initCommandSet(self, textBuffer)
+    commandSet.update({
+      KEY_ESCAPE: self.changeToInputWindow,
+      KEY_F1: self.info,
+      KEY_PAGE_DOWN: textBuffer.cursorSelectNonePageDown,
+      KEY_PAGE_UP: textBuffer.cursorSelectNonePageUp,
+    })
+    self.commandSet = commandSet
+    self.commandDefault = self.textBuffer.insertPrintable
+
+
 class FileOpener(app.file_manager_controller.FileManagerController):
   """Open a file to edit."""
   def __init__(self, host):
@@ -227,6 +246,8 @@ class FileOpener(app.file_manager_controller.FileManagerController):
     commandSet.update({
       KEY_ESCAPE: self.changeToInputWindow,
       KEY_F1: self.info,
+      KEY_PAGE_DOWN: self.passEventToDirectoryList,
+      KEY_PAGE_UP: self.passEventToDirectoryList,
       CTRL_I: self.tabCompleteExtend,
       CTRL_J: self.createOrOpen,
       CTRL_N: self.createOrOpen,

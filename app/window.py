@@ -1031,7 +1031,7 @@ class DirectoryList(Window):
     Window.__init__(self, host)
     self.host = host
     self.inputWindow = inputWindow
-    self.controller = app.file_manager_controller.DirectoryListController(self)
+    self.controller = app.cu_editor.DirectoryList(self)
     self.setTextBuffer(app.text_buffer.TextBuffer())
     self.optionsRow = OptionsRow(self)
     self.opt = {

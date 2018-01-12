@@ -30,6 +30,9 @@ class DirectoryListController(app.controller.Controller):
     self.onChange()
     app.controller.Controller.focus(self)
 
+  def info(self):
+    app.log.info('DirectoryListController command set')
+
   def onChange(self):
     input = self.host.getPath()
     app.log.debug(input, "\n", self.shownDirectory)
@@ -103,15 +106,6 @@ class DirectoryListController(app.controller.Controller):
   def optionChanged(self, name, value):
     self.shownDirectory = None
 
-  def setTextBuffer(self, textBuffer):
-    app.controller.Controller.setTextBuffer(self, textBuffer)
-    self.commandSet = {
-      CTRL_Q: self.saveEventChangeToInputWindow,
-
-      KEY_ESCAPE: self.changeToInputWindow,
-    }
-    self.commandDefault = self.textBuffer.noOpDefault
-
 
 class FileManagerController(app.controller.Controller):
   """Create or open files.
@@ -159,6 +153,9 @@ class FileManagerController(app.controller.Controller):
   def optionChanged(self, name, value):
     self.host.directoryList.controller.shownDirectory = None
 
+  def passEventToDirectoryList(self):
+    self.host.directoryList.controller.doCommand(self.savedCh, None)
+
   def tabCompleteExtend(self):
     """Extend the selection to match characters in common."""
     dirPath, fileName = os.path.split(self.textBuffer.lines[0])
@@ -169,9 +166,6 @@ class FileManagerController(app.controller.Controller):
     for i in os.listdir(expandedDir):
       if i.startswith(fileName):
         matches.append(i)
-      else:
-        pass
-        #app.log.info('not', i)
     if len(matches) <= 0:
       self.maybeSlash(expandedDir)
       self.onChange()
