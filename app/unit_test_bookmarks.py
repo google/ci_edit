@@ -1,7 +1,8 @@
 import app.prefs
 import app.text_buffer
+import app.window
+from mock import patch, Mock
 import unittest
-from mock import patch
 
 class BookmarkTestCases(unittest.TestCase):
   def setUp(self):
@@ -32,3 +33,24 @@ class BookmarkTestCases(unittest.TestCase):
 
       # Test for 256-colored mode
       test_with_an_x_colored_terminal(256)
+
+  def test_get_visible_bookmarks(self):
+    # Set up mock objects to test the LineNumbers methods.
+    fakeHost = Mock()
+    lineNumbers = app.window.LineNumbers(fakeHost)
+    fakeHost.lineNumberColumn = lineNumbers
+    lineNumbers.parent = fakeHost
+    fakeHost.textBuffer = Mock()
+    fakeHost.textBuffer.lines = 50
+    fakeHost.scrollRow = fakeHost.cursorRow = 0
+    lineNumbers.rows = 30
+    fakeHost.textBuffer.bookmarks = [((0, 0),), ((10, 10),), ((20, 20),),
+                                     ((30, 30),), ((30, 30),),]
+    visibleBookmarks = lineNumbers.getVisibleBookmarks(0, 30)
+    expectedBookmarks = {((0, 0),), ((10, 10),), ((20, 20),)}
+    self.assertEqual(set(visibleBookmarks), expectedBookmarks)
+    self.assertEqual(len(visibleBookmarks), 3)
+
+
+
+
