@@ -66,6 +66,7 @@ color = prefs['color']
 editor = loadPrefs('editor', 'editor')
 devTest = prefs['devTest']
 palette = prefs['palette']
+startup = {}
 status = loadPrefs('status', 'status')
 
 
