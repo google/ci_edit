@@ -414,6 +414,8 @@ class LineNumbers(ViewWindow):
     beginIndex = endIndex = 0
     if len(bookmarkList):
       beginIndex = bisect.bisect_left(bookmarkList, ((beginRow,),))
+      if beginIndex > 0 and bookmarkList[beginIndex - 1][0][1] >= beginRow:
+        beginIndex -= 1
       endIndex = bisect.bisect(bookmarkList, ((endRow,),))
     return bookmarkList[beginIndex:endIndex]
 

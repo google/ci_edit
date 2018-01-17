@@ -85,7 +85,6 @@ class BookmarkTestCases(unittest.TestCase):
     self.textBuffer.bookmarks = [((0, 10),), ((11, 30),),
                                  ((30, 45),), ((45, 49),)]
     self.lineNumbers.rows = 15
-    import pdb; pdb.set_trace()
     visibleBookmarks = self.lineNumbers.getVisibleBookmarks(
         self.fakeHost.scrollRow, self.fakeHost.scrollRow + self.lineNumbers.rows)
     expectedBookmarks = {((0, 10),), ((11, 30),)}
