@@ -126,22 +126,7 @@ class Actions(app.mutator.Mutator):
       'colorIndex': self.getBookmarkColor()
     }
     upperRow, _, lowerRow, _ = self.startAndEnd()
-    bookmarkRange = (upperRow, lowerRow)
-    return (bookmarkRange, bookmarkData)
-
-  def bookmarksOverlap(self, bookmarkRange1, bookmarkRange2):
-    """
-    Returns whether the two sorted bookmark ranges overlap.
-
-    Args:
-      bookmarkRange1 (tuple): a sorted tuple of row numbers.
-      bookmarkRange2 (tuple): a sorted tuple of row numbers.
-
-    Returns:
-      True if the ranges overlap. Otherwise, returns False.
-    """
-    return (bookmarkRange1[-1] >= bookmarkRange2[0] and
-            bookmarkRange1[0] <= bookmarkRange2[-1])
+    return app.bookmark.Bookmark(upperRow, lowerRow, bookmarkData)
 
   def bookmarkAdd(self):
     """
@@ -194,7 +179,7 @@ class Actions(app.mutator.Mutator):
       self.setMessage("No bookmarks to jump to")
       return
     _, _, lowerRow, _ = self.startAndEnd()
-    tempBookmark = ((lowerRow, float('inf')),)
+    tempBookmark = app.bookmark.Bookmark(lowerRow, float('inf'))
     index = bisect.bisect(self.bookmarks, tempBookmark)
     self.bookmarkGoto(self.bookmarks[index % len(self.bookmarks)])
 
@@ -212,7 +197,7 @@ class Actions(app.mutator.Mutator):
       self.setMessage("No bookmarks to jump to")
       return
     upperRow, _, _, _ = self.startAndEnd()
-    tempBookmark = ((upperRow,),)
+    tempBookmark = app.bookmark.Bookmark(upperRow, upperRow)
     index = bisect.bisect_left(self.bookmarks, tempBookmark)
     self.bookmarkGoto(self.bookmarks[index - 1])
 
@@ -228,23 +213,23 @@ class Actions(app.mutator.Mutator):
     """
     upperRow, _, lowerRow, _ = self.startAndEnd()
     rangeList = self.bookmarks
-    needle = ((upperRow, lowerRow),)
+    needle = app.bookmark.Bookmark(upperRow, lowerRow)
     # Find the left-hand index.
     begin = bisect.bisect_left(rangeList, needle)
-    if begin and needle[0][0] <= rangeList[begin-1][0][1]:
+    if begin and needle.begin <= rangeList[begin - 1].end:
       begin -= 1
     # Find the right-hand index.
     low = begin
     index = begin
     high = len(rangeList)
-    offset = needle[0][1]
+    offset = needle.end
     while True:
       index = (high + low) / 2
       if low == high:
         break
-      if offset >= rangeList[index][0][1]:
+      if offset >= rangeList[index].end:
         low = index + 1
-      elif offset < rangeList[index][0][0]:
+      elif offset < rangeList[index].begin:
         high = index
       else:
         index += 1
