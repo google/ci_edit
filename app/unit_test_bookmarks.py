@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import app.bookmark
+from app.bookmark import Bookmark
 import app.prefs
 import app.text_buffer
 import app.window
@@ -34,66 +34,71 @@ class BookmarkTestCases(unittest.TestCase):
     pass
 
   def test_bookmark_comparisons(self):
-    b1 = app.bookmark.Bookmark(1, 5)
-    b2 = app.bookmark.Bookmark(1, 3)
-    self.assertEqual(b1 > b2, True)
-    self.assertEqual(b1 >= b2, True)
-    self.assertEqual(b1 < b2, False)
-    self.assertEqual(b1 <= b2, False)
-    self.assertEqual(b2 < b1, True)
-    self.assertEqual(b2 <= b1, True)
-    self.assertEqual(b2 > b1, False)
-    self.assertEqual(b2 >= b1, False)
-    self.assertEqual(b1 != b2, True)
-    self.assertEqual(b1 == b2, False)
+    b1 = Bookmark(1, 5)
+    b2 = Bookmark(1, 3)
+    self.assertTrue(b1 > b2)
+    self.assertTrue(b1 >= b2)
+    self.assertFalse(b1 < b2)
+    self.assertFalse(b1 <= b2)
+    self.assertTrue(b2 < b1)
+    self.assertTrue(b2 <= b1)
+    self.assertFalse(b2 > b1)
+    self.assertFalse(b2 >= b1)
+    self.assertTrue(b1 != b2)
+    self.assertFalse(b1 == b2)
+    self.assertFalse(hash(b1) == hash(b2))
 
-    b1 = app.bookmark.Bookmark(2, 5)
-    self.assertEqual(b1 > b2, True)
-    self.assertEqual(b1 >= b2, True)
-    self.assertEqual(b1 < b2, False)
-    self.assertEqual(b1 <= b2, False)
-    self.assertEqual(b2 < b1, True)
-    self.assertEqual(b2 <= b1, True)
-    self.assertEqual(b2 > b1, False)
-    self.assertEqual(b2 >= b1, False)
-    self.assertEqual(b1 != b2, True)
-    self.assertEqual(b1 == b2, False)
+    b1 = Bookmark(2, 5)
+    self.assertTrue(b1 > b2)
+    self.assertTrue(b1 >= b2)
+    self.assertFalse(b1 < b2)
+    self.assertFalse(b1 <= b2)
+    self.assertTrue(b2 < b1)
+    self.assertTrue(b2 <= b1)
+    self.assertFalse(b2 > b1)
+    self.assertFalse(b2 >= b1)
+    self.assertTrue(b1 != b2)
+    self.assertFalse(b1 == b2)
+    self.assertFalse(hash(b1) == hash(b2))
 
-    b2 = app.bookmark.Bookmark(1, 10)
-    self.assertEqual(b1 > b2, True)
-    self.assertEqual(b1 >= b2, True)
-    self.assertEqual(b1 < b2, False)
-    self.assertEqual(b1 <= b2, False)
-    self.assertEqual(b2 < b1, True)
-    self.assertEqual(b2 <= b1, True)
-    self.assertEqual(b2 > b1, False)
-    self.assertEqual(b2 >= b1, False)
-    self.assertEqual(b1 != b2, True)
-    self.assertEqual(b1 == b2, False)
+    b2 = Bookmark(1, 10)
+    self.assertTrue(b1 > b2)
+    self.assertTrue(b1 >= b2)
+    self.assertFalse(b1 < b2)
+    self.assertFalse(b1 <= b2)
+    self.assertTrue(b2 < b1)
+    self.assertTrue(b2 <= b1)
+    self.assertFalse(b2 > b1)
+    self.assertFalse(b2 >= b1)
+    self.assertTrue(b1 != b2)
+    self.assertFalse(b1 == b2)
+    self.assertFalse(hash(b1) == hash(b2))
 
-    b1 = app.bookmark.Bookmark(1, 10)
-    self.assertEqual(b1 > b2, False)
-    self.assertEqual(b1 >= b2, True)
-    self.assertEqual(b1 < b2, False)
-    self.assertEqual(b1 <= b2, True)
-    self.assertEqual(b2 < b1, False)
-    self.assertEqual(b2 <= b1, True)
-    self.assertEqual(b2 > b1, False)
-    self.assertEqual(b2 >= b1, True)
-    self.assertEqual(b1 != b2, False)
-    self.assertEqual(b1 == b2, True)
+    b1 = Bookmark(1, 10)
+    self.assertFalse(b1 > b2)
+    self.assertTrue(b1 >= b2)
+    self.assertFalse(b1 < b2)
+    self.assertTrue(b1 <= b2)
+    self.assertFalse(b2 < b1)
+    self.assertTrue(b2 <= b1)
+    self.assertFalse(b2 > b1)
+    self.assertTrue(b2 >= b1)
+    self.assertFalse(b1 != b2)
+    self.assertTrue(b1 == b2)
+    self.assertTrue(hash(b1) == hash(b2))
 
-    b2 = app.bookmark.Bookmark(-10, 10)
-    self.assertEqual(b1 > b2, True)
-    self.assertEqual(b1 >= b2, True)
-    self.assertEqual(b1 < b2, False)
-    self.assertEqual(b1 <= b2, False)
-    self.assertEqual(b2 < b1, True)
-    self.assertEqual(b2 <= b1, True)
-    self.assertEqual(b2 > b1, False)
-    self.assertEqual(b2 >= b1, False)
-    self.assertEqual(b1 != b2, True)
-    self.assertEqual(b1 == b2, False)
+    b2 = Bookmark(-10, 10)
+    self.assertTrue(b1 > b2)
+    self.assertTrue(b1 >= b2)
+    self.assertFalse(b1 < b2)
+    self.assertFalse(b1 <= b2)
+    self.assertTrue(b2 < b1)
+    self.assertTrue(b2 <= b1)
+    self.assertFalse(b2 > b1)
+    self.assertFalse(b2 >= b1)
+    self.assertTrue(b1 != b2)
+    self.assertFalse(b1 == b2)
+    self.assertFalse(hash(b1) == hash(b2))
 
   def test_get_next_bookmark_color(self):
     def test_with_an_x_colored_terminal(x):
@@ -121,25 +126,25 @@ class BookmarkTestCases(unittest.TestCase):
   def test_get_visible_bookmarks(self):
     # Set up mock objects to test the LineNumbers methods.
 
-    self.textBuffer.bookmarks = [((0, 0),), ((10, 10),), ((20, 20),),
-                                 ((30, 30),), ((40, 40),),]
+    self.textBuffer.bookmarks = [Bookmark(0, 0), Bookmark(10, 10), Bookmark(20, 20),
+                                 Bookmark(30, 30), Bookmark(40, 40)]
     visibleBookmarks = self.lineNumbers.getVisibleBookmarks(
-        self.fakeHost.scrollRow, self.lineNumbers.rows)
-    expectedBookmarks = {((0, 0),), ((10, 10),), ((20, 20),)}
+        self.fakeHost.scrollRow, self.fakeHost.scrollRow + self.lineNumbers.rows)
+    expectedBookmarks = {Bookmark(0, 0), Bookmark(10, 10), Bookmark(20, 20)}
     self.assertEqual(set(visibleBookmarks), expectedBookmarks)
     self.assertEqual(len(visibleBookmarks), len(expectedBookmarks))
 
     self.fakeHost.scrollRow = 20
     visibleBookmarks = self.lineNumbers.getVisibleBookmarks(
         self.fakeHost.scrollRow, 20 + self.lineNumbers.rows)
-    expectedBookmarks = {((20, 20),), ((30, 30),), ((40, 40),)}
+    expectedBookmarks = {Bookmark(20, 20), Bookmark(30, 30), Bookmark(40, 40)}
     self.assertEqual(set(visibleBookmarks), expectedBookmarks)
     self.assertEqual(len(visibleBookmarks), len(expectedBookmarks))
 
     self.fakeHost.scrollRow = 21
     visibleBookmarks = self.lineNumbers.getVisibleBookmarks(
         self.fakeHost.scrollRow, self.fakeHost.scrollRow + self.lineNumbers.rows)
-    expectedBookmarks = {((30, 30),), ((40, 40),)}
+    expectedBookmarks = {Bookmark(30, 30), Bookmark(40, 40)}
     self.assertEqual(set(visibleBookmarks), expectedBookmarks)
     self.assertEqual(len(visibleBookmarks), len(expectedBookmarks))
 
@@ -147,7 +152,7 @@ class BookmarkTestCases(unittest.TestCase):
     self.lineNumbers.rows = 10
     visibleBookmarks = self.lineNumbers.getVisibleBookmarks(
         self.fakeHost.scrollRow, self.fakeHost.scrollRow + self.lineNumbers.rows)
-    expectedBookmarks = {((30, 30),)}
+    expectedBookmarks = {Bookmark(30, 30)}
     self.assertEqual(set(visibleBookmarks), expectedBookmarks)
     self.assertEqual(len(visibleBookmarks), len(expectedBookmarks))
 
@@ -158,11 +163,11 @@ class BookmarkTestCases(unittest.TestCase):
     self.assertEqual(visibleBookmarks, [])
 
     self.fakeHost.scrollRow = 10
-    self.textBuffer.bookmarks = [((0, 10),), ((11, 30),),
-                                 ((30, 45),), ((45, 49),)]
+    self.textBuffer.bookmarks = [Bookmark(0, 10), Bookmark(11, 29),
+                                 Bookmark(30, 45), Bookmark(46, 49)]
     self.lineNumbers.rows = 15
     visibleBookmarks = self.lineNumbers.getVisibleBookmarks(
         self.fakeHost.scrollRow, self.fakeHost.scrollRow + self.lineNumbers.rows)
-    expectedBookmarks = {((0, 10),), ((11, 30),)}
+    expectedBookmarks = {Bookmark(0, 10), Bookmark(11, 29)}
     self.assertEqual(set(visibleBookmarks), expectedBookmarks)
     self.assertEqual(len(visibleBookmarks), len(expectedBookmarks))

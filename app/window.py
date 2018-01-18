@@ -439,7 +439,7 @@ class LineNumbers(ViewWindow):
       if beginIndex > 0 and bookmarkList[beginIndex - 1].end >= beginRow:
         beginIndex -= 1
       needle.range = (endRow, endRow)
-      endIndex = bisect.bisect(bookmarkList, needle)
+      endIndex = bisect.bisect_left(bookmarkList, needle)
     return bookmarkList[beginIndex:endIndex]
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):

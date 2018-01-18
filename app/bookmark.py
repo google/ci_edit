@@ -76,3 +76,9 @@ class Bookmark:
 
   def __ge__(self, other):
     return self.range >= other.range
+
+  def __hash__(self):
+    return hash(self.range)
+
+  def __repr__(self):
+    return repr(self.range)
