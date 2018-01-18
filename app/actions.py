@@ -149,13 +149,13 @@ class Actions(app.mutator.Mutator):
     Goes to the bookmark that is passed in.
 
     Args:
-      bookmark (tuple): contains bookmarkRange and bookmarkData. More info can
-        be found in the dataToBookmark function.
+      bookmark (Bookmark): The bookmark you want to jump to. This object is
+                           defined in bookmark.py
 
     Returns:
       None.
     """
-    bookmarkData = bookmark[1]
+    bookmarkData = bookmark.data
     #cursorRow, cursorCol = bookmarkData['cursor']
     penRow, penCol = bookmarkData['pen']
     markerRow, markerCol = bookmarkData['marker']

@@ -18,7 +18,7 @@ class Bookmark:
   text document. Note that because text buffer lines index at 0, all
   references to rows also assume that 0 is the first line.
   """
-  def __init__(self, beginRow, endRow, data=None):
+  def __init__(self, beginRow, endRow, data={}):
     """
     Args:
       beginRow (int): The line that the bookmark starts on (inclusive).

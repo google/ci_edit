@@ -397,12 +397,12 @@ class LineNumbers(ViewWindow):
         currentBookmark = None
       # Use a different color if the row is associated with a bookmark.
       if currentBookmark:
-        if (currentRow >= currentBookmark[0][0] and
-            currentRow <= currentBookmark[0][1]):
-          color = app.color.get(currentBookmark[1].get('colorIndex'))
+        if (currentRow >= currentBookmark.begin and
+            currentRow <= currentBookmark.end):
+          color = app.color.get(currentBookmark.data.get('colorIndex'))
           if self.host.cursorRow == currentRow:
-            cursorBookmarkColorIndex = currentBookmark[1].get('colorIndex')
-        if currentRow + 1 > currentBookmark[0][1]:
+            cursorBookmarkColorIndex = currentBookmark.data.get('colorIndex')
+        if currentRow + 1 > currentBookmark.end:
           currentBookmarkIndex += 1
       self.addStr(i, 0, ' %5d ' % (currentRow + 1), color)
     color = app.color.get('outside_document')
@@ -434,10 +434,12 @@ class LineNumbers(ViewWindow):
     bookmarkList = self.host.textBuffer.bookmarks
     beginIndex = endIndex = 0
     if len(bookmarkList):
-      beginIndex = bisect.bisect_left(bookmarkList, ((beginRow,),))
-      if beginIndex > 0 and bookmarkList[beginIndex - 1][0][1] >= beginRow:
+      needle = app.bookmark.Bookmark(beginRow, beginRow)
+      beginIndex = bisect.bisect_left(bookmarkList, needle)
+      if beginIndex > 0 and bookmarkList[beginIndex - 1].end >= beginRow:
         beginIndex -= 1
-      endIndex = bisect.bisect(bookmarkList, ((endRow,),))
+      needle.range = (endRow, endRow)
+      endIndex = bisect.bisect(bookmarkList, needle)
     return bookmarkList[beginIndex:endIndex]
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
