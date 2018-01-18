@@ -22,6 +22,7 @@ import sys
 import time
 import traceback
 
+import app.bookmark
 import app.clipboard
 import app.history
 import app.log

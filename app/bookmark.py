@@ -46,6 +46,9 @@ class Bookmark:
   def __eq__(self, other):
     return self.range == other.range
 
+  def __ne__(self, other):
+    return self.range != other.range
+
   def __le__(self, other):
     return self.range <= other.range
 

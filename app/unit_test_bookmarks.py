@@ -1,4 +1,4 @@
-# Copyright 2016 Google Inc.
+# Copyright 2018 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,9 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import mock
-import unittest
-
+import app.bookmark
 import app.prefs
 import app.text_buffer
 import app.window
@@ -34,6 +32,68 @@ class BookmarkTestCases(unittest.TestCase):
 
   def tearDown(self):
     pass
+
+  def test_bookmark_comparisons(self):
+    b1 = app.bookmark.Bookmark(1, 5)
+    b2 = app.bookmark.Bookmark(1, 3)
+    self.assertEqual(b1 > b2, True)
+    self.assertEqual(b1 >= b2, True)
+    self.assertEqual(b1 < b2, False)
+    self.assertEqual(b1 <= b2, False)
+    self.assertEqual(b2 < b1, True)
+    self.assertEqual(b2 <= b1, True)
+    self.assertEqual(b2 > b1, False)
+    self.assertEqual(b2 >= b1, False)
+    self.assertEqual(b1 != b2, True)
+    self.assertEqual(b1 == b2, False)
+
+    b1 = app.bookmark.Bookmark(2, 5)
+    self.assertEqual(b1 > b2, True)
+    self.assertEqual(b1 >= b2, True)
+    self.assertEqual(b1 < b2, False)
+    self.assertEqual(b1 <= b2, False)
+    self.assertEqual(b2 < b1, True)
+    self.assertEqual(b2 <= b1, True)
+    self.assertEqual(b2 > b1, False)
+    self.assertEqual(b2 >= b1, False)
+    self.assertEqual(b1 != b2, True)
+    self.assertEqual(b1 == b2, False)
+
+    b2 = app.bookmark.Bookmark(1, 10)
+    self.assertEqual(b1 > b2, True)
+    self.assertEqual(b1 >= b2, True)
+    self.assertEqual(b1 < b2, False)
+    self.assertEqual(b1 <= b2, False)
+    self.assertEqual(b2 < b1, True)
+    self.assertEqual(b2 <= b1, True)
+    self.assertEqual(b2 > b1, False)
+    self.assertEqual(b2 >= b1, False)
+    self.assertEqual(b1 != b2, True)
+    self.assertEqual(b1 == b2, False)
+
+    b1 = app.bookmark.Bookmark(1, 10)
+    self.assertEqual(b1 > b2, False)
+    self.assertEqual(b1 >= b2, True)
+    self.assertEqual(b1 < b2, False)
+    self.assertEqual(b1 <= b2, True)
+    self.assertEqual(b2 < b1, False)
+    self.assertEqual(b2 <= b1, True)
+    self.assertEqual(b2 > b1, False)
+    self.assertEqual(b2 >= b1, True)
+    self.assertEqual(b1 != b2, False)
+    self.assertEqual(b1 == b2, True)
+
+    b2 = app.bookmark.Bookmark(-10, 10)
+    self.assertEqual(b1 > b2, True)
+    self.assertEqual(b1 >= b2, True)
+    self.assertEqual(b1 < b2, False)
+    self.assertEqual(b1 <= b2, False)
+    self.assertEqual(b2 < b1, True)
+    self.assertEqual(b2 <= b1, True)
+    self.assertEqual(b2 > b1, False)
+    self.assertEqual(b2 >= b1, False)
+    self.assertEqual(b1 != b2, True)
+    self.assertEqual(b1 == b2, False)
 
   def test_get_next_bookmark_color(self):
     def test_with_an_x_colored_terminal(x):
