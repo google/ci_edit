@@ -1255,3 +1255,11 @@ class PaletteWindow(Window):
       for k in range(rows):
         self.addStr(k, i * 5, ' %3d ' % (i + k * width,),
             app.color.get(i + k * width))
+
+  def setTextBuffer(self, textBuffer):
+    Window.setTextBuffer(self, textBuffer)
+    self.controller.setTextBuffer(textBuffer)
+
+  def unfocus(self):
+    self.hide()
+    Window.unfocus(self)
