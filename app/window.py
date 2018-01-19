@@ -1169,14 +1169,15 @@ class FileManagerWindow(Window):
     self.textBuffer.editPasteLines((path,))
 
 
-class PaletteWindow(ActiveWindow):
+class PaletteWindow(Window):
   """A window with example foreground and background text colors."""
   def __init__(self, prg):
-    ActiveWindow.__init__(self, prg)
+    Window.__init__(self, prg)
+    self.prg = prg
     self.resizeTo(16, 16 * 5)
     self.moveTo(8, 8)
-    self.controller = app.controller.MainController(self)
-    self.controller.add(app.cu_editor.PaletteDialogController(self))
+    self.controller = app.cu_editor.PaletteDialogController(self)
+    self.setTextBuffer(app.text_buffer.TextBuffer())
 
   def render(self):
     width = 16
@@ -1186,3 +1187,10 @@ class PaletteWindow(ActiveWindow):
         self.addStr(k, i * 5, ' %3d ' % (i + k * width,),
             app.color.get(i + k * width))
 
+  def setTextBuffer(self, textBuffer):
+    Window.setTextBuffer(self, textBuffer)
+    self.controller.setTextBuffer(textBuffer)
+
+  def unfocus(self):
+    self.hide()
+    Window.unfocus(self)
