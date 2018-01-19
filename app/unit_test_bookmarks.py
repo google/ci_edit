@@ -66,7 +66,10 @@ class BookmarkTestCases(unittest.TestCase):
     visibleBookmarks = self.lineNumbers.getVisibleBookmarks(
         self.fakeHost.scrollRow, self.lineNumbers.rows)
     expectedBookmarks = {((0, 0),), ((10, 10),), ((20, 20),)}
+
+    # Check that visibleBookmarks contains all the correct bookmarks
     self.assertEqual(set(visibleBookmarks), expectedBookmarks)
+    # Check that the number of bookmarks is the same, as set removes duplicates.
     self.assertEqual(len(visibleBookmarks), len(expectedBookmarks))
 
     self.fakeHost.scrollRow = 20
