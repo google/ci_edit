@@ -947,11 +947,19 @@ class OptionsRow(ViewWindow):
       return '%s %s' % (decoration, control['name'])
     self.addElement(draw, 'sort', name, reference, width, sep, len(' v'))
 
-  def addToggle(self, name, reference, width=None, sep=" "):
+  def addToggle(self, name, reference, width=None, sep="  "):
+    if 1:
+      toggleOn = '[x] ' + name
+      toggleOff = '[ ] ' + name
+    if 0:
+      toggleOn = unichr(0x2612) + ' ' + control['name']
+      toggleOff = unichr(0x2610) + ' ' + control['name']
+    if 0:
+      toggleOn = '[+' + control['name'] + ']'
+      toggleOff = '[-' + control['name'] + ']'
     def draw(control):
-      if control['dict'][control['name']]:
-        return '[+' + control['name'] + ']'
-      return '[-' + control['name'] + ']'
+      return toggleOn if control['dict'][control['name']] else toggleOff
+    width = max(width, min(len(toggleOn), len(toggleOff)))
     self.addElement(draw, 'toggle', name, reference, width, sep, len('[-]'))
 
   def beginGroup(self):
