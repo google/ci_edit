@@ -1132,14 +1132,14 @@ class FileManagerWindow(Window):
     self.titleRow.addLabel(' ci    Open File')
     self.titleRow.setParent(self, 0)
     self.optionsRow = OptionsRow(self)
-    self.optionsRow.addLabel('       Show: ')
+    self.optionsRow.addLabel(' Show: ')
     for key in ['dotFiles', 'sizes', 'modified']:
       self.optionsRow.addToggle(key, self.opt)
     self.optionsRow.setParent(self, 0)
     self.directoryList = DirectoryList(self, inputWindow)
     self.directoryList.setParent(self, 0)
-    self.statusLine = StatusLine(self)
-    self.statusLine.setParent(self, 0)
+    #self.statusLine = StatusLine(self)
+    #self.statusLine.setParent(self, 0)
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
     row = self.scrollRow + paneRow
@@ -1162,14 +1162,13 @@ class FileManagerWindow(Window):
     self.titleRow.reshape(1, cols, top, left)
     top += 1
     rows -= 1
-    self.optionsRow.reshape(1, cols, top, left)
-    top += 1
-    rows -= 1
     Window.reshape(self, 1, cols, top, left)
     top += 1
     rows -= 1
-    self.statusLine.reshape(1, cols, rows, left)
+    self.optionsRow.reshape(1, cols, rows, left)
     rows -= 2
+    #self.statusLine.reshape(1, cols, rows, left)
+    #rows -= 2
     self.directoryList.reshape(rows, cols, top, left)
 
   def setTextBuffer(self, textBuffer):
