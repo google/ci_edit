@@ -1128,11 +1128,12 @@ class FileManagerWindow(Window):
       'sizes': True,
       'modified': True,
     }
+    self.titleRow = OptionsRow(self)
+    self.titleRow.addLabel(' ci    Open File')
+    self.titleRow.setParent(self, 0)
     self.optionsRow = OptionsRow(self)
-    self.optionsRow.addLabel('ci   Open File ')
-    keys = self.opt.keys()
-    keys.sort()
-    for key in keys:
+    self.optionsRow.addLabel('       Show: ')
+    for key in ['dotFiles', 'sizes', 'modified']:
       self.optionsRow.addToggle(key, self.opt)
     self.optionsRow.setParent(self, 0)
     self.directoryList = DirectoryList(self, inputWindow)
@@ -1158,6 +1159,9 @@ class FileManagerWindow(Window):
   def reshape(self, rows, cols, top, left):
     """Change self and sub-windows to fit within the given rectangle."""
     app.log.detail('reshape', rows, cols, top, left)
+    self.titleRow.reshape(1, cols, top, left)
+    top += 1
+    rows -= 1
     self.optionsRow.reshape(1, cols, top, left)
     top += 1
     rows -= 1
