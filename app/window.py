@@ -1099,6 +1099,7 @@ class DirectoryList(Window):
 
   def setTextBuffer(self, textBuffer):
     textBuffer.lineLimitIndicator = 999999
+    textBuffer.highlightTrailingWhitespace = False
     Window.setTextBuffer(self, textBuffer)
     self.controller.setTextBuffer(textBuffer)
 
@@ -1161,6 +1162,7 @@ class FileManagerWindow(Window):
 
   def setTextBuffer(self, textBuffer):
     textBuffer.lineLimitIndicator = 999999
+    textBuffer.highlightTrailingWhitespace = False
     Window.setTextBuffer(self, textBuffer)
     self.controller.setTextBuffer(textBuffer)
 

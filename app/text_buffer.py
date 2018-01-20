@@ -29,6 +29,7 @@ class TextBuffer(app.actions.Actions):
     app.actions.Actions.__init__(self)
     self.lineLimitIndicator = 0
     self.highlightRe = None
+    self.highlightTrailingWhitespace = True
     self.fileHistory = {}
     self.fileEncoding = None
     self.lastChecksum = None
@@ -263,7 +264,7 @@ class TextBuffer(app.actions.Actions):
           for f in k.regs:
             window.addStr(top + i, left + f[0], line[f[0]:f[1]],
                 app.color.get('number', colorDelta))
-    if 1:
+    if self.highlightTrailingWhitespace:
       # Highlight space ending lines.
       for i in range(rowLimit):
         line = self.lines[startRow + i]

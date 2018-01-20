@@ -63,7 +63,7 @@ class DirectoryListController(app.controller.Controller):
           if os.path.isdir(fullPath):
             i += os.path.sep
           iSize = ''
-          iModified = ''
+          iModified = 0
           if self.host.host.opt['sizes'] and os.path.isfile(fullPath):
             iSize = '%d bytes' % os.path.getsize(fullPath)
           if self.host.host.opt['modified']:
@@ -81,7 +81,8 @@ class DirectoryListController(app.controller.Controller):
           fileLines.sort(reverse=not self.host.opt['Name'],
               key=lambda x: unicode.lower(x[0]))
         lines = ['%-40s  %16s  %24s' % (
-            i[0], i[1], unicode(time.strftime('%c', time.localtime(i[2]))))
+            i[0], i[1],
+            unicode(time.strftime('%c', time.localtime(i[2]))) if i[2] else '')
             for i in fileLines]
         self.host.contents = [i[0] for i in fileLines]
       except OSError as e:
