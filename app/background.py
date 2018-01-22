@@ -78,6 +78,7 @@ def background(inputQueue, outputQueue):
           os.kill(pid, signalNumber)
           continue
         program.executeCommandList(message)
+        program.focusedWindow.textBuffer.parseScreenMaybe()
         redrawProgram(program, callerSemaphore)
         #app.profile.endPythonProfile(profile)
         if not inputQueue.empty():
