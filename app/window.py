@@ -1188,6 +1188,58 @@ class FileManagerWindow(Window):
     self.textBuffer.selectionAll()
     self.textBuffer.editPasteLines((path,))
 
+class PopupWindow(Window):
+  def __init__(self, host):
+    assert(host)
+    Window.__init__(self, host)
+    self.host = host
+    self.controller = app.cu_editor.PopupController(self)
+    self.setTextBuffer(app.text_buffer.TextBuffer())
+    self.longestLineLength = 0
+    self.message = []
+    self.showOptions = True
+    self.options = ["Y", "N"]
+
+  def render(self):
+    """
+    Display a box of text in the center of the window.
+    """
+    maxRows, maxCols = self.host.rows, self.host.cols
+    cols = min(self.longestLineLength + 6, maxCols)
+    rows = min(len(self.message) + 4, maxRows)
+    self.resizeTo(rows, cols)
+    self.moveTo(maxRows / 2 - rows / 2, maxCols / 2 - cols / 2)
+    color = app.color.get('popup_window')
+    for row in range(rows):
+      if row == rows - 2 and self.showOptions:
+        message = '/'.join(self.options)
+      elif row == 0 or row >= rows - 3:
+        self.addStr(row, 0, ' ' * cols, color)
+        continue
+      else:
+        message = self.message[row - 1]
+      lineLength = len(message)
+      spacing1 = (cols - lineLength) / 2
+      spacing2 = cols - lineLength - spacing1
+      self.addStr(row, 0, ' ' * spacing1 + message + ' ' * spacing2, color)
+
+  def setMessage(self, message):
+    """
+    Sets the Popup window's message to the given message.
+    message (str): A string that you want to display.
+    Returns:
+      None.
+    """
+    self.message = message.split("\n")
+    self.longestLineLength = max([len(line) for line in self.message])
+
+  def setTextBuffer(self, textBuffer):
+    Window.setTextBuffer(self, textBuffer)
+    self.controller.setTextBuffer(textBuffer)
+
+  def unfocus(self):
+    self.hide()
+    Window.unfocus(self)
 
 class PaletteWindow(Window):
   """A window with example foreground and background text colors."""
