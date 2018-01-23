@@ -12,6 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-uname
+autoconf
+awk
+chmod
+chown
+cp
+env
+grep
+ls
 mkdir
 rf
+rm
+rmdir
+sed
+uname

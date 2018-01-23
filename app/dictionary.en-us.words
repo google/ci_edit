@@ -304,6 +304,7 @@ adobes
 adopt
 adopted
 adopter
+adopting
 adoption
 adopts
 adornment
@@ -992,6 +993,7 @@ assist
 assistance
 assistant
 assisted
+assistive
 assists
 assoc
 associate
@@ -2225,6 +2227,7 @@ canned
 cannot
 canon
 canonical
+canonicalizing
 canonize
 canopy
 cans
@@ -3736,6 +3739,7 @@ crank
 crankshaft
 crap
 crappy
+crapshoot
 crash
 crashed
 crashes
@@ -3891,6 +3895,8 @@ cupcake
 cups
 cur
 curacao
+curated
+curating
 curator
 curd
 cure
@@ -4180,6 +4186,7 @@ decreasing
 decreasingly
 decrement
 decremented
+decrementing
 decrements
 decrescendo
 decrypt
@@ -4197,6 +4204,9 @@ deduped
 deed
 deem
 deemed
+deemphasize
+deemphasized
+deemphasizing
 deems
 deep
 deeper
@@ -4396,6 +4406,7 @@ depths
 deputy
 derailments
 deranged
+dereference
 derelict
 derivation
 derivative
@@ -4429,6 +4440,7 @@ deselected
 deselecting
 deselection
 deselects
+deserialize
 deserves
 design
 designate
@@ -5462,6 +5474,7 @@ emphasizes
 emphasizing
 empire
 empirically
+emplace
 emplacement
 emplacements
 employ
@@ -5649,6 +5662,7 @@ enumerating
 enumeration
 enumerations
 enumerator
+enumerators
 envelope
 enveloped
 envelopes
@@ -6131,6 +6145,7 @@ fakes
 faking
 fall
 fallback
+fallbacks
 fallen
 falling
 falls
@@ -7980,6 +7995,7 @@ ids
 if
 ifs
 ignition
+ignorable
 ignorance
 ignorant
 ignore
@@ -8213,6 +8229,7 @@ incremental
 incrementalist
 incrementally
 incremented
+incrementing
 increments
 incs
 incumbency
@@ -8311,6 +8328,7 @@ infected
 infection
 infectious
 infer
+inferable
 inference
 inferential
 inferior
@@ -8696,6 +8714,7 @@ interviews
 interweaving
 intimate
 into
+intra
 intractable
 intranet
 intranets
@@ -8847,6 +8866,7 @@ iterating
 iteration
 iterations
 iterative
+iteratively
 iterator
 iterators
 itinerary
@@ -9624,6 +9644,7 @@ lookup
 loon
 loop
 looped
+looper
 loophole
 looping
 loops
@@ -9693,6 +9714,7 @@ lug
 lulling
 lulu
 lulus
+luminance
 luminary
 luminescent
 luminosity
@@ -10116,6 +10138,7 @@ mere
 merely
 meres
 merge
+mergeable
 merged
 merger
 merges
@@ -10838,6 +10861,7 @@ nip
 nit
 niter
 nits
+nitty
 nix
 no
 nob
@@ -12333,6 +12357,7 @@ ports
 pose
 poser
 poses
+posesses
 posit
 position
 positional
@@ -12517,6 +12542,8 @@ prepares
 preparing
 prepend
 prepended
+prepending
+prepends
 preponderance
 preposition
 prepositional
@@ -12641,6 +12668,7 @@ printout
 printouts
 prints
 prior
+priori
 priorities
 prioritize
 prioritized
@@ -13130,6 +13158,7 @@ rad
 radar
 radial
 radially
+radians
 radiant
 radical
 radically
@@ -13507,6 +13536,8 @@ redirection
 redirects
 rediscovered
 rediscovery
+redisplayed
+redisplaying
 redistribute
 redistributing
 redistribution
@@ -13561,6 +13592,8 @@ referrer
 referrers
 referring
 refers
+refetch
+refetches
 refiling
 refill
 refine
@@ -13964,6 +13997,7 @@ rerunning
 res
 resale
 rescale
+rescan
 reschedule
 rescheduled
 reschedules
@@ -14019,6 +14053,7 @@ resizable
 resize
 resizeable
 resized
+resizes
 resizing
 resolute
 resolution
@@ -14037,6 +14072,7 @@ resorts
 resource
 resources
 resp
+respawn
 respect
 respected
 respecter
@@ -14545,6 +14581,7 @@ sanely
 saner
 sang
 sanitation
+sanitization
 sanitize
 sanitized
 sanitizes
@@ -17198,6 +17235,7 @@ tornado
 torrent
 tors
 tort
+tortious
 tortoise
 tortuous
 torture
@@ -17405,6 +17443,7 @@ tremolo
 trend
 trending
 trends
+tri
 triage
 trial
 trials
@@ -17430,6 +17469,7 @@ trier
 tries
 trig
 trigger
+triggerable
 triggered
 triggering
 triggers
@@ -17652,6 +17692,7 @@ unambiguous
 unambiguously
 unanswered
 unapproved
+unary
 unassigned
 unattached
 unattended
