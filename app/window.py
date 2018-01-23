@@ -1198,7 +1198,9 @@ class PopupWindow(Window):
     self.longestLineLength = 0
     self.__message = []
     self.showOptions = True
-    self.options = ["Y", "N"]
+    # This will be displayed and should contain the keys that respond to user
+    # input. This should be updated if you change the controller's command set.
+    self.options = []
 
   def render(self):
     """

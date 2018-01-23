@@ -413,10 +413,6 @@ class PopupController(app.controller.Controller):
       app.log.info('noOp in PopupController')
     self.commandDefault = noOp
     self.commandSet = {
-      ord('Y'): self.reloadBuffer,
-      ord('y'): self.reloadBuffer,
-      ord('N'): self.changeToMainWindow,
-      ord('n'): self.changeToMainWindow,
       KEY_ESCAPE: self.changeToMainWindow,
     }
 
@@ -427,6 +423,19 @@ class PopupController(app.controller.Controller):
     if self.callerSemaphore:
       self.callerSemaphore.release()
       self.callerSemaphore = None
+
+  def setOptions(self, options):
+    """
+    This function is used to change the options that are displayed in the
+    popup window as well as their functions.
+
+    Args:
+      options (dict): A dictionary mapping keys to its corresponding action.
+
+    Returns;
+      None.
+    """
+    self.commandSet = options
 
   def setTextBuffer(self, textBuffer):
     self.textBuffer = textBuffer
