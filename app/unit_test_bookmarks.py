@@ -19,10 +19,12 @@ import app.prefs
 import app.text_buffer
 import app.window
 
+class EmptyObject:
+  pass
 
 class BookmarkTestCases(unittest.TestCase):
   def setUp(self):
-    self.fakeHost = mock.Mock()
+    self.fakeHost = EmptyObject()
     self.textBuffer = app.text_buffer.TextBuffer()
     self.textBuffer.lines = 50
     self.lineNumbers = app.window.LineNumbers(self.fakeHost)
@@ -36,6 +38,19 @@ class BookmarkTestCases(unittest.TestCase):
     pass
 
   def test_get_next_bookmark_color(self):
+    try:
+      import mock
+    except ImportError:
+      startYellow = '\033[93m'
+      disableColor = '\033[0m'
+      startBlue = '\033[94m'
+      exceptionMessage = (startYellow + "This test could " +
+          "not execute because the 'mock' module could not be found. If " +
+          "you would like to run this test, please install the mock module " +
+          "for python 2.7. You can visit their website at " + startBlue +
+          "https://pypi.python.org/pypi/mock " + startYellow + "or you can " +
+          "try running " + startBlue + "pip install mock." + disableColor)
+      raise Exception(exceptionMessage)
     def test_with_an_x_colored_terminal(x):
       mock.patch.dict(app.prefs.startup, {'numColors': x}, clear=True)
       colors = set()
@@ -59,8 +74,7 @@ class BookmarkTestCases(unittest.TestCase):
       test_with_an_x_colored_terminal(256)
 
   def test_get_visible_bookmarks(self):
-    # Set up mock objects to test the LineNumbers methods.
-
+    # Set up the fake objects to test the LineNumbers methods.
     self.textBuffer.bookmarks = [((0, 0),), ((10, 10),), ((20, 20),),
                                  ((30, 30),), ((40, 40),),]
     visibleBookmarks = self.lineNumbers.getVisibleBookmarks(
