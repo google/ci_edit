@@ -1196,7 +1196,7 @@ class PopupWindow(Window):
     self.controller = app.cu_editor.PopupController(self)
     self.setTextBuffer(app.text_buffer.TextBuffer())
     self.longestLineLength = 0
-    self.message = []
+    self.__message = []
     self.showOptions = True
     self.options = ["Y", "N"]
 
@@ -1206,7 +1206,7 @@ class PopupWindow(Window):
     """
     maxRows, maxCols = self.host.rows, self.host.cols
     cols = min(self.longestLineLength + 6, maxCols)
-    rows = min(len(self.message) + 4, maxRows)
+    rows = min(len(self.__message) + 4, maxRows)
     self.resizeTo(rows, cols)
     self.moveTo(maxRows / 2 - rows / 2, maxCols / 2 - cols / 2)
     color = app.color.get('popup_window')
@@ -1217,7 +1217,7 @@ class PopupWindow(Window):
         self.addStr(row, 0, ' ' * cols, color)
         continue
       else:
-        message = self.message[row - 1]
+        message = self.__message[row - 1]
       lineLength = len(message)
       spacing1 = (cols - lineLength) / 2
       spacing2 = cols - lineLength - spacing1
@@ -1230,8 +1230,8 @@ class PopupWindow(Window):
     Returns:
       None.
     """
-    self.message = message.split("\n")
-    self.longestLineLength = max([len(line) for line in self.message])
+    self.__message = message.split("\n")
+    self.longestLineLength = max([len(line) for line in self.__message])
 
   def setTextBuffer(self, textBuffer):
     Window.setTextBuffer(self, textBuffer)
