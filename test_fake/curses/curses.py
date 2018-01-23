@@ -100,16 +100,31 @@ class FakeDisplay:
   def __init__(self):
     self.rows = 15
     self.cols = 40
+    self.colors = {}
     self.cursorRow = 0
     self.cursorCol = 0
-    self.display = None
+    self.displayStyle = None
+    self.displayText = None
     self.reset()
+
+  def checkStyle(self, row, col, height, width, color):
+    colorPair = self.colors.get(color)
+    if colorPair is None:
+      return "color %s is not ready" % (color,)
+    for i in range(height):
+      for k in range(width):
+        d = self.displayStyle[row + i][col + k]
+        if d != colorPair:
+          self.show()
+          return "row %s, col %s color/style mismatch '%d' != '%d'" % (
+              row + i, col + k, d, colorPair)
+    return None
 
   def check(self, row, col, lines):
     for i in range(len(lines)):
       line = lines[i]
       for k in range(len(line)):
-        d = self.display[row + i][col + k]
+        d = self.displayText[row + i][col + k]
         c = line[k]
         if d != c:
           self.show()
@@ -117,18 +132,28 @@ class FakeDisplay:
               row + i, col + k, d, c)
     return None
 
-  def get(self):
-    return [''.join(self.display[i]) for i in range(self.rows)]
+  def getColorPair(self, colorIndex):
+    return self.colors.setdefault(colorIndex, 91 + len(self.colors))
+
+  def getStyle(self):
+    return [
+      ''.join([unichr(c) for c in self.displayStyle[i]])
+          for i in range(self.rows)
+      ]
+
+  def getText(self):
+    return [''.join(self.displayText[i]) for i in range(self.rows)]
 
   def show(self):
-    print '+' + '-' * self.cols + '+'
-    for line in self.get():
-      print '|' + line + '|'
-      #print [ord(i) for i in line]
-    print '+' + '-' * self.cols + '+'
+    print '+' + '-' * self.cols + '+ +' + '-' * self.cols + '+'
+    for line, styles in zip(self.getText(), self.getStyle()):
+      print '|' + line + '| |' + styles + '|'
+    print '+' + '-' * self.cols + '+ +' + '-' * self.cols + '+'
 
   def reset(self):
-    self.display = [
+    self.displayStyle = [
+        [-1 for k in range(self.cols)] for i in range(self.rows)]
+    self.displayText = [
         [u'x' for k in range(self.cols)] for i in range(self.rows)]
 
 fakeDisplay = None
@@ -161,7 +186,8 @@ class FakeCursesWindow:
       text = args[2].decode('utf-8')
       color = args[3]
       for i in range(len(text)):
-        fakeDisplay.display[cursorRow][cursorCol + i] = text[i]
+        fakeDisplay.displayText[cursorRow][cursorCol + i] = text[i]
+        fakeDisplay.displayStyle[cursorRow][cursorCol + i] = color
       self.cursorRow = cursorRow + len(text)
       self.cursorCol = cursorCol + len(text[-1])
       if len(text) > 1:
@@ -190,11 +216,11 @@ class FakeCursesWindow:
     testLog()
     return (fakeDisplay.rows, fakeDisplay.cols)
 
-  def keypad(self, a):
-    testLog(a)
+  def keypad(self, *args):
+    testLog(*args)
 
-  def leaveok(self, a):
-    testLog(a)
+  def leaveok(self, *args):
+    testLog(*args)
 
   def move(self, a, b):
     testLog(a, b)
@@ -210,11 +236,11 @@ class FakeCursesWindow:
   def resize(self, a, b):
     testLog(a, b)
 
-  def scrollok(self, a):
-    testLog(a)
+  def scrollok(self, *args):
+    testLog(*args)
 
-  def timeout(self, a):
-    testLog(a)
+  def timeout(self, *args):
+    testLog(*args)
 
 
 class StandardScreen(FakeCursesWindow):
@@ -223,6 +249,7 @@ class StandardScreen(FakeCursesWindow):
     testLog()
     FakeCursesWindow.__init__(self, 0, 0)
     fakeDisplay = FakeDisplay()
+    self.fakeDisplay = fakeDisplay
     fakeInput = FakeInput(fakeDisplay)
     self.fakeInput = fakeInput
 
@@ -231,8 +258,7 @@ class StandardScreen(FakeCursesWindow):
 
   def getmaxyx(self):
     testLog()
-    global fakeDisplay
-    return (fakeDisplay.rows, fakeDisplay.cols)
+    return (self.fakeDisplay.rows, self.fakeDisplay.cols)
 
   def refresh(self):
     fakeInput.waitingForRefresh = False
@@ -245,12 +271,12 @@ def can_change_color():
 def color_content():
   testLog()
 
-def color_pair(a):
-  testLog(a)
-  return 1
+def color_pair(*args):
+  testLog(*args)
+  return fakeDisplay.getColorPair(*args)
 
-def curs_set(a):
-  testLog(a)
+def curs_set(*args):
+  testLog(*args)
 
 def error():
   testLog()
@@ -311,6 +337,7 @@ def use_default_colors():
   pass
 
 def get_pair(*args):
+  fakeDisplay.getColorPair(*args)
   testLog(*args)
 
 def wrapper(fun, *args, **kw):

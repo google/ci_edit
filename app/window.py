@@ -544,7 +544,9 @@ class StatusLine(ViewWindow):
     statusLine = ''
     if tb.message:
       statusLine = tb.message[0]
-      color = tb.message[1]
+      color = (tb.message[1]
+          if tb.message[1] is not None
+          else app.color.get('status_line'))
       tb.setMessage()
     if 0:
       if tb.isDirty():

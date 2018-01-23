@@ -65,6 +65,16 @@ class IntentionTestCases(unittest.TestCase):
         self.fail(callerText + result + ' at index ' + str(cmdIndex))
     return checker
 
+  def displayCheckStyle(self, *args):
+    caller = inspect.stack()[1]
+    callerText = "\n  %s:%s:%s(): " % (
+        os.path.split(caller[1])[1], caller[2], caller[3])
+    def checker(display, cmdIndex):
+      result = display.checkStyle(*args)
+      if result is not None:
+        self.fail(callerText + result + ' at index ' + str(cmdIndex))
+    return checker
+
   def cursorCheck(self, expectedRow, expectedCol):
     caller = inspect.stack()[1]
     callerText = "in %s:%s:%s(): " % (
@@ -101,6 +111,7 @@ class IntentionTestCases(unittest.TestCase):
     return createEvent
 
   def runWithTestFile(self, fakeInputs):
+    app.color.reset(),
     self.cursesScreen.setFakeInputs(fakeInputs + [self.notReached,])
     self.assertTrue(self.prg)
     self.assertFalse(self.prg.exiting)
@@ -133,7 +144,10 @@ class IntentionTestCases(unittest.TestCase):
 
   def test_logo(self):
     self.runWithTestFile([
-        self.displayCheck(0, 0, [" ci "]), CTRL_Q])
+        self.assertEqual(256, app.prefs.startup['numColors']),
+        self.displayCheck(0, 0, [" ci "]),
+        self.displayCheckStyle(0, 0, 1, len(" ci "), 168),
+        CTRL_Q])
 
   def test_whole_screen(self):
     self.runWithTestFile([
@@ -225,6 +239,7 @@ class IntentionTestCases(unittest.TestCase):
         self.selectionCheck(2, 6, 0, 0, 0),
         CTRL_L,
         self.selectionCheck(2, 6, 2, 0, 4),
+        self.displayCheckStyle(0, 0, 1, len(" ci "), 168),
         KEY_UP,
         self.selectionCheck(1, 5, 2, 6, 0),
         CTRL_L,
