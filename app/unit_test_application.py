@@ -16,19 +16,18 @@
 
 
 import app.ci_program
+import app.fake_curses_testing
+import app.prefs
 from app.curses_util import *
 import curses
-import inspect
 import os
-import re
 import sys
-import unittest
 
 
 kTestFile = '#test_file_with_unlikely_file_name~'
 
 
-class IntentionTestCases(unittest.TestCase):
+class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
   def setUp(self):
     self.longMessage = True
     if True:
@@ -41,99 +40,12 @@ class IntentionTestCases(unittest.TestCase):
     if os.path.isfile(kTestFile):
       os.unlink(kTestFile)
     self.assertFalse(os.path.isfile(kTestFile))
-    self.cursesScreen = curses.StandardScreen()
-    self.prg = app.ci_program.CiProgram(self.cursesScreen)
-
-  def tearDown(self):
-    # Disable mouse tracking in xterm.
-    sys.stdout.write('\033[?1002l\n')
-    # Disable Bracketed Paste Mode.
-    sys.stdout.write('\033[?2004l\n')
-
-  def notReached(display):
-    """Calling this will fail the test. It's expected that the code will not
-    reach this function."""
-    self.fail('Called notReached!')
-
-  def displayCheck(self, *args):
-    caller = inspect.stack()[1]
-    callerText = "\n  %s:%s:%s(): " % (
-        os.path.split(caller[1])[1], caller[2], caller[3])
-    def checker(display, cmdIndex):
-      result = display.check(*args)
-      if result is not None:
-        self.fail(callerText + result + ' at index ' + str(cmdIndex))
-    return checker
-
-  def displayCheckStyle(self, *args):
-    caller = inspect.stack()[1]
-    callerText = "\n  %s:%s:%s(): " % (
-        os.path.split(caller[1])[1], caller[2], caller[3])
-    def checker(display, cmdIndex):
-      result = display.checkStyle(*args)
-      if result is not None:
-        self.fail(callerText + result + ' at index ' + str(cmdIndex))
-    return checker
-
-  def cursorCheck(self, expectedRow, expectedCol):
-    caller = inspect.stack()[1]
-    callerText = "in %s:%s:%s(): " % (
-        os.path.split(caller[1])[1], caller[2], caller[3])
-    def checker(display, cmdIndex):
-      penRow, penCol = self.cursesScreen.getyx()
-      self.assertEqual((expectedRow, expectedCol), (penRow, penCol), callerText)
-    return checker
-
-  def selectionCheck(self, expectedPenRow, expectedPenCol, expectedMarkerRow,
-      expectedMarkerCol, expectedMode):
-    caller = inspect.stack()[1]
-    callerText = "in %s:%s:%s(): " % (
-        os.path.split(caller[1])[1], caller[2], caller[3])
-    def checker(display, cmdIndex):
-      selection = self.prg.getSelection()
-      self.assertEqual((expectedPenRow, expectedPenCol, expectedMarkerRow,
-          expectedMarkerCol, expectedMode), selection, callerText)
-    return checker
-
-  def addMouseInfo(self, timeStamp, mouseRow, mouseCol, bState):
-    """
-    bState may be a logical or of:
-      curses.BUTTON1_PRESSED;
-      curses.BUTTON1_RELEASED;
-      ...
-      curses.BUTTON_SHIFT
-      curses.BUTTON_CTRL
-      curses.BUTTON_ALT
-    """
-    info = (timeStamp, mouseCol, mouseRow, 0, bState)
-    def createEvent(display, cmdIndex):
-      curses.addMouseEvent(info)
-    return createEvent
+    app.fake_curses_testing.FakeCursesTestCase.setUp(self)
 
   def runWithTestFile(self, fakeInputs):
-    app.color.reset(),
-    self.cursesScreen.setFakeInputs(fakeInputs + [self.notReached,])
-    self.assertTrue(self.prg)
-    self.assertFalse(self.prg.exiting)
     sys.argv = [kTestFile]
     self.assertFalse(os.path.isfile(kTestFile))
-    self.prg.run()
-    #curses.printFakeDisplay()
-    if app.ci_program.userConsoleMessage:
-      message = app.ci_program.userConsoleMessage
-      app.ci_program.userConsoleMessage = None
-      self.fail(message)
-    # Check that the application is closed down (don't leave it running across
-    # tests).
-    self.assertTrue(self.prg.exiting)
-    self.assertEqual(self.cursesScreen.fakeInput.inputsIndex,
-        len(fakeInputs) - 1)
-    # Handy for debugging.
-    if 0:
-      caller = inspect.stack()[1]
-      callerText = "  %s:%s:%s(): " % (
-          os.path.split(caller[1])[1], caller[2], caller[3])
-      print '\n-------- finished', callerText
+    self.runWithFakeInputs(fakeInputs)
 
   def test_open_and_quit(self):
     self.runWithTestFile([CTRL_Q])
@@ -146,7 +58,7 @@ class IntentionTestCases(unittest.TestCase):
     self.runWithTestFile([
         self.assertEqual(256, app.prefs.startup['numColors']),
         self.displayCheck(0, 0, [" ci "]),
-        self.displayCheckStyle(0, 0, 1, len(" ci "), 168),
+        self.displayCheckStyle(0, 0, 1, len(" ci "), app.prefs.color['logo']),
         CTRL_Q])
 
   def test_whole_screen(self):
@@ -239,7 +151,7 @@ class IntentionTestCases(unittest.TestCase):
         self.selectionCheck(2, 6, 0, 0, 0),
         CTRL_L,
         self.selectionCheck(2, 6, 2, 0, 4),
-        self.displayCheckStyle(0, 0, 1, len(" ci "), 168),
+        self.displayCheckStyle(0, 0, 1, len(" ci "), app.prefs.color['logo']),
         KEY_UP,
         self.selectionCheck(1, 5, 2, 6, 0),
         CTRL_L,

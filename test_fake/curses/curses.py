@@ -120,7 +120,7 @@ class FakeDisplay:
               row + i, col + k, d, colorPair)
     return None
 
-  def check(self, row, col, lines):
+  def checkText(self, row, col, lines):
     for i in range(len(lines)):
       line = lines[i]
       for k in range(len(line)):
