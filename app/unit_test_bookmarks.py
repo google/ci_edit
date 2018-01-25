@@ -11,19 +11,33 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-import mock
+import os
+import sys
 import unittest
 
+from app.curses_util import *
+import app.fake_curses_testing
 import app.prefs
 import app.text_buffer
 import app.window
 
+kTestFile = '#test_file_with_unlikely_file_name~'
+
 class EmptyObject:
   pass
 
-class BookmarkTestCases(unittest.TestCase):
+class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
   def setUp(self):
+    if True:
+      # The buffer manager will retain the test file in RAM. Reset it.
+      try:
+        del sys.modules['app.buffer_manager']
+        import app.buffer_manager
+      except KeyError:
+        pass
+    if os.path.isfile(kTestFile):
+      os.unlink(kTestFile)
+    self.assertFalse(os.path.isfile(kTestFile))
     self.fakeHost = EmptyObject()
     self.textBuffer = app.text_buffer.TextBuffer()
     self.textBuffer.lines = 50
@@ -33,9 +47,15 @@ class BookmarkTestCases(unittest.TestCase):
     self.fakeHost.lineNumberColumn = self.lineNumbers
     self.fakeHost.textBuffer = self.textBuffer
     self.fakeHost.scrollRow = self.fakeHost.cursorRow = 0
+    app.fake_curses_testing.FakeCursesTestCase.setUp(self)
 
   def tearDown(self):
-    pass
+    app.fake_curses_testing.FakeCursesTestCase.tearDown(self)
+
+  def runWithTestFile(self, fakeInputs):
+    sys.argv = [kTestFile]
+    self.assertFalse(os.path.isfile(kTestFile))
+    self.runWithFakeInputs(fakeInputs)
 
   def test_get_next_bookmark_color(self):
     try:
@@ -123,3 +143,51 @@ class BookmarkTestCases(unittest.TestCase):
     expectedBookmarks = {((0, 10),), ((11, 30),)}
     self.assertEqual(set(visibleBookmarks), expectedBookmarks)
     self.assertEqual(len(visibleBookmarks), len(expectedBookmarks))
+
+  def test_bookmarks_render(self):
+    self.runWithFakeInputs([
+        self.displayCheck(0, 0, [
+            " ci     .                               ",
+            "                                        ",
+            "     1                                  ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "New buffer         |    1, 1 | 100%,100%",
+            "                                        "]),
+        'f', 'i', 'r', 's', 't', ' ', 'l', 'i', 'n', 'e',
+        CTRL_E, 'b', 'm', CTRL_J, CTRL_J, # Create bookmark and go to next line.
+        's', 'e', 'c', 'o', 'n', 'd', ' ', 'l', 'i', 'n', 'e', CTRL_J,
+        't', 'h', 'i', 'r', 'd', ' ', 'l', 'i', 'n', 'e',
+        CTRL_E, 'b', 'm', CTRL_J, CTRL_J, # Create bookmark and go to next line.
+        'f', 'o', 'u', 'r', 't', 'h', ' ', 'l', 'i', 'n', 'e', CTRL_J,
+        'f', 'i', 'f', 't', 'h', ' ', 'l', 'i', 'n', 'e', CTRL_J,
+        's', 'i', 'x', 't', 'h', ' ', 'l', 'i', 'n', 'e', CTRL_J,
+        's', 'e', 'v', 'e', 'n', 't', 'h', ' ', 'l', 'i', 'n', 'e', CTRL_J,
+        'e', 'i', 'g', 'h', 't', 'h', ' ', 'l', 'i', 'n', 'e', CTRL_J,
+        CTRL_E, 'b', 'm', CTRL_J, # Create a new bookmark.
+        self.displayCheck(0, 0, [
+            " ci     *                               ",
+            "                                        ",
+            "     1 first line                       ",
+            "     2 second line                      ",
+            "     3 third line                       ",
+            "     4 fourth line                      ",
+            "     5 fifth line                       ",
+            "     6 sixth line                       ",
+            "     7 seventh line                     ",
+            "     8 eighth line                      ",
+            "     9                                  ",
+            "                                        ",
+            "                                        ",
+            "Added bookmark     |    9, 1 | 100%,100%",
+            "                                        "]),
+        CTRL_Q, 'n'
+      ])
