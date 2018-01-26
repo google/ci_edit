@@ -49,8 +49,8 @@ def test_parseInt():
 
 class EditText(app.controller.Controller):
   """An EditText is a base class for one-line controllers."""
-  def __init__(self, host):
-    app.controller.Controller.__init__(self, host, 'EditText')
+  def __init__(self, view):
+    app.controller.Controller.__init__(self, view, 'EditText')
     self.document = None
 
   def setTextBuffer(self, textBuffer):
@@ -97,9 +97,9 @@ class EditText(app.controller.Controller):
 
 class InteractiveOpener(EditText):
   """Open a file to edit."""
-  def __init__(self, prg, host, textBuffer):
-    EditText.__init__(self, prg, host, textBuffer)
-    self.document = host
+  def __init__(self, prg, view, textBuffer):
+    EditText.__init__(self, prg, view, textBuffer)
+    self.document = view.host
     app.log.info('xxxxx', self.document)
     commandSet = self.commandSet.copy()
     commandSet.update({
@@ -117,7 +117,7 @@ class InteractiveOpener(EditText):
     app.log.info('InteractiveOpener.focus')
     EditText.focus(self)
     # Create a new text buffer to display dir listing.
-    self.host.setTextBuffer(text_buffer.TextBuffer(self.prg))
+    self.view.host.setTextBuffer(text_buffer.TextBuffer(self.prg))
 
   def info(self):
     app.log.info('InteractiveOpener command set')
@@ -126,8 +126,8 @@ class InteractiveOpener(EditText):
     app.log.info('createOrOpen')
     expandedPath = os.path.abspath(os.path.expanduser(self.textBuffer.lines[0]))
     if not os.path.isdir(expandedPath):
-      self.host.setTextBuffer(
-          self.prg.bufferManager.loadTextBuffer(expandedPath), self.host)
+      self.view.host.setTextBuffer(
+          self.prg.bufferManager.loadTextBuffer(expandedPath), self.view.host)
     self.changeToInputWindow()
 
   def maybeSlash(self, expandedPath):
@@ -205,21 +205,21 @@ class InteractiveOpener(EditText):
         if i.startswith(fileName):
           lines.append(i)
       if len(lines) == 1 and os.path.isfile(os.path.join(dirPath, fileName)):
-        self.host.setTextBuffer(app.buffer_manager.buffers.loadTextBuffer(
-            os.path.join(dirPath, fileName), self.host))
+        self.view.host.setTextBuffer(app.buffer_manager.buffers.loadTextBuffer(
+            os.path.join(dirPath, fileName), self.view.host))
       else:
-        self.host.textBuffer.lines = [
+        self.view.host.textBuffer.lines = [
             os.path.abspath(os.path.expanduser(dirPath))+":"] + lines
     else:
-      self.host.textBuffer.lines = [
+      self.view.host.textBuffer.lines = [
           os.path.abspath(os.path.expanduser(dirPath))+": not found"]
 
 
 class InteractiveFind(EditText):
   """Find text within the current document."""
-  def __init__(self, prg, host, textBuffer):
-    EditText.__init__(self, prg, host, textBuffer)
-    self.document = host.host
+  def __init__(self, prg, view, textBuffer):
+    EditText.__init__(self, prg, view, textBuffer)
+    self.document = view.host
     self.commandSet.update({
       KEY_ESCAPE: self.changeToInputWindow,
       KEY_F1: self.info,
@@ -242,8 +242,8 @@ class InteractiveFind(EditText):
   def focus(self):
     #self.document.statusLine.hide()
     #self.document.resizeBy(-self.height, 0)
-    #self.host.moveBy(-self.height, 0)
-    #self.host.resizeBy(self.height-1, 0)
+    #self.view.host.moveBy(-self.height, 0)
+    #self.view.host.resizeBy(self.height-1, 0)
     EditText.focus(self)
     self.findCmd = self.document.textBuffer.find
     selection = self.document.textBuffer.getSelectedText()
@@ -273,16 +273,16 @@ class InteractiveFind(EditText):
     #self.hide()
     return
     self.document.resizeBy(self.height, 0)
-    #self.host.resizeBy(-self.height, 0)
-    #self.host.moveBy(self.height, 0)
+    #self.view.host.resizeBy(-self.height, 0)
+    #self.view.host.moveBy(self.height, 0)
     self.document.statusLine.show()
 
 
 class InteractiveGoto(EditText):
   """Jump to a particular line number."""
-  def __init__(self, prg, host, textBuffer):
-    EditText.__init__(self, prg, host, textBuffer)
-    self.document = host.host
+  def __init__(self, prg, view, textBuffer):
+    EditText.__init__(self, prg, view, textBuffer)
+    self.document = view.host
     commandSet = self.commandSet.copy()
     commandSet.update({
       KEY_ESCAPE: self.changeToInputWindow,
@@ -463,8 +463,8 @@ class CiEdit(app.controller.Controller):
 class EmacsEdit(app.controller.Controller):
   """Emacs is a common Unix based text editor. This keyboard mapping is similar
   to basic Emacs commands."""
-  def __init__(self, host):
-    app.controller.Controller.__init__(self, host, 'EditText')
+  def __init__(self, view):
+    app.controller.Controller.__init__(self, view, 'EditText')
 
   def focus(self):
     app.log.info('EmacsEdit.focus')
@@ -501,7 +501,7 @@ class EmacsEdit(app.controller.Controller):
 
       CTRL_K: textBuffer.deleteToEndOfLine,
 
-      CTRL_L: self.host.refresh,
+      CTRL_L: self.view.host.refresh,
 
       CTRL_N: textBuffer.cursorDown,
       KEY_DOWN: textBuffer.cursorDown,

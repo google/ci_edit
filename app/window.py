@@ -284,9 +284,11 @@ class LabeledLine(Window):
     self.label = label
     self.leftColumn = ViewWindow(self)
 
+  def quitNow(self):
+    self.host.quitNow()
+
   def render(self):
-    self.leftColumn.addStr(0, 0, self.label,
-        app.color.get('keyword'))
+    self.leftColumn.addStr(0, 0, self.label, app.color.get('keyword'))
     Window.render(self)
 
   def reshape(self, rows, cols, top, left):
@@ -296,8 +298,8 @@ class LabeledLine(Window):
     self.leftColumn.reshape(rows, labelWidth, top, left)
 
   def setController(self, controllerClass):
-    app.log.caller('                        ',self.textBuffer)
-    self.controller = controllerClass(self.host)
+    #app.log.caller('                        ',self.textBuffer)
+    self.controller = controllerClass(self)
     self.controller.setTextBuffer(self.textBuffer)
 
   def setLabel(self, label):
@@ -351,7 +353,7 @@ class Menu(ViewWindow):
 
   def setController(self, controllerClass):
     app.log.info('                        ',self.textBuffer)
-    self.controller = controllerClass(self.host)
+    self.controller = controllerClass(self)
     self.controller.setTextBuffer(self.textBuffer)
 
 
@@ -495,7 +497,7 @@ class InteractiveFind(Window):
     self.replaceLine.setController(app.cu_editor.InteractiveFind)
     self.zOrder.append(self.replaceLine)
     self.setTextBuffer(app.text_buffer.TextBuffer())
-    self.controller = app.cu_editor.InteractiveFind(host,
+    self.controller = app.cu_editor.InteractiveFind(self,
         self.findLine.textBuffer)
 
   def reshape(self, rows, cols, top, left):
@@ -1039,7 +1041,8 @@ class PathRow(ViewWindow):
 class DirectoryList(Window):
   """This <tbd>."""
   def __init__(self, host, inputWindow):
-    assert(host)
+    assert host
+    assert self is not host
     Window.__init__(self, host)
     self.host = host
     self.inputWindow = inputWindow
@@ -1056,9 +1059,6 @@ class DirectoryList(Window):
       self.optionsRow.addSortHeader(key, self.opt, size)
     self.optionsRow.setParent(self, 0)
 
-  def getPath(self):
-    return self.host.textBuffer.lines[0]
-
   def reshape(self, rows, cols, top, left):
     """Change self and sub-windows to fit within the given rectangle."""
     app.log.detail('reshape', rows, cols, top, left)
@@ -1071,7 +1071,7 @@ class DirectoryList(Window):
     row = self.scrollRow + paneRow
     if row >= len(self.textBuffer.lines):
       return
-    path = self.getPath()
+    path = self.host.getPath()
     if row == 0:  # Clicked on "./".
       # Clear the shown directory to trigger a refresh.
       self.controller.shownDirectory = None
@@ -1116,7 +1116,8 @@ class DirectoryList(Window):
 
 class FileManagerWindow(Window):
   def __init__(self, host, inputWindow):
-    assert(host)
+    assert host
+    #assert issubclass(host.__class__, Window), host
     Window.__init__(self, host)
     self.host = host
     self.inputWindow = inputWindow
@@ -1142,6 +1143,9 @@ class FileManagerWindow(Window):
     self.directoryList.setParent(self, 0)
     #self.statusLine = StatusLine(self)
     #self.statusLine.setParent(self, 0)
+
+  def getPath(self):
+    return self.textBuffer.lines[0]
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
     row = self.scrollRow + paneRow

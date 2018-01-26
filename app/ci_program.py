@@ -52,6 +52,7 @@ class CiProgram:
     self.clicks = 0
     self.debugMouseEvent = (0, 0, 0, 0, 0)
     self.exiting = False
+    self.host = None
     self.modalUi = None
     self.modeStack = []
     self.priorClick = 0
@@ -284,7 +285,6 @@ class CiProgram:
       self.debugWindow = None
       self.debugUndoWindow = None
       self.logWindow = None
-      self.paletteWindow = None
     self.paletteWindow = app.window.PaletteWindow(self)
     self.inputWindow = app.window.InputWindow(self)
     self.zOrder.append(self.inputWindow)
