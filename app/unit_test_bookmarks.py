@@ -189,5 +189,24 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
             "                                        ",
             "Added bookmark     |    9, 1 | 100%,100%",
             "                                        "]),
+        # Bookmarks should now be at the following positions (row, col):
+        #   (1, 11), (3, 11), (8, 12).
+        KEY_F2, # This should cause the cursor to jump to the first bookmark.
+        self.displayCheck(0, 0, [
+            " ci     *                               ",
+            "                                        ",
+            "     1 first line                       ",
+            "     2 second line                      ",
+            "     3 third line                       ",
+            "     4 fourth line                      ",
+            "     5 fifth line                       ",
+            "     6 sixth line                       ",
+            "     7 seventh line                     ",
+            "     8 eighth line                      ",
+            "     9                                  ",
+            "                                        ",
+            "                                        ",
+            "                        1, 11 | 100%,100%",
+            "                                        "]),
         CTRL_Q, 'n'
       ])
