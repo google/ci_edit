@@ -396,7 +396,6 @@ class CuaPlusEdit(CuaEdit):
       KEY_F2: textBuffer.bookmarkNext,
       KEY_F3: textBuffer.findAgain,
       KEY_F4: self.changeToPaletteWindow,
-      KEY_F5: self.changeToPopup, # Should remove this after using for testing.
       KEY_SHIFT_F2: textBuffer.bookmarkPrior,
       KEY_SHIFT_F3: textBuffer.findBack,
     })
@@ -440,19 +439,6 @@ class PopupController(app.controller.Controller):
 
   def setTextBuffer(self, textBuffer):
     self.textBuffer = textBuffer
-
-  def reloadBuffer(self):
-    """
-    Reloads the file on disk into the program. This will get rid of all changes
-    that have been made to the current file. This will also remove all
-    edit history.
-
-    TODO: Make this reloading a new change that can be appended
-    to the redo chain so user can undo out of a reloadBuffer call.
-    """
-    mainBuffer = self.view.host.inputWindow.textBuffer
-    mainBuffer.fileLoad()
-    self.changeToMainWindow()
 
 
 class PaletteDialogController(app.controller.Controller):
