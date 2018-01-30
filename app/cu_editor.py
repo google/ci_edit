@@ -430,7 +430,8 @@ class PopupController(app.controller.Controller):
     popup window as well as their functions.
 
     Args:
-      options (dict): A dictionary mapping keys to its corresponding action.
+      options (dict): A dictionary mapping keys (ints) to its
+                      corresponding action.
 
     Returns;
       None.

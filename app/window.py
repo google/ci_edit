@@ -1237,6 +1237,17 @@ class PopupWindow(Window):
     self.__message = message.split("\n")
     self.longestLineLength = max([len(line) for line in self.__message])
 
+  def setOptions(self, options):
+    """
+    This function is used to change the options that are displayed in the
+    popup window as well as their functions.
+
+    Args:
+      options (dict): A dictionary mapping keys (ints) to its
+                      corresponding action.
+    """
+    self.controller.setOptions(options)
+
   def setTextBuffer(self, textBuffer):
     Window.setTextBuffer(self, textBuffer)
     self.controller.setTextBuffer(textBuffer)
