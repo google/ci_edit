@@ -1237,16 +1237,16 @@ class PopupWindow(Window):
     self.__message = message.split("\n")
     self.longestLineLength = max([len(line) for line in self.__message])
 
-  def setOptions(self, options):
+  def setOptionsToDisplay(self, options):
     """
     This function is used to change the options that are displayed in the
-    popup window as well as their functions.
+    popup window. They will be separated by a '/' character when displayed.
 
     Args:
-      options (dict): A dictionary mapping keys (ints) to its
-                      corresponding action.
+      options (list): A list of possible keys which the user can press and
+                      should be responded to by the controller.
     """
-    self.controller.setOptions(options)
+    self.options = options
 
   def setTextBuffer(self, textBuffer):
     Window.setTextBuffer(self, textBuffer)
