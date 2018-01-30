@@ -396,6 +396,7 @@ class CuaPlusEdit(CuaEdit):
       KEY_F2: textBuffer.bookmarkNext,
       KEY_F3: textBuffer.findAgain,
       KEY_F4: self.changeToPaletteWindow,
+      KEY_F5: self.changeToPopup, # Should remove this after using for testing.
       KEY_SHIFT_F2: textBuffer.bookmarkPrior,
       KEY_SHIFT_F3: textBuffer.findBack,
     })
@@ -418,8 +419,7 @@ class PopupController(app.controller.Controller):
 
   def changeToMainWindow(self):
     self.view.hide()
-    mainProgram = self.host.host
-    mainProgram.changeFocusTo(mainProgram.inputWindow)
+    self.host.changeFocusTo(self.host.host)
     if self.callerSemaphore:
       self.callerSemaphore.release()
       self.callerSemaphore = None

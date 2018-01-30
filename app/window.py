@@ -746,6 +746,8 @@ class InputWindow(Window):
       self.rightColumn.setParent(self, 0)
       if not self.showRightColumn:
         self.rightColumn.hide()
+    if 1:
+      self.popupWindow = PopupWindow(self)
     if self.showMessageLine:
       self.messageLine = MessageLine(self)
       self.messageLine.setParent(self, 0)
