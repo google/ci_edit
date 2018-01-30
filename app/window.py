@@ -561,7 +561,7 @@ class StatusLine(ViewWindow):
     if lineCount == 1:
       rowPercentage = 100
     else:
-      rowPercentage = self.host.cursorRow * 100 / (lineCount - 1)
+      rowPercentage = (self.host.cursorRow + 1) * 100 / lineCount
     charCount = len(tb.lines[self.host.cursorRow])
     if self.host.cursorCol == charCount:
       colPercentage = 100
