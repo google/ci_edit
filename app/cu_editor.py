@@ -396,6 +396,7 @@ class CuaPlusEdit(CuaEdit):
       KEY_F2: textBuffer.bookmarkNext,
       KEY_F3: textBuffer.findAgain,
       KEY_F4: self.changeToPaletteWindow,
+      KEY_F5: self.changeToPopup,
       KEY_SHIFT_F2: textBuffer.bookmarkPrior,
       KEY_SHIFT_F3: textBuffer.findBack,
     })
@@ -407,18 +408,16 @@ class PopupController(app.controller.Controller):
   """
   def __init__(self, view):
     app.controller.Controller.__init__(self, view, 'popup')
-    self.view = view
     self.callerSemaphore = None
     def noOp(ch, meta):
       app.log.info('noOp in PopupController')
     self.commandDefault = noOp
     self.commandSet = {
-      KEY_ESCAPE: self.changeToMainWindow,
+      KEY_ESCAPE: self.changeToInputWindow,
     }
 
-  def changeToMainWindow(self):
-    self.view.hide()
-    self.host.changeFocusTo(self.host.host)
+  def changeToInputWindow(self):
+    self.findAndChangeTo('inputWindow')
     if self.callerSemaphore:
       self.callerSemaphore.release()
       self.callerSemaphore = None
