@@ -699,7 +699,7 @@ class InputWindow(Window):
     if 1:
       self.interactiveGoto = LabeledLine(self, 'goto: ')
       self.interactiveGoto.setController(app.cu_editor.InteractiveGoto)
-    if 1:
+    if 0:
       self.interactiveOpen = LabeledLine(self, 'open: ')
       self.interactiveOpen.setController(app.cu_editor.InteractiveOpener)
     if 1:
@@ -800,7 +800,8 @@ class InputWindow(Window):
 
     self.confirmClose.reshape(bottomRows, cols, bottomFirstRow, left)
     self.confirmOverwrite.reshape(bottomRows, cols, bottomFirstRow, left)
-    self.interactiveOpen.reshape(bottomRows, cols, bottomFirstRow, left)
+    if 0:
+      self.interactiveOpen.reshape(bottomRows, cols, bottomFirstRow, left)
     self.interactivePrediction.reshape(bottomRows, cols, bottomFirstRow, left)
     self.interactivePrompt.reshape(bottomRows, cols, bottomFirstRow, left)
     self.interactiveQuit.reshape(bottomRows, cols, bottomFirstRow, left)

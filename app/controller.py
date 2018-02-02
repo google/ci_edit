@@ -55,8 +55,9 @@ class Controller:
   def changeToInputWindow(self, *args):
     self.findAndChangeTo('inputWindow')
 
-  def changeToFileOpen(self):
-    self.findAndChangeTo('interactiveOpen')
+  if 0:
+    def changeToFileOpen(self):
+      self.findAndChangeTo('interactiveOpen')
 
   def changeToFind(self):
     self.findAndChangeTo('interactiveFind')
