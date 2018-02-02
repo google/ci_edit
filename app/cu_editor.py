@@ -396,10 +396,48 @@ class CuaPlusEdit(CuaEdit):
       KEY_F2: textBuffer.bookmarkNext,
       KEY_F3: textBuffer.findAgain,
       KEY_F4: self.changeToPaletteWindow,
+      KEY_F5: self.changeToPopup,
       KEY_SHIFT_F2: textBuffer.bookmarkPrior,
       KEY_SHIFT_F3: textBuffer.findBack,
     })
     self.commandSet = commandSet
+
+class PopupController(app.controller.Controller):
+  """
+  A controller for pop up boxes to notify the user.
+  """
+  def __init__(self, view):
+    app.controller.Controller.__init__(self, view, 'popup')
+    self.callerSemaphore = None
+    def noOp(ch, meta):
+      app.log.info('noOp in PopupController')
+    self.commandDefault = noOp
+    self.commandSet = {
+      KEY_ESCAPE: self.changeToInputWindow,
+    }
+
+  def changeToInputWindow(self):
+    self.findAndChangeTo('inputWindow')
+    if self.callerSemaphore:
+      self.callerSemaphore.release()
+      self.callerSemaphore = None
+
+  def setOptions(self, options):
+    """
+    This function is used to change the options that are displayed in the
+    popup window as well as their functions.
+
+    Args:
+      options (dict): A dictionary mapping keys (ints) to its
+                      corresponding action.
+
+    Returns;
+      None.
+    """
+    self.commandSet = options
+
+  def setTextBuffer(self, textBuffer):
+    self.textBuffer = textBuffer
 
 
 class PaletteDialogController(app.controller.Controller):

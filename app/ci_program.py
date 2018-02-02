@@ -285,6 +285,7 @@ class CiProgram:
       self.debugWindow = None
       self.debugUndoWindow = None
       self.logWindow = None
+    self.popupWindow = app.window.PopupWindow(self)
     self.paletteWindow = app.window.PaletteWindow(self)
     self.inputWindow = app.window.InputWindow(self)
     self.zOrder.append(self.inputWindow)
