@@ -342,11 +342,13 @@ class Actions(app.mutator.Mutator):
     self.redoAddChange(('m', (rowDelta, colDelta, 0, 0, 0)))
 
   def cursorMoveDown(self):
-    if self.penRow + 1 < len(self.lines):
-      savedGoal = self.goalCol
-      self.cursorMove(1, self.cursorColDelta(self.penRow + 1))
-      self.redo()
-      self.goalCol = savedGoal
+    if self.penRow == len(self.lines) - 1:
+      self.setMessage('Bottom of file')
+      return
+    savedGoal = self.goalCol
+    self.cursorMove(1, self.cursorColDelta(self.penRow + 1))
+    self.redo()
+    self.goalCol = savedGoal
 
   def cursorMoveLeft(self):
     if self.penCol > 0:
@@ -365,18 +367,22 @@ class Actions(app.mutator.Mutator):
     elif self.penRow + 1 < len(self.lines):
       self.cursorMove(1, -len(self.lines[self.penRow]))
       self.redo()
+    else:
+      self.setMessage('Bottom of file')
 
   def cursorMoveUp(self):
-    if self.penRow > 0:
-      savedGoal = self.goalCol
-      lineLen = len(self.lines[self.penRow - 1])
-      if self.goalCol <= lineLen:
-        self.cursorMove(-1, self.goalCol - self.penCol)
-        self.redo()
-      else:
-        self.cursorMove(-1, lineLen - self.penCol)
-        self.redo()
-      self.goalCol = savedGoal
+    if self.penRow <= 0:
+      self.setMessage('Top of file')
+      return
+    savedGoal = self.goalCol
+    lineLen = len(self.lines[self.penRow - 1])
+    if self.goalCol <= lineLen:
+      self.cursorMove(-1, self.goalCol - self.penCol)
+      self.redo()
+    else:
+      self.cursorMove(-1, lineLen - self.penCol)
+      self.redo()
+    self.goalCol = savedGoal
 
   def cursorMoveSubwordLeft(self):
     self.doCursorMoveLeftTo(app.selectable.kReSubwordBoundaryRvr)
@@ -524,7 +530,8 @@ class Actions(app.mutator.Mutator):
     Returns:
       None.
     """
-    if self.penRow == len(self.lines):
+    if self.penRow == len(self.lines) - 1:
+      self.setMessage('Bottom of file')
       return
     maxRow = self.view.rows
     penRowDelta = maxRow
@@ -553,6 +560,7 @@ class Actions(app.mutator.Mutator):
       None.
     """
     if self.penRow == 0:
+      self.setMessage('Top of file')
       return
     maxRow = self.view.rows
     penRowDelta = -maxRow
@@ -1358,6 +1366,7 @@ class Actions(app.mutator.Mutator):
 
   def scrollUp(self):
     if self.view.scrollRow == 0:
+      self.setMessage('Top of file')
       return
     maxRow = self.view.rows
     cursorDelta = 0
@@ -1380,6 +1389,7 @@ class Actions(app.mutator.Mutator):
   def scrollDown(self):
     maxRow = self.view.rows
     if self.view.scrollRow + maxRow >= len(self.lines):
+      self.setMessage('Bottom of file')
       return
     cursorDelta = 0
     if self.penRow <= self.view.scrollRow + 1:
