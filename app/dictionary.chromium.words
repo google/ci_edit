@@ -53,12 +53,14 @@ doesnt
 dont
 dragdrop
 dsc
+dst
 eap
 ef
 eslint
 ev
 filemanager
 fixup
+focusability
 fullscreen
 futf
 gclient
@@ -79,8 +81,10 @@ hwid
 infobar
 jstemplate
 lbuttonup
+log
 lso
 mojom
+mousewheel
 multiline
 nacl
 nav
@@ -109,6 +113,7 @@ remora
 rendertext
 rtlui
 safebrowsing
+scrollview
 sel
 sideload
 sideloaded
@@ -118,11 +123,13 @@ tabrestore
 tabstrip
 tbr
 textfield
+tooltips
 tryserver
 uitest
 uma
 unittest
 unittests
+vis
 vlog
 vox
 vpd
