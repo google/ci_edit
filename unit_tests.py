@@ -27,7 +27,6 @@ if not os.getenv('CI_EDIT_USE_REAL_CURSES'):
   app.log.shouldWritePrintLog = True
 
 import app.unit_test_application
-import app.unit_test_bookmarks
 import app.unit_test_parser
 import app.unit_test_performance
 import app.unit_test_prefs
@@ -44,7 +43,6 @@ tests = [
   app.unit_test_prefs.PrefsTestCases,
   app.unit_test_text_buffer.MouseTestCases,
   app.unit_test_application.IntentionTestCases,
-  app.unit_test_bookmarks.BookmarkTestCases,
 ]
 
 def runTests(stopOnFailure=False):
