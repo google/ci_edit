@@ -145,11 +145,11 @@ class Actions(app.mutator.Mutator):
         if self.selectionMode != app.selectable.kSelectionNone:
             text = self.getSelectedText()
             if text:
+                upper = min(self.penRow, self.markerRow)
+                left = min(self.penCol, self.markerCol)
+                lower = max(self.penRow, self.markerRow)
+                right = max(self.penCol, self.markerCol)
                 if self.selectionMode == app.selectable.kSelectionBlock:
-                    upper = min(self.penRow, self.markerRow)
-                    left = min(self.penCol, self.markerCol)
-                    lower = max(self.penRow, self.markerRow)
-                    right = max(self.penCol, self.markerCol)
                     self.cursorMoveAndMark(
                         upper - self.penRow, left - self.penCol,
                         lower - self.markerRow, right - self.markerCol, 0)
@@ -157,6 +157,8 @@ class Actions(app.mutator.Mutator):
                       (self.penRow == self.markerRow and
                        self.penCol > self.markerCol)):
                     self.swapPenAndMarker()
+                self.bookmarkRemoveFrom(upper + 1, lower - 1)
+                self.bookmarkMove(lower, upper - lower)
                 self.redoAddChange((u'ds', text))
                 self.redo()
             self.selectionNone()
@@ -173,6 +175,8 @@ class Actions(app.mutator.Mutator):
         elif self.penRow == lowerRow:
             col = upperCol - lowerCol
             self.cursorMove(upperRow - self.penRow, col)
+        self.bookmarkRemoveFrom(upperRow + 1, lowerRow - 1)
+        self.bookmarkMove(lowerRow, upperRow - lowerRow)
         self.redoAddChange((u'dr', (upperRow, upperCol, lowerRow, lowerCol),
                             self.getText(upperRow, upperCol, lowerRow,
                                          lowerCol)))
@@ -295,8 +299,23 @@ class Actions(app.mutator.Mutator):
           (boolean) Whether any bookmarks were removed.
         """
         upperRow, _, lowerRow, _ = self.startAndEnd()
+        bookmarkRemoveFrom(upperRow, lowerRow)
+
+    def bookmarkRemoveFrom(self, startRow, endRow):
+        """
+        Removes bookmarks in the given line interval.
+
+        Args:
+          startRow: The start of the line interval, inclusive.
+          endRow: The end of the line interval, inclusive.
+
+        Returns:
+          (boolean) Whether any bookmarks were removed.
+        """
+        if startRow > endRow:
+          return False
         rangeList = self.bookmarks
-        needle = app.bookmark.Bookmark(upperRow, lowerRow, {})
+        needle = app.bookmark.Bookmark(startRow, endRow, {})
         # Find the left-hand index.
         begin = bisect.bisect_left(rangeList, needle)
         if begin and needle.begin <= rangeList[begin - 1].end:
@@ -321,6 +340,37 @@ class Actions(app.mutator.Mutator):
             return False
         self.bookmarks = rangeList[:begin] + rangeList[index:]
         return True
+
+    def bookmarkMove(self, startRow, delta):
+        """
+        Moves bookmarks up and down.
+        Called after changes to line numbers.
+
+        Args:
+          startRow (int): The upper limit on the bookmarks boundaries to move.
+          delta (int): The number of rows to move.
+
+        Returns:
+          None.
+        """
+        begin = max(bisect.bisect_left(self.bookmarks, ((startRow, startRow),)) - 1, 0)
+
+        # TODO(Androbin, aaxu): defer changes outside the screen
+        for index in range(begin, len(self.bookmarks)):
+            bookmark = self.bookmarks[index]
+            markRange, data = bookmark
+            if markRange[0] > startRow:
+                markRange = (markRange[0] + delta, markRange[1] + delta)
+            elif markRange[1] >= startRow:
+                markRange = (markRange[0], markRange[1] + delta)
+
+            for key in ['cursor', 'marker', 'pen']:
+                value = data[key]
+                if value[0] >= startRow:
+                    data[key] = (value[0] + delta, value[1])
+
+            bookmark = (markRange, data)
+            self.bookmarks[index] = bookmark
 
     def backspace(self):
         #app.log.info('backspace', self.penRow > self.markerRow)
@@ -355,6 +405,7 @@ class Actions(app.mutator.Mutator):
         grammar = self.parser.grammarAt(self.penRow, self.penCol)
         self.redoAddChange((u'n', 1, self.getCursorMove(1, -self.penCol)))
         self.redo()
+        self.bookmarkMove(self.penRow - 1, 1)
         grammarIndent = grammar.get(u'indent')
         if grammarIndent:
             line = self.lines[self.penRow - 1]
@@ -883,6 +934,7 @@ class Actions(app.mutator.Mutator):
             self.performDelete()
         self.redoAddChange((u'v', clip))
         self.redo()
+        self.bookmarkMove(self.penRow - len(lines) + 1, len(lines) - 1)
         rowDelta = len(clip) - 1
         if rowDelta == 0:
             endCol = self.penCol + len(clip[0])
@@ -1578,6 +1630,7 @@ class Actions(app.mutator.Mutator):
 
     def joinLines(self):
         """join the next line onto the current line."""
+        self.bookmarkMove(self.penRow, -1)
         self.redoAddChange((u'j',))
         self.redo()
 
@@ -1848,6 +1901,7 @@ class Actions(app.mutator.Mutator):
         """split the line into two at current column."""
         self.redoAddChange((u'n', (1,)))
         self.redo()
+        self.bookmarkMove(self.penRow, 1)
         self.updateBasicScrollPosition()
 
     def swapPenAndMarker(self):
