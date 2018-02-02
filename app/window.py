@@ -741,6 +741,8 @@ class InputWindow(Window):
       self.rightColumn.setParent(self, 0)
       if not self.showRightColumn:
         self.rightColumn.hide()
+    if 1:
+      self.popupWindow = PopupWindow(self)
     if self.showMessageLine:
       self.messageLine = MessageLine(self)
       self.messageLine.setParent(self, 0)
@@ -1183,6 +1185,71 @@ class FileManagerWindow(Window):
     self.textBuffer.selectionAll()
     self.textBuffer.editPasteLines((path,))
 
+class PopupWindow(Window):
+  def __init__(self, host):
+    assert(host)
+    Window.__init__(self, host)
+    self.host = host
+    self.controller = app.cu_editor.PopupController(self)
+    self.setTextBuffer(app.text_buffer.TextBuffer())
+    self.longestLineLength = 0
+    self.__message = []
+    self.showOptions = True
+    # This will be displayed and should contain the keys that respond to user
+    # input. This should be updated if you change the controller's command set.
+    self.options = []
+
+  def render(self):
+    """
+    Display a box of text in the center of the window.
+    """
+    maxRows, maxCols = self.host.rows, self.host.cols
+    cols = min(self.longestLineLength + 6, maxCols)
+    rows = min(len(self.__message) + 4, maxRows)
+    self.resizeTo(rows, cols)
+    self.moveTo(maxRows / 2 - rows / 2, maxCols / 2 - cols / 2)
+    color = app.color.get('popup_window')
+    for row in range(rows):
+      if row == rows - 2 and self.showOptions:
+        message = '/'.join(self.options)
+      elif row == 0 or row >= rows - 3:
+        self.addStr(row, 0, ' ' * cols, color)
+        continue
+      else:
+        message = self.__message[row - 1]
+      lineLength = len(message)
+      spacing1 = (cols - lineLength) / 2
+      spacing2 = cols - lineLength - spacing1
+      self.addStr(row, 0, ' ' * spacing1 + message + ' ' * spacing2, color)
+
+  def setMessage(self, message):
+    """
+    Sets the Popup window's message to the given message.
+    message (str): A string that you want to display.
+    Returns:
+      None.
+    """
+    self.__message = message.split("\n")
+    self.longestLineLength = max([len(line) for line in self.__message])
+
+  def setOptionsToDisplay(self, options):
+    """
+    This function is used to change the options that are displayed in the
+    popup window. They will be separated by a '/' character when displayed.
+
+    Args:
+      options (list): A list of possible keys which the user can press and
+                      should be responded to by the controller.
+    """
+    self.options = options
+
+  def setTextBuffer(self, textBuffer):
+    Window.setTextBuffer(self, textBuffer)
+    self.controller.setTextBuffer(textBuffer)
+
+  def unfocus(self):
+    self.hide()
+    Window.unfocus(self)
 
 class PaletteWindow(Window):
   """A window with example foreground and background text colors."""

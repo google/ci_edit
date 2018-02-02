@@ -71,6 +71,9 @@ class Controller:
   def changeToPaletteWindow(self):
     self.findAndChangeTo('paletteWindow')
 
+  def changeToPopup(self):
+    self.findAndChangeTo('popupWindow')
+
   def changeToPrediction(self):
     self.findAndChangeTo('interactivePrediction')
 
@@ -312,4 +315,3 @@ class MainController:
 
   def unfocus(self):
     self.controller.unfocus()
-
