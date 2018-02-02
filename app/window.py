@@ -559,16 +559,11 @@ class StatusLine(ViewWindow):
     rowPercentage = 0
     colPercentage = 0
     lineCount = len(tb.lines)
-    # Assumes lineCount is always at least 1.
-    if lineCount == 1:
-      rowPercentage = 100
-    else:
-      rowPercentage = (self.host.cursorRow + 1) * 100 / lineCount
-    charCount = len(tb.lines[self.host.cursorRow])
-    if self.host.cursorCol == charCount:
-      colPercentage = 100
-    else:
-      colPercentage = self.host.cursorCol * 100 / charCount
+    if lineCount:
+      rowPercentage = self.host.cursorRow * 100 / lineCount
+      charCount = len(tb.lines[self.host.cursorRow])
+      if self.host.cursorCol != 0:
+        colPercentage = self.host.cursorCol * 100 / charCount
     # Format.
     rightSide = ''
     if len(statusLine):
