@@ -996,7 +996,7 @@ class Actions(app.mutator.Mutator):
       except Exception as e:
         color = app.color.get('status_line_error')
         if self.isReadOnly:
-          self.setMessage("Permission error. Try modifing in sudo mode.",
+          self.setMessage("Permission error. Try modifying in sudo mode.",
                           color=color)
         else:
           self.setMessage(
