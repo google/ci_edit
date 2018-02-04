@@ -434,23 +434,9 @@ class PopupController(app.controller.Controller):
     TODO: Make this reloading a new change that can be appended
     to the redo chain so user can undo out of a reloadBuffer call.
     """
-    mainBuffer = self.view.host.inputWindow.textBuffer
+    mainBuffer = self.view.host.textBuffer
     mainBuffer.fileLoad()
-    self.changeToMainWindow()
-
-  def setOptions(self, options):
-    """
-    This function is used to change the options that are displayed in the
-    popup window as well as their functions.
-
-    Args:
-      options (dict): A dictionary mapping keys (ints) to its
-                      corresponding action.
-
-    Returns;
-      None.
-    """
-    self.commandSet = options
+    self.changeToInputWindow()
 
 class PaletteDialogController(app.controller.Controller):
   """."""

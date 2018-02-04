@@ -13,13 +13,13 @@
 # limitations under the License.
 
 import app.background
+import app.curses_util
 import app.log
 import app.prefs
 import os
 import time
 import threading
 import app.window
-
 
 class FileTracker(threading.Thread):
   def __init__(self, *args, **keywords):
@@ -66,10 +66,12 @@ class FileStats:
       redraw = False
       waitOnSemaphore = False
       if program:
-        if self.fileContentChangedSinceCheck():
-          program.popupWindow.setMessage(
-              "The file on disk has changed.\nReload file?")
-          program.popupWindow.controller.callerSemaphore = self.thread.semaphore
+        if self.fileContentChangedSinceCheck() and self.__popupWindow:
+          self.__popupWindow.setUpWindow(
+              message="The file on disk has changed.\nReload file?",
+              displayOptions=self.__popupDisplayOptions,
+              controllerOptions=self.__popupControllerOptions)
+          self.__popupWindow.controller.callerSemaphore = self.thread.semaphore
           app.background.bg.put((program, 'popup', self.thread.semaphore))
           self.thread.semaphore.acquire() # Wait for popup to load
           redraw = True
@@ -142,6 +144,29 @@ class FileStats:
     Retrieves the current file info that we have in memory.
     """
     return self.currentFileInfo
+
+  def setPopupWindow(self, popupWindow):
+    """
+    Sets the file stat's object's reference to the popup window that
+    it will use to notify the user of any changes.
+
+    Args:
+      popupWindow (PopupWindow): The popup window that this object will use.
+
+    Returns:
+      None.
+    """
+    # The keys that the user can press to respond to the popup window.
+    self.__popupControllerOptions = {
+      ord('Y'): popupWindow.controller.reloadBuffer,
+      ord('y'): popupWindow.controller.reloadBuffer,
+      ord('N'): popupWindow.controller.changeToInputWindow,
+      ord('n'): popupWindow.controller.changeToInputWindow,
+      app.curses_util.KEY_ESCAPE: popupWindow.controller.changeToInputWindow,
+    }
+    # The options that will be displayed on the popup window.
+    self.__popupDisplayOptions = ['Y', 'N']
+    self.__popupWindow = popupWindow
 
   def setTextBuffer(self, textBuffer):
     self.textBuffer = textBuffer

@@ -131,7 +131,7 @@ class CiProgram:
             self.exiting = True
             return
           if frame[0] == 'popup':
-            self.changeFocusTo(self.popupWindow)
+            self.changeFocusTo(self.inputWindow.popupWindow)
             callerSemaphore.release()
           else:
             self.refresh(frame[0], frame[1])
@@ -224,7 +224,7 @@ class CiProgram:
                 self.exiting = True
                 return
               if frame[0] == 'popup':
-                self.changeFocusTo(self.popupWindow)
+                self.changeFocusTo(self.inputWindow.popupWindow)
                 callerSemaphore.release()
               else:
                 self.refresh(frame[0], frame[1])
@@ -295,7 +295,6 @@ class CiProgram:
       self.debugWindow = None
       self.debugUndoWindow = None
       self.logWindow = None
-    self.popupWindow = app.window.PopupWindow(self)
     self.paletteWindow = app.window.PaletteWindow(self)
     self.inputWindow = app.window.InputWindow(self)
     self.zOrder.append(self.inputWindow)
