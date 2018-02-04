@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-class Bookmark:
+class Bookmark(object):
   """
   This bookmark object is used as a marker for different places in a
   text document. Note that because text buffer lines index at 0, all
@@ -27,18 +27,41 @@ class Bookmark:
                     to associate with this bookmark. It can be accessed by calling
                     bookmark.getData()
     """
-    self.range = (beginRow, endRow)
+    self.__begin = beginRow
+    self.__end = endRow
     self.data = data
 
   @property
+  def range(self):
+    return (self.begin, self.end)
+
+  @range.setter
+  def range(self, value):
+    self.__begin, self.__end = min(value), max(value)
+
+  @property
   def begin(self):
-    return self.range[0]
+    return self.__begin
+
+  @begin.setter
+  def begin(self, value):
+    minVal = min(value, self.__end)
+    maxVal = max(value, self.__end)
+    self.__begin = minVal
+    self.__end = maxVal
 
   @property
   def end(self):
-    return self.range[1]
+    return self.__end
 
-  def overlap(self, bookmark):
+  @end.setter
+  def end(self, value):
+    minVal = min(self.__begin, value)
+    maxVal = max(self.__begin, value)
+    self.__begin = minVal
+    self.__end = maxVal
+
+  def overlaps(self, bookmark):
     """
     Takes in another bookmark object and returns True if this bookmark
     shares any rows with the passed in bookmark.

@@ -130,7 +130,86 @@ class BookmarkTestCases(unittest.TestCase):
     checkRanges(Bookmark(-5000, 5000))
 
   def test_bookmark_overlap(self):
-    pass
+    b1 = Bookmark(1, 5)
+    b2 = Bookmark(1, 5)
+    self.assertTrue(b1.overlaps(b2))
+    self.assertTrue(b2.overlaps(b1))
+
+    b1 = Bookmark(2, 5)
+    b2 = Bookmark(1, 5)
+    self.assertTrue(b1.overlaps(b2))
+    self.assertTrue(b2.overlaps(b1))
+
+    b1 = Bookmark(1, 3)
+    b2 = Bookmark(1, 5)
+    self.assertTrue(b1.overlaps(b2))
+    self.assertTrue(b2.overlaps(b1))
+
+    b1 = Bookmark(3, 4)
+    b2 = Bookmark(1, 5)
+    self.assertTrue(b1.overlaps(b2))
+    self.assertTrue(b2.overlaps(b1))
+
+    b1 = Bookmark(3, 10)
+    b2 = Bookmark(1, 5)
+    self.assertTrue(b1.overlaps(b2))
+    self.assertTrue(b2.overlaps(b1))
+
+    b1 = Bookmark(5, 10)
+    b2 = Bookmark(1, 5)
+    self.assertTrue(b1.overlaps(b2))
+    self.assertTrue(b2.overlaps(b1))
+
+    b1 = Bookmark(-5, 0)
+    b2 = Bookmark(-5, 5)
+    self.assertTrue(b1.overlaps(b2))
+    self.assertTrue(b2.overlaps(b1))
+
+    b1 = Bookmark(0, 0)
+    b2 = Bookmark(0, 0)
+    self.assertTrue(b1.overlaps(b2))
+    self.assertTrue(b2.overlaps(b1))
+
+  def test_bookmark_properties(self):
+    b1 = Bookmark(3, 5)
+    self.assertTrue(b1.begin == 3)
+    self.assertTrue(b1.end == 5)
+    self.assertTrue(b1.range == (3, 5))
+
+    b1.range = (10, 20)
+    self.assertTrue(b1.begin == 10)
+    self.assertTrue(b1.end == 20)
+    self.assertTrue(b1.range == (10, 20))
+
+    b1.range = (20, 10)
+    self.assertTrue(b1.begin == 10)
+    self.assertTrue(b1.end == 20)
+    self.assertTrue(b1.range == (10, 20))
+
+    b1.range = (3,)
+    self.assertTrue(b1.begin == 3)
+    self.assertTrue(b1.end == 3)
+    self.assertTrue(b1.range == (3, 3))
+
+    b1.begin = -3
+    self.assertTrue(b1.begin == -3)
+    self.assertTrue(b1.end == 3)
+    self.assertTrue(b1.range == (-3, 3))
+
+    b1.begin = 10
+    self.assertTrue(b1.begin == 3)
+    self.assertTrue(b1.end == 10)
+    self.assertTrue(b1.range == (3, 10))
+
+    b1.end = 15
+    self.assertTrue(b1.begin == 3)
+    self.assertTrue(b1.end == 15)
+    self.assertTrue(b1.range == (3, 15))
+
+    b1.end = -5
+    self.assertTrue(b1.begin == -5)
+    self.assertTrue(b1.end == 3)
+    self.assertTrue(b1.range == (-5, 3))
 
   def test_get_next_bookmark_color(self):
     def test_with_an_x_colored_terminal(x):
