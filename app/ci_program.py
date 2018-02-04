@@ -52,6 +52,7 @@ class CiProgram:
     self.clicks = 0
     self.debugMouseEvent = (0, 0, 0, 0, 0)
     self.exiting = False
+    self.host = None
     self.modalUi = None
     self.modeStack = []
     self.priorClick = 0

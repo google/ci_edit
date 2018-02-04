@@ -140,6 +140,7 @@ restype
 rfind
 rit
 rsplit
+rstrip
 scrollok
 sel
 sep

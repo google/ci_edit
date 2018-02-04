@@ -43,6 +43,7 @@ abcdefghijklmnopqrstuvwxy
 abcdefghijklmnopqrstuvwxyz
 accessor
 accessors
+acos
 adate
 alloc
 apis
@@ -61,6 +62,7 @@ backtrace
 baz
 bbggrr
 bgr
+bitmask
 bool
 booleans
 buf
@@ -169,7 +171,11 @@ hxx
 idr
 iff
 ifndef
+ij
+ijk
+ik
 img
+infographic
 ini
 init
 inlined
@@ -182,6 +188,7 @@ ipsum
 ipv
 iter
 iterable
+jk
 jpeg
 jpg
 json
@@ -193,6 +200,7 @@ len
 lf
 lhs
 lifo
+loc
 localhost
 loopback
 lorem
@@ -251,11 +259,17 @@ rar
 rb
 readme
 rect
+rects
+recurses
+recursing
 refptr
 regex
 regexes
 remoting
 renderer
+reparented
+reparenting
+reparents
 rhs
 ro
 rrggbb
@@ -304,6 +318,7 @@ todo
 tolltip
 tooltip
 traceback
+traversable
 tty
 txt
 typdef

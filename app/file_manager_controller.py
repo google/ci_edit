@@ -23,8 +23,9 @@ import time
 class DirectoryListController(app.controller.Controller):
   """Gather and prepare file directory information.
   """
-  def __init__(self, host):
-    app.controller.Controller.__init__(self, host, 'DirectoryListController')
+  def __init__(self, view):
+    assert self is not view
+    app.controller.Controller.__init__(self, view, 'DirectoryListController')
     self.filter = None
     self.shownDirectory = None
 
@@ -36,7 +37,7 @@ class DirectoryListController(app.controller.Controller):
     app.log.info('DirectoryListController command set')
 
   def onChange(self):
-    input = self.host.getPath()
+    input = self.view.host.getPath()
     if self.shownDirectory == input:
       return
     self.shownDirectory = input
@@ -45,17 +46,19 @@ class DirectoryListController(app.controller.Controller):
     fileName = ''
     if len(input) > 0 and input[-1] != os.sep:
       dirPath, fileName = os.path.split(fullPath)
-      self.host.textBuffer.findRe = re.compile('()^' + re.escape(fileName))
+      self.view.textBuffer.findRe = re.compile('()^' + re.escape(fileName))
     else:
-      self.host.textBuffer.findRe = None
+      self.view.textBuffer.findRe = None
     dirPath = dirPath or '.'
     if os.path.isdir(dirPath):
+      hostOptions = self.view.host.opt
+      viewOptions = self.view.opt
       lines = []
       try:
         fileLines = []
         contents = os.listdir(dirPath)
         for i in contents:
-          if not self.host.host.opt['dotFiles'] and i[0] == '.':
+          if not hostOptions['dotFiles'] and i[0] == '.':
             continue
           if self.filter is not None and not i.startswith(self.filter):
             continue
@@ -64,40 +67,40 @@ class DirectoryListController(app.controller.Controller):
             i += os.path.sep
           iSize = ''
           iModified = 0
-          if self.host.host.opt['sizes'] and os.path.isfile(fullPath):
+          if hostOptions['sizes'] and os.path.isfile(fullPath):
             iSize = '%d bytes' % os.path.getsize(fullPath)
-          if self.host.host.opt['modified']:
+          if hostOptions['modified']:
             iModified = os.path.getmtime(fullPath)
           fileLines.append([i, iSize, iModified])
-        if self.host.opt['Size'] is not None:
+        if viewOptions['Size'] is not None:
           # Sort by size.
-          fileLines.sort(reverse=not self.host.opt['Size'],
+          fileLines.sort(reverse=not viewOptions['Size'],
               key=lambda x: x[1])
-        elif self.host.opt['Modified'] is not None:
+        elif viewOptions['Modified'] is not None:
           # Sort by modification date.
-          fileLines.sort(reverse=not self.host.opt['Modified'],
+          fileLines.sort(reverse=not viewOptions['Modified'],
               key=lambda x: x[2])
         else:
-          fileLines.sort(reverse=not self.host.opt['Name'],
+          fileLines.sort(reverse=not viewOptions['Name'],
               key=lambda x: unicode.lower(x[0]))
         lines = ['%-40s  %16s  %24s' % (
             i[0], i[1],
             unicode(time.strftime('%c', time.localtime(i[2]))) if i[2] else '')
             for i in fileLines]
-        self.host.contents = [i[0] for i in fileLines]
+        self.view.contents = [i[0] for i in fileLines]
       except OSError as e:
         lines = ['Error opening directory.']
         lines.append(unicode(e))
       clip = ['./', '../'] + lines
     else:
       clip = [dirPath + ": not found"]
-    self.host.textBuffer.selectionAll()
-    self.host.textBuffer.editPasteLines(tuple(clip))
-    #self.host.textBuffer.findPlainText(fileName)
-    self.host.textBuffer.penRow = 0
-    self.host.textBuffer.penCol = 0
-    self.host.scrollRow = 0
-    self.host.scrollCol = 0
+    self.view.textBuffer.selectionAll()
+    self.view.textBuffer.editPasteLines(tuple(clip))
+    #self.view.textBuffer.findPlainText(fileName)
+    self.view.textBuffer.penRow = 0
+    self.view.textBuffer.penCol = 0
+    self.view.scrollRow = 0
+    self.view.scrollCol = 0
     self.filter = None
 
   def optionChanged(self, name, value):
@@ -111,8 +114,8 @@ class DirectoryListController(app.controller.Controller):
 class FileManagerController(app.controller.Controller):
   """Create or open files.
   """
-  def __init__(self, host):
-    app.controller.Controller.__init__(self, host, 'FileManagerController')
+  def __init__(self, view):
+    app.controller.Controller.__init__(self, view, 'FileManagerController')
 
   def createOrOpen(self):
     path = self.textBuffer.lines[0]
@@ -122,21 +125,21 @@ class FileManagerController(app.controller.Controller):
           clip = [path + ":", 'Error opening file.']
           return
       textBuffer = app.buffer_manager.buffers.loadTextBuffer(path,
-          self.host.host.inputWindow)
+          self.view.host.inputWindow)
       assert textBuffer.parser
-      self.host.host.inputWindow.setTextBuffer(textBuffer)
+      self.view.host.inputWindow.setTextBuffer(textBuffer)
     self.changeToInputWindow()
 
   def focus(self):
     self.textBuffer.selectionAll()
-    if len(self.host.inputWindow.textBuffer.fullPath) == 0:
+    if len(self.view.inputWindow.textBuffer.fullPath) == 0:
       path = os.getcwd()
     else:
-      path = os.path.dirname(self.host.inputWindow.textBuffer.fullPath)
+      path = os.path.dirname(self.view.inputWindow.textBuffer.fullPath)
     if len(path) != 0:
       path += os.path.sep
     self.textBuffer.editPasteLines((path,))
-    self.host.directoryList.focus()
+    self.view.directoryList.focus()
     app.controller.Controller.focus(self)
 
   def info(self):
@@ -148,14 +151,14 @@ class FileManagerController(app.controller.Controller):
       self.textBuffer.insert('/')
 
   def onChange(self):
-    self.host.directoryList.controller.onChange()
+    self.view.directoryList.controller.onChange()
     app.controller.Controller.onChange(self)
 
   def optionChanged(self, name, value):
-    self.host.directoryList.controller.shownDirectory = None
+    self.view.directoryList.controller.shownDirectory = None
 
   def passEventToDirectoryList(self):
-    self.host.directoryList.controller.doCommand(self.savedCh, None)
+    self.view.directoryList.controller.doCommand(self.savedCh, None)
 
   def tabCompleteExtend(self):
     """Extend the selection to match characters in common."""
@@ -196,5 +199,5 @@ class FileManagerController(app.controller.Controller):
     if expandedPath == os.path.expandvars(os.path.expanduser(
         self.textBuffer.lines[0])):
       # No further expansion found.
-      self.host.directoryList.controller.setFilter(fileName)
+      self.view.directoryList.controller.setFilter(fileName)
     self.onChange()

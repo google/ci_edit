@@ -168,7 +168,8 @@ class Parser:
       newGrammarIndexLimit = 2 + len(parent.get('contains', []))
       errorIndexLimit = newGrammarIndexLimit + len(parent.get('error', []))
       keywordIndexLimit = errorIndexLimit + len(parent.get('keywords', []))
-      specialIndexLimit = keywordIndexLimit + len(parent.get('special', []))
+      typeIndexLimit = keywordIndexLimit + len(parent.get('types', []))
+      specialIndexLimit = typeIndexLimit + len(parent.get('special', []))
       index = -1
       for i,k in enumerate(found.groups()):
         if k is not None:
@@ -230,6 +231,18 @@ class Parser:
         # A keyword doesn't change the nodeIndex.
         keywordNode = ParserNode()
         keywordNode.grammar = app.prefs.grammars['keyword']
+        keywordNode.begin = cursor + reg[0]
+        keywordNode.prior = len(self.parserNodes) - 1
+        self.parserNodes.append(keywordNode)
+        # Resume the current grammar.
+        child.grammar = self.parserNodes[self.parserNodes[-1].prior].grammar
+        child.begin = cursor + reg[1]
+        child.prior = self.parserNodes[self.parserNodes[-1].prior].prior
+        cursor += reg[1]
+      elif index < typeIndexLimit:
+        # A keyword doesn't change the nodeIndex.
+        keywordNode = ParserNode()
+        keywordNode.grammar = app.prefs.grammars['type']
         keywordNode.begin = cursor + reg[0]
         keywordNode.prior = len(self.parserNodes) - 1
         self.parserNodes.append(keywordNode)

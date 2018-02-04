@@ -77,7 +77,7 @@ class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
             "                                        ",
             "                                        ",
             "                                        ",
-            "New buffer         |    1, 1 | 100%,100%",
+            "New buffer         |    1, 1 |   0%,  0%",
             "                                        ",
             ]), CTRL_Q])
 
@@ -193,7 +193,7 @@ class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
             "                                        ",
             "                                        ",
             "                                        ",
-            "New buffer         |    1, 1 | 100%,100%",
+            "New buffer         |    1, 1 |   0%,  0%",
             "                                        "]),
         'H', 'e', 'l', 'l', 'o',
         self.displayCheck(0, 0, [
@@ -210,7 +210,7 @@ class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
             "                                        ",
             "                                        ",
             "                                        ",
-            "                        1, 6 | 100%,100%",
+            "                        1, 6 |   0%,100%",
             "                                        "]),
         CTRL_Z,
         self.displayCheck(0, 0, [
@@ -227,6 +227,6 @@ class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
             "                                        ",
             "                                        ",
             "                                        ",
-            "                        1, 1 | 100%,100%",
+            "                        1, 1 |   0%,  0%",
             "                                        "]),
         CTRL_Q])

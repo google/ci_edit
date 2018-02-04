@@ -27,8 +27,8 @@ import text_buffer
 class ViEdit(app.controller.Controller):
   """Vi is a common Unix editor. This mapping supports some common vi/vim
   commands."""
-  def __init__(self, host):
-    app.controller.Controller.__init__(self, host, 'ViEdit')
+  def __init__(self, view):
+    app.controller.Controller.__init__(self, view, 'ViEdit')
     self.commandDefault = None
 
   def setTextBuffer(self, textBuffer):

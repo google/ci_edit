@@ -27,6 +27,13 @@ namespace sample {
 // a comment.
 #endif
 
+enum Blah {
+  zero,
+  one,
+  two
+};
+
+void int bool goto sizeof char double case const switch typedef bool
 
 constexpr char string[] = R"foo(
     foo: "5 apples", R"(carrot)"

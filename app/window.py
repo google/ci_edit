@@ -284,9 +284,11 @@ class LabeledLine(Window):
     self.label = label
     self.leftColumn = ViewWindow(self)
 
+  def quitNow(self):
+    self.host.quitNow()
+
   def render(self):
-    self.leftColumn.addStr(0, 0, self.label,
-        app.color.get('keyword'))
+    self.leftColumn.addStr(0, 0, self.label, app.color.get('keyword'))
     Window.render(self)
 
   def reshape(self, rows, cols, top, left):
@@ -296,8 +298,8 @@ class LabeledLine(Window):
     self.leftColumn.reshape(rows, labelWidth, top, left)
 
   def setController(self, controllerClass):
-    app.log.caller('                        ',self.textBuffer)
-    self.controller = controllerClass(self.host)
+    #app.log.caller('                        ',self.textBuffer)
+    self.controller = controllerClass(self)
     self.controller.setTextBuffer(self.textBuffer)
 
   def setLabel(self, label):
@@ -351,7 +353,7 @@ class Menu(ViewWindow):
 
   def setController(self, controllerClass):
     app.log.info('                        ',self.textBuffer)
-    self.controller = controllerClass(self.host)
+    self.controller = controllerClass(self)
     self.controller.setTextBuffer(self.textBuffer)
 
 
@@ -495,7 +497,7 @@ class InteractiveFind(Window):
     self.replaceLine.setController(app.cu_editor.InteractiveFind)
     self.zOrder.append(self.replaceLine)
     self.setTextBuffer(app.text_buffer.TextBuffer())
-    self.controller = app.cu_editor.InteractiveFind(host,
+    self.controller = app.cu_editor.InteractiveFind(self,
         self.findLine.textBuffer)
 
   def reshape(self, rows, cols, top, left):
@@ -559,13 +561,9 @@ class StatusLine(ViewWindow):
     lineCount = len(tb.lines)
     if lineCount:
       rowPercentage = self.host.cursorRow * 100 / lineCount
-      if self.host.cursorRow >= lineCount - 1:
-         rowPercentage = 100
       charCount = len(tb.lines[self.host.cursorRow])
-      if (self.host.cursorCol < charCount):
+      if self.host.cursorCol != 0:
         colPercentage = self.host.cursorCol * 100 / charCount
-      else:
-        colPercentage = 100
     # Format.
     rightSide = ''
     if len(statusLine):
@@ -701,7 +699,7 @@ class InputWindow(Window):
     if 1:
       self.interactiveGoto = LabeledLine(self, 'goto: ')
       self.interactiveGoto.setController(app.cu_editor.InteractiveGoto)
-    if 1:
+    if 0:
       self.interactiveOpen = LabeledLine(self, 'open: ')
       self.interactiveOpen.setController(app.cu_editor.InteractiveOpener)
     if 1:
@@ -743,6 +741,8 @@ class InputWindow(Window):
       self.rightColumn.setParent(self, 0)
       if not self.showRightColumn:
         self.rightColumn.hide()
+    if 1:
+      self.popupWindow = PopupWindow(self)
     if self.showMessageLine:
       self.messageLine = MessageLine(self)
       self.messageLine.setParent(self, 0)
@@ -800,7 +800,8 @@ class InputWindow(Window):
 
     self.confirmClose.reshape(bottomRows, cols, bottomFirstRow, left)
     self.confirmOverwrite.reshape(bottomRows, cols, bottomFirstRow, left)
-    self.interactiveOpen.reshape(bottomRows, cols, bottomFirstRow, left)
+    if 0:
+      self.interactiveOpen.reshape(bottomRows, cols, bottomFirstRow, left)
     self.interactivePrediction.reshape(bottomRows, cols, bottomFirstRow, left)
     self.interactivePrompt.reshape(bottomRows, cols, bottomFirstRow, left)
     self.interactiveQuit.reshape(bottomRows, cols, bottomFirstRow, left)
@@ -1039,7 +1040,8 @@ class PathRow(ViewWindow):
 class DirectoryList(Window):
   """This <tbd>."""
   def __init__(self, host, inputWindow):
-    assert(host)
+    assert host
+    assert self is not host
     Window.__init__(self, host)
     self.host = host
     self.inputWindow = inputWindow
@@ -1056,9 +1058,6 @@ class DirectoryList(Window):
       self.optionsRow.addSortHeader(key, self.opt, size)
     self.optionsRow.setParent(self, 0)
 
-  def getPath(self):
-    return self.host.textBuffer.lines[0]
-
   def reshape(self, rows, cols, top, left):
     """Change self and sub-windows to fit within the given rectangle."""
     app.log.detail('reshape', rows, cols, top, left)
@@ -1071,7 +1070,7 @@ class DirectoryList(Window):
     row = self.scrollRow + paneRow
     if row >= len(self.textBuffer.lines):
       return
-    path = self.getPath()
+    path = self.host.getPath()
     if row == 0:  # Clicked on "./".
       # Clear the shown directory to trigger a refresh.
       self.controller.shownDirectory = None
@@ -1116,7 +1115,8 @@ class DirectoryList(Window):
 
 class FileManagerWindow(Window):
   def __init__(self, host, inputWindow):
-    assert(host)
+    assert host
+    #assert issubclass(host.__class__, Window), host
     Window.__init__(self, host)
     self.host = host
     self.inputWindow = inputWindow
@@ -1142,6 +1142,9 @@ class FileManagerWindow(Window):
     self.directoryList.setParent(self, 0)
     #self.statusLine = StatusLine(self)
     #self.statusLine.setParent(self, 0)
+
+  def getPath(self):
+    return self.textBuffer.lines[0]
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
     row = self.scrollRow + paneRow
@@ -1191,9 +1194,11 @@ class PopupWindow(Window):
     self.controller = app.cu_editor.PopupController(self)
     self.setTextBuffer(app.text_buffer.TextBuffer())
     self.longestLineLength = 0
-    self.message = []
+    self.__message = []
     self.showOptions = True
-    self.options = ["Y", "N"]
+    # This will be displayed and should contain the keys that respond to user
+    # input. This should be updated if you change the controller's command set.
+    self.options = []
 
   def render(self):
     """
@@ -1201,7 +1206,7 @@ class PopupWindow(Window):
     """
     maxRows, maxCols = self.host.rows, self.host.cols
     cols = min(self.longestLineLength + 6, maxCols)
-    rows = min(len(self.message) + 4, maxRows)
+    rows = min(len(self.__message) + 4, maxRows)
     self.resizeTo(rows, cols)
     self.moveTo(maxRows / 2 - rows / 2, maxCols / 2 - cols / 2)
     color = app.color.get('popup_window')
@@ -1212,7 +1217,7 @@ class PopupWindow(Window):
         self.addStr(row, 0, ' ' * cols, color)
         continue
       else:
-        message = self.message[row - 1]
+        message = self.__message[row - 1]
       lineLength = len(message)
       spacing1 = (cols - lineLength) / 2
       spacing2 = cols - lineLength - spacing1
@@ -1221,14 +1226,24 @@ class PopupWindow(Window):
   def setMessage(self, message):
     """
     Sets the Popup window's message to the given message.
-
     message (str): A string that you want to display.
 
     Returns:
       None.
     """
-    self.message = message.split("\n")
-    self.longestLineLength = max([len(line) for line in self.message])
+    self.__message = message.split("\n")
+    self.longestLineLength = max([len(line) for line in self.__message])
+
+  def setOptionsToDisplay(self, options):
+    """
+    This function is used to change the options that are displayed in the
+    popup window. They will be separated by a '/' character when displayed.
+
+    Args:
+      options (list): A list of possible keys which the user can press and
+                      should be responded to by the controller.
+    """
+    self.options = options
 
   def setTextBuffer(self, textBuffer):
     Window.setTextBuffer(self, textBuffer)

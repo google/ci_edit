@@ -40,7 +40,7 @@ __common_keywords = [
 ]
 
 __c_keywords = __common_keywords + [
-  'case', 'const', 'default', 'do',
+  'case', 'const', 'default', 'do', 'enum',
   'goto', 'sizeof', 'static', 'struct', 'switch',
   'typedef',
 ]
@@ -148,6 +148,7 @@ color8 = {
   'text': 0,
   'top_info': 7,
   'trailing_space': 1,
+  'type': 1,
 }
 
 for i in color8.values():
@@ -203,6 +204,7 @@ color256 = {
   'text': defaultColorIndex,
   'top_info': 168,
   'trailing_space': 180,
+  'type': keywordsColorIndex,
 }
 
 for i in color256.values():
@@ -674,6 +676,9 @@ prefs = {
       'indent': '  ',
       'special': [__sha_1,],
       'contains': ['quoted_string1', 'quoted_string2'],
+    },
+    'type': {
+      'spelling': False,
     },
   },
   'palette': {

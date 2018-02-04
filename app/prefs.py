@@ -78,11 +78,12 @@ for k,v in prefs['grammar'].items():
 
 # Compile regexes for each grammar.
 for k,v in prefs['grammar'].items():
-  # keywords re.
-  v['keywordsRe'] = re.compile(
-      joinReWordList(v.get('keywords', []) + v.get('types', [])))
-  v['errorsRe'] = re.compile(joinReList(v.get('error', [])))
-  v['specialsRe'] = re.compile(joinReList(v.get('special', [])))
+  if 0:
+    # keywords re.
+    v['keywordsRe'] = re.compile(
+        joinReWordList(v.get('keywords', []) + v.get('types', [])))
+    v['errorsRe'] = re.compile(joinReList(v.get('error', [])))
+    v['specialsRe'] = re.compile(joinReList(v.get('special', [])))
   # contains and end re.
   matchGrammars = []
   markers = []
@@ -118,6 +119,9 @@ for k,v in prefs['grammar'].items():
   for keyword in v.get('keywords', []):
     markers.append(r'\b' + keyword + r'\b')
   # Index [2+len(contains)+len(error)+len(keywords)..]
+  for types in v.get('types', []):
+    markers.append(r'\b' + types + r'\b')
+  # Index [2+len(contains)+len(error)+len(keywords)+len(types)..]
   markers += v.get('special', [])
   # Index [-1]
   markers.append(r'\n')

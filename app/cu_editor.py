@@ -23,17 +23,17 @@ import curses
 import text_buffer
 
 
-def initCommandSet(editText, textBuffer):
+def initCommandSet(controller, textBuffer):
   """The basic command set includes line editing controls."""
   return {
     CTRL_A: textBuffer.selectionAll,
     CTRL_C: textBuffer.editCopy,
     #CTRL_H: textBuffer.backspace,
     CTRL_L: textBuffer.cursorSelectLine,
-    CTRL_Q: editText.quitOrSwitchToConfirmQuit,
-    CTRL_S: editText.saveOrChangeToSaveAs,
+    CTRL_Q: controller.quitOrSwitchToConfirmQuit,
+    CTRL_S: controller.saveOrChangeToSaveAs,
     CTRL_V: textBuffer.editPaste,
-    CTRL_W: editText.closeOrConfirmClose,
+    CTRL_W: controller.closeOrConfirmClose,
     CTRL_X: textBuffer.editCut,
     CTRL_Y: textBuffer.editRedo,
     CTRL_Z: textBuffer.editUndo,
@@ -85,7 +85,10 @@ def mainWindowCommands(controller, textBuffer):
     CTRL_J: textBuffer.carriageReturn,
     #CTRL_O: controller.changeToFileOpen,
     CTRL_O: controller.changeToFileManagerWindow,
+    CTRL_Q: controller.initiateQuit,
     CTRL_R: controller.changeToFindPrior,
+    CTRL_S: controller.initiateSave,
+    CTRL_W: controller.initiateClose,
 
     KEY_DOWN: textBuffer.cursorDown,
     KEY_SHIFT_LEFT: textBuffer.cursorSelectLeft,
@@ -105,8 +108,8 @@ def mainWindowCommands(controller, textBuffer):
 
 class ConfirmClose(app.controller.Controller):
   """Ask about closing a file with unsaved changes."""
-  def __init__(self, host):
-    app.controller.Controller.__init__(self, host, 'confirmClose')
+  def __init__(self, view):
+    app.controller.Controller.__init__(self, view, 'confirmClose')
 
   def setTextBuffer(self, textBuffer):
     app.controller.Controller.setTextBuffer(self, textBuffer)
@@ -123,8 +126,8 @@ class ConfirmClose(app.controller.Controller):
 
 class ConfirmOverwrite(app.controller.Controller):
   """Ask about writing over an existing file."""
-  def __init__(self, host):
-    app.controller.Controller.__init__(self, host, 'confirmOverwrite')
+  def __init__(self, view):
+    app.controller.Controller.__init__(self, view, 'confirmOverwrite')
 
   def setTextBuffer(self, textBuffer):
     app.controller.Controller.setTextBuffer(self, textBuffer)
@@ -139,8 +142,8 @@ class ConfirmOverwrite(app.controller.Controller):
 
 class InteractiveFind(app.editor.InteractiveFind):
   """Find text within the current document."""
-  def __init__(self, host):
-    app.editor.InteractiveFind.__init__(self, host)
+  def __init__(self, view):
+    app.editor.InteractiveFind.__init__(self, view)
 
   def setTextBuffer(self, textBuffer):
     app.editor.InteractiveFind.setTextBuffer(self, textBuffer)
@@ -154,7 +157,8 @@ class InteractiveFind(app.editor.InteractiveFind):
       CTRL_F: self.findNext,
       CTRL_G: self.findNext,
       CTRL_J: self.changeToHostWindow,
-      CTRL_O: self.changeToFileOpen,
+      #CTRL_O: self.changeToFileOpen,
+      CTRL_O: self.changeToFileManagerWindow,
       CTRL_P: self.changeToPrediction,
       CTRL_R: self.findPrior,
       KEY_DOWN: self.findNext,
@@ -170,8 +174,8 @@ class InteractiveFind(app.editor.InteractiveFind):
 
 class InteractiveGoto(app.editor.InteractiveGoto):
   """Jump to a particular line number."""
-  def __init__(self, host):
-    app.editor.InteractiveGoto.__init__(self, host)
+  def __init__(self, view):
+    app.editor.InteractiveGoto.__init__(self, view)
 
   def setTextBuffer(self, textBuffer):
     app.editor.InteractiveGoto.setTextBuffer(self, textBuffer)
@@ -193,34 +197,36 @@ class InteractiveGoto(app.editor.InteractiveGoto):
     self.commandDefault = self.textBuffer.insertPrintable
 
 
-class InteractiveOpener(app.editor.InteractiveOpener):
-  """Open a file to edit."""
-  def __init__(self, host):
-    app.editor.InteractiveOpener.__init__(self, host)
+if 0:
+  class InteractiveOpener(app.editor.InteractiveOpener):
+    """Open a file to edit."""
+    def __init__(self, view):
+      app.editor.InteractiveOpener.__init__(self, view)
 
-  def setTextBuffer(self, textBuffer):
-    app.editor.InteractiveOpener.setTextBuffer(self, textBuffer)
-    commandSet = initCommandSet(self, textBuffer)
-    commandSet.update({
-      KEY_ESCAPE: self.changeToHostWindow,
-      KEY_F1: self.info,
-      CTRL_I: self.tabCompleteExtend,
-      CTRL_J: self.createOrOpen,
-      CTRL_N: self.createOrOpen,
-      CTRL_O: self.createOrOpen,
-      CTRL_P: self.changeToPrediction,
-      CTRL_Q: self.saveEventChangeToHostWindow,
-    })
-    self.commandSet = commandSet
-    self.commandDefault = self.textBuffer.insertPrintable
+    def setTextBuffer(self, textBuffer):
+      app.editor.InteractiveOpener.setTextBuffer(self, textBuffer)
+      commandSet = initCommandSet(self, textBuffer)
+      commandSet.update({
+        KEY_ESCAPE: self.changeToHostWindow,
+        KEY_F1: self.info,
+        CTRL_I: self.tabCompleteExtend,
+        CTRL_J: self.createOrOpen,
+        CTRL_N: self.createOrOpen,
+        CTRL_O: self.createOrOpen,
+        CTRL_P: self.changeToPrediction,
+        CTRL_Q: self.saveEventChangeToHostWindow,
+      })
+      self.commandSet = commandSet
+      self.commandDefault = self.textBuffer.insertPrintable
 
 
 class DirectoryList(app.file_manager_controller.DirectoryListController):
   """Open a file to edit."""
-  def __init__(self, host):
-    app.file_manager_controller.DirectoryListController.__init__(self, host)
+  def __init__(self, view):
+    app.file_manager_controller.DirectoryListController.__init__(self, view)
 
   def setTextBuffer(self, textBuffer):
+    assert textBuffer is self.view.textBuffer, textBuffer
     app.file_manager_controller.DirectoryListController.setTextBuffer(self,
         textBuffer)
     commandSet = initCommandSet(self, textBuffer)
@@ -236,8 +242,8 @@ class DirectoryList(app.file_manager_controller.DirectoryListController):
 
 class FileOpener(app.file_manager_controller.FileManagerController):
   """Open a file to edit."""
-  def __init__(self, host):
-    app.file_manager_controller.FileManagerController.__init__(self, host)
+  def __init__(self, view):
+    app.file_manager_controller.FileManagerController.__init__(self, view)
 
   def setTextBuffer(self, textBuffer):
     app.file_manager_controller.FileManagerController.setTextBuffer(self,
@@ -261,8 +267,8 @@ class FileOpener(app.file_manager_controller.FileManagerController):
 
 class InteractivePrediction(app.editor.InteractivePrediction):
   """Make a guess."""
-  def __init__(self, host):
-    app.editor.InteractivePrediction.__init__(self, host)
+  def __init__(self, view):
+    app.editor.InteractivePrediction.__init__(self, view)
 
   def setTextBuffer(self, textBuffer):
     app.editor.InteractivePrediction.setTextBuffer(self, textBuffer)
@@ -274,7 +280,8 @@ class InteractivePrediction(app.editor.InteractivePrediction):
       CTRL_G: self.changeToGoto,
       CTRL_J: self.selectItem,
       CTRL_N: self.nextItem,
-      CTRL_O: self.changeToFileOpen,
+      #CTRL_O: self.changeToFileOpen,
+      CTRL_O: self.changeToFileManagerWindow,
       CTRL_P: self.priorItem,
       CTRL_Q: self.saveEventChangeToHostWindow,
       KEY_DOWN: self.nextItem,
@@ -286,8 +293,8 @@ class InteractivePrediction(app.editor.InteractivePrediction):
 
 class InteractivePrompt(app.interactive_prompt.InteractivePrompt):
   """Extended command prompt."""
-  def __init__(self, host):
-    app.interactive_prompt.InteractivePrompt.__init__(self, host)
+  def __init__(self, view):
+    app.interactive_prompt.InteractivePrompt.__init__(self, view)
 
   def setTextBuffer(self, textBuffer):
     app.interactive_prompt.InteractivePrompt.setTextBuffer(self, textBuffer)
@@ -303,8 +310,8 @@ class InteractivePrompt(app.interactive_prompt.InteractivePrompt):
 
 class InteractiveQuit(app.controller.Controller):
   """Ask about unsaved changes."""
-  def __init__(self, host):
-    app.controller.Controller.__init__(self, host, 'interactiveQuit')
+  def __init__(self, view):
+    app.controller.Controller.__init__(self, view, 'interactiveQuit')
 
   def setTextBuffer(self, textBuffer):
     app.controller.Controller.setTextBuffer(self, textBuffer)
@@ -312,8 +319,8 @@ class InteractiveQuit(app.controller.Controller):
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
       #KEY_F1: self.info,
-      ord('n'): self.host.quitNow,
-      ord('N'): self.host.quitNow,
+      ord('n'): self.view.quitNow,
+      ord('N'): self.view.quitNow,
       ord('y'): self.saveOrChangeToSaveAs,
       ord('Y'): self.saveOrChangeToSaveAs,
     })
@@ -323,8 +330,8 @@ class InteractiveQuit(app.controller.Controller):
 
 class InteractiveSaveAs(app.controller.Controller):
   """Ask about unsaved files."""
-  def __init__(self, host):
-    app.controller.Controller.__init__(self, host, 'saveAs')
+  def __init__(self, view):
+    app.controller.Controller.__init__(self, view, 'saveAs')
 
   def setTextBuffer(self, textBuffer):
     app.controller.Controller.setTextBuffer(self, textBuffer)
@@ -341,22 +348,22 @@ class InteractiveSaveAs(app.controller.Controller):
     app.log.info('saveAs')
     name = self.textBuffer.lines[0]
     if not len(name):
-      self.host.textBuffer.setMessage(
+      self.view.textBuffer.setMessage(
           'File not saved (file name was empty).')
       self.changeToHostWindow()
       return
-    self.host.textBuffer.setFilePath(self.textBuffer.lines[0])
+    self.view.textBuffer.setFilePath(self.textBuffer.lines[0])
     # Preload the message with an error that should be overwritten.
-    self.host.textBuffer.setMessage('Error saving file')
-    self.host.textBuffer.fileWrite()
+    self.view.textBuffer.setMessage('Error saving file')
+    self.view.textBuffer.fileWrite()
     self.changeToHostWindow()
 
 
 class CuaEdit(app.controller.Controller):
   """Keyboard mappings for CUA. CUA is the Cut/Copy/Paste paradigm."""
-  def __init__(self, host):
-    app.controller.Controller.__init__(self, host, 'CuaEdit')
-    self.host = host
+  def __init__(self, view):
+    app.controller.Controller.__init__(self, view, 'CuaEdit')
+    #self.view = view
 
   def setTextBuffer(self, textBuffer):
     app.controller.Controller.setTextBuffer(self, textBuffer)
@@ -373,8 +380,8 @@ class CuaEdit(app.controller.Controller):
 
 class CuaPlusEdit(CuaEdit):
   """Keyboard mappings for CUA, plus some extra."""
-  def __init__(self, host):
-    CuaEdit.__init__(self, host)
+  def __init__(self, view):
+    CuaEdit.__init__(self, view)
     app.log.info('CuaPlusEdit.__init__')
 
   def info(self):
@@ -392,6 +399,7 @@ class CuaPlusEdit(CuaEdit):
       KEY_F2: textBuffer.bookmarkNext,
       KEY_F3: textBuffer.findAgain,
       KEY_F4: self.changeToPaletteWindow,
+      KEY_F5: self.changeToPopup,
       KEY_SHIFT_F2: textBuffer.bookmarkPrior,
       KEY_SHIFT_F3: textBuffer.findBack,
     })
@@ -403,29 +411,19 @@ class PopupController(app.controller.Controller):
   """
   def __init__(self, view):
     app.controller.Controller.__init__(self, view, 'popup')
-    self.view = view
     self.callerSemaphore = None
     def noOp(ch, meta):
       app.log.info('noOp in PopupController')
     self.commandDefault = noOp
     self.commandSet = {
-      ord('Y'): self.reloadBuffer,
-      ord('y'): self.reloadBuffer,
-      ord('N'): self.changeToMainWindow,
-      ord('n'): self.changeToMainWindow,
-      KEY_ESCAPE: self.changeToMainWindow,
+      KEY_ESCAPE: self.changeToInputWindow,
     }
 
-  def changeToMainWindow(self):
-    self.view.hide()
-    mainProgram = self.host.host
-    mainProgram.changeFocusTo(mainProgram.inputWindow)
+  def changeToInputWindow(self):
+    self.findAndChangeTo('inputWindow')
     if self.callerSemaphore:
       self.callerSemaphore.release()
       self.callerSemaphore = None
-
-  def setTextBuffer(self, textBuffer):
-    self.textBuffer = textBuffer
 
   def reloadBuffer(self):
     """
@@ -439,6 +437,20 @@ class PopupController(app.controller.Controller):
     mainBuffer = self.view.host.inputWindow.textBuffer
     mainBuffer.fileLoad()
     self.changeToMainWindow()
+
+  def setOptions(self, options):
+    """
+    This function is used to change the options that are displayed in the
+    popup window as well as their functions.
+
+    Args:
+      options (dict): A dictionary mapping keys (ints) to its
+                      corresponding action.
+
+    Returns;
+      None.
+    """
+    self.commandSet = options
 
 class PaletteDialogController(app.controller.Controller):
   """."""
@@ -456,7 +468,7 @@ class PaletteDialogController(app.controller.Controller):
     }
 
   def changeToHostWindow(self):
-    mainProgram = self.host.prg
+    mainProgram = self.view.prg
     mainProgram.changeFocusTo(mainProgram.inputWindow)
 
   def info(self):

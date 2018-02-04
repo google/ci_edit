@@ -44,162 +44,163 @@ def test_parseInt():
   assert parseInt('--10') == 0
 
 
-class InteractiveOpener(app.controller.Controller):
-  """Open a file to edit."""
-  def __init__(self, host):
-    app.controller.Controller.__init__(self, host, 'opener')
+if 0:
+  class InteractiveOpener(app.controller.Controller):
+    """Open a file to edit."""
+    def __init__(self, view):
+      app.controller.Controller.__init__(self, view, 'opener')
 
-  def createOrOpen(self):
-    self.changeToHostWindow()
+    def createOrOpen(self):
+      self.changeToHostWindow()
 
-  def focus(self):
-    app.log.info('InteractiveOpener.focus\n',
-        self.host.textBuffer.fullPath)
-    self.priorTextBuffer = self.host.textBuffer
-    self.commandDefault = self.textBuffer.insertPrintable
-    self.textBuffer.selectionAll()
-    if len(self.host.textBuffer.fullPath) == 0:
-      path = os.getcwd()
-    else:
-      path = os.path.dirname(self.host.textBuffer.fullPath)
-    if len(path) != 0:
-      path += os.path.sep
-    self.textBuffer.editPasteLines((path,))
-    # Create a new text buffer to display dir listing.
-    self.host.setTextBuffer(text_buffer.TextBuffer())
+    def focus(self):
+      app.log.info('InteractiveOpener.focus\n',
+          self.view.host.textBuffer.fullPath)
+      self.priorTextBuffer = self.view.host.textBuffer
+      self.commandDefault = self.textBuffer.insertPrintable
+      self.textBuffer.selectionAll()
+      if len(self.view.host.textBuffer.fullPath) == 0:
+        path = os.getcwd()
+      else:
+        path = os.path.dirname(self.view.host.textBuffer.fullPath)
+      if len(path) != 0:
+        path += os.path.sep
+      self.textBuffer.editPasteLines((path,))
+      # Create a new text buffer to display dir listing.
+      self.view.host.setTextBuffer(text_buffer.TextBuffer())
 
-  def info(self):
-    app.log.info('InteractiveOpener command set')
+    def info(self):
+      app.log.info('InteractiveOpener command set')
 
-  def maybeSlash(self, expandedPath):
-    if (self.textBuffer.lines[0] and self.textBuffer.lines[0][-1] != '/' and
-        os.path.isdir(expandedPath)):
-      self.textBuffer.insert('/')
+    def maybeSlash(self, expandedPath):
+      if (self.textBuffer.lines[0] and self.textBuffer.lines[0][-1] != '/' and
+          os.path.isdir(expandedPath)):
+        self.textBuffer.insert('/')
 
-  def tabCompleteFirst(self):
-    """Find the first file that starts with the pattern."""
-    dirPath, fileName = os.path.split(self.lines[0])
-    foundOnce = ''
-    #app.log.debug('tabComplete\n', dirPath, '\n', fileName)
-    for i in os.listdir(os.path.expandvars(os.path.expanduser(dirPath)) or '.'):
-      if i.startswith(fileName):
-        if foundOnce:
-          # Found more than one match.
+    def tabCompleteFirst(self):
+      """Find the first file that starts with the pattern."""
+      dirPath, fileName = os.path.split(self.lines[0])
+      foundOnce = ''
+      #app.log.debug('tabComplete\n', dirPath, '\n', fileName)
+      for i in os.listdir(os.path.expandvars(os.path.expanduser(dirPath)) or '.'):
+        if i.startswith(fileName):
+          if foundOnce:
+            # Found more than one match.
+            return
+          fileName = os.path.join(dirPath, i)
+          if os.path.isdir(fileName):
+            fileName += '/'
+          self.lines[0] = fileName
+          self.onChange()
           return
-        fileName = os.path.join(dirPath, i)
-        if os.path.isdir(fileName):
-          fileName += '/'
-        self.lines[0] = fileName
+
+    def tabCompleteExtend(self):
+      """Extend the selection to match characters in common."""
+      dirPath, fileName = os.path.split(self.textBuffer.lines[0])
+      expandedDir = os.path.expandvars(os.path.expanduser(dirPath)) or '.'
+      matches = []
+      if not os.path.isdir(expandedDir):
+        return
+      for i in os.listdir(expandedDir):
+        if i.startswith(fileName):
+          matches.append(i)
+        else:
+          pass
+          #app.log.info('not', i)
+      if len(matches) <= 0:
+        self.maybeSlash(expandedDir)
         self.onChange()
         return
-
-  def tabCompleteExtend(self):
-    """Extend the selection to match characters in common."""
-    dirPath, fileName = os.path.split(self.textBuffer.lines[0])
-    expandedDir = os.path.expandvars(os.path.expanduser(dirPath)) or '.'
-    matches = []
-    if not os.path.isdir(expandedDir):
-      return
-    for i in os.listdir(expandedDir):
-      if i.startswith(fileName):
-        matches.append(i)
-      else:
-        pass
-        #app.log.info('not', i)
-    if len(matches) <= 0:
-      self.maybeSlash(expandedDir)
+      if len(matches) == 1:
+        self.textBuffer.insert(matches[0][len(fileName):])
+        self.maybeSlash(os.path.join(expandedDir, matches[0]))
+        self.onChange()
+        return
+      def findCommonPrefixLength(prefixLen):
+        count = 0
+        ch = None
+        for match in matches:
+          if len(match) <= prefixLen:
+            return prefixLen
+          if not ch:
+            ch = match[prefixLen]
+          if match[prefixLen] == ch:
+            count += 1
+        if count and count == len(matches):
+          return findCommonPrefixLength(prefixLen + 1)
+        return prefixLen
+      prefixLen = findCommonPrefixLength(len(fileName))
+      self.textBuffer.insert(matches[0][len(fileName):prefixLen])
       self.onChange()
-      return
-    if len(matches) == 1:
-      self.textBuffer.insert(matches[0][len(fileName):])
-      self.maybeSlash(os.path.join(expandedDir, matches[0]))
-      self.onChange()
-      return
-    def findCommonPrefixLength(prefixLen):
-      count = 0
-      ch = None
-      for match in matches:
-        if len(match) <= prefixLen:
-          return prefixLen
-        if not ch:
-          ch = match[prefixLen]
-        if match[prefixLen] == ch:
-          count += 1
-      if count and count == len(matches):
-        return findCommonPrefixLength(prefixLen + 1)
-      return prefixLen
-    prefixLen = findCommonPrefixLength(len(fileName))
-    self.textBuffer.insert(matches[0][len(fileName):prefixLen])
-    self.onChange()
 
-  def oldAutoOpenOnChange(self):
-    path = os.path.expanduser(os.path.expandvars(self.textBuffer.lines[0]))
-    dirPath, fileName = os.path.split(path)
-    dirPath = dirPath or '.'
-    #app.log.info('O.onChange', dirPath, fileName)
-    if os.path.isdir(dirPath):
-      lines = []
-      for i in os.listdir(dirPath):
-        if i.startswith(fileName):
-          lines.append(i)
-      if len(lines) == 1 and os.path.isfile(os.path.join(dirPath, fileName)):
-        self.host.setTextBuffer(app.buffer_manager.buffers.loadTextBuffer(
-            os.path.join(dirPath, fileName), self.host))
-      else:
-        self.host.textBuffer.lines = [
-            os.path.abspath(os.path.expanduser(dirPath))+":"] + lines
-    else:
-      self.host.textBuffer.lines = [
-          os.path.abspath(os.path.expanduser(dirPath))+": not found"]
-
-  def separateDirAndFile(self, input):
-    path = os.path.expanduser(os.path.expandvars(input))
-    dirPath = path
-    fileName = ''
-    if len(path) > 0 and path[-1] != os.sep:
+    def oldAutoOpenOnChange(self):
+      path = os.path.expanduser(os.path.expandvars(self.textBuffer.lines[0]))
       dirPath, fileName = os.path.split(path)
-    dirPath = os.path.abspath(dirPath)
-    return dirPath, fileName
+      dirPath = dirPath or '.'
+      #app.log.info('O.onChange', dirPath, fileName)
+      if os.path.isdir(dirPath):
+        lines = []
+        for i in os.listdir(dirPath):
+          if i.startswith(fileName):
+            lines.append(i)
+        if len(lines) == 1 and os.path.isfile(os.path.join(dirPath, fileName)):
+          self.view.host.setTextBuffer(app.buffer_manager.buffers.loadTextBuffer(
+              os.path.join(dirPath, fileName), self.view.host))
+        else:
+          self.view.host.textBuffer.lines = [
+              os.path.abspath(os.path.expanduser(dirPath))+":"] + lines
+      else:
+        self.view.host.textBuffer.lines = [
+            os.path.abspath(os.path.expanduser(dirPath))+": not found"]
 
-  def onChange(self):
-    dirPath, fileName = self.separateDirAndFile(self.textBuffer.lines[0])
-    if os.path.isdir(dirPath):
-      lines = []
-      contents = os.listdir(dirPath)
-      contents.sort()
-      for i in contents:
-        if os.path.isdir(i):
-          i += '/'
-        lines.append(i)
-      clip = [dirPath+":"] + lines
-    else:
-      clip = [dirPath+": not found"]
-    app.log.info(clip)
-    self.host.textBuffer.selectionAll()
-    self.host.textBuffer.editPasteLines(tuple(clip))
-    if len(fileName) == 0:
-      self.host.textBuffer.cursorMoveTo(0, 0)
-    else:
-      self.host.textBuffer.findPlainText(fileName)
+    def separateDirAndFile(self, input):
+      path = os.path.expanduser(os.path.expandvars(input))
+      dirPath = path
+      fileName = ''
+      if len(path) > 0 and path[-1] != os.sep:
+        dirPath, fileName = os.path.split(path)
+      dirPath = os.path.abspath(dirPath)
+      return dirPath, fileName
 
-  def unfocus(self):
-    expandedPath = os.path.abspath(os.path.expanduser(self.textBuffer.lines[0]))
-    if os.path.isdir(expandedPath):
-      app.log.info('dir\n\n', expandedPath)
-      self.host.setTextBuffer(
-          app.buffer_manager.buffers.getValidTextBuffer(self.priorTextBuffer))
-    else:
-      app.log.info('non-dir\n\n', expandedPath)
-      textBuffer = app.buffer_manager.buffers.loadTextBuffer(expandedPath,
-          self.host)
-      app.log.info('non-dir\n\n', textBuffer.lines[0])
-      self.host.setTextBuffer(textBuffer)
+    def onChange(self):
+      dirPath, fileName = self.separateDirAndFile(self.textBuffer.lines[0])
+      if os.path.isdir(dirPath):
+        lines = []
+        contents = os.listdir(dirPath)
+        contents.sort()
+        for i in contents:
+          if os.path.isdir(i):
+            i += '/'
+          lines.append(i)
+        clip = [dirPath+":"] + lines
+      else:
+        clip = [dirPath+": not found"]
+      app.log.info(clip)
+      self.view.textBuffer.selectionAll()
+      self.view.textBuffer.editPasteLines(tuple(clip))
+      if len(fileName) == 0:
+        self.view.textBuffer.cursorMoveTo(0, 0)
+      else:
+        self.view.textBuffer.findPlainText(fileName)
+
+    def unfocus(self):
+      expandedPath = os.path.abspath(os.path.expanduser(self.textBuffer.lines[0]))
+      if os.path.isdir(expandedPath):
+        app.log.info('dir\n\n', expandedPath)
+        self.view.host.setTextBuffer(
+            app.buffer_manager.buffers.getValidTextBuffer(self.priorTextBuffer))
+      else:
+        app.log.info('non-dir\n\n', expandedPath)
+        textBuffer = app.buffer_manager.buffers.loadTextBuffer(expandedPath,
+            self.view.host)
+        app.log.info('non-dir\n\n', textBuffer.lines[0])
+        self.view.host.setTextBuffer(textBuffer)
 
 
 class InteractivePrediction(app.controller.Controller):
   """Make a guess about what the user desires."""
-  def __init__(self, host):
-    app.controller.Controller.__init__(self, host, 'prediction')
+  def __init__(self, view):
+    app.controller.Controller.__init__(self, view, 'prediction')
 
   def cancel(self):
     self.items = [(self.priorTextBuffer, self.priorTextBuffer.fullPath, '')]
@@ -207,19 +208,19 @@ class InteractivePrediction(app.controller.Controller):
     self.changeToHostWindow()
 
   def cursorMoveTo(self, row, col):
-    textBuffer = self.host.textBuffer
+    textBuffer = self.view.host.textBuffer
     textBuffer.cursorMoveTo(row, col)
     textBuffer.cursorScrollToMiddle()
     textBuffer.redo()
 
   def focus(self):
     app.log.info('InteractivePrediction.focus')
-    self.priorTextBuffer = self.host.textBuffer
-    self.index = self.buildFileList(self.host.textBuffer.fullPath)
-    self.host.setTextBuffer(text_buffer.TextBuffer())
-    self.commandDefault = self.host.textBuffer.insertPrintable
-    self.host.textBuffer.lineLimitIndicator = 0
-    self.host.textBuffer.rootGrammar = app.prefs.getGrammar('_pre')
+    self.priorTextBuffer = self.view.host.textBuffer
+    self.index = self.buildFileList(self.view.host.textBuffer.fullPath)
+    self.view.host.setTextBuffer(text_buffer.TextBuffer())
+    self.commandDefault = self.view.textBuffer.insertPrintable
+    self.view.host.textBuffer.lineLimitIndicator = 0
+    self.view.host.textBuffer.rootGrammar = app.prefs.getGrammar('_pre')
 
   def info(self):
     app.log.info('InteractivePrediction command set')
@@ -264,14 +265,14 @@ class InteractivePrediction(app.controller.Controller):
   def onChange(self):
     #input = self.textBuffer.lines[0]
     clip = []
-    limit = max(5, self.host.cols-10)
+    limit = max(5, self.view.host.cols-10)
     for i,item in enumerate(self.items):
       prefix = '-->' if i == self.index else '   '
       suffix = ' <--' if i == self.index else ''
       clip.append("%s %s %s%s"%(prefix, item[1][-limit:], item[2], suffix))
     app.log.info(clip)
-    self.host.textBuffer.selectionAll()
-    self.host.textBuffer.editPasteLines(tuple(clip))
+    self.view.host.textBuffer.selectionAll()
+    self.view.host.textBuffer.editPasteLines(tuple(clip))
     self.cursorMoveTo(self.index, 0)
 
   def nextItem(self):
@@ -286,34 +287,34 @@ class InteractivePrediction(app.controller.Controller):
   def unfocus(self):
     textBuffer, fullPath = self.items[self.index][:2]
     if textBuffer is not None:
-      self.host.setTextBuffer(
+      self.view.host.setTextBuffer(
           app.buffer_manager.buffers.getValidTextBuffer(textBuffer))
     else:
       expandedPath = os.path.abspath(os.path.expanduser(fullPath))
       textBuffer = app.buffer_manager.buffers.loadTextBuffer(expandedPath,
-          self.host)
-      self.host.setTextBuffer(textBuffer)
+          self.view.host)
+      self.view.host.setTextBuffer(textBuffer)
     self.items = None
 
 
 class InteractiveFind(app.controller.Controller):
   """Find text within the current document."""
-  def __init__(self, host):
-    app.controller.Controller.__init__(self, host, 'find')
+  def __init__(self, view):
+    app.controller.Controller.__init__(self, view, 'find')
 
   def findNext(self):
-    self.findCmd = self.host.textBuffer.findNext
+    self.findCmd = self.view.host.textBuffer.findNext
 
   def findPrior(self):
-    self.findCmd = self.host.textBuffer.findPrior
+    self.findCmd = self.view.host.textBuffer.findPrior
 
   def findReplace(self):
-    self.findCmd = self.host.textBuffer.findReplace
+    self.findCmd = self.view.host.textBuffer.findReplace
 
   def focus(self):
     app.log.info('InteractiveFind')
-    self.findCmd = self.host.textBuffer.find
-    selection = self.host.textBuffer.getSelectedText()
+    self.findCmd = self.view.host.textBuffer.find
+    selection = self.view.host.textBuffer.getSelectedText()
     if selection:
       self.textBuffer.selectionAll()
       # Make a single regex line.
@@ -332,18 +333,18 @@ class InteractiveFind(app.controller.Controller):
       self.findCmd(searchFor)
     except re.error, e:
       self.error = e.message
-    self.findCmd = self.host.textBuffer.find
+    self.findCmd = self.view.host.textBuffer.find
 
 
 class InteractiveGoto(app.controller.Controller):
   """Jump to a particular line number."""
-  def __init__(self, host):
-    app.controller.Controller.__init__(self, host, 'goto')
+  def __init__(self, view):
+    app.controller.Controller.__init__(self, view, 'goto')
 
   def focus(self):
     app.log.info('InteractiveGoto.focus')
     self.textBuffer.selectionAll()
-    self.textBuffer.insert(str(self.host.textBuffer.penRow + 1))
+    self.textBuffer.insert(str(self.view.host.textBuffer.penRow + 1))
     self.textBuffer.selectionAll()
 
   def info(self):
@@ -352,12 +353,12 @@ class InteractiveGoto(app.controller.Controller):
   def gotoBottom(self):
     app.log.info()
     self.textBuffer.selectionAll()
-    self.textBuffer.insert(str(len(self.host.textBuffer.lines)))
+    self.textBuffer.insert(str(len(self.view.host.textBuffer.lines)))
     self.changeToHostWindow()
 
   def gotoHalfway(self):
     self.textBuffer.selectionAll()
-    self.textBuffer.insert(str(len(self.host.textBuffer.lines) / 2 + 1))
+    self.textBuffer.insert(str(len(self.view.host.textBuffer.lines) / 2 + 1))
     self.changeToHostWindow()
 
   def gotoTop(self):
@@ -366,7 +367,7 @@ class InteractiveGoto(app.controller.Controller):
     self.changeToHostWindow()
 
   def cursorMoveTo(self, row, col):
-    textBuffer = self.host.textBuffer
+    textBuffer = self.view.host.textBuffer
     textBuffer.cursorMoveTo(row, col)
     textBuffer.cursorScrollToMiddle()
     textBuffer.redo()
