@@ -1,4 +1,4 @@
-# Copyright 2016 Google Inc.
+# Copyright 2018 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -78,9 +78,7 @@ class Bookmark(object):
     Returns:
       True if the passed in row is inside the bookmark's range.
     """
-    assert isinstance(row, int)
-    begin, end = self.range
-    return begin <= row <= end
+    return self.begin <= row <= self.end
 
   def __lt__(self, other):
     assert isinstance(other, Bookmark)

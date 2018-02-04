@@ -129,6 +129,10 @@ class BookmarkTestCases(unittest.TestCase):
     checkRanges(Bookmark(5000, 5000))
     checkRanges(Bookmark(-5000, 5000))
 
+    b = Bookmark(3, float('inf'))
+    self.assertTrue(1000000 in b)
+    self.assertTrue(float('inf') in b)
+
   def test_bookmark_overlap(self):
     b1 = Bookmark(1, 5)
     b2 = Bookmark(1, 5)
@@ -167,6 +171,11 @@ class BookmarkTestCases(unittest.TestCase):
 
     b1 = Bookmark(0, 0)
     b2 = Bookmark(0, 0)
+    self.assertTrue(b1.overlaps(b2))
+    self.assertTrue(b2.overlaps(b1))
+
+    b1 = Bookmark(0, 0)
+    b2 = Bookmark(-5, float('inf'))
     self.assertTrue(b1.overlaps(b2))
     self.assertTrue(b2.overlaps(b1))
 
@@ -210,6 +219,11 @@ class BookmarkTestCases(unittest.TestCase):
     self.assertTrue(b1.begin == -5)
     self.assertTrue(b1.end == 3)
     self.assertTrue(b1.range == (-5, 3))
+
+    b1.begin = float('inf')
+    self.assertTrue(b1.begin == 3)
+    self.assertTrue(b1.end == float('inf'))
+    self.assertTrue(b1.range == (3, float('inf')))
 
   def test_get_next_bookmark_color(self):
     def test_with_an_x_colored_terminal(x):
