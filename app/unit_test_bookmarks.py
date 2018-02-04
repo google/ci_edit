@@ -49,6 +49,7 @@ class BookmarkTestCases(unittest.TestCase):
     self.assertFalse(hash(b1) == hash(b2))
 
     b1 = Bookmark(2, 5)
+    # b2 = Bookmark(1, 3)
     self.assertTrue(b1 > b2)
     self.assertTrue(b1 >= b2)
     self.assertFalse(b1 < b2)
@@ -61,6 +62,7 @@ class BookmarkTestCases(unittest.TestCase):
     self.assertFalse(b1 == b2)
     self.assertFalse(hash(b1) == hash(b2))
 
+    # b1 = Bookmark(2, 5)
     b2 = Bookmark(1, 10)
     self.assertTrue(b1 > b2)
     self.assertTrue(b1 >= b2)
@@ -75,6 +77,7 @@ class BookmarkTestCases(unittest.TestCase):
     self.assertFalse(hash(b1) == hash(b2))
 
     b1 = Bookmark(1, 10)
+    # b2 = Bookmark(1, 10)
     self.assertFalse(b1 > b2)
     self.assertTrue(b1 >= b2)
     self.assertFalse(b1 < b2)
@@ -87,6 +90,7 @@ class BookmarkTestCases(unittest.TestCase):
     self.assertTrue(b1 == b2)
     self.assertTrue(hash(b1) == hash(b2))
 
+    # b1 - Bookmark(1, 10)
     b2 = Bookmark(-10, 10)
     self.assertTrue(b1 > b2)
     self.assertTrue(b1 >= b2)
@@ -99,6 +103,34 @@ class BookmarkTestCases(unittest.TestCase):
     self.assertTrue(b1 != b2)
     self.assertFalse(b1 == b2)
     self.assertFalse(hash(b1) == hash(b2))
+
+  def test_bookmark_contains(self):
+    def checkRanges(bookmark):
+      """
+      Checks that every integer between the bookmark's interval is 'in'
+      the bookmark. It also checks if the two integers outside of the bookmark's
+      range on both sides of its interval are NOT 'in' the bookmark.
+      """
+      begin = bookmark.begin
+      end = bookmark.end
+      for i in range(begin, end + 1):
+        self.assertTrue(i in bookmark)
+      self.assertFalse(begin - 2 in bookmark)
+      self.assertFalse(begin - 1 in bookmark)
+      self.assertFalse(end + 1 in bookmark)
+      self.assertFalse(end + 2 in bookmark)
+
+    checkRanges(Bookmark(1, 5))
+    checkRanges(Bookmark(-3, 3))
+    checkRanges(Bookmark(-5000, -4990))
+
+    # Check intervals of length 0
+    checkRanges(Bookmark(0, 0))
+    checkRanges(Bookmark(5000, 5000))
+    checkRanges(Bookmark(-5000, 5000))
+
+  def test_bookmark_overlap(self):
+    pass
 
   def test_get_next_bookmark_color(self):
     def test_with_an_x_colored_terminal(x):

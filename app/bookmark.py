@@ -55,29 +55,37 @@ class Bookmark:
     Returns:
       True if the passed in row is inside the bookmark's range.
     """
-    assert type(row) == int
+    assert isinstance(row, int)
     begin, end = self.range
     return begin <= row <= end
 
   def __lt__(self, other):
+    assert isinstance(other, Bookmark)
     return self.range < other.range
 
   def __gt__(self, other):
+    assert isinstance(other, Bookmark)
     return self.range > other.range
 
   def __eq__(self, other):
+    assert isinstance(other, Bookmark)
     return self.range == other.range
 
   def __ne__(self, other):
+    assert isinstance(other, Bookmark)
     return self.range != other.range
 
   def __le__(self, other):
+    assert isinstance(other, Bookmark)
     return self.range <= other.range
 
   def __ge__(self, other):
+    assert isinstance(other, Bookmark)
     return self.range >= other.range
 
   def __hash__(self):
+    # NOTE: Any two bookmarks with the same range WILL have the same hash value.
+    # self.range can also change, so be careful when using this in a hash table.
     return hash(self.range)
 
   def __repr__(self):
