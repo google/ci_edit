@@ -105,18 +105,13 @@ class Actions(app.mutator.Mutator):
 
   def dataToBookmark(self):
     """
-    Grabs all the cursor data and returns a bookmark. Also assigns a color
-    for this particular bookmark. The color is used to determine the color
-    of the bookmark's line numbers.
-
     Args:
       None.
 
     Returns:
-      A bookmark in the form of (bookmarkRange, bookmarkData).
-      bookmarkRange is an ordered tuple in which its elements
-      are the rows that the bookmark affects.
-      bookmarkData is a dictionary that contains the cursor data.
+      A Bookmark object containing its range and the current state of the
+      cursor and selection mode. The bookmark is also assigned a color, which
+      is used to determine the color of the bookmark's line numbers.
     """
     bookmarkData = {
       'cursor': (self.view.cursorRow, self.view.cursorCol),
@@ -179,7 +174,7 @@ class Actions(app.mutator.Mutator):
       self.setMessage("No bookmarks to jump to")
       return
     _, _, lowerRow, _ = self.startAndEnd()
-    tempBookmark = app.bookmark.Bookmark(lowerRow, float('inf'))
+    needle = app.bookmark.Bookmark(lowerRow, float('inf'))
     index = bisect.bisect(self.bookmarks, tempBookmark)
     self.bookmarkGoto(self.bookmarks[index % len(self.bookmarks)])
 
@@ -197,7 +192,7 @@ class Actions(app.mutator.Mutator):
       self.setMessage("No bookmarks to jump to")
       return
     upperRow, _, _, _ = self.startAndEnd()
-    tempBookmark = app.bookmark.Bookmark(upperRow, upperRow)
+    needle = app.bookmark.Bookmark(upperRow, upperRow)
     index = bisect.bisect_left(self.bookmarks, tempBookmark)
     self.bookmarkGoto(self.bookmarks[index - 1])
 

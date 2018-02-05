@@ -24,8 +24,8 @@ class Bookmark(object):
       beginRow (int): The line that the bookmark starts on (inclusive).
       endRow (int): The line that the bookmark ends on (inclusive).
       data (other): This is used to store any information that you would like to
-                    to associate with this bookmark. It can be accessed by calling
-                    bookmark.getData()
+                    to associate with this bookmark. It is an empty dictionary
+                    by default.
     """
     self.__begin = beginRow
     self.__end = endRow
