@@ -65,10 +65,10 @@ class DirectoryListController(app.controller.Controller):
           fullPath = os.path.join(dirPath, i)
           if os.path.isdir(fullPath):
             i += os.path.sep
-          iSize = ''
+          iSize = None
           iModified = 0
           if hostOptions['sizes'] and os.path.isfile(fullPath):
-            iSize = '%d bytes' % os.path.getsize(fullPath)
+            iSize = os.path.getsize(fullPath)
           if hostOptions['modified']:
             iModified = os.path.getmtime(fullPath)
           fileLines.append([i, iSize, iModified])
@@ -84,7 +84,7 @@ class DirectoryListController(app.controller.Controller):
           fileLines.sort(reverse=not viewOptions['Name'],
               key=lambda x: unicode.lower(x[0]))
         lines = ['%-40s  %16s  %24s' % (
-            i[0], i[1],
+            i[0], '%s bytes' % (i[1],) if i[1] is not None else '',
             unicode(time.strftime('%c', time.localtime(i[2]))) if i[2] else '')
             for i in fileLines]
         self.view.contents = [i[0] for i in fileLines]
