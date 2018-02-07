@@ -235,6 +235,8 @@ class DirectoryList(app.file_manager_controller.DirectoryListController):
       KEY_F1: self.info,
       KEY_PAGE_DOWN: textBuffer.cursorSelectNonePageDown,
       KEY_PAGE_UP: textBuffer.cursorSelectNonePageUp,
+      KEY_DOWN: textBuffer.cursorDown,
+      KEY_UP: textBuffer.cursorUp,
     })
     self.commandSet = commandSet
     self.commandDefault = self.textBuffer.insertPrintable
@@ -254,6 +256,8 @@ class FileOpener(app.file_manager_controller.FileManagerController):
       KEY_F1: self.info,
       KEY_PAGE_DOWN: self.passEventToDirectoryList,
       KEY_PAGE_UP: self.passEventToDirectoryList,
+      KEY_DOWN: self.passEventToDirectoryList,
+      KEY_UP: self.passEventToDirectoryList,
       CTRL_I: self.tabCompleteExtend,
       CTRL_J: self.createOrOpen,
       CTRL_N: self.createOrOpen,

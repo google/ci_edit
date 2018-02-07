@@ -713,6 +713,10 @@ class Actions(app.mutator.Mutator):
     self.editCopy()
     self.performDelete()
 
+  def replaceLines(self, clip):
+    self.view.textBuffer.selectionAll()
+    self.view.textBuffer.editPasteLines(tuple(clip))
+
   def editPaste(self):
     data = app.clipboard.paste()
     if data is not None:

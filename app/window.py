@@ -1070,21 +1070,7 @@ class DirectoryList(Window):
     row = self.scrollRow + paneRow
     if row >= len(self.textBuffer.lines):
       return
-    path = self.host.getPath()
-    if row == 0:  # Clicked on "./".
-      # Clear the shown directory to trigger a refresh.
-      self.controller.shownDirectory = None
-      return
-    elif row == 1:  # Clicked on "../".
-      if path[-1] == os.path.sep:
-        path = path[:-1]
-      path = os.path.dirname(path)
-      if len(path) > len(os.path.sep):
-        path += os.path.sep
-      self.host.setPath(path)
-      return
-    self.host.setPath(path + self.contents[row - 2])
-    self.host.controller.createOrOpen()
+    self.controller.openFileOrDir(row)
 
   def mouseDoubleClick(self, paneRow, paneCol, shift, ctrl, alt):
     self.changeFocusTo(self.host)
@@ -1107,7 +1093,9 @@ class DirectoryList(Window):
     self.changeFocusTo(self.host)
 
   def setTextBuffer(self, textBuffer):
-    textBuffer.lineLimitIndicator = 999999
+    #assert textBuffer is not self.host.textBuffer
+    textBuffer.lineLimitIndicator = 0
+    textBuffer.highlightCursorLine = True
     textBuffer.highlightTrailingWhitespace = False
     Window.setTextBuffer(self, textBuffer)
     self.controller.setTextBuffer(textBuffer)
@@ -1115,7 +1103,7 @@ class DirectoryList(Window):
 
 class FileManagerWindow(Window):
   def __init__(self, host, inputWindow):
-    assert host
+    #assert host
     #assert issubclass(host.__class__, Window), host
     Window.__init__(self, host)
     self.host = host

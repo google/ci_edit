@@ -94,14 +94,31 @@ class DirectoryListController(app.controller.Controller):
       clip = ['./', '../'] + lines
     else:
       clip = [dirPath + ": not found"]
-    self.view.textBuffer.selectionAll()
-    self.view.textBuffer.editPasteLines(tuple(clip))
+    self.view.textBuffer.replaceLines(tuple(clip))
     #self.view.textBuffer.findPlainText(fileName)
     self.view.textBuffer.penRow = 0
     self.view.textBuffer.penCol = 0
     self.view.scrollRow = 0
     self.view.scrollCol = 0
     self.filter = None
+
+  def openFileOrDir(self, row):
+    path = self.view.host.getPath()
+    if row == 0:  # Clicked on "./".
+      # Clear the shown directory to trigger a refresh.
+      self.shownDirectory = None
+      return
+    elif row == 1:  # Clicked on "../".
+      if path[-1] == os.path.sep:
+        path = path[:-1]
+      path = os.path.dirname(path)
+      if len(path) > len(os.path.sep):
+        path += os.path.sep
+      self.view.host.setPath(path)
+      return
+    self.view.host.setPath(path + self.view.contents[row - 2])
+    if not os.path.isdir(self.view.host.getPath()):
+      self.view.host.controller.createOrOpen()
 
   def optionChanged(self, name, value):
     self.shownDirectory = None
@@ -119,15 +136,14 @@ class FileManagerController(app.controller.Controller):
 
   def createOrOpen(self):
     path = self.textBuffer.lines[0]
-    if not os.path.isdir(path):
-      if not os.access(path, os.R_OK):
-        if os.path.isfile(path):
-          clip = [path + ":", 'Error opening file.']
-          return
-      textBuffer = app.buffer_manager.buffers.loadTextBuffer(path,
-          self.view.host.inputWindow)
-      assert textBuffer.parser
-      self.view.host.inputWindow.setTextBuffer(textBuffer)
+    if not os.access(path, os.R_OK):
+      if os.path.isfile(path):
+        clip = [path + ":", 'Error opening file.']
+        return
+    textBuffer = app.buffer_manager.buffers.loadTextBuffer(path,
+        self.view.host.inputWindow)
+    assert textBuffer.parser
+    self.view.host.inputWindow.setTextBuffer(textBuffer)
     self.changeToInputWindow()
 
   def focus(self):

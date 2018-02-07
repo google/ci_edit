@@ -29,6 +29,7 @@ class TextBuffer(app.actions.Actions):
     app.actions.Actions.__init__(self)
     self.lineLimitIndicator = 0
     self.highlightRe = None
+    self.highlightCursorLine = False
     self.highlightTrailingWhitespace = True
     self.fileHistory = {}
     self.fileEncoding = None
@@ -264,6 +265,12 @@ class TextBuffer(app.actions.Actions):
           for f in k.regs:
             window.addStr(top + i, left + f[0], line[f[0]:f[1]],
                 app.color.get('number', colorDelta))
+    if self.highlightCursorLine:
+      # Highlight the whole line at the cursor location.
+      if startRow <= self.penRow < endRow:
+        line = self.lines[self.penRow][startCol:endCol]
+        window.addStr(self.penRow - top, left, line,
+            app.color.get('trailing_space', colorDelta))
     if self.highlightTrailingWhitespace:
       # Highlight space ending lines.
       for i in range(rowLimit):
