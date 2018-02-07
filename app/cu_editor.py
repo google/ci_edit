@@ -259,9 +259,9 @@ class FileOpener(app.file_manager_controller.FileManagerController):
       KEY_DOWN: self.passEventToDirectoryList,
       KEY_UP: self.passEventToDirectoryList,
       CTRL_I: self.tabCompleteExtend,
-      CTRL_J: self.createOrOpen,
-      CTRL_N: self.createOrOpen,
-      CTRL_O: self.createOrOpen,
+      CTRL_J: self.whatToCallThis,
+      CTRL_N: self.whatToCallThis,
+      CTRL_O: self.whatToCallThis,
       CTRL_P: self.changeToPrediction,
       CTRL_Q: self.saveEventChangeToInputWindow,
     })

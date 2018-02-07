@@ -813,7 +813,6 @@ class InputWindow(Window):
     if 1:
       self.interactiveGoto.reshape(bottomRows, cols, bottomFirstRow,
           left)
-
     if self.showFooter and rows > 0:
       self.statusLine.reshape(self.statusLineCount, cols,
           bottomFirstRow - self.statusLineCount, left)
@@ -1165,14 +1164,13 @@ class FileManagerWindow(Window):
     self.directoryList.reshape(rows, cols, top, left)
 
   def setTextBuffer(self, textBuffer):
-    textBuffer.lineLimitIndicator = 999999
+    textBuffer.lineLimitIndicator = 0
     textBuffer.highlightTrailingWhitespace = False
     Window.setTextBuffer(self, textBuffer)
     self.controller.setTextBuffer(textBuffer)
 
   def setPath(self, path):
-    self.textBuffer.selectionAll()
-    self.textBuffer.editPasteLines((path,))
+    self.textBuffer.replaceLines((path,))
 
 class PopupWindow(Window):
   def __init__(self, host):

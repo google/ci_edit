@@ -116,6 +116,9 @@ class DirectoryListController(app.controller.Controller):
         path += os.path.sep
       self.view.host.setPath(path)
       return
+    # If there is a partially typed name in the line, clear it.
+    if path[-1:] != os.path.sep:
+      path = os.path.dirname(path) + os.path.sep
     self.view.host.setPath(path + self.view.contents[row - 2])
     if not os.path.isdir(self.view.host.getPath()):
       self.view.host.controller.createOrOpen()
@@ -134,6 +137,14 @@ class FileManagerController(app.controller.Controller):
   def __init__(self, view):
     app.controller.Controller.__init__(self, view, 'FileManagerController')
 
+  def whatToCallThis(self):
+    row = self.view.directoryList.textBuffer.penRow
+    if row == 0:
+      if not os.path.isdir(self.view.getPath()):
+        self.createOrOpen()
+    else:
+      self.view.directoryList.controller.openFileOrDir(row)
+
   def createOrOpen(self):
     path = self.textBuffer.lines[0]
     if not os.access(path, os.R_OK):
@@ -147,14 +158,14 @@ class FileManagerController(app.controller.Controller):
     self.changeToInputWindow()
 
   def focus(self):
-    self.textBuffer.selectionAll()
-    if len(self.view.inputWindow.textBuffer.fullPath) == 0:
-      path = os.getcwd()
-    else:
-      path = os.path.dirname(self.view.inputWindow.textBuffer.fullPath)
-    if len(path) != 0:
-      path += os.path.sep
-    self.textBuffer.editPasteLines((path,))
+    if self.view.textBuffer.isEmpty():
+      if len(self.view.inputWindow.textBuffer.fullPath) == 0:
+        path = os.getcwd()
+      else:
+        path = os.path.dirname(self.view.inputWindow.textBuffer.fullPath)
+      if len(path) != 0:
+        path += os.path.sep
+      self.view.textBuffer.replaceLines((path,))
     self.view.directoryList.focus()
     app.controller.Controller.focus(self)
 

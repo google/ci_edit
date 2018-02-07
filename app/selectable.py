@@ -61,6 +61,9 @@ class BaseLineBuffer:
     self.lines = [unicode("")]
     self.message = ('New buffer', None)
 
+  def isEmpty(self):
+    return len(self.lines) == 1 and len(self.lines[0]) == 0
+
   def setMessage(self, *args, **dict):
     if not len(args):
       self.message = None
