@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 import app.buffer_manager
 import app.color
+import app.config
 import app.controller
 import app.cu_editor
 import app.editor
@@ -44,6 +46,9 @@ class ViewWindow:
       parent is responsible for the order in which this window is updated,
       relative to its siblings.
     """
+    if app.config.strict_debug:
+      assert issubclass(self.__class__, ViewWindow), self
+      assert issubclass(parent.__class__, ViewWindow), parent
     self.parent = parent
     self.zOrder = []
     self.isFocusable = False
@@ -65,6 +70,9 @@ class ViewWindow:
         text.encode('utf-8'), colorPair)
 
   def changeFocusTo(self, changeTo):
+    if app.config.strict_debug:
+      assert issubclass(self.__class__, ViewWindow), self
+      assert issubclass(changeTo.__class__, ActiveWindow), parent
     self.parent.changeFocusTo(changeTo)
 
   def normalize(self):
@@ -147,8 +155,9 @@ class ViewWindow:
 
   def resizeTo(self, rows, cols):
     #app.log.detail(rows, cols, self)
-    assert rows >=0, rows
-    assert cols >=0, cols
+    if app.config.strict_debug:
+      assert rows >=0, rows
+      assert cols >=0, cols
     self.rows = rows
     self.cols = cols
 
@@ -167,6 +176,9 @@ class ViewWindow:
     """Setting the parent will cause the the window to refresh (i.e. if self
     was hidden with hide() it will no longer be hidden).
     """
+    if app.config.strict_debug:
+      assert issubclass(self.__class__, ViewWindow), self
+      assert issubclass(parent.__class__, ViewWindow), parent
     if self.parent:
       try:
         self.parent.zOrder.remove(self)
@@ -196,6 +208,9 @@ class ViewWindow:
 class ActiveWindow(ViewWindow):
   """An ActiveWindow may have focus and a controller."""
   def __init__(self, parent):
+    if app.config.strict_debug:
+      assert issubclass(self.__class__, ActiveWindow), self
+      assert issubclass(parent.__class__, ActiveWindow), parent
     ViewWindow.__init__(self, parent)
     self.controller = None
     self.isFocusable = True
@@ -220,6 +235,9 @@ class Window(ActiveWindow):
   """A Window holds a TextBuffer and a controller that operates on the
   TextBuffer."""
   def __init__(self, parent):
+    if app.config.strict_debug:
+      assert issubclass(self.__class__, Window), self
+      assert issubclass(parent.__class__, ActiveWindow), parent
     ActiveWindow.__init__(self, parent)
     self.cursorRow = 0
     self.cursorCol = 0
@@ -276,6 +294,9 @@ class LabeledLine(Window):
   """A single line with a label. This is akin to a line prompt or gui modal
       dialog. It's used for things like 'find' and 'goto line'."""
   def __init__(self, parent, label):
+    if app.config.strict_debug:
+      assert issubclass(self.__class__, LabeledLine), self
+      assert issubclass(parent.__class__, ActiveWindow), parent
     Window.__init__(self, parent)
     self.host = parent
     tb = app.text_buffer.TextBuffer()
@@ -318,6 +339,9 @@ class Menu(ViewWindow):
   """Work in progress on a context menu.
   """
   def __init__(self, host):
+    if app.config.strict_debug:
+      assert issubclass(self.__class__, Menu), self
+      assert issubclass(host.__class__, ActiveWindow), parent
     ViewWindow.__init__(self, host)
     self.host = host
     self.controller = None
@@ -661,7 +685,8 @@ class TopInfo(ViewWindow):
 class InputWindow(Window):
   """This is the main content window. Often the largest pane displayed."""
   def __init__(self, host):
-    assert(host)
+    if app.config.strict_debug:
+      assert(host)
     Window.__init__(self, host)
     self.bottomRows = 1  # Not including status line.
     self.host = host
@@ -908,14 +933,15 @@ class OptionsRow(ViewWindow):
       self.sep = sep
 
   def __init__(self, host):
-    assert(host)
+    if app.config.strict_debug:
+      assert(host)
     ViewWindow.__init__(self, host)
     self.host = host
     self.controlList = []
     self.group = None
 
   def addElement(self, draw, kind, name, reference, width, sep, extraWidth=0):
-    if 1:
+    if app.config.strict_debug:
       assert type(name) == str
       assert type(sep) == str
       assert type(width) in [type(None), int]
@@ -1011,7 +1037,8 @@ class OptionsRow(ViewWindow):
 # todo remove or use this.
 class PathRow(ViewWindow):
   def __init__(self, host):
-    assert(host)
+    if app.config.strict_debug:
+      assert(host)
     ViewWindow.__init__(self, host)
     self.host = host
     self.path = ''
@@ -1039,8 +1066,9 @@ class PathRow(ViewWindow):
 class DirectoryList(Window):
   """This <tbd>."""
   def __init__(self, host, inputWindow):
-    assert host
-    assert self is not host
+    if app.config.strict_debug:
+      assert host
+      assert self is not host
     Window.__init__(self, host)
     self.host = host
     self.inputWindow = inputWindow
@@ -1092,7 +1120,8 @@ class DirectoryList(Window):
     self.changeFocusTo(self.host)
 
   def setTextBuffer(self, textBuffer):
-    #assert textBuffer is not self.host.textBuffer
+    if app.config.strict_debug:
+      assert textBuffer is not self.host.textBuffer
     textBuffer.lineLimitIndicator = 0
     textBuffer.highlightCursorLine = True
     textBuffer.highlightTrailingWhitespace = False
@@ -1102,8 +1131,9 @@ class DirectoryList(Window):
 
 class FileManagerWindow(Window):
   def __init__(self, host, inputWindow):
-    #assert host
-    #assert issubclass(host.__class__, Window), host
+    if app.config.strict_debug:
+      assert host
+      assert issubclass(host.__class__, ActiveWindow), host
     Window.__init__(self, host)
     self.host = host
     self.inputWindow = inputWindow
@@ -1174,7 +1204,8 @@ class FileManagerWindow(Window):
 
 class PopupWindow(Window):
   def __init__(self, host):
-    assert(host)
+    if app.config.strict_debug:
+      assert(host)
     Window.__init__(self, host)
     self.host = host
     self.controller = app.cu_editor.PopupController(self)

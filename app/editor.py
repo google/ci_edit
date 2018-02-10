@@ -14,23 +14,28 @@
 
 """Interactive UIs for the ciEditor."""
 
+
 import app.buffer_manager
+import app.config
 import app.controller
+import app.window
 import os
 import re
 import text_buffer
 
 
-def parseInt(str):
+def parseInt(inStr):
+  if app.config.strict_debug:
+    assert type(inStr) is str
   i = 0
   k = 0
-  if len(str) > i and str[i] in ('+', '-'):
+  if len(inStr) > i and inStr[i] in ('+', '-'):
     i += 1
   k = i
-  while len(str) > k and str[k].isdigit():
+  while len(inStr) > k and inStr[k].isdigit():
     k += 1
   if k > i:
-    return int(str[:k])
+    return int(inStr[:k])
   return 0
 
 def test_parseInt():
@@ -200,6 +205,9 @@ if 0:
 class InteractivePrediction(app.controller.Controller):
   """Make a guess about what the user desires."""
   def __init__(self, view):
+    if app.config.strict_debug:
+      assert issubclass(self.__class__, InteractivePrediction), self
+      assert issubclass(view.__class__, app.window.ViewWindow), view
     app.controller.Controller.__init__(self, view, 'prediction')
 
   def cancel(self):
@@ -208,6 +216,9 @@ class InteractivePrediction(app.controller.Controller):
     self.changeToHostWindow()
 
   def cursorMoveTo(self, row, col):
+    if app.config.strict_debug:
+      assert type(row) is int
+      assert type(col) is int
     textBuffer = self.view.host.textBuffer
     textBuffer.cursorMoveTo(row, col)
     textBuffer.cursorScrollToMiddle()
@@ -226,6 +237,8 @@ class InteractivePrediction(app.controller.Controller):
     app.log.info('InteractivePrediction command set')
 
   def buildFileList(self, currentFile):
+    if app.config.strict_debug:
+      assert type(currentFile) is str
     self.items = []
     for i in app.buffer_manager.buffers.buffers:
       dirty = '*' if i.isDirty() else '.'
@@ -300,6 +313,9 @@ class InteractivePrediction(app.controller.Controller):
 class InteractiveFind(app.controller.Controller):
   """Find text within the current document."""
   def __init__(self, view):
+    if app.config.strict_debug:
+      assert issubclass(self.__class__, InteractiveFind), self
+      assert issubclass(view.__class__, app.window.ViewWindow), view
     app.controller.Controller.__init__(self, view, 'find')
 
   def findNext(self):
@@ -339,6 +355,9 @@ class InteractiveFind(app.controller.Controller):
 class InteractiveGoto(app.controller.Controller):
   """Jump to a particular line number."""
   def __init__(self, view):
+    if app.config.strict_debug:
+      assert issubclass(self.__class__, InteractiveGoto), self
+      assert issubclass(view.__class__, app.window.ViewWindow), view
     app.controller.Controller.__init__(self, view, 'goto')
 
   def focus(self):
@@ -367,6 +386,9 @@ class InteractiveGoto(app.controller.Controller):
     self.changeToHostWindow()
 
   def cursorMoveTo(self, row, col):
+    if app.config.strict_debug:
+      assert type(row) is int
+      assert type(col) is int
     textBuffer = self.view.host.textBuffer
     textBuffer.cursorMoveTo(row, col)
     textBuffer.cursorScrollToMiddle()

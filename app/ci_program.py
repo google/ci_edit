@@ -43,7 +43,7 @@ def userMessage(*args):
   userConsoleMessage += unicode(' '.join(args) + '\n')
 
 
-class CiProgram:
+class CiProgram(app.window.ActiveWindow):
   """This is the main editor program. It holds top level information and runs
   the main loop. The CiProgram is intended as a singleton.
   In some aspects, the program acts as a top level window, even though it's not
