@@ -14,6 +14,7 @@
 
 """Manager for key bindings."""
 
+import app.config
 import app.log
 import curses
 import curses.ascii
@@ -27,8 +28,9 @@ class Controller:
   """A Controller is a keyboard mapping from keyboard/mouse events to editor
   commands."""
   def __init__(self, view, name):
-    #assert issubclass(self.__class__, Controller)
-    #assert issubclass(view.__class__, window.Window)
+    if app.config.strict_debug:
+      assert issubclass(self.__class__, Controller)
+      assert issubclass(view.__class__, window.Window)
     self.view = view
     self.commandDefault = None
     self.commandSet = None
@@ -48,8 +50,9 @@ class Controller:
     self.findAndChangeTo('interactiveQuit')
 
   def changeToHostWindow(self, *args):
-    #assert issubclass(self.view.__class__, app.window.Window), self.view
-    #assert issubclass(self.view.host.__class__, app.window.Window), self.view.host
+    if app.config.strict_debug:
+      assert issubclass(self.view.__class__, app.window.Window), self.view
+      assert issubclass(self.view.host.__class__, app.window.Window), self.view.host
     self.view.host.changeFocusTo(self.view.host)
 
   def changeToInputWindow(self, *args):
@@ -226,11 +229,12 @@ class Controller:
 
   def saveOrChangeToSaveAs(self):
     app.log.debug()
-    #assert issubclass(self.__class__, Controller), self
-    #assert issubclass(self.view.__class__, app.window.Window), self
-    #assert issubclass(self.view.host.__class__, app.window.Window), self
-    #assert self.view.textBuffer is self.textBuffer
-    #assert self.view.textBuffer is not self.view.host.textBuffer
+    if app.config.strict_debug:
+      assert issubclass(self.__class__, Controller), self
+      assert issubclass(self.view.__class__, app.window.Window), self
+      assert issubclass(self.view.host.__class__, app.window.Window), self
+      assert self.view.textBuffer is self.textBuffer
+      assert self.view.textBuffer is not self.view.host.textBuffer
     tb = self.view.host.textBuffer
     if tb.fullPath:
       self.writeOrConfirmOverwrite()
@@ -249,8 +253,9 @@ class Controller:
     self.view.host.changeFocusTo(self.view.host.inputWindow)
 
   def setTextBuffer(self, textBuffer):
-    #assert issubclass(textBuffer.__class__, app.text_buffer.TextBuffer), textBuffer
-    #assert self.view.textBuffer is textBuffer
+    if app.config.strict_debug:
+      assert issubclass(textBuffer.__class__, app.text_buffer.TextBuffer), textBuffer
+      assert self.view.textBuffer is textBuffer
     self.textBuffer = textBuffer
 
   def unfocus(self):
@@ -262,7 +267,8 @@ class MainController:
   manages a collection of keyboard mappings and allows the user to switch
   between them."""
   def __init__(self, view):
-    #assert issubclass(view.__class__, app.window.Window)
+    if app.config.strict_debug:
+      assert issubclass(view.__class__, app.window.Window)
     self.view = view
     self.commandDefault = None
     self.commandSet = None
@@ -310,7 +316,8 @@ class MainController:
 
   def setTextBuffer(self, textBuffer):
     app.log.info('MainController.setTextBuffer', self.controller)
-    #assert issubclass(textBuffer.__class__, app.text_buffer.TextBuffer)
+    if app.config.strict_debug:
+      assert issubclass(textBuffer.__class__, app.text_buffer.TextBuffer)
     self.textBuffer = textBuffer
     self.controller.setTextBuffer(textBuffer)
 
