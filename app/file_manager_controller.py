@@ -228,3 +228,7 @@ class FileManagerController(app.controller.Controller):
       # No further expansion found.
       self.view.directoryList.controller.setFilter(fileName)
     self.onChange()
+
+  def unfocus(self):
+    self.view.textBuffer.replaceLines(('',))
+
