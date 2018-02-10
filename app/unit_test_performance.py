@@ -69,7 +69,7 @@ class PerformanceTestCases(unittest.TestCase):
     self.assertGreater(b, a * 2.0)  # b is much slower.
     self.assertGreater(b, c * 2.0)  # b is much slower.
     self.assertGreater(a, c * 0.7)  # a and c are similar.
-    self.assertGreater(c, a * 0.7)  # a and c are similar.
+    self.assertGreater(c, a * 0.6)  # a and c are similar.
 
   def test_default_parameter(self):
     setup  = '''def withDefault(a, b=None):\n'''
