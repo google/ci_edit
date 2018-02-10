@@ -1004,6 +1004,9 @@ class Actions(app.mutator.Mutator):
         self.lastChecksum, self.lastFileSize = app.history.getFileInfo(
             self.fullPath)
         self.fileStat = os.stat(self.fullPath)
+        # If we're writing this file for the first time, self.isReadOnly will
+        # still be True (from when it didn't exist).
+        self.isReadOnly = False
         self.setMessage('File saved')
       except Exception as e:
         color = app.color.get('status_line_error')
