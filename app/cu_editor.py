@@ -352,14 +352,13 @@ class InteractiveSaveAs(app.controller.Controller):
     app.log.info('saveAs')
     name = self.textBuffer.lines[0]
     if not len(name):
-      self.view.textBuffer.setMessage(
-          'File not saved (file name was empty).')
+      self.view.textBuffer.setMessage('File not saved (file name was empty).')
       self.changeToHostWindow()
       return
-    self.view.textBuffer.setFilePath(self.textBuffer.lines[0])
+    self.view.host.textBuffer.setFilePath(self.textBuffer.lines[0])
     # Preload the message with an error that should be overwritten.
-    self.view.textBuffer.setMessage('Error saving file')
-    self.view.textBuffer.fileWrite()
+    self.view.host.textBuffer.setMessage('Error saving file')
+    self.view.host.textBuffer.fileWrite()
     self.changeToHostWindow()
 
 
