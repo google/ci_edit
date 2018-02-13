@@ -141,6 +141,8 @@ accordion
 accordionist
 accords
 account
+accountability
+accountable
 accounted
 accounting
 accounts
@@ -325,6 +327,9 @@ adventure
 adverb
 adverbial
 adverbs
+adversarial
+adversaries
+adversary
 adverse
 adversely
 advert
@@ -1042,6 +1047,7 @@ atlases
 atom
 atomic
 atomically
+atomicity
 atoms
 atop
 attach
@@ -1566,6 +1572,8 @@ big
 bigamous
 bigger
 biggest
+bijection
+bijections
 bilabial
 bile
 bilge
@@ -2644,6 +2652,8 @@ cinema
 cipher
 ciphered
 ciphers
+ciphertext
+ciphertexts
 cir
 circa
 circle
@@ -5550,6 +5560,7 @@ encrypt
 encrypted
 encrypting
 encryption
+encryptions
 encrypts
 encumbered
 encyclopedia
@@ -8960,6 +8971,7 @@ jots
 joule
 joules
 journal
+journaling
 journalist
 journalists
 journals
@@ -11636,6 +11648,8 @@ paragraph
 paragraphs
 parallel
 parallelism
+parallelize
+parallellized
 parallelogram
 parallels
 param
@@ -12165,6 +12179,8 @@ plain
 plainly
 plains
 plaint
+plaintext
+plaintexts
 plan
 planar
 plane
@@ -12390,6 +12406,8 @@ postal
 postbox
 postcard
 postcode
+postcondition
+postconditions
 posted
 poster
 posterior
@@ -14646,6 +14664,7 @@ says
 scad
 scaffolding
 scag
+scalability
 scalable
 scalar
 scalars
