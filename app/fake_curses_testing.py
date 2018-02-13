@@ -21,10 +21,8 @@ import curses
 import inspect
 import os
 import sys
+import third_party.pyperclip as clipboard
 import unittest
-
-
-kTestFile = '#test_file_with_unlikely_file_name~'
 
 
 class FakeCursesTestCase(unittest.TestCase):
@@ -45,6 +43,7 @@ class FakeCursesTestCase(unittest.TestCase):
     info = (timeStamp, mouseCol, mouseRow, 0, bState)
     def createEvent(display, cmdIndex):
       curses.addMouseEvent(info)
+      return None
     return createEvent
 
   def displayCheck(self, *args):
@@ -55,6 +54,7 @@ class FakeCursesTestCase(unittest.TestCase):
       result = display.checkText(*args)
       if result is not None:
         self.fail(callerText + result + ' at index ' + str(cmdIndex))
+      return None
     return checker
 
   def displayCheckStyle(self, *args):
@@ -65,6 +65,7 @@ class FakeCursesTestCase(unittest.TestCase):
       result = display.checkStyle(*args)
       if result is not None:
         self.fail(callerText + result + ' at index ' + str(cmdIndex))
+      return None
     return checker
 
   def cursorCheck(self, expectedRow, expectedCol):
@@ -74,7 +75,28 @@ class FakeCursesTestCase(unittest.TestCase):
     def checker(display, cmdIndex):
       penRow, penCol = self.cursesScreen.getyx()
       self.assertEqual((expectedRow, expectedCol), (penRow, penCol), callerText)
+      return None
     return checker
+
+  def setClipboard(self, text):
+    caller = inspect.stack()[1]
+    callerText = "in %s:%s:%s(): " % (
+        os.path.split(caller[1])[1], caller[2], caller[3])
+    def copyToClipboard(display, cmdIndex):
+      self.assertTrue(clipboard.copy)  # Check that copy exists.
+      clipboard.copy(text)
+      return None
+    return copyToClipboard
+
+  def writeText(self, text):
+    caller = inspect.stack()[1]
+    callerText = "in %s:%s:%s(): " % (
+        os.path.split(caller[1])[1], caller[2], caller[3])
+    def copyToClipboard(display, cmdIndex):
+      self.assertTrue(clipboard.copy)  # Check that copy exists.
+      clipboard.copy(text)
+      return CTRL_V
+    return copyToClipboard
 
   def notReached(display):
     """Calling this will fail the test. It's expected that the code will not

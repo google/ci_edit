@@ -103,7 +103,7 @@ class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
   def test_backspace(self):
     self.runWithTestFile([
-        self.displayCheck(2, 7, ["      "]), 't', 'e', 'x',
+        self.displayCheck(2, 7, ["      "]), self.writeText('tex'),
         self.displayCheck(2, 7, ["tex "]), KEY_BACKSPACE1, 't',
         self.displayCheck(2, 7, ["tet "]), CTRL_Q, 'n'])
 

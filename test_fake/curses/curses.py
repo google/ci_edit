@@ -50,7 +50,10 @@ class FakeInput:
         self.inputsIndex += 1
         cmd = self.inputs[self.inputsIndex]
         if type(cmd) == types.FunctionType:
-          cmd(self.fakeDisplay, self.inputsIndex)
+          result = cmd(self.fakeDisplay, self.inputsIndex)
+          if result is not None:
+            self.waitingForRefresh = True
+            return result
         elif type(cmd) == types.StringType and len(cmd) == 1:
           if (not self.inBracketedPaste) and cmd != ascii.ESC:
             self.waitingForRefresh = True
