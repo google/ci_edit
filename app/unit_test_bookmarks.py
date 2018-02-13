@@ -21,7 +21,7 @@ import app.prefs
 import app.text_buffer
 import app.window
 
-kTestFile = '#test_file_with_unlikely_file_name~'
+kTestFile = '#bookmarks_test_file_with_unlikely_file_name~'
 
 class EmptyObject:
   pass
@@ -186,11 +186,11 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
         'e', 'i', 'g', 'h', 't', 'e', 'e', 'n', CTRL_J,
         'n', 'i', 'n', 'e', 't', 'e', 'e', 'n', CTRL_J,
         't', 'w', 'e', 'n', 't', 'y', CTRL_J,
-        't', 'w', 'e', 'n', 't', 'y', 'o', 'n', 'e', CTRL_J,
-        't', 'w', 'e', 'n', 't', 'y', 't', 'w', 'o', CTRL_J,
-        't', 'w', 'e', 'n', 't', 'y', 't', 'h', 'r', 'e', 'e',
+        't', 'w', 'e', 'n', 't', 'y', '-', 'o', 'n', 'e', CTRL_J,
+        't', 'w', 'e', 'n', 't', 'y', '-', 't', 'w', 'o', CTRL_J,
+        't', 'w', 'e', 'n', 't', 'y', '-', 't', 'h', 'r', 'e', 'e',
         CTRL_E, 'b', 'm', CTRL_J, # Create a new bookmark.
-        # Bookmarks are at positions (1, 4), (2, 1) (8, 6), (23, 12).
+        # Bookmarks are at positions (1, 4), (2, 1) (8, 6), (23, 13).
         # Note that rows here start at 1, so 1 is the first row.
         self.displayCheck(0, 0, [
             " ci     *                               ",
@@ -203,10 +203,10 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
             "    18 eighteen                         ",
             "    19 nineteen                         ",
             "    20 twenty                           ",
-            "    21 twentyone                        ",
-            "    22 twentytwo                        ",
-            "    23 twentythree                      ",
-            "Added bookmark     |   23,12 |  95%,100%",
+            "    21 twenty-one                       ",
+            "    22 twenty-two                       ",
+            "    23 twenty-three                     ",
+            "Added bookmark     |   23,13 |  95%,100%",
             "                                        "]),
         KEY_F2, # Jump to the first bookmark (1, 4).
         self.displayCheck(0, 0, [
@@ -262,14 +262,14 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
             "    16 sixteen                          ",
             "                        8, 6 |  30%,100%",
             "                                        "]),
-        KEY_F2, # Jump to the fourth bookmark (23, 12).
+        KEY_F2, # Jump to the fourth bookmark (23, 13).
         # This moves the bookmark to the optimal scroll position.
         self.displayCheck(0, 0, [
             " ci     .                               ",
             "                                        ",
-            "    21  twentyone                       ",
-            "    22  twentytwo                       ",
-            "    23  twentythree                     ",
+            "    21  twenty-one                      ",
+            "    22  twenty-two                      ",
+            "    23  twenty-three                    ",
             "                                        ",
             "                                        ",
             "                                        ",
@@ -278,7 +278,7 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
             "                                        ",
             "                                        ",
             "                                        ",
-            "                       23,12 |  95%,100%",
+            "                       23,13 |  95%,100%",
             "                                        "]),
         KEY_F2, # Jump to the first bookmark (1, 4).
         # This moves the bookmark to the optimal scroll position.
@@ -298,14 +298,14 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
             "    11 eleven                           ",
             "                        1, 4 |   0%,100%",
             "                                        "]),
-        KEY_SHIFT_F2, # Go back to the fourth bookmark (23, 12).
+        KEY_SHIFT_F2, # Go back to the fourth bookmark (23, 13).
         # This moves the bookmark to the optimal scroll position.
         self.displayCheck(0, 0, [
             " ci     .                               ",
             "                                        ",
-            "    21  twentyone                       ",
-            "    22  twentytwo                       ",
-            "    23  twentythree                     ",
+            "    21  twenty-one                      ",
+            "    22  twenty-two                      ",
+            "    23  twenty-three                    ",
             "                                        ",
             "                                        ",
             "                                        ",
@@ -314,7 +314,7 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
             "                                        ",
             "                                        ",
             "                                        ",
-            "                       23,12 |  95%,100%",
+            "                       23,13 |  95%,100%",
             "                                        "]),
         KEY_SHIFT_F2, # Go back to the third bookmark (8, 6).
         # This moves the bookmark to the optimal scroll position.
