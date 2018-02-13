@@ -24,7 +24,7 @@ import os
 import sys
 
 
-kTestFile = '#test_file_with_unlikely_file_name~'
+kTestFile = '#application_test_file_with_unlikely_file_name~'
 
 
 class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
@@ -114,9 +114,7 @@ class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
             "                                        ",
             "     1                                  "]),
         self.cursorCheck(2, 7),
-        't', 'e', 's', 't', CTRL_J,
-        'a', 'p', 'p', 'l', 'e', CTRL_J,
-        'o', 'r', 'a', 'n', 'g', 'e',
+        self.writeText('test\napple\norange'),
         self.cursorCheck(4, 13),
         self.selectionCheck(2, 6, 0, 0, 0),
         KEY_UP, self.cursorCheck(3, 12), self.selectionCheck(1, 5, 0, 0, 0),
@@ -144,9 +142,7 @@ class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
             "                                        ",
             "     1                                  "]),
         self.cursorCheck(2, 7),
-        't', 'e', 's', 't', CTRL_J,
-        'a', 'p', 'p', 'l', 'e', CTRL_J,
-        'o', 'r', 'a', 'n', 'g', 'e',
+        self.writeText('test\napple\norange'),
         self.cursorCheck(4, 13),
         self.selectionCheck(2, 6, 0, 0, 0),
         CTRL_L,
