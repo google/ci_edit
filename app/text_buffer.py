@@ -267,9 +267,9 @@ class TextBuffer(app.actions.Actions):
                 app.color.get('number', colorDelta))
     if self.highlightCursorLine:
       # Highlight the whole line at the cursor location.
-      if startRow <= self.penRow < endRow:
+      if startRow <= self.penRow < startRow + rowLimit:
         line = self.lines[self.penRow][startCol:endCol]
-        window.addStr(self.penRow - top, left, line,
+        window.addStr(top + self.penRow - startRow, left, line,
             app.color.get('trailing_space', colorDelta))
     if self.highlightTrailingWhitespace:
       # Highlight space ending lines.
