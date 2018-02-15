@@ -1181,15 +1181,16 @@ class FileManagerWindow(Window):
   def reshape(self, rows, cols, top, left):
     """Change self and sub-windows to fit within the given rectangle."""
     app.log.detail('reshape', rows, cols, top, left)
+    originalRows = rows
     self.titleRow.reshape(1, cols, top, left)
     top += 1
     rows -= 1
     Window.reshape(self, 1, cols, top, left)
     top += 1
     rows -= 1
-    self.optionsRow.reshape(1, cols, rows, left)
+    self.optionsRow.reshape(1, cols, originalRows - 2, left)
     rows -= 2
-    #self.statusLine.reshape(1, cols, rows, left)
+    #self.statusLine.reshape(1, cols, originalRows - 2, left)
     #rows -= 2
     self.directoryList.reshape(rows, cols, top, left)
 
