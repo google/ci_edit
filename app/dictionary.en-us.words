@@ -227,6 +227,7 @@ activities
 activity
 actor
 actors
+actress
 actresses
 acts
 actual
@@ -518,6 +519,7 @@ allocates
 allocating
 allocation
 allocations
+allocator
 allotted
 allow
 allowable
@@ -2037,6 +2039,7 @@ bulk
 bulked
 bull
 bullet
+bulleted
 bulletin
 bulletins
 bullets
@@ -2091,6 +2094,8 @@ busiest
 business
 businesses
 businessman
+businessperson
+businesswoman
 busker
 buss
 bust
@@ -9593,6 +9598,7 @@ locality
 localization
 localize
 localized
+localizer
 localizes
 localizing
 locally
@@ -11617,6 +11623,7 @@ panache
 panama
 panda
 pane
+paned
 panel
 panels
 panes
@@ -12574,6 +12581,7 @@ preposition
 prepositional
 prepositions
 preprocess
+preprocessed
 preprocessor
 preps
 prerecorded
@@ -12640,6 +12648,7 @@ prevails
 prevent
 preventable
 prevented
+preventer
 preventing
 prevention
 prevents
@@ -13383,6 +13392,7 @@ reattaching
 reattachment
 reattempt
 reattempts
+reauthentication
 reauthorize
 rebase
 rebate
@@ -17511,6 +17521,7 @@ trimmer
 trimming
 trimmings
 trims
+trinary
 trinity
 trio
 trip

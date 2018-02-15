@@ -16,11 +16,15 @@
 # Chromium (May be specific to Chromium development)
 # May of these are not real words or correct spellings.
 accname
+ansa
+ansb
 appcache
 appcaches
 appmenu
 arraysize
 asan
+atlbase
+atlwin
 autocollapse
 autocompletion
 autolaunch
@@ -34,8 +38,10 @@ buildflag
 buildflags
 callstack
 cbd
+cflags
 checkboxes
 chromevox
+clientdata
 codereview
 coord
 coords
@@ -54,10 +60,12 @@ dont
 dragdrop
 dsc
 dst
+du
 eap
 ef
 eslint
 ev
+fieldtrialtriggered
 filemanager
 fixup
 focusability
@@ -80,6 +88,7 @@ hotword
 hwid
 infobar
 jstemplate
+keycodes
 lbuttonup
 log
 lso
@@ -108,9 +117,11 @@ preconnectable
 prerendering
 presubmit
 pylint
+rappor
 relevances
 remora
 rendertext
+rlz
 rtlui
 safebrowsing
 scrollview
@@ -119,6 +130,10 @@ sideload
 sideloaded
 spdy
 stringprintf
+subtypeid
+suggestdetail
+suggestrelevance
+suggesttype
 tabrestore
 tabstrip
 tbr
@@ -126,13 +141,16 @@ textfield
 tooltips
 tryserver
 uitest
+ukm
 uma
 unittest
 unittests
+verbatimrelevance
 vis
 vlog
 vox
 vpd
 webstore
 wildcard
+wrl
 xtb
