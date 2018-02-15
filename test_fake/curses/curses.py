@@ -43,10 +43,12 @@ class FakeInput:
     self.inBracketedPaste = False
     self.tupleIndex = -1
     self.waitingForRefresh = True
+    self.isVerbose = False
 
   def next(self):
     if not self.waitingForRefresh:
       while self.inputsIndex + 1 < len(self.inputs):
+        assert not self.waitingForRefresh
         self.inputsIndex += 1
         cmd = self.inputs[self.inputsIndex]
         if type(cmd) == types.FunctionType:
@@ -57,11 +59,15 @@ class FakeInput:
         elif type(cmd) == types.StringType and len(cmd) == 1:
           if (not self.inBracketedPaste) and cmd != ascii.ESC:
             self.waitingForRefresh = True
+          if self.isVerbose:
+            print repr(cmd), ord(cmd)
           return ord(cmd)
         elif (type(cmd) == types.TupleType and len(cmd) > 1 and
             type(cmd[0]) == types.IntType):
           if cmd == app.curses_util.BRACKETED_PASTE_BEGIN:
             self.inBracketedPaste = True
+          if self.isVerbose and self.tupleIndex == 0:
+            print cmd, type(cmd)
           self.tupleIndex += 1
           if self.tupleIndex >= len(cmd):
             self.tupleIndex = -1
@@ -74,6 +80,8 @@ class FakeInput:
         else:
           if (not self.inBracketedPaste) and cmd != ascii.ESC:
             self.waitingForRefresh = True
+          if self.isVerbose:
+            print cmd, type(cmd)
           return cmd
     return ERR
 
@@ -148,10 +156,11 @@ class FakeDisplay:
     return [''.join(self.displayText[i]) for i in range(self.rows)]
 
   def show(self):
-    print '+' + '-' * self.cols + '+ +' + '-' * self.cols + '+'
-    for line, styles in zip(self.getText(), self.getStyle()):
-      print '|' + line + '| |' + styles + '|'
-    print '+' + '-' * self.cols + '+ +' + '-' * self.cols + '+'
+    print '   %*s   %s' % (-self.cols, 'display', 'style')
+    print '  +' + '-' * self.cols + '+ +' + '-' * self.cols + '+'
+    for i, (line, styles) in enumerate(zip(self.getText(), self.getStyle())):
+      print "%2d|%s| |%s|" % (i, line, styles)
+    print '  +' + '-' * self.cols + '+ +' + '-' * self.cols + '+'
 
   def reset(self):
     self.displayStyle = [
@@ -255,6 +264,7 @@ class StandardScreen(FakeCursesWindow):
     self.fakeDisplay = fakeDisplay
     fakeInput = FakeInput(fakeDisplay)
     self.fakeInput = fakeInput
+    self.movie = False
 
   def setFakeInputs(self, cmdList):
     self.fakeInput.setInputs(cmdList)
@@ -264,6 +274,8 @@ class StandardScreen(FakeCursesWindow):
     return (self.fakeDisplay.rows, self.fakeDisplay.cols)
 
   def refresh(self):
+    if self.movie:
+      fakeDisplay.show()
     fakeInput.waitingForRefresh = False
     testLog()
 
