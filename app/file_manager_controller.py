@@ -156,6 +156,7 @@ class FileManagerController(app.controller.Controller):
     assert textBuffer.parser
     self.view.host.inputWindow.setTextBuffer(textBuffer)
     self.changeToInputWindow()
+    self.view.textBuffer.replaceLines(('',))
 
   def focus(self):
     if self.view.textBuffer.isEmpty():
@@ -228,7 +229,3 @@ class FileManagerController(app.controller.Controller):
       # No further expansion found.
       self.view.directoryList.controller.setFilter(fileName)
     self.onChange()
-
-  def unfocus(self):
-    self.view.textBuffer.replaceLines(('',))
-
