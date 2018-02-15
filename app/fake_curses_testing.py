@@ -51,9 +51,10 @@ class FakeCursesTestCase(unittest.TestCase):
     callerText = "\n  %s:%s:%s(): " % (
         os.path.split(caller[1])[1], caller[2], caller[3])
     def displayChecker(display, cmdIndex):
+      #result = display.checkText(*args)
       result = display.checkText(*args)
       if result is not None:
-        output = callerText + result + ' at index ' + str(cmdIndex)
+        output = callerText + ' at index ' + str(cmdIndex) + result
         if self.cursesScreen.movie:
           print output
         else:
@@ -68,7 +69,7 @@ class FakeCursesTestCase(unittest.TestCase):
     def displayStyleChecker(display, cmdIndex):
       result = display.checkStyle(*args)
       if result is not None:
-        output = callerText + result + ' at index ' + str(cmdIndex)
+        output = callerText + ' at index ' + str(cmdIndex) + result
         if self.cursesScreen.movie:
           print output
         else:
