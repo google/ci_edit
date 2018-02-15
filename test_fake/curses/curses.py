@@ -119,6 +119,7 @@ class FakeDisplay:
     self.reset()
 
   def checkStyle(self, row, col, height, width, color):
+    result = None
     colorPair = self.colors.get(color)
     if colorPair is None:
       return "\n  color %s is not ready" % (color,)
@@ -127,9 +128,9 @@ class FakeDisplay:
         d = self.displayStyle[row + i][col + k]
         if d != colorPair:
           self.show()
-          return "\n  row %s, col %s color/style mismatch '%d' != '%d'" % (
+          result = "\n  row %s, col %s color/style mismatch '%d' != '%d'" % (
               row + i, col + k, d, colorPair)
-    return None
+    return result
 
   def checkText(self, row, col, lines, verbose=3):
     result = None
@@ -142,16 +143,16 @@ class FakeDisplay:
           self.show()
           result = "\n  row %s, col %s mismatch '%s' != '%s'" % (
               row + i, col + k, d, c)
-          if verbose > 0:
+          if verbose >= 1:
             actualLine = ''.join(self.displayText[row + i])
             result += unicode("\n  actual:   |%s|") % actualLine
-          if verbose > 1:
+          if verbose >= 2:
             expectedText = ''.join(line)
             expectedLine = (actualLine[:col] + expectedText +
                 actualLine[col + len(expectedText):])
             result += unicode("\n  expected: |%s|") % expectedLine
-          if verbose > 1:
-            result += unicode("\n  mismatch:  %*s^") % (col + k, ' ')
+          if verbose >= 3:
+            result += unicode("\n  mismatch:  %*s^") % (col + k, '')
     return result
 
 
