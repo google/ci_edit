@@ -81,6 +81,40 @@ class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
             "                                        ",
             ]), CTRL_Q])
 
+  def test_resize_screen(self):
+    self.runWithTestFile([
+        self.displayCheck(0, 0, [
+            " ci     .                               ",
+            "                                        ",
+            "     1                                  ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "                                        ",
+            "New buffer         |    1, 1 |   0%,  0%",
+            "                                        ",
+            ]),
+        self.resizeScreen(10, 36),
+        self.displayCheck(0, 0, [
+            " ci     .                           ",
+            "                                    ",
+            "     1                              ",
+            "                                    ",
+            "                                    ",
+            "                                    ",
+            "                                    ",
+            "                                    ",
+            "                    1, 1 |   0%,  0%",
+            "                                    ",
+            ]),
+            CTRL_Q])
+
   def test_find(self):
     self.runWithTestFile([
         self.displayCheck(-1, 0, ["      "]),

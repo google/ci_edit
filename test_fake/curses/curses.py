@@ -26,6 +26,7 @@ import ascii
 import app.curses_util
 import inspect
 import os
+import signal
 import sys
 import time
 import traceback
@@ -135,6 +136,12 @@ class FakeDisplay:
     for i in range(len(lines)):
       line = lines[i]
       for k in range(len(line)):
+        if row + i >= self.rows:
+          return "\n  Row %d is outside of the %d row display" % (row + i,
+              self.rows)
+        if col + k >= self.cols:
+          return "\n  Column %d is outside of the %d column display" % (col + k,
+              self.cols)
         d = self.displayText[row + i][col + k]
         c = line[k]
         if d != c:
@@ -166,6 +173,11 @@ class FakeDisplay:
 
   def getText(self):
     return [''.join(self.displayText[i]) for i in range(self.rows)]
+
+  def setScreenSize(self, rows, cols):
+    self.rows = rows
+    self.cols = cols
+    self.reset()
 
   def show(self):
     print '   %*s   %s' % (-self.cols, 'display', 'style')
@@ -351,17 +363,17 @@ def newwin(*args):
 def raw(*args):
   testLog(*args)
 
-def resizeterm():
-  pass
+def resizeterm(*args):
+  testLog(*args)
 
-def start_color():
-  pass
+def start_color(*args):
+  testLog(*args)
 
 def ungetch(*args):
   testLog(*args)
 
-def use_default_colors():
-  pass
+def use_default_colors(*args):
+  testLog(*args)
 
 def get_pair(*args):
   fakeDisplay.getColorPair(*args)

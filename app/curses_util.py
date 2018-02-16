@@ -203,7 +203,7 @@ def cursesKeyName(keyCode):
     pass
   return None
 
-# This should be provide by something built in and apparently it is in Python 3.
+# This is built-in in Python 3.
 # In Python 2 it's done by hand.
 def terminalSize():
   h, w = struct.unpack(

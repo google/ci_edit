@@ -88,6 +88,15 @@ class FakeCursesTestCase(unittest.TestCase):
       return None
     return cursorChecker
 
+  def resizeScreen(self, rows, cols):
+    caller = inspect.stack()[1]
+    callerText = "in %s:%s:%s(): " % (
+        os.path.split(caller[1])[1], caller[2], caller[3])
+    def setScreenSize(display, cmdIndex):
+      self.cursesScreen.fakeDisplay.setScreenSize(rows, cols)
+      return curses.KEY_RESIZE
+    return setScreenSize
+
   def setClipboard(self, text):
     caller = inspect.stack()[1]
     callerText = "in %s:%s:%s(): " % (
