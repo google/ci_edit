@@ -197,29 +197,6 @@ class InteractiveGoto(app.editor.InteractiveGoto):
     self.commandDefault = self.textBuffer.insertPrintable
 
 
-if 0:
-  class InteractiveOpener(app.editor.InteractiveOpener):
-    """Open a file to edit."""
-    def __init__(self, view):
-      app.editor.InteractiveOpener.__init__(self, view)
-
-    def setTextBuffer(self, textBuffer):
-      app.editor.InteractiveOpener.setTextBuffer(self, textBuffer)
-      commandSet = initCommandSet(self, textBuffer)
-      commandSet.update({
-        KEY_ESCAPE: self.changeToHostWindow,
-        KEY_F1: self.info,
-        CTRL_I: self.tabCompleteExtend,
-        CTRL_J: self.createOrOpen,
-        CTRL_N: self.createOrOpen,
-        CTRL_O: self.createOrOpen,
-        CTRL_P: self.changeToPrediction,
-        CTRL_Q: self.saveEventChangeToHostWindow,
-      })
-      self.commandSet = commandSet
-      self.commandDefault = self.textBuffer.insertPrintable
-
-
 class DirectoryList(app.file_manager_controller.DirectoryListController):
   """Open a file to edit."""
   def __init__(self, view):
