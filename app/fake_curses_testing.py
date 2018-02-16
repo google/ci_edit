@@ -51,7 +51,6 @@ class FakeCursesTestCase(unittest.TestCase):
     callerText = "\n  %s:%s:%s(): " % (
         os.path.split(caller[1])[1], caller[2], caller[3])
     def displayChecker(display, cmdIndex):
-      #result = display.checkText(*args)
       result = display.checkText(*args)
       if result is not None:
         output = callerText + ' at index ' + str(cmdIndex) + result
