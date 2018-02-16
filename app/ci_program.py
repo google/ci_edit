@@ -15,6 +15,7 @@
 
 import app.background
 import app.curses_util
+import app.file_manager_window
 import app.help
 import app.history
 import app.log
@@ -290,7 +291,7 @@ class CiProgram(app.window.ActiveWindow):
     self.inputWindow = app.window.InputWindow(self)
     self.zOrder.append(self.inputWindow)
     if 1:
-      self.fileManagerWindow = app.window.FileManagerWindow(self,
+      self.fileManagerWindow = app.file_manager_window.FileManagerWindow(self,
           self.inputWindow)
       self.zOrder.append(self.fileManagerWindow)
       self.inputWindow.show()
