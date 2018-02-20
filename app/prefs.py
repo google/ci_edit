@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import app.default_prefs
-import app.log
 import curses
 import io
 import json
@@ -21,6 +19,9 @@ import os
 import re
 import sys
 import time
+
+import app.default_prefs
+import app.log
 
 importStartTime = time.time()
 kNonMatchingRegex = r'^\b$'

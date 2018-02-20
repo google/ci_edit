@@ -12,14 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import app.profile
-import app.render
 import os
 import Queue
 import signal
 import sys
 import threading
 import traceback
+
+import app.profile
+import app.render
 
 
 # The instance of the background thread.

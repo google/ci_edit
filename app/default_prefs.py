@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import app.log
 import re
 import os
+
+import app.log
 
 commentColorIndex = 2
 defaultColorIndex = 18

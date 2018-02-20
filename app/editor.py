@@ -14,14 +14,14 @@
 
 """Interactive UIs for the ciEditor."""
 
+import os
+import re
+import text_buffer
 
 import app.buffer_manager
 import app.config
 import app.controller
-import app.window
-import os
-import re
-import text_buffer
+#import app.window
 
 
 def parseInt(inStr):

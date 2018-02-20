@@ -13,13 +13,13 @@
 # limitations under the License.
 
 import curses
+import curses.ascii
 import fcntl
 import os
 import signal
 import struct
 import sys
 import termios
-import curses.ascii
 
 
 # Strings are found using the cursesKeyName() function.

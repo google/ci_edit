@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import app.log
 import bisect
 import glob
 import io
 import os
 import re
+
+import app.log
 
 
 grammarWords = {}

@@ -12,9 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import unittest
+
 import app.log
 import app.selectable
-import unittest
+
 
 class SelectableTestCases(unittest.TestCase):
   def setUp(self):

@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import curses
+import re
+import sys
+
 import app.actions
 import app.color
 import app.log
@@ -19,9 +23,7 @@ import app.parser
 import app.prefs
 import app.selectable
 import app.spelling
-import curses
-import re
-import sys
+
 
 class TextBuffer(app.actions.Actions):
   """The TextBuffer adds the drawing/rendering to the BackingTextBuffer."""

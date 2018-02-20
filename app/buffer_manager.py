@@ -12,13 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import io
+import os
+import sys
+
 import app.config
 import app.log
 import app.history
 import app.text_buffer
-import io
-import os
-import sys
 
 class BufferManager:
   """Manage a set of text buffers. Some text buffers may be hidden."""

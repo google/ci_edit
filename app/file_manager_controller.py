@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from app.curses_util import *
-import app.buffer_manager
-import app.controller
 import os
 import re
 import time
+
+from app.curses_util import *
+import app.buffer_manager
+import app.controller
 
 
 class DirectoryListController(app.controller.Controller):

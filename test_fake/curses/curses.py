@@ -21,9 +21,7 @@ what ci_edit uses, without regard or reference to the internals of the curses
 library."""
 
 
-from .constants import *
 import ascii
-import app.curses_util
 import inspect
 import os
 import signal
@@ -31,6 +29,15 @@ import sys
 import time
 import traceback
 import types
+
+from .constants import *
+
+
+# Avoiding importing app.curses_util.
+# Tuple events are preceded by an escape (27).
+BRACKETED_PASTE_BEGIN = (91, 50, 48, 48, 126)  # i.e. "[200~"
+BRACKETED_PASTE_END = (91, 50, 48, 49, 126)  # i.e. "[201~"
+BRACKETED_PASTE = ('terminal_paste',)  # Pseudo event type.
 
 
 class FakeInput:
@@ -65,14 +72,14 @@ class FakeInput:
           return ord(cmd)
         elif (type(cmd) == types.TupleType and len(cmd) > 1 and
             type(cmd[0]) == types.IntType):
-          if cmd == app.curses_util.BRACKETED_PASTE_BEGIN:
+          if cmd == BRACKETED_PASTE_BEGIN:
             self.inBracketedPaste = True
           if self.isVerbose and self.tupleIndex == 0:
             print cmd, type(cmd)
           self.tupleIndex += 1
           if self.tupleIndex >= len(cmd):
             self.tupleIndex = -1
-            if cmd == app.curses_util.BRACKETED_PASTE_END:
+            if cmd == BRACKETED_PASTE_END:
               self.inBracketedPaste = False
               self.waitingForRefresh = True
             return ERR

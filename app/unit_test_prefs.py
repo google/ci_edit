@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import app.default_prefs
 import re
 import unittest
+
+import app.default_prefs
 
 
 numbersRe = re.compile(app.default_prefs.joinReList(

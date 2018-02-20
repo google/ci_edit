@@ -12,13 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import app.clipboard
-import app.history
-import app.log
-import app.mutator
-import app.parser
-import app.prefs
-import app.selectable
 import bisect
 import curses.ascii
 import difflib
@@ -28,6 +21,14 @@ import re
 import sys
 import time
 import traceback
+
+import app.clipboard
+import app.history
+import app.log
+import app.mutator
+import app.parser
+import app.prefs
+import app.selectable
 
 
 class Actions(app.mutator.Mutator):

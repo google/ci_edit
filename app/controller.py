@@ -14,14 +14,13 @@
 
 """Manager for key bindings."""
 
-import app.config
-import app.log
 import curses
 import curses.ascii
-import app.curses_util
 
-import inspect
-import window
+import app.config
+import app.curses_util
+import app.log
+#import app.window
 
 
 class Controller:
@@ -30,7 +29,7 @@ class Controller:
   def __init__(self, view, name):
     if app.config.strict_debug:
       assert issubclass(self.__class__, Controller)
-      assert issubclass(view.__class__, window.Window)
+      assert issubclass(view.__class__, app.window.Window)
     self.view = view
     self.commandDefault = None
     self.commandSet = None

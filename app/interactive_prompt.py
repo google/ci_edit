@@ -14,10 +14,11 @@
 
 """Interactive prompt to run advanced commands and sub-processes."""
 
-import app.controller
 import os
 import re
 import subprocess
+
+import app.controller
 
 
 def functionTestEq(a, b):

@@ -14,15 +14,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-import app.ci_program
-from app.curses_util import *
 import curses
 import inspect
 import os
 import sys
-import third_party.pyperclip as clipboard
 import unittest
+
+import third_party.pyperclip as clipboard
+
+import app.ci_program
+from app.curses_util import *
 
 
 class FakeCursesTestCase(unittest.TestCase):

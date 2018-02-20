@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import bisect
+import os
+import sys
+import curses
 
 import app.buffer_manager
 import app.color
@@ -22,10 +26,6 @@ import app.em_editor
 import app.render
 import app.text_buffer
 import app.vi_editor
-import bisect
-import os
-import sys
-import curses
 
 
 # The terminal area that the curses can draw to.

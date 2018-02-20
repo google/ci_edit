@@ -12,17 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import app.background
-import app.log
-import app.selectable
-import app.prefs
-import third_party.pyperclip as clipboard
 import curses.ascii
 import os
 import re
 import sys
 import time
 import traceback
+
+import third_party.pyperclip as clipboard
+
+import app.background
+import app.log
+import app.selectable
+import app.prefs
 
 
 class ParserNode:

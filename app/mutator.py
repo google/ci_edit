@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+import re
+
 import app.log
 import app.parser
 import app.prefs
 import app.selectable
-import os
-import re
 
 
 # If a change is in |noOpInstructions| then it has no real effect.

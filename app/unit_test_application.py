@@ -14,14 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-import app.ci_program
-import app.fake_curses_testing
-import app.prefs
-from app.curses_util import *
 import curses
 import os
 import sys
+
+from app.curses_util import *
+import app.ci_program
+import app.fake_curses_testing
+import app.prefs
 
 
 kTestFile = '#application_test_file_with_unlikely_file_name~'

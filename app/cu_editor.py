@@ -14,13 +14,14 @@
 
 """Key bindings for the cua-like editor."""
 
+import curses
+import text_buffer
+
 from app.curses_util import *
 import app.controller
 import app.editor
 import app.file_manager_controller
 import app.interactive_prompt
-import curses
-import text_buffer
 
 
 def initCommandSet(controller, textBuffer):

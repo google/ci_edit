@@ -12,11 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import mock
+import unittest
+
 import app.prefs
 import app.text_buffer
 import app.window
-import mock
-import unittest
+
 
 class BookmarkTestCases(unittest.TestCase):
   def setUp(self):

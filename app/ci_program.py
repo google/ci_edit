@@ -12,16 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-import app.background
-import app.curses_util
-import app.file_manager_window
-import app.help
-import app.history
-import app.log
-import app.prefs
-import app.text_buffer
-import app.window
 import cProfile
 import pstats
 import cPickle as pickle
@@ -33,6 +23,16 @@ import StringIO
 import sys
 import time
 import traceback
+
+import app.background
+import app.curses_util
+import app.file_manager_window
+import app.help
+import app.history
+import app.log
+import app.prefs
+import app.text_buffer
+import app.window
 
 
 userConsoleMessage = None

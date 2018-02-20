@@ -12,10 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 import app.color
 import app.config
-#import app.cu_editor
+import app.cu_editor
 import app.log
 import app.text_buffer
 import app.window
