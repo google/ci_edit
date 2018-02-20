@@ -12,10 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import app.buffer_manager
 import app.clipboard
-import app.log
 import app.history
+import app.log
 import app.mutator
 import app.parser
 import app.prefs
@@ -784,9 +783,6 @@ class Actions(app.mutator.Mutator):
     self.dataToLines()
     self.upperChangedRow = 0
     self.savedAtRedoIndex = self.redoIndex
-
-  def setFilePath(self, path):
-    app.buffer_manager.buffers.renameBuffer(self, path)
 
   def fileLoad(self):
     app.log.info('fileLoad', self.fullPath)
