@@ -83,7 +83,6 @@ def mainWindowCommands(controller, textBuffer):
     CTRL_G: controller.changeToGoto,
     CTRL_I: textBuffer.indent,
     CTRL_J: textBuffer.carriageReturn,
-    #CTRL_O: controller.changeToFileOpen,
     CTRL_O: controller.changeToFileManagerWindow,
     CTRL_Q: controller.initiateQuit,
     CTRL_R: controller.changeToFindPrior,
@@ -157,7 +156,6 @@ class InteractiveFind(app.editor.InteractiveFind):
       CTRL_F: self.findNext,
       CTRL_G: self.findNext,
       CTRL_J: self.changeToHostWindow,
-      #CTRL_O: self.changeToFileOpen,
       CTRL_O: self.changeToFileManagerWindow,
       CTRL_P: self.changeToPrediction,
       CTRL_R: self.findPrior,
@@ -241,6 +239,7 @@ class FileOpener(app.file_manager_controller.FileManagerController):
       CTRL_O: self.whatToCallThis,
       CTRL_P: self.changeToPrediction,
       CTRL_Q: self.saveEventChangeToInputWindow,
+      CTRL_S: self.saveEventChangeToInputWindow,
     })
     self.commandSet = commandSet
     self.commandDefault = self.textBuffer.insertPrintable
@@ -261,7 +260,6 @@ class InteractivePrediction(app.editor.InteractivePrediction):
       CTRL_G: self.changeToGoto,
       CTRL_J: self.selectItem,
       CTRL_N: self.nextItem,
-      #CTRL_O: self.changeToFileOpen,
       CTRL_O: self.changeToFileManagerWindow,
       CTRL_P: self.priorItem,
       CTRL_Q: self.saveEventChangeToHostWindow,
