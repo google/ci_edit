@@ -16,6 +16,7 @@ import io
 import os
 import sys
 
+import app.buffer_file
 import app.config
 import app.log
 import app.history
@@ -85,7 +86,7 @@ class BufferManager:
       assert issubclass(self.__class__, BufferManager), self
       assert type(relPath) is str
       assert issubclass(view.__class__, app.window.ViewWindow)
-    fullPath = os.path.abspath(os.path.expanduser(os.path.expandvars(relPath)))
+    fullPath = app.buffer_file.fullPath(relPath)
     app.log.info(fullPath)
     textBuffer = None
     for i,tb in enumerate(self.buffers):

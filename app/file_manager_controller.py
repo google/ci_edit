@@ -17,6 +17,7 @@ import re
 import time
 
 from app.curses_util import *
+import app.buffer_file
 import app.buffer_manager
 import app.controller
 
@@ -42,7 +43,7 @@ class DirectoryListController(app.controller.Controller):
     if self.shownDirectory == input:
       return
     self.shownDirectory = input
-    fullPath = os.path.abspath(os.path.expanduser(os.path.expandvars(input)))
+    fullPath = app.buffer_file.fullPath(input)
     dirPath = fullPath
     fileName = ''
     if len(input) > 0 and input[-1] != os.sep:
