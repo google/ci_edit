@@ -325,7 +325,6 @@ class InteractiveGoto(EditText):
     textBuffer.cursorMove(cursorRow-textBuffer.cursorRow,
         col-textBuffer.cursorCol,
         col-textBuffer.goalCol)
-    textBuffer.redo()
 
   def onChange(self):
     gotoLine = 0

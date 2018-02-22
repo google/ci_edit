@@ -57,7 +57,6 @@ class Actions(app.mutator.Mutator):
           self.cursorMoveAndMark(
               upper - self.penRow, left - self.penCol,
               lower - self.markerRow, right - self.markerCol, 0)
-          self.redo()
         elif (self.penRow > self.markerRow or
             (self.penRow == self.markerRow and
             self.penCol > self.markerCol)):
@@ -73,14 +72,11 @@ class Actions(app.mutator.Mutator):
         if lowerCol <= self.penCol:
           col = upperCol - lowerCol
         self.cursorMove(0, col)
-        self.redo()
     elif upperRow <= self.penRow < lowerRow:
       self.cursorMove(upperRow - self.penRow, upperCol - self.penCol)
-      self.redo()
     elif self.penRow == lowerRow:
       col = upperCol - lowerCol
       self.cursorMove(upperRow - self.penRow, col)
-      self.redo()
     self.redoAddChange((
       'dr',
       (upperRow, upperCol, lowerRow, lowerCol),
@@ -181,7 +177,6 @@ class Actions(app.mutator.Mutator):
     self.cursorMoveAndMark(penRow - self.penRow, penCol - self.penCol,
         markerRow - self.markerRow, markerCol - self.markerCol,
         selectionMode - self.selectionMode)
-    self.redo()
     self.scrollToOptimalScrollPosition()
 
   def bookmarkNext(self):
@@ -335,6 +330,7 @@ class Actions(app.mutator.Mutator):
     change = self.getCursorMoveAndMark(rowDelta, colDelta, markRowDelta,
                                        markColDelta, selectionModeDelta)
     self.redoAddChange(change)
+    self.redo()
 
   def cursorMoveScroll(self, rowDelta, colDelta,
       scrollRowDelta, scrollColDelta):
@@ -347,26 +343,21 @@ class Actions(app.mutator.Mutator):
       return
     savedGoal = self.goalCol
     self.cursorMove(1, self.cursorColDelta(self.penRow + 1))
-    self.redo()
     self.goalCol = savedGoal
 
   def cursorMoveLeft(self):
     if self.penCol > 0:
       self.cursorMove(0, -1)
-      self.redo()
     elif self.penRow > 0:
       self.cursorMove(-1, len(self.lines[self.penRow - 1]))
-      self.redo()
 
   def cursorMoveRight(self):
     if not self.lines:
       return
     if self.penCol < len(self.lines[self.penRow]):
       self.cursorMove(0, 1)
-      self.redo()
     elif self.penRow + 1 < len(self.lines):
       self.cursorMove(1, -len(self.lines[self.penRow]))
-      self.redo()
     else:
       self.setMessage('Bottom of file')
 
@@ -378,10 +369,8 @@ class Actions(app.mutator.Mutator):
     lineLen = len(self.lines[self.penRow - 1])
     if self.goalCol <= lineLen:
       self.cursorMove(-1, self.goalCol - self.penCol)
-      self.redo()
     else:
       self.cursorMove(-1, lineLen - self.penCol)
-      self.redo()
     self.goalCol = savedGoal
 
   def cursorMoveSubwordLeft(self):
@@ -393,7 +382,6 @@ class Actions(app.mutator.Mutator):
   def cursorMoveTo(self, row, col):
     cursorRow = min(max(row, 0), len(self.lines)-1)
     self.cursorMove(cursorRow - self.penRow, col - self.penCol)
-    self.redo()
 
   def cursorMoveWordLeft(self):
     self.doCursorMoveLeftTo(app.selectable.kReWordBoundary)
@@ -410,10 +398,8 @@ class Actions(app.mutator.Mutator):
           pos = segment.start()
           break
       self.cursorMove(0, pos - self.penCol)
-      self.redo()
     elif self.penRow > 0:
       self.cursorMove(-1, len(self.lines[self.penRow - 1]))
-      self.redo()
 
   def doCursorMoveRightTo(self, boundary):
     if not self.lines:
@@ -426,10 +412,8 @@ class Actions(app.mutator.Mutator):
           pos = segment.end()
           break
       self.cursorMove(0, pos - self.penCol)
-      self.redo()
     elif self.penRow + 1 < len(self.lines):
       self.cursorMove(1, -len(self.lines[self.penRow]))
-      self.redo()
 
   def cursorRight(self):
     self.selectionNone()
@@ -466,28 +450,24 @@ class Actions(app.mutator.Mutator):
       self.selectionCharacter()
     self.cursorMoveSubwordLeft()
     self.cursorMoveAndMark(*self.extendSelection())
-    self.redo()
 
   def cursorSelectSubwordRight(self):
     if self.selectionMode == app.selectable.kSelectionNone:
       self.selectionCharacter()
     self.cursorMoveSubwordRight()
     self.cursorMoveAndMark(*self.extendSelection())
-    self.redo()
 
   def cursorSelectWordLeft(self):
     if self.selectionMode == app.selectable.kSelectionNone:
       self.selectionCharacter()
     self.cursorMoveWordLeft()
     self.cursorMoveAndMark(*self.extendSelection())
-    self.redo()
 
   def cursorSelectWordRight(self):
     if self.selectionMode == app.selectable.kSelectionNone:
       self.selectionCharacter()
     self.cursorMoveWordRight()
     self.cursorMoveAndMark(*self.extendSelection())
-    self.redo()
 
   def cursorSelectUp(self):
     if self.selectionMode == app.selectable.kSelectionNone:
@@ -508,7 +488,6 @@ class Actions(app.mutator.Mutator):
   def cursorEndOfLine(self):
     lineLen = len(self.lines[self.penRow])
     self.cursorMove(0, lineLen - self.penCol)
-    self.redo()
 
   def cursorSelectToStartOfLine(self):
     self.selectionCharacter()
@@ -667,7 +646,6 @@ class Actions(app.mutator.Mutator):
 
   def cursorStartOfLine(self):
     self.cursorMove(0, -self.penCol)
-    self.redo()
 
   def cursorUp(self):
     self.selectionNone()
@@ -734,7 +712,6 @@ class Actions(app.mutator.Mutator):
     else:
       endCol = len(clip[-1])
     self.cursorMove(rowDelta, endCol - self.penCol)
-    self.redo()
 
   def editRedo(self):
     """Undo a set of redo nodes."""
@@ -1026,10 +1003,8 @@ class Actions(app.mutator.Mutator):
     inView = self.isInView(row, endCol, row, endCol)
     self.doSelectionMode(app.selectable.kSelectionNone)
     self.cursorMove(row - self.penRow, endCol - self.penCol)
-    self.redo()
     self.doSelectionMode(mode)
     self.cursorMove(0, -length)
-    self.redo()
     if not inView:
       self.scrollToOptimalScrollPosition()
 
@@ -1210,7 +1185,6 @@ class Actions(app.mutator.Mutator):
     else:
       self.indentLines()
     self.cursorMoveAndMark(0, indentationLength, 0, indentationLength, 0)
-    self.redo()
 
   def indentLines(self):
     """
@@ -1229,10 +1203,8 @@ class Actions(app.mutator.Mutator):
     self.redo()
     if row <= self.markerRow <= endRow:
       self.cursorMoveAndMark(0, 0, 0, -len(text), 0)
-      self.redo()
     if row <= self.penRow <= endRow:
       self.cursorMoveAndMark(0, -len(text), 0, 0, 0)
-      self.redo()
 
   def verticalInsert(self, row, endRow, col, text):
     self.redoAddChange(('vi', (text, row, endRow, col)))
@@ -1298,14 +1270,12 @@ class Actions(app.mutator.Mutator):
       lastLine = len(self.lines) - 1
       self.cursorMove(lastLine - self.penRow,
           len(self.lines[lastLine]) - self.penCol)
-      self.redo()
       return
     row = max(0, min(virtualRow, len(self.lines)))
     col = max(0, self.view.scrollCol + paneCol)
     if self.selectionMode == app.selectable.kSelectionBlock:
       self.cursorMoveAndMark(0, 0, row - self.markerRow, col - self.markerCol,
           0)
-      self.redo()
       return
     markerRow = 0
     # If not block selection, restrict col to the chars on the line.
@@ -1339,10 +1309,8 @@ class Actions(app.mutator.Mutator):
           markerCol = -1
     self.cursorMoveAndMark(row - self.penRow, col - self.penCol,
         markerRow, markerCol, 0)
-    self.redo()
     if self.selectionMode == app.selectable.kSelectionLine:
       self.cursorMoveAndMark(*self.extendSelection())
-      self.redo()
     elif self.selectionMode == app.selectable.kSelectionWord:
       if (self.penRow < self.markerRow or
          (self.penRow == self.markerRow and
@@ -1476,7 +1444,6 @@ class Actions(app.mutator.Mutator):
   def selectionAll(self):
     self.doSelectionMode(app.selectable.kSelectionAll)
     self.cursorMoveAndMark(*self.extendSelection())
-    self.redo()
 
   def selectionBlock(self):
     self.doSelectionMode(app.selectable.kSelectionBlock)
@@ -1510,13 +1477,11 @@ class Actions(app.mutator.Mutator):
       self.cursorMoveAndMark((row + 1) - self.penRow, -self.penCol,
           0, -self.markerCol,
           app.selectable.kSelectionLine - self.selectionMode)
-      self.redo()
     else:
       self.cursorMoveAndMark(row - self.penRow,
           len(self.lines[row]) - self.penCol,
           0, -self.markerCol,
           app.selectable.kSelectionLine - self.selectionMode)
-      self.redo()
 
   def selectWordAt(self, row, col):
     """row and col may be from a mouse click and may not actually land in the
@@ -1539,7 +1504,6 @@ class Actions(app.mutator.Mutator):
         self.markerCol - self.penCol,
         self.penRow - self.markerRow,
         self.penCol - self.markerCol, 0)
-    self.redo()
 
   def test(self):
     self.insertPrintable(0x00, None)
