@@ -331,6 +331,10 @@ class Actions(app.mutator.Mutator):
                                        markColDelta, selectionModeDelta)
     self.redoAddChange(change)
     self.redo()
+    if self.selectionMode != app.selectable.kSelectionNone:
+      charCount, lineCount = self.countSelected()
+      self.setMessage('%d characters (%d lines) selected' % (charCount,
+          lineCount))
 
   def cursorMoveScroll(self, rowDelta, colDelta,
       scrollRowDelta, scrollColDelta):
@@ -686,6 +690,10 @@ class Actions(app.mutator.Mutator):
     if len(text):
       data = self.doLinesToData(text)
       app.clipboard.copy(data)
+      if len(text) == 1:
+        self.setMessage('copied %d characters' % len(text[0]))
+      else:
+        self.setMessage('copied %d lines' % (len(text),))
 
   def editCut(self):
     self.editCopy()

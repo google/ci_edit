@@ -91,6 +91,13 @@ class Selectable(BaseLineBuffer):
     self.selectionMode = kSelectionNone
     self.upperChangedRow = 0
 
+  def countSelected(self):
+    lines = self.getSelectedText()
+    chars = len(lines) - 1  # Count carriage returns.
+    for line in lines:
+      chars += len(line)
+    return chars, len(lines)
+
   def selection(self):
     return (self.penRow, self.penCol, self.markerRow, self.markerCol)
 
