@@ -260,3 +260,35 @@ class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
             "                        1, 1 |   0%,  0%",
             "                                        "]),
         CTRL_Q])
+
+  def test_quit_cancel(self):
+    #self.setMovieMode(True)
+    self.runWithFakeInputs([
+        self.displayCheck(0, 0, [
+            " ci     .                               ",]),
+        'x',
+        CTRL_Q,
+        'c',
+        self.writeText(' after cancel'),
+        self.displayCheck(2, 7, [
+            "x after cancel ",]),
+        CTRL_Q,
+        'n'
+        ])
+
+  def test_quit_save_as(self):
+    #self.setMovieMode(True)
+    self.assertFalse(os.path.isfile(kTestFile))
+    self.runWithFakeInputs([
+        self.displayCheck(0, 0, [
+            " ci     .                               ",]),
+        'x',
+        CTRL_Q,
+        'y',
+        self.writeText(kTestFile),
+        CTRL_J,
+        CTRL_Q,
+        ])
+    self.assertTrue(os.path.isfile(kTestFile))
+    os.unlink(kTestFile)
+    self.assertFalse(os.path.isfile(kTestFile))

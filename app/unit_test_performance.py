@@ -68,7 +68,7 @@ class PerformanceTestCases(unittest.TestCase):
     #print "\na %s, b %s, c %s | %s %s" % (a, b, c, c, a/c)
     # Calling a function or member is significantly slower than direct access.
     self.assertGreater(b, a * 2.0)  # b is much slower.
-    self.assertGreater(b, c * 2.0)  # b is much slower.
+    self.assertGreater(b, c * 1.9)  # b is much slower.
     self.assertGreater(a, c * 0.7)  # a and c are similar.
     self.assertGreater(c, a * 0.6)  # a and c are similar.
 
@@ -88,7 +88,7 @@ class PerformanceTestCases(unittest.TestCase):
         setup=setup,
         number=10000)
     # Assert that neither too much faster than the other
-    self.assertGreater(a, b * 0.81)
+    self.assertGreater(a, b * 0.77)
     self.assertGreater(b, a * 0.77)
 
   def test_insert1(self):
