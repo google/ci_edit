@@ -311,11 +311,16 @@ class StandardScreen(FakeCursesWindow):
     testLog()
 
 
-def can_change_color():
-  testLog()
+def baudrate(*args):
+  testLog(*args)
+  return -1
 
-def color_content():
-  testLog()
+def can_change_color(*args):
+  testLog(*args)
+  return 1
+
+def color_content(*args):
+  testLog(*args)
 
 def color_pair(*args):
   testLog(*args)
@@ -324,35 +329,35 @@ def color_pair(*args):
 def curs_set(*args):
   testLog(*args)
 
-def error():
-  testLog()
+def error(*args):
+  testLog(*args)
 
-def errorpass():
-  testLog()
+def errorpass(*args):
+  testLog(*args)
 
-def getch():
-  testLog()
+def getch(*args):
+  testLog(*args)
   return ERR
 
 def addMouseEvent(mouseEvent):
   testLog()
   return mouseEvents.append(mouseEvent)
 
-def getmouse():
-  testLog()
+def getmouse(*args):
+  testLog(*args)
   return mouseEvents.pop()
 
-def has_colors():
-  testLog()
+def has_colors(*args):
+  testLog(*args)
 
-def init_color():
-  testLog()
+def init_color(*args):
+  testLog(*args)
 
 def init_pair(*args):
   testLog(*args)
 
-def keyname():
-  testLog()
+def keyname(*args):
+  testLog(*args)
 
 def meta(*args):
   testLog(*args)

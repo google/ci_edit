@@ -102,9 +102,6 @@ class ViewWindow:
   def debugDraw(self, win):
     self.parent.debugDraw(win)
 
-  def debugUndoDraw(self, win):
-    self.parent.debugUndoDraw(win)
-
   def hide(self):
     """Remove window from the render list."""
     try:
@@ -149,6 +146,7 @@ class ViewWindow:
   def reshape(self, rows, cols, top, left):
     self.moveTo(top, left)
     self.resizeTo(rows, cols)
+    app.log.debug(self, rows, cols, top, left)
 
   def resizeTo(self, rows, cols):
     #app.log.detail(rows, cols, self)
@@ -270,7 +268,6 @@ class Window(ActiveWindow):
     ViewWindow.render(self)
     if self.hasFocus:
       self.parent.debugDraw(self)
-      self.parent.debugUndoDraw(self)
       if (self.cursorRow >= self.scrollRow and
           self.cursorRow < self.scrollRow + self.rows):
         app.render.frame.setCursor((
@@ -310,6 +307,7 @@ class LabeledLine(Window):
     Window.render(self)
 
   def reshape(self, rows, cols, top, left):
+    app.log.debug(self, rows, cols, top, left)
     labelWidth = len(self.label)
     Window.reshape(self, rows, max(0, cols - labelWidth), top,
         left + labelWidth)
@@ -521,6 +519,7 @@ class InteractiveFind(Window):
         self.findLine.textBuffer)
 
   def reshape(self, rows, cols, top, left):
+    Window.reshape(self, rows, cols, top, left)
     self.findLine.reshape(1, cols, top, left)
     top += 1
     self.replaceLine.reshape(1, cols, top, left)
@@ -796,7 +795,8 @@ class InputWindow(Window):
 
   def reshape(self, rows, cols, top, left):
     """Change self and sub-windows to fit within the given rectangle."""
-    app.log.detail('reshape', rows, cols, top, left)
+    app.log.detail(rows, cols, top, left)
+    Window.reshape(self, rows, cols, top, left)
     self.outerShape = (rows, cols, top, left)
     self.layout()
 

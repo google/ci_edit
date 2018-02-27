@@ -44,200 +44,139 @@ def userMessage(*args):
   userConsoleMessage += unicode(' '.join(args) + '\n')
 
 
-class CiProgram(app.window.ActiveWindow):
-  """This is the main editor program. It holds top level information and runs
-  the main loop. The CiProgram is intended as a singleton.
-  In some aspects, the program acts as a top level window, even though it's not
-  exactly a window."""
-  def __init__(self, cursesScreen):
-    self.clicks = 0
-    self.debugMouseEvent = (0, 0, 0, 0, 0)
-    self.exiting = False
-    self.host = None
-    self.modalUi = None
-    self.modeStack = []
+class DebugWindow(app.window.ActiveWindow):
+  def __init__(self, host):
+    app.window.ActiveWindow.__init__(self, host)
+
+  def debugDraw(self, program, win):
+    """Draw real-time debug information to the screen."""
+    textBuffer = win.textBuffer
+    y, x = win.top, win.left
+    maxRow, maxCol = win.rows, win.cols
+    self.writeLineRow = 0
+    intent = "noIntent"
+    try: intent = win.userIntent
+    except: pass
+    color = app.color.get('debug_window')
+    self.writeLine(
+        "   cRow %3d    cCol %2d goalCol %2d  %s"
+        %(win.textBuffer.penRow, win.textBuffer.penCol, win.textBuffer.goalCol,
+            intent),
+        color)
+    self.writeLine(
+        "   pRow %3d    pCol %2d chRow %4d"
+        %(textBuffer.penRow, textBuffer.penCol,
+            textBuffer.debugUpperChangedRow), color)
+    self.writeLine(
+        " mkrRow %3d  mkrCol %2d sm %d"
+        %(textBuffer.markerRow, textBuffer.markerCol,
+            textBuffer.selectionMode),
+        color)
+    self.writeLine(
+        "scrlRow %3d scrlCol %2d lines %3d"
+        %(win.scrollRow, win.scrollCol, len(textBuffer.lines)),
+        color)
+    self.writeLine(
+        "y %2d x %2d maxRow %d maxCol %d baud %d color %d"
+        %(y, x, maxRow, maxCol, curses.baudrate(), curses.can_change_color()),
+            color)
+    screenRows, screenCols = program.cursesScreen.getmaxyx()
+    self.writeLine(
+        "scr rows %d cols %d mlt %f/%f pt %f"
+        %(screenRows, screenCols, program.mainLoopTime, program.mainLoopTimePeak,
+            textBuffer.parserTime), color)
+    self.writeLine(
+        "ch %3s %s"
+        %(program.ch, app.curses_util.cursesKeyName(program.ch) or 'UNKNOWN'),
+        color)
+    self.writeLine("win %r"%(win,),
+        color)
+    self.writeLine("win %r"%(program.programWindow.focusedWindow,),
+        color)
+    self.writeLine("tb %r"%(textBuffer,),
+        color)
+    (id, mouseCol, mouseRow, mouseZ, bState) = program.debugMouseEvent
+    self.writeLine(
+        "mouse id %d, mouseCol %d, mouseRow %d, mouseZ %d"
+        %(id, mouseCol, mouseRow, mouseZ), color)
+    self.writeLine(
+        "bState %s %d"
+        %(app.curses_util.mouseButtonName(bState), bState),
+            color)
+    self.writeLine(
+        "startAndEnd %r"
+        %(textBuffer.startAndEnd(),),
+            color)
+
+
+class DebugUndoWindow(app.window.ActiveWindow):
+  def __init__(self, host):
+    app.window.ActiveWindow.__init__(self, host)
+
+  def debugUndoDraw(self, win):
+    """Draw real-time debug information to the screen."""
+    textBuffer = win.textBuffer
+    y, x = win.top, win.left
+    maxRow, maxCol = win.rows, win.cols
+    self.writeLineRow = 0
+    # Display some of the redo chain.
+    redoColorA = app.color.get(100)
+    self.writeLine(
+        "procTemp %d temp %r"
+        %(textBuffer.processTempChange, textBuffer.tempChange,),
+        redoColorA)
+    self.writeLine(
+        "redoIndex %3d savedAt %3d depth %3d"
+        %(textBuffer.redoIndex, textBuffer.savedAtRedoIndex,
+          len(textBuffer.redoChain)),
+        redoColorA)
+    redoColorB = app.color.get(101)
+    split = 8
+    for i in range(textBuffer.redoIndex - split, textBuffer.redoIndex):
+      text = i >= 0 and textBuffer.redoChain[i] or ''
+      self.writeLine(text, redoColorB)
+    redoColorC = app.color.get(1)
+    for i in range(textBuffer.redoIndex, textBuffer.redoIndex + split - 1):
+      text = (i < len(textBuffer.redoChain) and
+          textBuffer.redoChain[i] or '')
+      self.writeLine(text, redoColorC)
+
+
+class ProgramWindow(app.window.ActiveWindow):
+  """The outermost window."""
+  def __init__(self, program):
+    app.window.ActiveWindow.__init__(self, None)
+    self.program = program
     self.priorClick = 0
     self.savedMouseButton1Down = False
     self.savedMouseWindow = None
     self.savedMouseX = -1
     self.savedMouseY = -1
-    self.cursesScreen = cursesScreen
-    self.ch = 0
-    curses.mousemask(-1)
-    curses.mouseinterval(0)
-    # Enable mouse tracking in xterm.
-    sys.stdout.write('\033[?1002;h\n')
-    #sys.stdout.write('\033[?1005;h\n')
-    curses.meta(1)
-    # Access ^c before shell does.
-    curses.raw()
-    # Enable Bracketed Paste Mode.
-    sys.stdout.write('\033[?2004;h\n')
-    #curses.start_color()
-    curses.use_default_colors()
-    if 0:
-      assert(curses.COLORS == 256)
-      assert(curses.can_change_color() == 1)
-      assert(curses.has_colors() == 1)
-      app.log.detail("color_content:")
-      for i in range(0, curses.COLORS):
-        app.log.detail("color", i, ": ", curses.color_content(i))
-      for i in range(16, curses.COLORS):
-        curses.init_color(i, 500, 500, i * 787 % 1000)
-      app.log.detail("color_content, after:")
-      for i in range(0, curses.COLORS):
-        app.log.detail("color", i, ": ", curses.color_content(i))
-    if 1:
-      #rows, cols = self.cursesScreen.getmaxyx()
-      cursesWindow = self.cursesScreen
-      cursesWindow.leaveok(1)  # Don't update cursor position.
-      cursesWindow.scrollok(0)
-      cursesWindow.timeout(10)
-      cursesWindow.keypad(1)
-      self.top, self.left = cursesWindow.getyx()
-      self.rows, self.cols = cursesWindow.getmaxyx()
-      app.window.mainCursesWindow = cursesWindow
-    self.zOrder = []
+    self.showLogWindow = app.prefs.startup['showLogWindow']
+    self.debugWindow = DebugWindow(self)
+    self.debugUndoWindow = DebugUndoWindow(self)
+    self.logWindow = app.window.LogWindow(self)
+    self.popupWindow = app.window.PopupWindow(self)
+    self.paletteWindow = app.window.PaletteWindow(self)
+    self.inputWindow = app.window.InputWindow(self)
+    self.zOrder.append(self.inputWindow)
+    self.fileManagerWindow = app.file_manager_window.FileManagerWindow(self,
+        self.inputWindow)
+    self.zOrder.append(self.fileManagerWindow)
+    self.inputWindow.show()
 
-  def commandLoop(self):
-    # At startup, focus the main window (just to start somewhere).
-    self.focusedWindow = self.zOrder[-1]
+  def changeFocusTo(self, changeTo):
+    self.focusedWindow.controller.onChange()
+    self.focusedWindow.unfocus()
+    self.focusedWindow = changeTo
+    #self.focusedWindow.show()
     self.focusedWindow.focus()
-    # Cache the thread setting.
-    useBgThread = app.prefs.editor['useBgThread']
-    # Track the time needed to handle commands and render the UI.
-    # (A performance measurement).
-    self.mainLoopTime = 0
-    self.mainLoopTimePeak = 0
-    cursesWindow = app.window.mainCursesWindow
-    if app.prefs.startup['timeStartup']:
-      # When running a timing of the application startup, push a CTRL_Q onto the
-      # curses event messages to simulate a full startup with a GUI render.
-      curses.ungetch(17)
-    start = time.time()
-    # The first render, to get something on the screen.
-    if useBgThread:
-      self.bg.put((self, []))
-    else:
-      self.render()
-    # This is the 'main loop'. Execution doesn't leave this loop until the
-    # application is closing down.
-    while not self.exiting:
-      if useBgThread:
-        while self.bg.hasMessage():
-          frame = self.bg.get()
-          if frame[0] == 'exception':
-            for line in frame[1]:
-              userMessage(line[:-1])
-            self.exiting = True
-            return
-          self.refresh(frame[0], frame[1])
-      elif 1:
-        frame = app.render.frame.grabFrame()
-        self.refresh(frame[0], frame[1])
-      else:
-        profile = cProfile.Profile()
-        profile.enable()
-        self.refresh(frame[0], frame[1])
-        profile.disable()
-        output = StringIO.StringIO()
-        stats = pstats.Stats(profile, stream=output).sort_stats('cumulative')
-        stats.print_stats()
-        app.log.info(output.getvalue())
-      self.mainLoopTime = time.time() - start
-      if self.mainLoopTime > self.mainLoopTimePeak:
-        self.mainLoopTimePeak = self.mainLoopTime
-      # Gather several commands into a batch before doing a redraw.
-      # (A performance optimization).
-      cmdList = []
-      while not len(cmdList):
-        for i in range(5):
-          eventInfo = None
-          if self.exiting:
-            return
-          ch = cursesWindow.getch()
-          if ch == curses.ascii.ESC:
-            # Some keys are sent from the terminal as a sequence of bytes
-            # beginning with an Escape character. To help reason about these
-            # events (and apply event handler callback functions) the sequence
-            # is converted into tuple.
-            keySequence = []
-            n = cursesWindow.getch()
-            while n != curses.ERR:
-              keySequence.append(n)
-              n = cursesWindow.getch()
-            #app.log.info('sequence\n', keySequence)
-            # Check for Bracketed Paste Mode begin.
-            paste_begin = app.curses_util.BRACKETED_PASTE_BEGIN
-            if tuple(keySequence[:len(paste_begin)]) == paste_begin:
-              ch = app.curses_util.BRACKETED_PASTE
-              keySequence = keySequence[len(paste_begin):]
-              paste_end = (curses.ascii.ESC,) + app.curses_util.BRACKETED_PASTE_END
-              while tuple(keySequence[-len(paste_end):]) != paste_end:
-                #app.log.info('waiting in paste mode')
-                n = cursesWindow.getch()
-                if n != curses.ERR:
-                  keySequence.append(n)
-              keySequence = keySequence[:-(len(paste_end))]
-              #print 'keySequence', keySequence
-              eventInfo = ''.join([chr(i) for i in keySequence])
-            else:
-              ch = tuple(keySequence)
-            if not ch:
-              # The sequence was empty, so it looks like this Escape wasn't
-              # really the start of a sequence and is instead a stand-alone
-              # Escape. Just forward the esc.
-              ch = curses.ascii.ESC
-          elif 160 <= ch < 257:
-            # Start of utf-8 character.
-            u = None
-            if (ch & 0xe0) == 0xc0:
-              # Two byte utf-8.
-              b = cursesWindow.getch()
-              u = (chr(ch) + chr(b)).decode("utf-8")
-            elif (ch & 0xf0) == 0xe0:
-              # Three byte utf-8.
-              b = cursesWindow.getch()
-              c = cursesWindow.getch()
-              u = (chr(ch) + chr(b) + chr(c)).decode("utf-8")
-            elif (ch & 0xf8) == 0xf0:
-              # Four byte utf-8.
-              b = cursesWindow.getch()
-              c = cursesWindow.getch()
-              d = cursesWindow.getch()
-              u = (chr(ch) + chr(b) + chr(c) + chr(d)).decode("utf-8")
-            assert u is not None
-            eventInfo = u
-            ch = app.curses_util.UNICODE_INPUT
-          if ch == 0 and useBgThread:
-            # bg response.
-            frame = None
-            while self.bg.hasMessage():
-              frame = self.bg.get()
-              if frame[0] == 'exception':
-                for line in frame[1]:
-                  userMessage(line[:-1])
-                self.exiting = True
-                return
-            if frame is not None:
-              self.refresh(frame[0], frame[1])
-          elif ch != curses.ERR:
-            self.ch = ch
-            if ch == curses.KEY_MOUSE:
-              # On Ubuntu, Gnome terminal, curses.getmouse() may only be called
-              # once for each KEY_MOUSE. Subsequent calls will throw an
-              # exception. So getmouse is (only) called here and other parts of
-              # the code use the eventInfo list instead of calling getmouse.
-              self.debugMouseEvent = curses.getmouse()
-              eventInfo = (self.debugMouseEvent, time.time())
-            cmdList.append((ch, eventInfo))
-      start = time.time()
-      if len(cmdList):
-        if useBgThread:
-          self.bg.put((self, cmdList))
-        else:
-          self.executeCommandList(cmdList)
-          self.render()
+    self.focusedWindow.textBuffer.compoundChangePush()
+
+  def debugDraw(self, win):
+    if self.showLogWindow:
+      self.debugWindow.debugDraw(self.program, win)
+      self.debugUndoWindow.debugUndoDraw(win)
 
   def executeCommandList(self, cmdList):
     for cmd, eventInfo in cmdList:
@@ -249,186 +188,9 @@ class CiProgram(app.window.ActiveWindow):
         self.handleMouse(eventInfo)
       self.focusedWindow.controller.onChange()
 
-  def changeFocusTo(self, changeTo):
-    self.focusedWindow.controller.onChange()
-    self.focusedWindow.unfocus()
-    self.focusedWindow = changeTo
-    #self.focusedWindow.show()
+  def focus(self):
+    self.focusedWindow = self.zOrder[-1]
     self.focusedWindow.focus()
-    self.focusedWindow.textBuffer.compoundChangePush()
-
-  def getSelection(self):
-    """This is primarily for testing."""
-    tb = self.focusedWindow.textBuffer
-    return (tb.penRow, tb.penCol, tb.markerRow, tb.markerCol, tb.selectionMode)
-
-  def normalize(self):
-    self.presentModal(None)
-
-  def presentModal(self, changeTo, top=0, left=0):
-    if self.modalUi is not None:
-      #self.modalUi.controller.onChange()
-      self.modalUi.hide()
-    app.log.info('\n', changeTo)
-    self.modalUi = changeTo
-    if self.modalUi is not None:
-      self.modalUi.moveSizeToFit(top, left)
-      self.modalUi.show()
-
-  def startup(self):
-    """A second init-like function. Called after command line arguments are
-    parsed."""
-    if self.showLogWindow:
-      self.debugWindow = app.window.ViewWindow(self)
-      self.debugUndoWindow = app.window.ViewWindow(self)
-      self.logWindow = app.window.LogWindow(self)
-    else:
-      self.debugWindow = None
-      self.debugUndoWindow = None
-      self.logWindow = None
-    self.popupWindow = app.window.PopupWindow(self)
-    self.paletteWindow = app.window.PaletteWindow(self)
-    self.inputWindow = app.window.InputWindow(self)
-    self.zOrder.append(self.inputWindow)
-    if 1:
-      self.fileManagerWindow = app.file_manager_window.FileManagerWindow(self,
-          self.inputWindow)
-      self.zOrder.append(self.fileManagerWindow)
-      self.inputWindow.show()
-    self.layout()
-    self.inputWindow.startup()
-
-  def layout(self):
-    """Arrange the debug, log, and input windows."""
-    rows, cols = self.rows, self.cols
-    #app.log.detail('layout', rows, cols)
-    if self.showLogWindow:
-      inputWidth = min(88, cols)
-      debugWidth = max(cols - inputWidth - 1, 0)
-      debugRows = 20
-      self.debugWindow.reshape(debugRows, debugWidth, 0,
-          inputWidth + 1)
-      self.debugUndoWindow.reshape(rows - debugRows, debugWidth, debugRows,
-          inputWidth + 1)
-      self.logWindow.reshape(rows - debugRows, inputWidth, debugRows, 0)
-      rows = debugRows
-    else:
-      inputWidth = cols
-    count = len(self.zOrder)
-    if 1:  # Full screen.
-      count = 1
-    eachRows = rows / count
-    for i, window in enumerate(self.zOrder[:-1]):
-      window.reshape(eachRows, inputWidth, eachRows * i, 0)
-    self.zOrder[-1].reshape(rows - eachRows * (count - 1), inputWidth,
-        eachRows * (count - 1), 0)
-
-  def debugDraw(self, win):
-    """Draw real-time debug information to the screen."""
-    if not self.debugWindow:
-      return
-    textBuffer = win.textBuffer
-    y, x = win.top, win.left
-    maxRow, maxCol = win.rows, win.cols
-    self.debugWindow.writeLineRow = 0
-    intent = "noIntent"
-    try: intent = win.userIntent
-    except: pass
-    color = app.color.get('debug_window')
-    self.debugWindow.writeLine(
-        "   cRow %3d    cCol %2d goalCol %2d  %s"
-        %(win.textBuffer.penRow, win.textBuffer.penCol, win.textBuffer.goalCol,
-            intent),
-        color)
-    self.debugWindow.writeLine(
-        "   pRow %3d    pCol %2d chRow %4d"
-        %(textBuffer.penRow, textBuffer.penCol,
-            textBuffer.debugUpperChangedRow), color)
-    self.debugWindow.writeLine(
-        " mkrRow %3d  mkrCol %2d sm %d"
-        %(textBuffer.markerRow, textBuffer.markerCol,
-            textBuffer.selectionMode),
-        color)
-    self.debugWindow.writeLine(
-        "scrlRow %3d scrlCol %2d lines %3d"
-        %(win.scrollRow, win.scrollCol, len(textBuffer.lines)),
-        color)
-    self.debugWindow.writeLine(
-        "y %2d x %2d maxRow %d maxCol %d baud %d color %d"
-        %(y, x, maxRow, maxCol, curses.baudrate(), curses.can_change_color()),
-            color)
-    screenRows, screenCols = self.cursesScreen.getmaxyx()
-    self.debugWindow.writeLine(
-        "scr rows %d cols %d mlt %f/%f pt %f"
-        %(screenRows, screenCols, self.mainLoopTime, self.mainLoopTimePeak,
-            textBuffer.parserTime), color)
-    self.debugWindow.writeLine(
-        "ch %3s %s"
-        %(self.ch, app.curses_util.cursesKeyName(self.ch) or 'UNKNOWN'),
-        color)
-    self.debugWindow.writeLine("win %r"%(win,),
-        color)
-    self.debugWindow.writeLine("win %r"%(self.focusedWindow,),
-        color)
-    self.debugWindow.writeLine("tb %r"%(textBuffer,),
-        color)
-    (id, mouseCol, mouseRow, mouseZ, bState) = self.debugMouseEvent
-    self.debugWindow.writeLine(
-        "mouse id %d, mouseCol %d, mouseRow %d, mouseZ %d"
-        %(id, mouseCol, mouseRow, mouseZ), color)
-    self.debugWindow.writeLine(
-        "bState %s %d"
-        %(app.curses_util.mouseButtonName(bState), bState),
-            color)
-    self.debugWindow.writeLine(
-        "startAndEnd %r"
-        %(textBuffer.startAndEnd(),),
-            color)
-
-  def debugUndoDraw(self, win):
-    """Draw real-time debug information to the screen."""
-    if not self.debugUndoWindow:
-      return
-    textBuffer = win.textBuffer
-    y, x = win.top, win.left
-    maxRow, maxCol = win.rows, win.cols
-    self.debugUndoWindow.writeLineRow = 0
-    # Display some of the redo chain.
-    redoColorA = app.color.get(100)
-    self.debugUndoWindow.writeLine(
-        "procTemp %d temp %r"
-        %(textBuffer.processTempChange, textBuffer.tempChange,),
-        redoColorA)
-    self.debugUndoWindow.writeLine(
-        "redoIndex %3d savedAt %3d depth %3d"
-        %(textBuffer.redoIndex, textBuffer.savedAtRedoIndex,
-          len(textBuffer.redoChain)),
-        redoColorA)
-    redoColorB = app.color.get(101)
-    split = 8
-    for i in range(textBuffer.redoIndex - split, textBuffer.redoIndex):
-      text = i >= 0 and textBuffer.redoChain[i] or ''
-      self.debugUndoWindow.writeLine(text, redoColorB)
-    redoColorC = app.color.get(1)
-    for i in range(textBuffer.redoIndex, textBuffer.redoIndex + split - 1):
-      text = (i < len(textBuffer.redoChain) and
-          textBuffer.redoChain[i] or '')
-      self.debugUndoWindow.writeLine(text, redoColorC)
-
-  def debugWindowOrder(self):
-    app.log.info('debugWindowOrder')
-    def recurse(list, indent):
-      for i in list:
-        app.log.info(indent, i)
-        recurse(i.zOrder, indent + '  ')
-    recurse(self.zOrder, '  ')
-    app.log.info('top window', self.topWindow())
-
-  def topWindow(self):
-    top = self
-    while len(top.zOrder):
-      top = top.zOrder[-1]
-    return top
 
   def clickedNearby(self, row, col):
     y, x = self.priorClickRowCol
@@ -536,12 +298,281 @@ class CiProgram(app.window.ActiveWindow):
       # to the application to resize the curses terminal.
       rows, cols = app.curses_util.terminalSize()
       curses.resizeterm(rows, cols)
-    self.layout()
-    window.controller.onChange()
-    self.render()
     self.top, self.left = app.window.mainCursesWindow.getyx()
     self.rows, self.cols = app.window.mainCursesWindow.getmaxyx()
     self.layout()
+    window.controller.onChange()
+    self.render()
+
+  def layout(self):
+    """Arrange the debug, log, and input windows."""
+    rows, cols = self.rows, self.cols
+    #app.log.detail('layout', rows, cols)
+    if self.showLogWindow:
+      inputWidth = min(88, cols)
+      debugWidth = max(cols - inputWidth - 1, 0)
+      debugRows = 20
+      self.debugWindow.reshape(debugRows, debugWidth, 0,
+          inputWidth + 1)
+      self.debugUndoWindow.reshape(rows - debugRows, debugWidth, debugRows,
+          inputWidth + 1)
+      self.logWindow.reshape(rows - debugRows, inputWidth, debugRows, 0)
+      rows = debugRows
+    else:
+      inputWidth = cols
+    count = len(self.zOrder)
+    if 1:  # Full screen.
+      count = 1
+    eachRows = rows / count
+    for i, window in enumerate(self.zOrder[:-1]):
+      window.reshape(eachRows, inputWidth, eachRows * i, 0)
+    self.zOrder[-1].reshape(rows - eachRows * (count - 1), inputWidth,
+        eachRows * (count - 1), 0)
+
+  def quitNow(self):
+    self.program.quitNow()
+
+  def render(self):
+    if self.showLogWindow:
+      self.logWindow.render()
+    app.window.ActiveWindow.render(self)
+
+  def reshape(self, rows, cols, top, left):
+    app.window.ActiveWindow.reshape(self, rows, cols, top, left)
+    self.layout()
+
+  def unfocus(self):
+    pass
+
+
+class CiProgram(app.window.ActiveWindow):
+  """This is the main editor program. It holds top level information and runs
+  the main loop. The CiProgram is intended as a singleton.
+  In some aspects, the program acts as a top level window, even though it's not
+  exactly a window."""
+  def __init__(self, cursesScreen):
+    self.clicks = 0
+    self.debugMouseEvent = (0, 0, 0, 0, 0)
+    self.exiting = False
+    self.modalUi = None
+    self.cursesScreen = cursesScreen
+    self.ch = 0
+    curses.mousemask(-1)
+    curses.mouseinterval(0)
+    # Enable mouse tracking in xterm.
+    sys.stdout.write('\033[?1002;h\n')
+    #sys.stdout.write('\033[?1005;h\n')
+    curses.meta(1)
+    # Access ^c before shell does.
+    curses.raw()
+    # Enable Bracketed Paste Mode.
+    sys.stdout.write('\033[?2004;h\n')
+    #curses.start_color()
+    curses.use_default_colors()
+    if 0:
+      assert(curses.COLORS == 256)
+      assert(curses.can_change_color() == 1)
+      assert(curses.has_colors() == 1)
+      app.log.detail("color_content:")
+      for i in range(0, curses.COLORS):
+        app.log.detail("color", i, ": ", curses.color_content(i))
+      for i in range(16, curses.COLORS):
+        curses.init_color(i, 500, 500, i * 787 % 1000)
+      app.log.detail("color_content, after:")
+      for i in range(0, curses.COLORS):
+        app.log.detail("color", i, ": ", curses.color_content(i))
+    if 1:
+      #rows, cols = self.cursesScreen.getmaxyx()
+      cursesWindow = self.cursesScreen
+      cursesWindow.leaveok(1)  # Don't update cursor position.
+      cursesWindow.scrollok(0)
+      cursesWindow.timeout(10)
+      cursesWindow.keypad(1)
+      app.window.mainCursesWindow = cursesWindow
+    self.zOrder = []
+
+  def commandLoop(self):
+    # Cache the thread setting.
+    useBgThread = app.prefs.editor['useBgThread']
+    # Track the time needed to handle commands and render the UI.
+    # (A performance measurement).
+    self.mainLoopTime = 0
+    self.mainLoopTimePeak = 0
+    cursesWindow = app.window.mainCursesWindow
+    if app.prefs.startup['timeStartup']:
+      # When running a timing of the application startup, push a CTRL_Q onto the
+      # curses event messages to simulate a full startup with a GUI render.
+      curses.ungetch(17)
+    start = time.time()
+    # The first render, to get something on the screen.
+    if useBgThread:
+      self.bg.put((self.programWindow, []))
+    else:
+      self.render()
+    # This is the 'main loop'. Execution doesn't leave this loop until the
+    # application is closing down.
+    while not self.exiting:
+      if useBgThread:
+        while self.bg.hasMessage():
+          frame = self.bg.get()
+          if frame[0] == 'exception':
+            for line in frame[1]:
+              userMessage(line[:-1])
+            self.exiting = True
+            return
+          self.refresh(frame[0], frame[1])
+      elif 1:
+        frame = app.render.frame.grabFrame()
+        self.refresh(frame[0], frame[1])
+      else:
+        profile = cProfile.Profile()
+        profile.enable()
+        self.refresh(frame[0], frame[1])
+        profile.disable()
+        output = StringIO.StringIO()
+        stats = pstats.Stats(profile, stream=output).sort_stats('cumulative')
+        stats.print_stats()
+        app.log.info(output.getvalue())
+      self.mainLoopTime = time.time() - start
+      if self.mainLoopTime > self.mainLoopTimePeak:
+        self.mainLoopTimePeak = self.mainLoopTime
+      # Gather several commands into a batch before doing a redraw.
+      # (A performance optimization).
+      cmdList = []
+      while not len(cmdList):
+        for i in range(5):
+          eventInfo = None
+          if self.exiting:
+            return
+          ch = cursesWindow.getch()
+          if ch == curses.ascii.ESC:
+            # Some keys are sent from the terminal as a sequence of bytes
+            # beginning with an Escape character. To help reason about these
+            # events (and apply event handler callback functions) the sequence
+            # is converted into tuple.
+            keySequence = []
+            n = cursesWindow.getch()
+            while n != curses.ERR:
+              keySequence.append(n)
+              n = cursesWindow.getch()
+            #app.log.info('sequence\n', keySequence)
+            # Check for Bracketed Paste Mode begin.
+            paste_begin = app.curses_util.BRACKETED_PASTE_BEGIN
+            if tuple(keySequence[:len(paste_begin)]) == paste_begin:
+              ch = app.curses_util.BRACKETED_PASTE
+              keySequence = keySequence[len(paste_begin):]
+              paste_end = (
+                  curses.ascii.ESC,) + app.curses_util.BRACKETED_PASTE_END
+              while tuple(keySequence[-len(paste_end):]) != paste_end:
+                #app.log.info('waiting in paste mode')
+                n = cursesWindow.getch()
+                if n != curses.ERR:
+                  keySequence.append(n)
+              keySequence = keySequence[:-(len(paste_end))]
+              #print 'keySequence', keySequence
+              eventInfo = ''.join([chr(i) for i in keySequence])
+            else:
+              ch = tuple(keySequence)
+            if not ch:
+              # The sequence was empty, so it looks like this Escape wasn't
+              # really the start of a sequence and is instead a stand-alone
+              # Escape. Just forward the esc.
+              ch = curses.ascii.ESC
+          elif 160 <= ch < 257:
+            # Start of utf-8 character.
+            u = None
+            if (ch & 0xe0) == 0xc0:
+              # Two byte utf-8.
+              b = cursesWindow.getch()
+              u = (chr(ch) + chr(b)).decode("utf-8")
+            elif (ch & 0xf0) == 0xe0:
+              # Three byte utf-8.
+              b = cursesWindow.getch()
+              c = cursesWindow.getch()
+              u = (chr(ch) + chr(b) + chr(c)).decode("utf-8")
+            elif (ch & 0xf8) == 0xf0:
+              # Four byte utf-8.
+              b = cursesWindow.getch()
+              c = cursesWindow.getch()
+              d = cursesWindow.getch()
+              u = (chr(ch) + chr(b) + chr(c) + chr(d)).decode("utf-8")
+            assert u is not None
+            eventInfo = u
+            ch = app.curses_util.UNICODE_INPUT
+          if ch == 0 and useBgThread:
+            # bg response.
+            frame = None
+            while self.bg.hasMessage():
+              frame = self.bg.get()
+              if frame[0] == 'exception':
+                for line in frame[1]:
+                  userMessage(line[:-1])
+                self.exiting = True
+                return
+            if frame is not None:
+              self.refresh(frame[0], frame[1])
+          elif ch != curses.ERR:
+            self.ch = ch
+            if ch == curses.KEY_MOUSE:
+              # On Ubuntu, Gnome terminal, curses.getmouse() may only be called
+              # once for each KEY_MOUSE. Subsequent calls will throw an
+              # exception. So getmouse is (only) called here and other parts of
+              # the code use the eventInfo list instead of calling getmouse.
+              self.debugMouseEvent = curses.getmouse()
+              eventInfo = (self.debugMouseEvent, time.time())
+            cmdList.append((ch, eventInfo))
+      start = time.time()
+      if len(cmdList):
+        if useBgThread:
+          self.bg.put((self.programWindow, cmdList))
+        else:
+          self.programWindow.executeCommandList(cmdList)
+          self.render()
+
+  def getSelection(self):
+    """This is primarily for testing."""
+    tb = self.programWindow.focusedWindow.textBuffer
+    return (tb.penRow, tb.penCol, tb.markerRow, tb.markerCol, tb.selectionMode)
+
+  def normalize(self):
+    self.presentModal(None)
+
+  def presentModal(self, changeTo, top=0, left=0):
+    if self.modalUi is not None:
+      #self.modalUi.controller.onChange()
+      self.modalUi.hide()
+    app.log.info('\n', changeTo)
+    self.modalUi = changeTo
+    if self.modalUi is not None:
+      self.modalUi.moveSizeToFit(top, left)
+      self.modalUi.show()
+
+  def startup(self):
+    """A second init-like function. Called after command line arguments are
+    parsed."""
+    self.programWindow = ProgramWindow(self)
+    top, left = app.window.mainCursesWindow.getyx()
+    rows, cols = app.window.mainCursesWindow.getmaxyx()
+    self.programWindow.reshape(rows, cols, top, left)
+    self.programWindow.inputWindow.startup()
+    self.programWindow.focus()
+
+  """
+  def debugWindowOrder(self):
+    app.log.info('debugWindowOrder')
+    def recurse(list, indent):
+      for i in list:
+        app.log.info(indent, i)
+        recurse(i.zOrder, indent + '  ')
+    recurse(self.zOrder, '  ')
+    app.log.info('top window', self.topWindow())
+
+  def topWindow(self):
+    top = self
+    while len(top.zOrder):
+      top = top.zOrder[-1]
+    return top
+  """
 
   def parseArgs(self):
     """Interpret the command line arguments."""
@@ -620,13 +651,6 @@ class CiProgram(app.window.ActiveWindow):
     }
     self.showLogWindow = showLogWindow
 
-  def quit(self):
-    """Determine whether it's ok to quit. quitNow() will be called if it
-        looks ok to quit."""
-    app.log.info()
-    assert False
-    self.exiting = True
-
   def quitNow(self):
     """Set the intent to exit the program. The actual exit will occur a bit
     later."""
@@ -656,13 +680,6 @@ class CiProgram(app.window.ActiveWindow):
         cursesWindow.leaveok(1)  # Don't update cursor position.
       except:
         pass
-
-  def render(self):
-    """Repaint stacked windows, furthest to nearest in the background thread."""
-    if self.showLogWindow:
-      self.logWindow.render()
-    for k in self.zOrder:
-      k.render()
 
   def makeHomeDirs(self, homePath):
     try:
@@ -698,7 +715,7 @@ class CiProgram(app.window.ActiveWindow):
     else:
       self.commandLoop()
     if app.prefs.editor['useBgThread']:
-      self.bg.put((self, 'quit'))
+      self.bg.put((self.programWindow, 'quit'))
       self.bg.join()
 
   def setUpPalette(self):

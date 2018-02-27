@@ -62,6 +62,7 @@ class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
         CTRL_Q])
 
   def test_whole_screen(self):
+    #self.setMovieMode(True)
     self.runWithTestFile([
         self.displayCheck(0, 0, [
             " ci     .                               ",

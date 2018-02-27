@@ -102,7 +102,7 @@ class Controller:
     while view is not None:
       if hasattr(view, windowName):
         view.changeFocusTo(getattr(view, windowName));
-      view = view.host
+      view = view.parent
     app.log.error(windowName + ' not found');
 
   def focus(self):
