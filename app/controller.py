@@ -85,6 +85,9 @@ class Controller:
   def changeToSaveAs(self):
     self.view.host.changeFocusTo(self.view.host.interactiveSaveAs)
 
+  def createNewTextBuffer(self):
+    self.view.setTextBuffer(app.buffer_manager.buffers.newTextBuffer())
+
   def doCommand(self, ch, meta):
     # Check the commandSet for the input with both its string and integer
     # representation.

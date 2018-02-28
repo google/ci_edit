@@ -84,6 +84,7 @@ def mainWindowCommands(controller, textBuffer):
     CTRL_G: controller.changeToGoto,
     CTRL_I: textBuffer.indent,
     CTRL_J: textBuffer.carriageReturn,
+    CTRL_N: controller.createNewTextBuffer,
     CTRL_O: controller.changeToFileManagerWindow,
     CTRL_Q: controller.initiateQuit,
     CTRL_R: controller.changeToFindPrior,
@@ -157,6 +158,7 @@ class InteractiveFind(app.editor.InteractiveFind):
       CTRL_F: self.findNext,
       CTRL_G: self.findNext,
       CTRL_J: self.changeToHostWindow,
+      CTRL_N: self.saveEventChangeToHostWindow,
       CTRL_O: self.changeToFileManagerWindow,
       CTRL_P: self.changeToPrediction,
       CTRL_R: self.findPrior,
@@ -184,6 +186,7 @@ class InteractiveGoto(app.editor.InteractiveGoto):
       KEY_F1: self.info,
       CTRL_F: self.changeToFind,
       CTRL_J: self.changeToHostWindow,
+      CTRL_N: self.saveEventChangeToHostWindow,
       CTRL_P: self.changeToPrediction,
       ord('b'): self.gotoBottom,
       ord('B'): self.gotoBottom,
@@ -236,7 +239,7 @@ class FileOpener(app.file_manager_controller.FileManagerController):
       KEY_UP: self.passEventToDirectoryList,
       CTRL_I: self.tabCompleteExtend,
       CTRL_J: self.whatToCallThis,
-      CTRL_N: self.whatToCallThis,
+      CTRL_N: self.saveEventChangeToInputWindow,
       CTRL_O: self.whatToCallThis,
       CTRL_P: self.changeToPrediction,
       CTRL_Q: self.saveEventChangeToInputWindow,
@@ -283,6 +286,7 @@ class InteractivePrompt(app.interactive_prompt.InteractivePrompt):
       KEY_ESCAPE: self.changeToHostWindow,
       KEY_F1: self.info,
       CTRL_J: self.execute,
+      CTRL_N: self.saveEventChangeToHostWindow,
     })
     self.commandSet = commandSet
     self.commandDefault = self.textBuffer.insertPrintable
