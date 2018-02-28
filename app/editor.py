@@ -97,8 +97,11 @@ class InteractivePrediction(app.controller.Controller):
     file, ext = os.path.splitext(fileName)
     # TODO(dschuyler): rework this ignore list.
     ignoreExt = set(('.pyc', '.pyo', '.o', '.obj', '.tgz', '.zip', '.tar',))
-    contents = os.listdir(
-        os.path.expandvars(os.path.expanduser(dirPath)) or '.')
+    try:
+      contents = os.listdir(
+          os.path.expandvars(os.path.expanduser(dirPath)) or '.')
+    except OSError:
+      contents = []
     contents.sort()
     for i in contents:
       f, e = os.path.splitext(i)
