@@ -143,10 +143,10 @@ class ViewWindow:
     for child in self.zOrder:
       child.render()
 
-  def reshape(self, rows, cols, top, left):
+  def reshape(self, top, left, rows, cols):
     self.moveTo(top, left)
     self.resizeTo(rows, cols)
-    app.log.debug(self, rows, cols, top, left)
+    app.log.debug(self, top, left, rows, cols)
 
   def resizeTo(self, rows, cols):
     #app.log.detail(rows, cols, self)
@@ -306,12 +306,12 @@ class LabeledLine(Window):
     self.leftColumn.addStr(0, 0, self.label, app.color.get('keyword'))
     Window.render(self)
 
-  def reshape(self, rows, cols, top, left):
-    app.log.debug(self, rows, cols, top, left)
+  def reshape(self, top, left, rows, cols):
+    app.log.debug(self, top, left, rows, cols)
     labelWidth = len(self.label)
-    Window.reshape(self, rows, max(0, cols - labelWidth), top,
-        left + labelWidth)
-    self.leftColumn.reshape(rows, labelWidth, top, left)
+    Window.reshape(self, top,
+        left + labelWidth, rows, max(0, cols - labelWidth))
+    self.leftColumn.reshape(top, left, rows, labelWidth)
 
   def setController(self, controllerClass):
     #app.log.caller('                        ',self.textBuffer)
@@ -320,7 +320,7 @@ class LabeledLine(Window):
 
   def setLabel(self, label):
     self.label = label
-    self.reshape(self.rows, self.cols, self.top, self.left)
+    self.reshape(self.top, self.left, self.rows, self.cols)
 
   def unfocus(self):
     self.blank(app.color.get('message_line'))
@@ -361,7 +361,7 @@ class Menu(ViewWindow):
     for i in self.lines:
       if len(i) > longest:
         longest = len(i)
-    self.reshape(len(self.lines), longest + 2, left, top)
+    self.reshape(left, top, len(self.lines), longest + 2)
 
   def render(self):
     color = app.color.get('context_menu')
@@ -518,11 +518,11 @@ class InteractiveFind(Window):
     self.controller = app.cu_editor.InteractiveFind(self,
         self.findLine.textBuffer)
 
-  def reshape(self, rows, cols, top, left):
-    Window.reshape(self, rows, cols, top, left)
-    self.findLine.reshape(1, cols, top, left)
+  def reshape(self, top, left, rows, cols):
+    Window.reshape(self, top, left, rows, cols)
+    self.findLine.reshape(top, left, 1, cols)
     top += 1
-    self.replaceLine.reshape(1, cols, top, left)
+    self.replaceLine.reshape(top, left, 1, cols)
 
 
 class MessageLine(ViewWindow):
@@ -672,9 +672,9 @@ class TopInfo(ViewWindow):
     for i in range(len(lines), self.rows):
       self.addStr(i, 0, ' ' * self.cols, color)
 
-  def reshape(self, rows, cols, top, left):
+  def reshape(self, top, left, rows, cols):
     self.borrowedRows = 0
-    ViewWindow.reshape(self, rows, cols, top, left)
+    ViewWindow.reshape(self, top, left, rows, cols)
 
 
 class InputWindow(Window):
@@ -793,56 +793,56 @@ class InputWindow(Window):
       self.textBuffer.selectText(openToLine - 1, 0, 0,
           app.selectable.kSelectionNone)
 
-  def reshape(self, rows, cols, top, left):
+  def reshape(self, top, left, rows, cols):
     """Change self and sub-windows to fit within the given rectangle."""
-    app.log.detail(rows, cols, top, left)
-    Window.reshape(self, rows, cols, top, left)
-    self.outerShape = (rows, cols, top, left)
+    app.log.detail(top, left, rows, cols)
+    Window.reshape(self, top, left, rows, cols)
+    self.outerShape = (top, left, rows, cols)
     self.layout()
 
   def layout(self):
     """Change self and sub-windows to fit within the given rectangle."""
     app.log.info()
-    rows, cols, top, left = self.outerShape
+    top, left, rows, cols = self.outerShape
     lineNumbersCols = 7
     topRows = self.topRows
     bottomRows = self.bottomRows
 
     if self.showTopInfo and rows > topRows and cols > lineNumbersCols:
-      self.topInfo.reshape(topRows, cols - lineNumbersCols, top,
-          left + lineNumbersCols)
+      self.topInfo.reshape(top,
+          left + lineNumbersCols, topRows, cols - lineNumbersCols)
       top += topRows
       rows -= topRows
     rows -= bottomRows
     bottomFirstRow = top + rows
 
-    self.confirmClose.reshape(bottomRows, cols, bottomFirstRow, left)
-    self.confirmOverwrite.reshape(bottomRows, cols, bottomFirstRow, left)
-    self.interactivePrediction.reshape(bottomRows, cols, bottomFirstRow, left)
-    self.interactivePrompt.reshape(bottomRows, cols, bottomFirstRow, left)
-    self.interactiveQuit.reshape(bottomRows, cols, bottomFirstRow, left)
-    self.interactiveSaveAs.reshape(bottomRows, cols, bottomFirstRow, left)
+    self.confirmClose.reshape(bottomFirstRow, left, bottomRows, cols)
+    self.confirmOverwrite.reshape(bottomFirstRow, left, bottomRows, cols)
+    self.interactivePrediction.reshape(bottomFirstRow, left, bottomRows, cols)
+    self.interactivePrompt.reshape(bottomFirstRow, left, bottomRows, cols)
+    self.interactiveQuit.reshape(bottomFirstRow, left, bottomRows, cols)
+    self.interactiveSaveAs.reshape(bottomFirstRow, left, bottomRows, cols)
     if self.showMessageLine:
-      self.messageLine.reshape(bottomRows, cols, bottomFirstRow, left)
+      self.messageLine.reshape(bottomFirstRow, left, bottomRows, cols)
     if self.useInteractiveFind:
-      self.interactiveFind.reshape(bottomRows, cols, bottomFirstRow, left)
+      self.interactiveFind.reshape(bottomFirstRow, left, bottomRows, cols)
     if 1:
-      self.interactiveGoto.reshape(bottomRows, cols, bottomFirstRow,
-          left)
+      self.interactiveGoto.reshape(bottomFirstRow,
+          left, bottomRows, cols)
     if self.showFooter and rows > 0:
-      self.statusLine.reshape(self.statusLineCount, cols,
-          bottomFirstRow - self.statusLineCount, left)
+      self.statusLine.reshape(
+          bottomFirstRow - self.statusLineCount, left, self.statusLineCount, cols)
       rows -= self.statusLineCount
     if self.showLineNumbers and cols > lineNumbersCols:
-      self.lineNumberColumn.reshape(rows, lineNumbersCols, top, left)
+      self.lineNumberColumn.reshape(top, left, rows, lineNumbersCols)
       cols -= lineNumbersCols
       left += lineNumbersCols
     if self.showRightColumn and cols > 0:
-      self.rightColumn.reshape(rows, 1, top, left + cols - 1)
+      self.rightColumn.reshape(top, left + cols - 1, rows, 1)
       cols -= 1
     # The top, left of the main window is the rows, cols of the logo corner.
-    self.logoCorner.reshape(top, left, 0, 0)
-    Window.reshape(self, rows, cols, top, left)
+    self.logoCorner.reshape(0, 0, top, left)
+    Window.reshape(self, top, left, rows, cols)
 
   def drawLogoCorner(self):
     """."""

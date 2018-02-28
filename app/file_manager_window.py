@@ -71,13 +71,13 @@ class DirectoryList(app.window.Window):
       self.optionsRow.addSortHeader(key, self.opt, size)
     self.optionsRow.setParent(self, 0)
 
-  def reshape(self, rows, cols, top, left):
+  def reshape(self, top, left, rows, cols):
     """Change self and sub-windows to fit within the given rectangle."""
-    app.log.detail('reshape', rows, cols, top, left)
-    self.optionsRow.reshape(1, cols, top, left)
+    app.log.detail('reshape', top, left, rows, cols)
+    self.optionsRow.reshape(top, left, 1, cols)
     top += 1
     rows -= 1
-    app.window.Window.reshape(self, rows, cols, top, left)
+    app.window.Window.reshape(self, top, left, rows, cols)
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
     row = self.scrollRow + paneRow
@@ -164,21 +164,21 @@ class FileManagerWindow(app.window.Window):
     app.log.debug()
     self.host.quitNow()
 
-  def reshape(self, rows, cols, top, left):
+  def reshape(self, top, left, rows, cols):
     """Change self and sub-windows to fit within the given rectangle."""
-    app.log.detail('reshape', rows, cols, top, left)
+    app.log.detail('reshape', top, left, rows, cols)
     originalRows = rows
-    self.titleRow.reshape(1, cols, top, left)
+    self.titleRow.reshape(top, left, 1, cols)
     top += 1
     rows -= 1
-    app.window.Window.reshape(self, 1, cols, top, left)
+    app.window.Window.reshape(self, top, left, 1, cols)
     top += 1
     rows -= 1
-    self.optionsRow.reshape(1, cols, originalRows - 2, left)
+    self.optionsRow.reshape(originalRows - 2, left, 1, cols)
     rows -= 2
-    #self.statusLine.reshape(1, cols, originalRows - 2, left)
+    #self.statusLine.reshape(originalRows - 2, left, 1, cols)
     #rows -= 2
-    self.directoryList.reshape(rows, cols, top, left)
+    self.directoryList.reshape(top, left, rows, cols)
 
   def setTextBuffer(self, textBuffer):
     textBuffer.lineLimitIndicator = 0

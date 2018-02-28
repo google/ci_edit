@@ -312,11 +312,11 @@ class ProgramWindow(app.window.ActiveWindow):
       inputWidth = min(88, cols)
       debugWidth = max(cols - inputWidth - 1, 0)
       debugRows = 20
-      self.debugWindow.reshape(debugRows, debugWidth, 0,
-          inputWidth + 1)
-      self.debugUndoWindow.reshape(rows - debugRows, debugWidth, debugRows,
-          inputWidth + 1)
-      self.logWindow.reshape(rows - debugRows, inputWidth, debugRows, 0)
+      self.debugWindow.reshape(0,
+          inputWidth + 1, debugRows, debugWidth)
+      self.debugUndoWindow.reshape(debugRows,
+          inputWidth + 1, rows - debugRows, debugWidth)
+      self.logWindow.reshape(debugRows, 0, rows - debugRows, inputWidth)
       rows = debugRows
     else:
       inputWidth = cols
@@ -325,9 +325,9 @@ class ProgramWindow(app.window.ActiveWindow):
       count = 1
     eachRows = rows / count
     for i, window in enumerate(self.zOrder[:-1]):
-      window.reshape(eachRows, inputWidth, eachRows * i, 0)
-    self.zOrder[-1].reshape(rows - eachRows * (count - 1), inputWidth,
-        eachRows * (count - 1), 0)
+      window.reshape(eachRows * i, 0, eachRows, inputWidth)
+    self.zOrder[-1].reshape(
+        eachRows * (count - 1), 0, rows - eachRows * (count - 1), inputWidth)
 
   def quitNow(self):
     self.program.quitNow()
@@ -337,8 +337,8 @@ class ProgramWindow(app.window.ActiveWindow):
       self.logWindow.render()
     app.window.ActiveWindow.render(self)
 
-  def reshape(self, rows, cols, top, left):
-    app.window.ActiveWindow.reshape(self, rows, cols, top, left)
+  def reshape(self, top, left, rows, cols):
+    app.window.ActiveWindow.reshape(self, top, left, rows, cols)
     self.layout()
 
   def unfocus(self):
@@ -553,7 +553,7 @@ class CiProgram(app.window.ActiveWindow):
     self.programWindow = ProgramWindow(self)
     top, left = app.window.mainCursesWindow.getyx()
     rows, cols = app.window.mainCursesWindow.getmaxyx()
-    self.programWindow.reshape(rows, cols, top, left)
+    self.programWindow.reshape(top, left, rows, cols)
     self.programWindow.inputWindow.startup()
     self.programWindow.focus()
 
