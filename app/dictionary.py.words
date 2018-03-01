@@ -92,6 +92,7 @@ fstat
 fstatvfs
 fsync
 ftruncate
+getattr
 getch
 getcheckinterval
 getcwd
@@ -342,3 +343,4 @@ wuntraced
 xclip
 xrange
 xsel
+hasattr
