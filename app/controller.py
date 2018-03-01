@@ -100,6 +100,15 @@ class Controller:
       self.commandDefault(ch, meta)
     self.textBuffer.compoundChangePush()
 
+  def getNamedWindow(self, windowName):
+    view = self.view
+    while view is not None:
+      if hasattr(view, windowName):
+        return getattr(view, windowName);
+      view = view.parent
+    app.log.error(windowName + ' not found');
+    return None
+
   def findAndChangeTo(self, windowName):
     view = self.view
     while view is not None:
