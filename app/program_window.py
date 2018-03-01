@@ -24,9 +24,14 @@ import app.window
 
 
 class ProgramWindow(app.window.ActiveWindow):
-  """The outermost window."""
+  """The outermost window. This window doesn't draw content itself. It is
+  primarily a container the child windows that make up the UI. The program
+  window is expected to be a singleton. The program window has no parent (the
+  parent is None). Calls that propagate up the window tree stop here or jump
+  over to the |program|."""
   def __init__(self, program):
     app.window.ActiveWindow.__init__(self, None)
+    self.modalUi = None
     self.program = program
     self.priorClick = 0
     self.savedMouseButton1Down = False
@@ -209,6 +214,19 @@ class ProgramWindow(app.window.ActiveWindow):
       window.reshape(eachRows * i, 0, eachRows, inputWidth)
     self.zOrder[-1].reshape(
         eachRows * (count - 1), 0, rows - eachRows * (count - 1), inputWidth)
+
+  def normalize(self):
+    self.presentModal(None)
+
+  def presentModal(self, changeTo, top=0, left=0):
+    if self.modalUi is not None:
+      #self.modalUi.controller.onChange()
+      self.modalUi.hide()
+    app.log.info('\n', changeTo)
+    self.modalUi = changeTo
+    if self.modalUi is not None:
+      self.modalUi.moveSizeToFit(top, left)
+      self.modalUi.show()
 
   def quitNow(self):
     self.program.quitNow()

@@ -46,13 +46,11 @@ def userMessage(*args):
 class CiProgram:
   """This is the main editor program. It holds top level information and runs
   the main loop. The CiProgram is intended as a singleton.
-  In some aspects, the program acts as a top level window, even though it's not
-  exactly a window."""
+  The program interacts with a single top-level ProgramWindow."""
   def __init__(self, cursesScreen):
     self.clicks = 0
     self.debugMouseEvent = (0, 0, 0, 0, 0)
     self.exiting = False
-    self.modalUi = None
     self.cursesScreen = cursesScreen
     self.ch = 0
     curses.mousemask(-1)
@@ -227,24 +225,6 @@ class CiProgram:
           self.programWindow.executeCommandList(cmdList)
           self.render()
 
-  def getSelection(self):
-    """This is primarily for testing."""
-    tb = self.programWindow.focusedWindow.textBuffer
-    return (tb.penRow, tb.penCol, tb.markerRow, tb.markerCol, tb.selectionMode)
-
-  def normalize(self):
-    self.presentModal(None)
-
-  def presentModal(self, changeTo, top=0, left=0):
-    if self.modalUi is not None:
-      #self.modalUi.controller.onChange()
-      self.modalUi.hide()
-    app.log.info('\n', changeTo)
-    self.modalUi = changeTo
-    if self.modalUi is not None:
-      self.modalUi.moveSizeToFit(top, left)
-      self.modalUi.show()
-
   def startup(self):
     """A second init-like function. Called after command line arguments are
     parsed."""
@@ -254,23 +234,6 @@ class CiProgram:
     self.programWindow.reshape(top, left, rows, cols)
     self.programWindow.inputWindow.startup()
     self.programWindow.focus()
-
-  """
-  def debugWindowOrder(self):
-    app.log.info('debugWindowOrder')
-    def recurse(list, indent):
-      for i in list:
-        app.log.info(indent, i)
-        recurse(i.zOrder, indent + '  ')
-    recurse(self.zOrder, '  ')
-    app.log.info('top window', self.topWindow())
-
-  def topWindow(self):
-    top = self
-    while len(top.zOrder):
-      top = top.zOrder[-1]
-    return top
-  """
 
   def parseArgs(self):
     """Interpret the command line arguments."""
@@ -356,7 +319,7 @@ class CiProgram:
     self.exiting = True
 
   def refresh(self, drawList, cursor):
-    """Repaint stacked windows, furthest to nearest in the main thread."""
+    """Paint the drawList to the screen in the main thread."""
     # Ask curses to hold the back buffer until curses refresh().
     cursesWindow = app.window.mainCursesWindow
     cursesWindow.noutrefresh()
@@ -441,6 +404,27 @@ class CiProgram:
     else:
       raise Exception('unknown palette color count ' +
                       repr(app.prefs.startup['numColors']))
+
+  if 1:  # For unit tests/debugging.
+    def debugWindowOrder(self):
+      app.log.info('debugWindowOrder')
+      def recurse(list, indent):
+        for i in list:
+          app.log.info(indent, i)
+          recurse(i.zOrder, indent + '  ')
+      recurse(self.zOrder, '  ')
+      app.log.info('top window', self.topWindow())
+
+    def getSelection(self):
+      """This is primarily for testing."""
+      tb = self.programWindow.focusedWindow.textBuffer
+      return (tb.penRow, tb.penCol, tb.markerRow, tb.markerCol, tb.selectionMode)
+
+    def topWindow(self):
+      top = self
+      while len(top.zOrder):
+        top = top.zOrder[-1]
+      return top
 
 def wrapped_ci(cursesScreen):
   try:
