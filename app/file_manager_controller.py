@@ -139,7 +139,7 @@ class FileManagerController(app.controller.Controller):
   def __init__(self, view):
     app.controller.Controller.__init__(self, view, 'FileManagerController')
 
-  def performOpen(self):
+  def performPrimaryAction(self):
     row = self.view.directoryList.textBuffer.penRow
     if row == 0:
       if not os.path.isdir(self.view.getPath()):
