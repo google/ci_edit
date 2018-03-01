@@ -942,19 +942,21 @@ class OptionsRow(ViewWindow):
         assert name in reference
     if self.group is not None:
       self.group.append(len(self.controlList))
-    self.controlList.append({
-        'draw': draw,
-        'type': kind,
-        'name': name,
-        'dict': reference,
-        'sep': sep,
-        'width': width if width is not None else len(name) + extraWidth
-        })
+    element = {
+      'draw': draw,
+      'type': kind,
+      'name': name,
+      'dict': reference,
+      'sep': sep,
+      'width': width if width is not None else len(name) + extraWidth
+    }
+    self.controlList.append(element)
+    return element
 
   def addLabel(self, name, width=None, sep=" "):
     def draw(control):
       return control['name']
-    self.addElement(draw, 'label', name, None, width, sep)
+    return self.addElement(draw, 'label', name, None, width, sep)
 
   def addSortHeader(self, name, reference, width=None, sep=" |"):
     def draw(control):
