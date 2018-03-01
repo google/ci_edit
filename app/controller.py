@@ -83,7 +83,9 @@ class Controller:
     self.findAndChangeTo('interactiveQuit')
 
   def changeToSaveAs(self):
-    self.view.host.changeFocusTo(self.view.host.interactiveSaveAs)
+    view = self.getNamedWindow('fileManagerWindow')
+    view.setMode('saveAs')
+    view.changeFocusTo(view);
 
   def createNewTextBuffer(self):
     self.view.setTextBuffer(app.buffer_manager.buffers.newTextBuffer())
@@ -188,7 +190,7 @@ class Controller:
         return
       tb.fileWrite()
       return
-    self.view.changeFocusTo(self.view.interactiveSaveAs)
+    self.changeToSaveAs()
 
   def overwriteHostFile(self):
     """Close the current file and switch to another or create an empty file."""

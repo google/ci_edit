@@ -138,16 +138,21 @@ class FileManagerController(app.controller.Controller):
   """
   def __init__(self, view):
     app.controller.Controller.__init__(self, view, 'FileManagerController')
+    self.primaryActions = {
+      'open': self.doCreateOrOpen,
+      'saveAs': self.doSaveAs,
+      'selectDir': self.doSelectDir,
+    }
 
   def performPrimaryAction(self):
     row = self.view.directoryList.textBuffer.penRow
     if row == 0:
       if not os.path.isdir(self.view.getPath()):
-        self.createOrOpen()
+        self.primaryActions[self.view.mode]()
     else:
       self.view.directoryList.controller.openFileOrDir(row)
 
-  def createOrOpen(self):
+  def doCreateOrOpen(self):
     path = self.textBuffer.lines[0]
     if not os.access(path, os.R_OK):
       if os.path.isfile(path):
@@ -157,8 +162,24 @@ class FileManagerController(app.controller.Controller):
         self.view.host.inputWindow)
     assert textBuffer.parser
     self.view.host.inputWindow.setTextBuffer(textBuffer)
-    self.changeToInputWindow()
     self.view.textBuffer.replaceLines(('',))
+    self.changeToInputWindow()
+
+  def doSaveAs(self):
+    path = self.textBuffer.lines[0]
+    tb = self.view.host.inputWindow.textBuffer
+    tb.setFilePath(path);
+    self.changeToInputWindow()
+    if not tb.isSafeToWrite():
+      self.view.changeFocusTo(self.view.host.inputWindow.confirmOverwrite)
+      return
+    tb.fileWrite();
+    self.view.textBuffer.replaceLines(('',))
+
+  def doSelectDir(self):
+    # TODO(dschuyler): not yet implemented.
+    self.view.textBuffer.replaceLines(('',))
+    self.changeToInputWindow()
 
   def focus(self):
     if self.view.textBuffer.isEmpty():
