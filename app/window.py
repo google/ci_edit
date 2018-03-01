@@ -731,9 +731,6 @@ class InputWindow(Window):
           "Save changes? (yes, no, or cancel): ")
       self.interactiveQuit.setController(app.cu_editor.InteractiveQuit)
     if 1:
-      self.interactiveSaveAs = LabeledLine(self, "save as: ")
-      self.interactiveSaveAs.setController(app.cu_editor.InteractiveSaveAs)
-    if 1:
       self.topInfo = TopInfo(self)
       self.topInfo.setParent(self, 0)
       if not self.showTopInfo:
@@ -821,7 +818,6 @@ class InputWindow(Window):
     self.interactivePrediction.reshape(bottomFirstRow, left, bottomRows, cols)
     self.interactivePrompt.reshape(bottomFirstRow, left, bottomRows, cols)
     self.interactiveQuit.reshape(bottomFirstRow, left, bottomRows, cols)
-    self.interactiveSaveAs.reshape(bottomFirstRow, left, bottomRows, cols)
     if self.showMessageLine:
       self.messageLine.reshape(bottomFirstRow, left, bottomRows, cols)
     if self.useInteractiveFind:

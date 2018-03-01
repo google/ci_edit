@@ -312,36 +312,6 @@ class InteractiveQuit(app.controller.Controller):
     self.commandDefault = self.confirmationPromptFinish
 
 
-class InteractiveSaveAs(app.controller.Controller):
-  """Ask about unsaved files."""
-  def __init__(self, view):
-    app.controller.Controller.__init__(self, view, 'saveAs')
-
-  def setTextBuffer(self, textBuffer):
-    app.controller.Controller.setTextBuffer(self, textBuffer)
-    commandSet = initCommandSet(self, textBuffer)
-    commandSet.update({
-      KEY_ESCAPE: self.changeToHostWindow,
-      #KEY_F1: self.info,
-      CTRL_J: self.saveAs,
-    })
-    self.commandSet = commandSet
-    self.commandDefault = self.textBuffer.insertPrintable
-
-  def saveAs(self):
-    app.log.info('saveAs')
-    name = self.textBuffer.lines[0]
-    if not len(name):
-      self.view.textBuffer.setMessage('File not saved (file name was empty).')
-      self.changeToHostWindow()
-      return
-    self.view.host.textBuffer.setFilePath(self.textBuffer.lines[0])
-    # Preload the message with an error that should be overwritten.
-    self.view.host.textBuffer.setMessage('Error saving file')
-    self.view.host.textBuffer.fileWrite()
-    self.changeToHostWindow()
-
-
 class CuaEdit(app.controller.Controller):
   """Keyboard mappings for CUA. CUA is the Cut/Copy/Paste paradigm."""
   def __init__(self, view):

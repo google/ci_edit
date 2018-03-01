@@ -170,6 +170,9 @@ class FileManagerController(app.controller.Controller):
     tb = self.view.host.inputWindow.textBuffer
     tb.setFilePath(path);
     self.changeToInputWindow()
+    if not len(path):
+      tb.setMessage('File not saved (file name was empty).')
+      return
     if not tb.isSafeToWrite():
       self.view.changeFocusTo(self.view.host.inputWindow.confirmOverwrite)
       return
