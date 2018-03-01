@@ -124,17 +124,19 @@ class FileManagerWindow(app.window.Window):
     self.host = host
     self.inputWindow = inputWindow
     self.inputWindow.fileManagerWindow = self
+    self.mode = 'open'
     self.showTips = False
     self.controller = app.cu_editor.FileOpener(self)
     self.setTextBuffer(app.text_buffer.TextBuffer())
-    #self.textBuffer.setMessage('asdf', 0)
     self.opt = {
       'dotFiles': True,
       'sizes': True,
       'modified': True,
     }
     self.titleRow = app.window.OptionsRow(self)
-    self.titleRow.addLabel(' ci    Open File')
+    self.titleRow.addLabel(' ci   ')
+    self.modeTitle = self.titleRow.addLabel('x')
+    self.setMode('open')
     self.titleRow.setParent(self, 0)
     self.optionsRow = app.window.OptionsRow(self)
     self.optionsRow.addLabel(' Show: ')
@@ -143,8 +145,6 @@ class FileManagerWindow(app.window.Window):
     self.optionsRow.setParent(self, 0)
     self.directoryList = DirectoryList(self, inputWindow)
     self.directoryList.setParent(self, 0)
-    #self.statusLine = StatusLine(self)
-    #self.statusLine.setParent(self, 0)
 
   def getPath(self):
     return self.textBuffer.lines[0]
@@ -179,6 +179,15 @@ class FileManagerWindow(app.window.Window):
     #self.statusLine.reshape(originalRows - 2, left, 1, cols)
     #rows -= 2
     self.directoryList.reshape(top, left, rows, cols)
+
+  def setMode(self, mode):
+    self.mode = mode
+    modeTitles = {
+      'open': 'Open File',
+      'saveAs': 'Save File As',
+      'selectDir': 'Select a Directory',
+    }
+    self.modeTitle['name'] = modeTitles[mode]
 
   def setTextBuffer(self, textBuffer):
     textBuffer.lineLimitIndicator = 0
