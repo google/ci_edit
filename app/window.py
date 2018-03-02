@@ -15,6 +15,7 @@
 import bisect
 import os
 import sys
+import types
 import curses
 
 import app.buffer_manager
@@ -45,7 +46,8 @@ class ViewWindow:
     """
     if app.config.strict_debug:
       assert issubclass(self.__class__, ViewWindow), self
-      assert issubclass(parent.__class__, ViewWindow), parent
+      if parent is not None:
+        assert issubclass(parent.__class__, ViewWindow), parent
     self.parent = parent
     self.zOrder = []
     self.isFocusable = False
@@ -205,7 +207,8 @@ class ActiveWindow(ViewWindow):
   def __init__(self, parent):
     if app.config.strict_debug:
       assert issubclass(self.__class__, ActiveWindow), self
-      assert issubclass(parent.__class__, ActiveWindow), parent
+      if parent is not None:
+        assert issubclass(parent.__class__, ActiveWindow), parent
     ViewWindow.__init__(self, parent)
     self.controller = None
     self.isFocusable = True
@@ -276,6 +279,13 @@ class Window(ActiveWindow):
       else:
         app.render.frame.setCursor(None)
 
+  def setController(self, controller):
+    if app.config.strict_debug:
+      assert issubclass(self.__class__, Window), self
+      assert type(controller) == types.ClassType, type(controller)
+    self.controller = controller(self)
+    self.controller.setTextBuffer(self.textBuffer)
+
   def setTextBuffer(self, textBuffer):
     textBuffer.setView(self)
     self.textBuffer = textBuffer
@@ -312,11 +322,6 @@ class LabeledLine(Window):
     Window.reshape(self, top,
         left + labelWidth, rows, max(0, cols - labelWidth))
     self.leftColumn.reshape(top, left, rows, labelWidth)
-
-  def setController(self, controllerClass):
-    #app.log.caller('                        ',self.textBuffer)
-    self.controller = controllerClass(self)
-    self.controller.setTextBuffer(self.textBuffer)
 
   def setLabel(self, label):
     self.label = label
@@ -369,11 +374,6 @@ class Menu(ViewWindow):
     for i in self.lines[:self.rows]:
       self.writeLine(" "+i, color);
     ViewWindow.render(self)
-
-  def setController(self, controllerClass):
-    app.log.info('                        ',self.textBuffer)
-    self.controller = controllerClass(self)
-    self.controller.setTextBuffer(self.textBuffer)
 
 
 class LineNumbers(ViewWindow):

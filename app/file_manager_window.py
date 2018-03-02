@@ -119,7 +119,7 @@ class FileManagerWindow(app.window.Window):
   def __init__(self, host, inputWindow):
     if app.config.strict_debug:
       assert host
-      assert issubclass(host.__class__, ActiveWindow), host
+      assert issubclass(host.__class__, app.window.ActiveWindow), host
     app.window.Window.__init__(self, host)
     self.host = host
     self.inputWindow = inputWindow
