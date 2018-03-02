@@ -123,7 +123,7 @@ class DirectoryListController(app.controller.Controller):
       path = os.path.dirname(path) + os.path.sep
     self.view.host.setPath(path + self.view.contents[row - 2])
     if not os.path.isdir(self.view.host.getPath()):
-      self.view.host.controller.createOrOpen()
+      self.view.host.controller.doCreateOrOpen()
 
   def optionChanged(self, name, value):
     self.shownDirectory = None
