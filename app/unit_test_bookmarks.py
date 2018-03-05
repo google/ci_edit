@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import unittest
+
 from app.bookmark import Bookmark
 import app.prefs
 import app.text_buffer
