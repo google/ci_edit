@@ -14,20 +14,20 @@
 
 import app.buffer_manager
 import app.color
+import app.config
 import app.controller
 import app.cu_editor
-import app.editor
 import app.em_editor
-import app.file_manager_controller
-import app.history
 import app.render
 import app.text_buffer
 import app.vi_editor
+
 import bisect
-import threading
-import os
-import sys
 import curses
+import os
+import threading
+import types
+import sys
 
 
 # The terminal area that the curses can draw to.
@@ -45,6 +45,10 @@ class ViewWindow:
       parent is responsible for the order in which this window is updated,
       relative to its siblings.
     """
+    if app.config.strict_debug:
+      assert issubclass(self.__class__, ViewWindow), self
+      if parent is not None:
+        assert issubclass(parent.__class__, ViewWindow), parent
     self.parent = parent
     self.zOrder = []
     self.isFocusable = False
@@ -66,6 +70,9 @@ class ViewWindow:
         text.encode('utf-8'), colorPair)
 
   def changeFocusTo(self, changeTo):
+    if app.config.strict_debug:
+      assert issubclass(self.__class__, ViewWindow), self
+      assert issubclass(changeTo.__class__, ActiveWindow), parent
     self.parent.changeFocusTo(changeTo)
 
   def normalize(self):
@@ -97,9 +104,6 @@ class ViewWindow:
 
   def debugDraw(self, win):
     self.parent.debugDraw(win)
-
-  def debugUndoDraw(self, win):
-    self.parent.debugUndoDraw(win)
 
   def hide(self):
     """Remove window from the render list."""
@@ -142,14 +146,16 @@ class ViewWindow:
     for child in self.zOrder:
       child.render()
 
-  def reshape(self, rows, cols, top, left):
+  def reshape(self, top, left, rows, cols):
     self.moveTo(top, left)
     self.resizeTo(rows, cols)
+    app.log.debug(self, top, left, rows, cols)
 
   def resizeTo(self, rows, cols):
     #app.log.detail(rows, cols, self)
-    assert rows >=0, rows
-    assert cols >=0, cols
+    if app.config.strict_debug:
+      assert rows >=0, rows
+      assert cols >=0, cols
     self.rows = rows
     self.cols = cols
 
@@ -168,6 +174,9 @@ class ViewWindow:
     """Setting the parent will cause the the window to refresh (i.e. if self
     was hidden with hide() it will no longer be hidden).
     """
+    if app.config.strict_debug:
+      assert issubclass(self.__class__, ViewWindow), self
+      assert issubclass(parent.__class__, ViewWindow), parent
     if self.parent:
       try:
         self.parent.zOrder.remove(self)
@@ -197,6 +206,10 @@ class ViewWindow:
 class ActiveWindow(ViewWindow):
   """An ActiveWindow may have focus and a controller."""
   def __init__(self, parent):
+    if app.config.strict_debug:
+      assert issubclass(self.__class__, ActiveWindow), self
+      if parent is not None:
+        assert issubclass(parent.__class__, ActiveWindow), parent
     ViewWindow.__init__(self, parent)
     self.controller = None
     self.isFocusable = True
@@ -221,6 +234,9 @@ class Window(ActiveWindow):
   """A Window holds a TextBuffer and a controller that operates on the
   TextBuffer."""
   def __init__(self, parent):
+    if app.config.strict_debug:
+      assert issubclass(self.__class__, Window), self
+      assert issubclass(parent.__class__, ActiveWindow), parent
     ActiveWindow.__init__(self, parent)
     self.cursorRow = 0
     self.cursorCol = 0
@@ -256,7 +272,6 @@ class Window(ActiveWindow):
     ViewWindow.render(self)
     if self.hasFocus:
       self.parent.debugDraw(self)
-      self.parent.debugUndoDraw(self)
       if (self.cursorRow >= self.scrollRow and
           self.cursorRow < self.scrollRow + self.rows):
         app.render.frame.setCursor((
@@ -264,6 +279,13 @@ class Window(ActiveWindow):
             self.left + self.cursorCol - self.scrollCol))
       else:
         app.render.frame.setCursor(None)
+
+  def setController(self, controller):
+    if app.config.strict_debug:
+      assert issubclass(self.__class__, Window), self
+      assert type(controller) == types.ClassType, type(controller)
+    self.controller = controller(self)
+    self.controller.setTextBuffer(self.textBuffer)
 
   def setTextBuffer(self, textBuffer):
     textBuffer.setView(self)
@@ -277,6 +299,9 @@ class LabeledLine(Window):
   """A single line with a label. This is akin to a line prompt or gui modal
       dialog. It's used for things like 'find' and 'goto line'."""
   def __init__(self, parent, label):
+    if app.config.strict_debug:
+      assert issubclass(self.__class__, LabeledLine), self
+      assert issubclass(parent.__class__, ActiveWindow), parent
     Window.__init__(self, parent)
     self.host = parent
     tb = app.text_buffer.TextBuffer()
@@ -292,20 +317,16 @@ class LabeledLine(Window):
     self.leftColumn.addStr(0, 0, self.label, app.color.get('keyword'))
     Window.render(self)
 
-  def reshape(self, rows, cols, top, left):
+  def reshape(self, top, left, rows, cols):
+    app.log.debug(self, top, left, rows, cols)
     labelWidth = len(self.label)
-    Window.reshape(self, rows, max(0, cols - labelWidth), top,
-        left + labelWidth)
-    self.leftColumn.reshape(rows, labelWidth, top, left)
-
-  def setController(self, controllerClass):
-    #app.log.caller('                        ',self.textBuffer)
-    self.controller = controllerClass(self)
-    self.controller.setTextBuffer(self.textBuffer)
+    Window.reshape(self, top,
+        left + labelWidth, rows, max(0, cols - labelWidth))
+    self.leftColumn.reshape(top, left, rows, labelWidth)
 
   def setLabel(self, label):
     self.label = label
-    self.reshape(self.rows, self.cols, self.top, self.left)
+    self.reshape(self.top, self.left, self.rows, self.cols)
 
   def unfocus(self):
     self.blank(app.color.get('message_line'))
@@ -319,6 +340,9 @@ class Menu(ViewWindow):
   """Work in progress on a context menu.
   """
   def __init__(self, host):
+    if app.config.strict_debug:
+      assert issubclass(self.__class__, Menu), self
+      assert issubclass(host.__class__, ActiveWindow), parent
     ViewWindow.__init__(self, host)
     self.host = host
     self.controller = None
@@ -343,7 +367,7 @@ class Menu(ViewWindow):
     for i in self.lines:
       if len(i) > longest:
         longest = len(i)
-    self.reshape(len(self.lines), longest + 2, left, top)
+    self.reshape(left, top, len(self.lines), longest + 2)
 
   def render(self):
     color = app.color.get('context_menu')
@@ -351,11 +375,6 @@ class Menu(ViewWindow):
     for i in self.lines[:self.rows]:
       self.writeLine(" "+i, color);
     ViewWindow.render(self)
-
-  def setController(self, controllerClass):
-    app.log.info('                        ',self.textBuffer)
-    self.controller = controllerClass(self)
-    self.controller.setTextBuffer(self.textBuffer)
 
 
 class LineNumbers(ViewWindow):
@@ -440,7 +459,6 @@ class LineNumbers(ViewWindow):
       tb.cursorMoveAndMark(self.host.scrollRow + paneRow - tb.penRow, 0,
                            self.host.scrollRow + paneRow - tb.markerRow, 0,
                            app.selectable.kSelectionNone - tb.selectionMode)
-      tb.redo()
       self.mouseRelease(paneRow, paneCol, shift, ctrl, alt)
 
   def mouseDoubleClick(self, paneRow, paneCol, shift, ctrl, alt):
@@ -501,10 +519,11 @@ class InteractiveFind(Window):
     self.controller = app.cu_editor.InteractiveFind(self,
         self.findLine.textBuffer)
 
-  def reshape(self, rows, cols, top, left):
-    self.findLine.reshape(1, cols, top, left)
+  def reshape(self, top, left, rows, cols):
+    Window.reshape(self, top, left, rows, cols)
+    self.findLine.reshape(top, left, 1, cols)
     top += 1
-    self.replaceLine.reshape(1, cols, top, left)
+    self.replaceLine.reshape(top, left, 1, cols)
 
 
 class MessageLine(ViewWindow):
@@ -654,15 +673,16 @@ class TopInfo(ViewWindow):
     for i in range(len(lines), self.rows):
       self.addStr(i, 0, ' ' * self.cols, color)
 
-  def reshape(self, rows, cols, top, left):
+  def reshape(self, top, left, rows, cols):
     self.borrowedRows = 0
-    ViewWindow.reshape(self, rows, cols, top, left)
+    ViewWindow.reshape(self, top, left, rows, cols)
 
 
 class InputWindow(Window):
   """This is the main content window. Often the largest pane displayed."""
   def __init__(self, host):
-    assert(host)
+    if app.config.strict_debug:
+      assert(host)
     Window.__init__(self, host)
     self.bottomRows = 1  # Not including status line.
     self.host = host
@@ -700,9 +720,6 @@ class InputWindow(Window):
     if 1:
       self.interactiveGoto = LabeledLine(self, 'goto: ')
       self.interactiveGoto.setController(app.cu_editor.InteractiveGoto)
-    if 0:
-      self.interactiveOpen = LabeledLine(self, 'open: ')
-      self.interactiveOpen.setController(app.cu_editor.InteractiveOpener)
     if 1:
       self.interactivePrediction = LabeledLine(self, 'p: ')
       self.interactivePrediction.setController(
@@ -714,9 +731,6 @@ class InputWindow(Window):
       self.interactiveQuit = LabeledLine(self,
           "Save changes? (yes, no, or cancel): ")
       self.interactiveQuit.setController(app.cu_editor.InteractiveQuit)
-    if 1:
-      self.interactiveSaveAs = LabeledLine(self, "save as: ")
-      self.interactiveSaveAs.setController(app.cu_editor.InteractiveSaveAs)
     if 1:
       self.topInfo = TopInfo(self)
       self.topInfo.setParent(self, 0)
@@ -777,58 +791,55 @@ class InputWindow(Window):
       self.textBuffer.selectText(openToLine - 1, 0, 0,
           app.selectable.kSelectionNone)
 
-  def reshape(self, rows, cols, top, left):
+  def reshape(self, top, left, rows, cols):
     """Change self and sub-windows to fit within the given rectangle."""
-    app.log.detail('reshape', rows, cols, top, left)
-    self.outerShape = (rows, cols, top, left)
+    app.log.detail(top, left, rows, cols)
+    Window.reshape(self, top, left, rows, cols)
+    self.outerShape = (top, left, rows, cols)
     self.layout()
 
   def layout(self):
     """Change self and sub-windows to fit within the given rectangle."""
     app.log.info()
-    rows, cols, top, left = self.outerShape
+    top, left, rows, cols = self.outerShape
     lineNumbersCols = 7
     topRows = self.topRows
     bottomRows = self.bottomRows
 
     if self.showTopInfo and rows > topRows and cols > lineNumbersCols:
-      self.topInfo.reshape(topRows, cols - lineNumbersCols, top,
-          left + lineNumbersCols)
+      self.topInfo.reshape(top,
+          left + lineNumbersCols, topRows, cols - lineNumbersCols)
       top += topRows
       rows -= topRows
     rows -= bottomRows
     bottomFirstRow = top + rows
 
-    self.confirmClose.reshape(bottomRows, cols, bottomFirstRow, left)
-    self.confirmOverwrite.reshape(bottomRows, cols, bottomFirstRow, left)
-    if 0:
-      self.interactiveOpen.reshape(bottomRows, cols, bottomFirstRow, left)
-    self.interactivePrediction.reshape(bottomRows, cols, bottomFirstRow, left)
-    self.interactivePrompt.reshape(bottomRows, cols, bottomFirstRow, left)
-    self.interactiveQuit.reshape(bottomRows, cols, bottomFirstRow, left)
-    self.interactiveSaveAs.reshape(bottomRows, cols, bottomFirstRow, left)
+    self.confirmClose.reshape(bottomFirstRow, left, bottomRows, cols)
+    self.confirmOverwrite.reshape(bottomFirstRow, left, bottomRows, cols)
+    self.interactivePrediction.reshape(bottomFirstRow, left, bottomRows, cols)
+    self.interactivePrompt.reshape(bottomFirstRow, left, bottomRows, cols)
+    self.interactiveQuit.reshape(bottomFirstRow, left, bottomRows, cols)
     if self.showMessageLine:
-      self.messageLine.reshape(bottomRows, cols, bottomFirstRow, left)
+      self.messageLine.reshape(bottomFirstRow, left, bottomRows, cols)
     if self.useInteractiveFind:
-      self.interactiveFind.reshape(bottomRows, cols, bottomFirstRow, left)
+      self.interactiveFind.reshape(bottomFirstRow, left, bottomRows, cols)
     if 1:
-      self.interactiveGoto.reshape(bottomRows, cols, bottomFirstRow,
-          left)
-
+      self.interactiveGoto.reshape(bottomFirstRow,
+          left, bottomRows, cols)
     if self.showFooter and rows > 0:
-      self.statusLine.reshape(self.statusLineCount, cols,
-          bottomFirstRow - self.statusLineCount, left)
+      self.statusLine.reshape(
+          bottomFirstRow - self.statusLineCount, left, self.statusLineCount, cols)
       rows -= self.statusLineCount
     if self.showLineNumbers and cols > lineNumbersCols:
-      self.lineNumberColumn.reshape(rows, lineNumbersCols, top, left)
+      self.lineNumberColumn.reshape(top, left, rows, lineNumbersCols)
       cols -= lineNumbersCols
       left += lineNumbersCols
     if self.showRightColumn and cols > 0:
-      self.rightColumn.reshape(rows, 1, top, left + cols - 1)
+      self.rightColumn.reshape(top, left + cols - 1, rows, 1)
       cols -= 1
     # The top, left of the main window is the rows, cols of the logo corner.
-    self.logoCorner.reshape(top, left, 0, 0)
-    Window.reshape(self, rows, cols, top, left)
+    self.logoCorner.reshape(0, 0, top, left)
+    Window.reshape(self, top, left, rows, cols)
 
   def drawLogoCorner(self):
     """."""
@@ -910,14 +921,15 @@ class OptionsRow(ViewWindow):
       self.sep = sep
 
   def __init__(self, host):
-    assert(host)
+    if app.config.strict_debug:
+      assert(host)
     ViewWindow.__init__(self, host)
     self.host = host
     self.controlList = []
     self.group = None
 
   def addElement(self, draw, kind, name, reference, width, sep, extraWidth=0):
-    if 1:
+    if app.config.strict_debug:
       assert type(name) == str
       assert type(sep) == str
       assert type(width) in [type(None), int]
@@ -927,19 +939,21 @@ class OptionsRow(ViewWindow):
         assert name in reference
     if self.group is not None:
       self.group.append(len(self.controlList))
-    self.controlList.append({
-        'draw': draw,
-        'type': kind,
-        'name': name,
-        'dict': reference,
-        'sep': sep,
-        'width': width if width is not None else len(name) + extraWidth
-        })
+    element = {
+      'draw': draw,
+      'type': kind,
+      'name': name,
+      'dict': reference,
+      'sep': sep,
+      'width': width if width is not None else len(name) + extraWidth
+    }
+    self.controlList.append(element)
+    return element
 
   def addLabel(self, name, width=None, sep=" "):
     def draw(control):
       return control['name']
-    self.addElement(draw, 'label', name, None, width, sep)
+    return self.addElement(draw, 'label', name, None, width, sep)
 
   def addSortHeader(self, name, reference, width=None, sep=" |"):
     def draw(control):
@@ -1009,187 +1023,10 @@ class OptionsRow(ViewWindow):
     self.writeLineRow = 0
     self.writeLine(line[:self.cols], color)
 
-
-# todo remove or use this.
-class PathRow(ViewWindow):
-  def __init__(self, host):
-    assert(host)
-    ViewWindow.__init__(self, host)
-    self.host = host
-    self.path = ''
-
-  def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
-    row = self.scrollRow + paneRow
-    col = self.scrollCol + paneCol
-    line = self.path
-    col = self.scrollCol + paneCol
-    self.host.controller.shownDirectory = None
-    if col >= len(line):
-      return
-    slash = line[col:].find('/')
-    self.path = line[:col + slash + 1]
-
-  def render(self):
-    app.log.debug()
-    offset = 0
-    color = app.color.get('message_line')
-    #self.addStr(0, 0, self.path, color)
-    self.writeLineRow = 0
-    self.writeLine(self.path, color)
-
-
-class DirectoryList(Window):
-  """This <tbd>."""
-  def __init__(self, host, inputWindow):
-    assert host
-    assert self is not host
-    Window.__init__(self, host)
-    self.host = host
-    self.inputWindow = inputWindow
-    self.controller = app.cu_editor.DirectoryList(self)
-    self.setTextBuffer(app.text_buffer.TextBuffer())
-    self.optionsRow = OptionsRow(self)
-    self.opt = {
-      'Name': True,
-      'Size': None,
-      'Modified': None,
-    }
-    self.optionsRow.beginGroup()
-    for key, size in [('Name', -40), ('Size', 15), ('Modified', 24)]:
-      self.optionsRow.addSortHeader(key, self.opt, size)
-    self.optionsRow.setParent(self, 0)
-
-  def reshape(self, rows, cols, top, left):
-    """Change self and sub-windows to fit within the given rectangle."""
-    app.log.detail('reshape', rows, cols, top, left)
-    self.optionsRow.reshape(1, cols, top, left)
-    top += 1
-    rows -= 1
-    Window.reshape(self, rows, cols, top, left)
-
-  def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
-    row = self.scrollRow + paneRow
-    if row >= len(self.textBuffer.lines):
-      return
-    path = self.host.getPath()
-    if row == 0:  # Clicked on "./".
-      # Clear the shown directory to trigger a refresh.
-      self.controller.shownDirectory = None
-      return
-    elif row == 1:  # Clicked on "../".
-      if path[-1] == os.path.sep:
-        path = path[:-1]
-      path = os.path.dirname(path)
-      if len(path) > len(os.path.sep):
-        path += os.path.sep
-      self.host.setPath(path)
-      return
-    self.host.setPath(path + self.contents[row - 2])
-    self.host.controller.createOrOpen()
-
-  def mouseDoubleClick(self, paneRow, paneCol, shift, ctrl, alt):
-    self.changeFocusTo(self.host)
-
-  def mouseMoved(self, paneRow, paneCol, shift, ctrl, alt):
-    self.changeFocusTo(self.host)
-
-  def mouseRelease(self, paneRow, paneCol, shift, ctrl, alt):
-    self.changeFocusTo(self.host)
-
-  def mouseTripleClick(self, paneRow, paneCol, shift, ctrl, alt):
-    self.changeFocusTo(self.host)
-
-  def mouseWheelDown(self, shift, ctrl, alt):
-    self.textBuffer.mouseWheelDown(shift, ctrl, alt)
-    self.changeFocusTo(self.host)
-
-  def mouseWheelUp(self, shift, ctrl, alt):
-    self.textBuffer.mouseWheelUp(shift, ctrl, alt)
-    self.changeFocusTo(self.host)
-
-  def setTextBuffer(self, textBuffer):
-    textBuffer.lineLimitIndicator = 999999
-    textBuffer.highlightTrailingWhitespace = False
-    Window.setTextBuffer(self, textBuffer)
-    self.controller.setTextBuffer(textBuffer)
-
-
-class FileManagerWindow(Window):
-  def __init__(self, host, inputWindow):
-    assert host
-    #assert issubclass(host.__class__, Window), host
-    Window.__init__(self, host)
-    self.host = host
-    self.inputWindow = inputWindow
-    self.inputWindow.fileManagerWindow = self
-    self.showTips = False
-    self.controller = app.cu_editor.FileOpener(self)
-    self.setTextBuffer(app.text_buffer.TextBuffer())
-    self.textBuffer.setMessage('asdf', 0)
-    self.opt = {
-      'dotFiles': True,
-      'sizes': True,
-      'modified': True,
-    }
-    self.titleRow = OptionsRow(self)
-    self.titleRow.addLabel(' ci    Open File')
-    self.titleRow.setParent(self, 0)
-    self.optionsRow = OptionsRow(self)
-    self.optionsRow.addLabel(' Show: ')
-    for key in ['dotFiles', 'sizes', 'modified']:
-      self.optionsRow.addToggle(key, self.opt)
-    self.optionsRow.setParent(self, 0)
-    self.directoryList = DirectoryList(self, inputWindow)
-    self.directoryList.setParent(self, 0)
-    #self.statusLine = StatusLine(self)
-    #self.statusLine.setParent(self, 0)
-
-  def getPath(self):
-    return self.textBuffer.lines[0]
-
-  def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
-    row = self.scrollRow + paneRow
-    col = self.scrollCol + paneCol
-    line = self.textBuffer.lines[0]
-    col = self.scrollCol + paneCol
-    self.directoryList.controller.shownDirectory = None
-    if col >= len(line):
-      return
-    slash = line[col:].find('/')
-    self.setPath(line[:col + slash + 1])
-
-  def quitNow(self):
-    app.log.debug()
-    self.host.quitNow()
-
-  def reshape(self, rows, cols, top, left):
-    """Change self and sub-windows to fit within the given rectangle."""
-    app.log.detail('reshape', rows, cols, top, left)
-    self.titleRow.reshape(1, cols, top, left)
-    top += 1
-    rows -= 1
-    Window.reshape(self, 1, cols, top, left)
-    top += 1
-    rows -= 1
-    self.optionsRow.reshape(1, cols, rows, left)
-    rows -= 2
-    #self.statusLine.reshape(1, cols, rows, left)
-    #rows -= 2
-    self.directoryList.reshape(rows, cols, top, left)
-
-  def setTextBuffer(self, textBuffer):
-    textBuffer.lineLimitIndicator = 999999
-    textBuffer.highlightTrailingWhitespace = False
-    Window.setTextBuffer(self, textBuffer)
-    self.controller.setTextBuffer(textBuffer)
-
-  def setPath(self, path):
-    self.textBuffer.selectionAll()
-    self.textBuffer.editPasteLines((path,))
-
 class PopupWindow(Window):
   def __init__(self, host):
-    assert(host)
+    if app.config.strict_debug:
+      assert(host)
     Window.__init__(self, host)
     self.host = host
     self.controller = app.cu_editor.PopupController(self)

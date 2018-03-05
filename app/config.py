@@ -1,4 +1,4 @@
-# Copyright 2017 Google Inc.
+# Copyright 2018 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,27 +12,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import curses
 
-import app.prefs
-
-
-colors = 256
-cache__ = {}
-
-def reset():
-  global cache__
-  cache__ = {}
-
-def get(colorType, delta=0):
-  global cache__
-  if type(colorType) == type(0):
-    colorIndex = colorType
-  else:
-    colorIndex = app.prefs.color[colorType]
-  colorIndex = min(colors - 1, colorIndex + delta)
-  color = cache__.get(colorIndex) or curses.color_pair(colorIndex)
-  cache__[colorIndex] = color
-  if colorType in ('error', 'misspelling'):
-    color |= curses.A_BOLD | curses.A_REVERSE
-  return color
+strict_debug = False

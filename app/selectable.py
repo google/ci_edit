@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import app.log
 import re
+
+import app.log
 
 kReBrackets = re.compile('[[\]{}()]')
 kReComments = re.compile('(?:#|//).*$|/\*.*?\*/|<!--.*?-->')
@@ -61,6 +62,9 @@ class BaseLineBuffer:
     self.lines = [unicode("")]
     self.message = ('New buffer', None)
 
+  def isEmpty(self):
+    return len(self.lines) == 1 and len(self.lines[0]) == 0
+
   def setMessage(self, *args, **dict):
     if not len(args):
       self.message = None
@@ -86,6 +90,13 @@ class Selectable(BaseLineBuffer):
     self.markerCol = 0
     self.selectionMode = kSelectionNone
     self.upperChangedRow = 0
+
+  def countSelected(self):
+    lines = self.getSelectedText()
+    chars = len(lines) - 1  # Count carriage returns.
+    for line in lines:
+      chars += len(line)
+    return chars, len(lines)
 
   def selection(self):
     return (self.penRow, self.penCol, self.markerRow, self.markerCol)

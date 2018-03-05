@@ -58,11 +58,13 @@ async
 attr
 attrs
 auth
+authenticator
 backtrace
 baz
 bbggrr
 bgr
 bitmask
+blitter
 bool
 booleans
 buf
@@ -161,6 +163,7 @@ grey
 guid
 gz
 gzip
+hardcode
 hasher
 hostname
 hostnames
@@ -199,6 +202,7 @@ le
 len
 lf
 lhs
+libs
 lifo
 loc
 localhost
@@ -210,8 +214,8 @@ memoized
 minified
 mixin
 mixins
-mozilla
 msg
+mutex
 na
 namespaces
 ndebug
@@ -277,8 +281,11 @@ rrggbbaa
 rtti
 runtime
 rv
+scrollback
+scrollbar
 serializable
 sha
+shader
 sig
 sigbus
 signin
@@ -287,6 +294,7 @@ skia
 solaris
 sql
 src
+srcs
 ssh
 std
 stderr
@@ -301,10 +309,12 @@ stylesheet
 sudo
 svg
 svn
+symlinks
 syncable
 sys
 syscall
 sysex
+syslog
 tar
 templated
 templatizer
@@ -312,7 +322,6 @@ templatizers
 tgz
 throbber
 tk
-tkinter
 tmp
 todo
 tolltip
@@ -328,8 +337,6 @@ uchar
 uid
 uintptr
 undef
-unicode
-unix
 unobserve
 unparsable
 unserializable

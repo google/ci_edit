@@ -14,14 +14,15 @@
 
 """Key bindings for the emacs-like editor."""
 
-from app.curses_util import *
-import app.controller
-import app.log
 import curses
 import curses.ascii
 import os
 import re
 import text_buffer
+
+from app.curses_util import *
+import app.controller
+import app.log
 
 
 def parseInt(str):
@@ -324,7 +325,6 @@ class InteractiveGoto(EditText):
     textBuffer.cursorMove(cursorRow-textBuffer.cursorRow,
         col-textBuffer.cursorCol,
         col-textBuffer.goalCol)
-    textBuffer.redo()
 
   def onChange(self):
     gotoLine = 0

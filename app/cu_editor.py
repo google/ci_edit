@@ -14,13 +14,14 @@
 
 """Key bindings for the cua-like editor."""
 
+import curses
+import text_buffer
+
 from app.curses_util import *
 import app.controller
 import app.editor
 import app.file_manager_controller
 import app.interactive_prompt
-import curses
-import text_buffer
 
 
 def initCommandSet(controller, textBuffer):
@@ -83,7 +84,7 @@ def mainWindowCommands(controller, textBuffer):
     CTRL_G: controller.changeToGoto,
     CTRL_I: textBuffer.indent,
     CTRL_J: textBuffer.carriageReturn,
-    #CTRL_O: controller.changeToFileOpen,
+    CTRL_N: controller.createNewTextBuffer,
     CTRL_O: controller.changeToFileManagerWindow,
     CTRL_Q: controller.initiateQuit,
     CTRL_R: controller.changeToFindPrior,
@@ -157,7 +158,7 @@ class InteractiveFind(app.editor.InteractiveFind):
       CTRL_F: self.findNext,
       CTRL_G: self.findNext,
       CTRL_J: self.changeToHostWindow,
-      #CTRL_O: self.changeToFileOpen,
+      CTRL_N: self.saveEventChangeToHostWindow,
       CTRL_O: self.changeToFileManagerWindow,
       CTRL_P: self.changeToPrediction,
       CTRL_R: self.findPrior,
@@ -185,6 +186,7 @@ class InteractiveGoto(app.editor.InteractiveGoto):
       KEY_F1: self.info,
       CTRL_F: self.changeToFind,
       CTRL_J: self.changeToHostWindow,
+      CTRL_N: self.saveEventChangeToHostWindow,
       CTRL_P: self.changeToPrediction,
       ord('b'): self.gotoBottom,
       ord('B'): self.gotoBottom,
@@ -195,29 +197,6 @@ class InteractiveGoto(app.editor.InteractiveGoto):
     })
     self.commandSet = commandSet
     self.commandDefault = self.textBuffer.insertPrintable
-
-
-if 0:
-  class InteractiveOpener(app.editor.InteractiveOpener):
-    """Open a file to edit."""
-    def __init__(self, view):
-      app.editor.InteractiveOpener.__init__(self, view)
-
-    def setTextBuffer(self, textBuffer):
-      app.editor.InteractiveOpener.setTextBuffer(self, textBuffer)
-      commandSet = initCommandSet(self, textBuffer)
-      commandSet.update({
-        KEY_ESCAPE: self.changeToHostWindow,
-        KEY_F1: self.info,
-        CTRL_I: self.tabCompleteExtend,
-        CTRL_J: self.createOrOpen,
-        CTRL_N: self.createOrOpen,
-        CTRL_O: self.createOrOpen,
-        CTRL_P: self.changeToPrediction,
-        CTRL_Q: self.saveEventChangeToHostWindow,
-      })
-      self.commandSet = commandSet
-      self.commandDefault = self.textBuffer.insertPrintable
 
 
 class DirectoryList(app.file_manager_controller.DirectoryListController):
@@ -235,6 +214,8 @@ class DirectoryList(app.file_manager_controller.DirectoryListController):
       KEY_F1: self.info,
       KEY_PAGE_DOWN: textBuffer.cursorSelectNonePageDown,
       KEY_PAGE_UP: textBuffer.cursorSelectNonePageUp,
+      KEY_DOWN: textBuffer.cursorDown,
+      KEY_UP: textBuffer.cursorUp,
     })
     self.commandSet = commandSet
     self.commandDefault = self.textBuffer.insertPrintable
@@ -254,12 +235,15 @@ class FileOpener(app.file_manager_controller.FileManagerController):
       KEY_F1: self.info,
       KEY_PAGE_DOWN: self.passEventToDirectoryList,
       KEY_PAGE_UP: self.passEventToDirectoryList,
+      KEY_DOWN: self.passEventToDirectoryList,
+      KEY_UP: self.passEventToDirectoryList,
       CTRL_I: self.tabCompleteExtend,
-      CTRL_J: self.createOrOpen,
-      CTRL_N: self.createOrOpen,
-      CTRL_O: self.createOrOpen,
+      CTRL_J: self.performPrimaryAction,
+      CTRL_N: self.saveEventChangeToInputWindow,
+      CTRL_O: self.performPrimaryAction,
       CTRL_P: self.changeToPrediction,
       CTRL_Q: self.saveEventChangeToInputWindow,
+      CTRL_S: self.saveEventChangeToInputWindow,
     })
     self.commandSet = commandSet
     self.commandDefault = self.textBuffer.insertPrintable
@@ -280,7 +264,6 @@ class InteractivePrediction(app.editor.InteractivePrediction):
       CTRL_G: self.changeToGoto,
       CTRL_J: self.selectItem,
       CTRL_N: self.nextItem,
-      #CTRL_O: self.changeToFileOpen,
       CTRL_O: self.changeToFileManagerWindow,
       CTRL_P: self.priorItem,
       CTRL_Q: self.saveEventChangeToHostWindow,
@@ -303,6 +286,7 @@ class InteractivePrompt(app.interactive_prompt.InteractivePrompt):
       KEY_ESCAPE: self.changeToHostWindow,
       KEY_F1: self.info,
       CTRL_J: self.execute,
+      CTRL_N: self.saveEventChangeToHostWindow,
     })
     self.commandSet = commandSet
     self.commandDefault = self.textBuffer.insertPrintable
@@ -326,37 +310,6 @@ class InteractiveQuit(app.controller.Controller):
     })
     self.commandSet = commandSet
     self.commandDefault = self.confirmationPromptFinish
-
-
-class InteractiveSaveAs(app.controller.Controller):
-  """Ask about unsaved files."""
-  def __init__(self, view):
-    app.controller.Controller.__init__(self, view, 'saveAs')
-
-  def setTextBuffer(self, textBuffer):
-    app.controller.Controller.setTextBuffer(self, textBuffer)
-    commandSet = initCommandSet(self, textBuffer)
-    commandSet.update({
-      KEY_ESCAPE: self.changeToHostWindow,
-      #KEY_F1: self.info,
-      CTRL_J: self.saveAs,
-    })
-    self.commandSet = commandSet
-    self.commandDefault = self.textBuffer.insertPrintable
-
-  def saveAs(self):
-    app.log.info('saveAs')
-    name = self.textBuffer.lines[0]
-    if not len(name):
-      self.view.textBuffer.setMessage(
-          'File not saved (file name was empty).')
-      self.changeToHostWindow()
-      return
-    self.view.textBuffer.setFilePath(self.textBuffer.lines[0])
-    # Preload the message with an error that should be overwritten.
-    self.view.textBuffer.setMessage('Error saving file')
-    self.view.textBuffer.fileWrite()
-    self.changeToHostWindow()
 
 
 class CuaEdit(app.controller.Controller):

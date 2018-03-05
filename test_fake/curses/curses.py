@@ -21,15 +21,23 @@ what ci_edit uses, without regard or reference to the internals of the curses
 library."""
 
 
-from .constants import *
 import ascii
-import app.curses_util
 import inspect
 import os
+import signal
 import sys
 import time
 import traceback
 import types
+
+from .constants import *
+
+
+# Avoiding importing app.curses_util.
+# Tuple events are preceded by an escape (27).
+BRACKETED_PASTE_BEGIN = (91, 50, 48, 48, 126)  # i.e. "[200~"
+BRACKETED_PASTE_END = (91, 50, 48, 49, 126)  # i.e. "[201~"
+BRACKETED_PASTE = ('terminal_paste',)  # Pseudo event type.
 
 
 class FakeInput:
@@ -43,26 +51,35 @@ class FakeInput:
     self.inBracketedPaste = False
     self.tupleIndex = -1
     self.waitingForRefresh = True
+    self.isVerbose = False
 
   def next(self):
     if not self.waitingForRefresh:
       while self.inputsIndex + 1 < len(self.inputs):
+        assert not self.waitingForRefresh
         self.inputsIndex += 1
         cmd = self.inputs[self.inputsIndex]
         if type(cmd) == types.FunctionType:
-          cmd(self.fakeDisplay, self.inputsIndex)
+          result = cmd(self.fakeDisplay, self.inputsIndex)
+          if result is not None:
+            self.waitingForRefresh = True
+            return result
         elif type(cmd) == types.StringType and len(cmd) == 1:
           if (not self.inBracketedPaste) and cmd != ascii.ESC:
             self.waitingForRefresh = True
+          if self.isVerbose:
+            print repr(cmd), ord(cmd)
           return ord(cmd)
         elif (type(cmd) == types.TupleType and len(cmd) > 1 and
             type(cmd[0]) == types.IntType):
-          if cmd == app.curses_util.BRACKETED_PASTE_BEGIN:
+          if cmd == BRACKETED_PASTE_BEGIN:
             self.inBracketedPaste = True
+          if self.isVerbose and self.tupleIndex == 0:
+            print cmd, type(cmd)
           self.tupleIndex += 1
           if self.tupleIndex >= len(cmd):
             self.tupleIndex = -1
-            if cmd == app.curses_util.BRACKETED_PASTE_END:
+            if cmd == BRACKETED_PASTE_END:
               self.inBracketedPaste = False
               self.waitingForRefresh = True
             return ERR
@@ -71,6 +88,8 @@ class FakeInput:
         else:
           if (not self.inBracketedPaste) and cmd != ascii.ESC:
             self.waitingForRefresh = True
+          if self.isVerbose:
+            print cmd, type(cmd)
           return cmd
     return ERR
 
@@ -110,27 +129,45 @@ class FakeDisplay:
   def checkStyle(self, row, col, height, width, color):
     colorPair = self.colors.get(color)
     if colorPair is None:
-      return "color %s is not ready" % (color,)
+      return "\n  color %s is not ready" % (color,)
     for i in range(height):
       for k in range(width):
         d = self.displayStyle[row + i][col + k]
         if d != colorPair:
           self.show()
-          return "row %s, col %s color/style mismatch '%d' != '%d'" % (
+          return "\n  row %s, col %s color/style mismatch '%d' != '%d'" % (
               row + i, col + k, d, colorPair)
     return None
 
-  def checkText(self, row, col, lines):
+  def checkText(self, row, col, lines, verbose=3):
     for i in range(len(lines)):
       line = lines[i]
       for k in range(len(line)):
+        if row + i >= self.rows:
+          return "\n  Row %d is outside of the %d row display" % (row + i,
+              self.rows)
+        if col + k >= self.cols:
+          return "\n  Column %d is outside of the %d column display" % (col + k,
+              self.cols)
         d = self.displayText[row + i][col + k]
         c = line[k]
         if d != c:
           self.show()
-          return "row %s, col %s mismatch '%s' != '%s'" % (
+          result = "\n  row %s, col %s mismatch '%s' != '%s'" % (
               row + i, col + k, d, c)
+          if verbose >= 1:
+            actualLine = ''.join(self.displayText[row + i])
+            result += unicode("\n  actual:   |%s|") % actualLine
+          if verbose >= 2:
+            expectedText = ''.join(line)
+            expectedLine = (actualLine[:col] + expectedText +
+                actualLine[col + len(expectedText):])
+            result += unicode("\n  expected: |%s|") % expectedLine
+          if verbose >= 3:
+            result += unicode("\n  mismatch:  %*s^") % (col + k, '')
+          return result
     return None
+
 
   def getColorPair(self, colorIndex):
     return self.colors.setdefault(colorIndex, 91 + len(self.colors))
@@ -144,11 +181,17 @@ class FakeDisplay:
   def getText(self):
     return [''.join(self.displayText[i]) for i in range(self.rows)]
 
+  def setScreenSize(self, rows, cols):
+    self.rows = rows
+    self.cols = cols
+    self.reset()
+
   def show(self):
-    print '+' + '-' * self.cols + '+ +' + '-' * self.cols + '+'
-    for line, styles in zip(self.getText(), self.getStyle()):
-      print '|' + line + '| |' + styles + '|'
-    print '+' + '-' * self.cols + '+ +' + '-' * self.cols + '+'
+    print '   %*s   %s' % (-self.cols, 'display', 'style')
+    print '  +' + '-' * self.cols + '+ +' + '-' * self.cols + '+'
+    for i, (line, styles) in enumerate(zip(self.getText(), self.getStyle())):
+      print "%2d|%s| |%s|" % (i, line, styles)
+    print '  +' + '-' * self.cols + '+ +' + '-' * self.cols + '+'
 
   def reset(self):
     self.displayStyle = [
@@ -252,6 +295,7 @@ class StandardScreen(FakeCursesWindow):
     self.fakeDisplay = fakeDisplay
     fakeInput = FakeInput(fakeDisplay)
     self.fakeInput = fakeInput
+    self.movie = False
 
   def setFakeInputs(self, cmdList):
     self.fakeInput.setInputs(cmdList)
@@ -261,15 +305,22 @@ class StandardScreen(FakeCursesWindow):
     return (self.fakeDisplay.rows, self.fakeDisplay.cols)
 
   def refresh(self):
+    if self.movie:
+      fakeDisplay.show()
     fakeInput.waitingForRefresh = False
     testLog()
 
 
-def can_change_color():
-  testLog()
+def baudrate(*args):
+  testLog(*args)
+  return -1
 
-def color_content():
-  testLog()
+def can_change_color(*args):
+  testLog(*args)
+  return 1
+
+def color_content(*args):
+  testLog(*args)
 
 def color_pair(*args):
   testLog(*args)
@@ -278,35 +329,35 @@ def color_pair(*args):
 def curs_set(*args):
   testLog(*args)
 
-def error():
-  testLog()
+def error(*args):
+  testLog(*args)
 
-def errorpass():
-  testLog()
+def errorpass(*args):
+  testLog(*args)
 
-def getch():
-  testLog()
+def getch(*args):
+  testLog(*args)
   return ERR
 
 def addMouseEvent(mouseEvent):
   testLog()
   return mouseEvents.append(mouseEvent)
 
-def getmouse():
-  testLog()
+def getmouse(*args):
+  testLog(*args)
   return mouseEvents.pop()
 
-def has_colors():
-  testLog()
+def has_colors(*args):
+  testLog(*args)
 
-def init_color():
-  testLog()
+def init_color(*args):
+  testLog(*args)
 
 def init_pair(*args):
   testLog(*args)
 
-def keyname():
-  testLog()
+def keyname(*args):
+  testLog(*args)
 
 def meta(*args):
   testLog(*args)
@@ -324,17 +375,17 @@ def newwin(*args):
 def raw(*args):
   testLog(*args)
 
-def resizeterm():
-  pass
+def resizeterm(*args):
+  testLog(*args)
 
-def start_color():
-  pass
+def start_color(*args):
+  testLog(*args)
 
 def ungetch(*args):
   testLog(*args)
 
-def use_default_colors():
-  pass
+def use_default_colors(*args):
+  testLog(*args)
 
 def get_pair(*args):
   fakeDisplay.getColorPair(*args)

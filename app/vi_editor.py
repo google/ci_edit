@@ -14,14 +14,15 @@
 
 """Key bindings for the vi-like editor."""
 
-from app.curses_util import *
-import app.controller
-import app.log
 import curses
 import curses.ascii
 import os
 import re
 import text_buffer
+
+from app.curses_util import *
+import app.controller
+import app.log
 
 
 class ViEdit(app.controller.Controller):

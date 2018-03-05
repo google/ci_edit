@@ -16,11 +16,12 @@
   Track user history to provide features such as resuming editing at the same
   cursor position after reloading a file; or a recent file list.
 """
-import app.log
 import cPickle as pickle
-import os
 import hashlib
+import os
 import time
+
+import app.log
 import app.prefs
 
 userHistory = {}

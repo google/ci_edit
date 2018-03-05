@@ -12,12 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from app.curses_util import *
-import app.buffer_manager
-import app.controller
 import os
 import re
 import time
+
+from app.curses_util import *
+import app.buffer_file
+import app.buffer_manager
+import app.controller
 
 
 class DirectoryListController(app.controller.Controller):
@@ -41,7 +43,7 @@ class DirectoryListController(app.controller.Controller):
     if self.shownDirectory == input:
       return
     self.shownDirectory = input
-    fullPath = os.path.abspath(os.path.expanduser(os.path.expandvars(input)))
+    fullPath = app.buffer_file.fullPath(input)
     dirPath = fullPath
     fileName = ''
     if len(input) > 0 and input[-1] != os.sep:
@@ -65,10 +67,10 @@ class DirectoryListController(app.controller.Controller):
           fullPath = os.path.join(dirPath, i)
           if os.path.isdir(fullPath):
             i += os.path.sep
-          iSize = ''
+          iSize = None
           iModified = 0
           if hostOptions['sizes'] and os.path.isfile(fullPath):
-            iSize = '%d bytes' % os.path.getsize(fullPath)
+            iSize = os.path.getsize(fullPath)
           if hostOptions['modified']:
             iModified = os.path.getmtime(fullPath)
           fileLines.append([i, iSize, iModified])
@@ -84,7 +86,7 @@ class DirectoryListController(app.controller.Controller):
           fileLines.sort(reverse=not viewOptions['Name'],
               key=lambda x: unicode.lower(x[0]))
         lines = ['%-40s  %16s  %24s' % (
-            i[0], i[1],
+            i[0], '%s bytes' % (i[1],) if i[1] is not None else '',
             unicode(time.strftime('%c', time.localtime(i[2]))) if i[2] else '')
             for i in fileLines]
         self.view.contents = [i[0] for i in fileLines]
@@ -94,14 +96,34 @@ class DirectoryListController(app.controller.Controller):
       clip = ['./', '../'] + lines
     else:
       clip = [dirPath + ": not found"]
-    self.view.textBuffer.selectionAll()
-    self.view.textBuffer.editPasteLines(tuple(clip))
+    self.view.textBuffer.replaceLines(tuple(clip))
     #self.view.textBuffer.findPlainText(fileName)
     self.view.textBuffer.penRow = 0
     self.view.textBuffer.penCol = 0
     self.view.scrollRow = 0
     self.view.scrollCol = 0
     self.filter = None
+
+  def openFileOrDir(self, row):
+    path = self.view.host.getPath()
+    if row == 0:  # Clicked on "./".
+      # Clear the shown directory to trigger a refresh.
+      self.shownDirectory = None
+      return
+    elif row == 1:  # Clicked on "../".
+      if path[-1] == os.path.sep:
+        path = path[:-1]
+      path = os.path.dirname(path)
+      if len(path) > len(os.path.sep):
+        path += os.path.sep
+      self.view.host.setPath(path)
+      return
+    # If there is a partially typed name in the line, clear it.
+    if path[-1:] != os.path.sep:
+      path = os.path.dirname(path) + os.path.sep
+    self.view.host.setPath(path + self.view.contents[row - 2])
+    if not os.path.isdir(self.view.host.getPath()):
+      self.view.host.controller.doCreateOrOpen()
 
   def optionChanged(self, name, value):
     self.shownDirectory = None
@@ -116,29 +138,61 @@ class FileManagerController(app.controller.Controller):
   """
   def __init__(self, view):
     app.controller.Controller.__init__(self, view, 'FileManagerController')
+    self.primaryActions = {
+      'open': self.doCreateOrOpen,
+      'saveAs': self.doSaveAs,
+      'selectDir': self.doSelectDir,
+    }
 
-  def createOrOpen(self):
+  def performPrimaryAction(self):
+    row = self.view.directoryList.textBuffer.penRow
+    if row == 0:
+      if not os.path.isdir(self.view.getPath()):
+        self.primaryActions[self.view.mode]()
+    else:
+      self.view.directoryList.controller.openFileOrDir(row)
+
+  def doCreateOrOpen(self):
     path = self.textBuffer.lines[0]
-    if not os.path.isdir(path):
-      if not os.access(path, os.R_OK):
-        if os.path.isfile(path):
-          clip = [path + ":", 'Error opening file.']
-          return
-      textBuffer = app.buffer_manager.buffers.loadTextBuffer(path,
-          self.view.host.inputWindow)
-      assert textBuffer.parser
-      self.view.host.inputWindow.setTextBuffer(textBuffer)
+    if not os.access(path, os.R_OK):
+      if os.path.isfile(path):
+        clip = [path + ":", 'Error opening file.']
+        return
+    textBuffer = app.buffer_manager.buffers.loadTextBuffer(path,
+        self.view.host.inputWindow)
+    assert textBuffer.parser
+    self.view.host.inputWindow.setTextBuffer(textBuffer)
+    self.view.textBuffer.replaceLines(('',))
+    self.changeToInputWindow()
+
+  def doSaveAs(self):
+    path = self.textBuffer.lines[0]
+    tb = self.view.host.inputWindow.textBuffer
+    tb.setFilePath(path);
+    self.changeToInputWindow()
+    if not len(path):
+      tb.setMessage('File not saved (file name was empty).')
+      return
+    if not tb.isSafeToWrite():
+      self.view.changeFocusTo(self.view.host.inputWindow.confirmOverwrite)
+      return
+    tb.fileWrite();
+    self.view.textBuffer.replaceLines(('',))
+
+  def doSelectDir(self):
+    # TODO(dschuyler): not yet implemented.
+    self.view.textBuffer.replaceLines(('',))
     self.changeToInputWindow()
 
   def focus(self):
-    self.textBuffer.selectionAll()
-    if len(self.view.inputWindow.textBuffer.fullPath) == 0:
-      path = os.getcwd()
-    else:
-      path = os.path.dirname(self.view.inputWindow.textBuffer.fullPath)
-    if len(path) != 0:
-      path += os.path.sep
-    self.textBuffer.editPasteLines((path,))
+    if self.view.textBuffer.isEmpty():
+      if len(self.view.inputWindow.textBuffer.fullPath) == 0:
+        path = os.getcwd()
+      else:
+        path = os.path.dirname(self.view.inputWindow.textBuffer.fullPath)
+      if len(path) != 0:
+        path += os.path.sep
+      self.view.textBuffer.replaceLines((path,))
     self.view.directoryList.focus()
     app.controller.Controller.focus(self)
 

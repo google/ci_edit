@@ -141,6 +141,8 @@ accordion
 accordionist
 accords
 account
+accountability
+accountable
 accounted
 accounting
 accounts
@@ -225,6 +227,7 @@ activities
 activity
 actor
 actors
+actress
 actresses
 acts
 actual
@@ -325,6 +328,9 @@ adventure
 adverb
 adverbial
 adverbs
+adversarial
+adversaries
+adversary
 adverse
 adversely
 advert
@@ -513,6 +519,7 @@ allocates
 allocating
 allocation
 allocations
+allocator
 allotted
 allow
 allowable
@@ -1042,6 +1049,7 @@ atlases
 atom
 atomic
 atomically
+atomicity
 atoms
 atop
 attach
@@ -1566,6 +1574,8 @@ big
 bigamous
 bigger
 biggest
+bijection
+bijections
 bilabial
 bile
 bilge
@@ -2029,6 +2039,7 @@ bulk
 bulked
 bull
 bullet
+bulleted
 bulletin
 bulletins
 bullets
@@ -2083,6 +2094,8 @@ busiest
 business
 businesses
 businessman
+businessperson
+businesswoman
 busker
 buss
 bust
@@ -2644,6 +2657,8 @@ cinema
 cipher
 ciphered
 ciphers
+ciphertext
+ciphertexts
 cir
 circa
 circle
@@ -5550,6 +5565,7 @@ encrypt
 encrypted
 encrypting
 encryption
+encryptions
 encrypts
 encumbered
 encyclopedia
@@ -8960,6 +8976,7 @@ jots
 joule
 joules
 journal
+journaling
 journalist
 journalists
 journals
@@ -9581,6 +9598,7 @@ locality
 localization
 localize
 localized
+localizer
 localizes
 localizing
 locally
@@ -11605,6 +11623,7 @@ panache
 panama
 panda
 pane
+paned
 panel
 panels
 panes
@@ -11636,6 +11655,8 @@ paragraph
 paragraphs
 parallel
 parallelism
+parallelize
+parallellized
 parallelogram
 parallels
 param
@@ -12165,6 +12186,8 @@ plain
 plainly
 plains
 plaint
+plaintext
+plaintexts
 plan
 planar
 plane
@@ -12390,6 +12413,8 @@ postal
 postbox
 postcard
 postcode
+postcondition
+postconditions
 posted
 poster
 posterior
@@ -12556,6 +12581,7 @@ preposition
 prepositional
 prepositions
 preprocess
+preprocessed
 preprocessor
 preps
 prerecorded
@@ -12622,6 +12648,7 @@ prevails
 prevent
 preventable
 prevented
+preventer
 preventing
 prevention
 prevents
@@ -13365,6 +13392,7 @@ reattaching
 reattachment
 reattempt
 reattempts
+reauthentication
 reauthorize
 rebase
 rebate
@@ -14646,6 +14674,7 @@ says
 scad
 scaffolding
 scag
+scalability
 scalable
 scalar
 scalars
@@ -17492,6 +17521,7 @@ trimmer
 trimming
 trimmings
 trims
+trinary
 trinity
 trio
 trip

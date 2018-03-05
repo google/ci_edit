@@ -12,13 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+import re
+
+import app.buffer_file
 import app.file_stats
 import app.log
 import app.parser
 import app.prefs
 import app.selectable
-import os
-import re
 
 
 # If a change is in |noOpInstructions| then it has no real effect.
@@ -140,6 +142,8 @@ class Mutator(app.selectable.Selectable):
       return True
     return not self.fileStats.fileContentChangedSinceSave()
 
+  def setFilePath(self, path):
+    self.fullPath = app.buffer_file.fullPath(path)
 
   def __doMoveLines(self, begin, end, to):
     lines = self.lines[begin:end]

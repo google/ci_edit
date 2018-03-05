@@ -12,16 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import app.log
-import app.history
-import app.text_buffer
 import io
 import os
 import sys
 
+import app.buffer_file
+import app.config
+import app.log
+import app.history
+import app.text_buffer
+
 class BufferManager:
   """Manage a set of text buffers. Some text buffers may be hidden."""
   def __init__(self):
+    if app.config.strict_debug:
+      assert issubclass(self.__class__, BufferManager), self
     # Using a dictionary lookup for buffers accelerates finding buffers by key
     # (the file path), but that's not the common use. Maintaining an ordered
     # list turns out to be more valuable.
@@ -30,6 +35,9 @@ class BufferManager:
   def closeTextBuffer(self, textBuffer):
     """Warning this will throw away the buffer. Please be sure the user is
         ok with this before calling."""
+    if app.config.strict_debug:
+      assert issubclass(self.__class__, BufferManager), self
+      assert issubclass(textBuffer.__class__, app.text_buffer.TextBuffer)
     self.untrackBuffer_(textBuffer)
 
   def getUnsavedBuffer(self):
@@ -74,7 +82,11 @@ class BufferManager:
     return textBuffer
 
   def loadTextBuffer(self, relPath, view):
-    fullPath = os.path.abspath(os.path.expanduser(os.path.expandvars(relPath)))
+    if app.config.strict_debug:
+      assert issubclass(self.__class__, BufferManager), self
+      assert type(relPath) is str
+      assert issubclass(view.__class__, app.window.ViewWindow)
+    fullPath = app.buffer_file.fullPath(relPath)
     app.log.info(fullPath)
     textBuffer = None
     for i,tb in enumerate(self.buffers):
@@ -91,6 +103,7 @@ class BufferManager:
       if not os.path.isfile(fullPath):
         app.log.info('creating a new file at\n ', fullPath)
       textBuffer = app.text_buffer.TextBuffer()
+      textBuffer.setFilePath(fullPath)
       textBuffer.view = view
       self.renameBuffer(textBuffer, fullPath)
       textBuffer.fileStats.setPopupWindow(view.popupWindow)
@@ -136,8 +149,6 @@ class BufferManager:
     For now, when you change the path of a fileBuffer, you should also be
     updating its fileStat object, so that it tracks the new file as well.
     """
-    # TODO(dschuyler): this can be phased out. It was from a time when the
-    # buffer manager needed to know if a path changed.
     fileBuffer.fullPath = fullPath
     fileBuffer.changeFileStats() # Track this new file.
 

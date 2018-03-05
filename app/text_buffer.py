@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import curses
+import re
+import sys
+
 import app.actions
 import app.color
 import app.file_stats
@@ -20,9 +24,7 @@ import app.parser
 import app.prefs
 import app.selectable
 import app.spelling
-import curses
-import re
-import sys
+
 
 class TextBuffer(app.actions.Actions):
   """The TextBuffer adds the drawing/rendering to the BackingTextBuffer."""
@@ -30,6 +32,7 @@ class TextBuffer(app.actions.Actions):
     app.actions.Actions.__init__(self)
     self.lineLimitIndicator = 0
     self.highlightRe = None
+    self.highlightCursorLine = False
     self.highlightTrailingWhitespace = True
     self.fileHistory = {}
     self.fileStats = app.file_stats.FileStats(self.fullPath)
@@ -284,6 +287,12 @@ class TextBuffer(app.actions.Actions):
           for f in k.regs:
             window.addStr(top + i, left + f[0], line[f[0]:f[1]],
                 app.color.get('number', colorDelta))
+    if self.highlightCursorLine:
+      # Highlight the whole line at the cursor location.
+      if startRow <= self.penRow < startRow + rowLimit:
+        line = self.lines[self.penRow][startCol:endCol]
+        window.addStr(top + self.penRow - startRow, left, line,
+            app.color.get('trailing_space', colorDelta))
     if self.highlightTrailingWhitespace:
       # Highlight space ending lines.
       for i in range(rowLimit):
