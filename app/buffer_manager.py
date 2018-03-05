@@ -84,7 +84,7 @@ class BufferManager:
   def loadTextBuffer(self, relPath, view):
     if app.config.strict_debug:
       assert issubclass(self.__class__, BufferManager), self
-      assert type(relPath) is str
+      assert type(relPath) is unicode, type(relPath)
       assert issubclass(view.__class__, app.window.ViewWindow)
     fullPath = app.buffer_file.fullPath(relPath)
     app.log.info(fullPath)
