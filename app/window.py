@@ -49,7 +49,6 @@ class ViewWindow:
       if parent is not None:
         assert issubclass(parent.__class__, ViewWindow), parent
     self.parent = parent
-    self.zOrder = []
     self.isFocusable = False
     self.top = 0
     self.left = 0
@@ -58,6 +57,7 @@ class ViewWindow:
     self.scrollRow = 0
     self.scrollCol = 0
     self.writeLineRow = 0
+    self.zOrder = []
 
   def addStr(self, row, col, text, colorPair):
     """Overwrite text at row, column with text. The caller is responsible for

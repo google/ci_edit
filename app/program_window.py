@@ -75,8 +75,19 @@ class ProgramWindow(app.window.ActiveWindow):
       self.focusedWindow.controller.onChange()
 
   def focus(self):
-    self.focusedWindow = self.zOrder[-1]
-    self.focusedWindow.focus()
+    self.setFocusedWindow(self.zOrder[-1])
+
+  def setFocusedWindow(self, window):
+    # Depth-first search for focusable window.
+    depth = [window]
+    while len(depth):
+      possibility = depth.pop()
+      if possibility.isFocusable:
+        self.focusedWindow = possibility
+        self.focusedWindow.focus()
+        return
+      depth += possibility.zOrder
+    app.log.error("focusable window not found")
 
   def clickedNearby(self, row, col):
     y, x = self.priorClickRowCol
