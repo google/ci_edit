@@ -68,30 +68,16 @@ class ViewWindow:
     app.render.frame.addStr(self.top + row, self.left + col,
         text.encode('utf-8'), colorPair)
 
+  def blank(self, colorPair):
+    """Clear the window."""
+    for i in range(self.rows):
+      self.addStr(i, 0, ' ' * self.cols, colorPair)
+
   def changeFocusTo(self, changeTo):
     if app.config.strict_debug:
       assert issubclass(self.__class__, ViewWindow), self
       assert issubclass(changeTo.__class__, ActiveWindow), parent
     self.parent.changeFocusTo(changeTo)
-
-  def normalize(self):
-    self.parent.normalize()
-
-  def paint(self, row, col, count, colorPair):
-    """Paint text a row, column with colorPair.
-      fyi, I thought this may be faster than using addStr to paint over the text
-      with a different colorPair. It looks like there isn't a significant
-      performance difference between chgat and addstr.
-    """
-    mainCursesWindow.chgat(self.top + row, self.left + col, count, colorPair)
-
-  def presentModal(self, changeTo, paneRow, paneCol):
-    self.parent.presentModal(changeTo, paneRow, paneCol)
-
-  def blank(self, colorPair):
-    """Clear the window."""
-    for i in range(self.rows):
-      self.addStr(i, 0, ' ' * self.cols, colorPair)
 
   def contains(self, row, col):
     """Determine whether the position at row, col lay within this window."""
@@ -140,6 +126,20 @@ class ViewWindow:
     self.top += top
     self.left += left
 
+  def normalize(self):
+    self.parent.normalize()
+
+  def paint(self, row, col, count, colorPair):
+    """Paint text a row, column with colorPair.
+      fyi, I thought this may be faster than using addStr to paint over the text
+      with a different colorPair. It looks like there isn't a significant
+      performance difference between chgat and addstr.
+    """
+    mainCursesWindow.chgat(self.top + row, self.left + col, count, colorPair)
+
+  def presentModal(self, changeTo, paneRow, paneCol):
+    self.parent.presentModal(changeTo, paneRow, paneCol)
+
   def render(self):
     """Redraw window."""
     for child in self.zOrder:
@@ -150,6 +150,13 @@ class ViewWindow:
     self.resizeTo(rows, cols)
     app.log.debug(self, top, left, rows, cols)
 
+  def resizeBottomBy(self, rows):
+    self.rows += rows
+
+  def resizeBy(self, rows, cols):
+    self.rows += rows
+    self.cols += cols
+
   def resizeTo(self, rows, cols):
     #app.log.detail(rows, cols, self)
     if app.config.strict_debug:
@@ -157,13 +164,6 @@ class ViewWindow:
       assert cols >=0, cols
     self.rows = rows
     self.cols = cols
-
-  def resizeBottomBy(self, rows):
-    self.rows += rows
-
-  def resizeBy(self, rows, cols):
-    self.rows += rows
-    self.cols += cols
 
   def resizeTopBy(self, rows):
     self.top += rows
@@ -214,6 +214,11 @@ class ActiveWindow(ViewWindow):
     self.isFocusable = True
 
   def focus(self):
+    """
+    Note: to focus a view it must have a controller. Focusing a view without a
+        controller would make the program appear to freeze since nothing would
+        be responding to user input.
+    """
     app.log.info(self)
     self.hasFocus = True
     try:
