@@ -193,7 +193,7 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
         self.writeText('twenty-two'), CTRL_J,
         self.writeText('twenty-three'),
         CTRL_E, 'b', 'm', CTRL_J, # Create a new bookmark.
-        # Bookmarks are at positions (1, 4), (2, 1) (8, 6), (23, 13).
+        # Bookmarks are at positions (1, 4), (2, 1), (3, 6) (9, 1), (23, 13).
         # Note that rows here start at 1, so 1 is the first row.
         self.displayCheck(0, 0, [
             " ci     *                               ",
