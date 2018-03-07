@@ -247,7 +247,7 @@ class FakeCursesWindow:
         val = getchCallback()
         return val
     val = fakeInput.next()
-    if 0 and val != ERR:
+    if self.movie and val != ERR:
       print 'val', val
     return val
 
@@ -304,11 +304,11 @@ class StandardScreen(FakeCursesWindow):
     testLog()
     return (self.fakeDisplay.rows, self.fakeDisplay.cols)
 
-  def refresh(self):
+  def refresh(self, *args):
+    testLog(*args)
     if self.movie:
       fakeDisplay.show()
     fakeInput.waitingForRefresh = False
-    testLog()
 
 
 def baudrate(*args):

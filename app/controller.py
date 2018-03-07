@@ -49,10 +49,11 @@ class Controller:
     self.findAndChangeTo('interactiveQuit')
 
   def changeToHostWindow(self, *args):
+    host = self.getNamedWindow('inputWindow')
     if app.config.strict_debug:
       assert issubclass(self.view.__class__, app.window.Window), self.view
-      assert issubclass(self.view.host.__class__, app.window.Window), self.view.host
-    self.view.host.changeFocusTo(self.view.host)
+      assert issubclass(host.__class__, app.window.Window), host
+    self.view.changeFocusTo(host)
 
   def changeToInputWindow(self, *args):
     self.findAndChangeTo('inputWindow')
@@ -124,7 +125,8 @@ class Controller:
     pass
 
   def confirmationPromptFinish(self, *args):
-    self.view.host.userIntent = 'edit'
+    host = self.getNamedWindow('inputWindow')
+    host.userIntent = 'edit'
     self.changeToHostWindow()
 
   def __closeHostFile(self, host):
@@ -140,7 +142,8 @@ class Controller:
 
   def closeFile(self):
     app.log.info()
-    self.__closeHostFile(self.view.host)
+    host = self.getNamedWindow('inputWindow')
+    self.__closeHostFile(host)
     #app.buffer_manager.buffers.closeTextBuffer(self.view.host.textBuffer)
     #self.view.host.setTextBuffer(app.buffer_manager.buffers.newTextBuffer())
     self.confirmationPromptFinish()
@@ -148,12 +151,13 @@ class Controller:
   def closeOrConfirmClose(self):
     """If the file is clean, close it. If it is dirty, prompt the user
         about whether to lose unsaved changes."""
-    tb = self.view.host.textBuffer
+    host = self.getNamedWindow('inputWindow')
+    tb = host.textBuffer
     if not tb.isDirty():
-      self.__closeHostFile(self.view.host)
+      self.__closeHostFile(host)
       return
-    if self.view.host.userIntent == 'edit':
-      self.view.host.userIntent = 'close'
+    if host.userIntent == 'edit':
+      host.userIntent = 'close'
     self.changeToConfirmClose()
 
   def initiateClose(self):
@@ -194,18 +198,20 @@ class Controller:
 
   def overwriteHostFile(self):
     """Close the current file and switch to another or create an empty file."""
-    self.view.host.textBuffer.fileWrite()
-    if self.view.host.userIntent == 'quit':
+    host = self.getNamedWindow('inputWindow')
+    host.textBuffer.fileWrite()
+    if host.userIntent == 'quit':
       self.quitOrSwitchToConfirmQuit()
       return
-    if self.view.host.userIntent == 'close':
-      self.__closeHostFile(self.view.host)
+    if host.userIntent == 'close':
+      self.__closeHostFile(host)
     self.changeToHostWindow()
 
   def writeOrConfirmOverwrite(self):
     """Ask whether the file should be overwritten."""
     app.log.debug()
-    tb = self.view.host.textBuffer
+    host = self.getNamedWindow('inputWindow')
+    tb = host.textBuffer
     if not tb.isSafeToWrite():
       self.changeToConfirmOverwrite()
       return
@@ -213,39 +219,40 @@ class Controller:
     # TODO(dschuyler): Is there a deeper issue here that necessitates saving
     # the message? Does this only need to wrap the changeToHostWindow()?
     saveMessage = tb.message  # Store the save message so it is not overwritten.
-    if self.view.host.userIntent == 'quit':
+    if host.userIntent == 'quit':
       self.quitOrSwitchToConfirmQuit()
       return
-    if self.view.host.userIntent == 'close':
-      self.__closeHostFile(self.view.host)
+    if host.userIntent == 'close':
+      self.__closeHostFile(host)
     self.changeToHostWindow()
     tb.message = saveMessage  # Restore the save message.
 
   def quitOrSwitchToConfirmQuit(self):
-    app.log.debug(self, self.view, self.view.host)
-    tb = self.view.host.textBuffer
-    self.view.host.userIntent = 'quit'
+    app.log.debug(self, self.view)
+    host = self.getNamedWindow('inputWindow')
+    tb = host.textBuffer
+    host.userIntent = 'quit'
     if tb.isDirty():
       self.changeToConfirmQuit()
       return
     tb = app.buffer_manager.buffers.getUnsavedBuffer()
     if tb:
-      self.view.host.setTextBuffer(tb)
+      host.setTextBuffer(tb)
       self.changeToConfirmQuit()
       return
     app.buffer_manager.buffers.debugLog()
-    self.view.host.quitNow()
+    host.quitNow()
 
   def saveOrChangeToSaveAs(self):
     app.log.debug()
+    host = self.getNamedWindow('inputWindow')
     if app.config.strict_debug:
       assert issubclass(self.__class__, Controller), self
       assert issubclass(self.view.__class__, app.window.Window), self
-      assert issubclass(self.view.host.__class__, app.window.Window), self
+      assert issubclass(host.__class__, app.window.Window), self
       assert self.view.textBuffer is self.textBuffer
-      assert self.view.textBuffer is not self.view.host.textBuffer
-    tb = self.view.host.textBuffer
-    if tb.fullPath:
+      assert self.view.textBuffer is not host.textBuffer
+    if host.textBuffer.fullPath:
       self.writeOrConfirmOverwrite()
       return
     self.changeToSaveAs()
@@ -255,11 +262,13 @@ class Controller:
 
   def saveEventChangeToHostWindow(self, *args):
     curses.ungetch(self.savedCh)
-    self.view.host.changeFocusTo(self.view.host)
+    host = self.getNamedWindow('inputWindow')
+    self.view.changeFocusTo(host)
 
   def saveEventChangeToInputWindow(self, *args):
     curses.ungetch(self.savedCh)
-    self.view.host.changeFocusTo(self.view.host.inputWindow)
+    host = self.getNamedWindow('inputWindow')
+    self.view.changeFocusTo(host)
 
   def setTextBuffer(self, textBuffer):
     if app.config.strict_debug:

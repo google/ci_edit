@@ -175,7 +175,7 @@ class Actions(app.mutator.Mutator):
       return
     _, _, lowerRow, _ = self.startAndEnd()
     needle = app.bookmark.Bookmark(lowerRow, float('inf'))
-    index = bisect.bisect(self.bookmarks, tempBookmark)
+    index = bisect.bisect(self.bookmarks, needle)
     self.bookmarkGoto(self.bookmarks[index % len(self.bookmarks)])
 
   def bookmarkPrior(self):
@@ -193,7 +193,7 @@ class Actions(app.mutator.Mutator):
       return
     upperRow, _, _, _ = self.startAndEnd()
     needle = app.bookmark.Bookmark(upperRow, upperRow)
-    index = bisect.bisect_left(self.bookmarks, tempBookmark)
+    index = bisect.bisect_left(self.bookmarks, needle)
     self.bookmarkGoto(self.bookmarks[index - 1])
 
   def bookmarkRemove(self):
