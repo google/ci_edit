@@ -324,7 +324,6 @@ class CiProgram:
     cursesWindow = app.window.mainCursesWindow
     cursesWindow.noutrefresh()
     curses.curs_set(0)  # Hide cursor.
-    #drawList, cursor = app.render.frame.grabFrame()
     for i in drawList:
       try:
         cursesWindow.addstr(*i)
