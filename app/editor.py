@@ -26,7 +26,7 @@ import app.controller
 
 def parseInt(inStr):
   if app.config.strict_debug:
-    assert type(inStr) is str
+    assert type(inStr) is unicode, type(inStr)
   i = 0
   k = 0
   if len(inStr) > i and inStr[i] in ('+', '-'):

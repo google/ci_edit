@@ -298,7 +298,7 @@ class CiProgram:
       if i == '-':
         readStdin = True
       else:
-        cliFiles.append({'path': i})
+        cliFiles.append({'path': unicode(i)})
     app.prefs.init()
     app.prefs.startup = {
       'debugRedo': debugRedo,
