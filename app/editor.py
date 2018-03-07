@@ -246,8 +246,8 @@ class InteractiveGoto(app.controller.Controller):
 
   def onChange(self):
     app.log.info()
-    line = ''
+    line = U''
     try: line = self.textBuffer.lines[0]
     except: pass
-    gotoLine, gotoCol = (line.split(',') + ['0', '0'])[:2]
+    gotoLine, gotoCol = (line.split(U',') + [U'0', U'0'])[:2]
     self.cursorMoveTo(parseInt(gotoLine)-1, parseInt(gotoCol))
