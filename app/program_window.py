@@ -54,10 +54,7 @@ class ProgramWindow(app.window.ActiveWindow):
   def changeFocusTo(self, changeTo):
     self.focusedWindow.controller.onChange()
     self.focusedWindow.unfocus()
-    self.focusedWindow = changeTo
-    #self.focusedWindow.show()
-    self.focusedWindow.focus()
-    self.focusedWindow.textBuffer.compoundChangePush()
+    self.setFocusedWindow(changeTo)
 
   def debugDraw(self, win):
     if self.showLogWindow:
@@ -83,8 +80,12 @@ class ProgramWindow(app.window.ActiveWindow):
     while len(depth):
       possibility = depth.pop()
       if possibility.isFocusable:
+        if app.config.strict_debug:
+          assert issubclass(possibility.__class__, app.window.ActiveWindow)
+          assert possibility.controller
         self.focusedWindow = possibility
         self.focusedWindow.focus()
+        self.focusedWindow.textBuffer.compoundChangePush()
         return
       depth += possibility.zOrder
     app.log.error("focusable window not found")

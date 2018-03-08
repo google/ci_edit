@@ -154,7 +154,7 @@ class InteractiveFind(app.editor.InteractiveFind):
       KEY_F1: self.info,
       KEY_F3: self.saveEventChangeToHostWindow,
       KEY_SHIFT_F3: self.saveEventChangeToHostWindow,
-      CTRL_E: self.findReplaceChangeToHostWindow,
+      CTRL_E: self.extendFindWindow,
       CTRL_F: self.findNext,
       CTRL_G: self.findNext,
       CTRL_J: self.changeToHostWindow,
@@ -168,9 +168,8 @@ class InteractiveFind(app.editor.InteractiveFind):
     self.commandSet = commandSet
     self.commandDefault = self.textBuffer.insertPrintable
 
-  def findReplaceChangeToHostWindow(self):
-    self.findReplace()
-    self.changeToHostWindow()
+  def extendFindWindow(self):
+    self.view.host.toggleExtendedFindWindow()
 
 
 class InteractiveGoto(app.editor.InteractiveGoto):

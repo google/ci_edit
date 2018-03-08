@@ -169,18 +169,18 @@ class InteractiveFind(app.controller.Controller):
     app.controller.Controller.__init__(self, view, 'find')
 
   def findNext(self):
-    self.findCmd = self.view.host.textBuffer.findNext
+    self.findCmd = self.view.parent.host.textBuffer.findNext
 
   def findPrior(self):
-    self.findCmd = self.view.host.textBuffer.findPrior
+    self.findCmd = self.view.parent.host.textBuffer.findPrior
 
   def findReplace(self):
-    self.findCmd = self.view.host.textBuffer.findReplace
+    self.findCmd = self.view.parent.host.textBuffer.findReplace
 
   def focus(self):
     app.log.info('InteractiveFind')
-    self.findCmd = self.view.host.textBuffer.find
-    selection = self.view.host.textBuffer.getSelectedText()
+    self.findCmd = self.view.parent.host.textBuffer.find
+    selection = self.view.parent.host.textBuffer.getSelectedText()
     if selection:
       self.textBuffer.selectionAll()
       # Make a single regex line.
@@ -199,7 +199,7 @@ class InteractiveFind(app.controller.Controller):
       self.findCmd(searchFor)
     except re.error, e:
       self.error = e.message
-    self.findCmd = self.view.host.textBuffer.find
+    self.findCmd = self.view.host.parent.textBuffer.find
 
 
 class InteractiveGoto(app.controller.Controller):

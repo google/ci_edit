@@ -77,7 +77,7 @@ class ViewWindow:
   def changeFocusTo(self, changeTo):
     if app.config.strict_debug:
       assert issubclass(self.__class__, ViewWindow), self
-      assert issubclass(changeTo.__class__, ActiveWindow), parent
+      assert issubclass(changeTo.__class__, ViewWindow), changeTo
     self.parent.changeFocusTo(changeTo)
 
   def contains(self, row, col):
@@ -96,7 +96,7 @@ class ViewWindow:
     try:
       self.parent.zOrder.remove(self)
     except ValueError:
-      app.log.detail(repr(self) + 'not found in zOrder')
+      app.log.detail(repr(self) + ' not found in zOrder')
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
     pass
@@ -149,7 +149,7 @@ class ViewWindow:
   def reshape(self, top, left, rows, cols):
     self.moveTo(top, left)
     self.resizeTo(rows, cols)
-    app.log.debug(self, top, left, rows, cols)
+    #app.log.debug(self, top, left, rows, cols)
 
   def resizeBottomBy(self, rows):
     self.rows += rows
@@ -209,7 +209,7 @@ class ActiveWindow(ViewWindow):
     if app.config.strict_debug:
       assert issubclass(self.__class__, ActiveWindow), self
       if parent is not None:
-        assert issubclass(parent.__class__, ActiveWindow), parent
+        assert issubclass(parent.__class__, ViewWindow), parent
     ViewWindow.__init__(self, parent)
     self.controller = None
     self.isFocusable = True
@@ -241,7 +241,7 @@ class Window(ActiveWindow):
   def __init__(self, parent):
     if app.config.strict_debug:
       assert issubclass(self.__class__, Window), self
-      assert issubclass(parent.__class__, ActiveWindow), parent
+      assert issubclass(parent.__class__, ViewWindow), parent
     ActiveWindow.__init__(self, parent)
     self.cursorRow = 0
     self.cursorCol = 0
@@ -296,9 +296,6 @@ class Window(ActiveWindow):
     textBuffer.setView(self)
     self.textBuffer = textBuffer
 
-  def unfocus(self):
-    ActiveWindow.unfocus(self)
-
 
 class LabeledLine(Window):
   """A single line with a label. This is akin to a line prompt or gui modal
@@ -306,7 +303,7 @@ class LabeledLine(Window):
   def __init__(self, parent, label):
     if app.config.strict_debug:
       assert issubclass(self.__class__, LabeledLine), self
-      assert issubclass(parent.__class__, ActiveWindow), parent
+      assert issubclass(parent.__class__, ViewWindow), parent
     Window.__init__(self, parent)
     self.host = parent
     tb = app.text_buffer.TextBuffer()
@@ -323,7 +320,7 @@ class LabeledLine(Window):
     Window.render(self)
 
   def reshape(self, top, left, rows, cols):
-    app.log.debug(self, top, left, rows, cols)
+    #app.log.debug(self, top, left, rows, cols)
     labelWidth = len(self.label)
     Window.reshape(self, top,
         left + labelWidth, rows, max(0, cols - labelWidth))
@@ -335,9 +332,9 @@ class LabeledLine(Window):
 
   def unfocus(self):
     self.blank(app.color.get('message_line'))
-    self.hide()
+    #self.hide()
     self.leftColumn.blank(app.color.get('message_line'))
-    self.leftColumn.hide()
+    #self.leftColumn.hide()
     Window.unfocus(self)
 
 
@@ -511,24 +508,40 @@ class LogWindow(ViewWindow):
     ViewWindow.render(self)
 
 
-class InteractiveFind(Window):
+class InteractiveFind(ViewWindow):
   def __init__(self, host):
-    Window.__init__(self, host)
+    ViewWindow.__init__(self, host)
+    self.host = host
+    self.expanded = False
     self.findLine = LabeledLine(self, 'find: ')
     self.findLine.setController(app.cu_editor.InteractiveFind)
-    self.zOrder.append(self.findLine)
+    self.findLine.setParent(self, 0)
     self.replaceLine = LabeledLine(self, 'replace: ')
     self.replaceLine.setController(app.cu_editor.InteractiveFind)
-    self.zOrder.append(self.replaceLine)
-    self.setTextBuffer(app.text_buffer.TextBuffer())
-    self.controller = app.cu_editor.InteractiveFind(self,
-        self.findLine.textBuffer)
+    self.replaceLine.setParent(self, 1)
+
+  def focus(self):
+   assert False
+
+  def preferredSize(self):
+    if self.expanded:
+      return (2, -1)
+    return (1, -1)
+
+  def toggleExtendedFindWindow(self):
+    self.expanded = not self.expanded
+    self.parent.layout()
 
   def reshape(self, top, left, rows, cols):
-    Window.reshape(self, top, left, rows, cols)
+    ViewWindow.reshape(self, top, left, rows, cols)
     self.findLine.reshape(top, left, 1, cols)
     top += 1
-    self.replaceLine.reshape(top, left, 1, cols)
+    rows -= 1
+    if rows < 1:
+      self.replaceLine.hide()
+    else:
+      self.replaceLine.show()
+      self.replaceLine.reshape(top, left, 1, cols)
 
 
 class MessageLine(ViewWindow):
@@ -717,8 +730,9 @@ class InputWindow(Window):
           "Overwrite exiting file? (yes or no): ")
       self.confirmOverwrite.setController(app.cu_editor.ConfirmOverwrite)
     self.contextMenu = Menu(self)
-    if 0:  # wip on multi-line interactive find.
+    if 1:  # wip on multi-line interactive find.
       self.interactiveFind = InteractiveFind(self)
+      self.interactiveFind.setParent(self, 0)
     else:
       self.interactiveFind = LabeledLine(self, 'find: ')
       self.interactiveFind.setController(app.cu_editor.InteractiveFind)
@@ -810,6 +824,8 @@ class InputWindow(Window):
     lineNumbersCols = 7
     topRows = self.topRows
     bottomRows = self.bottomRows
+    if self.useInteractiveFind:
+      bottomRows = self.interactiveFind.preferredSize()[0]
 
     if self.showTopInfo and rows > topRows and cols > lineNumbersCols:
       self.topInfo.reshape(top,
