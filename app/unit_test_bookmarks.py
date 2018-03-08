@@ -150,14 +150,16 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
     checkRanges(Bookmark(-3, 3))
     checkRanges(Bookmark(-5000, -4990))
 
-    # Check intervals of length 0
+    # Check intervals of length 0.
     checkRanges(Bookmark(0, 0))
     checkRanges(Bookmark(5000, 5000))
     checkRanges(Bookmark(-5000, 5000))
 
-    b = Bookmark(3, float('inf'))
-    self.assertTrue(1000000 in b)
-    self.assertTrue(float('inf') in b)
+    b = Bookmark(-3.99, 3.99) # Floats get casted to int (rounds towards zero).
+    self.assertFalse(-4 in b)
+    self.assertTrue(-3 in b)
+    self.assertFalse(4 in b)
+    self.assertTrue(3 in b)
 
   def test_bookmark_overlap(self):
     b1 = Bookmark(1, 5)
@@ -201,55 +203,95 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
     self.assertTrue(b2.overlaps(b1))
 
     b1 = Bookmark(0, 0)
-    b2 = Bookmark(-5, float('inf'))
+    b2 = Bookmark(-5, 99)
+    self.assertTrue(b1.overlaps(b2))
+    self.assertTrue(b2.overlaps(b1))
+
+    b1 = Bookmark(0, 0)
+    b2 = Bookmark(-5, -1)
+    self.assertFalse(b1.overlaps(b2))
+    self.assertFalse(b2.overlaps(b1))
+
+    b1 = Bookmark(5, 5)
+    b2 = Bookmark(6, 9)
+    self.assertFalse(b1.overlaps(b2))
+    self.assertFalse(b2.overlaps(b1))
+
+    b1 = Bookmark(3, 5)
+    b2 = Bookmark(5, 8)
+    self.assertTrue(b1.overlaps(b2))
+    self.assertTrue(b2.overlaps(b1))
+
+    b1 = Bookmark(-3.999, 3.999) # Rounds to range (-3, 3).
+    b2 = Bookmark(-5, -4)
+    self.assertFalse(b1.overlaps(b2))
+    self.assertFalse(b2.overlaps(b1))
+
+    b1 = Bookmark(-3.001, 3.001) # Rounds to range (-3, 3).
+    b2 = Bookmark(3.99, 9.0) # Rounds to range (3, 9).
     self.assertTrue(b1.overlaps(b2))
     self.assertTrue(b2.overlaps(b1))
 
   def test_bookmark_properties(self):
-    b1 = Bookmark(3, 5)
-    self.assertTrue(b1.begin == 3)
-    self.assertTrue(b1.end == 5)
-    self.assertTrue(b1.range == (3, 5))
+    b = Bookmark(3, 5)
+    self.assertTrue(b.begin == 3)
+    self.assertTrue(b.end == 5)
+    self.assertTrue(b.range == (3, 5))
 
-    b1.range = (10, 20)
-    self.assertTrue(b1.begin == 10)
-    self.assertTrue(b1.end == 20)
-    self.assertTrue(b1.range == (10, 20))
+    b = Bookmark(-5.99, 5.99) # Test constructor
+    self.assertTrue(b.begin == -5)
+    self.assertTrue(b.end == 5)
+    self.assertTrue(b.range == (-5, 5))
 
-    b1.range = (20, 10)
-    self.assertTrue(b1.begin == 10)
-    self.assertTrue(b1.end == 20)
-    self.assertTrue(b1.range == (10, 20))
+    b.range = (10, 20)
+    self.assertTrue(b.begin == 10)
+    self.assertTrue(b.end == 20)
+    self.assertTrue(b.range == (10, 20))
 
-    b1.range = (3,)
-    self.assertTrue(b1.begin == 3)
-    self.assertTrue(b1.end == 3)
-    self.assertTrue(b1.range == (3, 3))
+    b.range = (20, 10)
+    self.assertTrue(b.begin == 10)
+    self.assertTrue(b.end == 20)
+    self.assertTrue(b.range == (10, 20))
 
-    b1.begin = -3
-    self.assertTrue(b1.begin == -3)
-    self.assertTrue(b1.end == 3)
-    self.assertTrue(b1.range == (-3, 3))
+    b.range = (3,)
+    self.assertTrue(b.begin == 3)
+    self.assertTrue(b.end == 3)
+    self.assertTrue(b.range == (3, 3))
 
-    b1.begin = 10
-    self.assertTrue(b1.begin == 3)
-    self.assertTrue(b1.end == 10)
-    self.assertTrue(b1.range == (3, 10))
+    b.begin = -3
+    self.assertTrue(b.begin == -3)
+    self.assertTrue(b.end == 3)
+    self.assertTrue(b.range == (-3, 3))
 
-    b1.end = 15
-    self.assertTrue(b1.begin == 3)
-    self.assertTrue(b1.end == 15)
-    self.assertTrue(b1.range == (3, 15))
+    b.begin = 10
+    self.assertTrue(b.begin == 3)
+    self.assertTrue(b.end == 10)
+    self.assertTrue(b.range == (3, 10))
 
-    b1.end = -5
-    self.assertTrue(b1.begin == -5)
-    self.assertTrue(b1.end == 3)
-    self.assertTrue(b1.range == (-5, 3))
+    b.end = 15
+    self.assertTrue(b.begin == 3)
+    self.assertTrue(b.end == 15)
+    self.assertTrue(b.range == (3, 15))
 
-    b1.begin = float('inf')
-    self.assertTrue(b1.begin == 3)
-    self.assertTrue(b1.end == float('inf'))
-    self.assertTrue(b1.range == (3, float('inf')))
+    b.end = -5
+    self.assertTrue(b.begin == -5)
+    self.assertTrue(b.end == 3)
+    self.assertTrue(b.range == (-5, 3))
+
+    b.begin = 3.9
+    self.assertTrue(b.begin == 3)
+    self.assertTrue(b.end == 3)
+    self.assertTrue(b.range == (3, 3))
+
+    b.end = 2.99
+    self.assertTrue(b.begin == 2)
+    self.assertTrue(b.end == 3)
+    self.assertTrue(b.range == (2, 3))
+
+    b.range = (-9.99, 9.99)
+    self.assertTrue(b.begin == -9)
+    self.assertTrue(b.end == 9)
+    self.assertTrue(b.range == (-9, 9))
 
   def test_get_next_bookmark_color(self):
     try:

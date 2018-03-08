@@ -20,6 +20,8 @@ class Bookmark(object):
   """
   def __init__(self, beginRow, endRow, data={}):
     """
+    Creates a bookmark located at the specified rows. This will automatically
+    cast the passed in rows into integers.
     Args:
       beginRow (int): The line that the bookmark starts on (inclusive).
       endRow (int): The line that the bookmark ends on (inclusive).
@@ -27,8 +29,8 @@ class Bookmark(object):
                     to associate with this bookmark. It is an empty dictionary
                     by default.
     """
-    self.__begin = beginRow
-    self.__end = endRow
+    self.__begin = int(beginRow)
+    self.__end = int(endRow)
     self.data = data
 
   @property
@@ -37,7 +39,7 @@ class Bookmark(object):
 
   @range.setter
   def range(self, value):
-    self.__begin, self.__end = min(value), max(value)
+    self.__begin, self.__end = int(min(value)), int(max(value))
 
   @property
   def begin(self):
@@ -47,8 +49,8 @@ class Bookmark(object):
   def begin(self, value):
     minVal = min(value, self.__end)
     maxVal = max(value, self.__end)
-    self.__begin = minVal
-    self.__end = maxVal
+    self.__begin = int(minVal)
+    self.__end = int(maxVal)
 
   @property
   def end(self):
@@ -58,8 +60,8 @@ class Bookmark(object):
   def end(self, value):
     minVal = min(self.__begin, value)
     maxVal = max(self.__begin, value)
-    self.__begin = minVal
-    self.__end = maxVal
+    self.__begin = int(minVal)
+    self.__end = int(maxVal)
 
   def overlaps(self, bookmark):
     """
