@@ -26,6 +26,10 @@ if not os.getenv('CI_EDIT_USE_REAL_CURSES'):
   }
   app.log.shouldWritePrintLog = True
 
+# Set up strict_debug before loading other app.* modules.
+import app.config
+app.config.strict_debug = True
+
 import app.unit_test_application
 import app.unit_test_bookmarks
 import app.unit_test_parser

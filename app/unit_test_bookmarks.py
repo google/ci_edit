@@ -21,10 +21,9 @@ import app.prefs
 import app.text_buffer
 import app.window
 
+
 kTestFile = '#bookmarks_test_file_with_unlikely_file_name~'
 
-class EmptyObject:
-  pass
 
 class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
   def setUp(self):
@@ -38,7 +37,7 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
     if os.path.isfile(kTestFile):
       os.unlink(kTestFile)
     self.assertFalse(os.path.isfile(kTestFile))
-    self.fakeHost = EmptyObject()
+    self.fakeHost = app.window.ViewWindow(None)
     self.textBuffer = app.text_buffer.TextBuffer()
     self.textBuffer.lines = 50
     self.lineNumbers = app.window.LineNumbers(self.fakeHost)
