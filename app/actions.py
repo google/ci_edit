@@ -137,7 +137,7 @@ class Actions(app.mutator.Mutator):
     """
     newBookmark = self.dataToBookmark()
     self.bookmarkRemove()
-    bisect.insort(self.bookmarks, newBookmark)
+    bisect.insort_right(self.bookmarks, newBookmark)
 
   def bookmarkGoto(self, bookmark):
     """
@@ -174,8 +174,8 @@ class Actions(app.mutator.Mutator):
       self.setMessage("No bookmarks to jump to")
       return
     _, _, lowerRow, _ = self.startAndEnd()
-    needle = app.bookmark.Bookmark(lowerRow, float('inf'))
-    index = bisect.bisect(self.bookmarks, needle)
+    needle = app.bookmark.Bookmark(lowerRow + 1, lowerRow + 1)
+    index = bisect.bisect_left(self.bookmarks, needle)
     self.bookmarkGoto(self.bookmarks[index % len(self.bookmarks)])
 
   def bookmarkPrior(self):
