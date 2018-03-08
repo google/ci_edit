@@ -702,10 +702,8 @@ class InputWindow(Window):
     if app.config.strict_debug:
       assert(host)
     Window.__init__(self, host)
-    self.bottomRows = 1  # Not including status line.
     self.host = host
     self.showFooter = True
-    self.useInteractiveFind = True
     self.savedScrollPositions = {}
     self.showLineNumbers = app.prefs.editor.get(
         'showLineNumbers', True)
@@ -823,9 +821,7 @@ class InputWindow(Window):
     top, left, rows, cols = self.outerShape
     lineNumbersCols = 7
     topRows = self.topRows
-    bottomRows = self.bottomRows
-    if self.useInteractiveFind:
-      bottomRows = self.interactiveFind.preferredSize()[0]
+    bottomRows = self.interactiveFind.preferredSize()[0]
 
     if self.showTopInfo and rows > topRows and cols > lineNumbersCols:
       self.topInfo.reshape(top,
@@ -842,8 +838,7 @@ class InputWindow(Window):
     self.interactiveQuit.reshape(bottomFirstRow, left, bottomRows, cols)
     if self.showMessageLine:
       self.messageLine.reshape(bottomFirstRow, left, bottomRows, cols)
-    if self.useInteractiveFind:
-      self.interactiveFind.reshape(bottomFirstRow, left, bottomRows, cols)
+    self.interactiveFind.reshape(bottomFirstRow, left, bottomRows, cols)
     if 1:
       self.interactiveGoto.reshape(bottomFirstRow,
           left, bottomRows, cols)
