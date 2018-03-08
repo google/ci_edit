@@ -109,16 +109,11 @@ class Controller:
       if hasattr(view, windowName):
         return getattr(view, windowName);
       view = view.parent
-    app.log.error(windowName + ' not found');
+    app.log.fatal(windowName + ' not found');
     return None
 
   def findAndChangeTo(self, windowName):
-    view = self.view
-    while view is not None:
-      if hasattr(view, windowName):
-        view.changeFocusTo(getattr(view, windowName));
-      view = view.parent
-    app.log.error(windowName + ' not found');
+    self.view.changeFocusTo(self.getNamedWindow(windowName))
 
   def focus(self):
     app.log.info('base controller focus()')
