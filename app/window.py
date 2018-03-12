@@ -942,6 +942,7 @@ class OptionsRow(ViewWindow):
       assert(host)
     ViewWindow.__init__(self, host)
     self.host = host
+    self.color = app.color.get('top_info')
     self.controlList = []
     self.group = None
 
@@ -1030,7 +1031,6 @@ class OptionsRow(ViewWindow):
       offset += width + len(control['sep'])
 
   def render(self):
-    color = app.color.get('top_info')
     line = ''
     for control in self.controlList:
       label = control['draw'](control)
@@ -1038,7 +1038,7 @@ class OptionsRow(ViewWindow):
       if len(line) >= self.cols:
         break
     self.writeLineRow = 0
-    self.writeLine(line[:self.cols], color)
+    self.writeLine(line[:self.cols], self.color)
 
 class PopupWindow(Window):
   def __init__(self, host):
