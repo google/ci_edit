@@ -84,6 +84,7 @@ class ProgramWindow(app.window.ActiveWindow):
           assert issubclass(possibility.__class__, app.window.ActiveWindow)
           assert possibility.controller
         self.focusedWindow = possibility
+        self.focusedWindow.show()
         self.focusedWindow.focus()
         self.focusedWindow.textBuffer.compoundChangePush()
         return
@@ -202,6 +203,9 @@ class ProgramWindow(app.window.ActiveWindow):
     window.controller.onChange()
     self.render()
 
+  def hide(self):
+    pass
+
   def layout(self):
     """Arrange the debug, log, and input windows."""
     rows, cols = self.rows, self.cols
@@ -251,6 +255,9 @@ class ProgramWindow(app.window.ActiveWindow):
   def reshape(self, top, left, rows, cols):
     app.window.ActiveWindow.reshape(self, top, left, rows, cols)
     self.layout()
+
+  def show(self):
+    pass
 
   def unfocus(self):
     pass

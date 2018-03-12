@@ -193,6 +193,7 @@ class ViewWindow:
     except Exception:
       pass
     self.parent.zOrder.append(self)
+    self.parent.show()
 
   def writeLine(self, text, color):
     """Simple line writer for static windows."""
