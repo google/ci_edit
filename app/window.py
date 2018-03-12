@@ -795,27 +795,6 @@ class InputWindow(Window):
       self.prg.layout()
       app.log.info()
 
-  def startup(self):
-    for f in app.prefs.startup.get('cliFiles', []):
-      app.buffer_manager.buffers.loadTextBuffer(f['path'], self)
-    if app.prefs.startup.get('readStdin'):
-      app.buffer_manager.buffers.readStdin()
-    tb = app.buffer_manager.buffers.topBuffer()
-    if not tb:
-      tb = app.buffer_manager.buffers.newTextBuffer()
-    self.setTextBuffer(tb)
-    openToLine = app.prefs.startup.get('openToLine')
-    if openToLine is not None:
-      self.textBuffer.selectText(openToLine - 1, 0, 0,
-          app.selectable.kSelectionNone)
-
-  def reshape(self, top, left, rows, cols):
-    """Change self and sub-windows to fit within the given rectangle."""
-    app.log.detail(top, left, rows, cols)
-    Window.reshape(self, top, left, rows, cols)
-    self.outerShape = (top, left, rows, cols)
-    self.layout()
-
   def layout(self):
     """Change self and sub-windows to fit within the given rectangle."""
     app.log.info()
@@ -900,6 +879,13 @@ class InputWindow(Window):
     self.drawRightEdge()
     Window.render(self)
 
+  def reshape(self, top, left, rows, cols):
+    """Change self and sub-windows to fit within the given rectangle."""
+    app.log.detail(top, left, rows, cols)
+    Window.reshape(self, top, left, rows, cols)
+    self.outerShape = (top, left, rows, cols)
+    self.layout()
+
   def setTextBuffer(self, textBuffer):
     app.log.info('setTextBuffer')
     if self.textBuffer is not None:
@@ -915,6 +901,20 @@ class InputWindow(Window):
       self.scrollRow, self.scrollCol = savedScroll
     else:
       self.textBuffer.scrollToOptimalScrollPosition()
+
+  def startup(self):
+    for f in app.prefs.startup.get('cliFiles', []):
+      app.buffer_manager.buffers.loadTextBuffer(f['path'], self)
+    if app.prefs.startup.get('readStdin'):
+      app.buffer_manager.buffers.readStdin()
+    tb = app.buffer_manager.buffers.topBuffer()
+    if not tb:
+      tb = app.buffer_manager.buffers.newTextBuffer()
+    self.setTextBuffer(tb)
+    openToLine = app.prefs.startup.get('openToLine')
+    if openToLine is not None:
+      self.textBuffer.selectText(openToLine - 1, 0, 0,
+          app.selectable.kSelectionNone)
 
   def toggleShowTips(self):
     self.showTips = not self.showTips
