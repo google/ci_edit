@@ -334,13 +334,6 @@ class LabeledLine(Window):
     self.label = label
     self.reshape(self.top, self.left, self.rows, self.cols)
 
-  def unfocus(self):
-    self.blank(app.color.get('message_line'))
-    #self.hide()
-    self.leftColumn.blank(app.color.get('message_line'))
-    #self.leftColumn.hide()
-    Window.unfocus(self)
-
 
 class Menu(ViewWindow):
   """Work in progress on a context menu.
