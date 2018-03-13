@@ -510,19 +510,40 @@ class InteractiveFind(ViewWindow):
     ViewWindow.__init__(self, host)
     self.host = host
     self.expanded = False
-    self.findLine = LabeledLine(self, 'find: ')
+
+    self.scopeRow = OptionsRow(self)
+    self.scopeRow.color = app.color.get('keyword')
+    self.scopeRow.addLabel('Search in: ')
+    scopeOptionKeys = ['selection', 'file', 'directory', 'project']
+    self.scopeOptions = {}
+    for key in scopeOptionKeys:
+      self.scopeOptions[key] = False
+      self.scopeRow.addToggle(key, self.scopeOptions)
+    self.scopeRow.setParent(self, 0)
+
+    self.optionsRow = OptionsRow(self)
+    self.optionsRow.color = app.color.get('keyword')
+    self.optionsRow.addLabel('Use/match: ')
+    findOptionKeys = ['regex', 'wholeWord', 'matchCase', 'multiLine']
+    self.matchOptions = {}
+    for key in findOptionKeys:
+      self.matchOptions[key] = False
+      self.optionsRow.addToggle(key, self.matchOptions)
+    self.optionsRow.setParent(self, 0)
+
+    self.findLine = LabeledLine(self, 'Find: ')
     self.findLine.setController(app.cu_editor.InteractiveFind)
-    self.findLine.setParent(self, 0)
-    self.replaceLine = LabeledLine(self, 'replace: ')
+    self.findLine.setParent(self, 1)
+    self.replaceLine = LabeledLine(self, 'Replace: ')
     self.replaceLine.setController(app.cu_editor.InteractiveFind)
-    self.replaceLine.setParent(self, 1)
+    self.replaceLine.setParent(self, 2)
 
   def focus(self):
-   assert False
+   assert False, "InteractiveFind should not be focused directly."
 
   def preferredSize(self):
-    if self.expanded:
-      return (2, -1)
+    if self in self.parent.zOrder and self.expanded:
+      return (4, -1)
     return (1, -1)
 
   def toggleExtendedFindWindow(self):
@@ -531,6 +552,20 @@ class InteractiveFind(ViewWindow):
 
   def reshape(self, top, left, rows, cols):
     ViewWindow.reshape(self, top, left, rows, cols)
+    if self not in self.parent.zOrder or not self.expanded:
+      self.scopeRow.hide()
+      self.optionsRow.hide()
+      self.findLine.reshape(top, left, rows, cols)
+      self.replaceLine.hide()
+      return
+    self.scopeRow.show()
+    self.scopeRow.reshape(top, left, 1, cols)
+    top += 1
+    rows -= 1
+    self.optionsRow.show()
+    self.optionsRow.reshape(top, left, 1, cols)
+    top += 1
+    rows -= 1
     self.findLine.reshape(top, left, 1, cols)
     top += 1
     rows -= 1
@@ -793,7 +828,6 @@ class InputWindow(Window):
 
   def layout(self):
     """Change self and sub-windows to fit within the given rectangle."""
-    app.log.info()
     top, left, rows, cols = self.outerShape
     lineNumbersCols = 7
     topRows = self.topRows
@@ -860,7 +894,7 @@ class InputWindow(Window):
       self.rightColumn.addStr(i, 0, ' ', color)
 
   def focus(self):
-    app.log.debug()
+    self.interactiveFind.hide()
     self.layout()
     if self.showMessageLine:
       self.messageLine.show()
