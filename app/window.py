@@ -78,7 +78,10 @@ class ViewWindow:
     if app.config.strict_debug:
       assert issubclass(self.__class__, ViewWindow), self
       assert issubclass(changeTo.__class__, ViewWindow), changeTo
-    self.parent.changeFocusTo(changeTo)
+    topWindow = self
+    while topWindow.parent:
+      topWindow = topWindow.parent
+    topWindow.changeFocusTo(changeTo)
 
   def contains(self, row, col):
     """Determine whether the position at row, col lay within this window."""
