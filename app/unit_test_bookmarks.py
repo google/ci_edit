@@ -253,7 +253,7 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
     self.assertTrue(b.end == 20)
     self.assertTrue(b.range == (10, 20))
 
-    b.range = (3,)
+    b.range = (3, 3)
     self.assertTrue(b.begin == 3)
     self.assertTrue(b.end == 3)
     self.assertTrue(b.range == (3, 3))
