@@ -351,8 +351,8 @@ prefs = {
     'cpp': {
       'indent': '  ',
       'keywords': __c_keywords + [
-        'auto', 'catch', 'class', 'constexpr', 'false',
-        'namespace', 'nullptr',
+        'auto', 'catch', 'class', 'constexpr', 'explicit', 'false',
+        'namespace', 'nullptr', 'override',
         'private', 'protected', 'public',
         'template', 'this', 'throw', 'true', 'typename',
       ],
