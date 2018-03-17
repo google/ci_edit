@@ -22,6 +22,7 @@ import sys
 import time
 import traceback
 
+import app.bookmark
 import app.clipboard
 import app.history
 import app.log
@@ -104,18 +105,13 @@ class Actions(app.mutator.Mutator):
 
   def dataToBookmark(self):
     """
-    Grabs all the cursor data and returns a bookmark. Also assigns a color
-    for this particular bookmark. The color is used to determine the color
-    of the bookmark's line numbers.
-
     Args:
       None.
 
     Returns:
-      A bookmark in the form of (bookmarkRange, bookmarkData).
-      bookmarkRange is an ordered tuple in which its elements
-      are the rows that the bookmark affects.
-      bookmarkData is a dictionary that contains the cursor data.
+      A Bookmark object containing its range and the current state of the
+      cursor and selection mode. The bookmark is also assigned a color, which
+      is used to determine the color of the bookmark's line numbers.
     """
     bookmarkData = {
       'cursor': (self.view.cursorRow, self.view.cursorCol),
@@ -125,22 +121,7 @@ class Actions(app.mutator.Mutator):
       'colorIndex': self.getBookmarkColor()
     }
     upperRow, _, lowerRow, _ = self.startAndEnd()
-    bookmarkRange = (upperRow, lowerRow)
-    return (bookmarkRange, bookmarkData)
-
-  def bookmarksOverlap(self, bookmarkRange1, bookmarkRange2):
-    """
-    Returns whether the two sorted bookmark ranges overlap.
-
-    Args:
-      bookmarkRange1 (tuple): a sorted tuple of row numbers.
-      bookmarkRange2 (tuple): a sorted tuple of row numbers.
-
-    Returns:
-      True if the ranges overlap. Otherwise, returns False.
-    """
-    return (bookmarkRange1[-1] >= bookmarkRange2[0] and
-            bookmarkRange1[0] <= bookmarkRange2[-1])
+    return app.bookmark.Bookmark(upperRow, lowerRow, bookmarkData)
 
   def bookmarkAdd(self):
     """
@@ -156,20 +137,20 @@ class Actions(app.mutator.Mutator):
     """
     newBookmark = self.dataToBookmark()
     self.bookmarkRemove()
-    bisect.insort(self.bookmarks, newBookmark)
+    bisect.insort_right(self.bookmarks, newBookmark)
 
   def bookmarkGoto(self, bookmark):
     """
     Goes to the bookmark that is passed in.
 
     Args:
-      bookmark (tuple): contains bookmarkRange and bookmarkData. More info can
-        be found in the dataToBookmark function.
+      bookmark (Bookmark): The bookmark you want to jump to. This object is
+                           defined in bookmark.py
 
     Returns:
       None.
     """
-    bookmarkData = bookmark[1]
+    bookmarkData = bookmark.data
     #cursorRow, cursorCol = bookmarkData['cursor']
     penRow, penCol = bookmarkData['pen']
     markerRow, markerCol = bookmarkData['marker']
@@ -193,8 +174,8 @@ class Actions(app.mutator.Mutator):
       self.setMessage("No bookmarks to jump to")
       return
     _, _, lowerRow, _ = self.startAndEnd()
-    tempBookmark = ((lowerRow, float('inf')),)
-    index = bisect.bisect(self.bookmarks, tempBookmark)
+    needle = app.bookmark.Bookmark(lowerRow + 1, lowerRow + 1)
+    index = bisect.bisect_left(self.bookmarks, needle)
     self.bookmarkGoto(self.bookmarks[index % len(self.bookmarks)])
 
   def bookmarkPrior(self):
@@ -211,8 +192,8 @@ class Actions(app.mutator.Mutator):
       self.setMessage("No bookmarks to jump to")
       return
     upperRow, _, _, _ = self.startAndEnd()
-    tempBookmark = ((upperRow,),)
-    index = bisect.bisect_left(self.bookmarks, tempBookmark)
+    needle = app.bookmark.Bookmark(upperRow, upperRow)
+    index = bisect.bisect_left(self.bookmarks, needle)
     self.bookmarkGoto(self.bookmarks[index - 1])
 
   def bookmarkRemove(self):
@@ -227,23 +208,23 @@ class Actions(app.mutator.Mutator):
     """
     upperRow, _, lowerRow, _ = self.startAndEnd()
     rangeList = self.bookmarks
-    needle = ((upperRow, lowerRow),)
+    needle = app.bookmark.Bookmark(upperRow, lowerRow)
     # Find the left-hand index.
     begin = bisect.bisect_left(rangeList, needle)
-    if begin and needle[0][0] <= rangeList[begin-1][0][1]:
+    if begin and needle.begin <= rangeList[begin - 1].end:
       begin -= 1
     # Find the right-hand index.
     low = begin
     index = begin
     high = len(rangeList)
-    offset = needle[0][1]
+    offset = needle.end
     while True:
       index = (high + low) / 2
       if low == high:
         break
-      if offset >= rangeList[index][0][1]:
+      if offset >= rangeList[index].end:
         low = index + 1
-      elif offset < rangeList[index][0][0]:
+      elif offset < rangeList[index].begin:
         high = index
       else:
         index += 1
