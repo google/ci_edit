@@ -173,7 +173,7 @@ class ViewWindow:
     self.top += rows
     self.rows -= rows
 
-  def setParent(self, parent, layerIndex):
+  def setParent(self, parent, layerIndex=sys.maxint):
     """Setting the parent will cause the the window to refresh (i.e. if self
     was hidden with hide() it will no longer be hidden).
     """
@@ -196,7 +196,7 @@ class ViewWindow:
     except Exception:
       pass
     self.parent.zOrder.append(self)
-    self.parent.show()
+    #self.parent.show()
 
   def writeLine(self, text, color):
     """Simple line writer for static windows."""
@@ -224,7 +224,6 @@ class ActiveWindow(ViewWindow):
         controller would make the program appear to freeze since nothing would
         be responding to user input.
     """
-    app.log.info(self)
     self.hasFocus = True
     try:
       self.parent.zOrder.remove(self)
@@ -234,7 +233,6 @@ class ActiveWindow(ViewWindow):
     self.controller.focus()
 
   def unfocus(self):
-    app.log.info(self)
     self.hasFocus = False
     self.controller.unfocus()
 
@@ -275,9 +273,10 @@ class Window(ActiveWindow):
     self.textBuffer.mouseWheelUp(shift, ctrl, alt)
 
   def render(self):
-    self.cursorRow = self.textBuffer.penRow
-    self.cursorCol = self.textBuffer.penCol
-    self.textBuffer.draw(self)
+    if self.textBuffer:
+      self.cursorRow = self.textBuffer.penRow
+      self.cursorCol = self.textBuffer.penCol
+      self.textBuffer.draw(self)
     ViewWindow.render(self)
     if self.hasFocus:
       self.parent.debugDraw(self)
@@ -324,7 +323,6 @@ class LabeledLine(Window):
     Window.render(self)
 
   def reshape(self, top, left, rows, cols):
-    #app.log.debug(self, top, left, rows, cols)
     labelWidth = len(self.label)
     Window.reshape(self, top,
         left + labelWidth, rows, max(0, cols - labelWidth))
@@ -441,7 +439,6 @@ class LineNumbers(ViewWindow):
     return bookmarkList[beginIndex:endIndex]
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
-    app.log.info(paneRow, paneCol, shift)
     if ctrl:
       app.log.info('click at', paneRow, paneCol)
       return
@@ -505,75 +502,114 @@ class LogWindow(ViewWindow):
     ViewWindow.render(self)
 
 
-class InteractiveFind(ViewWindow):
+class InteractiveFind(Window):
   def __init__(self, host):
-    ViewWindow.__init__(self, host)
+    Window.__init__(self, host)
     self.host = host
     self.expanded = False
-
-    self.scopeRow = OptionsRow(self)
-    self.scopeRow.color = app.color.get('keyword')
-    self.scopeRow.addLabel('Search in: ')
-    scopeOptionKeys = ['selection', 'file', 'directory', 'project']
-    self.scopeOptions = {}
-    for key in scopeOptionKeys:
-      self.scopeOptions[key] = False
-      self.scopeRow.addToggle(key, self.scopeOptions)
-    self.scopeRow.setParent(self, 0)
-
-    self.optionsRow = OptionsRow(self)
-    self.optionsRow.color = app.color.get('keyword')
-    self.optionsRow.addLabel('Use/match: ')
-    findOptionKeys = ['regex', 'wholeWord', 'matchCase', 'multiLine']
-    self.matchOptions = {}
-    for key in findOptionKeys:
-      self.matchOptions[key] = False
-      self.optionsRow.addToggle(key, self.matchOptions)
-    self.optionsRow.setParent(self, 0)
+    self.setController(app.cu_editor.InteractiveFind)
+    indent = '  '
+    self.layoutOrder = []
 
     self.findLine = LabeledLine(self, 'Find: ')
-    self.findLine.setController(app.cu_editor.InteractiveFind)
-    self.findLine.setParent(self, 1)
+    self.findLine.setController(app.cu_editor.InteractiveFindInput)
+    self.findLine.setParent(self)
+    self.layoutOrder.append(self.findLine)
+
     self.replaceLine = LabeledLine(self, 'Replace: ')
-    self.replaceLine.setController(app.cu_editor.InteractiveFind)
-    self.replaceLine.setParent(self, 2)
+    self.replaceLine.setController(app.cu_editor.InteractiveFindInput)
+    self.replaceLine.setParent(self)
+    self.layoutOrder.append(self.replaceLine)
+
+    self.matchOptions, self.matchOptionsRow = self.addToggleOptionsRow(
+        indent + 'options   ',
+        [
+          'regex',
+          'wholeWord',
+          'matchCase',
+          'multiLine',  # Span lines.
+          'smart',  # Replace uppercase with upper and lowercase with lower.
+        ])
+    self.scopeOptions, self.scopeRow = self.addSelectOptionsRow(
+        indent + 'scope     ', ['file', 'directory', 'openFiles', 'project'])
+    self.changeCaseOptions, self.changeCaseRow = self.addSelectOptionsRow(
+        indent + 'changeCase', ['none', 'smart', 'upper', 'lower'])
+    self.withinOptions, self.withinOptionsRow = self.addSelectOptionsRow(
+        indent + 'within    ', [
+          'any',
+          'code',
+          'comment',
+          'error',
+          'markup',
+          'misspelled',  # Find in misspelled words.
+          'quoted',  # Find in strings.
+        ])
+    self.searchSelectionOption, self.searchSelectionRow = self.addSelectOptionsRow(
+        indent + 'selection ', ['any', 'yes', 'no'])
+    self.searchChangedOption, self.searchChangedRow = self.addSelectOptionsRow(
+        indent + 'changed   ', ['any', 'yes', 'no'])
+    self.pathsLine = LabeledLine(self, 'Paths: ')
+    self.pathsLine.setController(app.cu_editor.InteractiveFindInput)
+    self.pathsLine.setParent(self)
+    self.layoutOrder.append(self.pathsLine)
+
+  def addSelectOptionsRow(self, label, optionsList):
+    """
+    Such as a radio group.
+    """
+    optionsRow = OptionsRow(self)
+    optionsRow.color = app.color.get('keyword')
+    optionsRow.addLabel(label)
+    optionsDict = {}
+    optionsRow.beginGroup()
+    for key in optionsList:
+      optionsDict[key] = False
+      optionsRow.addSelection(key, optionsDict)
+    optionsRow.endGroup()
+    optionsDict[optionsList[0]] = True
+    optionsRow.setParent(self)
+    self.layoutOrder.append(optionsRow)
+    return optionsDict, optionsRow
+
+  def addToggleOptionsRow(self, label, optionsList):
+    optionsRow = OptionsRow(self)
+    optionsRow.color = app.color.get('keyword')
+    optionsRow.addLabel(label)
+    optionsDict = {}
+    for key in optionsList:
+      optionsDict[key] = False
+      optionsRow.addToggle(key, optionsDict)
+    optionsRow.setParent(self)
+    self.layoutOrder.append(optionsRow)
+    return optionsDict, optionsRow
 
   def focus(self):
-   assert False, "InteractiveFind should not be focused directly."
+   self.changeFocusTo(self.findLine)
 
   def preferredSize(self):
     if self in self.parent.zOrder and self.expanded:
-      return (4, -1)
+      return (len(self.layoutOrder), -1)
     return (1, -1)
 
   def toggleExtendedFindWindow(self):
     self.expanded = not self.expanded
     self.parent.layout()
 
+  def verticalLayout(self, children):
+    top = self.top
+    rows = self.rows
+    for view in self.layoutOrder:
+      if rows < view.rows:
+        view.hide()
+      else:
+        view.show()
+        view.reshape(top, self.left, view.rows, self.cols)
+        top += view.rows
+        rows -= view.rows
+
   def reshape(self, top, left, rows, cols):
-    ViewWindow.reshape(self, top, left, rows, cols)
-    if self not in self.parent.zOrder or not self.expanded:
-      self.scopeRow.hide()
-      self.optionsRow.hide()
-      self.findLine.reshape(top, left, rows, cols)
-      self.replaceLine.hide()
-      return
-    self.scopeRow.show()
-    self.scopeRow.reshape(top, left, 1, cols)
-    top += 1
-    rows -= 1
-    self.optionsRow.show()
-    self.optionsRow.reshape(top, left, 1, cols)
-    top += 1
-    rows -= 1
-    self.findLine.reshape(top, left, 1, cols)
-    top += 1
-    rows -= 1
-    if rows < 1:
-      self.replaceLine.hide()
-    else:
-      self.replaceLine.show()
-      self.replaceLine.reshape(top, left, 1, cols)
+    Window.reshape(self, top, left, rows, cols)
+    self.verticalLayout(self.zOrder)
 
 
 class MessageLine(ViewWindow):
@@ -831,7 +867,7 @@ class InputWindow(Window):
     top, left, rows, cols = self.outerShape
     lineNumbersCols = 7
     topRows = self.topRows
-    bottomRows = self.interactiveFind.preferredSize()[0]
+    bottomRows = max(1, self.interactiveFind.preferredSize()[0])
 
     if self.showTopInfo and rows > topRows and cols > lineNumbersCols:
       self.topInfo.reshape(top,
@@ -976,7 +1012,8 @@ class OptionsRow(ViewWindow):
     self.controlList = []
     self.group = None
 
-  def addElement(self, draw, kind, name, reference, width, sep, extraWidth=0):
+  def addElement(self, draw, kind, name, reference, width, sep,
+      extraWidth=0):
     if app.config.strict_debug:
       assert type(name) == str
       assert type(sep) == str
@@ -988,11 +1025,11 @@ class OptionsRow(ViewWindow):
     if self.group is not None:
       self.group.append(len(self.controlList))
     element = {
-      'draw': draw,
-      'type': kind,
-      'name': name,
       'dict': reference,
+      'draw': draw,
+      'name': name,
       'sep': sep,
+      'type': kind,
       'width': width if width is not None else len(name) + extraWidth
     }
     self.controlList.append(element)
@@ -1013,10 +1050,25 @@ class OptionsRow(ViewWindow):
       return '%s %s' % (decoration, control['name'])
     self.addElement(draw, 'sort', name, reference, width, sep, len(' v'))
 
-  def addToggle(self, name, reference, width=None, sep="  "):
+  def addSelection(self, name, reference, width=None, sep="  "):
+    if app.config.strict_debug:
+      assert type(name) == str
     if 1:
-      toggleOn = '[x] ' + name
-      toggleOff = '[ ] ' + name
+      toggleOn = '(*)' + name
+      toggleOff = '( )' + name
+    def draw(control):
+      return toggleOn if control['dict'][control['name']] else toggleOff
+    group = []
+    width = max(width, min(len(toggleOn), len(toggleOff)))
+    self.addElement(draw, 'selection', name, reference, width, sep,
+        len('(*)'))
+
+  def addToggle(self, name, reference, width=None, sep="  "):
+    if app.config.strict_debug:
+      assert type(name) == str
+    if 1:
+      toggleOn = '[x]' + name
+      toggleOff = '[ ]' + name
     if 0:
       toggleOn = unichr(0x2612) + ' ' + control['name']
       toggleOff = unichr(0x2610) + ' ' + control['name']
@@ -1043,6 +1095,14 @@ class OptionsRow(ViewWindow):
     for index, control in enumerate(self.controlList):
       width = abs(control['width'])
       if offset <= col < offset + width:
+        if control['type'] == 'selection':
+          name = control['name']
+          for element in self.group:
+            elementName = self.controlList[element]['name']
+            self.controlList[element]['dict'][elementName] = False
+          control['dict'][name] = True
+          self.host.controller.optionChanged(name, control['dict'][name])
+          break
         if control['type'] == 'sort':
           name = control['name']
           newValue = not control['dict'][name]

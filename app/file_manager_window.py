@@ -70,6 +70,7 @@ class DirectoryList(app.window.Window):
     for key, size in [('Name', -40), ('Size', 15), ('Modified', 24)]:
       self.optionsRow.addSortHeader(key, self.opt, size)
     self.optionsRow.setParent(self, 0)
+    self.optionsRow.endGroup()
 
   def reshape(self, top, left, rows, cols):
     """Change self and sub-windows to fit within the given rectangle."""

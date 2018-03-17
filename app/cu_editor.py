@@ -142,12 +142,19 @@ class ConfirmOverwrite(app.controller.Controller):
 
 
 class InteractiveFind(app.editor.InteractiveFind):
-  """Find text within the current document."""
   def __init__(self, view):
     app.editor.InteractiveFind.__init__(self, view)
 
   def setTextBuffer(self, textBuffer):
-    app.editor.InteractiveFind.setTextBuffer(self, textBuffer)
+    pass
+
+class InteractiveFindInput(app.editor.InteractiveFindInput):
+  """Find text within the current document."""
+  def __init__(self, view):
+    app.editor.InteractiveFindInput.__init__(self, view)
+
+  def setTextBuffer(self, textBuffer):
+    app.editor.InteractiveFindInput.setTextBuffer(self, textBuffer)
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
       KEY_ESCAPE: self.changeToHostWindow,

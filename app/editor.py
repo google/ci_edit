@@ -168,6 +168,18 @@ class InteractiveFind(app.controller.Controller):
       assert issubclass(view.__class__, app.window.ViewWindow), view
     app.controller.Controller.__init__(self, view, 'find')
 
+  def optionChanged(self, name, value):
+    pass
+
+
+class InteractiveFindInput(app.controller.Controller):
+  """Find text within the current document."""
+  def __init__(self, view):
+    if app.config.strict_debug:
+      assert issubclass(self.__class__, InteractiveFind), self
+      assert issubclass(view.__class__, app.window.ViewWindow), view
+    app.controller.Controller.__init__(self, view, 'find')
+
   def findNext(self):
     self.findCmd = self.view.parent.host.textBuffer.findNext
 
