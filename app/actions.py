@@ -999,16 +999,27 @@ class Actions(app.mutator.Mutator):
 
   def find(self, searchFor, direction=0):
     """direction is -1 for findPrior, 0 for at pen, 1 for findNext."""
-    app.log.info('find', searchFor, direction)
+    app.log.info(searchFor, direction)
     if not len(searchFor):
       self.findRe = None
       self.doSelectionMode(app.selectable.kSelectionNone)
       return
+    editorPrefs = app.prefs.editor
+    flags = 0
+    flags |= (editorPrefs.get('findIgnoreCase') and re.IGNORECASE or 0)
+    flags |= (editorPrefs.get('findMultiLine') and re.MULTILINE or 0)
+    flags |= (editorPrefs.get('findLocale') and re.LOCALE or 0)
+    flags |= (editorPrefs.get('findDotAll') and re.DOTALL or 0)
+    flags |= (editorPrefs.get('findVerbose') and re.VERBOSE or 0)
+    flags |= (editorPrefs.get('findUnicode') and re.UNICODE or 0)
+    if not editorPrefs.get('findUseRegex'):
+      searchFor = re.escape(searchFor)
+    if editorPrefs.get('findWholeWord'):
+      searchFor = ur'\b%s\b' % searchFor
+    #app.log.info(searchFor, flags)
     # The saved re is also used for highlighting.
-    ignoreCaseFlag = (app.prefs.editor.get('findIgnoreCase') and
-                      re.IGNORECASE or 0)
-    self.findRe = re.compile('()'+searchFor, ignoreCaseFlag)
-    self.findBackRe = re.compile('(.*)'+searchFor, ignoreCaseFlag)
+    self.findRe = re.compile('()'+searchFor, flags)
+    self.findBackRe = re.compile('(.*)'+searchFor, flags)
     self.findCurrentPattern(direction)
 
   def findPlainText(self, text):

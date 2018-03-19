@@ -169,7 +169,17 @@ class InteractiveFind(app.controller.Controller):
     app.controller.Controller.__init__(self, view, 'find')
 
   def optionChanged(self, name, value):
-    pass
+    translate = {
+      'regex': 'findUseRegex',
+      'multiline': 'findMultiline',
+      'wholeWord': 'findWholeWord',
+      'dotAll': 'findDotAll',
+      'ignoreCase': 'findIgnoreCase',
+      'locale': 'findLocale',
+      'verbose': 'findVerbose',
+      'unicode': 'findUnicode',
+    }
+    app.prefs.editor[translate[name]] = value
 
 
 class InteractiveFindInput(app.controller.Controller):

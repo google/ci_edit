@@ -526,34 +526,38 @@ class InteractiveFind(Window):
     self.matchOptions, self.matchOptionsRow = self.addToggleOptionsRow(
         indent + 'options   ',
         [
-          'regex',
-          'wholeWord',
-          'matchCase',
-          'multiLine',  # Span lines.
-          'smart',  # Replace uppercase with upper and lowercase with lower.
+          'regex',  # If false, re.escape the search.
+          'wholeWord',  # Wrap with \b.
+          'ignoreCase',
+          'locale',  # Use locale.
+          #'multiline',  # Span lines.
+          #'dotAll',  # Dot matches anything (even \n).
+          'unicode',  # Unicode match.
+          #'smart',  # Replace uppercase with upper and lowercase with lower.
         ])
-    self.scopeOptions, self.scopeRow = self.addSelectOptionsRow(
-        indent + 'scope     ', ['file', 'directory', 'openFiles', 'project'])
-    self.changeCaseOptions, self.changeCaseRow = self.addSelectOptionsRow(
-        indent + 'changeCase', ['none', 'smart', 'upper', 'lower'])
-    self.withinOptions, self.withinOptionsRow = self.addSelectOptionsRow(
-        indent + 'within    ', [
-          'any',
-          'code',
-          'comment',
-          'error',
-          'markup',
-          'misspelled',  # Find in misspelled words.
-          'quoted',  # Find in strings.
-        ])
-    self.searchSelectionOption, self.searchSelectionRow = self.addSelectOptionsRow(
-        indent + 'selection ', ['any', 'yes', 'no'])
-    self.searchChangedOption, self.searchChangedRow = self.addSelectOptionsRow(
-        indent + 'changed   ', ['any', 'yes', 'no'])
-    self.pathsLine = LabeledLine(self, 'Paths: ')
-    self.pathsLine.setController(app.cu_editor.InteractiveFindInput)
-    self.pathsLine.setParent(self)
-    self.layoutOrder.append(self.pathsLine)
+    if 0:
+      self.scopeOptions, self.scopeRow = self.addSelectOptionsRow(
+          indent + 'scope     ', ['file', 'directory', 'openFiles', 'project'])
+      self.changeCaseOptions, self.changeCaseRow = self.addSelectOptionsRow(
+          indent + 'changeCase', ['none', 'smart', 'upper', 'lower'])
+      self.withinOptions, self.withinOptionsRow = self.addSelectOptionsRow(
+          indent + 'within    ', [
+            'any',
+            'code',
+            'comment',
+            'error',
+            'markup',
+            'misspelled',  # Find in misspelled words.
+            'quoted',  # Find in strings.
+          ])
+      self.searchSelectionOption, self.searchSelectionRow = self.addSelectOptionsRow(
+          indent + 'selection ', ['any', 'yes', 'no'])
+      self.searchChangedOption, self.searchChangedRow = self.addSelectOptionsRow(
+          indent + 'changed   ', ['any', 'yes', 'no'])
+      self.pathsLine = LabeledLine(self, 'Paths: ')
+      self.pathsLine.setController(app.cu_editor.InteractiveFindInput)
+      self.pathsLine.setParent(self)
+      self.layoutOrder.append(self.pathsLine)
 
   def addSelectOptionsRow(self, label, optionsList):
     """
