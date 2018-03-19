@@ -179,7 +179,8 @@ class InteractiveFind(app.controller.Controller):
       'verbose': 'findVerbose',
       'unicode': 'findUnicode',
     }
-    app.prefs.editor[translate[name]] = value
+    #app.prefs.editor[translate[name]] = value
+    app.prefs.save('editor', translate[name], value)
 
 
 class InteractiveFindInput(app.controller.Controller):

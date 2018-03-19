@@ -518,10 +518,11 @@ class InteractiveFind(Window):
     self.findLine.setParent(self)
     self.layoutOrder.append(self.findLine)
 
-    self.replaceLine = LabeledLine(self, 'Replace: ')
-    self.replaceLine.setController(app.cu_editor.InteractiveFindInput)
-    self.replaceLine.setParent(self)
-    self.layoutOrder.append(self.replaceLine)
+    if 0:
+      self.replaceLine = LabeledLine(self, 'Replace: ')
+      self.replaceLine.setController(app.cu_editor.InteractiveFindInput)
+      self.replaceLine.setParent(self)
+      self.layoutOrder.append(self.replaceLine)
 
     self.matchOptions, self.matchOptionsRow = self.addToggleOptionsRow(
         indent + 'options   ',
@@ -578,12 +579,23 @@ class InteractiveFind(Window):
     return optionsDict, optionsRow
 
   def addToggleOptionsRow(self, label, optionsList):
+    # TODO(dschuyler): This is a hack copy of this lookup.
+    translate = {
+      'regex': 'findUseRegex',
+      'multiline': 'findMultiline',
+      'wholeWord': 'findWholeWord',
+      'dotAll': 'findDotAll',
+      'ignoreCase': 'findIgnoreCase',
+      'locale': 'findLocale',
+      'verbose': 'findVerbose',
+      'unicode': 'findUnicode',
+    }
     optionsRow = OptionsRow(self)
     optionsRow.color = app.color.get('keyword')
     optionsRow.addLabel(label)
     optionsDict = {}
     for key in optionsList:
-      optionsDict[key] = False
+      optionsDict[key] = app.prefs.editor.get(translate[key.strip()]) or False
       optionsRow.addToggle(key, optionsDict)
     optionsRow.setParent(self)
     self.layoutOrder.append(optionsRow)
