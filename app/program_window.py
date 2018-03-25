@@ -49,7 +49,7 @@ class ProgramWindow(app.window.ActiveWindow):
     self.fileManagerWindow = app.file_manager_window.FileManagerWindow(self,
         self.inputWindow)
     self.zOrder.append(self.fileManagerWindow)
-    self.inputWindow.show()
+    self.inputWindow.bringToFront()
 
   def changeFocusTo(self, changeTo):
     self.focusedWindow.controller.onChange()
@@ -84,11 +84,12 @@ class ProgramWindow(app.window.ActiveWindow):
           assert issubclass(possibility.__class__, app.window.ActiveWindow)
           assert possibility.controller
         self.focusedWindow = possibility
-        self.focusedWindow.show()
+        #self.focusedWindow.bringToFront()
         self.focusedWindow.focus()
         self.focusedWindow.textBuffer.compoundChangePush()
         return
       depth += possibility.zOrder
+      app.log.info(depth)
     app.log.error("focusable window not found")
 
   def clickedNearby(self, row, col):
@@ -242,7 +243,7 @@ class ProgramWindow(app.window.ActiveWindow):
     self.modalUi = changeTo
     if self.modalUi is not None:
       self.modalUi.moveSizeToFit(top, left)
-      self.modalUi.show()
+      self.modalUi.bringToFront()
 
   def quitNow(self):
     self.program.quitNow()
@@ -256,7 +257,7 @@ class ProgramWindow(app.window.ActiveWindow):
     app.window.ActiveWindow.reshape(self, top, left, rows, cols)
     self.layout()
 
-  def show(self):
+  def bringToFront(self):
     pass
 
   def unfocus(self):

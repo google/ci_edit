@@ -69,10 +69,30 @@ class ViewWindow:
     app.render.frame.addStr(self.top + row, self.left + col,
         text.encode('utf-8'), colorPair)
 
+  def reattach(self):
+    self.setParent(self.parent)
+
+  def detach(self):
+    """Hide the window by removing self from parents' children, but keep same
+    parent to be reattached later."""
+    try:
+      self.parent.zOrder.remove(self)
+    except Exception:
+      pass
+
   def blank(self, colorPair):
     """Clear the window."""
     for i in range(self.rows):
       self.addStr(i, 0, ' ' * self.cols, colorPair)
+
+  def bringToFront(self):
+    """Bring it to the top layer."""
+    try:
+      self.parent.zOrder.remove(self)
+    except Exception:
+      pass
+    self.parent.zOrder.append(self)
+    #self.parent.bringToFront()
 
   def changeFocusTo(self, changeTo):
     if app.config.strict_debug:
@@ -188,15 +208,6 @@ class ViewWindow:
     self.parent = parent
     if parent:
       self.parent.zOrder.insert(layerIndex, self)
-
-  def show(self):
-    """Show window and bring it to the top layer."""
-    try:
-      self.parent.zOrder.remove(self)
-    except Exception:
-      pass
-    self.parent.zOrder.append(self)
-    #self.parent.show()
 
   def writeLine(self, text, color):
     """Simple line writer for static windows."""
@@ -602,10 +613,15 @@ class InteractiveFind(Window):
     return optionsDict, optionsRow
 
   def focus(self):
-   self.changeFocusTo(self.findLine)
+    self.reattach()
+    assert self.parent
+    assert self.findLine.parent
+    assert self.rows > 0, self.rows
+    assert self.findLine.rows > 0, self.findLine.rows
+    self.changeFocusTo(self.findLine)
 
   def preferredSize(self):
-    if self in self.parent.zOrder and self.expanded:
+    if self.parent and self in self.parent.zOrder and self.expanded:
       return (len(self.layoutOrder), -1)
     return (1, -1)
 
@@ -617,13 +633,9 @@ class InteractiveFind(Window):
     top = self.top
     rows = self.rows
     for view in self.layoutOrder:
-      if rows < view.rows:
-        view.hide()
-      else:
-        view.show()
-        view.reshape(top, self.left, view.rows, self.cols)
-        top += view.rows
-        rows -= view.rows
+      view.reshape(top, self.left, max(0, min(rows, view.rows)), self.cols)
+      top += view.rows
+      rows -= view.rows
 
   def reshape(self, top, left, rows, cols):
     Window.reshape(self, top, left, rows, cols)
@@ -838,17 +850,17 @@ class InputWindow(Window):
       self.topInfo = TopInfo(self)
       self.topInfo.setParent(self, 0)
       if not self.showTopInfo:
-        self.topInfo.hide()
+        self.topInfo.detach()
     if 1:
       self.statusLine = StatusLine(self)
       self.statusLine.setParent(self, 0)
       if not self.showFooter:
-        self.statusLine.hide()
+        self.statusLine.detach()
     if 1:
       self.lineNumberColumn = LineNumbers(self)
       self.lineNumberColumn.setParent(self, 0)
       if not self.showLineNumbers:
-        self.lineNumberColumn.hide()
+        self.lineNumberColumn.detach()
     if 1:
       self.logoCorner = ViewWindow(self)
       self.logoCorner.name = 'Logo'
@@ -858,7 +870,7 @@ class InputWindow(Window):
       self.rightColumn.name = 'Right'
       self.rightColumn.setParent(self, 0)
       if not self.showRightColumn:
-        self.rightColumn.hide()
+        self.rightColumn.detach()
     if 1:
       self.popupWindow = PopupWindow(self)
     if self.showMessageLine:
@@ -948,10 +960,10 @@ class InputWindow(Window):
       self.rightColumn.addStr(i, 0, ' ', color)
 
   def focus(self):
-    self.interactiveFind.hide()
+    self.interactiveFind.detach()
     self.layout()
     if self.showMessageLine:
-      self.messageLine.show()
+      self.messageLine.bringToFront()
     Window.focus(self)
 
   def quitNow(self):
@@ -1008,7 +1020,7 @@ class InputWindow(Window):
 
   def unfocus(self):
     if self.showMessageLine:
-      self.messageLine.hide()
+      self.messageLine.detach()
     Window.unfocus(self)
 
 
@@ -1139,6 +1151,8 @@ class OptionsRow(ViewWindow):
       offset += width + len(control['sep'])
 
   def render(self):
+    if self.rows <= 0:
+      return
     line = ''
     for control in self.controlList:
       label = control['draw'](control)

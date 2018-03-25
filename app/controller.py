@@ -113,7 +113,9 @@ class Controller:
     return None
 
   def findAndChangeTo(self, windowName):
-    self.view.changeFocusTo(self.getNamedWindow(windowName))
+    window = self.getNamedWindow(windowName)
+    window.bringToFront()
+    self.view.changeFocusTo(window)
 
   def focus(self):
     app.log.info('base controller focus()')

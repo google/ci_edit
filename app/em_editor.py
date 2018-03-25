@@ -276,7 +276,7 @@ class InteractiveFind(EditText):
     self.document.resizeBy(self.height, 0)
     #self.view.host.resizeBy(-self.height, 0)
     #self.view.host.moveBy(self.height, 0)
-    self.document.statusLine.show()
+    self.document.statusLine.bringToFront()
 
 
 class InteractiveGoto(EditText):
