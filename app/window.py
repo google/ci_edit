@@ -115,11 +115,28 @@ class ViewWindow:
     self.parent.debugDraw(win)
 
   def hide(self):
+    assert False
     """Remove window from the render list."""
     try:
       self.parent.zOrder.remove(self)
     except ValueError:
       app.log.detail(repr(self) + ' not found in zOrder')
+
+  def layoutHorizontally(self, children):
+    left = self.left
+    cols = self.cols
+    for view in children:
+      view.reshape(self.top, left, self.rows, max(0, min(cols, view.cols)))
+      left += view.cols
+      cols -= view.cols
+
+  def layoutVertically(self, children):
+    top = self.top
+    rows = self.rows
+    for view in children:
+      view.reshape(top, self.left, max(0, min(rows, view.rows)), self.cols)
+      top += view.rows
+      rows -= view.rows
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
     pass
@@ -622,24 +639,17 @@ class InteractiveFind(Window):
 
   def preferredSize(self):
     if self.parent and self in self.parent.zOrder and self.expanded:
-      return (len(self.layoutOrder), -1)
+      return (len(self.zOrder), -1)
     return (1, -1)
 
   def toggleExtendedFindWindow(self):
     self.expanded = not self.expanded
     self.parent.layout()
 
-  def verticalLayout(self, children):
-    top = self.top
-    rows = self.rows
-    for view in self.layoutOrder:
-      view.reshape(top, self.left, max(0, min(rows, view.rows)), self.cols)
-      top += view.rows
-      rows -= view.rows
-
   def reshape(self, top, left, rows, cols):
     Window.reshape(self, top, left, rows, cols)
-    self.verticalLayout(self.zOrder)
+    app.log.info(top, left, rows, cols)
+    self.layoutVertically(self.zOrder)
 
 
 class MessageLine(ViewWindow):
