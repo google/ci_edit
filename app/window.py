@@ -122,21 +122,26 @@ class ViewWindow:
     except ValueError:
       app.log.detail(repr(self) + ' not found in zOrder')
 
-  def layoutHorizontally(self, children):
+  def layoutHorizontally(self, children, separation=0):
     left = self.left
     cols = self.cols
     for view in children:
-      view.reshape(self.top, left, self.rows, max(0, min(cols, view.cols)))
-      left += view.cols
-      cols -= view.cols
+      preferredCols = view.preferredSize(self.rows, max(0, cols))[1]
+      view.reshape(self.top, left, self.rows, max(0, min(cols, preferredCols)))
+      delta = view.cols + separation
+      left += delta
+      cols -= delta
 
-  def layoutVertically(self, children):
+  def layoutVertically(self, children, separation=0):
     top = self.top
     rows = self.rows
     for view in children:
-      view.reshape(top, self.left, max(0, min(rows, view.rows)), self.cols)
-      top += view.rows
-      rows -= view.rows
+      preferredRows = view.preferredSize(max(0, rows), self.cols)[0]
+      view.reshape(top, self.left, max(0, min(rows, preferredRows)), self.cols)
+      app.log.info('vvv', preferredRows, rows, max(0, min(rows, preferredRows)), view)
+      delta = view.rows + separation
+      top += delta
+      rows -= delta
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
     pass
