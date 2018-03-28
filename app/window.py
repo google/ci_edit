@@ -325,25 +325,32 @@ class Window(ActiveWindow):
     self.textBuffer = None
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
-    self.textBuffer.mouseClick(paneRow, paneCol, shift, ctrl, alt)
+    if self.textBuffer:
+      self.textBuffer.mouseClick(paneRow, paneCol, shift, ctrl, alt)
 
   def mouseDoubleClick(self, paneRow, paneCol, shift, ctrl, alt):
-    self.textBuffer.mouseDoubleClick(paneRow, paneCol, shift, ctrl, alt)
+    if self.textBuffer:
+      self.textBuffer.mouseDoubleClick(paneRow, paneCol, shift, ctrl, alt)
 
   def mouseMoved(self, paneRow, paneCol, shift, ctrl, alt):
-    self.textBuffer.mouseMoved(paneRow, paneCol, shift, ctrl, alt)
+    if self.textBuffer:
+      self.textBuffer.mouseMoved(paneRow, paneCol, shift, ctrl, alt)
 
   def mouseRelease(self, paneRow, paneCol, shift, ctrl, alt):
-    self.textBuffer.mouseRelease(paneRow, paneCol, shift, ctrl, alt)
+    if self.textBuffer:
+      self.textBuffer.mouseRelease(paneRow, paneCol, shift, ctrl, alt)
 
   def mouseTripleClick(self, paneRow, paneCol, shift, ctrl, alt):
-    self.textBuffer.mouseTripleClick(paneRow, paneCol, shift, ctrl, alt)
+    if self.textBuffer:
+      self.textBuffer.mouseTripleClick(paneRow, paneCol, shift, ctrl, alt)
 
   def mouseWheelDown(self, shift, ctrl, alt):
-    self.textBuffer.mouseWheelDown(shift, ctrl, alt)
+    if self.textBuffer:
+      self.textBuffer.mouseWheelDown(shift, ctrl, alt)
 
   def mouseWheelUp(self, shift, ctrl, alt):
-    self.textBuffer.mouseWheelUp(shift, ctrl, alt)
+    if self.textBuffer:
+      self.textBuffer.mouseWheelUp(shift, ctrl, alt)
 
   def render(self):
     if self.textBuffer:
