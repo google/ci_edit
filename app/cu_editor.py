@@ -157,6 +157,7 @@ class InteractiveFindInput(app.editor.InteractiveFindInput):
     app.editor.InteractiveFindInput.setTextBuffer(self, textBuffer)
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
+      KEY_BTAB: self.priorFocusableWindow,
       KEY_ESCAPE: self.changeToHostWindow,
       KEY_F1: self.info,
       KEY_F3: self.saveEventChangeToHostWindow,
@@ -164,6 +165,7 @@ class InteractiveFindInput(app.editor.InteractiveFindInput):
       CTRL_E: self.extendFindWindow,
       CTRL_F: self.findNext,
       CTRL_G: self.findNext,
+      CTRL_I: self.nextFocusableWindow,
       CTRL_J: self.changeToHostWindow,
       CTRL_N: self.saveEventChangeToHostWindow,
       CTRL_O: self.changeToFileManagerWindow,

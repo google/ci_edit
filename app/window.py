@@ -167,6 +167,43 @@ class ViewWindow:
     self.top += top
     self.left += left
 
+  def nextFocusableWindow(self, start, reverse=False):
+    windows = self.zOrder[:]
+    if reverse:
+      app.log.info('reverse')
+      windows.reverse()
+    try:
+      found = windows.index(start)
+      windows = windows[found + 1:]
+      for i in windows:
+        app.log.info(self, i)
+        if i.isFocusable:
+          app.log.info(self, i)
+          return i
+        else:
+          r = i.nextFocusableWindow(start, reverse)
+          if r is not None:
+            app.log.info(self, r)
+            return r
+      windows = windows[:found]
+    except ValueError:
+      app.log.info('ValueError')
+      pass
+    if self.parent is not None:
+      r = self.parent.nextFocusableWindow(self, reverse)
+      if r is not None:
+        return r
+    for i in windows:
+      app.log.info(self, i)
+      if i.isFocusable:
+        return i
+      else:
+        r = i.nextFocusableWindow(start, reverse)
+        if r is not None:
+          return r
+    app.log.info(self)
+    return None
+
   def normalize(self):
     self.parent.normalize()
 
@@ -180,6 +217,9 @@ class ViewWindow:
 
   def presentModal(self, changeTo, paneRow, paneCol):
     self.parent.presentModal(changeTo, paneRow, paneCol)
+
+  def priorFocusableWindow(self, start):
+    return self.nextFocusableWindow(start, True)
 
   def render(self):
     """Redraw window."""
@@ -975,6 +1015,11 @@ class InputWindow(Window):
     if self.showMessageLine:
       self.messageLine.bringToFront()
     Window.focus(self)
+
+  def nextFocusableWindow(self, start, reverse=False):
+    # Keep the tab focus in the child branch. (The child view will call this,
+    # tell the child there is nothing to tab to up here).
+    return None
 
   def quitNow(self):
     self.host.quitNow()
