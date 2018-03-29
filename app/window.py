@@ -613,24 +613,45 @@ class InteractiveFind(Window):
     self.findLine.setParent(self)
     self.layoutOrder.append(self.findLine)
 
-    if 0:
+    if 10:
       self.replaceLine = LabeledLine(self, 'Replace: ')
       self.replaceLine.setController(app.cu_editor.InteractiveFindInput)
       self.replaceLine.setParent(self)
       self.layoutOrder.append(self.replaceLine)
 
-    self.matchOptions, self.matchOptionsRow = self.addToggleOptionsRow(
-        indent + 'options   ',
-        [
-          'regex',  # If false, re.escape the search.
-          'wholeWord',  # Wrap with \b.
-          'ignoreCase',
-          'locale',  # Use locale.
-          #'multiline',  # Span lines.
-          #'dotAll',  # Dot matches anything (even \n).
-          'unicode',  # Unicode match.
-          #'smart',  # Replace uppercase with upper and lowercase with lower.
-        ])
+    if 1:
+      self.matchOptionsRow = RowWindow(self, 2)
+      self.matchOptionsRow.setParent(self)
+      self.matchOptions = {
+        'regex': False,
+        'wholeWord': False,
+        'ignoreCase': False,
+      }
+      toggle = OptionsToggle(self.matchOptionsRow, 'regex', self.matchOptions)
+      toggle.setController(app.cu_editor.ToggleController)
+      toggle.color = app.color.get('keyword')
+      toggle.setParent(self.matchOptionsRow)
+      toggle = OptionsToggle(self.matchOptionsRow, 'wholeWord', self.matchOptions)
+      toggle.setController(app.cu_editor.ToggleController)
+      toggle.color = app.color.get('keyword')
+      toggle.setParent(self.matchOptionsRow)
+      toggle = OptionsToggle(self.matchOptionsRow, 'ignoreCase', self.matchOptions)
+      toggle.setController(app.cu_editor.ToggleController)
+      toggle.color = app.color.get('keyword')
+      toggle.setParent(self.matchOptionsRow)
+    else:
+      self.matchOptions, self.matchOptionsRow = self.addToggleOptionsRow(
+          indent + 'options   ',
+          [
+            'regex',  # If false, re.escape the search.
+            'wholeWord',  # Wrap with \b.
+            'ignoreCase',
+            'locale',  # Use locale.
+            #'multiline',  # Span lines.
+            #'dotAll',  # Dot matches anything (even \n).
+            'unicode',  # Unicode match.
+            #'smart',  # Replace uppercase with upper and lowercase with lower.
+          ])
     if 0:
       self.scopeOptions, self.scopeRow = self.addSelectOptionsRow(
           indent + 'scope     ', ['file', 'directory', 'openFiles', 'project'])
