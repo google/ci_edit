@@ -102,7 +102,7 @@ class CiProgram:
     start = time.time()
     # The first render, to get something on the screen.
     if useBgThread:
-      self.bg.put((self.programWindow, []))
+      self.bg.put((self.programWindow, [], None))
     else:
       self.render()
     # This is the 'main loop'. Execution doesn't leave this loop until the
@@ -110,13 +110,20 @@ class CiProgram:
     while not self.exiting:
       if useBgThread:
         while self.bg.hasMessage():
-          frame = self.bg.get()
+          frame, callerSemaphore = self.bg.get()
           if frame[0] == 'exception':
             for line in frame[1]:
               userMessage(line[:-1])
             self.exiting = True
             return
-          self.refresh(frame[0], frame[1])
+          if frame[0] == 'popup':
+            self.programWindow.changeFocusTo(
+                self.programWindow.inputWindow.popupWindow)
+            callerSemaphore.release()
+          else:
+            self.refresh(frame[0], frame[1])
+            if callerSemaphore:
+              callerSemaphore.release()
       elif 1:
         frame = app.render.frame.grabFrame()
         self.refresh(frame[0], frame[1])
@@ -197,16 +204,21 @@ class CiProgram:
             ch = app.curses_util.UNICODE_INPUT
           if ch == 0 and useBgThread:
             # bg response.
-            frame = None
             while self.bg.hasMessage():
-              frame = self.bg.get()
+              frame, callerSemaphore = self.bg.get()
               if frame[0] == 'exception':
                 for line in frame[1]:
                   userMessage(line[:-1])
                 self.exiting = True
                 return
-            if frame is not None:
-              self.refresh(frame[0], frame[1])
+              if frame[0] == 'popup':
+                self.programWindow.changeFocusTo(self.programWindow.
+                    inputWindow.popupWindow)
+                callerSemaphore.release()
+              else:
+                self.refresh(frame[0], frame[1])
+                if callerSemaphore:
+                  callerSemaphore.release()
           elif ch != curses.ERR:
             self.ch = ch
             if ch == curses.KEY_MOUSE:
@@ -220,7 +232,7 @@ class CiProgram:
       start = time.time()
       if len(cmdList):
         if useBgThread:
-          self.bg.put((self.programWindow, cmdList))
+          self.bg.put((self.programWindow, cmdList, None))
         else:
           self.programWindow.executeCommandList(cmdList)
           self.render()
@@ -375,7 +387,7 @@ class CiProgram:
     else:
       self.commandLoop()
     if app.prefs.editor['useBgThread']:
-      self.bg.put((self.programWindow, 'quit'))
+      self.bg.put((self.programWindow, 'quit', None))
       self.bg.join()
 
   def setUpPalette(self):

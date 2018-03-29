@@ -18,6 +18,7 @@ import sys
 
 import app.actions
 import app.color
+import app.file_stats
 import app.log
 import app.parser
 import app.prefs
@@ -34,11 +35,30 @@ class TextBuffer(app.actions.Actions):
     self.highlightCursorLine = False
     self.highlightTrailingWhitespace = True
     self.fileHistory = {}
+    self.fileStats = app.file_stats.FileStats(self.fullPath)
     self.fileEncoding = None
     self.lastChecksum = None
     self.lastFileSize = 0
     self.bookmarks = []
     self.nextBookmarkColorPos = 0
+
+  def changeFileStats(self):
+    """
+    Stops tracking whatever file this object was monitoring before and tracks
+    the file whose absolute path is defined in self.fullPath.
+
+    Args:
+      None.
+
+    Returns:
+      None.
+    """
+    self.fileStats.cleanup()
+    self.fileStats = app.file_stats.FileStats(self.fullPath)
+    self.fileStats.setTextBuffer(self)
+    self.fileStats.updateStats()
+    if app.prefs.editor['useBgThread']:
+      self.fileStats.startTracking()
 
   def checkScrollToCursor(self, window):
     """Move the selected view rectangle so that the cursor is visible."""

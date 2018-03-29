@@ -74,6 +74,9 @@ class Controller:
   def changeToPopup(self):
     self.findAndChangeTo('popupWindow')
 
+  def changeToPopup(self):
+    self.host.changeFocusTo(self.host.host.popupWindow)
+
   def changeToPrediction(self):
     self.findAndChangeTo('interactivePrediction')
 

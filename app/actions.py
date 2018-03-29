@@ -754,8 +754,6 @@ class Actions(app.mutator.Mutator):
   def fileLoad(self):
     app.log.info('fileLoad', self.fullPath)
     inputFile = None
-    self.isReadOnly = (os.path.isfile(self.fullPath) and
-        not os.access(self.fullPath, os.W_OK))
     if not os.path.exists(self.fullPath):
       self.setMessage('Creating new file')
     else:
@@ -778,7 +776,7 @@ class Actions(app.mutator.Mutator):
           app.log.info('error opening file', self.fullPath)
           self.setMessage('error opening file', self.fullPath)
           return
-      self.fileStat = os.stat(self.fullPath)
+    self.fileStats.savedFileStat = self.fileStats.fileStats
     self.relativePath = os.path.relpath(self.fullPath, os.getcwd())
     app.log.info('fullPath', self.fullPath)
     app.log.info('cwd', os.getcwd())
@@ -814,7 +812,7 @@ class Actions(app.mutator.Mutator):
       None.
     """
     # Restore the file history.
-    self.fileHistory = app.history.getFileHistory(self.fullPath, self.data)
+    self.fileHistory = app.history.getFileHistory(self.fileStats, self.data)
 
     # Restore all positions and values of variables.
     self.view.cursorRow, self.view.cursorCol = self.fileHistory.setdefault(
@@ -822,22 +820,23 @@ class Actions(app.mutator.Mutator):
     self.penRow, self.penCol = self.fileHistory.setdefault('pen', (0, 0))
     self.view.scrollRow, self.view.scrollCol =  self.fileHistory.setdefault(
         'scroll', (0, 0))
-    self.doSelectionMode(self.fileHistory.setdefault('selectionMode',
-        app.selectable.kSelectionNone))
-    self.markerRow, self.markerCol = self.fileHistory.setdefault('marker',
-        (0, 0))
     if app.prefs.editor['saveUndo']:
       self.redoChain = self.fileHistory.setdefault('redoChainCompound', [])
       self.savedAtRedoIndex = self.fileHistory.setdefault('savedAtRedoIndexCompound', 0)
       self.redoIndex = self.savedAtRedoIndex
       self.oldRedoIndex = self.savedAtRedoIndex
+    self.tempChange = None
+    self.doSelectionMode(self.fileHistory.setdefault('selectionMode',
+        app.selectable.kSelectionNone))
+    self.markerRow, self.markerCol = self.fileHistory.setdefault('marker',
+        (0, 0))
 
     # Restore file bookmarks
     self.bookmarks = self.fileHistory.setdefault('bookmarks', [])
 
     # Store the file's info.
     self.lastChecksum, self.lastFileSize = app.history.getFileInfo(
-        self.fullPath)
+        self.fileStats)
 
   def updateBasicScrollPosition(self):
     """
@@ -934,7 +933,6 @@ class Actions(app.mutator.Mutator):
   def fileWrite(self):
     # Preload the message with an error that should be overwritten.
     self.setMessage('Error saving file')
-    self.isReadOnly = not os.access(self.fullPath, os.W_OK)
     try:
       try:
         if app.prefs.editor['onSaveStripTrailingSpaces']:
@@ -961,20 +959,17 @@ class Actions(app.mutator.Mutator):
         if app.prefs.editor['saveUndo']:
           self.fileHistory['redoChainCompound'] = self.redoChain
           self.fileHistory['savedAtRedoIndexCompound'] = self.savedAtRedoIndex
-        app.history.saveUserHistory((self.fullPath, self.lastChecksum,
-            self.lastFileSize), self.fileHistory)
+        app.history.saveUserHistory((self.lastChecksum, self.lastFileSize),
+            self.fileStats, self.fileHistory)
         # Store the file's new info
         self.lastChecksum, self.lastFileSize = app.history.getFileInfo(
-            self.fullPath)
-        self.fileStat = os.stat(self.fullPath)
-        # If we're writing this file for the first time, self.isReadOnly will
-        # still be True (from when it didn't exist).
-        self.isReadOnly = False
+            self.fileStats)
+        self.fileStats.savedFileStat = self.fileStats.fileStats
         self.setMessage('File saved')
       except Exception as e:
         color = app.color.get('status_line_error')
-        if self.isReadOnly:
-          self.setMessage("Permission error. Try modifying in sudo mode.",
+        if self.fileStats.getUpdatedFileInfo()['isReadOnly']:
+          self.setMessage("Permission error. Try modifing in sudo mode.",
                           color=color)
         else:
           self.setMessage(

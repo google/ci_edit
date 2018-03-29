@@ -105,6 +105,8 @@ class BufferManager:
       textBuffer = app.text_buffer.TextBuffer()
       textBuffer.setFilePath(fullPath)
       textBuffer.view = view
+      self.renameBuffer(textBuffer, fullPath)
+      textBuffer.fileStats.setPopupWindow(view.popupWindow)
       textBuffer.fileLoad()
       self.buffers.append(textBuffer)
     if 0:
@@ -141,6 +143,14 @@ class BufferManager:
   def untrackBuffer_(self, fileBuffer):
     app.log.debug(fileBuffer.fullPath)
     self.buffers.remove(fileBuffer)
+
+  def renameBuffer(self, fileBuffer, fullPath):
+    """
+    For now, when you change the path of a fileBuffer, you should also be
+    updating its fileStat object, so that it tracks the new file as well.
+    """
+    fileBuffer.fullPath = fullPath
+    fileBuffer.changeFileStats() # Track this new file.
 
   def fileClose(self, path):
     pass

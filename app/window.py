@@ -12,12 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import bisect
-import os
-import sys
-import types
-import curses
-
 import app.buffer_manager
 import app.color
 import app.config
@@ -27,6 +21,13 @@ import app.em_editor
 import app.render
 import app.text_buffer
 import app.vi_editor
+
+import bisect
+import curses
+import os
+import threading
+import types
+import sys
 
 
 # The terminal area that the curses can draw to.
@@ -749,7 +750,7 @@ class TopInfo(ViewWindow):
           lineCursor -= 1
     pathLine = self.host.textBuffer.fullPath
     if 1:
-      if tb.isReadOnly:
+      if tb.fileStats.getCurrentFileInfo()['isReadOnly']:
         pathLine += ' [RO]'
     if 1:
       if tb.isDirty():
@@ -1156,26 +1157,30 @@ class PopupWindow(Window):
     self.host = host
     self.controller = app.cu_editor.PopupController(self)
     self.setTextBuffer(app.text_buffer.TextBuffer())
-    self.longestLineLength = 0
     self.__message = []
     self.showOptions = True
     # This will be displayed and should contain the keys that respond to user
     # input. This should be updated if you change the controller's command set.
-    self.options = []
+    self.__displayOptions = []
+    # Prevent sync issues from occuring when setting options.
+    self.__optionsLock = threading.Lock()
 
   def render(self):
     """
     Display a box of text in the center of the window.
     """
     maxRows, maxCols = self.host.rows, self.host.cols
-    cols = min(self.longestLineLength + 6, maxCols)
+    longestLineLength = 0
+    if len(self.__message):
+      longestLineLength = len(max(self.__message, key=len))
+    cols = min(longestLineLength + 6, maxCols)
     rows = min(len(self.__message) + 4, maxRows)
     self.resizeTo(rows, cols)
     self.moveTo(maxRows / 2 - rows / 2, maxCols / 2 - cols / 2)
     color = app.color.get('popup_window')
     for row in range(rows):
       if row == rows - 2 and self.showOptions:
-        message = '/'.join(self.options)
+        message = '/'.join(self.__displayOptions)
       elif row == 0 or row >= rows - 3:
         self.addStr(row, 0, ' ' * cols, color)
         continue
@@ -1186,26 +1191,73 @@ class PopupWindow(Window):
       spacing2 = cols - lineLength - spacing1
       self.addStr(row, 0, ' ' * spacing1 + message + ' ' * spacing2, color)
 
-  def setMessage(self, message):
+  def __setMessage(self, message):
     """
     Sets the Popup window's message to the given message.
-    message (str): A string that you want to display.
+    This function should only be called by setUpWindow.
+
+    Args:
+      message (str): A string that you want to display.
+
     Returns:
       None.
     """
     self.__message = message.split("\n")
-    self.longestLineLength = max([len(line) for line in self.__message])
 
-  def setOptionsToDisplay(self, options):
+  def __setDisplayOptions(self, displayOptions):
     """
     This function is used to change the options that are displayed in the
     popup window. They will be separated by a '/' character when displayed.
+    This function should only be called by setUpWindow.
 
     Args:
-      options (list): A list of possible keys which the user can press and
-                      should be responded to by the controller.
+      displayOptions (list): A list of possible keys which the user can press
+                             and should be responded to by the controller.
     """
-    self.options = options
+    self.__displayOptions = displayOptions
+
+  def __setControllerOptions(self, controllerOptions):
+    """
+    This function is used to change the options that are displayed in the
+    popup window as well as their functions. This function should only be
+    called by setUpWindow.
+
+    Args:
+      controllerOptions (dict): A dictionary mapping keys (ints) to its
+                                corresponding action.
+
+    Returns;
+      None.
+    """
+    self.controller.commandSet = controllerOptions
+
+  def setUpWindow(self, message=None, displayOptions=None,
+                  controllerOptions=None):
+    """
+    Sets up the popup window. You should pass in the following arguments in
+    case of any sync issues, even if the values seem to already be set. By
+    default, the values will be set to None, meaning that the values will
+    not be changed. However, if you wish to set each value to be empty,
+    message should be an empty string, displayOptions should be an empty list,
+    and controllerOptions should be an empty dictionary.
+
+    Args:
+      message (str): The string that you want the popup window to display.
+      displayOptions (list): The list of strings representing the options
+                             that will be displayed on the popup window.
+      controllerOptions (dict): The mapping of user keypresses to functions.
+
+    Returns:
+      None.
+    """
+    self.__optionsLock.acquire()
+    if message is not None:
+      self.__setMessage(message)
+    if displayOptions is not None:
+      self.__setDisplayOptions(displayOptions)
+    if controllerOptions is not None:
+      self.__setControllerOptions(controllerOptions)
+    self.__optionsLock.release()
 
   def setTextBuffer(self, textBuffer):
     Window.setTextBuffer(self, textBuffer)

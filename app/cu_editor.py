@@ -384,23 +384,18 @@ class PopupController(app.controller.Controller):
       self.callerSemaphore.release()
       self.callerSemaphore = None
 
-  def setOptions(self, options):
+  def reloadBuffer(self):
     """
-    This function is used to change the options that are displayed in the
-    popup window as well as their functions.
+    Reloads the file on disk into the program. This will get rid of all changes
+    that have been made to the current file. This will also remove all
+    edit history.
 
-    Args:
-      options (dict): A dictionary mapping keys (ints) to its
-                      corresponding action.
-
-    Returns;
-      None.
+    TODO: Make this reloading a new change that can be appended
+    to the redo chain so user can undo out of a reloadBuffer call.
     """
-    self.commandSet = options
-
-  def setTextBuffer(self, textBuffer):
-    self.textBuffer = textBuffer
-
+    mainBuffer = self.view.host.textBuffer
+    mainBuffer.fileLoad()
+    self.changeToInputWindow()
 
 class PaletteDialogController(app.controller.Controller):
   """."""
