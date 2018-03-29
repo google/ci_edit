@@ -273,3 +273,15 @@ class InteractiveGoto(app.controller.Controller):
     except: pass
     gotoLine, gotoCol = (line.split(U',') + [U'0', U'0'])[:2]
     self.cursorMoveTo(parseInt(gotoLine)-1, parseInt(gotoCol))
+
+class ToggleController(app.controller.Controller):
+  def __init__(self, view):
+    if app.config.strict_debug:
+      assert issubclass(self.__class__, ToggleController), self
+      assert issubclass(view.__class__, app.window.ViewWindow), view
+    app.controller.Controller.__init__(self, view, 'toggle')
+
+  def toggleValue(self):
+    self.view.reference[self.view.name] = not  self.view.reference[self.view.name]
+
+

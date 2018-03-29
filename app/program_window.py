@@ -84,7 +84,7 @@ class ProgramWindow(app.window.ActiveWindow):
           assert issubclass(possibility.__class__, app.window.ActiveWindow)
           assert possibility.controller
         self.focusedWindow = possibility
-        #self.focusedWindow.bringToFront()
+        self.focusedWindow.bringToFront()
         self.focusedWindow.focus()
         self.focusedWindow.textBuffer.compoundChangePush()
         return

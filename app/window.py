@@ -85,14 +85,17 @@ class ViewWindow:
     for i in range(self.rows):
       self.addStr(i, 0, ' ' * self.cols, colorPair)
 
-  def bringToFront(self):
+  def bringChildToFront(self, child):
     """Bring it to the top layer."""
     try:
-      self.parent.zOrder.remove(self)
+      self.zOrder.remove(child)
     except Exception:
       pass
-    self.parent.zOrder.append(self)
-    #self.parent.bringToFront()
+    self.zOrder.append(child)
+
+  def bringToFront(self):
+    """Bring it to the top layer."""
+    self.parent.bringChildToFront(self)
 
   def changeFocusTo(self, changeTo):
     if app.config.strict_debug:
@@ -352,6 +355,9 @@ class Window(ActiveWindow):
     if self.textBuffer:
       self.textBuffer.mouseWheelUp(shift, ctrl, alt)
 
+  def preferredSize(self, rowLimit, colLimit):
+    return min(rowLimit, len(self.textBuffer.lines)), colLimit
+
   def render(self):
     if self.textBuffer:
       self.cursorRow = self.textBuffer.penRow
@@ -394,11 +400,18 @@ class LabeledLine(Window):
     self.setTextBuffer(tb)
     self.label = label
     self.leftColumn = ViewWindow(self)
+    # TODO(dschuyler) Add self.rightColumn.
+
+  def preferredSize(self, rowLimit, colLimit):
+    return min(rowLimit, 1), colLimit
 
   def quitNow(self):
     self.host.quitNow()
 
   def render(self):
+    app.log.info('LabeledLine', self.label, self.rows, self.cols)
+    if self.rows <= 0:
+      return
     self.leftColumn.addStr(0, 0, self.label, app.color.get('keyword'))
     Window.render(self)
 
@@ -681,6 +694,10 @@ class InteractiveFind(Window):
     self.layoutOrder.append(optionsRow)
     return optionsDict, optionsRow
 
+  def bringChildToFront(self, child):
+    # The find window doesn't reorder children
+    pass
+
   def focus(self):
     self.reattach()
     assert self.parent
@@ -689,9 +706,9 @@ class InteractiveFind(Window):
     assert self.findLine.rows > 0, self.findLine.rows
     self.changeFocusTo(self.findLine)
 
-  def preferredSize(self):
+  def preferredSize(self, rowLimit, colLimit):
     if self.parent and self in self.parent.zOrder and self.expanded:
-      return (len(self.zOrder), -1)
+      return (min(rowLimit, len(self.zOrder)), colLimit)
     return (1, -1)
 
   def toggleExtendedFindWindow(self):
@@ -700,7 +717,7 @@ class InteractiveFind(Window):
 
   def reshape(self, top, left, rows, cols):
     Window.reshape(self, top, left, rows, cols)
-    app.log.info(top, left, rows, cols)
+    app.log.info(top, left, rows, cols, self, self.zOrder)
     self.layoutVertically(self.zOrder)
 
 
@@ -959,7 +976,7 @@ class InputWindow(Window):
     top, left, rows, cols = self.outerShape
     lineNumbersCols = 7
     topRows = self.topRows
-    bottomRows = max(1, self.interactiveFind.preferredSize()[0])
+    bottomRows = max(1, self.interactiveFind.preferredSize(rows, cols)[0])
 
     if self.showTopInfo and rows > topRows and cols > lineNumbersCols:
       self.topInfo.reshape(top,
@@ -982,7 +999,8 @@ class InputWindow(Window):
           left, bottomRows, cols)
     if self.showFooter and rows > 0:
       self.statusLine.reshape(
-          bottomFirstRow - self.statusLineCount, left, self.statusLineCount, cols)
+          bottomFirstRow - self.statusLineCount, left, self.statusLineCount,
+          cols)
       rows -= self.statusLineCount
     if self.showLineNumbers and cols > lineNumbersCols:
       self.lineNumberColumn.reshape(top, left, rows, lineNumbersCols)
@@ -1089,6 +1107,71 @@ class InputWindow(Window):
     if self.showMessageLine:
       self.messageLine.detach()
     Window.unfocus(self)
+
+
+class OptionsToggle(Window):
+  def __init__(self, parent, name, reference, width=None):
+    if app.config.strict_debug:
+      assert type(name) == str
+    Window.__init__(self, parent)
+    self.name = name
+    self.reference = reference
+    # TODO(dschuyler): Creating a text buffer is rather heavy for a toggle
+    # control. This should get some optimization.
+    self.setTextBuffer(app.text_buffer.TextBuffer())
+    if 1:
+      toggleOn = '[x]' + name
+      toggleOff = '[ ]' + name
+    if 0:
+      toggleOn = unichr(0x2612) + ' ' + control['name']
+      toggleOff = unichr(0x2610) + ' ' + control['name']
+    if 0:
+      toggleOn = '[+' + control['name'] + ']'
+      toggleOff = '[-' + control['name'] + ']'
+    width = max(width, min(len(toggleOn), len(toggleOff)))
+    self.width = width if width is not None else len(name)
+    self.toggleOn = toggleOn
+    self.toggleOff = toggleOff
+    self.color = app.color.get('top_info')
+    self.focusColor = app.color.get('selected')
+
+  def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
+    self.controller.toggleValue()
+
+  def preferredSize(self, rowLimit, colLimit):
+    app.log.info(min(rowLimit, 1), min(colLimit, len(self.toggleOn)))
+    return min(rowLimit, 1), min(colLimit, len(self.toggleOn))
+
+  def render(self):
+    if self.rows <= 0:
+      return
+    label = self.toggleOn if self.reference[self.name] else self.toggleOff
+    line = '%*s' % (self.width, label)
+    app.log.info(line, self.rows, self.cols)
+    self.writeLineRow = 0
+    color = self.focusColor if self.hasFocus else self.color
+    self.writeLine(line[:self.cols], color)
+
+
+class RowWindow(ViewWindow):
+  def __init__(self, host, separator):
+    if app.config.strict_debug:
+      assert(host)
+    ViewWindow.__init__(self, host)
+    self.color = app.color.get('keyword')
+    self.separator = separator
+
+  def preferredSize(self, rowLimit, colLimit):
+    return min(rowLimit, 1), colLimit
+
+  def render(self):
+    self.blank(self.color)
+    ViewWindow.render(self)
+
+  def reshape(self, top, left, rows, cols):
+    ViewWindow.reshape(self, top, left, rows, cols)
+    app.log.info(top, left, rows, cols, self)
+    self.layoutHorizontally(self.zOrder, self.separator)
 
 
 class OptionsRow(ViewWindow):
@@ -1216,6 +1299,9 @@ class OptionsRow(ViewWindow):
           self.host.controller.optionChanged(name, control['dict'][name])
           break
       offset += width + len(control['sep'])
+
+  def preferredSize(self, rowLimit, colLimit):
+    return min(rowLimit, 1), colLimit
 
   def render(self):
     if self.rows <= 0:

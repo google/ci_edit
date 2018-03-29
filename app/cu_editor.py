@@ -429,3 +429,30 @@ class PaletteDialogController(app.controller.Controller):
 
   def setTextBuffer(self, textBuffer):
     self.textBuffer = textBuffer
+
+
+class ToggleController(app.editor.ToggleController):
+  """Find text within the current document."""
+  def __init__(self, view):
+    app.editor.ToggleController.__init__(self, view)
+
+  def setTextBuffer(self, textBuffer):
+    app.editor.ToggleController.setTextBuffer(self, textBuffer)
+    commandSet = initCommandSet(self, textBuffer)
+    commandSet.update({
+      KEY_BTAB: self.priorFocusableWindow,
+      KEY_ESCAPE: self.changeToHostWindow,
+      KEY_F3: self.saveEventChangeToHostWindow,
+      KEY_SHIFT_F3: self.saveEventChangeToHostWindow,
+      #CTRL_E: self.extendFindWindow,
+      #CTRL_F: self.findNext,
+      #CTRL_G: self.findNext,
+      CTRL_I: self.nextFocusableWindow,
+      CTRL_J: self.toggleValue,
+      CTRL_N: self.saveEventChangeToHostWindow,
+      CTRL_O: self.changeToFileManagerWindow,
+      CTRL_P: self.changeToPrediction,
+      #CTRL_R: self.findPrior,
+    })
+    self.commandSet = commandSet
+    self.commandDefault = self.textBuffer.insertPrintable
