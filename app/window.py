@@ -223,6 +223,10 @@ class ViewWindow:
     """
     mainCursesWindow.chgat(self.top + row, self.left + col, count, colorPair)
 
+  def preferredSize(self, rowLimit, colLimit):
+    # Derived classes should override this.
+    return rowLimit, colLimit
+
   def presentModal(self, changeTo, paneRow, paneCol):
     self.parent.presentModal(changeTo, paneRow, paneCol)
 
