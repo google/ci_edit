@@ -305,12 +305,13 @@ class ActiveWindow(ViewWindow):
         be responding to user input.
     """
     self.hasFocus = True
-    try:
-      self.parent.zOrder.remove(self)
-    except ValueError:
-      app.log.detail(repr(self) + 'not found in zOrder')
-    self.parent.zOrder.append(self)
     self.controller.focus()
+
+  def setController(self, controller):
+    if app.config.strict_debug:
+      assert issubclass(self.__class__, Window), self
+      assert type(controller) == types.ClassType, type(controller)
+    self.controller = controller(self)
 
   def unfocus(self):
     self.hasFocus = False
@@ -379,10 +380,7 @@ class Window(ActiveWindow):
         app.render.frame.setCursor(None)
 
   def setController(self, controller):
-    if app.config.strict_debug:
-      assert issubclass(self.__class__, Window), self
-      assert type(controller) == types.ClassType, type(controller)
-    self.controller = controller(self)
+    ActiveWindow.setController(self, controller)
     self.controller.setTextBuffer(self.textBuffer)
 
   def setTextBuffer(self, textBuffer):
