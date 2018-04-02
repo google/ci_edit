@@ -613,7 +613,7 @@ class InteractiveFind(Window):
     self.findLine.setParent(self)
     self.layoutOrder.append(self.findLine)
 
-    if 10:
+    if 0:
       self.replaceLine = LabeledLine(self, 'Replace: ')
       self.replaceLine.setController(app.cu_editor.InteractiveFindInput)
       self.replaceLine.setParent(self)
@@ -631,11 +631,13 @@ class InteractiveFind(Window):
       toggle.setController(app.cu_editor.ToggleController)
       toggle.color = app.color.get('keyword')
       toggle.setParent(self.matchOptionsRow)
-      toggle = OptionsToggle(self.matchOptionsRow, 'wholeWord', self.matchOptions)
+      toggle = OptionsToggle(self.matchOptionsRow, 'wholeWord',
+          self.matchOptions)
       toggle.setController(app.cu_editor.ToggleController)
       toggle.color = app.color.get('keyword')
       toggle.setParent(self.matchOptionsRow)
-      toggle = OptionsToggle(self.matchOptionsRow, 'ignoreCase', self.matchOptions)
+      toggle = OptionsToggle(self.matchOptionsRow, 'ignoreCase',
+          self.matchOptions)
       toggle.setController(app.cu_editor.ToggleController)
       toggle.color = app.color.get('keyword')
       toggle.setParent(self.matchOptionsRow)
@@ -675,6 +677,14 @@ class InteractiveFind(Window):
       self.pathsLine.setController(app.cu_editor.InteractiveFindInput)
       self.pathsLine.setParent(self)
       self.layoutOrder.append(self.pathsLine)
+
+  def reattach(self):
+    Window.reattach(self)
+    self.parent.layout()
+
+  def detach(self):
+    Window.detach(self)
+    self.parent.layout()
 
   def addSelectOptionsRow(self, label, optionsList):
     """
