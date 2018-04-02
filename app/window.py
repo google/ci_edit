@@ -740,6 +740,10 @@ class InteractiveFind(Window):
     self.changeFocusTo(self.findLine)
 
   def preferredSize(self, rowLimit, colLimit):
+    if app.config.strict_debug:
+      assert self.parent
+      assert rowLimit >= 0
+      assert colLimit >= 0
     if self.parent and self in self.parent.zOrder and self.expanded:
       return (min(rowLimit, len(self.zOrder)), colLimit)
     return (1, -1)
