@@ -445,14 +445,15 @@ class ToggleController(app.editor.ToggleController):
       KEY_F3: self.saveEventChangeToHostWindow,
       KEY_SHIFT_F3: self.saveEventChangeToHostWindow,
       #CTRL_E: self.extendFindWindow,
-      #CTRL_F: self.findNext,
-      #CTRL_G: self.findNext,
+      CTRL_F: self.changeToFind,
+      CTRL_G: self.changeToFind,
       CTRL_I: self.nextFocusableWindow,
       CTRL_J: self.toggleValue,
       CTRL_N: self.saveEventChangeToHostWindow,
       CTRL_O: self.changeToFileManagerWindow,
       CTRL_P: self.changeToPrediction,
-      #CTRL_R: self.findPrior,
+      CTRL_R: self.changeToFindPrior,
+      ord(' '): self.toggleValue,
     })
     self.commandSet = commandSet
     self.commandDefault = self.textBuffer.insertPrintable
