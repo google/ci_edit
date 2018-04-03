@@ -607,7 +607,7 @@ class InteractiveFind(Window):
   def __init__(self, host):
     Window.__init__(self, host)
     self.host = host
-    self.expanded = False
+    self.expanded = True
     self.setController(app.cu_editor.InteractiveFind)
     indent = '  '
 
@@ -628,17 +628,18 @@ class InteractiveFind(Window):
         'wholeWord': False,
         'ignoreCase': False,
       }
-      toggle = OptionsToggle(self.matchOptionsRow, 'regex', self.matchOptions)
+      toggle = OptionsToggle(self.matchOptionsRow, 'regex', 'editor',
+          'findUseRegex')
       toggle.setController(app.cu_editor.ToggleController)
       toggle.color = app.color.get('keyword')
       toggle.setParent(self.matchOptionsRow)
-      toggle = OptionsToggle(self.matchOptionsRow, 'wholeWord',
-          self.matchOptions)
+      toggle = OptionsToggle(self.matchOptionsRow, 'wholeWord', 'editor',
+          'findWholeWord')
       toggle.setController(app.cu_editor.ToggleController)
       toggle.color = app.color.get('keyword')
       toggle.setParent(self.matchOptionsRow)
-      toggle = OptionsToggle(self.matchOptionsRow, 'ignoreCase',
-          self.matchOptions)
+      toggle = OptionsToggle(self.matchOptionsRow, 'ignoreCase', 'editor',
+          'findIgnoreCase')
       toggle.setController(app.cu_editor.ToggleController)
       toggle.color = app.color.get('keyword')
       toggle.setParent(self.matchOptionsRow)
@@ -1145,26 +1146,27 @@ class InputWindow(Window):
 
 
 class OptionsToggle(Window):
-  def __init__(self, parent, name, reference, width=None):
+  def __init__(self, parent, label, prefCategory, prefName, width=None):
     if app.config.strict_debug:
-      assert type(name) == str
+      assert type(label) == str
     Window.__init__(self, parent)
-    self.name = name
-    self.reference = reference
+    self.name = label
+    self.prefCategory = prefCategory
+    self.prefName = prefName
     # TODO(dschuyler): Creating a text buffer is rather heavy for a toggle
     # control. This should get some optimization.
     self.setTextBuffer(app.text_buffer.TextBuffer())
     if 1:
-      toggleOn = '[x]' + name
-      toggleOff = '[ ]' + name
+      toggleOn = '[x]' + label
+      toggleOff = '[ ]' + label
     if 0:
-      toggleOn = unichr(0x2612) + ' ' + control['name']
-      toggleOff = unichr(0x2610) + ' ' + control['name']
+      toggleOn = unichr(0x2612) + ' ' + control['label']
+      toggleOff = unichr(0x2610) + ' ' + control['label']
     if 0:
-      toggleOn = '[+' + control['name'] + ']'
-      toggleOff = '[-' + control['name'] + ']'
+      toggleOn = '[+' + control['label'] + ']'
+      toggleOff = '[-' + control['label'] + ']'
     width = max(width, min(len(toggleOn), len(toggleOff)))
-    self.width = width if width is not None else len(name)
+    self.width = width if width is not None else len(label)
     self.toggleOn = toggleOn
     self.toggleOff = toggleOff
     self.color = app.color.get('top_info')
@@ -1180,7 +1182,7 @@ class OptionsToggle(Window):
   def render(self):
     if self.rows <= 0:
       return
-    label = self.toggleOn if self.reference[self.name] else self.toggleOff
+    label = self.toggleOn if app.prefs.prefs[self.prefCategory][self.prefName] else self.toggleOff
     line = '%*s' % (self.width, label)
     app.log.info(line, self.rows, self.cols)
     self.writeLineRow = 0

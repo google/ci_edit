@@ -274,6 +274,7 @@ class InteractiveGoto(app.controller.Controller):
     gotoLine, gotoCol = (line.split(U',') + [U'0', U'0'])[:2]
     self.cursorMoveTo(parseInt(gotoLine)-1, parseInt(gotoCol))
 
+
 class ToggleController(app.controller.Controller):
   def __init__(self, view):
     if app.config.strict_debug:
@@ -282,6 +283,9 @@ class ToggleController(app.controller.Controller):
     app.controller.Controller.__init__(self, view, 'toggle')
 
   def toggleValue(self):
-    self.view.reference[self.view.name] = not  self.view.reference[self.view.name]
+    category = self.view.prefCategory
+    name = self.view.prefName
+    prefs = app.prefs
+    prefs.save(category, name, not prefs.prefs[category][name])
 
 
