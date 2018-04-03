@@ -77,7 +77,7 @@ class ViewWindow:
     parent to be reattached later."""
     try:
       self.parent.zOrder.remove(self)
-    except Exception:
+    except ValueError:
       pass
 
   def blank(self, colorPair):
@@ -89,7 +89,7 @@ class ViewWindow:
     """Bring it to the top layer."""
     try:
       self.zOrder.remove(child)
-    except Exception:
+    except ValueError:
       pass
     self.zOrder.append(child)
 
@@ -272,7 +272,7 @@ class ViewWindow:
     if self.parent:
       try:
         self.parent.zOrder.remove(self)
-      except Exception:
+      except ValueError:
         pass
     self.parent = parent
     if parent:
