@@ -610,18 +610,15 @@ class InteractiveFind(Window):
     self.expanded = False
     self.setController(app.cu_editor.InteractiveFind)
     indent = '  '
-    self.layoutOrder = []
 
     self.findLine = LabeledLine(self, 'Find: ')
     self.findLine.setController(app.cu_editor.InteractiveFindInput)
     self.findLine.setParent(self)
-    self.layoutOrder.append(self.findLine)
 
     if 0:
       self.replaceLine = LabeledLine(self, 'Replace: ')
       self.replaceLine.setController(app.cu_editor.InteractiveFindInput)
       self.replaceLine.setParent(self)
-      self.layoutOrder.append(self.replaceLine)
 
     if 1:
       self.matchOptionsRow = RowWindow(self, 2)
@@ -680,7 +677,6 @@ class InteractiveFind(Window):
       self.pathsLine = LabeledLine(self, 'Paths: ')
       self.pathsLine.setController(app.cu_editor.InteractiveFindInput)
       self.pathsLine.setParent(self)
-      self.layoutOrder.append(self.pathsLine)
 
   def reattach(self):
     Window.reattach(self)
@@ -705,7 +701,6 @@ class InteractiveFind(Window):
     optionsRow.endGroup()
     optionsDict[optionsList[0]] = True
     optionsRow.setParent(self)
-    self.layoutOrder.append(optionsRow)
     return optionsDict, optionsRow
 
   def addToggleOptionsRow(self, label, optionsList):
@@ -728,7 +723,6 @@ class InteractiveFind(Window):
       optionsDict[key] = app.prefs.editor.get(translate[key.strip()]) or False
       optionsRow.addToggle(key, optionsDict)
     optionsRow.setParent(self)
-    self.layoutOrder.append(optionsRow)
     return optionsDict, optionsRow
 
   def bringChildToFront(self, child):
