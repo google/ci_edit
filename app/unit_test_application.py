@@ -119,9 +119,9 @@ class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
   def test_find(self):
     self.runWithTestFile([
         self.displayCheck(-1, 0, ["      "]),
-        CTRL_F, self.displayCheck(-1, 0, ["Find: "]), CTRL_J,
+        CTRL_F, self.displayCheck(-2, 0, ["Find: "]), CTRL_J,
         self.displayCheck(-1, 0, ["      "]),
-        CTRL_F, self.displayCheck(-1, 0, ["Find: "]),
+        CTRL_F, self.displayCheck(-2, 0, ["Find: "]),
         CTRL_Q])
 
   def test_text_contents(self):
