@@ -404,6 +404,10 @@ class LabeledLine(Window):
     self.leftColumn = ViewWindow(self)
     # TODO(dschuyler) Add self.rightColumn.
 
+  def focus(self):
+    self.bringToFront()
+    Window.focus(self)
+
   def preferredSize(self, rowLimit, colLimit):
     return min(rowLimit, 1), colLimit
 
