@@ -126,14 +126,12 @@ class InteractivePrediction(app.controller.Controller):
     return (len(app.buffer_manager.buffers.buffers) - 2) % len(self.items)
 
   def onChange(self):
-    #input = self.textBuffer.lines[0]
     clip = []
     limit = max(5, self.view.host.cols-10)
     for i,item in enumerate(self.items):
       prefix = '-->' if i == self.index else '   '
       suffix = ' <--' if i == self.index else ''
       clip.append("%s %s %s%s"%(prefix, item[1][-limit:], item[2], suffix))
-    app.log.info(clip)
     self.view.host.textBuffer.selectionAll()
     self.view.host.textBuffer.editPasteLines(tuple(clip))
     self.cursorMoveTo(self.index, 0)

@@ -608,6 +608,7 @@ class InteractiveFind(Window):
     Window.__init__(self, host)
     self.host = host
     self.expanded = False
+    self.ignoreUnfocus = False
     self.setController(app.cu_editor.InteractiveFind)
     indent = '  '
 
@@ -701,6 +702,8 @@ class InteractiveFind(Window):
     pass
 
   def focus(self):
+    assert not self.ignoreUnfocus
+    self.ignoreUnfocus = True
     self.reattach()
     if app.config.strict_debug:
       assert self.parent
@@ -726,6 +729,14 @@ class InteractiveFind(Window):
   def reshape(self, top, left, rows, cols):
     Window.reshape(self, top, left, rows, cols)
     self.layoutVertically(self.zOrder)
+
+  def unfocus(self):
+    # The focus() member above will focus the findLine child, which will
+    # generate an unfocus() call. Ignore the one caused by our own call.
+    if self.ignoreUnfocus:
+      self.ignoreUnfocus = False
+      return
+    self.detach()
 
 
 class MessageLine(ViewWindow):
@@ -1047,7 +1058,6 @@ class InputWindow(Window):
       self.rightColumn.addStr(i, 0, ' ', color)
 
   def focus(self):
-    self.interactiveFind.detach()
     self.layout()
     if self.showMessageLine:
       self.messageLine.bringToFront()

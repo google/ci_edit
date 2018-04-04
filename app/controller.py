@@ -56,7 +56,7 @@ class Controller:
     self.findAndChangeTo('interactiveQuit')
 
   def changeToHostWindow(self, *args):
-    host = self.getNamedWindow('inputWindow')
+    host = self.getNamedWindow('inputWindow', True)
     if app.config.strict_debug:
       assert issubclass(self.view.__class__, app.window.Window), self.view
       assert issubclass(host.__class__, app.window.Window), host
@@ -91,7 +91,7 @@ class Controller:
     self.findAndChangeTo('interactiveQuit')
 
   def changeToSaveAs(self):
-    view = self.getNamedWindow('fileManagerWindow')
+    view = self.getNamedWindow('fileManagerWindow', True)
     view.setMode('saveAs')
     view.changeFocusTo(view);
 
@@ -110,17 +110,21 @@ class Controller:
       self.commandDefault(ch, meta)
     self.textBuffer.compoundChangePush()
 
-  def getNamedWindow(self, windowName):
+  def getNamedWindow(self, windowName, unfocus=False):
     view = self.view
+    first = True
     while view is not None:
       if hasattr(view, windowName):
         return getattr(view, windowName);
+      if not first and unfocus:
+        view.unfocus()
+      first = False
       view = view.parent
     app.log.fatal(windowName + ' not found');
     return None
 
   def findAndChangeTo(self, windowName):
-    window = self.getNamedWindow(windowName)
+    window = self.getNamedWindow(windowName, True)
     window.bringToFront()
     self.view.changeFocusTo(window)
 
@@ -129,9 +133,9 @@ class Controller:
     pass
 
   def confirmationPromptFinish(self, *args):
-    host = self.getNamedWindow('inputWindow')
-    host.userIntent = 'edit'
-    self.changeToHostWindow()
+    window = self.getNamedWindow('inputWindow', True)
+    window.userIntent = 'edit'
+    self.view.changeFocusTo(window)
 
   def __closeHostFile(self, host):
     """Close the current file and switch to another or create an empty file."""
@@ -278,12 +282,12 @@ class Controller:
 
   def saveEventChangeToHostWindow(self, *args):
     curses.ungetch(self.savedCh)
-    host = self.getNamedWindow('inputWindow')
+    host = self.getNamedWindow('inputWindow', True)
     self.view.changeFocusTo(host)
 
   def saveEventChangeToInputWindow(self, *args):
     curses.ungetch(self.savedCh)
-    host = self.getNamedWindow('inputWindow')
+    host = self.getNamedWindow('inputWindow', True)
     self.view.changeFocusTo(host)
 
   def setTextBuffer(self, textBuffer):
