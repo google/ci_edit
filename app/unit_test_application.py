@@ -126,6 +126,15 @@ class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
         KEY_BTAB, KEY_BTAB, self.displayCheck(-1, 0, ["Find: "]),
         CTRL_Q])
 
+  def test_prediction(self):
+    #self.setMovieMode(True)
+    self.runWithTestFile([
+        self.displayCheck(-1, 0, ["      "]),
+        CTRL_P, self.displayCheck(-1, 0, ["p: "]), CTRL_J,
+        self.displayCheck(-1, 0, ["      "]),
+        CTRL_P, self.displayCheck(-1, 0, ["p: "]), CTRL_J,
+        CTRL_Q])
+
   def test_text_contents(self):
     self.runWithTestFile([
         self.displayCheck(2, 7, ["        "]), 't', 'e', 'x', 't',
