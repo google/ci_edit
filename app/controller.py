@@ -214,15 +214,14 @@ class Controller:
   def nextFocusableWindow(self):
     window = self.view.parent.nextFocusableWindow(self.view)
     if window is not None:
-      app.log.info(window)
       self.view.changeFocusTo(window)
+    return window is not None
 
   def priorFocusableWindow(self):
     window = self.view.parent.priorFocusableWindow(self.view)
-    app.log.info(window)
     if window is not None:
-      app.log.info(window)
       self.view.changeFocusTo(window)
+    return window is not None
 
   def writeOrConfirmOverwrite(self):
     """Ask whether the file should be overwritten."""

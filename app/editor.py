@@ -212,6 +212,14 @@ class InteractiveFindInput(app.controller.Controller):
       assert issubclass(view.__class__, app.window.ViewWindow), view
     app.controller.Controller.__init__(self, view, 'find')
 
+  def nextFocusableWindow(self):
+    self.view.parent.expandFindWindow(True)
+    app.controller.Controller.nextFocusableWindow(self)
+
+  def priorFocusableWindow(self):
+    if not app.controller.Controller.priorFocusableWindow(self):
+      self.view.host.expandFindWindow(False)
+
   def findNext(self):
     self.parentController().findNext()
 

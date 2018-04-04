@@ -154,8 +154,12 @@ class InteractiveFindInput(app.editor.InteractiveFindInput):
     app.editor.InteractiveFindInput.__init__(self, view)
 
   def focus(self):
-    self.view.parent.parent.textBuffer.setMessage(
-        'Press ctrl+g to find next; ctrl+r find prior.')
+    if self.view.parent.expanded:
+      self.view.parent.parent.textBuffer.setMessage(
+          'Press shift+tab for fewer options; ctrl+g find; ctrl+r find prior.')
+    else:
+      self.view.parent.parent.textBuffer.setMessage(
+          'Press tab for more options; ctrl+g to find next; ctrl+r find prior.')
 
   def setTextBuffer(self, textBuffer):
     app.editor.InteractiveFindInput.setTextBuffer(self, textBuffer)
@@ -166,7 +170,7 @@ class InteractiveFindInput(app.editor.InteractiveFindInput):
       KEY_F1: self.info,
       KEY_F3: self.saveEventChangeToHostWindow,
       KEY_SHIFT_F3: self.saveEventChangeToHostWindow,
-      CTRL_E: self.extendFindWindow,
+      #CTRL_E: self.extendFindWindow,
       CTRL_F: self.findNext,
       CTRL_G: self.findNext,
       CTRL_I: self.nextFocusableWindow,
@@ -180,9 +184,6 @@ class InteractiveFindInput(app.editor.InteractiveFindInput):
     })
     self.commandSet = commandSet
     self.commandDefault = self.textBuffer.insertPrintable
-
-  def extendFindWindow(self):
-    self.view.host.toggleExtendedFindWindow()
 
 class InteractiveReplaceInput(app.editor.InteractiveFindInput):
   """Find text within the current document."""

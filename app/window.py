@@ -607,7 +607,7 @@ class InteractiveFind(Window):
   def __init__(self, host):
     Window.__init__(self, host)
     self.host = host
-    self.expanded = True
+    self.expanded = False
     self.setController(app.cu_editor.InteractiveFind)
     indent = '  '
 
@@ -747,8 +747,8 @@ class InteractiveFind(Window):
       return (min(rowLimit, len(self.zOrder)), colLimit)
     return (1, -1)
 
-  def toggleExtendedFindWindow(self):
-    self.expanded = not self.expanded
+  def expandFindWindow(self, expanded):
+    self.expanded = expanded
     self.parent.layout()
 
   def reshape(self, top, left, rows, cols):
