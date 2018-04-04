@@ -146,6 +146,8 @@ class FileManagerWindow(app.window.Window):
     self.optionsRow.setParent(self, 0)
     self.directoryList = DirectoryList(self, inputWindow)
     self.directoryList.setParent(self, 0)
+    self.messageLine = app.window.LabeledLine(self, "")
+    self.messageLine.setParent(self, 0)
 
   def getPath(self):
     return self.textBuffer.lines[0]
@@ -176,9 +178,9 @@ class FileManagerWindow(app.window.Window):
     top += 1
     rows -= 1
     self.optionsRow.reshape(originalRows - 2, left, 1, cols)
-    rows -= 2
-    #self.statusLine.reshape(originalRows - 2, left, 1, cols)
-    #rows -= 2
+    rows -= 1
+    self.messageLine.reshape(originalRows - 1, left, 1, cols)
+    rows -= 1
     self.directoryList.reshape(top, left, rows, cols)
 
   def setMode(self, mode):
