@@ -615,10 +615,9 @@ class InteractiveFind(Window):
     self.findLine.setController(app.cu_editor.InteractiveFindInput)
     self.findLine.setParent(self)
 
-    if 0:
-      self.replaceLine = LabeledLine(self, 'Replace: ')
-      self.replaceLine.setController(app.cu_editor.InteractiveFindInput)
-      self.replaceLine.setParent(self)
+    self.replaceLine = LabeledLine(self, 'Replace: ')
+    self.replaceLine.setController(app.cu_editor.InteractiveReplaceInput)
+    self.replaceLine.setParent(self)
 
     if 1:
       self.matchOptionsRow = RowWindow(self, 2)
@@ -736,6 +735,7 @@ class InteractiveFind(Window):
     assert self.findLine.parent
     assert self.rows > 0, self.rows
     assert self.findLine.rows > 0, self.findLine.rows
+    self.controller.focus()
     self.changeFocusTo(self.findLine)
 
   def preferredSize(self, rowLimit, colLimit):

@@ -168,19 +168,40 @@ class InteractiveFind(app.controller.Controller):
       assert issubclass(view.__class__, app.window.ViewWindow), view
     app.controller.Controller.__init__(self, view, 'find')
 
-  def optionChanged(self, name, value):
-    translate = {
-      'regex': 'findUseRegex',
-      'multiline': 'findMultiline',
-      'wholeWord': 'findWholeWord',
-      'dotAll': 'findDotAll',
-      'ignoreCase': 'findIgnoreCase',
-      'locale': 'findLocale',
-      'verbose': 'findVerbose',
-      'unicode': 'findUnicode',
-    }
-    #app.prefs.editor[translate[name]] = value
-    app.prefs.save('editor', translate[name], value)
+  def findNext(self):
+    self.findCmd = self.view.host.textBuffer.findNext
+
+  def findPrior(self):
+    self.findCmd = self.view.host.textBuffer.findPrior
+
+  def focus(self):
+    self.findCmd = self.view.host.textBuffer.find
+    selection = self.view.host.textBuffer.getSelectedText()
+    if selection:
+      self.view.findLine.textBuffer.selectionAll()
+      # Make a single regex line.
+      selection = "\\n".join(selection)
+      app.log.info(selection)
+      self.view.findLine.textBuffer.insert(re.escape(selection))
+    self.view.findLine.textBuffer.selectionAll()
+
+  def onChange(self):
+    searchFor = self.view.findLine.textBuffer.lines[0]
+    try:
+      self.findCmd(searchFor)
+    except re.error, e:
+      self.error = e.message
+    self.findCmd = self.view.host.textBuffer.find
+
+  def replaceAndNext(self):
+    replaceWith = self.view.replaceLine.textBuffer.lines[0]
+    self.view.host.textBuffer.editPasteData(replaceWith)
+    self.findCmd = self.view.host.textBuffer.findNext
+
+  def replaceAndPrior(self):
+    replaceWith = self.view.replaceLine.textBuffer.lines[0]
+    self.view.host.textBuffer.editPasteData(replaceWith)
+    self.findCmd = self.view.host.textBuffer.findPrior
 
 
 class InteractiveFindInput(app.controller.Controller):
@@ -192,36 +213,22 @@ class InteractiveFindInput(app.controller.Controller):
     app.controller.Controller.__init__(self, view, 'find')
 
   def findNext(self):
-    self.findCmd = self.view.parent.host.textBuffer.findNext
+    self.parentController().findNext()
 
   def findPrior(self):
-    self.findCmd = self.view.parent.host.textBuffer.findPrior
-
-  def findReplace(self):
-    self.findCmd = self.view.parent.host.textBuffer.findReplace
-
-  def focus(self):
-    self.findCmd = self.view.parent.host.textBuffer.find
-    selection = self.view.parent.host.textBuffer.getSelectedText()
-    if selection:
-      self.textBuffer.selectionAll()
-      # Make a single regex line.
-      selection = "\\n".join(selection)
-      app.log.info(selection)
-      self.textBuffer.insert(re.escape(selection))
-    self.textBuffer.selectionAll()
+    self.parentController().findPrior()
 
   def info(self):
     app.log.info('InteractiveFind command set')
 
   def onChange(self):
-    app.log.info('InteractiveFind')
-    searchFor = self.textBuffer.lines[0]
-    try:
-      self.findCmd(searchFor)
-    except re.error, e:
-      self.error = e.message
-    self.findCmd = self.view.host.parent.textBuffer.find
+    self.parentController().onChange()
+
+  def replaceAndNext(self):
+    self.parentController().replaceAndNext()
+
+  def replaceAndPrior(self):
+    self.parentController().replaceAndPrior()
 
 
 class InteractiveGoto(app.controller.Controller):

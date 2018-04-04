@@ -153,6 +153,10 @@ class InteractiveFindInput(app.editor.InteractiveFindInput):
   def __init__(self, view):
     app.editor.InteractiveFindInput.__init__(self, view)
 
+  def focus(self):
+    self.view.parent.parent.textBuffer.setMessage(
+        'Press ctrl+g to find next; ctrl+r find prior.')
+
   def setTextBuffer(self, textBuffer):
     app.editor.InteractiveFindInput.setTextBuffer(self, textBuffer)
     commandSet = initCommandSet(self, textBuffer)
@@ -171,8 +175,45 @@ class InteractiveFindInput(app.editor.InteractiveFindInput):
       CTRL_O: self.changeToFileManagerWindow,
       CTRL_P: self.changeToPrediction,
       CTRL_R: self.findPrior,
-      KEY_DOWN: self.findNext,
-      KEY_UP: self.findPrior,
+      #KEY_DOWN: self.findNext,
+      #KEY_UP: self.findPrior,
+    })
+    self.commandSet = commandSet
+    self.commandDefault = self.textBuffer.insertPrintable
+
+  def extendFindWindow(self):
+    self.view.host.toggleExtendedFindWindow()
+
+class InteractiveReplaceInput(app.editor.InteractiveFindInput):
+  """Find text within the current document."""
+  def __init__(self, view):
+    app.editor.InteractiveFindInput.__init__(self, view)
+
+  def focus(self):
+    self.view.parent.parent.textBuffer.setMessage(
+        'Press ctrl+g to replace and find next; ctrl+r to replace and find'
+        ' prior.')
+
+  def setTextBuffer(self, textBuffer):
+    app.editor.InteractiveFindInput.setTextBuffer(self, textBuffer)
+    commandSet = initCommandSet(self, textBuffer)
+    commandSet.update({
+      KEY_BTAB: self.priorFocusableWindow,
+      KEY_ESCAPE: self.changeToHostWindow,
+      KEY_F1: self.info,
+      KEY_F3: self.saveEventChangeToHostWindow,
+      KEY_SHIFT_F3: self.saveEventChangeToHostWindow,
+      CTRL_E: self.extendFindWindow,
+      CTRL_F: self.findNext,
+      CTRL_G: self.replaceAndNext,
+      CTRL_I: self.nextFocusableWindow,
+      CTRL_J: self.changeToHostWindow,
+      CTRL_N: self.saveEventChangeToHostWindow,
+      CTRL_O: self.changeToFileManagerWindow,
+      CTRL_P: self.changeToPrediction,
+      CTRL_R: self.replaceAndPrior,
+      #KEY_DOWN: self.findNext,
+      #KEY_UP: self.findPrior,
     })
     self.commandSet = commandSet
     self.commandDefault = self.textBuffer.insertPrintable

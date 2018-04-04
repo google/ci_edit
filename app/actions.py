@@ -1054,6 +1054,7 @@ class Actions(app.mutator.Mutator):
     return flags
 
   def findReplace(self, cmd):
+    """substitute/a/b/flags"""
     if not len(cmd):
       return
     separator = cmd[0]

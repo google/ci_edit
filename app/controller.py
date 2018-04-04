@@ -36,6 +36,13 @@ class Controller:
     self.textBuffer = None
     self.name = name
 
+  def parentController(self):
+    view = self.view.parent
+    while view is not None:
+      if view.controller is not None:
+        return view.controller
+      view = view.parent
+
   def changeToConfirmClose(self):
     self.findAndChangeTo('confirmClose')
 
