@@ -141,7 +141,6 @@ class ViewWindow:
     for view in children:
       preferredRows = view.preferredSize(max(0, rows), self.cols)[0]
       view.reshape(top, self.left, max(0, min(rows, preferredRows)), self.cols)
-      app.log.info('vvv', preferredRows, rows, max(0, min(rows, preferredRows)), view)
       delta = view.rows + separation
       top += delta
       rows -= delta
@@ -563,7 +562,8 @@ class LineNumbers(ViewWindow):
 
   def mouseMoved(self, paneRow, paneCol, shift, ctrl, alt):
     app.log.info(paneRow, paneCol, shift)
-    self.host.textBuffer.mouseClick(paneRow, paneCol - self.cols, True, ctrl, alt)
+    self.host.textBuffer.mouseClick(paneRow, paneCol - self.cols, True, ctrl,
+        alt)
 
   def mouseRelease(self, paneRow, paneCol, shift, ctrl, alt):
     app.log.info(paneRow, paneCol, shift)
@@ -619,42 +619,35 @@ class InteractiveFind(Window):
     self.replaceLine.setController(app.cu_editor.InteractiveReplaceInput)
     self.replaceLine.setParent(self)
 
-    if 1:
-      self.matchOptionsRow = RowWindow(self, 2)
-      self.matchOptionsRow.setParent(self)
-      self.matchOptions = {
-        'regex': False,
-        'wholeWord': False,
-        'ignoreCase': False,
-      }
-      toggle = OptionsToggle(self.matchOptionsRow, 'regex', 'editor',
-          'findUseRegex')
-      toggle.setController(app.cu_editor.ToggleController)
-      toggle.color = app.color.get('keyword')
-      toggle.setParent(self.matchOptionsRow)
-      toggle = OptionsToggle(self.matchOptionsRow, 'wholeWord', 'editor',
-          'findWholeWord')
-      toggle.setController(app.cu_editor.ToggleController)
-      toggle.color = app.color.get('keyword')
-      toggle.setParent(self.matchOptionsRow)
-      toggle = OptionsToggle(self.matchOptionsRow, 'ignoreCase', 'editor',
-          'findIgnoreCase')
-      toggle.setController(app.cu_editor.ToggleController)
-      toggle.color = app.color.get('keyword')
-      toggle.setParent(self.matchOptionsRow)
-    else:
-      self.matchOptions, self.matchOptionsRow = self.addToggleOptionsRow(
-          indent + 'options   ',
-          [
-            'regex',  # If false, re.escape the search.
-            'wholeWord',  # Wrap with \b.
-            'ignoreCase',
-            'locale',  # Use locale.
-            #'multiline',  # Span lines.
-            #'dotAll',  # Dot matches anything (even \n).
-            'unicode',  # Unicode match.
-            #'smart',  # Replace uppercase with upper and lowercase with lower.
-          ])
+    self.matchOptionsRow = RowWindow(self, 2)
+    self.matchOptionsRow.setParent(self)
+
+    # If findUseRegex is false, re.escape the search.
+    toggle = OptionsToggle(self.matchOptionsRow, 'regex', 'editor',
+        'findUseRegex')
+    # If findWholeWord, wrap with \b.
+    toggle = OptionsToggle(self.matchOptionsRow, 'wholeWord', 'editor',
+        'findWholeWord')
+    # If findIgnoreCase, pass ignore case flag to regex.
+    toggle = OptionsToggle(self.matchOptionsRow, 'ignoreCase', 'editor',
+        'findIgnoreCase')
+    if 0:
+      # Use locale.
+      toggle = OptionsToggle(self.matchOptionsRow, 'locale', 'editor',
+          'findLocale')
+      # Span lines.
+      toggle = OptionsToggle(self.matchOptionsRow, 'multiline', 'editor',
+          'findMultiline')
+      # Dot matches anything (even \n).
+      toggle = OptionsToggle(self.matchOptionsRow, 'dotAll', 'editor',
+          'findDotAll')
+      # Unicode match.
+      toggle = OptionsToggle(self.matchOptionsRow, 'unicode', 'editor',
+          'findUnicode')
+      # Replace uppercase with upper and lowercase with lower.
+      toggle = OptionsToggle(self.matchOptionsRow, 'smartCaps', 'editor',
+          'findReplaceSmartCaps')
+
     if 0:
       self.scopeOptions, self.scopeRow = self.addSelectOptionsRow(
           indent + 'scope     ', ['file', 'directory', 'openFiles', 'project'])
@@ -703,38 +696,17 @@ class InteractiveFind(Window):
     optionsRow.setParent(self)
     return optionsDict, optionsRow
 
-  def addToggleOptionsRow(self, label, optionsList):
-    # TODO(dschuyler): This is a hack copy of this lookup.
-    translate = {
-      'regex': 'findUseRegex',
-      'multiline': 'findMultiline',
-      'wholeWord': 'findWholeWord',
-      'dotAll': 'findDotAll',
-      'ignoreCase': 'findIgnoreCase',
-      'locale': 'findLocale',
-      'verbose': 'findVerbose',
-      'unicode': 'findUnicode',
-    }
-    optionsRow = OptionsRow(self)
-    optionsRow.color = app.color.get('keyword')
-    optionsRow.addLabel(label)
-    optionsDict = {}
-    for key in optionsList:
-      optionsDict[key] = app.prefs.editor.get(translate[key.strip()]) or False
-      optionsRow.addToggle(key, optionsDict)
-    optionsRow.setParent(self)
-    return optionsDict, optionsRow
-
   def bringChildToFront(self, child):
-    # The find window doesn't reorder children
+    # The find window doesn't reorder children.
     pass
 
   def focus(self):
     self.reattach()
-    assert self.parent
-    assert self.findLine.parent
-    assert self.rows > 0, self.rows
-    assert self.findLine.rows > 0, self.findLine.rows
+    if app.config.strict_debug:
+      assert self.parent
+      assert self.findLine.parent
+      assert self.rows > 0, self.rows
+      assert self.findLine.rows > 0, self.findLine.rows
     self.controller.focus()
     self.changeFocusTo(self.findLine)
 
@@ -753,7 +725,6 @@ class InteractiveFind(Window):
 
   def reshape(self, top, left, rows, cols):
     Window.reshape(self, top, left, rows, cols)
-    app.log.info(top, left, rows, cols, self, self.zOrder)
     self.layoutVertically(self.zOrder)
 
 
@@ -1150,12 +1121,14 @@ class OptionsToggle(Window):
     if app.config.strict_debug:
       assert type(label) == str
     Window.__init__(self, parent)
-    self.name = label
-    self.prefCategory = prefCategory
-    self.prefName = prefName
     # TODO(dschuyler): Creating a text buffer is rather heavy for a toggle
     # control. This should get some optimization.
     self.setTextBuffer(app.text_buffer.TextBuffer())
+    self.setController(app.cu_editor.ToggleController)
+    self.setParent(parent)
+    self.name = label
+    self.prefCategory = prefCategory
+    self.prefName = prefName
     if 1:
       toggleOn = '[x]' + label
       toggleOff = '[ ]' + label
@@ -1169,7 +1142,7 @@ class OptionsToggle(Window):
     self.width = width if width is not None else len(label)
     self.toggleOn = toggleOn
     self.toggleOff = toggleOff
-    self.color = app.color.get('top_info')
+    self.color = app.color.get('keyword')
     self.focusColor = app.color.get('selected')
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
