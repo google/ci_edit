@@ -414,7 +414,7 @@ class LabeledLine(Window):
     self.host.quitNow()
 
   def render(self):
-    app.log.info('LabeledLine', self.label, self.rows, self.cols)
+    #app.log.info('LabeledLine', self.label, self.rows, self.cols)
     if self.rows <= 0:
       return
     self.leftColumn.addStr(0, 0, self.label, app.color.get('keyword'))
@@ -1159,7 +1159,7 @@ class OptionsToggle(Window):
     self.controller.toggleValue()
 
   def preferredSize(self, rowLimit, colLimit):
-    app.log.info(min(rowLimit, 1), min(colLimit, len(self.toggleOn)))
+    #app.log.info(min(rowLimit, 1), min(colLimit, len(self.toggleOn)))
     return min(rowLimit, 1), min(colLimit, len(self.toggleOn))
 
   def render(self):
@@ -1167,7 +1167,7 @@ class OptionsToggle(Window):
       return
     label = self.toggleOn if app.prefs.prefs[self.prefCategory][self.prefName] else self.toggleOff
     line = '%*s' % (self.width, label)
-    app.log.info(line, self.rows, self.cols)
+    #app.log.info(line, self.rows, self.cols)
     self.writeLineRow = 0
     color = self.focusColor if self.hasFocus else self.color
     self.writeLine(line[:self.cols], color)
@@ -1190,7 +1190,7 @@ class RowWindow(ViewWindow):
 
   def reshape(self, top, left, rows, cols):
     ViewWindow.reshape(self, top, left, rows, cols)
-    app.log.info(top, left, rows, cols, self)
+    #app.log.info(top, left, rows, cols, self)
     self.layoutHorizontally(self.zOrder, self.separator)
 
 
