@@ -22,7 +22,11 @@ import traceback
 
 screenLog = ["--- screen log ---"]
 fullLog = ["--- begin log ---"]
-enabledChannels = {'meta': True, 'mouse': True, 'startup': True}
+enabledChannels = {
+  'meta': True,
+  #'mouse': True,
+  'startup': True,
+}
 shouldWritePrintLog = False
 startTime = time.time()
 

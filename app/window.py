@@ -1046,7 +1046,7 @@ class InputWindow(Window):
     """Draw makers to indicate text extending past the right edge of the
     window."""
     maxRow, maxCol = self.rows, self.cols
-    limit = min(maxRow, len(self.textBuffer.lines)-self.scrollRow)
+    limit = min(maxRow, len(self.textBuffer.lines) - self.scrollRow)
     for i in range(limit):
       color = app.color.get('right_column')
       if len(self.textBuffer.lines[

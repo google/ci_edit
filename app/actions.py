@@ -828,7 +828,8 @@ class Actions(app.mutator.Mutator):
         (0, 0))
     if app.prefs.editor['saveUndo']:
       self.redoChain = self.fileHistory.setdefault('redoChainCompound', [])
-      self.savedAtRedoIndex = self.fileHistory.setdefault('savedAtRedoIndexCompound', 0)
+      self.savedAtRedoIndex = self.fileHistory.setdefault(
+          'savedAtRedoIndexCompound', 0)
       self.redoIndex = self.savedAtRedoIndex
       self.oldRedoIndex = self.savedAtRedoIndex
 
