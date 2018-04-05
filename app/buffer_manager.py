@@ -104,7 +104,7 @@ class BufferManager:
         app.log.info('creating a new file at\n ', fullPath)
       textBuffer = app.text_buffer.TextBuffer()
       textBuffer.setFilePath(fullPath)
-      textBuffer.view = view
+      view.setTextBuffer(textBuffer)
       textBuffer.fileLoad()
       self.buffers.append(textBuffer)
     if 0:

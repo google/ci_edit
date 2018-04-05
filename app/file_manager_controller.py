@@ -161,7 +161,7 @@ class FileManagerController(app.controller.Controller):
     textBuffer = app.buffer_manager.buffers.loadTextBuffer(path,
         self.view.host.inputWindow)
     assert textBuffer.parser
-    self.view.host.inputWindow.setTextBuffer(textBuffer)
+    #self.view.host.inputWindow.setTextBuffer(textBuffer)
     self.view.textBuffer.replaceLines(('',))
     self.changeToInputWindow()
 
