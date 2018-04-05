@@ -24,6 +24,7 @@ import traceback
 
 import app.bookmark
 import app.clipboard
+import app.config
 import app.history
 import app.log
 import app.mutator
@@ -832,6 +833,11 @@ class Actions(app.mutator.Mutator):
           'savedAtRedoIndexCompound', 0)
       self.redoIndex = self.savedAtRedoIndex
       self.oldRedoIndex = self.savedAtRedoIndex
+    if app.config.strict_debug:
+      assert self.view.textBuffer is self
+      assert self.view.scrollRow < len(self.lines), self.view.scrollRow
+      assert self.penRow < len(self.lines), self.penRow
+      assert self.markerRow < len(self.lines), self.markerRow
 
     # Restore file bookmarks
     self.bookmarks = self.fileHistory.setdefault('bookmarks', [])
