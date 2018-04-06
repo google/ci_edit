@@ -158,10 +158,9 @@ class FileManagerController(app.controller.Controller):
       if os.path.isfile(path):
         clip = [path + ":", 'Error opening file.']
         return
-    textBuffer = app.buffer_manager.buffers.loadTextBuffer(path,
-        self.view.host.inputWindow)
+    textBuffer = app.buffer_manager.buffers.loadTextBuffer(path)
     assert textBuffer.parser
-    #self.view.host.inputWindow.setTextBuffer(textBuffer)
+    self.view.host.inputWindow.setTextBuffer(textBuffer)
     self.view.textBuffer.replaceLines(('',))
     self.changeToInputWindow()
 

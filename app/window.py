@@ -1098,11 +1098,15 @@ class InputWindow(Window):
     if savedScroll is not None:
       self.scrollRow, self.scrollCol = savedScroll
     else:
-      self.textBuffer.scrollToOptimalScrollPosition()
+      historyScroll = self.textBuffer.fileHistory.get('scroll')
+      if historyScroll is not None:
+        self.scrollRow, self.scrollCol = historyScroll
+      else:
+        self.textBuffer.scrollToOptimalScrollPosition()
 
   def startup(self):
     for f in app.prefs.startup.get('cliFiles', []):
-      app.buffer_manager.buffers.loadTextBuffer(f['path'], self)
+      app.buffer_manager.buffers.loadTextBuffer(f['path'])
     if app.prefs.startup.get('readStdin'):
       app.buffer_manager.buffers.readStdin()
     tb = app.buffer_manager.buffers.topBuffer()

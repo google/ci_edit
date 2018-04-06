@@ -817,12 +817,18 @@ class Actions(app.mutator.Mutator):
     # Restore the file history.
     self.fileHistory = app.history.getFileHistory(self.fullPath, self.data)
 
+    # TODO(dschuyler): remove view cursorRow/Col
+    #self.view.cursorRow, self.view.cursorCol = self.fileHistory.setdefault(
+    #    'cursor', (0, 0))
+
     # Restore all positions and values of variables.
-    self.view.cursorRow, self.view.cursorCol = self.fileHistory.setdefault(
-        'cursor', (0, 0))
     self.penRow, self.penCol = self.fileHistory.setdefault('pen', (0, 0))
-    self.view.scrollRow, self.view.scrollCol =  self.fileHistory.setdefault(
-        'scroll', (0, 0))
+    app.log.info('\n\n\n    setting scrollRow', self.fileHistory.get('scroll'),
+        self.fullPath, '\n\n\n\n')
+    # Do not restore the scroll position here because the view may not be set.
+    # the scroll position is handled in the InputWindow.setTextBuffer.
+    # self.view.scrollRow, self.view.scrollCol =  self.fileHistory.setdefault(
+    #     'scroll', (0, 0))
     self.doSelectionMode(self.fileHistory.setdefault('selectionMode',
         app.selectable.kSelectionNone))
     self.markerRow, self.markerCol = self.fileHistory.setdefault('marker',
@@ -834,8 +840,6 @@ class Actions(app.mutator.Mutator):
       self.redoIndex = self.savedAtRedoIndex
       self.oldRedoIndex = self.savedAtRedoIndex
     if app.config.strict_debug:
-      assert self.view.textBuffer is self
-      assert self.view.scrollRow < len(self.lines), self.view.scrollRow
       assert self.penRow < len(self.lines), self.penRow
       assert self.markerRow < len(self.lines), self.markerRow
 
@@ -1416,6 +1420,8 @@ class Actions(app.mutator.Mutator):
     self.doParse(begin, end)
 
   def parseGrammars(self):
+    if not self.view:
+      return
     if not self.parser:
       self.parser = app.parser.Parser()
     scrollRow = self.view.scrollRow

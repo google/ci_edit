@@ -152,8 +152,7 @@ class InteractivePrediction(app.controller.Controller):
           app.buffer_manager.buffers.getValidTextBuffer(textBuffer))
     else:
       expandedPath = os.path.abspath(os.path.expanduser(fullPath))
-      textBuffer = app.buffer_manager.buffers.loadTextBuffer(expandedPath,
-          self.view.host)
+      textBuffer = app.buffer_manager.buffers.loadTextBuffer(expandedPath)
       self.view.host.setTextBuffer(textBuffer)
     self.items = None
 

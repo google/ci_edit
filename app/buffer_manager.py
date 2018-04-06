@@ -81,11 +81,10 @@ class BufferManager:
     self.buffers.append(textBuffer)
     return textBuffer
 
-  def loadTextBuffer(self, relPath, view):
+  def loadTextBuffer(self, relPath):
     if app.config.strict_debug:
       assert issubclass(self.__class__, BufferManager), self
       assert type(relPath) is unicode, type(relPath)
-      assert issubclass(view.__class__, app.window.ViewWindow)
     fullPath = app.buffer_file.fullPath(relPath)
     app.log.info(fullPath)
     textBuffer = None
@@ -104,7 +103,6 @@ class BufferManager:
         app.log.info('creating a new file at\n ', fullPath)
       textBuffer = app.text_buffer.TextBuffer()
       textBuffer.setFilePath(fullPath)
-      view.setTextBuffer(textBuffer)
       textBuffer.fileLoad()
       self.buffers.append(textBuffer)
     if 0:
