@@ -192,8 +192,8 @@ class InteractiveOpener(EditText):
 
   def setFileName(self, path):
     self.textBuffer.lines = [path]
-    self.textBuffer.cursorCol = len(path)
-    self.textBuffer.goalCol = self.textBuffer.cursorCol
+    self.textBuffer.penCol = len(path)
+    self.textBuffer.goalCol = self.textBuffer.penCol
 
   def onChange(self):
     path = os.path.expanduser(os.path.expandvars(self.textBuffer.lines[0]))
@@ -252,7 +252,7 @@ class InteractiveFind(EditText):
       self.textBuffer.selectionAll()
       self.textBuffer.insertLines(selection)
     self.textBuffer.selectionAll()
-    app.log.info('find tb', self.textBuffer.cursorCol)
+    app.log.info('find tb', self.textBuffer.penCol)
 
   def info(self):
     app.log.info('InteractiveFind command set')
@@ -299,7 +299,7 @@ class InteractiveGoto(EditText):
   def focus(self):
     app.log.info('InteractiveGoto.focus')
     self.textBuffer.selectionAll()
-    self.textBuffer.insert(str(self.document.textBuffer.cursorRow+1))
+    self.textBuffer.insert(str(self.document.textBuffer.penRow + 1))
     self.textBuffer.selectionAll()
     EditText.focus(self)
 
@@ -320,10 +320,10 @@ class InteractiveGoto(EditText):
 
   def cursorMoveTo(self, row, col):
     textBuffer = self.document.textBuffer
-    cursorRow = min(max(row - 1, 0), len(textBuffer.lines)-1)
-    app.log.info('cursorMoveTo row', row, cursorRow)
-    textBuffer.cursorMove(cursorRow-textBuffer.cursorRow,
-        col-textBuffer.cursorCol,
+    penRow = min(max(row - 1, 0), len(textBuffer.lines)-1)
+    app.log.info('cursorMoveTo row', row, penRow)
+    textBuffer.cursorMove(penRow - textBuffer.penRow,
+        col-textBuffer.penCol,
         col-textBuffer.goalCol)
 
   def onChange(self):

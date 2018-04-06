@@ -115,7 +115,6 @@ class Actions(app.mutator.Mutator):
       is used to determine the color of the bookmark's line numbers.
     """
     bookmarkData = {
-      'cursor': (self.view.cursorRow, self.view.cursorCol),
       'marker': (self.markerRow, self.markerCol),
       'pen': (self.penRow, self.penCol),
       'selectionMode': self.selectionMode,
@@ -152,7 +151,6 @@ class Actions(app.mutator.Mutator):
       None.
     """
     bookmarkData = bookmark.data
-    #cursorRow, cursorCol = bookmarkData['cursor']
     penRow, penCol = bookmarkData['pen']
     markerRow, markerCol = bookmarkData['marker']
     selectionMode = bookmarkData['selectionMode']
@@ -366,8 +364,8 @@ class Actions(app.mutator.Mutator):
     self.doCursorMoveRightTo(app.selectable.kReSubwordBoundaryFwd)
 
   def cursorMoveTo(self, row, col):
-    cursorRow = min(max(row, 0), len(self.lines)-1)
-    self.cursorMove(cursorRow - self.penRow, col - self.penCol)
+    penRow = min(max(row, 0), len(self.lines)-1)
+    self.cursorMove(penRow - self.penRow, col - self.penCol)
 
   def cursorMoveWordLeft(self):
     self.doCursorMoveLeftTo(app.selectable.kReWordBoundary)
@@ -817,10 +815,6 @@ class Actions(app.mutator.Mutator):
     # Restore the file history.
     self.fileHistory = app.history.getFileHistory(self.fullPath, self.data)
 
-    # TODO(dschuyler): remove view cursorRow/Col
-    #self.view.cursorRow, self.view.cursorCol = self.fileHistory.setdefault(
-    #    'cursor', (0, 0))
-
     # Restore all positions and values of variables.
     self.penRow, self.penCol = self.fileHistory.setdefault('pen', (0, 0))
     app.log.info('\n\n\n    setting scrollRow', self.fileHistory.get('scroll'),
@@ -953,7 +947,6 @@ class Actions(app.mutator.Mutator):
           self.compoundChangePush()
         # Save user data that applies to read-only files into history.
         self.fileHistory['pen'] = (self.penRow, self.penCol)
-        self.fileHistory['cursor'] = (self.view.cursorRow, self.view.cursorCol)
         self.fileHistory['scroll'] = (self.view.scrollRow, self.view.scrollCol)
         self.fileHistory['marker'] = (self.markerRow, self.markerCol)
         self.fileHistory['selectionMode'] = self.selectionMode

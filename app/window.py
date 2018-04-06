@@ -325,8 +325,6 @@ class Window(ActiveWindow):
       assert issubclass(self.__class__, Window), self
       assert issubclass(parent.__class__, ViewWindow), parent
     ActiveWindow.__init__(self, parent)
-    self.cursorRow = 0
-    self.cursorCol = 0
     self.hasCaptiveCursor = app.prefs.editor['captiveCursor']
     self.hasFocus = False
     self.textBuffer = None
@@ -364,17 +362,16 @@ class Window(ActiveWindow):
 
   def render(self):
     if self.textBuffer:
-      self.cursorRow = self.textBuffer.penRow
-      self.cursorCol = self.textBuffer.penCol
       self.textBuffer.draw(self)
     ViewWindow.render(self)
     if self.hasFocus:
       self.parent.debugDraw(self)
-      if (self.cursorRow >= self.scrollRow and
-          self.cursorRow < self.scrollRow + self.rows):
+      penRow = self.textBuffer.penRow
+      penCol = self.textBuffer.penCol
+      if (penRow >= self.scrollRow and penRow < self.scrollRow + self.rows):
         app.render.frame.setCursor((
-            self.top + self.cursorRow - self.scrollRow,
-            self.left + self.cursorCol - self.scrollCol))
+            self.top + penRow - self.scrollRow,
+            self.left + penCol - self.scrollCol))
       else:
         app.render.frame.setCursor(None)
 
@@ -496,7 +493,7 @@ class LineNumbers(ViewWindow):
         if (currentRow >= currentBookmark.begin and
             currentRow <= currentBookmark.end):
           color = app.color.get(currentBookmark.data.get('colorIndex'))
-          if self.host.cursorRow == currentRow:
+          if self.host.textBuffer.penRow == currentRow:
             cursorBookmarkColorIndex = currentBookmark.data.get('colorIndex')
         if currentRow + 1 > currentBookmark.end:
           currentBookmarkIndex += 1
@@ -504,7 +501,7 @@ class LineNumbers(ViewWindow):
     color = app.color.get('outside_document')
     for i in range(limit, self.rows):
       self.addStr(i, 0, '       ', color)
-    cursorAt = self.host.cursorRow - self.host.scrollRow
+    cursorAt = self.host.textBuffer.penRow - self.host.scrollRow
     if 0 <= cursorAt < limit:
       if cursorBookmarkColorIndex:
         if app.prefs.startup['numColors'] == 8:
@@ -513,7 +510,7 @@ class LineNumbers(ViewWindow):
           color = app.color.get(cursorBookmarkColorIndex % 32 + 128)
       else:
         color = app.color.get('line_number_current')
-      self.addStr(cursorAt, 1, '%5d' % (self.host.cursorRow + 1), color)
+      self.addStr(cursorAt, 1, '%5d' % (self.host.textBuffer.penRow + 1), color)
 
   def getVisibleBookmarks(self, beginRow, endRow):
     """
@@ -793,10 +790,10 @@ class StatusLine(ViewWindow):
     colPercentage = 0
     lineCount = len(tb.lines)
     if lineCount:
-      rowPercentage = self.host.cursorRow * 100 / lineCount
-      charCount = len(tb.lines[self.host.cursorRow])
-      if self.host.cursorCol != 0:
-        colPercentage = self.host.cursorCol * 100 / charCount
+      rowPercentage = self.host.textBuffer.penRow * 100 / lineCount
+      charCount = len(tb.lines[self.host.textBuffer.penRow])
+      if self.host.textBuffer.penCol != 0:
+        colPercentage = self.host.textBuffer.penCol * 100 / charCount
     # Format.
     rightSide = ''
     if len(statusLine):
@@ -805,7 +802,7 @@ class StatusLine(ViewWindow):
       rightSide += ' %s | %s |' % (tb.cursorGrammarName(),
           tb.selectionModeName())
     rightSide += ' %4d,%2d | %3d%%,%3d%%' % (
-        self.host.cursorRow+1, self.host.cursorCol + 1,
+        self.host.textBuffer.penRow + 1, self.host.textBuffer.penCol + 1,
         rowPercentage,
         colPercentage)
     statusLine += \
