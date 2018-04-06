@@ -212,7 +212,7 @@ class Parser:
           hereKey = re.search(
               child.grammar['end_key'], subdata[reg[1]:]).groups()[0]
           markers = child.grammar['markers']
-          markers[1] = child.grammar['end'].replace(r'\0', hereKey)
+          markers[1] = child.grammar['end'].replace(r'\0', re.escape(hereKey))
           child.grammar['matchRe'] = re.compile(app.prefs.joinReList(markers))
         child.begin = cursor + reg[0]
         cursor += reg[1]
