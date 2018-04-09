@@ -12,17 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import app.background
-import app.log
-import app.selectable
-import app.prefs
-import third_party.pyperclip as clipboard
 import curses.ascii
 import os
 import re
 import sys
 import time
 import traceback
+
+import third_party.pyperclip as clipboard
+
+import app.background
+import app.log
+import app.selectable
+import app.prefs
 
 
 class ParserNode:
@@ -45,7 +47,7 @@ class Parser:
   def __init__(self):
     self.data = ""
     self.emptyNode = ParserNode()
-    self.emptyNode.grammar = None
+    self.emptyNode.grammar = {}
     self.endNode = ParserNode()
     self.endNode.grammar = {}
     self.endNode.begin = sys.maxint
@@ -168,7 +170,8 @@ class Parser:
       newGrammarIndexLimit = 2 + len(parent.get('contains', []))
       errorIndexLimit = newGrammarIndexLimit + len(parent.get('error', []))
       keywordIndexLimit = errorIndexLimit + len(parent.get('keywords', []))
-      specialIndexLimit = keywordIndexLimit + len(parent.get('special', []))
+      typeIndexLimit = keywordIndexLimit + len(parent.get('types', []))
+      specialIndexLimit = typeIndexLimit + len(parent.get('special', []))
       index = -1
       for i,k in enumerate(found.groups()):
         if k is not None:
@@ -204,6 +207,13 @@ class Parser:
           self.rows.append(len(self.parserNodes))
         child.grammar = self.parserNodes[-1].grammar.get(
             'matchGrammars', [])[index]
+        if child.grammar.get('end_key'):
+          # A dynamic end tag.
+          hereKey = re.search(
+              child.grammar['end_key'], subdata[reg[1]:]).groups()[0]
+          markers = child.grammar['markers']
+          markers[1] = child.grammar['end'].replace(r'\0', re.escape(hereKey))
+          child.grammar['matchRe'] = re.compile(app.prefs.joinReList(markers))
         child.begin = cursor + reg[0]
         cursor += reg[1]
         child.prior = len(self.parserNodes) - 1
@@ -223,6 +233,18 @@ class Parser:
         # A keyword doesn't change the nodeIndex.
         keywordNode = ParserNode()
         keywordNode.grammar = app.prefs.grammars['keyword']
+        keywordNode.begin = cursor + reg[0]
+        keywordNode.prior = len(self.parserNodes) - 1
+        self.parserNodes.append(keywordNode)
+        # Resume the current grammar.
+        child.grammar = self.parserNodes[self.parserNodes[-1].prior].grammar
+        child.begin = cursor + reg[1]
+        child.prior = self.parserNodes[self.parserNodes[-1].prior].prior
+        cursor += reg[1]
+      elif index < typeIndexLimit:
+        # A keyword doesn't change the nodeIndex.
+        keywordNode = ParserNode()
+        keywordNode.grammar = app.prefs.grammars['type']
         keywordNode.begin = cursor + reg[0]
         keywordNode.prior = len(self.parserNodes) - 1
         self.parserNodes.append(keywordNode)

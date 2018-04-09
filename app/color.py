@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import app.prefs
 import curses
+
+import app.prefs
+
 
 colors = 256
 cache__ = {}
@@ -29,12 +31,8 @@ def get(colorType, delta=0):
   else:
     colorIndex = app.prefs.color[colorType]
   colorIndex = min(colors - 1, colorIndex + delta)
-  #colorIndex = colorIndex % colors
-  r = cache__.get(colorIndex)
-  if r is not None:
-    return r
-  color = curses.color_pair(colorIndex)
+  color = cache__.get(colorIndex) or curses.color_pair(colorIndex)
+  cache__[colorIndex] = color
   if colorType in ('error', 'misspelling'):
     color |= curses.A_BOLD | curses.A_REVERSE
-  cache__[colorIndex] = color
   return color

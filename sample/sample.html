@@ -17,19 +17,23 @@
 <html>
 <head>
   <style>
-    color: rgb(3,5,5);
-    color: rgba(3,5,5,44.4);
-    color: rgb(3,5,5,44.4,4,55,3,33);
-    color: #f;
-    color: rgb(3,5,5);
-    color: #fa; @apply
-    color: #faf;  /* rgb */
-    color: #fafa;  /* rgba */
-    color: #fafab;
-    color: #ffaaff;  /* rrggbb */
-    color: #ffaafff;
-    color: #ffaafffa;  /* rrggbbaa */
-    color: #catsAndDogs;
+    :host #monkey {
+      @apply(--something);
+      background-color: var(--another-thing);
+      color: rgb(3,5,5);
+      color: rgba(3,5,5,44.4);
+      color: rgb(3,5,5,44.4,4,55,3,33);
+      color: #f;
+      color: rgb(3,5,5);
+      color: #fa; @apply
+      color: #faf;  /* rgb */
+      color: #fafa;  /* rgba */
+      color: #fafab;
+      color: #ffaaff;  /* rrggbb */
+      color: #ffaafff;
+      color: #ffaafffa;  /* rrggbbaa */
+      color: #catsAndDogs;
+    }
 
     /* A CSS comment. */
     // Not a CSS comment.

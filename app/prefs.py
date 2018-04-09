@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import app.default_prefs
-import app.log
 import curses
 import io
 import json
@@ -21,6 +19,9 @@ import os
 import re
 import sys
 import time
+
+import app.default_prefs
+import app.log
 
 importStartTime = time.time()
 kNonMatchingRegex = r'^\b$'
@@ -54,26 +55,19 @@ def loadPrefs(fileName, category):
 
 color8 = app.default_prefs.color8
 color256 = app.default_prefs.color256
-
-builtInColorSchemes = {
-  'dark': {},
-  'light': {},
-  'sky': {},
-}
+prefs['color'] = color256
 
 colorSchemeName = prefs['editor']['colorScheme']
 if colorSchemeName == 'custom':
   # Check the user home directory for a color scheme preference. If found load
   # it to replace the default color scheme.
   prefs['color'].update(loadPrefs('color_scheme', 'color'))
-elif colorSchemeName in builtInColorSchemes:
-  prefs['color'].update(builtInColorSchemes[colorSchemeName])
-
 
 color = prefs['color']
 editor = loadPrefs('editor', 'editor')
 devTest = prefs['devTest']
 palette = prefs['palette']
+startup = {}
 status = loadPrefs('status', 'status')
 
 
@@ -85,11 +79,12 @@ for k,v in prefs['grammar'].items():
 
 # Compile regexes for each grammar.
 for k,v in prefs['grammar'].items():
-  # keywords re.
-  v['keywordsRe'] = re.compile(
-      joinReWordList(v.get('keywords', []) + v.get('types', [])))
-  v['errorsRe'] = re.compile(joinReList(v.get('error', [])))
-  v['specialsRe'] = re.compile(joinReList(v.get('special', [])))
+  if 0:
+    # keywords re.
+    v['keywordsRe'] = re.compile(
+        joinReWordList(v.get('keywords', []) + v.get('types', [])))
+    v['errorsRe'] = re.compile(joinReList(v.get('error', [])))
+    v['specialsRe'] = re.compile(joinReList(v.get('special', [])))
   # contains and end re.
   matchGrammars = []
   markers = []
@@ -125,11 +120,15 @@ for k,v in prefs['grammar'].items():
   for keyword in v.get('keywords', []):
     markers.append(r'\b' + keyword + r'\b')
   # Index [2+len(contains)+len(error)+len(keywords)..]
+  for types in v.get('types', []):
+    markers.append(r'\b' + types + r'\b')
+  # Index [2+len(contains)+len(error)+len(keywords)+len(types)..]
   markers += v.get('special', [])
   # Index [-1]
   markers.append(r'\n')
   #app.log.startup('markers', v['name'], markers)
   v['matchRe'] = re.compile(joinReList(markers))
+  v['markers'] = markers
   v['matchGrammars'] = matchGrammars
 # Reset the re.cache for user regexes.
 re.purge()

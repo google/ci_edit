@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import app.log
 import re
 import os
+
+import app.log
 
 commentColorIndex = 2
 defaultColorIndex = 18
@@ -40,7 +41,7 @@ __common_keywords = [
 ]
 
 __c_keywords = __common_keywords + [
-  'case', 'const', 'default', 'do',
+  'case', 'const', 'default', 'do', 'enum',
   'goto', 'sizeof', 'static', 'struct', 'switch',
   'typedef',
 ]
@@ -110,10 +111,11 @@ color8 = {
   'context_menu': 1,
   'cpp_block_comment': 2,
   'cpp_line_comment': 2,
+  'cpp_string_literal': 2,
   'debug_window': 1,
   'default': 0,
   'doc_block_comment': 3,
-  'error': 9,
+  'error': 7,
   'found_find': 1,
   'highlight': 3,
   'html_block_comment': 2,
@@ -131,6 +133,7 @@ color8 = {
   'misspelling': 3,
   'number': 1,
   'outside_document': 7,
+  'popup_window': 0,
   'pound_comment': 3,
   'py_raw_string1': 2,
   'py_raw_string2': 2,
@@ -142,10 +145,15 @@ color8 = {
   'selected': 5,
   'special': 1,
   'status_line': 7,
+  'status_line_error': 7,
   'text': 0,
   'top_info': 7,
   'trailing_space': 1,
+  'type': 1,
 }
+
+for i in color8.values():
+  assert 0 <= i < 8, i
 
 color256 = {
   '_pre_selection': stringColorIndex,
@@ -159,6 +167,7 @@ color256 = {
   'context_menu': 201,
   'cpp_block_comment': commentColorIndex,
   'cpp_line_comment': commentColorIndex,
+  'cpp_string_literal': stringColorIndex,
   'debug_window': defaultColorIndex,
   'default': defaultColorIndex,
   'doc_block_comment': commentColorIndex,
@@ -180,6 +189,7 @@ color256 = {
   'misspelling': 9,
   'number': 31,
   'outside_document': outsideOfBufferColorIndex,
+  'popup_window': 117,
   'pound_comment': commentColorIndex,
   'py_raw_string1': stringColorIndex,
   'py_raw_string2': stringColorIndex,
@@ -191,10 +201,18 @@ color256 = {
   'selected': selectedColor,
   'special': specialsColorIndex,
   'status_line': 168,
+  'status_line_error': 161,
   'text': defaultColorIndex,
   'top_info': 168,
   'trailing_space': 180,
+  'type': keywordsColorIndex,
 }
+
+for i in color256.values():
+  assert 0 <= i < 256, i
+
+# Please keep these color dictionaries in sync.
+assert color8.keys() == color256.keys()
 
 
 # These prefs are not fully working.
@@ -205,14 +223,21 @@ prefs = {
   },
   'editor': {
     'captiveCursor': False,
-    'naturalScrollDirection': True,
     'colorScheme': 'default',
+    'findDotAll': False,
     'findIgnoreCase': True,
+    'findLocale': False,
+    'findMultiLine': False,
+    'findUnicode': True,
+    'findUseRegex': True,
+    'findVerbose': False,
+    'findWholeWord': False,
     'indentation': '  ',
     'lineLimitIndicator': 80,
+    'naturalScrollDirection': True,
     'onSaveStripTrailingSpaces': True,
-    'optimalCursorRow': 0.28,  # Ratio of rows: 0 top, 0.5 middle, 1.0 bottom.
     'optimalCursorCol': 0.98,  # Ratio of columns: 0 left, 1.0 right.
+    'optimalCursorRow': 0.28,  # Ratio of rows: 0 top, 0.5 middle, 1.0 bottom.
     'palette': 'default',
     'palette8': 'default8',
     'saveUndo': True,
@@ -284,6 +309,8 @@ prefs = {
     #   'continued': None or string,
     #       Prefixed used when continuing to another line,
     #   'end': None or regex,
+    #   'end_key': None or regex to determine dynamic end tag. For 'here
+    #       documents' and c++ string literals.
     #   'error': None or list of string.
     #   'escaped': None or regex,
     #   'indent': None or string,
@@ -318,6 +345,7 @@ prefs = {
       'contains': ['c_string1', 'c_string2', 'pound_comment'],
     },
     'binary': {
+      'spelling': False,
       'type': 'binary',
     },
     'c': {
@@ -330,8 +358,8 @@ prefs = {
     'cpp': {
       'indent': '  ',
       'keywords': __c_keywords + [
-        'auto', 'catch', 'class', 'constexpr', 'false',
-        'namespace', 'nullptr',
+        'auto', 'catch', 'class', 'constexpr', 'explicit', 'false',
+        'namespace', 'nullptr', 'override',
         'private', 'protected', 'public',
         'template', 'this', 'throw', 'true', 'typename',
       ],
@@ -340,7 +368,7 @@ prefs = {
       ],
       'types': __c_primitive_types,
       'contains': ['cpp_block_comment', 'cpp_line_comment', 'c_preprocessor',
-        'c_string1', 'c_string2'],
+        'cpp_string_literal', 'c_string1', 'c_string2'],
     },
     'cpp_block_comment': {
       'begin': r'/\*',
@@ -391,6 +419,13 @@ prefs = {
       'single_line': True,
       'special': __special_string_escapes + [r"\\\\"],
     },
+    'cpp_string_literal': {
+      'begin': r'R"',
+      # TODO(dschuyler): backslash and whitespace are invalid in the |end_key|.
+      'end_key': r'''([^(]*)\(''',
+      'end': r'\)\0"',
+      'single_line': False,
+    },
     'c_string1': {
       'begin': "'(?!'')",
       'end': r"'",
@@ -412,10 +447,25 @@ prefs = {
       'end': '</style>',
       'indent': '  ',
       'keywords': [
-        'background-color', 'color', 'diplay',
+        'host', 'slotted',
+      ],
+      'special': [
+        r'#[\w-]+'
+      ],
+      'contains': ['cpp_block_comment', 'css_block'],
+    },
+    'css_block': {
+      'begin': r'\{',
+      'end': r'\}',
+      'indent': '  ',
+      'keywords': [
+        'background-color', 'color', 'display',
         'font-family', 'font-size',
         'height', 'max-height', 'min-height',
         'width', 'max-width', 'min-width',
+      ],
+      'special': [
+        r'@apply\b',
       ],
       'contains': ['cpp_block_comment', 'css_value'],
     },
@@ -634,6 +684,9 @@ prefs = {
       'indent': '  ',
       'special': [__sha_1,],
       'contains': ['quoted_string1', 'quoted_string2'],
+    },
+    'type': {
+      'spelling': False,
     },
   },
   'palette': {

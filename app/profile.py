@@ -43,4 +43,24 @@ def runningDelta(key, start):
 def results():
   return "one\ntwo\nthree"
 
+#----------------------------
+# TODO(dschuyler): consider moving this python profile code out of this file.
+import app.log
+import cProfile
+import pstats
+import StringIO
+
+def beginPythonProfile():
+  profile = cProfile.Profile()
+  profile.enable()
+  return profile
+
+def endPythonProfile(profile):
+  profile.disable()
+  output = StringIO.StringIO()
+  stats = pstats.Stats(profile, stream=output).sort_stats('cumulative')
+  stats.print_stats()
+  app.log.info(output.getvalue())
+
+
 

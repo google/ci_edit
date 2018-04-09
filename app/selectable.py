@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import app.log
 import re
 
+import app.log
 
 kReBrackets = re.compile('[[\]{}()]')
 kReComments = re.compile('(?:#|//).*$|/\*.*?\*/|<!--.*?-->')
@@ -60,7 +60,10 @@ kSelectionModeNames = [
 class BaseLineBuffer:
   def __init__(self):
     self.lines = [unicode("")]
-    self.message = ('New buffer', 0)
+    self.message = ('New buffer', None)
+
+  def isEmpty(self):
+    return len(self.lines) == 1 and len(self.lines[0]) == 0
 
   def setMessage(self, *args, **dict):
     if not len(args):
@@ -75,7 +78,7 @@ class BaseLineBuffer:
       prior = str(i)
       msg += prior
     #app.log.caller("\n", msg)
-    self.message = (repr(msg)[1:-1], dict.get('color', 0))
+    self.message = (repr(msg)[1:-1], dict.get('color'))
 
 
 class Selectable(BaseLineBuffer):
@@ -87,6 +90,13 @@ class Selectable(BaseLineBuffer):
     self.markerCol = 0
     self.selectionMode = kSelectionNone
     self.upperChangedRow = 0
+
+  def countSelected(self):
+    lines = self.getSelectedText()
+    chars = len(lines) - 1  # Count carriage returns.
+    for line in lines:
+      chars += len(line)
+    return chars, len(lines)
 
   def selection(self):
     return (self.penRow, self.penCol, self.markerRow, self.markerCol)
@@ -155,9 +165,9 @@ class Selectable(BaseLineBuffer):
       self.upperChangedRow = row
     if selectionMode == kSelectionBlock:
       for i, line in enumerate(lines):
-        self.lines[row+i] = (
-            self.lines[row+i][:col] + line +
-            self.lines[row+i][col:])
+        self.lines[row + i] = (
+            self.lines[row + i][:col] + line +
+            self.lines[row + i][col:])
         self.lines.insert(row, line)
     elif (selectionMode == kSelectionNone or
         selectionMode == kSelectionAll or

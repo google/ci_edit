@@ -12,12 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+import re
+
+import app.buffer_file
 import app.log
 import app.parser
 import app.prefs
 import app.selectable
-import os
-import re
 
 
 # If a change is in |noOpInstructions| then it has no real effect.
@@ -139,7 +141,8 @@ class Mutator(app.selectable.Selectable):
   def isSafeToWrite(self):
     if not os.path.exists(self.fullPath):
       return True
-    self.isReadOnly = not os.access(self.fullPath, os.W_OK)
+    if self.fileStat is None:
+      return False
     s1 = os.stat(self.fullPath)
     s2 = self.fileStat
     app.log.info('st_mode', s1.st_mode, s2.st_mode)
@@ -158,6 +161,9 @@ class Mutator(app.selectable.Selectable):
         s1.st_size == s2.st_size and
         s1.st_mtime == s2.st_mtime and
         s1.st_ctime == s2.st_ctime)
+
+  def setFilePath(self, path):
+    self.fullPath = app.buffer_file.fullPath(path)
 
   def __doMoveLines(self, begin, end, to):
     lines = self.lines[begin:end]
@@ -313,10 +319,8 @@ class Mutator(app.selectable.Selectable):
       if self.upperChangedRow > row:
         self.upperChangedRow = row
     elif change[0] == 'vd':  # Redo vertical delete.
-      app.log.info('do vd')
       self.__doVerticalDelete(change)
     elif change[0] == 'vi':  # Redo vertical insert.
-      app.log.info('do vi')
       self.__doVerticalInsert(change)
     else:
       app.log.info('ERROR: unknown redo.')
@@ -327,17 +331,27 @@ class Mutator(app.selectable.Selectable):
     Push a change onto the end of the redoChain. Call redo() to enact the
     change.
     """
-    newTrivialChange = False
     if self.debugRedo:
       app.log.info('redoAddChange', change)
-    # When the redoChain is trimmed we may lose the saved at.
-    # Trim only when there is a non-trivial action.
-    # A trivial change is a standalone cursor move.
+    # Handle new trivial actions, which are defined as standalone cursor moves.
     if change[0] == 'm' and not self.__compoundChange:
-      newTrivialChange = True
+      if self.tempChange:
+        # Combine new change with the existing tempChange.
+        change = (change[0], addVectors(self.tempChange[1], change[1]))
+        self.__undoChange(self.tempChange)
+        self.__tempChange = change
+      if change in noOpInstructions:
+        self.stallNextRedo = True
+        self.processTempChange = False
+        self.tempChange = None
+        self.updateBasicScrollPosition()
+        return
+      self.processTempChange = True
+      self.tempChange = change
     else:
       # Trim and combine main redoChain with tempChange
       # if there is a non-trivial action.
+      # We may lose the saved at when trimming.
       if self.redoIndex < self.savedAtRedoIndex:
         self.savedAtRedoIndex = -1
       self.redoChain = self.redoChain[:self.redoIndex]
@@ -358,21 +372,6 @@ class Mutator(app.selectable.Selectable):
           self.redoIndex += 1
           self.oldRedoIndex += 1
         self.tempChange = None
-    if newTrivialChange:
-      if self.tempChange:
-        # Combine new change with the existing tempChange.
-        change = (change[0], addVectors(self.tempChange[1], change[1]))
-        self.__undoChange(self.tempChange)
-        self.__tempChange = change
-      if change in noOpInstructions:
-        self.stallNextRedo = True
-        self.processTempChange = False
-        self.tempChange = None
-        self.updateBasicScrollPosition()
-        return
-      self.processTempChange = True
-      self.tempChange = change
-    else:
       # Accumulating changes together as a unit.
       self.__compoundChange.append(change)
       self.redoChain.append((change,))
@@ -413,7 +412,6 @@ class Mutator(app.selectable.Selectable):
         for change in reversed(changes):
           self.__undoChange(change)
         break
-
     self.processTempChange = False
 
 
@@ -511,10 +509,8 @@ class Mutator(app.selectable.Selectable):
       if self.upperChangedRow > row:
         self.upperChangedRow = row
     elif change[0] == 'vd': # Undo vertical delete
-      app.log.info('undo vd', change[1])
       self.__doVerticalInsert(change)
     elif change[0] == 'vi':  # Undo vertical insert
-      app.log.info('undo vi', change[1])
       self.__doVerticalDelete(change)
     else:
       app.log.info('ERROR: unknown undo.')

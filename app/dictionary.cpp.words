@@ -46,7 +46,10 @@ std
 stddef
 stdint
 stdlib
+strcmp
 strerror
+stricmp
+strlen
 toupper
 typename
 uint

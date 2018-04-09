@@ -12,15 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import curses
+import re
+import sys
+
 import app.actions
+import app.color
 import app.log
 import app.parser
 import app.prefs
 import app.selectable
 import app.spelling
-import curses
-import re
-import sys
+
 
 class TextBuffer(app.actions.Actions):
   """The TextBuffer adds the drawing/rendering to the BackingTextBuffer."""
@@ -28,11 +31,14 @@ class TextBuffer(app.actions.Actions):
     app.actions.Actions.__init__(self)
     self.lineLimitIndicator = 0
     self.highlightRe = None
+    self.highlightCursorLine = False
+    self.highlightTrailingWhitespace = True
     self.fileHistory = {}
     self.fileEncoding = None
     self.lastChecksum = None
     self.lastFileSize = 0
     self.bookmarks = []
+    self.nextBookmarkColorPos = 0
 
   def checkScrollToCursor(self, window):
     """Move the selected view rectangle so that the cursor is visible."""
@@ -63,9 +69,7 @@ class TextBuffer(app.actions.Actions):
   def draw(self, window):
     if self.view.rows <= 0 or self.view.cols <= 0:
       return
-    if 1:
-      self.parseGrammars()
-    else:
+    if not app.prefs.editor['useBgThread']:
       if self.shouldReparse:
         self.parseGrammars()
         self.shouldReparse = False
@@ -117,6 +121,7 @@ class TextBuffer(app.actions.Actions):
     startCol = self.view.scrollCol + left
     endCol = startCol + cols
     colors = app.prefs.color
+    defaultColor = app.prefs.prefs['color']['default']
     spellChecking = app.prefs.editor.get('spellChecking', True)
     if self.parser:
       # Highlight grammar.
@@ -139,7 +144,8 @@ class TextBuffer(app.actions.Actions):
           assert remaining >= 0, remaining
           remaining = min(len(line) - k, remaining)
           length = min(endCol - k, remaining)
-          color = app.color.get(node.grammar['colorIndex'], colorDelta)
+          color = app.color.get(node.grammar.get('colorIndex', defaultColor),
+              colorDelta)
           if length <= 0:
             window.addStr(top + i, left + k - startCol, ' ' * (endCol - k),
                 color)
@@ -166,7 +172,7 @@ class TextBuffer(app.actions.Actions):
                       wordFragment, misspellingColor)
           k += length
     else:
-      # Draw to screen.
+      # For testing, draw without parser.
       rowLimit = min(max(len(self.lines) - startRow, 0), rows)
       for i in range(rowLimit):
         line = self.lines[startRow + i][startCol:endCol]
@@ -261,7 +267,13 @@ class TextBuffer(app.actions.Actions):
           for f in k.regs:
             window.addStr(top + i, left + f[0], line[f[0]:f[1]],
                 app.color.get('number', colorDelta))
-    if 1:
+    if self.highlightCursorLine:
+      # Highlight the whole line at the cursor location.
+      if startRow <= self.penRow < startRow + rowLimit:
+        line = self.lines[self.penRow][startCol:endCol]
+        window.addStr(top + self.penRow - startRow, left, line,
+            app.color.get('trailing_space', colorDelta))
+    if self.highlightTrailingWhitespace:
       # Highlight space ending lines.
       for i in range(rowLimit):
         line = self.lines[startRow + i]

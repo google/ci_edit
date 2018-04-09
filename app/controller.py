@@ -14,61 +14,89 @@
 
 """Manager for key bindings."""
 
-import app.log
 import curses
 import curses.ascii
+
+import app.config
 import app.curses_util
+import app.log
+#import app.window
 
 
 class Controller:
   """A Controller is a keyboard mapping from keyboard/mouse events to editor
   commands."""
-  def __init__(self, host, name):
-    self.host = host
+  def __init__(self, view, name):
+    if app.config.strict_debug:
+      assert issubclass(self.__class__, Controller)
+      assert issubclass(view.__class__, app.window.Window)
+    self.view = view
     self.commandDefault = None
     self.commandSet = None
     self.textBuffer = None
     self.name = name
 
+  def parentController(self):
+    view = self.view.parent
+    while view is not None:
+      if view.controller is not None:
+        return view.controller
+      view = view.parent
+
   def changeToConfirmClose(self):
-    self.host.changeFocusTo(self.host.confirmClose)
+    self.findAndChangeTo('confirmClose')
 
   def changeToConfirmOverwrite(self):
-    self.host.changeFocusTo(self.host.confirmOverwrite)
+    self.findAndChangeTo('confirmOverwrite')
+
+  def changeToFileManagerWindow(self, *args):
+    self.findAndChangeTo('fileManagerWindow')
 
   def changeToConfirmQuit(self):
-    self.host.changeFocusTo(self.host.interactiveQuit)
+    self.findAndChangeTo('interactiveQuit')
 
   def changeToHostWindow(self, *args):
-    self.host.changeFocusTo(self.host)
+    host = self.getNamedWindow('inputWindow', True)
+    if app.config.strict_debug:
+      assert issubclass(self.view.__class__, app.window.Window), self.view
+      assert issubclass(host.__class__, app.window.Window), host
+    self.view.changeFocusTo(host)
 
-  def changeToFileOpen(self):
-    self.host.changeFocusTo(self.host.interactiveOpen)
+  def changeToInputWindow(self, *args):
+    self.findAndChangeTo('inputWindow')
 
   def changeToFind(self):
-    self.host.changeFocusTo(self.host.interactiveFind)
+    self.findAndChangeTo('interactiveFind')
 
   def changeToFindPrior(self):
     curses.ungetch(self.savedCh)
-    self.host.changeFocusTo(self.host.interactiveFind)
+    self.findAndChangeTo('interactiveFind')
 
   def changeToGoto(self):
-    self.host.changeFocusTo(self.host.interactiveGoto)
+    self.findAndChangeTo('interactiveGoto')
 
   def changeToPaletteWindow(self):
-    self.host.changeFocusTo(self.host.host.paletteWindow)
+    self.findAndChangeTo('paletteWindow')
+
+  def changeToPopup(self):
+    self.findAndChangeTo('popupWindow')
 
   def changeToPrediction(self):
-    self.host.changeFocusTo(self.host.interactivePrediction)
+    self.findAndChangeTo('interactivePrediction')
 
   def changeToPrompt(self):
-    self.host.changeFocusTo(self.host.interactivePrompt)
+    self.findAndChangeTo('interactivePrompt')
 
   def changeToQuit(self):
-    self.host.changeFocusTo(self.host.interactiveQuit)
+    self.findAndChangeTo('interactiveQuit')
 
   def changeToSaveAs(self):
-    self.host.changeFocusTo(self.host.interactiveSaveAs)
+    view = self.getNamedWindow('fileManagerWindow', True)
+    view.setMode('saveAs')
+    view.changeFocusTo(view);
+
+  def createNewTextBuffer(self):
+    self.view.setTextBuffer(app.buffer_manager.buffers.newTextBuffer())
 
   def doCommand(self, ch, meta):
     # Check the commandSet for the input with both its string and integer
@@ -82,57 +110,128 @@ class Controller:
       self.commandDefault(ch, meta)
     self.textBuffer.compoundChangePush()
 
+  def getNamedWindow(self, windowName, unfocus=False):
+    view = self.view
+    first = True
+    while view is not None:
+      if hasattr(view, windowName):
+        return getattr(view, windowName);
+      if not first and unfocus:
+        view.unfocus()
+      first = False
+      view = view.parent
+    app.log.fatal(windowName + ' not found');
+    return None
+
+  def findAndChangeTo(self, windowName):
+    window = self.getNamedWindow(windowName, True)
+    window.bringToFront()
+    self.view.changeFocusTo(window)
+
   def focus(self):
     app.log.info('base controller focus()')
     pass
 
   def confirmationPromptFinish(self, *args):
-    self.host.userIntent = 'edit'
-    self.changeToHostWindow()
+    window = self.getNamedWindow('inputWindow', True)
+    window.userIntent = 'edit'
+    self.view.changeFocusTo(window)
 
-  def closeHostFile(self):
+  def __closeHostFile(self, host):
     """Close the current file and switch to another or create an empty file."""
-    app.buffer_manager.buffers.closeTextBuffer(self.host.textBuffer)
-    self.host.userIntent = 'edit'
+    app.buffer_manager.buffers.closeTextBuffer(host.textBuffer)
+    host.userIntent = 'edit'
     tb = app.buffer_manager.buffers.getUnsavedBuffer()
     if not tb:
       tb = app.buffer_manager.buffers.nextBuffer()
       if not tb:
         tb = app.buffer_manager.buffers.newTextBuffer()
-    self.host.setTextBuffer(tb)
+    host.setTextBuffer(tb)
 
   def closeFile(self):
     app.log.info()
-    self.closeHostFile()
-    #app.buffer_manager.buffers.closeTextBuffer(self.host.textBuffer)
-    #self.host.setTextBuffer(app.buffer_manager.buffers.newTextBuffer())
+    host = self.getNamedWindow('inputWindow')
+    self.__closeHostFile(host)
+    #app.buffer_manager.buffers.closeTextBuffer(self.view.host.textBuffer)
+    #self.view.host.setTextBuffer(app.buffer_manager.buffers.newTextBuffer())
     self.confirmationPromptFinish()
 
   def closeOrConfirmClose(self):
     """If the file is clean, close it. If it is dirty, prompt the user
         about whether to lose unsaved changes."""
-    tb = self.host.textBuffer
+    host = self.getNamedWindow('inputWindow')
+    tb = host.textBuffer
     if not tb.isDirty():
-      self.closeHostFile()
+      self.__closeHostFile(host)
       return
-    if self.host.userIntent == 'edit':
-      self.host.userIntent = 'close'
+    if host.userIntent == 'edit':
+      host.userIntent = 'close'
     self.changeToConfirmClose()
+
+  def initiateClose(self):
+    """Called from input window controller."""
+    self.view.userIntent = 'close'
+    tb = self.view.textBuffer
+    if not tb.isDirty():
+      self.__closeHostFile(self.view)
+      return
+    self.view.changeFocusTo(self.view.confirmClose)
+
+  def initiateQuit(self):
+    """Called from input window controller."""
+    self.view.userIntent = 'quit'
+    tb = self.view.textBuffer
+    if tb.isDirty():
+      self.view.changeFocusTo(self.view.interactiveQuit)
+      return
+    tb = app.buffer_manager.buffers.getUnsavedBuffer()
+    if tb:
+      self.view.setTextBuffer(tb)
+      self.view.changeFocusTo(self.view.interactiveQuit)
+      return
+    app.buffer_manager.buffers.debugLog()
+    self.view.quitNow()
+
+  def initiateSave(self):
+    """Called from input window controller."""
+    self.view.userIntent = 'edit'
+    tb = self.view.textBuffer
+    if tb.fullPath:
+      if not tb.isSafeToWrite():
+        self.view.changeFocusTo(self.view.confirmOverwrite)
+        return
+      tb.fileWrite()
+      return
+    self.changeToSaveAs()
 
   def overwriteHostFile(self):
     """Close the current file and switch to another or create an empty file."""
-    self.host.textBuffer.fileWrite()
-    if self.host.userIntent == 'quit':
+    host = self.getNamedWindow('inputWindow')
+    host.textBuffer.fileWrite()
+    if host.userIntent == 'quit':
       self.quitOrSwitchToConfirmQuit()
       return
-    if self.host.userIntent == 'close':
-      self.closeHostFile()
+    if host.userIntent == 'close':
+      self.__closeHostFile(host)
     self.changeToHostWindow()
+
+  def nextFocusableWindow(self):
+    window = self.view.parent.nextFocusableWindow(self.view)
+    if window is not None:
+      self.view.changeFocusTo(window)
+    return window is not None
+
+  def priorFocusableWindow(self):
+    window = self.view.parent.priorFocusableWindow(self.view)
+    if window is not None:
+      self.view.changeFocusTo(window)
+    return window is not None
 
   def writeOrConfirmOverwrite(self):
     """Ask whether the file should be overwritten."""
     app.log.debug()
-    tb = self.host.textBuffer
+    host = self.getNamedWindow('inputWindow')
+    tb = host.textBuffer
     if not tb.isSafeToWrite():
       self.changeToConfirmOverwrite()
       return
@@ -140,33 +239,40 @@ class Controller:
     # TODO(dschuyler): Is there a deeper issue here that necessitates saving
     # the message? Does this only need to wrap the changeToHostWindow()?
     saveMessage = tb.message  # Store the save message so it is not overwritten.
-    if self.host.userIntent == 'quit':
+    if host.userIntent == 'quit':
       self.quitOrSwitchToConfirmQuit()
       return
-    if self.host.userIntent == 'close':
-      self.closeHostFile()
+    if host.userIntent == 'close':
+      self.__closeHostFile(host)
     self.changeToHostWindow()
     tb.message = saveMessage  # Restore the save message.
 
   def quitOrSwitchToConfirmQuit(self):
-    app.log.debug()
-    tb = self.host.textBuffer
-    self.host.userIntent = 'quit'
+    app.log.debug(self, self.view)
+    host = self.getNamedWindow('inputWindow')
+    tb = host.textBuffer
+    host.userIntent = 'quit'
     if tb.isDirty():
       self.changeToConfirmQuit()
       return
     tb = app.buffer_manager.buffers.getUnsavedBuffer()
     if tb:
-      self.host.setTextBuffer(tb)
+      host.setTextBuffer(tb)
       self.changeToConfirmQuit()
       return
     app.buffer_manager.buffers.debugLog()
-    self.host.quitNow()
+    host.quitNow()
 
   def saveOrChangeToSaveAs(self):
     app.log.debug()
-    tb = self.host.textBuffer
-    if tb.fullPath:
+    host = self.getNamedWindow('inputWindow')
+    if app.config.strict_debug:
+      assert issubclass(self.__class__, Controller), self
+      assert issubclass(self.view.__class__, app.window.Window), self
+      assert issubclass(host.__class__, app.window.Window), self
+      assert self.view.textBuffer is self.textBuffer
+      assert self.view.textBuffer is not host.textBuffer
+    if host.textBuffer.fullPath:
       self.writeOrConfirmOverwrite()
       return
     self.changeToSaveAs()
@@ -176,10 +282,18 @@ class Controller:
 
   def saveEventChangeToHostWindow(self, *args):
     curses.ungetch(self.savedCh)
-    self.host.changeFocusTo(self.host)
+    host = self.getNamedWindow('inputWindow', True)
+    self.view.changeFocusTo(host)
+
+  def saveEventChangeToInputWindow(self, *args):
+    curses.ungetch(self.savedCh)
+    host = self.getNamedWindow('inputWindow', True)
+    self.view.changeFocusTo(host)
 
   def setTextBuffer(self, textBuffer):
-    #app.log.info(textBuffer)
+    if app.config.strict_debug:
+      assert issubclass(textBuffer.__class__, app.text_buffer.TextBuffer), textBuffer
+      assert self.view.textBuffer is textBuffer
     self.textBuffer = textBuffer
 
   def unfocus(self):
@@ -190,8 +304,10 @@ class MainController:
   """The different keyboard mappings are different controllers. This class
   manages a collection of keyboard mappings and allows the user to switch
   between them."""
-  def __init__(self, host):
-    #self.view = host
+  def __init__(self, view):
+    if app.config.strict_debug:
+      assert issubclass(view.__class__, app.window.Window)
+    self.view = view
     self.commandDefault = None
     self.commandSet = None
     self.controllers = {}
@@ -238,9 +354,10 @@ class MainController:
 
   def setTextBuffer(self, textBuffer):
     app.log.info('MainController.setTextBuffer', self.controller)
+    if app.config.strict_debug:
+      assert issubclass(textBuffer.__class__, app.text_buffer.TextBuffer)
     self.textBuffer = textBuffer
     self.controller.setTextBuffer(textBuffer)
 
   def unfocus(self):
     self.controller.unfocus()
-

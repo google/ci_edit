@@ -12,14 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import app.buffer_manager
-import app.clipboard
-import app.log
-import app.history
-import app.mutator
-import app.parser
-import app.prefs
-import app.selectable
 import bisect
 import curses.ascii
 import difflib
@@ -30,6 +22,16 @@ import sys
 import time
 import traceback
 
+import app.bookmark
+import app.clipboard
+import app.config
+import app.history
+import app.log
+import app.mutator
+import app.parser
+import app.prefs
+import app.selectable
+
 
 class Actions(app.mutator.Mutator):
   """This base class to TextBuffer handles the text manipulation (without
@@ -37,7 +39,10 @@ class Actions(app.mutator.Mutator):
   def __init__(self):
     app.mutator.Mutator.__init__(self)
     self.view = None
+    self.isBinary = False
     self.rootGrammar = app.prefs.getGrammar(None)
+    self.debugUpperChangedRow = -1
+    self.parser = app.parser.Parser()
 
   def setView(self, view):
     self.view = view
@@ -54,7 +59,6 @@ class Actions(app.mutator.Mutator):
           self.cursorMoveAndMark(
               upper - self.penRow, left - self.penCol,
               lower - self.markerRow, right - self.markerCol, 0)
-          self.redo()
         elif (self.penRow > self.markerRow or
             (self.penRow == self.markerRow and
             self.penCol > self.markerCol)):
@@ -70,56 +74,54 @@ class Actions(app.mutator.Mutator):
         if lowerCol <= self.penCol:
           col = upperCol - lowerCol
         self.cursorMove(0, col)
-        self.redo()
     elif upperRow <= self.penRow < lowerRow:
       self.cursorMove(upperRow - self.penRow, upperCol - self.penCol)
-      self.redo()
     elif self.penRow == lowerRow:
       col = upperCol - lowerCol
       self.cursorMove(upperRow - self.penRow, col)
-      self.redo()
     self.redoAddChange((
       'dr',
       (upperRow, upperCol, lowerRow, lowerCol),
       self.getText(upperRow, upperCol, lowerRow, lowerCol)))
     self.redo()
 
-  def dataToBookmark(self):
+  def getBookmarkColor(self):
     """
-    Grabs all the cursor data and returns a bookmark.
+    Returns a new color by cycling through a predefined
+    section of the color palette.
 
     Args:
       None.
 
     Returns:
-      A bookmark in the form of (bookmarkRange, bookmarkData).
-      bookmarkRange is an ordered tuple in which its elements
-      are the rows that the bookmark affects.
-      bookmarkData is a dictionary that contains the cursor data.
+      A color (int) for a new bookmark.
+    """
+    if app.prefs.startup['numColors'] == 8:
+      goodColorIndices = [1, 2, 3, 4, 5]
+    else:
+      goodColorIndices = [97, 98, 113, 117, 127]
+    self.nextBookmarkColorPos = (
+        self.nextBookmarkColorPos + 1) % len(goodColorIndices)
+    return goodColorIndices[self.nextBookmarkColorPos]
+
+  def dataToBookmark(self):
+    """
+    Args:
+      None.
+
+    Returns:
+      A Bookmark object containing its range and the current state of the
+      cursor and selection mode. The bookmark is also assigned a color, which
+      is used to determine the color of the bookmark's line numbers.
     """
     bookmarkData = {
-      'cursor': (self.view.cursorRow, self.view.cursorCol),
       'marker': (self.markerRow, self.markerCol),
       'pen': (self.penRow, self.penCol),
       'selectionMode': self.selectionMode,
+      'colorIndex': self.getBookmarkColor()
     }
     upperRow, _, lowerRow, _ = self.startAndEnd()
-    bookmarkRange = (upperRow, lowerRow)
-    return (bookmarkRange, bookmarkData)
-
-  def bookmarksOverlap(self, bookmarkRange1, bookmarkRange2):
-    """
-    Returns whether the two sorted bookmark ranges overlap.
-
-    Args:
-      bookmarkRange1 (tuple): a sorted tuple of row numbers.
-      bookmarkRange2 (tuple): a sorted tuple of row numbers.
-
-    Returns:
-      True if the ranges overlap. Otherwise, returns False.
-    """
-    return (bookmarkRange1[-1] >= bookmarkRange2[0] and
-            bookmarkRange1[0] <= bookmarkRange2[-1])
+    return app.bookmark.Bookmark(upperRow, lowerRow, bookmarkData)
 
   def bookmarkAdd(self):
     """
@@ -135,28 +137,26 @@ class Actions(app.mutator.Mutator):
     """
     newBookmark = self.dataToBookmark()
     self.bookmarkRemove()
-    bisect.insort(self.bookmarks, newBookmark)
+    bisect.insort_right(self.bookmarks, newBookmark)
 
   def bookmarkGoto(self, bookmark):
     """
     Goes to the bookmark that is passed in.
 
     Args:
-      bookmark (tuple): contains bookmarkRange and bookmarkData. More info can
-        be found in the dataToBookmark function.
+      bookmark (Bookmark): The bookmark you want to jump to. This object is
+                           defined in bookmark.py
 
     Returns:
       None.
     """
-    bookmarkData = bookmark[1]
-    #cursorRow, cursorCol = bookmarkData['cursor']
+    bookmarkData = bookmark.data
     penRow, penCol = bookmarkData['pen']
     markerRow, markerCol = bookmarkData['marker']
     selectionMode = bookmarkData['selectionMode']
     self.cursorMoveAndMark(penRow - self.penRow, penCol - self.penCol,
         markerRow - self.markerRow, markerCol - self.markerCol,
         selectionMode - self.selectionMode)
-    self.redo()
     self.scrollToOptimalScrollPosition()
 
   def bookmarkNext(self):
@@ -173,8 +173,8 @@ class Actions(app.mutator.Mutator):
       self.setMessage("No bookmarks to jump to")
       return
     _, _, lowerRow, _ = self.startAndEnd()
-    tempBookmark = ((lowerRow, float('inf')),)
-    index = bisect.bisect(self.bookmarks, tempBookmark)
+    needle = app.bookmark.Bookmark(lowerRow + 1, lowerRow + 1)
+    index = bisect.bisect_left(self.bookmarks, needle)
     self.bookmarkGoto(self.bookmarks[index % len(self.bookmarks)])
 
   def bookmarkPrior(self):
@@ -191,8 +191,8 @@ class Actions(app.mutator.Mutator):
       self.setMessage("No bookmarks to jump to")
       return
     upperRow, _, _, _ = self.startAndEnd()
-    tempBookmark = ((upperRow,),)
-    index = bisect.bisect_left(self.bookmarks, tempBookmark)
+    needle = app.bookmark.Bookmark(upperRow, upperRow)
+    index = bisect.bisect_left(self.bookmarks, needle)
     self.bookmarkGoto(self.bookmarks[index - 1])
 
   def bookmarkRemove(self):
@@ -207,23 +207,23 @@ class Actions(app.mutator.Mutator):
     """
     upperRow, _, lowerRow, _ = self.startAndEnd()
     rangeList = self.bookmarks
-    needle = ((upperRow, lowerRow),)
+    needle = app.bookmark.Bookmark(upperRow, lowerRow)
     # Find the left-hand index.
     begin = bisect.bisect_left(rangeList, needle)
-    if begin and needle[0][0] <= rangeList[begin-1][0][1]:
+    if begin and needle.begin <= rangeList[begin - 1].end:
       begin -= 1
     # Find the right-hand index.
     low = begin
     index = begin
     high = len(rangeList)
-    offset = needle[0][1]
+    offset = needle.end
     while True:
       index = (high + low) / 2
       if low == high:
         break
-      if offset >= rangeList[index][0][1]:
+      if offset >= rangeList[index].end:
         low = index + 1
-      elif offset < rangeList[index][0][0]:
+      elif offset < rangeList[index].begin:
         high = index
       else:
         index += 1
@@ -310,6 +310,11 @@ class Actions(app.mutator.Mutator):
     change = self.getCursorMoveAndMark(rowDelta, colDelta, markRowDelta,
                                        markColDelta, selectionModeDelta)
     self.redoAddChange(change)
+    self.redo()
+    if self.selectionMode != app.selectable.kSelectionNone:
+      charCount, lineCount = self.countSelected()
+      self.setMessage('%d characters (%d lines) selected' % (charCount,
+          lineCount))
 
   def cursorMoveScroll(self, rowDelta, colDelta,
       scrollRowDelta, scrollColDelta):
@@ -317,41 +322,40 @@ class Actions(app.mutator.Mutator):
     self.redoAddChange(('m', (rowDelta, colDelta, 0, 0, 0)))
 
   def cursorMoveDown(self):
-    if self.penRow + 1 < len(self.lines):
-      savedGoal = self.goalCol
-      self.cursorMove(1, self.cursorColDelta(self.penRow + 1))
-      self.redo()
-      self.goalCol = savedGoal
+    if self.penRow == len(self.lines) - 1:
+      self.setMessage('Bottom of file')
+      return
+    savedGoal = self.goalCol
+    self.cursorMove(1, self.cursorColDelta(self.penRow + 1))
+    self.goalCol = savedGoal
 
   def cursorMoveLeft(self):
     if self.penCol > 0:
       self.cursorMove(0, -1)
-      self.redo()
     elif self.penRow > 0:
       self.cursorMove(-1, len(self.lines[self.penRow - 1]))
-      self.redo()
 
   def cursorMoveRight(self):
     if not self.lines:
       return
     if self.penCol < len(self.lines[self.penRow]):
       self.cursorMove(0, 1)
-      self.redo()
     elif self.penRow + 1 < len(self.lines):
       self.cursorMove(1, -len(self.lines[self.penRow]))
-      self.redo()
+    else:
+      self.setMessage('Bottom of file')
 
   def cursorMoveUp(self):
-    if self.penRow > 0:
-      savedGoal = self.goalCol
-      lineLen = len(self.lines[self.penRow - 1])
-      if self.goalCol <= lineLen:
-        self.cursorMove(-1, self.goalCol - self.penCol)
-        self.redo()
-      else:
-        self.cursorMove(-1, lineLen - self.penCol)
-        self.redo()
-      self.goalCol = savedGoal
+    if self.penRow <= 0:
+      self.setMessage('Top of file')
+      return
+    savedGoal = self.goalCol
+    lineLen = len(self.lines[self.penRow - 1])
+    if self.goalCol <= lineLen:
+      self.cursorMove(-1, self.goalCol - self.penCol)
+    else:
+      self.cursorMove(-1, lineLen - self.penCol)
+    self.goalCol = savedGoal
 
   def cursorMoveSubwordLeft(self):
     self.doCursorMoveLeftTo(app.selectable.kReSubwordBoundaryRvr)
@@ -360,9 +364,8 @@ class Actions(app.mutator.Mutator):
     self.doCursorMoveRightTo(app.selectable.kReSubwordBoundaryFwd)
 
   def cursorMoveTo(self, row, col):
-    cursorRow = min(max(row, 0), len(self.lines)-1)
-    self.cursorMove(cursorRow - self.penRow, col - self.penCol)
-    self.redo()
+    penRow = min(max(row, 0), len(self.lines)-1)
+    self.cursorMove(penRow - self.penRow, col - self.penCol)
 
   def cursorMoveWordLeft(self):
     self.doCursorMoveLeftTo(app.selectable.kReWordBoundary)
@@ -379,10 +382,8 @@ class Actions(app.mutator.Mutator):
           pos = segment.start()
           break
       self.cursorMove(0, pos - self.penCol)
-      self.redo()
     elif self.penRow > 0:
       self.cursorMove(-1, len(self.lines[self.penRow - 1]))
-      self.redo()
 
   def doCursorMoveRightTo(self, boundary):
     if not self.lines:
@@ -395,10 +396,8 @@ class Actions(app.mutator.Mutator):
           pos = segment.end()
           break
       self.cursorMove(0, pos - self.penCol)
-      self.redo()
     elif self.penRow + 1 < len(self.lines):
       self.cursorMove(1, -len(self.lines[self.penRow]))
-      self.redo()
 
   def cursorRight(self):
     self.selectionNone()
@@ -435,28 +434,24 @@ class Actions(app.mutator.Mutator):
       self.selectionCharacter()
     self.cursorMoveSubwordLeft()
     self.cursorMoveAndMark(*self.extendSelection())
-    self.redo()
 
   def cursorSelectSubwordRight(self):
     if self.selectionMode == app.selectable.kSelectionNone:
       self.selectionCharacter()
     self.cursorMoveSubwordRight()
     self.cursorMoveAndMark(*self.extendSelection())
-    self.redo()
 
   def cursorSelectWordLeft(self):
     if self.selectionMode == app.selectable.kSelectionNone:
       self.selectionCharacter()
     self.cursorMoveWordLeft()
     self.cursorMoveAndMark(*self.extendSelection())
-    self.redo()
 
   def cursorSelectWordRight(self):
     if self.selectionMode == app.selectable.kSelectionNone:
       self.selectionCharacter()
     self.cursorMoveWordRight()
     self.cursorMoveAndMark(*self.extendSelection())
-    self.redo()
 
   def cursorSelectUp(self):
     if self.selectionMode == app.selectable.kSelectionNone:
@@ -477,7 +472,6 @@ class Actions(app.mutator.Mutator):
   def cursorEndOfLine(self):
     lineLen = len(self.lines[self.penRow])
     self.cursorMove(0, lineLen - self.penCol)
-    self.redo()
 
   def cursorSelectToStartOfLine(self):
     self.selectionCharacter()
@@ -499,7 +493,8 @@ class Actions(app.mutator.Mutator):
     Returns:
       None.
     """
-    if self.penRow == len(self.lines):
+    if self.penRow == len(self.lines) - 1:
+      self.setMessage('Bottom of file')
       return
     maxRow = self.view.rows
     penRowDelta = maxRow
@@ -528,6 +523,7 @@ class Actions(app.mutator.Mutator):
       None.
     """
     if self.penRow == 0:
+      self.setMessage('Top of file')
       return
     maxRow = self.view.rows
     penRowDelta = -maxRow
@@ -634,7 +630,6 @@ class Actions(app.mutator.Mutator):
 
   def cursorStartOfLine(self):
     self.cursorMove(0, -self.penCol)
-    self.redo()
 
   def cursorUp(self):
     self.selectionNone()
@@ -675,6 +670,10 @@ class Actions(app.mutator.Mutator):
     if len(text):
       data = self.doLinesToData(text)
       app.clipboard.copy(data)
+      if len(text) == 1:
+        self.setMessage('copied %d characters' % len(text[0]))
+      else:
+        self.setMessage('copied %d lines' % (len(text),))
 
   def editCut(self):
     self.editCopy()
@@ -701,7 +700,6 @@ class Actions(app.mutator.Mutator):
     else:
       endCol = len(clip[-1])
     self.cursorMove(rowDelta, endCol - self.penCol)
-    self.redo()
 
   def editRedo(self):
     """Undo a set of redo nodes."""
@@ -715,24 +713,36 @@ class Actions(app.mutator.Mutator):
     if not self.isSelectionInView():
        self.scrollToOptimalScrollPosition()
 
-  def doLinesToData(self, data):
+  def doLinesToBinaryData(self, lines):
+    # TODO(dschuyler): convert lines to binary data.
+    return ''
+
+  def doLinesToData(self, lines):
     def encode(line):
       return chr(int(line.groups()[0], 16))
-    return re.sub('\x01([0-9a-fA-F][0-9a-fA-F])', encode, "\n".join(data))
+    return re.sub('\x01([0-9a-fA-F][0-9a-fA-F])', encode, "\n".join(lines))
+
+  def doBinaryDataToLines(self, data):
+    # TODO(dschuyler): convert binary data to lines.
+    return ["Binary file.", "Editing this text won't change the file."]
 
   def doDataToLines(self, data):
     # Performance: in a 1000 line test it appears fastest to do some simple
     # .replace() calls to minimize the number of calls to parse().
     data = data.replace('\r\n', '\n')
     data = data.replace('\r', '\n')
-    data = data.replace('\t', ' '*8)
+    data = data.replace('\t', ' ' * 8)
     def parse(sre):
-      return "\x01%02x"%ord(sre.groups()[0])
-    data = re.sub('([\0-\x09\x0b-\x1f\x7f-\xff])', parse, data)
+      return "\x01%02x" % ord(sre.groups()[0])
+    #data = re.sub('([\0-\x09\x0b-\x1f\x7f-\xff])', parse, data)
+    data = re.sub('([\0-\x09\x0b-\x1f])', parse, data)
     return data.split('\n')
 
   def dataToLines(self):
-    self.lines = self.doDataToLines(self.data)
+    if self.isBinary:
+      self.lines = self.doBinaryDataToLines(self.data)
+    else:
+      self.lines = self.doDataToLines(self.data)
 
   def fileFilter(self, data):
     self.data = data
@@ -740,31 +750,33 @@ class Actions(app.mutator.Mutator):
     self.upperChangedRow = 0
     self.savedAtRedoIndex = self.redoIndex
 
-  def setFilePath(self, path):
-    app.buffer_manager.buffers.renameBuffer(self, path)
-
   def fileLoad(self):
     app.log.info('fileLoad', self.fullPath)
     inputFile = None
+    self.isReadOnly = (os.path.isfile(self.fullPath) and
+        not os.access(self.fullPath, os.W_OK))
     if not os.path.exists(self.fullPath):
       self.setMessage('Creating new file')
     else:
       try:
         inputFile = io.open(self.fullPath)
         data = inputFile.read()
+        # Hacky detection of binary files.
+        unicode(data).decode('utf-8')
         self.fileEncoding = inputFile.encoding
         self.setMessage('Opened existing file')
+        self.isBinary = False
       except Exception:
         try:
           inputFile = io.open(self.fullPath, 'rb')
           data = inputFile.read()
-          self.fileEncoding = None  # i.e. binary.
+          self.fileEncoding = None
+          self.isBinary = True
           self.setMessage('Opened file as a binary file')
         except Exception:
           app.log.info('error opening file', self.fullPath)
           self.setMessage('error opening file', self.fullPath)
           return
-      self.isReadOnly = not os.access(self.fullPath, os.W_OK)
       self.fileStat = os.stat(self.fullPath)
     self.relativePath = os.path.relpath(self.fullPath, os.getcwd())
     app.log.info('fullPath', self.fullPath)
@@ -777,15 +789,16 @@ class Actions(app.mutator.Mutator):
       self.data = unicode("")
     self.fileExtension = os.path.splitext(self.fullPath)[1]
     self.rootGrammar = app.prefs.getGrammar(self.fileExtension)
-    if self.data:
-      self.parseGrammars()
-      self.dataToLines()
-    else:
-      self.parser = None
+    self.parseGrammars()
+    self.dataToLines()
 
     # Restore all user history.
     app.history.loadUserHistory(self.fullPath)
     self.restoreUserHistory()
+
+  def replaceLines(self, clip):
+    self.view.textBuffer.selectionAll()
+    self.view.textBuffer.editPasteLines(tuple(clip))
 
   def restoreUserHistory(self):
     """
@@ -803,20 +816,26 @@ class Actions(app.mutator.Mutator):
     self.fileHistory = app.history.getFileHistory(self.fullPath, self.data)
 
     # Restore all positions and values of variables.
-    self.view.cursorRow, self.view.cursorCol = self.fileHistory.setdefault(
-        'cursor', (0, 0))
     self.penRow, self.penCol = self.fileHistory.setdefault('pen', (0, 0))
-    self.view.scrollRow, self.view.scrollCol =  self.fileHistory.setdefault(
-        'scroll', (0, 0))
+    app.log.info('\n\n\n    setting scrollRow', self.fileHistory.get('scroll'),
+        self.fullPath, '\n\n\n\n')
+    # Do not restore the scroll position here because the view may not be set.
+    # the scroll position is handled in the InputWindow.setTextBuffer.
+    # self.view.scrollRow, self.view.scrollCol =  self.fileHistory.setdefault(
+    #     'scroll', (0, 0))
     self.doSelectionMode(self.fileHistory.setdefault('selectionMode',
         app.selectable.kSelectionNone))
     self.markerRow, self.markerCol = self.fileHistory.setdefault('marker',
         (0, 0))
     if app.prefs.editor['saveUndo']:
       self.redoChain = self.fileHistory.setdefault('redoChainCompound', [])
-      self.savedAtRedoIndex = self.fileHistory.setdefault('savedAtRedoIndexCompound', 0)
+      self.savedAtRedoIndex = self.fileHistory.setdefault(
+          'savedAtRedoIndexCompound', 0)
       self.redoIndex = self.savedAtRedoIndex
       self.oldRedoIndex = self.savedAtRedoIndex
+    if app.config.strict_debug:
+      assert self.penRow < len(self.lines), self.penRow
+      assert self.markerRow < len(self.lines), self.markerRow
 
     # Restore file bookmarks
     self.bookmarks = self.fileHistory.setdefault('bookmarks', [])
@@ -836,22 +855,18 @@ class Actions(app.mutator.Mutator):
     Returns:
       None.
     """
-    scrollRow = self.view.scrollRow
-    scrollCol = self.view.scrollCol
     # Row.
     maxRow = self.view.rows
     if self.view.scrollRow > self.penRow:
-      scrollRow = self.penRow
+      self.view.scrollRow = self.penRow
     elif self.penRow >= self.view.scrollRow + maxRow:
-      scrollRow = self.penRow - maxRow + 1
+      self.view.scrollRow = self.penRow - maxRow + 1
     # Column.
     maxCol = self.view.cols
     if self.view.scrollCol > self.penCol:
-      scrollCol = self.penCol
+      self.view.scrollCol = self.penCol
     elif self.penCol >= self.view.scrollCol + maxCol:
-      scrollCol = self.penCol - maxCol + 1
-    self.view.scrollRow = scrollRow
-    self.view.scrollCol = scrollCol
+      self.view.scrollCol = self.penCol - maxCol + 1
 
   def scrollToOptimalScrollPosition(self):
     """
@@ -915,11 +930,16 @@ class Actions(app.mutator.Mutator):
     return horizontally and vertically
 
   def linesToData(self):
-    self.data = self.doLinesToData(self.lines)
+    if self.isBinary:
+      # TODO(dschuyler): convert binary data.
+      pass #self.data = self.doLinesToBinaryData(self.lines)
+    else:
+      self.data = self.doLinesToData(self.lines)
 
   def fileWrite(self):
     # Preload the message with an error that should be overwritten.
     self.setMessage('Error saving file')
+    self.isReadOnly = not os.access(self.fullPath, os.W_OK)
     try:
       try:
         if app.prefs.editor['onSaveStripTrailingSpaces']:
@@ -927,7 +947,6 @@ class Actions(app.mutator.Mutator):
           self.compoundChangePush()
         # Save user data that applies to read-only files into history.
         self.fileHistory['pen'] = (self.penRow, self.penCol)
-        self.fileHistory['cursor'] = (self.view.cursorRow, self.view.cursorCol)
         self.fileHistory['scroll'] = (self.view.scrollRow, self.view.scrollCol)
         self.fileHistory['marker'] = (self.markerRow, self.markerCol)
         self.fileHistory['selectionMode'] = self.selectionMode
@@ -946,19 +965,25 @@ class Actions(app.mutator.Mutator):
         if app.prefs.editor['saveUndo']:
           self.fileHistory['redoChainCompound'] = self.redoChain
           self.fileHistory['savedAtRedoIndexCompound'] = self.savedAtRedoIndex
-        # Hmm, could this be hard coded to False here?
-        self.isReadOnly = not os.access(self.fullPath, os.W_OK)
         app.history.saveUserHistory((self.fullPath, self.lastChecksum,
             self.lastFileSize), self.fileHistory)
         # Store the file's new info
         self.lastChecksum, self.lastFileSize = app.history.getFileInfo(
             self.fullPath)
         self.fileStat = os.stat(self.fullPath)
+        # If we're writing this file for the first time, self.isReadOnly will
+        # still be True (from when it didn't exist).
+        self.isReadOnly = False
         self.setMessage('File saved')
       except Exception as e:
-        self.setMessage(
-            'Error writing file. The file did not save properly.',
-            color=3)
+        color = app.color.get('status_line_error')
+        if self.isReadOnly:
+          self.setMessage("Permission error. Try modifying in sudo mode.",
+                          color=color)
+        else:
+          self.setMessage(
+              'Error writing file. The file did not save properly.',
+              color=color)
         app.log.error('error writing file')
         app.log.exception(e)
     except Exception:
@@ -971,25 +996,34 @@ class Actions(app.mutator.Mutator):
     inView = self.isInView(row, endCol, row, endCol)
     self.doSelectionMode(app.selectable.kSelectionNone)
     self.cursorMove(row - self.penRow, endCol - self.penCol)
-    self.redo()
     self.doSelectionMode(mode)
     self.cursorMove(0, -length)
-    self.redo()
     if not inView:
       self.scrollToOptimalScrollPosition()
 
   def find(self, searchFor, direction=0):
     """direction is -1 for findPrior, 0 for at pen, 1 for findNext."""
-    app.log.info('find', searchFor, direction)
+    app.log.info(searchFor, direction)
     if not len(searchFor):
       self.findRe = None
       self.doSelectionMode(app.selectable.kSelectionNone)
       return
+    editorPrefs = app.prefs.editor
+    flags = 0
+    flags |= (editorPrefs.get('findIgnoreCase') and re.IGNORECASE or 0)
+    flags |= (editorPrefs.get('findMultiLine') and re.MULTILINE or 0)
+    flags |= (editorPrefs.get('findLocale') and re.LOCALE or 0)
+    flags |= (editorPrefs.get('findDotAll') and re.DOTALL or 0)
+    flags |= (editorPrefs.get('findVerbose') and re.VERBOSE or 0)
+    flags |= (editorPrefs.get('findUnicode') and re.UNICODE or 0)
+    if not editorPrefs.get('findUseRegex'):
+      searchFor = re.escape(searchFor)
+    if editorPrefs.get('findWholeWord'):
+      searchFor = ur'\b%s\b' % searchFor
+    #app.log.info(searchFor, flags)
     # The saved re is also used for highlighting.
-    ignoreCaseFlag = (app.prefs.editor.get('findIgnoreCase') and
-                      re.IGNORECASE or 0)
-    self.findRe = re.compile('()'+searchFor, ignoreCaseFlag)
-    self.findBackRe = re.compile('(.*)'+searchFor, ignoreCaseFlag)
+    self.findRe = re.compile('()'+searchFor, flags)
+    self.findBackRe = re.compile('(.*)'+searchFor, flags)
     self.findCurrentPattern(direction)
 
   def findPlainText(self, text):
@@ -1024,6 +1058,7 @@ class Actions(app.mutator.Mutator):
     return flags
 
   def findReplace(self, cmd):
+    """substitute/a/b/flags"""
     if not len(cmd):
       return
     separator = cmd[0]
@@ -1155,7 +1190,6 @@ class Actions(app.mutator.Mutator):
     else:
       self.indentLines()
     self.cursorMoveAndMark(0, indentationLength, 0, indentationLength, 0)
-    self.redo()
 
   def indentLines(self):
     """
@@ -1172,6 +1206,10 @@ class Actions(app.mutator.Mutator):
   def verticalDelete(self, row, endRow, col, text):
     self.redoAddChange(('vd', (text, row, endRow, col)))
     self.redo()
+    if row <= self.markerRow <= endRow:
+      self.cursorMoveAndMark(0, 0, 0, -len(text), 0)
+    if row <= self.penRow <= endRow:
+      self.cursorMoveAndMark(0, -len(text), 0, 0, 0)
 
   def verticalInsert(self, row, endRow, col, text):
     self.redoAddChange(('vi', (text, row, endRow, col)))
@@ -1186,9 +1224,9 @@ class Actions(app.mutator.Mutator):
   def insertPrintable(self, ch, meta):
     #app.log.info(ch, meta)
     if curses.ascii.isprint(ch):
-      self.insert(chr(ch))
+      self.insert(unichr(ch))
     elif ch is app.curses_util.BRACKETED_PASTE:
-      self.editPasteData(meta)
+      self.editPasteData(meta.decode('utf-8'))
     elif ch is app.curses_util.UNICODE_INPUT:
       self.insert(meta)
 
@@ -1237,14 +1275,12 @@ class Actions(app.mutator.Mutator):
       lastLine = len(self.lines) - 1
       self.cursorMove(lastLine - self.penRow,
           len(self.lines[lastLine]) - self.penCol)
-      self.redo()
       return
     row = max(0, min(virtualRow, len(self.lines)))
     col = max(0, self.view.scrollCol + paneCol)
     if self.selectionMode == app.selectable.kSelectionBlock:
       self.cursorMoveAndMark(0, 0, row - self.markerRow, col - self.markerCol,
           0)
-      self.redo()
       return
     markerRow = 0
     # If not block selection, restrict col to the chars on the line.
@@ -1278,10 +1314,8 @@ class Actions(app.mutator.Mutator):
           markerCol = -1
     self.cursorMoveAndMark(row - self.penRow, col - self.penCol,
         markerRow, markerCol, 0)
-    self.redo()
     if self.selectionMode == app.selectable.kSelectionLine:
       self.cursorMoveAndMark(*self.extendSelection())
-      self.redo()
     elif self.selectionMode == app.selectable.kSelectionWord:
       if (self.penRow < self.markerRow or
          (self.penRow == self.markerRow and
@@ -1309,6 +1343,7 @@ class Actions(app.mutator.Mutator):
 
   def scrollUp(self):
     if self.view.scrollRow == 0:
+      self.setMessage('Top of file')
       return
     maxRow = self.view.rows
     cursorDelta = 0
@@ -1331,6 +1366,7 @@ class Actions(app.mutator.Mutator):
   def scrollDown(self):
     maxRow = self.view.rows
     if self.view.scrollRow + maxRow >= len(self.lines):
+      self.setMessage('Bottom of file')
       return
     cursorDelta = 0
     if self.penRow <= self.view.scrollRow + 1:
@@ -1350,25 +1386,48 @@ class Actions(app.mutator.Mutator):
   def noOp(self, ignored):
     pass
 
+  def noOpDefault(self, ignored, ignored2=None):
+    pass
+
   def normalize(self):
     self.selectionNone()
     self.findRe = None
     self.view.normalize()
 
+  def doParse(self, begin, end):
+    self.linesToData()
+    self.parser.parse(self.data, self.rootGrammar, begin, end)
+    self.upperChangedRow = len(self.parser.rows)
+
+  def parseDocument(self):
+    begin = min(len(self.parser.rows), self.upperChangedRow)
+    end = len(self.lines)
+    self.doParse(begin, end)
+
+  def parseScreenMaybe(self):
+    begin = min(len(self.parser.rows), self.upperChangedRow)
+    end = self.view.scrollRow + self.view.rows + 1
+    if end > begin + 100:
+      # Call doParse with an empty range.
+      end = begin
+    self.doParse(begin, end)
+
   def parseGrammars(self):
+    if not self.view:
+      return
     if not self.parser:
       self.parser = app.parser.Parser()
-    end = self.view.scrollRow + self.view.rows + 1
-    # If there is a huge gap, leave it to the background parsing.
-    if self.upperChangedRow - len(self.parser.rows) > 500:
-      self.sentUpperChangedRow = self.upperChangedRow
+    scrollRow = self.view.scrollRow
+    # If there is a gap, leave it to the background parsing.
+    if self.parser.rows < scrollRow or self.upperChangedRow < scrollRow:
       return
+    end = self.view.scrollRow + self.view.rows + 1
     # Reset the self.data to get recent changes in self.lines.
     self.linesToData()
     start = time.time()
     self.parser.parse(self.data, self.rootGrammar,
         self.upperChangedRow, end)
-    self.sentUpperChangedRow = self.upperChangedRow
+    self.debugUpperChangedRow = self.upperChangedRow
     self.upperChangedRow = len(self.lines)
     self.parserTime = time.time() - start
 
@@ -1386,15 +1445,12 @@ class Actions(app.mutator.Mutator):
       Consecutive calls to this function will select subsequent lines.
     """
     if self.selectionMode != app.selectable.kSelectionLine:
-      self.selectLineAt(self.penRow)
-    else:
-      if self.penRow + 1 < len(self.lines):
-        self.selectLineAt(self.penRow + 1)
+      self.selectionLine()
+    self.selectLineAt(self.penRow)
 
   def selectionAll(self):
     self.doSelectionMode(app.selectable.kSelectionAll)
     self.cursorMoveAndMark(*self.extendSelection())
-    self.redo()
 
   def selectionBlock(self):
     self.doSelectionMode(app.selectable.kSelectionBlock)
@@ -1412,17 +1468,27 @@ class Actions(app.mutator.Mutator):
     self.doSelectionMode(app.selectable.kSelectionWord)
 
   def selectLineAt(self, row):
+    """
+    Adds the line with the specified row to the current selection.
+
+    Args:
+      row (int): the specified line of text that you want to select.
+
+    Returns:
+      None
+    """
+    if row >= len(self.lines):
+      self.selectionNone()
+      return
     if row + 1 < len(self.lines):
       self.cursorMoveAndMark((row + 1) - self.penRow, -self.penCol,
-          row - self.markerRow, -self.markerCol,
+          0, -self.markerCol,
           app.selectable.kSelectionLine - self.selectionMode)
-      self.redo()
     else:
       self.cursorMoveAndMark(row - self.penRow,
           len(self.lines[row]) - self.penCol,
-          row - self.penRow, -self.markerCol,
+          0, -self.markerCol,
           app.selectable.kSelectionLine - self.selectionMode)
-      self.redo()
 
   def selectWordAt(self, row, col):
     """row and col may be from a mouse click and may not actually land in the
@@ -1445,7 +1511,6 @@ class Actions(app.mutator.Mutator):
         self.markerCol - self.penCol,
         self.penRow - self.markerRow,
         self.penCol - self.markerCol, 0)
-    self.redo()
 
   def test(self):
     self.insertPrintable(0x00, None)
@@ -1465,8 +1530,6 @@ class Actions(app.mutator.Mutator):
       start = self.penCol - indentationLength
       if indentation == line[start:self.penCol]:
         self.verticalDelete(self.penRow, self.penRow, start, indentation)
-        self.cursorMoveAndMark(0, -indentationLength, 0, -indentationLength, 0)
-        self.redo()
 
   def unindentLines(self):
     indentation = app.prefs.editor['indentation']
@@ -1474,15 +1537,14 @@ class Actions(app.mutator.Mutator):
     row = min(self.markerRow, self.penRow)
     endRow = max(self.markerRow, self.penRow)
     begin = 0
-    for i,line in enumerate(self.lines[row:endRow + 1]):
+    for i, line in enumerate(self.lines[row:endRow + 1]):
       if (len(line) < indentationLength or
-          (line[:indentationLength] != indentation)):
-        if i > begin:
+          line[:indentationLength] != indentation):
+        if begin < i:
           self.verticalDelete(row + begin, row + i - 1, 0, indentation)
         begin = i + 1
-    self.verticalDelete(row + begin, endRow, 0, indentation)
-    self.cursorMoveAndMark(0, -indentationLength, 0, -indentationLength, 0)
-    self.redo()
+    if begin <= i:
+      self.verticalDelete(row + begin, row + i, 0, indentation)
 
   def updateScrollPosition(self, scrollRowDelta, scrollColDelta):
     """
