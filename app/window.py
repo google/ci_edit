@@ -498,9 +498,17 @@ class LineNumbers(ViewWindow):
         if currentRow + 1 > currentBookmark.end:
           currentBookmarkIndex += 1
       self.addStr(i, 0, ' %5d ' % (currentRow + 1), color)
+    # Draw indicators for text off of the left edge.
+    if self.host.scrollCol > 0:
+      color = app.color.get('line_overflow')
+      for i in range(limit):
+        if len(self.host.textBuffer.lines[self.host.scrollRow + i]) > 0:
+          self.addStr(i, 6, ' ', color)
+    # Draw blank line number rows past the end of the document.
     color = app.color.get('outside_document')
     for i in range(limit, self.rows):
       self.addStr(i, 0, '       ', color)
+    # Highlight the line numbers for the current cursor line.
     cursorAt = self.host.textBuffer.penRow - self.host.scrollRow
     if 0 <= cursorAt < limit:
       if cursorBookmarkColorIndex:
