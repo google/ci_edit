@@ -328,6 +328,14 @@ class Actions(app.mutator.Mutator):
     savedGoal = self.goalCol
     self.cursorMove(1, self.cursorColDelta(self.penRow + 1))
     self.goalCol = savedGoal
+    self.adjustHorizontalScroll()
+
+  def adjustHorizontalScroll(self):
+    if self.view.scrollCol:
+      if len(self.lines[self.penRow]) < self.view.cols:
+        self.view.scrollCol = 0
+        return
+      self.view.scrollCol = max(0, self.view.scrollCol - self.view.cols / 4)
 
   def cursorMoveLeft(self):
     if self.penCol > 0:
@@ -356,6 +364,7 @@ class Actions(app.mutator.Mutator):
     else:
       self.cursorMove(-1, lineLen - self.penCol)
     self.goalCol = savedGoal
+    self.adjustHorizontalScroll()
 
   def cursorMoveSubwordLeft(self):
     self.doCursorMoveLeftTo(app.selectable.kReSubwordBoundaryRvr)
