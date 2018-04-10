@@ -797,8 +797,8 @@ class Actions(app.mutator.Mutator):
     self.restoreUserHistory()
 
   def replaceLines(self, clip):
-    self.view.textBuffer.selectionAll()
-    self.view.textBuffer.editPasteLines(tuple(clip))
+    self.selectionAll()
+    self.editPasteLines(tuple(clip))
 
   def restoreUserHistory(self):
     """
