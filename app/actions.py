@@ -333,9 +333,10 @@ class Actions(app.mutator.Mutator):
   def adjustHorizontalScroll(self):
     if self.view.scrollCol:
       if len(self.lines[self.penRow]) < self.view.cols:
+        # The whole line fits on screen.
         self.view.scrollCol = 0
-        return
-      self.view.scrollCol = max(0, self.view.scrollCol - self.view.cols / 4)
+      elif self.view.scrollCol == self.penCol and self.penCol == len(self.lines[self.penRow]):
+        self.view.scrollCol = max(0, self.view.scrollCol - self.view.cols / 4)
 
   def cursorMoveLeft(self):
     if self.penCol > 0:
