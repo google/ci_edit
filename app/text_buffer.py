@@ -226,7 +226,7 @@ class TextBuffer(app.actions.Actions):
         def searchForward(openCh, closeCh):
           count = 1
           textCol = self.penCol + 1
-          for row in range(self.penRow, startRow + maxRow):
+          for row in range(self.penRow, min(startRow + maxRow, len(self.lines))):
             if row != self.penRow:
               textCol = 0
             line = self.lines[row][textCol:]
