@@ -378,7 +378,7 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
     self.assertEqual(len(visibleBookmarks), len(expectedBookmarks))
 
   def test_bookmarks_jump(self):
-    #self.setMovieMode(True)
+    # self.setMovieMode(True)
     self.runWithTestFile(kTestFile, [
         self.displayCheck(0, 0, [
             " ci     .                               ",
