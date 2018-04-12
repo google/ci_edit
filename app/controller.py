@@ -93,6 +93,7 @@ class Controller:
   def changeToSaveAs(self):
     view = self.getNamedWindow('fileManagerWindow', True)
     view.setMode('saveAs')
+    view.bringToFront()
     view.changeFocusTo(view);
 
   def createNewTextBuffer(self):
