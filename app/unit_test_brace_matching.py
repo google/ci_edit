@@ -39,6 +39,7 @@ class BraceMatchingTestCases(app.fake_curses_testing.FakeCursesTestCase):
     write = self.writeText
     checkStyle = self.displayCheckStyle
     bracketColor = app.prefs.color['bracket']
+    defaultColor = app.prefs.color['default']
     matchingBracketColor = app.prefs.color['matching_bracket']
     self.runWithFakeInputs([
         self.displayCheck(2, 7, ["     "]),
@@ -50,10 +51,42 @@ class BraceMatchingTestCases(app.fake_curses_testing.FakeCursesTestCase):
         write(')'), self.displayCheck(2, 7, [")    "]), KEY_LEFT, CTRL_A,
         write(']'), self.displayCheck(2, 7, ["]    "]), KEY_LEFT, CTRL_A,
         write('}'), self.displayCheck(2, 7, ["}    "]), KEY_LEFT, CTRL_A,
-        # Test matching.
+        # Test adjacent matching.
         write('()'), self.displayCheck(2, 7, ["()    "]),
           checkStyle(2, 7, 1, 2, bracketColor), KEY_LEFT,
           checkStyle(2, 7, 1, 2, matchingBracketColor), CTRL_A,
-        write('[]'), self.displayCheck(2, 7, ["[]    "]), KEY_LEFT, CTRL_A,
-        write('{}'), self.displayCheck(2, 7, ["{}    "]), KEY_LEFT, CTRL_A,
+        write('[]'), self.displayCheck(2, 7, ["[]    "]),
+          checkStyle(2, 7, 1, 2, bracketColor), KEY_LEFT,
+          checkStyle(2, 7, 1, 2, matchingBracketColor), CTRL_A,
+        write('{}'), self.displayCheck(2, 7, ["{}    "]),
+          checkStyle(2, 7, 1, 2, bracketColor), KEY_LEFT,
+          checkStyle(2, 7, 1, 2, matchingBracketColor), CTRL_A,
+        # Test same line matching.
+        write('(test)'), self.displayCheck(2, 7, ["(test)    "]),
+          checkStyle(2, 7, 1, 1, bracketColor),
+          checkStyle(2, 8, 1, 4, defaultColor),
+          checkStyle(2, 12, 1, 1, bracketColor),
+          KEY_LEFT,
+          checkStyle(2, 7, 1, 1, matchingBracketColor),
+          checkStyle(2, 8, 1, 4, defaultColor),
+          checkStyle(2, 12, 1, 1, matchingBracketColor),
+          CTRL_A,
+        write('[test]'), self.displayCheck(2, 7, ["[test]    "]),
+          checkStyle(2, 7, 1, 1, bracketColor),
+          checkStyle(2, 8, 1, 4, defaultColor),
+          checkStyle(2, 12, 1, 1, bracketColor),
+          KEY_LEFT,
+          checkStyle(2, 7, 1, 1, matchingBracketColor),
+          checkStyle(2, 8, 1, 4, defaultColor),
+          checkStyle(2, 12, 1, 1, matchingBracketColor),
+          CTRL_A,
+        write('{test}'), self.displayCheck(2, 7, ["{test}    "]),
+          checkStyle(2, 7, 1, 1, bracketColor),
+          checkStyle(2, 8, 1, 4, defaultColor),
+          checkStyle(2, 12, 1, 1, bracketColor),
+          KEY_LEFT,
+          checkStyle(2, 7, 1, 1, matchingBracketColor),
+          checkStyle(2, 8, 1, 4, defaultColor),
+          checkStyle(2, 12, 1, 1, matchingBracketColor),
+          CTRL_A,
         CTRL_Q, 'n'])
