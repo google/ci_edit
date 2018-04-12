@@ -34,6 +34,7 @@ import app.unit_test_application
 import app.unit_test_automatic_column_adjustment
 import app.unit_test_bookmarks
 import app.unit_test_brace_matching
+import app.unit_test_file_manager
 import app.unit_test_parser
 import app.unit_test_performance
 import app.unit_test_prefs
@@ -52,6 +53,7 @@ tests = {
   'application': app.unit_test_application.IntentionTestCases,
   'bookmarks': app.unit_test_bookmarks.BookmarkTestCases,
   'brace_matching': app.unit_test_brace_matching.BraceMatchingTestCases,
+  'file_manager': app.unit_test_file_manager.FileManagerTestCases,
   'automatic_column_adjustment':
       app.unit_test_automatic_column_adjustment.AutomaticColumnAdjustmentCases,
 }
