@@ -237,6 +237,7 @@ actuate
 actuated
 actuator
 acute
+acyclic
 ad
 adapt
 adaptability
@@ -1063,6 +1064,7 @@ attack
 attacked
 attacker
 attackers
+attacking
 attacks
 attain
 attaining
@@ -1765,6 +1767,10 @@ bolas
 bold
 bolder
 boldfaced
+bolt
+bolted
+bolthole
+bolts
 bomb
 bombed
 bombing
@@ -2291,6 +2297,8 @@ card
 cardholder
 cardholders
 cardinal
+cardinality
+cardinalities
 cardiovascular
 cards
 care
@@ -2322,6 +2330,7 @@ carryover
 cars
 cart
 carter
+cartesian
 cartoon
 carts
 carve
@@ -10460,6 +10469,7 @@ modify
 modifying
 mods
 modular
+modularity
 modulate
 modulated
 modulation

@@ -31,6 +31,7 @@ import app.config
 app.config.strict_debug = True
 
 import app.unit_test_application
+import app.unit_test_automatic_column_adjustment
 import app.unit_test_bookmarks
 import app.unit_test_parser
 import app.unit_test_performance
@@ -49,6 +50,7 @@ tests = [
   app.unit_test_text_buffer.MouseTestCases,
   app.unit_test_application.IntentionTestCases,
   app.unit_test_bookmarks.BookmarkTestCases,
+  app.unit_test_automatic_column_adjustment.AutomaticColumnAdjustmentCases,
 ]
 
 def runTests(stopOnFailure=False):

@@ -150,6 +150,11 @@ class FakeCursesTestCase(unittest.TestCase):
           os.path.split(caller[1])[1], caller[2], caller[3])
       print '\n-------- finished', callerText
 
+  def runWithTestFile(self, kTestFile, fakeInputs):
+    sys.argv = [kTestFile]
+    self.assertFalse(os.path.isfile(kTestFile))
+    self.runWithFakeInputs(fakeInputs)
+
   def selectionCheck(self, expectedPenRow, expectedPenCol, expectedMarkerRow,
       expectedMarkerCol, expectedMode):
     caller = inspect.stack()[1]
