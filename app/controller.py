@@ -136,6 +136,7 @@ class Controller:
   def confirmationPromptFinish(self, *args):
     window = self.getNamedWindow('inputWindow', True)
     window.userIntent = 'edit'
+    window.bringToFront()
     self.view.changeFocusTo(window)
 
   def __closeHostFile(self, host):
@@ -284,16 +285,13 @@ class Controller:
   def saveEventChangeToHostWindow(self, *args):
     curses.ungetch(self.savedCh)
     host = self.getNamedWindow('inputWindow', True)
-    self.view.changeFocusTo(host)
-
-  def saveEventChangeToInputWindow(self, *args):
-    curses.ungetch(self.savedCh)
-    host = self.getNamedWindow('inputWindow', True)
+    host.bringToFront()
     self.view.changeFocusTo(host)
 
   def setTextBuffer(self, textBuffer):
     if app.config.strict_debug:
-      assert issubclass(textBuffer.__class__, app.text_buffer.TextBuffer), textBuffer
+      assert issubclass(textBuffer.__class__,
+          app.text_buffer.TextBuffer), textBuffer
       assert self.view.textBuffer is textBuffer
     self.textBuffer = textBuffer
 

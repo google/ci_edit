@@ -289,11 +289,11 @@ class FileOpener(app.file_manager_controller.FileManagerController):
       KEY_UP: self.passEventToDirectoryList,
       CTRL_I: self.tabCompleteExtend,
       CTRL_J: self.performPrimaryAction,
-      CTRL_N: self.saveEventChangeToInputWindow,
+      CTRL_N: self.saveEventChangeToHostWindow,
       CTRL_O: self.performPrimaryAction,
       CTRL_P: self.changeToPrediction,
-      CTRL_Q: self.saveEventChangeToInputWindow,
-      CTRL_S: self.saveEventChangeToInputWindow,
+      CTRL_Q: self.saveEventChangeToHostWindow,
+      CTRL_S: self.saveEventChangeToHostWindow,
     })
     self.commandSet = commandSet
     self.commandDefault = self.textBuffer.insertPrintable
