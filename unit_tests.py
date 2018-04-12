@@ -33,6 +33,7 @@ app.config.strict_debug = True
 import app.unit_test_application
 import app.unit_test_automatic_column_adjustment
 import app.unit_test_bookmarks
+import app.unit_test_brace_matching
 import app.unit_test_parser
 import app.unit_test_performance
 import app.unit_test_prefs
@@ -42,18 +43,22 @@ import unittest
 
 
 # Add new test cases here.
-tests = [
-  app.unit_test_selectable.SelectableTestCases,
-  app.unit_test_parser.ParserTestCases,
-  app.unit_test_performance.PerformanceTestCases,
-  app.unit_test_prefs.PrefsTestCases,
-  app.unit_test_text_buffer.MouseTestCases,
-  app.unit_test_application.IntentionTestCases,
-  app.unit_test_bookmarks.BookmarkTestCases,
-  app.unit_test_automatic_column_adjustment.AutomaticColumnAdjustmentCases,
-]
+tests = {
+  'selectable': app.unit_test_selectable.SelectableTestCases,
+  'parser': app.unit_test_parser.ParserTestCases,
+  'performance': app.unit_test_performance.PerformanceTestCases,
+  'prefs': app.unit_test_prefs.PrefsTestCases,
+  'text_buffer': app.unit_test_text_buffer.MouseTestCases,
+  'application': app.unit_test_application.IntentionTestCases,
+  'bookmarks': app.unit_test_bookmarks.BookmarkTestCases,
+  'brace_matching': app.unit_test_brace_matching.BraceMatchingTestCases,
+  'automatic_column_adjustment':
+      app.unit_test_automatic_column_adjustment.AutomaticColumnAdjustmentCases,
+}
 
-def runTests(stopOnFailure=False):
+
+
+def runTests(tests, stopOnFailure=False):
   """Run through the list of tests."""
   for test in tests:
     suite = unittest.TestLoader().loadTestsFromTestCase(test)
