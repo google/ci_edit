@@ -57,12 +57,11 @@ tests = {
 }
 
 
-
 def runTests(tests, stopOnFailure=False):
   """Run through the list of tests."""
   for test in tests:
     suite = unittest.TestLoader().loadTestsFromTestCase(test)
-    result = unittest.TextTestRunner(verbosity=2).run(suite)
+    result = unittest.TextTestRunner(verbosity = 2).run(suite)
     if stopOnFailure and (result.failures or result.errors):
       return -1
   return 0

@@ -36,7 +36,24 @@ class BraceMatchingTestCases(app.fake_curses_testing.FakeCursesTestCase):
   def test_parenthesis(self):
     #self.setMovieMode(True)
     sys.argv = []
+    write = self.writeText
+    checkStyle = self.displayCheckStyle
+    bracketColor = app.prefs.color['bracket']
+    matchingBracketColor = app.prefs.color['matching_bracket']
     self.runWithFakeInputs([
-        self.displayCheck(2, 7, ["     "]), self.writeText('('),
-        self.displayCheck(2, 7, ["(    "]), KEY_LEFT,
+        self.displayCheck(2, 7, ["     "]),
+        # Regression test for open ([{ without closing.
+        write('('), self.displayCheck(2, 7, ["(    "]), KEY_LEFT, CTRL_A,
+        write('['), self.displayCheck(2, 7, ["[    "]), KEY_LEFT, CTRL_A,
+        write('{'), self.displayCheck(2, 7, ["{    "]), KEY_LEFT, CTRL_A,
+        # Test for closing )]} without opening.
+        write(')'), self.displayCheck(2, 7, [")    "]), KEY_LEFT, CTRL_A,
+        write(']'), self.displayCheck(2, 7, ["]    "]), KEY_LEFT, CTRL_A,
+        write('}'), self.displayCheck(2, 7, ["}    "]), KEY_LEFT, CTRL_A,
+        # Test matching.
+        write('()'), self.displayCheck(2, 7, ["()    "]),
+          checkStyle(2, 7, 1, 2, bracketColor), KEY_LEFT,
+          checkStyle(2, 7, 1, 2, matchingBracketColor), CTRL_A,
+        write('[]'), self.displayCheck(2, 7, ["[]    "]), KEY_LEFT, CTRL_A,
+        write('{}'), self.displayCheck(2, 7, ["{}    "]), KEY_LEFT, CTRL_A,
         CTRL_Q, 'n'])
