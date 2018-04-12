@@ -104,7 +104,7 @@ class CiProgram:
     if useBgThread:
       self.bg.put((self.programWindow, []))
     else:
-      self.render()
+      self.programWindow.render()
     # This is the 'main loop'. Execution doesn't leave this loop until the
     # application is closing down.
     while not self.exiting:
@@ -223,7 +223,7 @@ class CiProgram:
           self.bg.put((self.programWindow, cmdList))
         else:
           self.programWindow.executeCommandList(cmdList)
-          self.render()
+          self.programWindow.render()
 
   def startup(self):
     """A second init-like function. Called after command line arguments are
