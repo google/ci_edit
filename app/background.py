@@ -61,6 +61,7 @@ def background(inputQueue, outputQueue):
         program.executeCommandList(message)
         program.focusedWindow.textBuffer.parseScreenMaybe()
         program.render()
+        # debugging only: program.showWindowHierarchy()
         outputQueue.put(app.render.frame.grabFrame())
         os.kill(pid, signalNumber)
         #app.profile.endPythonProfile(profile)

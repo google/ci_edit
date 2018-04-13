@@ -237,6 +237,12 @@ class ViewWindow:
     for child in self.zOrder:
       child.render()
 
+  def showWindowHierarchy(self, indent='  '):
+    """For debugging."""
+    app.log.info("%s%s" % (indent, self))
+    for child in self.zOrder:
+      child.showWindowHierarchy(indent + '  ')
+
   def reshape(self, top, left, rows, cols):
     self.moveTo(top, left)
     self.resizeTo(rows, cols)
