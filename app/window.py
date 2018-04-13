@@ -117,14 +117,6 @@ class ViewWindow:
   def debugDraw(self, win):
     self.parent.debugDraw(win)
 
-  def hide(self):
-    assert False
-    """Remove window from the render list."""
-    try:
-      self.parent.zOrder.remove(self)
-    except ValueError:
-      app.log.detail(repr(self) + ' not found in zOrder')
-
   def layoutHorizontally(self, children, separation=0):
     left = self.left
     cols = self.cols
@@ -269,7 +261,7 @@ class ViewWindow:
 
   def setParent(self, parent, layerIndex=sys.maxint):
     """Setting the parent will cause the the window to refresh (i.e. if self
-    was hidden with hide() it will no longer be hidden).
+    was hidden with detach() it will no longer be hidden).
     """
     if app.config.strict_debug:
       assert issubclass(self.__class__, ViewWindow), self
@@ -1414,7 +1406,7 @@ class PopupWindow(Window):
     self.controller.setTextBuffer(textBuffer)
 
   def unfocus(self):
-    self.hide()
+    self.detach()
     Window.unfocus(self)
 
 class PaletteWindow(Window):
@@ -1440,5 +1432,5 @@ class PaletteWindow(Window):
     self.controller.setTextBuffer(textBuffer)
 
   def unfocus(self):
-    self.hide()
+    self.detach()
     Window.unfocus(self)
