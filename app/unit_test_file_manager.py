@@ -36,9 +36,22 @@ class FileManagerTestCases(app.fake_curses_testing.FakeCursesTestCase):
   def test_save_as(self):
     #self.setMovieMode(True)
     sys.argv = []
-    write = self.writeText
     self.runWithFakeInputs([
         self.displayCheck(0, 0, [" ci     "]),
         self.displayCheck(2, 7, ["     "]), CTRL_S,
         self.displayCheck(0, 0, [" ci    Save File As"]),
         CTRL_Q, CTRL_Q])  # TODO(dschuyler): fix need for extra CTRL_Q.
+
+  def test_save_as_to_quit(self):
+    #self.setMovieMode(True)
+    sys.argv = []
+    self.runWithFakeInputs([
+        self.displayCheck(0, 0, [" ci     "]),
+        self.displayCheck(2, 7, ["     "]), ord('a'),
+        self.displayCheck(2, 7, ["a    "]),
+        CTRL_S,
+        self.displayCheck(0, 0, [" ci    Save File As"]),
+        CTRL_Q,
+        self.displayCheck(0, 0, [" ci     "]),
+        self.displayCheck(-2, 0, ["      "]),
+        CTRL_Q, ord('n')])
