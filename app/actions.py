@@ -841,6 +841,7 @@ class Actions(app.mutator.Mutator):
       self.redoChain = self.fileHistory.setdefault('redoChainCompound', [])
       self.savedAtRedoIndex = self.fileHistory.setdefault(
           'savedAtRedoIndexCompound', 0)
+      self.tempChange = self.fileHistory.setdefault('tempChange', None)
       self.redoIndex = self.savedAtRedoIndex
       self.oldRedoIndex = self.savedAtRedoIndex
     if app.config.strict_debug:
@@ -975,6 +976,7 @@ class Actions(app.mutator.Mutator):
         if app.prefs.editor['saveUndo']:
           self.fileHistory['redoChainCompound'] = self.redoChain
           self.fileHistory['savedAtRedoIndexCompound'] = self.savedAtRedoIndex
+          self.fileHistory['tempChange'] = self.tempChange
         app.history.saveUserHistory((self.fullPath, self.lastChecksum,
             self.lastFileSize), self.fileHistory)
         # Store the file's new info
