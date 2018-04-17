@@ -827,6 +827,9 @@ class Actions(app.mutator.Mutator):
 
     # Restore all positions and values of variables.
     self.penRow, self.penCol = self.fileHistory.setdefault('pen', (0, 0))
+    # Need to initialize goalCol since we set the cursor position directly
+    # instead of performing a chain of redoes (which sets goalCol).
+    self.goalCol = self.penCol
     app.log.info('\n\n\n    setting scrollRow', self.fileHistory.get('scroll'),
         self.fullPath, '\n\n\n\n')
     # Do not restore the scroll position here because the view may not be set.
