@@ -72,14 +72,6 @@ class ViewWindow:
   def reattach(self):
     self.setParent(self.parent)
 
-  def detach(self):
-    """Hide the window by removing self from parents' children, but keep same
-    parent to be reattached later."""
-    try:
-      self.parent.zOrder.remove(self)
-    except ValueError:
-      pass
-
   def blank(self, colorPair):
     """Clear the window."""
     for i in range(self.rows):
@@ -114,8 +106,19 @@ class ViewWindow:
     return (self.top <= row < self.top + self.rows and
         self.left <= col < self.left + self.cols and self)
 
-  def debugDraw(self, win):
-    self.parent.debugDraw(win)
+  def debugDraw(self):
+    programWindow = self
+    while programWindow.parent is not None:
+      programWindow = programWindow.parent
+    programWindow.debugDraw(self)
+
+  def detach(self):
+    """Hide the window by removing self from parents' children, but keep same
+    parent to be reattached later."""
+    try:
+      self.parent.zOrder.remove(self)
+    except ValueError:
+      pass
 
   def layoutHorizontally(self, children, separation=0):
     left = self.left
@@ -223,6 +226,12 @@ class ViewWindow:
 
   def priorFocusableWindow(self, start):
     return self.nextFocusableWindow(start, True)
+
+  def quitNow(self):
+    programWindow = self
+    while programWindow.parent is not None:
+      programWindow = programWindow.parent
+    programWindow.quitNow()
 
   def render(self):
     """Redraw window."""
@@ -363,7 +372,7 @@ class Window(ActiveWindow):
       self.textBuffer.draw(self)
     ViewWindow.render(self)
     if self.hasFocus:
-      self.parent.debugDraw(self)
+      self.debugDraw()
       penRow = self.textBuffer.penRow
       penCol = self.textBuffer.penCol
       if (penRow >= self.scrollRow and penRow < self.scrollRow + self.rows):
@@ -404,9 +413,6 @@ class LabeledLine(Window):
 
   def preferredSize(self, rowLimit, colLimit):
     return min(rowLimit, 1), colLimit
-
-  def quitNow(self):
-    self.host.quitNow()
 
   def render(self):
     #app.log.info('LabeledLine', self.label, self.rows, self.cols)
@@ -1070,9 +1076,6 @@ class InputWindow(Window):
     # Keep the tab focus in the child branch. (The child view will call this,
     # tell the child there is nothing to tab to up here).
     return None
-
-  def quitNow(self):
-    self.host.quitNow()
 
   def render(self):
     self.topInfo.onChange()
