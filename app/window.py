@@ -391,6 +391,35 @@ class Window(ActiveWindow):
     self.textBuffer = textBuffer
 
 
+class LabelWindow(ViewWindow):
+  """A text label. The label is inert, it will pass events to its parent."""
+  def __init__(self, parent, label, preferredWidth=None, align='right'):
+    if app.config.strict_debug:
+      assert issubclass(parent.__class__, ViewWindow), parent
+      assert type(label) == str
+      assert preferredWidth is None or type(preferredWidth) == int
+      assert type(align) == str
+    ViewWindow.__init__(self, parent)
+    self.label = label
+    self.preferredWidth = preferredWidth
+    self.align = 1 if align == 'right' else -1
+    self.color = app.color.get('keyword')
+
+  def preferredSize(self, rowLimit, colLimit):
+    if app.config.strict_debug:
+      assert self.parent
+      assert rowLimit >= 0
+      assert colLimit >= 0
+    return (min(rowLimit, 1), min(colLimit, len(self.label)))
+
+  def render(self):
+    ViewWindow.render(self)
+    if self.rows <= 0:
+      return
+    #app.log.info(self.top, self.left, self.rows, self.cols, self.label)
+    self.addStr(0, 0, self.label, self.color)
+
+
 class LabeledLine(Window):
   """A single line with a label. This is akin to a line prompt or gui modal
       dialog. It's used for things like 'find' and 'goto line'."""
