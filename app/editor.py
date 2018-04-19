@@ -299,5 +299,6 @@ class ToggleController(app.controller.Controller):
     name = self.view.prefName
     prefs = app.prefs
     prefs.save(category, name, not prefs.prefs[category][name])
+    self.view.onPrefChanged(category, name)
 
 

@@ -209,6 +209,9 @@ class ViewWindow:
   def normalize(self):
     self.parent.normalize()
 
+  def onPrefChanged(self, category, name):
+    self.parent.onPrefChanged(category, name)
+
   def paint(self, row, col, count, colorPair):
     """Paint text a row, column with colorPair.
       fyi, I thought this may be faster than using addStr to paint over the text
@@ -1165,8 +1168,8 @@ class InputWindow(Window):
     Window.unfocus(self)
 
 
-class OptionsToggle(Window):
-  def __init__(self, parent, label, prefCategory, prefName, width=None):
+class OptionsTrinaryStateWindow(Window):
+  def __init__(self, parent, label, prefCategory, prefName):
     if app.config.strict_debug:
       assert type(label) == str
     Window.__init__(self, parent)
@@ -1178,38 +1181,70 @@ class OptionsToggle(Window):
     self.name = label
     self.prefCategory = prefCategory
     self.prefName = prefName
-    if 1:
-      toggleOn = '[x]' + label
-      toggleOff = '[ ]' + label
-    if 0:
-      toggleOn = unichr(0x2612) + ' ' + control['label']
-      toggleOff = unichr(0x2610) + ' ' + control['label']
-    if 0:
-      toggleOn = '[+' + control['label'] + ']'
-      toggleOff = '[-' + control['label'] + ']'
-    width = max(width, min(len(toggleOn), len(toggleOff)))
-    self.width = width if width is not None else len(label)
-    self.toggleOn = toggleOn
-    self.toggleOff = toggleOff
     self.color = app.color.get('keyword')
     self.focusColor = app.color.get('selected')
+
+  def focus(self):
+    Window.focus(self)
+
+  def setUp(self, toggleOn, toggleOff, toggleUndefined, width=None):
+    if app.config.strict_debug:
+      assert type(toggleOn) == str
+      assert type(toggleOff) == str
+      assert type(toggleUndefined) == str
+      assert width is None or type(width) == int
+    self.toggleOn = toggleOn
+    self.toggleOff = toggleOff
+    self.toggleUndefined = toggleUndefined
+    longest = max(len(toggleOn), len(toggleOff), len(toggleUndefined))
+    self.width = width if width is not None else longest
+    self.updateLabel()
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
     self.controller.toggleValue()
 
+  def onPrefChanged(self, category, name):
+    Window.onPrefChanged(self, category, name)
+    if category != self.prefCategory or name != self.prefName:
+      return
+    self.updateLabel()
+
+  def updateLabel(self):
+    pref = app.prefs.prefs[self.prefCategory][self.prefName]
+    label = self.toggleOn if pref else self.toggleOff
+    self.label = '%*s' % (self.width, label)
+
   def preferredSize(self, rowLimit, colLimit):
-    #app.log.info(min(rowLimit, 1), min(colLimit, len(self.toggleOn)))
-    return min(rowLimit, 1), min(colLimit, len(self.toggleOn))
+    return min(rowLimit, 1), min(colLimit, abs(self.width))
 
   def render(self):
+    Window.render(self)
     if self.rows <= 0:
       return
-    label = self.toggleOn if app.prefs.prefs[self.prefCategory][self.prefName] else self.toggleOff
-    line = '%*s' % (self.width, label)
-    #app.log.info(line, self.rows, self.cols)
     self.writeLineRow = 0
     color = self.focusColor if self.hasFocus else self.color
-    self.writeLine(line[:self.cols], color)
+    self.writeLine(self.label[:self.cols], color)
+
+
+class OptionsToggle(OptionsTrinaryStateWindow):
+  def __init__(self, parent, label, prefCategory, prefName, width=None):
+    if app.config.strict_debug:
+      assert type(label) == str
+      assert type(prefCategory) == str
+      assert type(prefName) == str
+    OptionsTrinaryStateWindow.__init__(self, parent, label, prefCategory,
+        prefName)
+    if 0:
+      toggleOn = '[x]' + name
+      toggleOff = '[ ]' + name
+    if 0:
+      toggleOn = unichr(0x2612) + ' ' + control['name']
+      toggleOff = unichr(0x2610) + ' ' + control['name']
+    if 0:
+      toggleOn = '[+' + control['name'] + ']'
+      toggleOff = '[-' + control['name'] + ']'
+    OptionsTrinaryStateWindow.setUp(self, '[x]' + label, '[ ]' + label,
+        '[-]' + label, width)
 
 
 class RowWindow(ViewWindow):
@@ -1302,7 +1337,7 @@ class OptionsRow(ViewWindow):
     self.addElement(draw, 'selection', name, reference, width, sep,
         len('(*)'))
 
-  def addToggle(self, name, reference, width=None, sep="  "):
+  def removeThis_addToggle(self, name, reference, width=None, sep="  "):
     if app.config.strict_debug:
       assert type(name) == str
     if 1:

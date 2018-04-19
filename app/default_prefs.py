@@ -224,6 +224,9 @@ prefs = {
   'editor': {
     'captiveCursor': False,
     'colorScheme': 'default',
+    'filesShowDotFiles': True,
+    'filesShowSizes': True,
+    'filesShowModifiedDates': True,
     'findDotAll': False,
     'findIgnoreCase': True,
     'findLocale': False,

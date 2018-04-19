@@ -234,6 +234,9 @@ class ProgramWindow(app.window.ActiveWindow):
   def normalize(self):
     self.presentModal(None)
 
+  def onPrefChanged(self, category, name):
+    pass
+
   def presentModal(self, changeTo, top=0, left=0):
     if self.modalUi is not None:
       #self.modalUi.controller.onChange()
