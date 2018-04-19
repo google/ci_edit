@@ -107,6 +107,7 @@ kde
 kh
 ko
 kos
+lcd
 ld
 lds
 lgtm
@@ -117,6 +118,7 @@ lpd
 lru
 lsb
 lsbs
+lsd
 lte
 ltr
 ltrs
@@ -124,6 +126,7 @@ lv
 mb
 mbs
 mdn
+mips
 mit
 mmx
 mr
@@ -138,6 +141,7 @@ mx
 nasa
 nb
 ncsa
+nfs
 nl
 nls
 ns
@@ -161,6 +165,7 @@ pdt
 pgo
 pgp
 php
+ppc
 ppd
 pst
 qa
@@ -176,17 +181,22 @@ rtc
 rtl
 ru
 saml
+sdk
+sdks
 sgml
 sgmls
 simd
 sk
 sl
+smb
 sms
+sparc
 sr
 ssd
 sse
 ssid
 ssl
+ssp
 sv
 sw
 swf
