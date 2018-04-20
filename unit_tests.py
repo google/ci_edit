@@ -38,6 +38,7 @@ import app.unit_test_file_manager
 import app.unit_test_parser
 import app.unit_test_performance
 import app.unit_test_prefs
+import app.unit_test_regex
 import app.unit_test_selectable
 import app.unit_test_text_buffer
 import unittest
@@ -45,17 +46,18 @@ import unittest
 
 # Add new test cases here.
 tests = {
-  'selectable': app.unit_test_selectable.SelectableTestCases,
-  'parser': app.unit_test_parser.ParserTestCases,
-  'performance': app.unit_test_performance.PerformanceTestCases,
-  'prefs': app.unit_test_prefs.PrefsTestCases,
-  'text_buffer': app.unit_test_text_buffer.MouseTestCases,
   'application': app.unit_test_application.IntentionTestCases,
+  'automatic_column_adjustment':
+      app.unit_test_automatic_column_adjustment.AutomaticColumnAdjustmentCases,
   'bookmarks': app.unit_test_bookmarks.BookmarkTestCases,
   'brace_matching': app.unit_test_brace_matching.BraceMatchingTestCases,
   'file_manager': app.unit_test_file_manager.FileManagerTestCases,
-  'automatic_column_adjustment':
-      app.unit_test_automatic_column_adjustment.AutomaticColumnAdjustmentCases,
+  'parser': app.unit_test_parser.ParserTestCases,
+  'performance': app.unit_test_performance.PerformanceTestCases,
+  'prefs': app.unit_test_prefs.PrefsTestCases,
+  'regex': app.unit_test_regex.RegexTestCases,
+  'selectable': app.unit_test_selectable.SelectableTestCases,
+  'text_buffer': app.unit_test_text_buffer.MouseTestCases,
 }
 
 

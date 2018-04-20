@@ -22,10 +22,9 @@ import time
 
 import app.default_prefs
 import app.log
+import app.regex
 
 importStartTime = time.time()
-kNonMatchingRegex = r'^\b$'
-kReNonMatching = re.compile(kNonMatchingRegex)
 prefs = app.default_prefs.prefs
 
 def joinReList(reList):
@@ -94,7 +93,7 @@ for k,v in prefs['grammar'].items():
     matchGrammars.append(v)
   else:
     # Add a non-matchable placeholder.
-    markers.append(kNonMatchingRegex)
+    markers.append(app.regex.kNonMatchingRegex)
     matchGrammars.append(None)
   # Index [1]
   if v.get('end'):
@@ -102,7 +101,7 @@ for k,v in prefs['grammar'].items():
     matchGrammars.append(v)
   else:
     # Add a non-matchable placeholder.
-    markers.append(kNonMatchingRegex)
+    markers.append(app.regex.kNonMatchingRegex)
     matchGrammars.append(None)
   # Index [2..len(contains)]
   for grammarName in v.get('contains', []):

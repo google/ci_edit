@@ -12,18 +12,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+#import re
 import unittest
 
-import app.prefs
+import app.regex
 
 
-class PrefsTestCases(unittest.TestCase):
+class RegexTestCases(unittest.TestCase):
   def setUp(self):
     pass
 
   def tearDown(self):
     pass
 
-  def test_fill_this_in(self):
-    pass
+  def test_common_numbers(self):
+    def testNumber(str, reg):
+      sre = app.regex.kReNumbers.search(str)
+      for i,s in enumerate(sre.groups()):
+        if s is not None:
+          self.assertEqual(sre.regs[i+1], reg)
+          self.assertEqual(s, str)
+    testNumber('0342', (0, 4))
+    testNumber('2342', (0, 4))
+    #testNumber('0x42', (0, 4))
+    #testNumber('0x0', (0, 3))
+    testNumber('.2342', (0, 5))
+    testNumber('2.342', (0, 5))
+    testNumber('23.42', (0, 5))
+    testNumber('234.2', (0, 5))
+    testNumber('2342.', (0, 5))
 

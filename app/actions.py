@@ -368,20 +368,20 @@ class Actions(app.mutator.Mutator):
     self.adjustHorizontalScroll()
 
   def cursorMoveSubwordLeft(self):
-    self.doCursorMoveLeftTo(app.selectable.kReSubwordBoundaryRvr)
+    self.doCursorMoveLeftTo(app.regex.kReSubwordBoundaryRvr)
 
   def cursorMoveSubwordRight(self):
-    self.doCursorMoveRightTo(app.selectable.kReSubwordBoundaryFwd)
+    self.doCursorMoveRightTo(app.regex.kReSubwordBoundaryFwd)
 
   def cursorMoveTo(self, row, col):
     penRow = min(max(row, 0), len(self.lines)-1)
     self.cursorMove(penRow - self.penRow, col - self.penCol)
 
   def cursorMoveWordLeft(self):
-    self.doCursorMoveLeftTo(app.selectable.kReWordBoundary)
+    self.doCursorMoveLeftTo(app.regex.kReWordBoundary)
 
   def cursorMoveWordRight(self):
-    self.doCursorMoveRightTo(app.selectable.kReWordBoundary)
+    self.doCursorMoveRightTo(app.regex.kReWordBoundary)
 
   def doCursorMoveLeftTo(self, boundary):
     if self.penCol > 0:
@@ -1532,7 +1532,7 @@ class Actions(app.mutator.Mutator):
 
   def stripTrailingWhiteSpace(self):
     for i in range(len(self.lines)):
-      for found in app.selectable.kReEndSpaces.finditer(self.lines[i]):
+      for found in app.regex.kReEndSpaces.finditer(self.lines[i]):
         self.performDeleteRange(i, found.regs[0][0], i, found.regs[0][1])
 
   def unindent(self):

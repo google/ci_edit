@@ -17,6 +17,7 @@ import re
 import sys
 
 import app.actions
+import app.regex
 import app.color
 import app.log
 import app.parser
@@ -158,7 +159,7 @@ class TextBuffer(app.actions.Actions):
             # Highlight spelling errors
             grammarName = node.grammar.get('name', 'unknown')
             misspellingColor = app.color.get('misspelling', colorDelta)
-            for found in re.finditer(app.selectable.kReSubwords, subLine):
+            for found in re.finditer(app.regex.kReSubwords, subLine):
               reg = found.regs[0]  # Mispelllled word
               offsetStart = subStart + reg[0]
               offsetEnd = subStart + reg[1]
@@ -195,7 +196,7 @@ class TextBuffer(app.actions.Actions):
       color = app.color.get('bracket', colorDelta)
       for i in range(rowLimit):
         line = self.lines[startRow + i][startCol:endCol]
-        for k in re.finditer(app.selectable.kReBrackets, line):
+        for k in re.finditer(app.regex.kReBrackets, line):
           for f in k.regs:
             window.addStr(top + i, left+f[0], line[f[0]:f[1]], color)
     if 1:
@@ -264,7 +265,7 @@ class TextBuffer(app.actions.Actions):
       # Highlight numbers.
       for i in range(rowLimit):
         line = self.lines[startRow + i][startCol:endCol]
-        for k in re.finditer(app.selectable.kReNumbers, line):
+        for k in re.finditer(app.regex.kReNumbers, line):
           for f in k.regs:
             window.addStr(top + i, left + f[0], line[f[0]:f[1]],
                 app.color.get('number', colorDelta))
@@ -281,7 +282,7 @@ class TextBuffer(app.actions.Actions):
         if startRow + i == self.penRow and self.penCol == len(line):
           continue
         line = line[startCol:]
-        for k in app.selectable.kReEndSpaces.finditer(line):
+        for k in app.regex.kReEndSpaces.finditer(line):
           for f in k.regs:
             window.addStr(top + i, left + f[0], line[f[0]:f[1]],
                 app.color.get('trailing_space', colorDelta))

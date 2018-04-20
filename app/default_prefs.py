@@ -16,6 +16,7 @@ import re
 import os
 
 import app.log
+import app.regex
 
 commentColorIndex = 2
 defaultColorIndex = 18
@@ -25,15 +26,6 @@ selectedColor = 64  # Active find is a selection.
 specialsColorIndex = 20
 stringColorIndex = 5
 outsideOfBufferColorIndex = 211
-
-kNonMatchingRegex = r'^\b$'
-kReNonMatching = re.compile(kNonMatchingRegex)
-
-def joinReList(reList):
-  return r"("+r")|(".join(reList)+r")"
-
-def joinReWordList(reList):
-  return r"(\b"+r"\b)|(\b".join(reList)+r"\b)"
 
 __common_keywords = [
   'break', 'continue', 'else',
@@ -54,13 +46,6 @@ __c_primitive_types = [
   'void', 'wchar_t',
 ]
 
-# Trivia: all English contractions except 'sup, 'tis and 'twas will
-# match this regex (with re.I):  [adegIlnotuwy]'[acdmlsrtv]
-# The prefix part of that is used in the expression below to identify
-# English contractions.
-__english_contraction = \
-    r"(\"(\\\"|[^\"])*?\")|(?<![adegIlnotuwy])('(\\\'|[^'])*?')"
-
 __chrome_extension = r'''\b[a-z]{32}\b'''
 __sha_1 = r'''\b[a-z0-9]{40}\b'''
 
@@ -68,36 +53,6 @@ __special_string_escapes = [
   r'\\\\', r'\\b', r'\\f', r'\\n', r'\\r', r'\\t', r'\\v', r'\\0[0-7]{0,3}',
   __chrome_extension, __sha_1,
 ]
-
-__common_numbers = [
-  r'[-+]?[0-9]*\.[0-9]+(?:[eE][+-][0-9]+)?[fF]?(?!\w)',
-  r'[-+]?[0-9]+(?:\.[0-9]*(?:[eE][+-][0-9]+)?)?[fF]?(?!\w)',
-  r'[-+]?[0-9]+(?:[uUlL][lL]?[lL]?)?(?!\w)',
-  r'0[xX][^A-Fa-f0-9]+(?:[uUlL][lL]?[lL]?)?(?!\w)',
-]
-
-numbersRe = re.compile(joinReList(__common_numbers))
-
-def numberTest(str, expectRegs):
-  sre = numbersRe.search(str)
-  if sre:
-    app.log.startup('%16s %16s %-16s %s ' % (
-        str, expectRegs, sre.regs[0], sre.groups()))
-  else:
-    app.log.startup('%16s %16s %-16s ' % (str, expectRegs, sre))
-
-
-numberTest('.', None)
-numberTest('2', (0, 1))
-numberTest(' 2 ', (1, 2))
-numberTest('242.2', (0, 5))
-numberTest('.2', (0, 2))
-numberTest('2.', (0, 2))
-numberTest('.2a', None)
-numberTest('2.a', (0, 1))
-numberTest('+0.2e-15', (0, 8))
-numberTest('02factor', None)
-numberTest('02f', (0, 3))
 
 color8 = {
   '_pre_selection': 1,
@@ -317,6 +272,7 @@ prefs = {
     #   'error': None or list of string.
     #   'escaped': None or regex,
     #   'indent': None or string,
+    #   'numbers': None or list of string,
     #   'keywords': None or list of string. Matches whole words only (wraps
     #       values in \b).
     #   'single_line': Boolean, Whether entire grammar must be on a single line,
@@ -512,7 +468,7 @@ prefs = {
     },
     'html': {
       'begin': '<html>',
-      'end': kNonMatchingRegex,
+      'end': app.regex.kNonMatchingRegex,
       'errors': ['</br>', '</hr>', '</img>', '</input>',],
       'indent': '  ',
       'keywords': [
