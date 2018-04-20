@@ -84,6 +84,7 @@ color8 = {
   'logo': 7,
   'matching_bracket': 1,
   'matching_find': 1,
+  'md_link': 2,
   'message_line': 3,
   'misspelling': 3,
   'number': 1,
@@ -140,6 +141,7 @@ color256 = {
   'logo': 168,
   'matching_bracket': 201,
   'matching_find': 9,
+  'md_link': stringColorIndex,
   'message_line': 3,
   'misspelling': 9,
   'number': 31,
@@ -544,8 +546,17 @@ prefs = {
     'md': {
       'indent': '  ',
       'keywords': [],
-      'special': [r'\[[^]]+\]\([^)]+\)'],
-      'contains': ['quoted_string1', 'quoted_string2'],
+      #'special': [r'\[[^]]+\]\([^)]+\)'],
+      'contains': [
+        'md_link',
+        #'quoted_string1', 'quoted_string2'
+      ],
+    },
+    'md_link': {
+      'begin': "\[",
+      'end': "\]",
+      'escaped': r"\\\]",
+      'indent': '  ',
     },
     'none': {
       'spelling': False,
