@@ -46,13 +46,20 @@ kReSubwordBoundaryRvr = re.compile(
 
 kReWordBoundary = re.compile('(?:\w+)|(?:\W+)')
 
-__commonNumbersRegex = [
-  r'[-+]?[0-9]*\.[0-9]+(?:[eE][+-][0-9]+)?[fF]?(?!\w)',
-  r'[-+]?[0-9]+(?:\.[0-9]*(?:[eE][+-][0-9]+)?)?[fF]?(?!\w)',
-  r'[-+]?[0-9]+(?:[uUlL][lL]?[lL]?)?(?!\w)',
-  r'0[xX][^A-Fa-f0-9]+(?:[uUlL][lL]?[lL]?)?(?!\w)',
-]
-kReNumbers = re.compile(joinReList(__commonNumbersRegex))
+__commonNumbersRegex = (
+    # Don't include the [-+]? at the start of a number because it mismatches
+    # an equation like 0x33-0x44.
+    r'(?:'
+    r'0[xX][A-Fa-f0-9]+'
+    r'|\d+(?:(?:[uUlL][lL]?[lL]?)|\.?(?:\d+)?(?:e[-+]\d+)?[fFdD]?)?'
+    r'|\.\d+[fFdD]?'
+    r')'
+    #r'0[xX][^A-Fa-f0-9]+(?:[uUlL][lL]?[lL]?)?(?!\w)',
+    #r'[-+]?[0-9]*\.[0-9]+(?:[eE][+-][0-9]+)?[fF]?(?!\w)',
+    #r'[-+]?[0-9]+(?:\.[0-9]*(?:[eE][+-][0-9]+)?)?[fF]?(?!\w)',
+    #r'[-+]?[0-9]+(?:[uUlL][lL]?[lL]?)?(?!\w)',
+    )
+kReNumbers = re.compile(__commonNumbersRegex)
 
 # Trivia: all English contractions except 'sup, 'tis and 'twas will
 # match this regex (with re.I):  [adegIlnotuwy]'[acdmlsrtv]
@@ -60,27 +67,3 @@ kReNumbers = re.compile(joinReList(__commonNumbersRegex))
 # English contractions.
 kEnglishContractionRegex = \
     r"(\"(\\\"|[^\"])*?\")|(?<![adegIlnotuwy])('(\\\'|[^'])*?')"
-
-if 0:
-  def numberTest(str, expectRegs):
-    sre = kNumbersRe.search(str)
-    if sre:
-      app.log.startup('%16s %16s %-16s %s ' % (
-          str, expectRegs, sre.regs[0], sre.groups()))
-    else:
-      app.log.startup('%16s %16s %-16s ' % (str, expectRegs, sre))
-
-
-  numberTest('.', None)
-  numberTest('2', (0, 1))
-  numberTest(' 2 ', (1, 2))
-  numberTest('242.2', (0, 5))
-  numberTest('.2', (0, 2))
-  numberTest('2.', (0, 2))
-  numberTest('.2a', None)
-  numberTest('2.a', (0, 1))
-  numberTest('+0.2e-15', (0, 8))
-  numberTest('02factor', None)
-  numberTest('02f', (0, 3))
-  numberTest('02ull', (0, 5))
-  numberTest('02u', (0, 3))
