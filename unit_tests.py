@@ -63,7 +63,7 @@ tests = {
 
 def runTests(tests, stopOnFailure=False):
   """Run through the list of tests."""
-  for test in tests:
+  for test in tests.values():
     suite = unittest.TestLoader().loadTestsFromTestCase(test)
     result = unittest.TextTestRunner(verbosity = 2).run(suite)
     if stopOnFailure and (result.failures or result.errors):
@@ -72,4 +72,4 @@ def runTests(tests, stopOnFailure=False):
 
 if __name__ == '__main__':
   app.log.info("starting unit tests")
-  app.log.wrapper(runTests)
+  app.log.wrapper(lambda: runTests(tests))
