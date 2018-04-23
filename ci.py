@@ -19,12 +19,12 @@
 import sys
 
 
-args = sys.argv
-if '--test' in args:
-  import unit_tests
-  # Note: args to the left of (preceding) '--test' are ignored.
-  unit_tests.parseArgList(args[:1] + args[args.index('--test') + 1:])
-
 if __name__ == '__main__':
-  import app.ci_program
-  app.ci_program.run_ci()
+  args = sys.argv
+  if '--test' in args:
+    import unit_tests
+    args.remove('--test')
+    unit_tests.parseArgList(args)
+  else:
+    import app.ci_program
+    app.ci_program.run_ci()
