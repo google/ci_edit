@@ -73,6 +73,22 @@ def runTests(tests, stopOnFailure=False):
 def parseArgList(argList):
   testList = tests.values()
   try:
+    argList.remove('--help')
+    print 'Help:'
+    print './unit_tests.py [--log] [<name>]'
+    print
+    print '  --log     Print output from app.log.* calls'
+    print '  <name>    Run the named set of tests (only)'
+    print
+    print 'The <name> argument is any of:'
+    testNames = tests.keys()
+    testNames.sort()
+    for i in testNames:
+      print ' ', i
+    sys.exit(0)
+  except ValueError:
+    pass
+  try:
     useAppLog = False
     argList.remove('--log')
     useAppLog = True
