@@ -70,6 +70,15 @@ def runTests(tests, stopOnFailure=False):
       return -1
   return 0
 
+def parseArgList(argv):
+  testList = tests.values()
+  if len(argv) > 1:
+    testList = [tests[argv[1]]]
+  if runTests(testList, True) != 0:
+    sys.exit(-1)
+  sys.exit(0)
+
 if __name__ == '__main__':
   app.log.info("starting unit tests")
-  app.log.wrapper(runTests)
+  parseArgList(sys.argv)
+  #app.log.wrapper(lambda: runTests(tests.values()))

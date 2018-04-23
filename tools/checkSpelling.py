@@ -18,7 +18,7 @@ import os
 import sys
 ciEditDir = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(ciEditDir)
-import app.selectable
+import app.regex
 import app.spelling
 import re
 import sys
@@ -47,7 +47,7 @@ def handleFile(fileName):
     if not data: return set()
 
     unrecognizedWords = set()
-    for found in re.finditer(app.selectable.kReSubwords, data):
+    for found in re.finditer(app.regex.kReSubwords, data):
       reg = found.regs[0]
       word = data[reg[0]:reg[1]]
       if not app.spelling.isCorrect(word, 'py'):
