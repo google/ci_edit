@@ -12,16 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import app.log
-import app.history
-import app.text_buffer
 import io
 import os
 import sys
 
+import app.buffer_file
+import app.config
+import app.log
+import app.history
+import app.text_buffer
+
 class BufferManager:
   """Manage a set of text buffers. Some text buffers may be hidden."""
   def __init__(self):
+    if app.config.strict_debug:
+      assert issubclass(self.__class__, BufferManager), self
     # Using a dictionary lookup for buffers accelerates finding buffers by key
     # (the file path), but that's not the common use. Maintaining an ordered
     # list turns out to be more valuable.
@@ -30,6 +35,9 @@ class BufferManager:
   def closeTextBuffer(self, textBuffer):
     """Warning this will throw away the buffer. Please be sure the user is
         ok with this before calling."""
+    if app.config.strict_debug:
+      assert issubclass(self.__class__, BufferManager), self
+      assert issubclass(textBuffer.__class__, app.text_buffer.TextBuffer)
     self.untrackBuffer_(textBuffer)
 
   def getUnsavedBuffer(self):
@@ -73,8 +81,11 @@ class BufferManager:
     self.buffers.append(textBuffer)
     return textBuffer
 
-  def loadTextBuffer(self, relPath, view):
-    fullPath = os.path.abspath(os.path.expanduser(os.path.expandvars(relPath)))
+  def loadTextBuffer(self, relPath):
+    if app.config.strict_debug:
+      assert issubclass(self.__class__, BufferManager), self
+      assert type(relPath) is unicode, type(relPath)
+    fullPath = app.buffer_file.fullPath(relPath)
     app.log.info(fullPath)
     textBuffer = None
     for i,tb in enumerate(self.buffers):
@@ -91,8 +102,7 @@ class BufferManager:
       if not os.path.isfile(fullPath):
         app.log.info('creating a new file at\n ', fullPath)
       textBuffer = app.text_buffer.TextBuffer()
-      self.renameBuffer(textBuffer, fullPath)
-      textBuffer.view = view
+      textBuffer.setFilePath(fullPath)
       textBuffer.fileLoad()
       self.buffers.append(textBuffer)
     if 0:
@@ -129,11 +139,6 @@ class BufferManager:
   def untrackBuffer_(self, fileBuffer):
     app.log.debug(fileBuffer.fullPath)
     self.buffers.remove(fileBuffer)
-
-  def renameBuffer(self, fileBuffer, fullPath):
-    # TODO(dschuyler): this can be phased out. It was from a time when the
-    # buffer manager needed to know if a path changed.
-    fileBuffer.fullPath = fullPath
 
   def fileClose(self, path):
     pass

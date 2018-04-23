@@ -14,21 +14,22 @@
 
 """Key bindings for the vi-like editor."""
 
-from app.curses_util import *
-import app.controller
-import app.log
 import curses
 import curses.ascii
 import os
 import re
 import text_buffer
 
+from app.curses_util import *
+import app.controller
+import app.log
+
 
 class ViEdit(app.controller.Controller):
   """Vi is a common Unix editor. This mapping supports some common vi/vim
   commands."""
-  def __init__(self, host):
-    app.controller.Controller.__init__(self, host, 'ViEdit')
+  def __init__(self, view):
+    app.controller.Controller.__init__(self, view, 'ViEdit')
     self.commandDefault = None
 
   def setTextBuffer(self, textBuffer):

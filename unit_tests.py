@@ -14,30 +14,58 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+import os
+import sys
+if not os.getenv('CI_EDIT_USE_REAL_CURSES'):
+  # Replace curses with a fake version for testing.
+  sys.path = [os.path.join(os.path.dirname(__file__), 'test_fake')] + sys.path
+  import app.log
+  app.log.enabledChannels = {
+    'error': True, 'info': True, 'meta': True, 'mouse': True, 'startup': True
+  }
+  app.log.shouldWritePrintLog = True
+
+# Set up strict_debug before loading other app.* modules.
+import app.config
+app.config.strict_debug = True
+
 import app.unit_test_application
+import app.unit_test_automatic_column_adjustment
+import app.unit_test_bookmarks
+import app.unit_test_brace_matching
+import app.unit_test_file_manager
 import app.unit_test_parser
 import app.unit_test_performance
 import app.unit_test_prefs
+import app.unit_test_regex
 import app.unit_test_selectable
 import app.unit_test_text_buffer
 import unittest
 
 
 # Add new test cases here.
-tests = [
-  app.unit_test_selectable.SelectableTestCases,
-  app.unit_test_parser.ParserTestCases,
-  app.unit_test_performance.PerformanceTestCases,
-  app.unit_test_prefs.PrefsTestCases,
-  app.unit_test_text_buffer.MouseTestCases,
-  app.unit_test_application.IntentionTestCases,
-]
+tests = {
+  'application': app.unit_test_application.IntentionTestCases,
+  'automatic_column_adjustment':
+      app.unit_test_automatic_column_adjustment.AutomaticColumnAdjustmentCases,
+  'bookmarks': app.unit_test_bookmarks.BookmarkTestCases,
+  'brace_matching': app.unit_test_brace_matching.BraceMatchingTestCases,
+  'file_manager': app.unit_test_file_manager.FileManagerTestCases,
+  'parser': app.unit_test_parser.ParserTestCases,
+  'performance': app.unit_test_performance.PerformanceTestCases,
+  'prefs': app.unit_test_prefs.PrefsTestCases,
+  'regex': app.unit_test_regex.RegexTestCases,
+  'selectable': app.unit_test_selectable.SelectableTestCases,
+  'text_buffer': app.unit_test_text_buffer.MouseTestCases,
+}
 
-def runTests(stopOnFailure=False):
+
+def runTests(tests, stopOnFailure=False):
   """Run through the list of tests."""
   for test in tests:
     suite = unittest.TestLoader().loadTestsFromTestCase(test)
-    result = unittest.TextTestRunner(verbosity=2).run(suite)
+    result = unittest.TextTestRunner(verbosity = 2).run(suite)
     if stopOnFailure and (result.failures or result.errors):
       return -1
   return 0

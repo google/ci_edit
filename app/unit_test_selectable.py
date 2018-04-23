@@ -12,9 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import unittest
+
 import app.log
 import app.selectable
-import unittest
+
 
 class SelectableTestCases(unittest.TestCase):
   def setUp(self):
@@ -64,7 +66,6 @@ class SelectableTestCases(unittest.TestCase):
     selectable.lines = ['one two', '', 'five']
     selectable.penRow = 1
     selectable.selectionMode = app.selectable.kSelectionLine
-    app.log.debug('selectable', selectable.debug())
     app.log.debug('selectable.extendSelection', selectable.extendSelection())
     self.assertEqual(selectable.extendSelection(), (0, 0, 0, 0, 0))
     selectable.penRow = 3
@@ -135,7 +136,6 @@ class SelectableTestCases(unittest.TestCase):
     selectable.lines = ['one two', '', 'five']
     selectable.penRow = 1
     selectable.selectionMode = app.selectable.kSelectionLine
-    app.log.debug('selectable', selectable.debug())
     app.log.debug('selectable.extendSelection', selectable.extendSelection())
     self.assertEqual(selectable.extendSelection(), (0, 0, 0, 0, 0))
     selectable.penRow = 3

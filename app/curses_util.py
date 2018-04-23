@@ -13,21 +13,21 @@
 # limitations under the License.
 
 import curses
+import curses.ascii
 import fcntl
 import os
 import signal
 import struct
 import sys
 import termios
-import curses.ascii
 
 
 # Strings are found using the cursesKeyName() function.
 # Constants are found using the curses.getch() function.
 
 # Tuple events are preceded by an escape (27).
-BRACKETED_PASTE_BEGIN = (91, 50, 48, 48, 126)
-BRACKETED_PASTE_END = (91, 50, 48, 49, 126)
+BRACKETED_PASTE_BEGIN = (91, 50, 48, 48, 126)  # i.e. "[200~"
+BRACKETED_PASTE_END = (91, 50, 48, 49, 126)  # i.e. "[201~"
 BRACKETED_PASTE = ('terminal_paste',)  # Pseudo event type.
 
 UNICODE_INPUT = ('unicode_input',)  # Pseudo event type.
@@ -203,7 +203,7 @@ def cursesKeyName(keyCode):
     pass
   return None
 
-# This should be provide by something built in and apparently it is in Python 3.
+# This is built-in in Python 3.
 # In Python 2 it's done by hand.
 def terminalSize():
   h, w = struct.unpack(

@@ -12,9 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import app.log
 import re
 import os
+
+import app.log
+import app.regex
 
 commentColorIndex = 2
 defaultColorIndex = 18
@@ -25,22 +27,13 @@ specialsColorIndex = 20
 stringColorIndex = 5
 outsideOfBufferColorIndex = 211
 
-kNonMatchingRegex = r'^\b$'
-kReNonMatching = re.compile(kNonMatchingRegex)
-
-def joinReList(reList):
-  return r"("+r")|(".join(reList)+r")"
-
-def joinReWordList(reList):
-  return r"(\b"+r"\b)|(\b".join(reList)+r"\b)"
-
 __common_keywords = [
   'break', 'continue', 'else',
   'for', 'if', 'return', 'while',
 ]
 
 __c_keywords = __common_keywords + [
-  'case', 'const', 'default', 'do',
+  'case', 'const', 'default', 'do', 'enum',
   'goto', 'sizeof', 'static', 'struct', 'switch',
   'typedef',
 ]
@@ -53,13 +46,6 @@ __c_primitive_types = [
   'void', 'wchar_t',
 ]
 
-# Trivia: all English contractions except 'sup, 'tis and 'twas will
-# match this regex (with re.I):  [adegIlnotuwy]'[acdmlsrtv]
-# The prefix part of that is used in the expression below to identify
-# English contractions.
-__english_contraction = \
-    r"(\"(\\\"|[^\"])*?\")|(?<![adegIlnotuwy])('(\\\'|[^'])*?')"
-
 __chrome_extension = r'''\b[a-z]{32}\b'''
 __sha_1 = r'''\b[a-z0-9]{40}\b'''
 
@@ -67,36 +53,6 @@ __special_string_escapes = [
   r'\\\\', r'\\b', r'\\f', r'\\n', r'\\r', r'\\t', r'\\v', r'\\0[0-7]{0,3}',
   __chrome_extension, __sha_1,
 ]
-
-__common_numbers = [
-  r'[-+]?[0-9]*\.[0-9]+(?:[eE][+-][0-9]+)?[fF]?(?!\w)',
-  r'[-+]?[0-9]+(?:\.[0-9]*(?:[eE][+-][0-9]+)?)?[fF]?(?!\w)',
-  r'[-+]?[0-9]+(?:[uUlL][lL]?[lL]?)?(?!\w)',
-  r'0[xX][^A-Fa-f0-9]+(?:[uUlL][lL]?[lL]?)?(?!\w)',
-]
-
-numbersRe = re.compile(joinReList(__common_numbers))
-
-def numberTest(str, expectRegs):
-  sre = numbersRe.search(str)
-  if sre:
-    app.log.startup('%16s %16s %-16s %s ' % (
-        str, expectRegs, sre.regs[0], sre.groups()))
-  else:
-    app.log.startup('%16s %16s %-16s ' % (str, expectRegs, sre))
-
-
-numberTest('.', None)
-numberTest('2', (0, 1))
-numberTest(' 2 ', (1, 2))
-numberTest('242.2', (0, 5))
-numberTest('.2', (0, 2))
-numberTest('2.', (0, 2))
-numberTest('.2a', None)
-numberTest('2.a', (0, 1))
-numberTest('+0.2e-15', (0, 8))
-numberTest('02factor', None)
-numberTest('02f', (0, 3))
 
 color8 = {
   '_pre_selection': 1,
@@ -110,9 +66,11 @@ color8 = {
   'context_menu': 1,
   'cpp_block_comment': 2,
   'cpp_line_comment': 2,
+  'cpp_string_literal': 2,
   'debug_window': 1,
   'default': 0,
   'doc_block_comment': 3,
+  'error': 7,
   'found_find': 1,
   'highlight': 3,
   'html_block_comment': 2,
@@ -126,10 +84,12 @@ color8 = {
   'logo': 7,
   'matching_bracket': 1,
   'matching_find': 1,
+  'md_link': 2,
   'message_line': 3,
   'misspelling': 3,
   'number': 1,
   'outside_document': 7,
+  'popup_window': 0,
   'pound_comment': 3,
   'py_raw_string1': 2,
   'py_raw_string2': 2,
@@ -141,10 +101,15 @@ color8 = {
   'selected': 5,
   'special': 1,
   'status_line': 7,
+  'status_line_error': 7,
   'text': 0,
   'top_info': 7,
   'trailing_space': 1,
+  'type': 1,
 }
+
+for i in color8.values():
+  assert 0 <= i < 8, i
 
 color256 = {
   '_pre_selection': stringColorIndex,
@@ -158,9 +123,11 @@ color256 = {
   'context_menu': 201,
   'cpp_block_comment': commentColorIndex,
   'cpp_line_comment': commentColorIndex,
+  'cpp_string_literal': stringColorIndex,
   'debug_window': defaultColorIndex,
   'default': defaultColorIndex,
   'doc_block_comment': commentColorIndex,
+  'error': 9,
   'found_find': foundColorIndex,
   'highlight': 96,
   'html_block_comment': commentColorIndex,
@@ -174,10 +141,12 @@ color256 = {
   'logo': 168,
   'matching_bracket': 201,
   'matching_find': 9,
+  'md_link': stringColorIndex,
   'message_line': 3,
   'misspelling': 9,
   'number': 31,
   'outside_document': outsideOfBufferColorIndex,
+  'popup_window': 117,
   'pound_comment': commentColorIndex,
   'py_raw_string1': stringColorIndex,
   'py_raw_string2': stringColorIndex,
@@ -189,10 +158,18 @@ color256 = {
   'selected': selectedColor,
   'special': specialsColorIndex,
   'status_line': 168,
+  'status_line_error': 161,
   'text': defaultColorIndex,
   'top_info': 168,
   'trailing_space': 180,
+  'type': keywordsColorIndex,
 }
+
+for i in color256.values():
+  assert 0 <= i < 256, i
+
+# Please keep these color dictionaries in sync.
+assert color8.keys() == color256.keys()
 
 
 # These prefs are not fully working.
@@ -203,17 +180,27 @@ prefs = {
   },
   'editor': {
     'captiveCursor': False,
-    'naturalScrollDirection': True,
     'colorScheme': 'default',
+    'filesShowDotFiles': True,
+    'filesShowSizes': True,
+    'filesShowModifiedDates': True,
+    'findDotAll': False,
     'findIgnoreCase': True,
+    'findLocale': False,
+    'findMultiLine': False,
+    'findUnicode': True,
+    'findUseRegex': True,
+    'findVerbose': False,
+    'findWholeWord': False,
     'indentation': '  ',
     'lineLimitIndicator': 80,
+    'naturalScrollDirection': True,
     'onSaveStripTrailingSpaces': True,
-    'optimalCursorRow': 0.28,  # Ratio of rows: 0 top, 0.5 middle, 1.0 bottom.
     'optimalCursorCol': 0.98,  # Ratio of columns: 0 left, 1.0 right.
+    'optimalCursorRow': 0.28,  # Ratio of rows: 0 top, 0.5 middle, 1.0 bottom.
     'palette': 'default',
     'palette8': 'default8',
-    'saveUndo': False,
+    'saveUndo': True,
     'showLineNumbers': True,
     'showStatusLine': True,
     'showTopInfo': True,
@@ -282,13 +269,22 @@ prefs = {
     #   'continued': None or string,
     #       Prefixed used when continuing to another line,
     #   'end': None or regex,
+    #   'end_key': None or regex to determine dynamic end tag. For 'here
+    #       documents' and c++ string literals.
+    #   'error': None or list of string.
     #   'escaped': None or regex,
     #   'indent': None or string,
-    #   'keywords': None or list of string,
+    #   'numbers': None or list of string,
+    #   'keywords': None or list of string. Matches whole words only (wraps
+    #       values in \b).
     #   'single_line': Boolean, Whether entire grammar must be on a single line,
+    #   'special': None or list of string.
     #   'type': text or binary. default: text.
     #   'contains': other grammars that may be contained within this grammar.
     # }
+    # The entries for 'error', 'keywords', and 'special' are very similar.
+    # Other than 'keywords' being wrapped in \b markers, the difference between
+    # them is just how they are drawn (color and style).
     '_pre': {
       'contains': ['_pre_selection'],
       'spelling': False,
@@ -310,6 +306,7 @@ prefs = {
       'contains': ['c_string1', 'c_string2', 'pound_comment'],
     },
     'binary': {
+      'spelling': False,
       'type': 'binary',
     },
     'c': {
@@ -322,8 +319,8 @@ prefs = {
     'cpp': {
       'indent': '  ',
       'keywords': __c_keywords + [
-        'auto', 'catch', 'class', 'constexpr', 'false',
-        'namespace', 'nullptr',
+        'auto', 'catch', 'class', 'constexpr', 'explicit', 'false',
+        'namespace', 'nullptr', 'override',
         'private', 'protected', 'public',
         'template', 'this', 'throw', 'true', 'typename',
       ],
@@ -332,7 +329,7 @@ prefs = {
       ],
       'types': __c_primitive_types,
       'contains': ['cpp_block_comment', 'cpp_line_comment', 'c_preprocessor',
-        'c_string1', 'c_string2'],
+        'cpp_string_literal', 'c_string1', 'c_string2'],
     },
     'cpp_block_comment': {
       'begin': r'/\*',
@@ -362,6 +359,7 @@ prefs = {
         r'^\s*#\s*?define\b', r'^\s*#\s*?defined\b', r'^\s*#\s*?elif\b',
         r'^\s*#\s*?else\b',
         r'^\s*#\s*?endif\b', r'^\s*#\s*?if\b', r'^\s*#\s*ifdef\b',
+        r'^\s*#\s*?elif\b',
         r'^\s*#\s*?ifndef\b', r'^\s*#\s*?include\b', r'^\s*#\s*?undef\b',
       ],
       #'contains': ['file_path_quoted', 'file_path_bracketed'],
@@ -381,6 +379,13 @@ prefs = {
       'indent': '  ',
       'single_line': True,
       'special': __special_string_escapes + [r"\\\\"],
+    },
+    'cpp_string_literal': {
+      'begin': r'R"',
+      # TODO(dschuyler): backslash and whitespace are invalid in the |end_key|.
+      'end_key': r'''([^(]*)\(''',
+      'end': r'\)\0"',
+      'single_line': False,
     },
     'c_string1': {
       'begin': "'(?!'')",
@@ -403,6 +408,36 @@ prefs = {
       'end': '</style>',
       'indent': '  ',
       'keywords': [
+        'host', 'slotted',
+      ],
+      'special': [
+        r'#[\w-]+'
+      ],
+      'contains': ['cpp_block_comment', 'css_block'],
+    },
+    'css_block': {
+      'begin': r'\{',
+      'end': r'\}',
+      'indent': '  ',
+      'keywords': [
+        'background-color', 'color', 'display',
+        'font-family', 'font-size',
+        'height', 'max-height', 'min-height',
+        'width', 'max-width', 'min-width',
+      ],
+      'special': [
+        r'@apply\b',
+      ],
+      'contains': ['cpp_block_comment', 'css_value'],
+    },
+    'css_value': {
+      'begin': ':',
+      'end': ';',
+      'error': [
+        r'#(?:[^;]{1,2}|[^;]{5}|[^;]{7}|[^;]{9,})\b',
+      ],
+      'indent': '  ',
+      'keywords': [
         'absolute', 'attr', 'block', 'border-box', 'calc', 'center', 'default',
         'ease', 'hidden',
         'inherit', 'left', 'none',
@@ -410,10 +445,10 @@ prefs = {
         'transform', 'translate[XYZ]?', 'transparent', 'var',
       ],
       'special': [
-        r'@apply\b', r'\d+deg\b', r'\d+em\b', r'\d+px\b',
-        r'\d+rem\b', r'[\w-]+:',
+        r'@apply\b', r'\d+deg\b', r'\d+em\b', r'\d+px\b', r'\d+rem\b',
+        r'#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3,4})'
       ],
-      'contains': ['cpp_block_comment'],
+      'contains': ['cpp_block_comment',],
     },
     'doc_block_comment': {
       'begin': r'/\*\*',
@@ -427,12 +462,15 @@ prefs = {
       ],
       'types': ['Array', 'boolean', 'string', 'Object'],
     },
+    'error': {
+      'spelling': False,
+    },
     'grd': {
       'keywords': [ 'flattenhtml', 'allowexternalscript' ],
     },
     'html': {
       'begin': '<html>',
-      'end': kNonMatchingRegex,
+      'end': app.regex.kNonMatchingRegex,
       'errors': ['</br>', '</hr>', '</img>', '</input>',],
       'indent': '  ',
       'keywords': [
@@ -453,17 +491,17 @@ prefs = {
       'indent': '  ',
     },
     'html_element': {
-      'begin': '<\\w+',
+      'begin': r'<[\w-]+',  # The '-' is used by Polymer.
       'contains': ['html_element_attribute',],
       'end': '>',
-      'special': ['\\w+',],
+      'special': [r'\w+',],
     },
     'html_element_attribute': {
       'begin': '\\??="',
       'end': '"',
     },
     'html_element_end': {
-      'begin': '</\w+',
+      'begin': r'</\w+',
       'end': '>',
     },
     'java': {
@@ -508,8 +546,17 @@ prefs = {
     'md': {
       'indent': '  ',
       'keywords': [],
-      'special': [r'\[[^]]+\]\([^)]+\)'],
-      'contains': ['quoted_string1', 'quoted_string2'],
+      #'special': [r'\[[^]]+\]\([^)]+\)'],
+      'contains': [
+        'md_link',
+        #'quoted_string1', 'quoted_string2'
+      ],
+    },
+    'md_link': {
+      'begin': "\[",
+      'end': "\]",
+      'escaped': r"\\\]",
+      'indent': '  ',
     },
     'none': {
       'spelling': False,
@@ -608,6 +655,9 @@ prefs = {
       'special': [__sha_1,],
       'contains': ['quoted_string1', 'quoted_string2'],
     },
+    'type': {
+      'spelling': False,
+    },
   },
   'palette': {
     # Note: index 0 of each palette is not set, it remains as the system entry.
@@ -645,6 +695,9 @@ prefs = {
         [231] * 32 + [229] * 32 +  [14] * 32 + [221] * 32 +
         [255] * 32 + [254] * 32 + [253] * 32 + [225] * 32,
     },
+  },
+  'status': {
+    'showTips': False,
   },
   'userData': {
     'homePath': os.path.expanduser('~/.ci_edit'),

@@ -12,10 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import app.parser
-import app.prefs
 from timeit import timeit
 import unittest
+
+import app.parser
+import app.prefs
 
 
 class PerformanceTestCases(unittest.TestCase):
@@ -47,8 +48,48 @@ class PerformanceTestCases(unittest.TestCase):
         number=10000)
     #print "\n%s %s %s | %s %s" % (a, b, a/b, c, a/c)
     # Calling a function or member is significantly slower than direct access.
-    self.assertGreater(b, a * 2)
+    self.assertGreater(b, a * 1.7)
     self.assertGreater(c, a * 2)
+
+  def test_slice_vs_startswith(self):
+    setup = '''x = 'a' * 100\n'''
+    a = timeit(
+        '''x[:2] == "  "\n''',
+        setup=setup,
+        number=100000)
+    b = timeit(
+        '''x.startswith("  ")\n''',
+        setup=setup,
+        number=100000)
+    c = timeit(
+        '''x[0] == " " and x[1] == " "\n''',
+        setup=setup,
+        number=100000)
+    #print "\na %s, b %s, c %s | %s %s" % (a, b, c, c, a/c)
+    # Calling a function or member is significantly slower than direct access.
+    self.assertGreater(b, a * 1.8)  # b is much slower.
+    self.assertGreater(b, c * 1.9)  # b is much slower.
+    self.assertGreater(a, c * 0.7)  # a and c are similar.
+    self.assertGreater(c, a * 0.6)  # a and c are similar.
+
+  def test_default_parameter(self):
+    setup  = '''def withDefault(a, b=None):\n'''
+    setup += '''  if b is not None: return b\n'''
+    setup += '''  return a*a\n'''
+    setup += '''def withoutDefault(a, b):\n'''
+    setup += '''  if b is -1: return b\n'''
+    setup += '''  return a*b\n'''
+    a = timeit(
+        '''withDefault(5);''' * 100,
+        setup=setup,
+        number=10000)
+    b = timeit(
+        '''withoutDefault(5, 0);''' * 100,
+        setup=setup,
+        number=10000)
+    # Assert that neither too much faster than the other
+    self.assertGreater(a, b * 0.77)
+    self.assertGreater(b, a * 0.71)
 
   def test_insert1(self):
     return  # Remove to enable test (disabled due to running time).

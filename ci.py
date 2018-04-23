@@ -21,7 +21,10 @@ import sys
 
 if '--test' in sys.argv:
   import unit_tests
-  if unit_tests.runTests(True) != 0:
+  testList = unit_tests.tests.values()
+  if len(sys.argv) > 2:
+    testList = [unit_tests.tests[sys.argv[2]]]
+  if unit_tests.runTests(testList, True) != 0:
     sys.exit(-1)
   sys.exit(0)
 

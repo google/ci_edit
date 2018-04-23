@@ -12,18 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import app.default_prefs
-import app.log
 import curses
+import io
 import json
 import os
 import re
 import sys
 import time
 
+import app.default_prefs
+import app.log
+import app.regex
+
 importStartTime = time.time()
-kNonMatchingRegex = r'^\b$'
-kReNonMatching = re.compile(kNonMatchingRegex)
 prefs = app.default_prefs.prefs
 
 def joinReList(reList):
@@ -33,53 +34,40 @@ def joinReWordList(reList):
   return r"(\b"+r"\b)|(\b".join(reList)+r"\b)"
 
 
-if 1:
-  # Check the user home directory for editor preferences.
+def loadPrefs(fileName, category):
+  prefs.setdefault(category, {})
+  # Check the user home directory for preferences.
   prefsPath = os.path.expanduser(os.path.expandvars(
-      "~/.ci_edit/prefs/editor.json"))
+      "~/.ci_edit/prefs/%s.json" % (fileName,)))
   if os.path.isfile(prefsPath) and os.access(prefsPath, os.R_OK):
     with open(prefsPath, 'r') as f:
       try:
-        editorPrefs = json.loads(f.read())
-        app.log.startup(editorPrefs)
-        prefs['editor'].update(editorPrefs)
+        additionalPrefs = json.loads(f.read())
+        app.log.startup(additionalPrefs)
+        prefs[category].update(additionalPrefs)
         app.log.startup('Updated editor prefs from', prefsPath)
-        app.log.startup('as', prefs['editor'])
+        app.log.startup('as', prefs[category])
       except Exception as e:
         app.log.startup('failed to parse', prefsPath)
         app.log.startup('error', e)
+  return prefs[category]
 
 color8 = app.default_prefs.color8
 color256 = app.default_prefs.color256
-
-builtInColorSchemes = {
-  'dark': {},
-  'light': {},
-  'sky': {},
-}
+prefs['color'] = color256
 
 colorSchemeName = prefs['editor']['colorScheme']
 if colorSchemeName == 'custom':
   # Check the user home directory for a color scheme preference. If found load
   # it to replace the default color scheme.
-  prefsPath = os.path.expanduser(os.path.expandvars(
-      "~/.ci_edit/prefs/color_scheme.json"))
-  if os.path.isfile(prefsPath) and os.access(prefsPath, os.R_OK):
-    with open(prefsPath, 'r') as f:
-      try:
-        colorScheme = json.loads(f.read())
-        app.log.startup(colorScheme)
-        prefs['color'].update(colorScheme)
-      except:
-        app.log.startup('failed to parse', prefsPath)
-elif colorSchemeName in builtInColorSchemes:
-  prefs['color'].update(builtInColorSchemes[colorSchemeName])
-
+  prefs['color'].update(loadPrefs('color_scheme', 'color'))
 
 color = prefs['color']
-editor = prefs['editor']
+editor = loadPrefs('editor', 'editor')
 devTest = prefs['devTest']
 palette = prefs['palette']
+startup = {}
+status = loadPrefs('status', 'status')
 
 
 grammars = {}
@@ -90,10 +78,12 @@ for k,v in prefs['grammar'].items():
 
 # Compile regexes for each grammar.
 for k,v in prefs['grammar'].items():
-  # keywords re.
-  v['keywordsRe'] = re.compile(
-      joinReWordList(v.get('keywords', []) + v.get('types', [])))
-  v['specialsRe'] = re.compile(joinReList(v.get('special', [])))
+  if 0:
+    # keywords re.
+    v['keywordsRe'] = re.compile(
+        joinReWordList(v.get('keywords', []) + v.get('types', [])))
+    v['errorsRe'] = re.compile(joinReList(v.get('error', [])))
+    v['specialsRe'] = re.compile(joinReList(v.get('special', [])))
   # contains and end re.
   matchGrammars = []
   markers = []
@@ -103,7 +93,7 @@ for k,v in prefs['grammar'].items():
     matchGrammars.append(v)
   else:
     # Add a non-matchable placeholder.
-    markers.append(kNonMatchingRegex)
+    markers.append(app.regex.kNonMatchingRegex)
     matchGrammars.append(None)
   # Index [1]
   if v.get('end'):
@@ -111,7 +101,7 @@ for k,v in prefs['grammar'].items():
     matchGrammars.append(v)
   else:
     # Add a non-matchable placeholder.
-    markers.append(kNonMatchingRegex)
+    markers.append(app.regex.kNonMatchingRegex)
     matchGrammars.append(None)
   # Index [2..len(contains)]
   for grammarName in v.get('contains', []):
@@ -124,14 +114,20 @@ for k,v in prefs['grammar'].items():
     markers.append(g['begin'])
     matchGrammars.append(g)
   # Index [2+len(contains)..]
+  markers += v.get('error', [])
+  # Index [2+len(contains)+len(error)..]
   for keyword in v.get('keywords', []):
     markers.append(r'\b' + keyword + r'\b')
-  # Index [2+len(contains)+len(keywords)..]
+  # Index [2+len(contains)+len(error)+len(keywords)..]
+  for types in v.get('types', []):
+    markers.append(r'\b' + types + r'\b')
+  # Index [2+len(contains)+len(error)+len(keywords)+len(types)..]
   markers += v.get('special', [])
   # Index [-1]
   markers.append(r'\n')
   #app.log.startup('markers', v['name'], markers)
   v['matchRe'] = re.compile(joinReList(markers))
+  v['markers'] = markers
   v['matchGrammars'] = matchGrammars
 # Reset the re.cache for user regexes.
 re.purge()
@@ -165,10 +161,22 @@ def init():
   app.log.info('prefs init')
 
 def getGrammar(fileExtension):
-  if fileExtension is None:
-    return grammars.get('none')
   fileType = extensions.get(fileExtension, 'text')
   return grammars.get(fileType)
+
+def save(category, label, value):
+  app.log.info(category, label, value)
+  global prefs
+  prefs.setdefault(category, {})
+  prefs[category][label] = value
+  prefsPath = os.path.expanduser(os.path.expandvars(
+      "~/.ci_edit/prefs/%s.json" % (category,)))
+  with open(prefsPath, 'w') as f:
+    try:
+      f.write(json.dumps(prefs[category]))
+    except Exception as e:
+      app.log.error('error writing prefs')
+      app.log.exception(e)
 
 app.log.startup('prefs.py import time', time.time() - importStartTime)
 
