@@ -873,6 +873,8 @@ class Actions(app.mutator.Mutator):
     Returns:
       None.
     """
+    if self.view is None:
+      return
     # Row.
     maxRow = self.view.rows
     if self.view.scrollRow > self.penRow:
@@ -895,6 +897,8 @@ class Actions(app.mutator.Mutator):
       A tuple of (scrollRow, scrollCol) representing where
       the view's optimal position should be.
     """
+    if self.view is None:
+      return
     top, left, bottom, right = self.startAndEnd()
     # Row.
     maxRows = self.view.rows
@@ -941,6 +945,8 @@ class Actions(app.mutator.Mutator):
     Returns:
       True if selection is in view. Otherwise, False.
     """
+    if self.view is None:
+      return False
     horizontally = (self.view.scrollCol <= left and
             right < self.view.scrollCol + self.view.cols)
     vertically = (self.view.scrollRow <= top and
@@ -965,7 +971,9 @@ class Actions(app.mutator.Mutator):
           self.compoundChangePush()
         # Save user data that applies to read-only files into history.
         self.fileHistory['pen'] = (self.penRow, self.penCol)
-        self.fileHistory['scroll'] = (self.view.scrollRow, self.view.scrollCol)
+        if self.view is not None:
+          self.fileHistory['scroll'] = (self.view.scrollRow,
+              self.view.scrollCol)
         self.fileHistory['marker'] = (self.markerRow, self.markerCol)
         self.fileHistory['selectionMode'] = self.selectionMode
         self.fileHistory['bookmarks'] = self.bookmarks
