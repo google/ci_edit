@@ -178,6 +178,25 @@ class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
         KEY_SHIFT_RIGHT, self.cursorCheck(4, 8), self.selectionCheck(2, 1, 2, 6, 3),
         CTRL_Q, 'n']);
 
+  def test_ctrl_cursor_moves(self):
+    self.runWithTestFile(kTestFile, [
+        self.displayCheck(0, 0, [
+            " ci     .                               ",
+            "                                        ",
+            "     1                                  "]),
+        self.cursorCheck(2, 7),
+        self.writeText('test\napple bananaCarrot DogElephantFrog\norange'),
+        self.cursorCheck(4, 13),
+        self.selectionCheck(2, 6, 0, 0, 0),
+        KEY_CTRL_LEFT, self.cursorCheck(4, 7), self.selectionCheck(2, 0, 0, 0, 0),
+        KEY_CTRL_SHIFT_RIGHT, self.cursorCheck(4, 13), self.selectionCheck(2, 6, 2, 0, 3),
+        KEY_CTRL_SHIFT_LEFT, self.cursorCheck(4, 7), self.selectionCheck(2, 0, 2, 0, 3),
+        KEY_CTRL_SHIFT_LEFT, self.cursorCheck(3, 38), self.selectionCheck(1, 34, 2, 0, 3),
+        KEY_CTRL_SHIFT_LEFT, self.cursorCheck(3, 23), self.selectionCheck(1, 19, 2, 0, 3),
+        KEY_CTRL_SHIFT_LEFT, self.cursorCheck(3, 22), self.selectionCheck(1, 18, 2, 0, 3),
+        KEY_CTRL_RIGHT, self.cursorCheck(3, 23), self.selectionCheck(1, 19, 1, 18, 0),
+        CTRL_Q, 'n']);
+
   def test_select_line(self):
     self.runWithTestFile(kTestFile, [
         self.displayCheck(0, 0, [

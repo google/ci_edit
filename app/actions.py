@@ -368,9 +368,11 @@ class Actions(app.mutator.Mutator):
     self.adjustHorizontalScroll()
 
   def cursorMoveSubwordLeft(self):
+    self.selectionNone()
     self.doCursorMoveLeftTo(app.regex.kReSubwordBoundaryRvr)
 
   def cursorMoveSubwordRight(self):
+    self.selectionNone()
     self.doCursorMoveRightTo(app.regex.kReSubwordBoundaryFwd)
 
   def cursorMoveTo(self, row, col):
@@ -378,9 +380,11 @@ class Actions(app.mutator.Mutator):
     self.cursorMove(penRow - self.penRow, col - self.penCol)
 
   def cursorMoveWordLeft(self):
+    self.selectionNone()
     self.doCursorMoveLeftTo(app.regex.kReWordBoundary)
 
   def cursorMoveWordRight(self):
+    self.selectionNone()
     self.doCursorMoveRightTo(app.regex.kReWordBoundary)
 
   def doCursorMoveLeftTo(self, boundary):
@@ -454,13 +458,13 @@ class Actions(app.mutator.Mutator):
   def cursorSelectWordLeft(self):
     if self.selectionMode == app.selectable.kSelectionNone:
       self.selectionCharacter()
-    self.cursorMoveWordLeft()
+    self.doCursorMoveLeftTo(app.regex.kReWordBoundary)
     self.cursorMoveAndMark(*self.extendSelection())
 
   def cursorSelectWordRight(self):
     if self.selectionMode == app.selectable.kSelectionNone:
       self.selectionCharacter()
-    self.cursorMoveWordRight()
+    self.doCursorMoveRightTo(app.regex.kReWordBoundary)
     self.cursorMoveAndMark(*self.extendSelection())
 
   def cursorSelectUp(self):
