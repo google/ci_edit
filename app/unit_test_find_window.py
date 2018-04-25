@@ -42,3 +42,17 @@ class FindWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
         CTRL_I, self.displayCheck(-3, 0, ["Find: ", "Replace: ", "["]),
         KEY_BTAB, KEY_BTAB, self.displayCheck(-1, 0, ["Find: "]),
         CTRL_Q])
+
+  def test_find_esc_from_find(self):
+    self.runWithFakeInputs([
+        self.displayCheck(-1, 0, ["      "]),
+        CTRL_F, self.displayCheck(-1, 0, ["Find: "]),
+        KEY_ESCAPE, curses.ERR, self.displayCheck(-1, 0, ["      "]),
+        CTRL_F, self.displayCheck(-1, 0, ["Find: "]),
+        CTRL_I, self.displayCheck(-3, 0, ["Find: ", "Replace: ", "["]),
+        KEY_ESCAPE, curses.ERR, self.displayCheck(-1, 0, ["      "]),
+        CTRL_F, self.displayCheck(-3, 0, ["Find: ", "Replace: ", "["]),
+        CTRL_I, CTRL_I, self.displayCheck(-3, 0, ["Find: ", "Replace: ", "["]),
+        # Regression test for https://github.com/google/ci_edit/issues/170
+        KEY_ESCAPE, curses.ERR, self.displayCheck(-1, 0, ["      "]),
+        CTRL_Q])
