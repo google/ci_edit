@@ -111,16 +111,6 @@ class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
             ]),
             CTRL_Q])
 
-  def test_find(self):
-    self.runWithTestFile(kTestFile, [
-        self.displayCheck(-1, 0, ["      "]),
-        CTRL_F, self.displayCheck(-1, 0, ["Find: "]), CTRL_J,
-        self.displayCheck(-1, 0, ["      "]),
-        CTRL_F, self.displayCheck(-1, 0, ["Find: "]),
-        CTRL_I, self.displayCheck(-3, 0, ["Find: ", "Replace: ", "["]),
-        KEY_BTAB, KEY_BTAB, self.displayCheck(-1, 0, ["Find: "]),
-        CTRL_Q])
-
   def test_prediction(self):
     #self.setMovieMode(True)
     self.runWithTestFile(kTestFile, [
