@@ -54,6 +54,14 @@ class ProgramWindow(app.window.ActiveWindow):
   def changeFocusTo(self, changeTo):
     self.focusedWindow.controller.onChange()
     self.focusedWindow.unfocus()
+    # Unfocus all the windows from the prior focused window to the common root.
+    commonRoot = self.findCommonRoot(self.focusedWindow, changeTo)
+    current = self.focusedWindow
+    while current != commonRoot:
+      app.log.info('unfocus', current)
+      if current.isFocusable:
+        current.unfocus()
+      current = current.parent
     self.setFocusedWindow(changeTo)
 
   def debugDraw(self, win):
@@ -70,6 +78,32 @@ class ProgramWindow(app.window.ActiveWindow):
       if cmd == curses.KEY_MOUSE:
         self.handleMouse(eventInfo)
       self.focusedWindow.controller.onChange()
+
+  def findCommonRoot(self, first, second):
+    """Find the Window that is the parent of both |first| and |second|. If
+    |first| is a (grand*)parent of |second|, return |first| (or vice versa).
+    """
+    # If first is second there's probably a bug in the calling code.
+    assert first is not second
+    firstPath = [first]
+    while firstPath[-1].parent:
+      firstPath.append(firstPath[-1].parent)
+      if firstPath[-1] == second:
+        return second
+    secondPath = [second]
+    while secondPath[-1].parent:
+      secondPath.append(secondPath[-1].parent)
+      if secondPath[-1] == first:
+        return first
+    # assert firstPath[-1] is secondPath[-1]
+    # Assumptions: The first unequal match will never be found at [-1]. A match
+    # will always be found before exhausting the lists. It doesn't matter which
+    # list is longer.
+    for i in range(len(firstPath)):
+      if firstPath[-(i + 1)] is not secondPath[-(i + 1)]:
+        root = firstPath[-i]
+        break
+    return root
 
   def focus(self):
     self.setFocusedWindow(self.zOrder[-1])

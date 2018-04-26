@@ -117,8 +117,8 @@ class Controller:
     while view is not None:
       if hasattr(view, windowName):
         return getattr(view, windowName);
-      if not first and unfocus and view.isFocusable:
-        view.unfocus()
+      #if not first and unfocus and view.isFocusable:
+      #  view.unfocus()
       first = False
       view = view.parent
     app.log.fatal(windowName + ' not found');

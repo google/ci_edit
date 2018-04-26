@@ -45,14 +45,31 @@ class FindWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
   def test_find_esc_from_find(self):
     self.runWithFakeInputs([
+        # Check initial state.
         self.displayCheck(-1, 0, ["      "]),
+        self.displayCheckStyle(-2, 0, 1, 10, app.prefs.color['status_line']),
+
+        # Basic open and close.
         CTRL_F, self.displayCheck(-1, 0, ["Find: "]),
-        KEY_ESCAPE, curses.ERR, self.displayCheck(-1, 0, ["      "]),
+        KEY_ESCAPE, curses.ERR, self.displayCheck(-3, 0, ["   ", "   ", "   "]),
+        self.displayCheckStyle(-2, 0, 1, 10, app.prefs.color['status_line']),
+
+        # Open, expand, and close.
         CTRL_F, self.displayCheck(-1, 0, ["Find: "]),
         CTRL_I, self.displayCheck(-3, 0, ["Find: ", "Replace: ", "["]),
-        KEY_ESCAPE, curses.ERR, self.displayCheck(-1, 0, ["      "]),
+        KEY_ESCAPE, curses.ERR, self.displayCheck(-3, 0, ["   ", "   ", "   "]),
+        self.displayCheckStyle(-2, 0, 1, 10, app.prefs.color['status_line']),
+
+        # Regression test one for https://github.com/google/ci_edit/issues/170.
         CTRL_F, self.displayCheck(-3, 0, ["Find: ", "Replace: ", "["]),
         CTRL_I, CTRL_I, self.displayCheck(-3, 0, ["Find: ", "Replace: ", "["]),
-        # Regression test for https://github.com/google/ci_edit/issues/170
-        KEY_ESCAPE, curses.ERR, self.displayCheck(-1, 0, ["      "]),
+        KEY_ESCAPE, curses.ERR, self.displayCheck(-3, 0, ["   ", "   ", "   "]),
+        self.displayCheckStyle(-2, 0, 1, 10, app.prefs.color['status_line']),
+
+        # Regression test two for https://github.com/google/ci_edit/issues/170.
+        CTRL_F, self.displayCheck(-3, 0, ["Find: ", "Replace: ", "["]),
+        self.addMouseInfo(0, 2, 10, curses.BUTTON1_PRESSED),
+        curses.KEY_MOUSE,
+        #self.displayCheck(-3, 0, ["   ", "   ", "   "]),
+        self.displayCheckStyle(-2, 0, 1, 10, app.prefs.color['status_line']),
         CTRL_Q])
