@@ -83,8 +83,8 @@ class ProgramWindow(app.window.ActiveWindow):
     """Find the Window that is the parent of both |first| and |second|. If
     |first| is a (grand*)parent of |second|, return |first| (or vice versa).
     """
-    # If first is second there's probably a bug in the calling code.
-    assert first is not second
+    if first is second:
+      return first
     firstPath = [first]
     while firstPath[-1].parent:
       firstPath.append(firstPath[-1].parent)
