@@ -81,6 +81,7 @@ class ProgramWindow(app.window.ActiveWindow):
     """Find the Window that is the parent of both |first| and |second|. If
     |first| is a (grand*)parent of |second|, return |first| (or vice versa).
     """
+    # assert self.focusedWindow is not changeTo
     if first is second:
       return first
     firstPath = [first]
