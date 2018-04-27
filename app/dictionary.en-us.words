@@ -237,6 +237,7 @@ actuate
 actuated
 actuator
 acute
+acyclic
 ad
 adapt
 adaptability
@@ -483,6 +484,7 @@ algebra
 algebraic
 algorithm
 algorithmic
+algorithmically
 algorithms
 alias
 aliased
@@ -1063,6 +1065,7 @@ attack
 attacked
 attacker
 attackers
+attacking
 attacks
 attain
 attaining
@@ -1151,6 +1154,7 @@ authors
 authorship
 autism
 auto
+autocompletions
 autoconfiguration
 autofill
 automate
@@ -1765,6 +1769,10 @@ bolas
 bold
 bolder
 boldfaced
+bolt
+bolted
+bolthole
+bolts
 bomb
 bombed
 bombing
@@ -2291,6 +2299,8 @@ card
 cardholder
 cardholders
 cardinal
+cardinalities
+cardinality
 cardiovascular
 cards
 care
@@ -2322,6 +2332,7 @@ carryover
 cars
 cart
 carter
+cartesian
 cartoon
 carts
 carve
@@ -3844,6 +3855,7 @@ crossing
 crossings
 crossover
 crossword
+crostini
 crow
 crowd
 crowded
@@ -3869,6 +3881,8 @@ cry
 crypt
 cryptic
 cryptographer
+cryptographic
+cryptographically
 cryptography
 crystal
 cs
@@ -4218,6 +4232,9 @@ deducted
 deductible
 deduction
 deduped
+deduplicated
+deduplicating
+deduplication
 deed
 deem
 deemed
@@ -4509,6 +4526,9 @@ detailed
 detailing
 details
 detaining
+detangle
+detangled
+detangling
 detect
 detectable
 detected
@@ -8352,6 +8372,7 @@ inference
 inferential
 inferior
 inferno
+inferrable
 inferred
 inferring
 infinite
@@ -8365,6 +8386,7 @@ inflates
 inflating
 inflation
 inflicted
+inflight
 influence
 influences
 influential
@@ -8444,6 +8466,7 @@ inking
 inky
 inland
 inlet
+inlinable
 inline
 inmate
 inn
@@ -8786,6 +8809,7 @@ inverses
 inversion
 invert
 inverted
+invertible
 inverts
 invested
 investigate
@@ -9045,8 +9069,10 @@ keg
 kelvin
 ken
 kept
+kern
 kernel
 kernels
+kerning
 kestrel
 ketchup
 key
@@ -9526,6 +9552,7 @@ linguistics
 linguists
 lining
 link
+linkable
 linkage
 linked
 linker
@@ -9613,6 +9640,7 @@ locator
 loci
 lock
 lockable
+lockdown
 locked
 locker
 locking
@@ -10460,6 +10488,7 @@ modify
 modifying
 mods
 modular
+modularity
 modulate
 modulated
 modulation
@@ -11455,6 +11484,7 @@ oval
 ovation
 over
 overage
+overaggressively
 overall
 overcame
 overclock
@@ -11655,6 +11685,7 @@ paragraph
 paragraphs
 parallel
 parallelism
+parallelizable
 parallelize
 parallellized
 parallelogram
@@ -12497,6 +12528,7 @@ precludes
 precluding
 precondition
 preconditions
+preconnection
 precursor
 predate
 predates
@@ -12541,6 +12573,8 @@ preferentially
 preferred
 preferring
 prefers
+prefetched
+prefetching
 prefix
 prefixed
 prefixes
@@ -12577,6 +12611,7 @@ prepended
 prepending
 prepends
 preponderance
+prepopulated
 preposition
 prepositional
 prepositions
@@ -13433,6 +13468,7 @@ receiver
 receivers
 receives
 receiving
+recency
 recent
 recenter
 recentered
@@ -13985,6 +14021,10 @@ reporters
 reporting
 reports
 repose
+reposition
+repositioned
+repositioning
+repositions
 repositories
 repository
 repost
@@ -14230,6 +14270,7 @@ reused
 reuses
 reusing
 rev
+revalidate
 revalue
 revamp
 reveal
@@ -16122,6 +16163,7 @@ stopper
 stopping
 stops
 stopwatch
+storable
 storage
 store
 stored

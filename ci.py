@@ -19,12 +19,12 @@
 import sys
 
 
-if '--test' in sys.argv:
-  import unit_tests
-  if unit_tests.runTests(True) != 0:
-    sys.exit(-1)
-  sys.exit(0)
-
 if __name__ == '__main__':
-  import app.ci_program
-  app.ci_program.run_ci()
+  args = sys.argv
+  if '--test' in args:
+    import unit_tests
+    args.remove('--test')
+    unit_tests.parseArgList(args)
+  else:
+    import app.ci_program
+    app.ci_program.run_ci()

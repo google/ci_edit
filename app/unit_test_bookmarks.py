@@ -53,11 +53,6 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
   def tearDown(self):
     app.fake_curses_testing.FakeCursesTestCase.tearDown(self)
 
-  def runWithTestFile(self, fakeInputs):
-    sys.argv = [kTestFile]
-    self.assertFalse(os.path.isfile(kTestFile))
-    self.runWithFakeInputs(fakeInputs)
-
   def test_bookmark_comparisons(self):
     b1 = Bookmark(1, 5)
     b2 = Bookmark(1, 3)
@@ -383,8 +378,8 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
     self.assertEqual(len(visibleBookmarks), len(expectedBookmarks))
 
   def test_bookmarks_jump(self):
-    #self.setMovieMode(True)
-    self.runWithFakeInputs([
+    # self.setMovieMode(True)
+    self.runWithTestFile(kTestFile, [
         self.displayCheck(0, 0, [
             " ci     .                               ",
             "                                        ",

@@ -73,6 +73,7 @@ class InteractivePrediction(app.controller.Controller):
 
   def focus(self):
     app.log.info('InteractivePrediction.focus')
+    app.controller.Controller.focus(self)
     self.priorTextBuffer = self.view.host.textBuffer
     self.index = self.buildFileList(self.view.host.textBuffer.fullPath)
     self.view.host.setTextBuffer(text_buffer.TextBuffer())
@@ -146,6 +147,9 @@ class InteractivePrediction(app.controller.Controller):
     self.changeToHostWindow()
 
   def unfocus(self):
+    app.controller.Controller.unfocus(self)
+    if self.items is None:
+      return
     textBuffer, fullPath = self.items[self.index][:2]
     if textBuffer is not None:
       self.view.host.setTextBuffer(
@@ -299,5 +303,6 @@ class ToggleController(app.controller.Controller):
     name = self.view.prefName
     prefs = app.prefs
     prefs.save(category, name, not prefs.prefs[category][name])
+    self.view.onPrefChanged(category, name)
 
 

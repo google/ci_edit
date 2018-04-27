@@ -229,7 +229,7 @@ class InteractiveFind(EditText):
       CTRL_R: self.findPrior,
       #CTRL_S: self.replacementTextEdit,
       KEY_DOWN: self.findNext,
-      KEY_MOUSE: self.saveEventChangeToInputWindow,
+      KEY_MOUSE: self.saveEventChangeToHostWindow,
       KEY_UP: self.findPrior,
     })
     self.height = 1
@@ -289,7 +289,7 @@ class InteractiveGoto(EditText):
       KEY_ESCAPE: self.changeToInputWindow,
       KEY_F1: self.info,
       CTRL_J: self.changeToInputWindow,
-      KEY_MOUSE: self.saveEventChangeToInputWindow,
+      KEY_MOUSE: self.saveEventChangeToHostWindow,
       ord('b'): self.gotoBottom,
       ord('h'): self.gotoHalfway,
       ord('t'): self.gotoTop,

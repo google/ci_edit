@@ -328,6 +328,15 @@ class Actions(app.mutator.Mutator):
     savedGoal = self.goalCol
     self.cursorMove(1, self.cursorColDelta(self.penRow + 1))
     self.goalCol = savedGoal
+    self.adjustHorizontalScroll()
+
+  def adjustHorizontalScroll(self):
+    if self.view.scrollCol:
+      if len(self.lines[self.penRow]) < self.view.cols:
+        # The whole line fits on screen.
+        self.view.scrollCol = 0
+      elif self.view.scrollCol == self.penCol and self.penCol == len(self.lines[self.penRow]):
+        self.view.scrollCol = max(0, self.view.scrollCol - self.view.cols / 4)
 
   def cursorMoveLeft(self):
     if self.penCol > 0:
@@ -356,22 +365,27 @@ class Actions(app.mutator.Mutator):
     else:
       self.cursorMove(-1, lineLen - self.penCol)
     self.goalCol = savedGoal
+    self.adjustHorizontalScroll()
 
   def cursorMoveSubwordLeft(self):
-    self.doCursorMoveLeftTo(app.selectable.kReSubwordBoundaryRvr)
+    self.selectionNone()
+    self.doCursorMoveLeftTo(app.regex.kReSubwordBoundaryRvr)
 
   def cursorMoveSubwordRight(self):
-    self.doCursorMoveRightTo(app.selectable.kReSubwordBoundaryFwd)
+    self.selectionNone()
+    self.doCursorMoveRightTo(app.regex.kReSubwordBoundaryFwd)
 
   def cursorMoveTo(self, row, col):
     penRow = min(max(row, 0), len(self.lines)-1)
     self.cursorMove(penRow - self.penRow, col - self.penCol)
 
   def cursorMoveWordLeft(self):
-    self.doCursorMoveLeftTo(app.selectable.kReWordBoundary)
+    self.selectionNone()
+    self.doCursorMoveLeftTo(app.regex.kReWordBoundary)
 
   def cursorMoveWordRight(self):
-    self.doCursorMoveRightTo(app.selectable.kReWordBoundary)
+    self.selectionNone()
+    self.doCursorMoveRightTo(app.regex.kReWordBoundary)
 
   def doCursorMoveLeftTo(self, boundary):
     if self.penCol > 0:
@@ -444,13 +458,13 @@ class Actions(app.mutator.Mutator):
   def cursorSelectWordLeft(self):
     if self.selectionMode == app.selectable.kSelectionNone:
       self.selectionCharacter()
-    self.cursorMoveWordLeft()
+    self.doCursorMoveLeftTo(app.regex.kReWordBoundary)
     self.cursorMoveAndMark(*self.extendSelection())
 
   def cursorSelectWordRight(self):
     if self.selectionMode == app.selectable.kSelectionNone:
       self.selectionCharacter()
-    self.cursorMoveWordRight()
+    self.doCursorMoveRightTo(app.regex.kReWordBoundary)
     self.cursorMoveAndMark(*self.extendSelection())
 
   def cursorSelectUp(self):
@@ -797,8 +811,8 @@ class Actions(app.mutator.Mutator):
     self.restoreUserHistory()
 
   def replaceLines(self, clip):
-    self.view.textBuffer.selectionAll()
-    self.view.textBuffer.editPasteLines(tuple(clip))
+    self.selectionAll()
+    self.editPasteLines(tuple(clip))
 
   def restoreUserHistory(self):
     """
@@ -817,6 +831,9 @@ class Actions(app.mutator.Mutator):
 
     # Restore all positions and values of variables.
     self.penRow, self.penCol = self.fileHistory.setdefault('pen', (0, 0))
+    # Need to initialize goalCol since we set the cursor position directly
+    # instead of performing a chain of redoes (which sets goalCol).
+    self.goalCol = self.penCol
     app.log.info('\n\n\n    setting scrollRow', self.fileHistory.get('scroll'),
         self.fullPath, '\n\n\n\n')
     # Do not restore the scroll position here because the view may not be set.
@@ -831,6 +848,7 @@ class Actions(app.mutator.Mutator):
       self.redoChain = self.fileHistory.setdefault('redoChainCompound', [])
       self.savedAtRedoIndex = self.fileHistory.setdefault(
           'savedAtRedoIndexCompound', 0)
+      self.tempChange = self.fileHistory.setdefault('tempChange', None)
       self.redoIndex = self.savedAtRedoIndex
       self.oldRedoIndex = self.savedAtRedoIndex
     if app.config.strict_debug:
@@ -855,6 +873,8 @@ class Actions(app.mutator.Mutator):
     Returns:
       None.
     """
+    if self.view is None:
+      return
     # Row.
     maxRow = self.view.rows
     if self.view.scrollRow > self.penRow:
@@ -877,6 +897,8 @@ class Actions(app.mutator.Mutator):
       A tuple of (scrollRow, scrollCol) representing where
       the view's optimal position should be.
     """
+    if self.view is None:
+      return
     top, left, bottom, right = self.startAndEnd()
     # Row.
     maxRows = self.view.rows
@@ -923,6 +945,8 @@ class Actions(app.mutator.Mutator):
     Returns:
       True if selection is in view. Otherwise, False.
     """
+    if self.view is None:
+      return False
     horizontally = (self.view.scrollCol <= left and
             right < self.view.scrollCol + self.view.cols)
     vertically = (self.view.scrollRow <= top and
@@ -947,7 +971,9 @@ class Actions(app.mutator.Mutator):
           self.compoundChangePush()
         # Save user data that applies to read-only files into history.
         self.fileHistory['pen'] = (self.penRow, self.penCol)
-        self.fileHistory['scroll'] = (self.view.scrollRow, self.view.scrollCol)
+        if self.view is not None:
+          self.fileHistory['scroll'] = (self.view.scrollRow,
+              self.view.scrollCol)
         self.fileHistory['marker'] = (self.markerRow, self.markerCol)
         self.fileHistory['selectionMode'] = self.selectionMode
         self.fileHistory['bookmarks'] = self.bookmarks
@@ -965,6 +991,7 @@ class Actions(app.mutator.Mutator):
         if app.prefs.editor['saveUndo']:
           self.fileHistory['redoChainCompound'] = self.redoChain
           self.fileHistory['savedAtRedoIndexCompound'] = self.savedAtRedoIndex
+          self.fileHistory['tempChange'] = self.tempChange
         app.history.saveUserHistory((self.fullPath, self.lastChecksum,
             self.lastFileSize), self.fileHistory)
         # Store the file's new info
@@ -1517,7 +1544,7 @@ class Actions(app.mutator.Mutator):
 
   def stripTrailingWhiteSpace(self):
     for i in range(len(self.lines)):
-      for found in app.selectable.kReEndSpaces.finditer(self.lines[i]):
+      for found in app.regex.kReEndSpaces.finditer(self.lines[i]):
         self.performDeleteRange(i, found.regs[0][0], i, found.regs[0][1])
 
   def unindent(self):

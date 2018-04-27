@@ -53,14 +53,17 @@ class DirectoryListController(app.controller.Controller):
       self.view.textBuffer.findRe = None
     dirPath = dirPath or '.'
     if os.path.isdir(dirPath):
-      hostOptions = self.view.host.opt
+      showDotFiles = app.prefs.editor['filesShowDotFiles']
+      showSizes = app.prefs.editor['filesShowSizes']
+      showModified = app.prefs.editor['filesShowModifiedDates']
+
       viewOptions = self.view.opt
       lines = []
       try:
         fileLines = []
         contents = os.listdir(dirPath)
         for i in contents:
-          if not hostOptions['dotFiles'] and i[0] == '.':
+          if not showDotFiles and i[0] == '.':
             continue
           if self.filter is not None and not i.startswith(self.filter):
             continue
@@ -69,9 +72,9 @@ class DirectoryListController(app.controller.Controller):
             i += os.path.sep
           iSize = None
           iModified = 0
-          if hostOptions['sizes'] and os.path.isfile(fullPath):
+          if showSizes and os.path.isfile(fullPath):
             iSize = os.path.getsize(fullPath)
-          if hostOptions['modified']:
+          if showModified:
             iModified = os.path.getmtime(fullPath)
           fileLines.append([i, iSize, iModified])
         if viewOptions['Size'] is not None:
@@ -127,6 +130,7 @@ class DirectoryListController(app.controller.Controller):
 
   def optionChanged(self, name, value):
     self.shownDirectory = None
+    self.onChange()
 
   def setFilter(self, filter):
     self.filter = filter

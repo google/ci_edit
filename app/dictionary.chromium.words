@@ -26,6 +26,7 @@ asan
 atlbase
 atlwin
 autocollapse
+autocompleted
 autocompletion
 autolaunch
 axs
@@ -53,6 +54,7 @@ cryptohome
 cws
 darkconnect
 dcheck
+deletability
 displaymode
 dlog
 doesnt
@@ -65,6 +67,7 @@ eap
 ef
 eslint
 ev
+fallthrough
 fieldtrialtriggered
 filemanager
 fixup
@@ -78,6 +81,7 @@ gmock
 gn
 gni
 goma
+googlesource
 grd
 gtest
 gtestjs
@@ -94,11 +98,15 @@ log
 lso
 mojom
 mousewheel
+multidex
 multiline
 nacl
 nav
 navsuggest
+navsuggestion
+navsuggestions
 newtabpage
+nogncheck
 nolint
 nonslash
 notreached
@@ -116,6 +124,7 @@ preconnect
 preconnectable
 prerendering
 presubmit
+protobuf
 pylint
 rappor
 relevances
@@ -145,11 +154,14 @@ ukm
 uma
 unittest
 unittests
+uwyt
 verbatimrelevance
 vis
 vlog
 vox
 vpd
+webdata
+webrtc
 webstore
 wildcard
 wrl

@@ -42,20 +42,15 @@ class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
     self.assertFalse(os.path.isfile(kTestFile))
     app.fake_curses_testing.FakeCursesTestCase.setUp(self)
 
-  def runWithTestFile(self, fakeInputs):
-    sys.argv = [kTestFile]
-    self.assertFalse(os.path.isfile(kTestFile))
-    self.runWithFakeInputs(fakeInputs)
-
   def test_open_and_quit(self):
-    self.runWithTestFile([CTRL_Q])
+    self.runWithTestFile(kTestFile, [CTRL_Q])
 
   def test_new_file_quit(self):
-    self.runWithTestFile([
+    self.runWithTestFile(kTestFile, [
         self.displayCheck(2, 7, ["        "]), CTRL_Q])
 
   def test_logo(self):
-    self.runWithTestFile([
+    self.runWithTestFile(kTestFile, [
         self.assertEqual(256, app.prefs.startup['numColors']),
         self.displayCheck(0, 0, [" ci "]),
         self.displayCheckStyle(0, 0, 1, len(" ci "), app.prefs.color['logo']),
@@ -63,7 +58,7 @@ class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
   def test_whole_screen(self):
     #self.setMovieMode(True)
-    self.runWithTestFile([
+    self.runWithTestFile(kTestFile, [
         self.displayCheck(0, 0, [
             " ci     .                               ",
             "                                        ",
@@ -83,7 +78,7 @@ class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
             ]), CTRL_Q])
 
   def test_resize_screen(self):
-    self.runWithTestFile([
+    self.runWithTestFile(kTestFile, [
         self.displayCheck(0, 0, [
             " ci     .                               ",
             "                                        ",
@@ -116,19 +111,9 @@ class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
             ]),
             CTRL_Q])
 
-  def test_find(self):
-    self.runWithTestFile([
-        self.displayCheck(-1, 0, ["      "]),
-        CTRL_F, self.displayCheck(-1, 0, ["Find: "]), CTRL_J,
-        self.displayCheck(-1, 0, ["      "]),
-        CTRL_F, self.displayCheck(-1, 0, ["Find: "]),
-        CTRL_I, self.displayCheck(-3, 0, ["Find: ", "Replace: ", "["]),
-        KEY_BTAB, KEY_BTAB, self.displayCheck(-1, 0, ["Find: "]),
-        CTRL_Q])
-
   def test_prediction(self):
     #self.setMovieMode(True)
-    self.runWithTestFile([
+    self.runWithTestFile(kTestFile, [
         self.displayCheck(-1, 0, ["      "]),
         CTRL_P, self.displayCheck(-1, 0, ["p: "]), CTRL_J,
         self.displayCheck(-1, 0, ["      "]),
@@ -136,12 +121,12 @@ class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
         CTRL_Q])
 
   def test_text_contents(self):
-    self.runWithTestFile([
+    self.runWithTestFile(kTestFile, [
         self.displayCheck(2, 7, ["        "]), 't', 'e', 'x', 't',
         self.displayCheck(2, 7, ["text "]),  CTRL_Q, 'n'])
 
   def test_bracketed_paste(self):
-    self.runWithTestFile([
+    self.runWithTestFile(kTestFile, [
         self.displayCheck(2, 7, ["      "]),
         curses.ascii.ESC, app.curses_util.BRACKETED_PASTE_BEGIN,
         't', 'e', ord('\xc3'), ord('\xa9'), 't',
@@ -150,13 +135,13 @@ class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
         CTRL_Q, 'n'])
 
   def test_backspace(self):
-    self.runWithTestFile([
+    self.runWithTestFile(kTestFile, [
         self.displayCheck(2, 7, ["      "]), self.writeText('tex'),
         self.displayCheck(2, 7, ["tex "]), KEY_BACKSPACE1, 't',
         self.displayCheck(2, 7, ["tet "]), CTRL_Q, 'n'])
 
   def test_cursor_moves(self):
-    self.runWithTestFile([
+    self.runWithTestFile(kTestFile, [
         self.displayCheck(0, 0, [
             " ci     .                               ",
             "                                        ",
@@ -183,8 +168,27 @@ class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
         KEY_SHIFT_RIGHT, self.cursorCheck(4, 8), self.selectionCheck(2, 1, 2, 6, 3),
         CTRL_Q, 'n']);
 
+  def test_ctrl_cursor_moves(self):
+    self.runWithTestFile(kTestFile, [
+        self.displayCheck(0, 0, [
+            " ci     .                               ",
+            "                                        ",
+            "     1                                  "]),
+        self.cursorCheck(2, 7),
+        self.writeText('test\napple bananaCarrot DogElephantFrog\norange'),
+        self.cursorCheck(4, 13),
+        self.selectionCheck(2, 6, 0, 0, 0),
+        KEY_CTRL_LEFT, self.cursorCheck(4, 7), self.selectionCheck(2, 0, 0, 0, 0),
+        KEY_CTRL_SHIFT_RIGHT, self.cursorCheck(4, 13), self.selectionCheck(2, 6, 2, 0, 3),
+        KEY_CTRL_SHIFT_LEFT, self.cursorCheck(4, 7), self.selectionCheck(2, 0, 2, 0, 3),
+        KEY_CTRL_SHIFT_LEFT, self.cursorCheck(3, 38), self.selectionCheck(1, 34, 2, 0, 3),
+        KEY_CTRL_SHIFT_LEFT, self.cursorCheck(3, 23), self.selectionCheck(1, 19, 2, 0, 3),
+        KEY_CTRL_SHIFT_LEFT, self.cursorCheck(3, 22), self.selectionCheck(1, 18, 2, 0, 3),
+        KEY_CTRL_RIGHT, self.cursorCheck(3, 23), self.selectionCheck(1, 19, 1, 18, 0),
+        CTRL_Q, 'n']);
+
   def test_select_line(self):
-    self.runWithTestFile([
+    self.runWithTestFile(kTestFile, [
         self.displayCheck(0, 0, [
             " ci     .                               ",
             "                                        ",
@@ -208,7 +212,7 @@ class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
         CTRL_Q, 'n']);
 
   def test_select_line_via_line_numbers(self):
-    self.runWithTestFile([
+    self.runWithTestFile(kTestFile, [
         self.displayCheck(0, 0, [
             " ci     .                               ",
             "                                        ",
@@ -222,7 +226,7 @@ class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
         CTRL_Q, 'n']);
 
   def test_session(self):
-    self.runWithTestFile([
+    self.runWithTestFile(kTestFile, [
         self.displayCheck(0, 0, [
             " ci     .                               ",
             "                                        ",

@@ -53,7 +53,13 @@ class ProgramWindow(app.window.ActiveWindow):
 
   def changeFocusTo(self, changeTo):
     self.focusedWindow.controller.onChange()
-    self.focusedWindow.unfocus()
+    # Unfocus all the windows from the prior focused window to the common root.
+    commonRoot = self.findCommonRoot(self.focusedWindow, changeTo)
+    current = self.focusedWindow
+    while current != commonRoot:
+      if current.isFocusable:
+        current.unfocus()
+      current = current.parent
     self.setFocusedWindow(changeTo)
 
   def debugDraw(self, win):
@@ -70,6 +76,33 @@ class ProgramWindow(app.window.ActiveWindow):
       if cmd == curses.KEY_MOUSE:
         self.handleMouse(eventInfo)
       self.focusedWindow.controller.onChange()
+
+  def findCommonRoot(self, first, second):
+    """Find the Window that is the parent of both |first| and |second|. If
+    |first| is a (grand*)parent of |second|, return |first| (or vice versa).
+    """
+    # assert self.focusedWindow is not changeTo
+    if first is second:
+      return first
+    firstPath = [first]
+    while firstPath[-1].parent:
+      firstPath.append(firstPath[-1].parent)
+      if firstPath[-1] == second:
+        return second
+    secondPath = [second]
+    while secondPath[-1].parent:
+      secondPath.append(secondPath[-1].parent)
+      if secondPath[-1] == first:
+        return first
+    # assert firstPath[-1] is secondPath[-1]
+    # Assumptions: The first unequal match will never be found at [-1]. A match
+    # will always be found before exhausting the lists. It doesn't matter which
+    # list is longer.
+    for i in range(len(firstPath)):
+      if firstPath[-(i + 1)] is not secondPath[-(i + 1)]:
+        root = firstPath[-i]
+        break
+    return root
 
   def focus(self):
     self.setFocusedWindow(self.zOrder[-1])
@@ -234,6 +267,9 @@ class ProgramWindow(app.window.ActiveWindow):
   def normalize(self):
     self.presentModal(None)
 
+  def onPrefChanged(self, category, name):
+    pass
+
   def presentModal(self, changeTo, top=0, left=0):
     if self.modalUi is not None:
       #self.modalUi.controller.onChange()
@@ -251,6 +287,16 @@ class ProgramWindow(app.window.ActiveWindow):
     if self.showLogWindow:
       self.logWindow.render()
     app.window.ActiveWindow.render(self)
+    window = self.focusedWindow
+    self.debugDraw(window)
+    penRow = window.textBuffer.penRow
+    penCol = window.textBuffer.penCol
+    if (penRow >= window.scrollRow and penRow < window.scrollRow + window.rows):
+      app.render.frame.setCursor((
+          window.top + penRow - window.scrollRow,
+          window.left + penCol - window.scrollCol))
+    else:
+      app.render.frame.setCursor(None)
 
   def reshape(self, top, left, rows, cols):
     app.window.ActiveWindow.reshape(self, top, left, rows, cols)

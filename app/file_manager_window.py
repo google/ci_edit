@@ -106,6 +106,10 @@ class DirectoryList(app.window.Window):
     self.textBuffer.mouseWheelUp(shift, ctrl, alt)
     self.changeFocusTo(self.host)
 
+  def onPrefChanged(self, category, name):
+    self.controller.optionChanged(category, name)
+    app.window.Window.onPrefChanged(self, category, name)
+
   def setTextBuffer(self, textBuffer):
     if app.config.strict_debug:
       assert textBuffer is not self.host.textBuffer
@@ -129,25 +133,34 @@ class FileManagerWindow(app.window.Window):
     self.showTips = False
     self.controller = app.cu_editor.FileOpener(self)
     self.setTextBuffer(app.text_buffer.TextBuffer())
-    self.opt = {
-      'dotFiles': True,
-      'sizes': True,
-      'modified': True,
-    }
+
     self.titleRow = app.window.OptionsRow(self)
     self.titleRow.addLabel(' ci   ')
     self.modeTitle = self.titleRow.addLabel('x')
     self.setMode('open')
     self.titleRow.setParent(self, 0)
-    self.optionsRow = app.window.OptionsRow(self)
-    self.optionsRow.addLabel(' Show: ')
-    for key in ['dotFiles', 'sizes', 'modified']:
-      self.optionsRow.addToggle(key, self.opt)
-    self.optionsRow.setParent(self, 0)
+
     self.directoryList = DirectoryList(self, inputWindow)
     self.directoryList.setParent(self, 0)
     self.messageLine = app.window.LabeledLine(self, "")
     self.messageLine.setParent(self, 0)
+
+    if 1:
+      self.optionsRow = app.window.RowWindow(self, 2)
+      self.optionsRow.setParent(self)
+      self.optionsRow.color = app.color.get('top_info')
+      label = app.window.LabelWindow(self.optionsRow, 'Show:')
+      label.color = app.color.get('top_info')
+      label.setParent(self.optionsRow)
+      toggle = app.window.OptionsToggle(self.optionsRow, 'dotFiles', 'editor',
+          'filesShowDotFiles')
+      toggle.color = app.color.get('top_info')
+      toggle = app.window.OptionsToggle(self.optionsRow, 'sizes', 'editor',
+          'filesShowSizes')
+      toggle.color = app.color.get('top_info')
+      toggle = app.window.OptionsToggle(self.optionsRow, 'modified', 'editor',
+          'filesShowModifiedDates')
+      toggle.color = app.color.get('top_info')
 
   def getPath(self):
     return self.textBuffer.lines[0]
@@ -162,6 +175,10 @@ class FileManagerWindow(app.window.Window):
       return
     slash = line[col:].find('/')
     self.setPath(line[:col + slash + 1])
+
+  def onPrefChanged(self, category, name):
+    self.directoryList.controller.optionChanged(category, name)
+    app.window.Window.onPrefChanged(self, category, name)
 
   def quitNow(self):
     app.log.debug()

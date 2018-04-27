@@ -15,21 +15,7 @@
 import re
 
 import app.log
-
-kReBrackets = re.compile('[[\]{}()]')
-kReComments = re.compile('(?:#|//).*$|/\*.*?\*/|<!--.*?-->')
-kReEndSpaces = re.compile(r'\s+$')
-kReNumbers = re.compile('0x[0-9a-fA-F]+|\d+')
-kReStrings = re.compile(
-    r"(\"\"\".*?(?<!\\)\"\"\")|('''.*?(?<!\\)''')|(\".*?(?<!\\)\")|('.*?(?<!\\)')")
-# The first group is a hack to allow upper case pluralized, e.g. URLs.
-kReSubwords = re.compile(
-    r'(?:[A-Z]{2,}s\b)|(?:[A-Z][a-z]+)|(?:[A-Z]+(?![a-z]))|(?:[a-z]+)')
-kReSubwordBoundaryFwd = re.compile(
-    '(?:[_-]?[A-Z][a-z-]+)|(?:[_-]?[A-Z]+(?![a-z]))|(?:[_-]?[a-z]+)|(?:\W+)')
-kReSubwordBoundaryRvr = re.compile(
-    '(?:[A-Z][a-z-]+[_-]?)|(?:[A-Z]+(?![a-z])[_-]?)|(?:[a-z]+[_-]?)|(?:\W+)')
-kReWordBoundary = re.compile('(?:\w+)|(?:\W+)')
+import app.regex
 
 
 # No selection.
@@ -195,12 +181,12 @@ class Selectable(BaseLineBuffer):
         and marker will be extended away from each other. The extension may
         occur in one, both, or neither direction."""
     line = self.lines[upperRow]
-    for segment in re.finditer(kReWordBoundary, line):
+    for segment in re.finditer(app.regex.kReWordBoundary, line):
       if segment.start() <= upperCol < segment.end():
         upperCol = segment.start()
         break
     line = self.lines[lowerRow]
-    for segment in re.finditer(kReWordBoundary, line):
+    for segment in re.finditer(app.regex.kReWordBoundary, line):
       if segment.start() < lowerCol < segment.end():
         lowerCol = segment.end()
         break

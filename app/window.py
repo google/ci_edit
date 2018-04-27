@@ -72,14 +72,6 @@ class ViewWindow:
   def reattach(self):
     self.setParent(self.parent)
 
-  def detach(self):
-    """Hide the window by removing self from parents' children, but keep same
-    parent to be reattached later."""
-    try:
-      self.parent.zOrder.remove(self)
-    except ValueError:
-      pass
-
   def blank(self, colorPair):
     """Clear the window."""
     for i in range(self.rows):
@@ -114,16 +106,19 @@ class ViewWindow:
     return (self.top <= row < self.top + self.rows and
         self.left <= col < self.left + self.cols and self)
 
-  def debugDraw(self, win):
-    self.parent.debugDraw(win)
+  def debugDraw(self):
+    programWindow = self
+    while programWindow.parent is not None:
+      programWindow = programWindow.parent
+    programWindow.debugDraw(self)
 
-  def hide(self):
-    assert False
-    """Remove window from the render list."""
+  def detach(self):
+    """Hide the window by removing self from parents' children, but keep same
+    parent to be reattached later."""
     try:
       self.parent.zOrder.remove(self)
     except ValueError:
-      app.log.detail(repr(self) + ' not found in zOrder')
+      pass
 
   def layoutHorizontally(self, children, separation=0):
     left = self.left
@@ -214,6 +209,9 @@ class ViewWindow:
   def normalize(self):
     self.parent.normalize()
 
+  def onPrefChanged(self, category, name):
+    self.parent.onPrefChanged(category, name)
+
   def paint(self, row, col, count, colorPair):
     """Paint text a row, column with colorPair.
       fyi, I thought this may be faster than using addStr to paint over the text
@@ -232,10 +230,22 @@ class ViewWindow:
   def priorFocusableWindow(self, start):
     return self.nextFocusableWindow(start, True)
 
+  def quitNow(self):
+    programWindow = self
+    while programWindow.parent is not None:
+      programWindow = programWindow.parent
+    programWindow.quitNow()
+
   def render(self):
     """Redraw window."""
     for child in self.zOrder:
       child.render()
+
+  def showWindowHierarchy(self, indent='  '):
+    """For debugging."""
+    app.log.info("%s%s" % (indent, self))
+    for child in self.zOrder:
+      child.showWindowHierarchy(indent + '  ')
 
   def reshape(self, top, left, rows, cols):
     self.moveTo(top, left)
@@ -263,7 +273,7 @@ class ViewWindow:
 
   def setParent(self, parent, layerIndex=sys.maxint):
     """Setting the parent will cause the the window to refresh (i.e. if self
-    was hidden with hide() it will no longer be hidden).
+    was hidden with detach() it will no longer be hidden).
     """
     if app.config.strict_debug:
       assert issubclass(self.__class__, ViewWindow), self
@@ -295,6 +305,7 @@ class ActiveWindow(ViewWindow):
         assert issubclass(parent.__class__, ViewWindow), parent
     ViewWindow.__init__(self, parent)
     self.controller = None
+    self.hasFocus = False
     self.isFocusable = True
 
   def focus(self):
@@ -326,7 +337,6 @@ class Window(ActiveWindow):
       assert issubclass(parent.__class__, ViewWindow), parent
     ActiveWindow.__init__(self, parent)
     self.hasCaptiveCursor = app.prefs.editor['captiveCursor']
-    self.hasFocus = False
     self.textBuffer = None
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
@@ -364,16 +374,6 @@ class Window(ActiveWindow):
     if self.textBuffer:
       self.textBuffer.draw(self)
     ViewWindow.render(self)
-    if self.hasFocus:
-      self.parent.debugDraw(self)
-      penRow = self.textBuffer.penRow
-      penCol = self.textBuffer.penCol
-      if (penRow >= self.scrollRow and penRow < self.scrollRow + self.rows):
-        app.render.frame.setCursor((
-            self.top + penRow - self.scrollRow,
-            self.left + penCol - self.scrollCol))
-      else:
-        app.render.frame.setCursor(None)
 
   def setController(self, controller):
     ActiveWindow.setController(self, controller)
@@ -382,6 +382,35 @@ class Window(ActiveWindow):
   def setTextBuffer(self, textBuffer):
     textBuffer.setView(self)
     self.textBuffer = textBuffer
+
+
+class LabelWindow(ViewWindow):
+  """A text label. The label is inert, it will pass events to its parent."""
+  def __init__(self, parent, label, preferredWidth=None, align='right'):
+    if app.config.strict_debug:
+      assert issubclass(parent.__class__, ViewWindow), parent
+      assert type(label) == str
+      assert preferredWidth is None or type(preferredWidth) == int
+      assert type(align) == str
+    ViewWindow.__init__(self, parent)
+    self.label = label
+    self.preferredWidth = preferredWidth
+    self.align = 1 if align == 'right' else -1
+    self.color = app.color.get('keyword')
+
+  def preferredSize(self, rowLimit, colLimit):
+    if app.config.strict_debug:
+      assert self.parent
+      assert rowLimit >= 0
+      assert colLimit >= 0
+    return (min(rowLimit, 1), min(colLimit, len(self.label)))
+
+  def render(self):
+    ViewWindow.render(self)
+    if self.rows <= 0:
+      return
+    #app.log.info(self.top, self.left, self.rows, self.cols, self.label)
+    self.addStr(0, 0, self.label, self.color)
 
 
 class LabeledLine(Window):
@@ -406,9 +435,6 @@ class LabeledLine(Window):
 
   def preferredSize(self, rowLimit, colLimit):
     return min(rowLimit, 1), colLimit
-
-  def quitNow(self):
-    self.host.quitNow()
 
   def render(self):
     #app.log.info('LabeledLine', self.label, self.rows, self.cols)
@@ -498,9 +524,17 @@ class LineNumbers(ViewWindow):
         if currentRow + 1 > currentBookmark.end:
           currentBookmarkIndex += 1
       self.addStr(i, 0, ' %5d ' % (currentRow + 1), color)
+    # Draw indicators for text off of the left edge.
+    if self.host.scrollCol > 0:
+      color = app.color.get('line_overflow')
+      for i in range(limit):
+        if len(self.host.textBuffer.lines[self.host.scrollRow + i]) > 0:
+          self.addStr(i, 6, ' ', color)
+    # Draw blank line number rows past the end of the document.
     color = app.color.get('outside_document')
     for i in range(limit, self.rows):
       self.addStr(i, 0, '       ', color)
+    # Highlight the line numbers for the current cursor line.
     cursorAt = self.host.textBuffer.penRow - self.host.scrollRow
     if 0 <= cursorAt < limit:
       if cursorBookmarkColorIndex:
@@ -605,7 +639,6 @@ class InteractiveFind(Window):
     Window.__init__(self, host)
     self.host = host
     self.expanded = False
-    self.ignoreUnfocus = False
     self.setController(app.cu_editor.InteractiveFind)
     indent = '  '
 
@@ -699,8 +732,6 @@ class InteractiveFind(Window):
     pass
 
   def focus(self):
-    assert not self.ignoreUnfocus
-    self.ignoreUnfocus = True
     self.reattach()
     if app.config.strict_debug:
       assert self.parent
@@ -728,12 +759,8 @@ class InteractiveFind(Window):
     self.layoutVertically(self.zOrder)
 
   def unfocus(self):
-    # The focus() member above will focus the findLine child, which will
-    # generate an unfocus() call. Ignore the one caused by our own call.
-    if self.ignoreUnfocus:
-      self.ignoreUnfocus = False
-      return
     self.detach()
+    Window.unfocus(self)
 
 
 class MessageLine(ViewWindow):
@@ -1065,9 +1092,6 @@ class InputWindow(Window):
     # tell the child there is nothing to tab to up here).
     return None
 
-  def quitNow(self):
-    self.host.quitNow()
-
   def render(self):
     self.topInfo.onChange()
     self.drawLogoCorner()
@@ -1127,8 +1151,8 @@ class InputWindow(Window):
     Window.unfocus(self)
 
 
-class OptionsToggle(Window):
-  def __init__(self, parent, label, prefCategory, prefName, width=None):
+class OptionsTrinaryStateWindow(Window):
+  def __init__(self, parent, label, prefCategory, prefName):
     if app.config.strict_debug:
       assert type(label) == str
     Window.__init__(self, parent)
@@ -1140,38 +1164,70 @@ class OptionsToggle(Window):
     self.name = label
     self.prefCategory = prefCategory
     self.prefName = prefName
-    if 1:
-      toggleOn = '[x]' + label
-      toggleOff = '[ ]' + label
-    if 0:
-      toggleOn = unichr(0x2612) + ' ' + control['label']
-      toggleOff = unichr(0x2610) + ' ' + control['label']
-    if 0:
-      toggleOn = '[+' + control['label'] + ']'
-      toggleOff = '[-' + control['label'] + ']'
-    width = max(width, min(len(toggleOn), len(toggleOff)))
-    self.width = width if width is not None else len(label)
-    self.toggleOn = toggleOn
-    self.toggleOff = toggleOff
     self.color = app.color.get('keyword')
     self.focusColor = app.color.get('selected')
+
+  def focus(self):
+    Window.focus(self)
+
+  def setUp(self, toggleOn, toggleOff, toggleUndefined, width=None):
+    if app.config.strict_debug:
+      assert type(toggleOn) == str
+      assert type(toggleOff) == str
+      assert type(toggleUndefined) == str
+      assert width is None or type(width) == int
+    self.toggleOn = toggleOn
+    self.toggleOff = toggleOff
+    self.toggleUndefined = toggleUndefined
+    longest = max(len(toggleOn), len(toggleOff), len(toggleUndefined))
+    self.width = width if width is not None else longest
+    self.updateLabel()
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
     self.controller.toggleValue()
 
+  def onPrefChanged(self, category, name):
+    Window.onPrefChanged(self, category, name)
+    if category != self.prefCategory or name != self.prefName:
+      return
+    self.updateLabel()
+
+  def updateLabel(self):
+    pref = app.prefs.prefs[self.prefCategory][self.prefName]
+    label = self.toggleOn if pref else self.toggleOff
+    self.label = '%*s' % (self.width, label)
+
   def preferredSize(self, rowLimit, colLimit):
-    #app.log.info(min(rowLimit, 1), min(colLimit, len(self.toggleOn)))
-    return min(rowLimit, 1), min(colLimit, len(self.toggleOn))
+    return min(rowLimit, 1), min(colLimit, abs(self.width))
 
   def render(self):
+    Window.render(self)
     if self.rows <= 0:
       return
-    label = self.toggleOn if app.prefs.prefs[self.prefCategory][self.prefName] else self.toggleOff
-    line = '%*s' % (self.width, label)
-    #app.log.info(line, self.rows, self.cols)
     self.writeLineRow = 0
     color = self.focusColor if self.hasFocus else self.color
-    self.writeLine(line[:self.cols], color)
+    self.writeLine(self.label[:self.cols], color)
+
+
+class OptionsToggle(OptionsTrinaryStateWindow):
+  def __init__(self, parent, label, prefCategory, prefName, width=None):
+    if app.config.strict_debug:
+      assert type(label) == str
+      assert type(prefCategory) == str
+      assert type(prefName) == str
+    OptionsTrinaryStateWindow.__init__(self, parent, label, prefCategory,
+        prefName)
+    if 0:
+      toggleOn = '[x]' + name
+      toggleOff = '[ ]' + name
+    if 0:
+      toggleOn = unichr(0x2612) + ' ' + control['name']
+      toggleOff = unichr(0x2610) + ' ' + control['name']
+    if 0:
+      toggleOn = '[+' + control['name'] + ']'
+      toggleOff = '[-' + control['name'] + ']'
+    OptionsTrinaryStateWindow.setUp(self, '[x]' + label, '[ ]' + label,
+        '[-]' + label, width)
 
 
 class RowWindow(ViewWindow):
@@ -1264,7 +1320,7 @@ class OptionsRow(ViewWindow):
     self.addElement(draw, 'selection', name, reference, width, sep,
         len('(*)'))
 
-  def addToggle(self, name, reference, width=None, sep="  "):
+  def removeThis_addToggle(self, name, reference, width=None, sep="  "):
     if app.config.strict_debug:
       assert type(name) == str
     if 1:
@@ -1400,7 +1456,7 @@ class PopupWindow(Window):
     self.controller.setTextBuffer(textBuffer)
 
   def unfocus(self):
-    self.hide()
+    self.detach()
     Window.unfocus(self)
 
 class PaletteWindow(Window):
@@ -1426,5 +1482,5 @@ class PaletteWindow(Window):
     self.controller.setTextBuffer(textBuffer)
 
   def unfocus(self):
-    self.hide()
+    self.detach()
     Window.unfocus(self)

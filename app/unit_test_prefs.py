@@ -12,14 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import re
 import unittest
 
-import app.default_prefs
-
-
-numbersRe = re.compile(app.default_prefs.joinReList(
-    app.default_prefs.__common_numbers))
+import app.prefs
 
 
 class PrefsTestCases(unittest.TestCase):
@@ -29,20 +24,6 @@ class PrefsTestCases(unittest.TestCase):
   def tearDown(self):
     pass
 
-  def test_common_numbers(self):
-    def testNumber(str, reg):
-      sre = numbersRe.search(str)
-      for i,s in enumerate(sre.groups()):
-        if s is not None:
-          self.assertEqual(sre.regs[i+1], reg)
-          self.assertEqual(s, str)
-    testNumber('0342', (0, 4))
-    testNumber('2342', (0, 4))
-    #testNumber('0x42', (0, 4))
-    #testNumber('0x0', (0, 3))
-    testNumber('.2342', (0, 5))
-    testNumber('2.342', (0, 5))
-    testNumber('23.42', (0, 5))
-    testNumber('234.2', (0, 5))
-    testNumber('2342.', (0, 5))
+  def test_fill_this_in(self):
+    pass
 
