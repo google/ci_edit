@@ -53,12 +53,10 @@ class ProgramWindow(app.window.ActiveWindow):
 
   def changeFocusTo(self, changeTo):
     self.focusedWindow.controller.onChange()
-    self.focusedWindow.unfocus()
     # Unfocus all the windows from the prior focused window to the common root.
     commonRoot = self.findCommonRoot(self.focusedWindow, changeTo)
     current = self.focusedWindow
     while current != commonRoot:
-      app.log.info('unfocus', current)
       if current.isFocusable:
         current.unfocus()
       current = current.parent
@@ -288,6 +286,16 @@ class ProgramWindow(app.window.ActiveWindow):
     if self.showLogWindow:
       self.logWindow.render()
     app.window.ActiveWindow.render(self)
+    window = self.focusedWindow
+    self.debugDraw(window)
+    penRow = window.textBuffer.penRow
+    penCol = window.textBuffer.penCol
+    if (penRow >= window.scrollRow and penRow < window.scrollRow + window.rows):
+      app.render.frame.setCursor((
+          window.top + penRow - window.scrollRow,
+          window.left + penCol - window.scrollCol))
+    else:
+      app.render.frame.setCursor(None)
 
   def reshape(self, top, left, rows, cols):
     app.window.ActiveWindow.reshape(self, top, left, rows, cols)

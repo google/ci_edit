@@ -305,6 +305,7 @@ class ActiveWindow(ViewWindow):
         assert issubclass(parent.__class__, ViewWindow), parent
     ViewWindow.__init__(self, parent)
     self.controller = None
+    self.hasFocus = False
     self.isFocusable = True
 
   def focus(self):
@@ -336,7 +337,6 @@ class Window(ActiveWindow):
       assert issubclass(parent.__class__, ViewWindow), parent
     ActiveWindow.__init__(self, parent)
     self.hasCaptiveCursor = app.prefs.editor['captiveCursor']
-    self.hasFocus = False
     self.textBuffer = None
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
@@ -374,16 +374,6 @@ class Window(ActiveWindow):
     if self.textBuffer:
       self.textBuffer.draw(self)
     ViewWindow.render(self)
-    if self.hasFocus:
-      self.debugDraw()
-      penRow = self.textBuffer.penRow
-      penCol = self.textBuffer.penCol
-      if (penRow >= self.scrollRow and penRow < self.scrollRow + self.rows):
-        app.render.frame.setCursor((
-            self.top + penRow - self.scrollRow,
-            self.left + penCol - self.scrollCol))
-      else:
-        app.render.frame.setCursor(None)
 
   def setController(self, controller):
     ActiveWindow.setController(self, controller)
@@ -649,7 +639,6 @@ class InteractiveFind(Window):
     Window.__init__(self, host)
     self.host = host
     self.expanded = False
-    self.ignoreUnfocus = False
     self.setController(app.cu_editor.InteractiveFind)
     indent = '  '
 
@@ -743,8 +732,6 @@ class InteractiveFind(Window):
     pass
 
   def focus(self):
-    assert not self.ignoreUnfocus
-    self.ignoreUnfocus = True
     self.reattach()
     if app.config.strict_debug:
       assert self.parent
@@ -772,12 +759,8 @@ class InteractiveFind(Window):
     self.layoutVertically(self.zOrder)
 
   def unfocus(self):
-    # The focus() member above will focus the findLine child, which will
-    # generate an unfocus() call. Ignore the one caused by our own call.
-    if self.ignoreUnfocus:
-      self.ignoreUnfocus = False
-      return
     self.detach()
+    Window.unfocus(self)
 
 
 class MessageLine(ViewWindow):
