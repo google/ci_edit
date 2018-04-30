@@ -247,6 +247,9 @@ class ViewWindow:
     for child in self.zOrder:
       child.showWindowHierarchy(indent + '  ')
 
+  def shortTimeSlice(self):
+    pass
+
   def reshape(self, top, left, rows, cols):
     self.moveTo(top, left)
     self.resizeTo(rows, cols)
@@ -382,6 +385,10 @@ class Window(ActiveWindow):
   def setTextBuffer(self, textBuffer):
     textBuffer.setView(self)
     self.textBuffer = textBuffer
+
+  def shortTimeSlice(self):
+    if self.textBuffer is not None:
+      self.textBuffer.parseScreenMaybe()
 
 
 class LabelWindow(ViewWindow):

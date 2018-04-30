@@ -124,6 +124,13 @@ class ProgramWindow(app.window.ActiveWindow):
       app.log.info(depth)
     app.log.error("focusable window not found")
 
+  def shortTimeSlice(self):
+    win = self.focusedWindow
+    while win is not None and win is not self:
+      win.shortTimeSlice()
+      #assert win is not win.parent
+      win = win.parent
+
   def clickedNearby(self, row, col):
     y, x = self.priorClickRowCol
     return y - 1 <= row <= y + 1 and x - 1 <= col <= x + 1
