@@ -378,7 +378,7 @@ class Actions(app.mutator.Mutator):
     else:
       self.setMessage('Bottom of file')
 
-  def cursorMoveUp(self):
+  def unused_____cursorMoveUp(self):
     if self.penRow <= 0:
       self.setMessage('Top of file')
       return
@@ -389,6 +389,20 @@ class Actions(app.mutator.Mutator):
     else:
       self.cursorMove(-1, lineLen - self.penCol)
     self.goalCol = savedGoal
+    self.adjustHorizontalScroll()
+
+  def cursorMoveUpOrBegin(self):
+    if self.penRow <= 0:
+      self.setMessage('Top of file')
+      self.cursorMove(0, -self.penCol)
+    else:
+      savedGoal = self.goalCol
+      lineLen = len(self.lines[self.penRow - 1])
+      if self.goalCol <= lineLen:
+        self.cursorMove(-1, self.goalCol - self.penCol)
+      else:
+        self.cursorMove(-1, lineLen - self.penCol)
+      self.goalCol = savedGoal
     self.adjustHorizontalScroll()
 
   def cursorMoveSubwordLeft(self):
@@ -494,7 +508,7 @@ class Actions(app.mutator.Mutator):
   def cursorSelectUp(self):
     if self.selectionMode == app.selectable.kSelectionNone:
       self.selectionCharacter()
-    self.cursorMoveUp()
+    self.cursorMoveUpOrBegin()
 
   def cursorSelectUpScroll(self):
     """Move the line above the selection to below the selection."""
@@ -671,7 +685,7 @@ class Actions(app.mutator.Mutator):
 
   def cursorUp(self):
     self.selectionNone()
-    self.cursorMoveUp()
+    self.cursorMoveUpOrBegin()
 
   def cursorUpScroll(self):
     self.selectionNone()

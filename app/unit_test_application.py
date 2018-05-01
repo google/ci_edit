@@ -152,7 +152,8 @@ class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
         self.selectionCheck(2, 6, 0, 0, 0),
         KEY_UP, self.cursorCheck(3, 12), self.selectionCheck(1, 5, 0, 0, 0),
         KEY_UP, self.cursorCheck(2, 11), self.selectionCheck(0, 4, 0, 0, 0),
-        KEY_UP, self.cursorCheck(2, 11), self.selectionCheck(0, 4, 0, 0, 0),
+        KEY_UP, self.cursorCheck(2, 7), self.selectionCheck(0, 0, 0, 0, 0),
+        KEY_RIGHT, KEY_RIGHT, KEY_RIGHT, KEY_RIGHT,
         KEY_LEFT, self.cursorCheck(2, 10), self.selectionCheck(0, 3, 0, 0, 0),
         KEY_LEFT, self.cursorCheck(2, 9), self.selectionCheck(0, 2, 0, 0, 0),
         KEY_DOWN, self.cursorCheck(3, 9), self.selectionCheck(1, 2, 0, 0, 0),
@@ -168,12 +169,33 @@ class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
         KEY_SHIFT_RIGHT, self.cursorCheck(4, 8), self.selectionCheck(2, 1, 2, 6, 3),
         CTRL_Q, 'n']);
 
+  def test_cursor_select_first_line(self):
+    self.runWithTestFile(kTestFile, [
+        self.cursorCheck(2, 7),
+        self.writeText('test\napple\norange'),
+        self.cursorCheck(4, 13), self.selectionCheck(2, 6, 0, 0, 0),
+        KEY_SHIFT_UP,
+        self.cursorCheck(3, 12), self.selectionCheck(1, 5, 2, 6, 3),
+        KEY_SHIFT_UP,
+        self.cursorCheck(2, 11), self.selectionCheck(0, 4, 2, 6, 3),
+        # Regression test: shift down past the end of the document should select
+        # to end of document (i.e. end of line).
+        KEY_SHIFT_UP,
+        self.cursorCheck(2, 7), self.selectionCheck(0, 0, 2, 6, 3),
+        # Same for non-selection.
+        KEY_DOWN, KEY_END,
+        self.cursorCheck(3, 12), self.selectionCheck(1, 5, 0, 0, 0),
+        KEY_UP,
+        self.cursorCheck(2, 11), self.selectionCheck(0, 4, 0, 0, 0),
+        KEY_UP,
+        self.cursorCheck(2, 7), self.selectionCheck(0, 0, 0, 0, 0),
+        CTRL_Q, 'n']);
+
   def test_cursor_select_last_line(self):
     self.runWithTestFile(kTestFile, [
         self.cursorCheck(2, 7),
         self.writeText('test\napple\norange'),
-        self.cursorCheck(4, 13),
-        self.selectionCheck(2, 6, 0, 0, 0),
+        self.cursorCheck(4, 13), self.selectionCheck(2, 6, 0, 0, 0),
         CTRL_G, ord('t'),
         self.cursorCheck(2, 7), self.selectionCheck(0, 0, 0, 0, 0),
         KEY_SHIFT_DOWN,
