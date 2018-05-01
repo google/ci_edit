@@ -344,10 +344,9 @@ class Actions(app.mutator.Mutator):
     self.adjustHorizontalScroll()
 
   def cursorMoveDownOrEnd(self):
+    savedGoal = self.goalCol
     if self.penRow == len(self.lines) - 1:
       self.setMessage('End of file')
-    savedGoal = self.goalCol
-    if self.penRow + 1 >= len(self.lines):
       self.cursorMove(0, len(self.lines[self.penRow]) - self.penCol)
     else:
       self.cursorMove(1, self.cursorColDelta(self.penRow + 1))
@@ -392,17 +391,17 @@ class Actions(app.mutator.Mutator):
     self.adjustHorizontalScroll()
 
   def cursorMoveUpOrBegin(self):
+    savedGoal = self.goalCol
     if self.penRow <= 0:
       self.setMessage('Top of file')
       self.cursorMove(0, -self.penCol)
     else:
-      savedGoal = self.goalCol
       lineLen = len(self.lines[self.penRow - 1])
       if self.goalCol <= lineLen:
         self.cursorMove(-1, self.goalCol - self.penCol)
       else:
         self.cursorMove(-1, lineLen - self.penCol)
-      self.goalCol = savedGoal
+    self.goalCol = savedGoal
     self.adjustHorizontalScroll()
 
   def cursorMoveSubwordLeft(self):

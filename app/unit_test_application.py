@@ -189,6 +189,9 @@ class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
         self.cursorCheck(2, 11), self.selectionCheck(0, 4, 0, 0, 0),
         KEY_UP,
         self.cursorCheck(2, 7), self.selectionCheck(0, 0, 0, 0, 0),
+        # The goalCol should track the desired goal column.
+        KEY_DOWN,
+        self.cursorCheck(3, 12), self.selectionCheck(1, 5, 0, 0, 0),
         CTRL_Q, 'n']);
 
   def test_cursor_select_last_line(self):
@@ -213,6 +216,9 @@ class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
         self.cursorCheck(4, 7), self.selectionCheck(2, 0, 2, 6, 0),
         KEY_DOWN,
         self.cursorCheck(4, 13), self.selectionCheck(2, 6, 2, 6, 0),
+        # The goalCol should track the desired goal column.
+        KEY_UP,
+        self.cursorCheck(3, 7), self.selectionCheck(1, 0, 2, 6, 0),
         CTRL_Q, 'n']);
 
   def test_ctrl_cursor_moves(self):
