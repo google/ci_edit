@@ -60,17 +60,25 @@ class DirectoryList(app.window.Window):
     self.inputWindow = inputWindow
     self.controller = app.cu_editor.DirectoryList(self)
     self.setTextBuffer(app.text_buffer.TextBuffer())
-    self.optionsRow = app.window.OptionsRow(self)
-    self.opt = {
-      'Name': True,
-      'Size': None,
-      'Modified': None,
-    }
-    self.optionsRow.beginGroup()
-    for key, size in [('Name', -40), ('Size', 15), ('Modified', 24)]:
-      self.optionsRow.addSortHeader(key, self.opt, size)
-    self.optionsRow.setParent(self, 0)
-    self.optionsRow.endGroup()
+    # Set up table headers.
+    color = app.color.get('top_info')
+    self.optionsRow = app.window.OptionsSelectionWindow(self)
+    self.optionsRow.setParent(self)
+    app.window.SortableHeaderWindow(self.optionsRow, 'Name', 'editor',
+        'filesSortAscendingByName', -41)
+    label = app.window.LabelWindow(self.optionsRow, '|')
+    label.setParent(self.optionsRow)
+    label.color = color
+    app.window.SortableHeaderWindow(self.optionsRow, 'Size ', 'editor',
+        'filesSortAscendingBySize', 16)
+    label = app.window.LabelWindow(self.optionsRow, '|')
+    label.setParent(self.optionsRow)
+    label.color = color
+    app.window.SortableHeaderWindow(self.optionsRow, 'Modified ', 'editor',
+        'filesSortAscendingByModifiedDate', 25)
+    label = app.window.LabelWindow(self.optionsRow, '|')
+    label.setParent(self.optionsRow)
+    label.color = color
 
   def reshape(self, top, left, rows, cols):
     """Change self and sub-windows to fit within the given rectangle."""

@@ -112,6 +112,9 @@ class ViewWindow:
       programWindow = programWindow.parent
     programWindow.debugDraw(self)
 
+  def deselect(self):
+    pass
+
   def detach(self):
     """Hide the window by removing self from parents' children, but keep same
     parent to be reattached later."""
@@ -1158,6 +1161,29 @@ class InputWindow(Window):
     Window.unfocus(self)
 
 
+class OptionsSelectionWindow(ViewWindow):
+  """Mutex window."""
+  def __init__(self, parent):
+    if app.config.strict_debug:
+      assert parent is not None
+    ViewWindow.__init__(self, parent)
+    self.color = app.color.get('top_info')
+
+  def reshape(self, top, left, rows, cols):
+    ViewWindow.reshape(self, top, left, rows, cols)
+    self.layoutHorizontally(self.zOrder)
+
+  def childSelected(self, selectedChild):
+    app.log.info(self.zOrder)
+    for child in self.zOrder:
+      if child is not selectedChild:
+        child.deselect()
+
+  def render(self):
+    self.blank(self.color)
+    ViewWindow.render(self)
+
+
 class OptionsTrinaryStateWindow(Window):
   def __init__(self, parent, label, prefCategory, prefName):
     if app.config.strict_debug:
@@ -1201,7 +1227,10 @@ class OptionsTrinaryStateWindow(Window):
 
   def updateLabel(self):
     pref = app.prefs.prefs[self.prefCategory][self.prefName]
-    label = self.toggleOn if pref else self.toggleOff
+    if pref is None:
+      label = self.toggleUndefined
+    else:
+      label = self.toggleOn if pref else self.toggleOff
     self.label = '%*s' % (self.width, label)
 
   def preferredSize(self, rowLimit, colLimit):
@@ -1491,3 +1520,31 @@ class PaletteWindow(Window):
   def unfocus(self):
     self.detach()
     Window.unfocus(self)
+
+
+class SortableHeaderWindow(OptionsTrinaryStateWindow):
+  def __init__(self, parent, label, prefCategory, prefName, width=None):
+    if app.config.strict_debug:
+      assert type(label) == str
+      assert type(prefCategory) == str
+      assert type(prefName) == str
+    OptionsTrinaryStateWindow.__init__(self, parent, label, prefCategory,
+        prefName)
+    self.color = app.color.get('top_info')
+    def draw(label, decoration, width):
+      if width < 0:
+        x = '%s %s' % (label, decoration)
+      else:
+        x = '%s %s' % (decoration, label)
+      return '%*s' % (width, x)
+    OptionsTrinaryStateWindow.setUp(self,
+        draw(label, 'v', width),
+        draw(label, '^', width),
+        draw(label, '-', width))
+
+  def deselect(self):
+    self.controller.clearValue()
+
+  def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
+    self.parent.childSelected(self)
+    self.controller.toggleValue()

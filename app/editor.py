@@ -298,6 +298,13 @@ class ToggleController(app.controller.Controller):
       assert issubclass(view.__class__, app.window.ViewWindow), view
     app.controller.Controller.__init__(self, view, 'toggle')
 
+  def clearValue(self):
+    category = self.view.prefCategory
+    name = self.view.prefName
+    prefs = app.prefs
+    prefs.save(category, name, None)
+    self.view.onPrefChanged(category, name)
+
   def toggleValue(self):
     category = self.view.prefCategory
     name = self.view.prefName

@@ -57,7 +57,10 @@ class DirectoryListController(app.controller.Controller):
       showSizes = app.prefs.editor['filesShowSizes']
       showModified = app.prefs.editor['filesShowModifiedDates']
 
-      viewOptions = self.view.opt
+      sortByName = app.prefs.editor['filesSortAscendingByName']
+      sortBySize = app.prefs.editor['filesSortAscendingBySize']
+      sortByModifiedDate = app.prefs.editor['filesSortAscendingByModifiedDate']
+
       lines = []
       try:
         fileLines = []
@@ -77,16 +80,16 @@ class DirectoryListController(app.controller.Controller):
           if showModified:
             iModified = os.path.getmtime(fullPath)
           fileLines.append([i, iSize, iModified])
-        if viewOptions['Size'] is not None:
+        if sortBySize is not None:
           # Sort by size.
-          fileLines.sort(reverse=not viewOptions['Size'],
+          fileLines.sort(reverse=not sortBySize,
               key=lambda x: x[1])
-        elif viewOptions['Modified'] is not None:
+        elif sortByModifiedDate is not None:
           # Sort by modification date.
-          fileLines.sort(reverse=not viewOptions['Modified'],
+          fileLines.sort(reverse=not sortByModifiedDate,
               key=lambda x: x[2])
         else:
-          fileLines.sort(reverse=not viewOptions['Name'],
+          fileLines.sort(reverse=not sortByName,
               key=lambda x: unicode.lower(x[0]))
         lines = ['%-40s  %16s  %24s' % (
             i[0], '%s bytes' % (i[1],) if i[1] is not None else '',
