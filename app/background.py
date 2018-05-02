@@ -59,7 +59,7 @@ def background(inputQueue, outputQueue):
           app.log.info('bg received quit message')
           return
         program.executeCommandList(message)
-        program.focusedWindow.textBuffer.parseScreenMaybe()
+        program.shortTimeSlice()
         program.render()
         # debugging only: program.showWindowHierarchy()
         outputQueue.put(app.render.frame.grabFrame())

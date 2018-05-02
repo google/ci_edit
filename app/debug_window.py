@@ -66,7 +66,7 @@ class DebugWindow(app.window.ActiveWindow):
         color)
     self.writeLine("win %r"%(win,),
         color)
-    self.writeLine("win %r"%(program.programWindow.focusedWindow,),
+    self.writeLine("foc %r"%(program.programWindow.focusedWindow,),
         color)
     self.writeLine("tb %r"%(textBuffer,),
         color)

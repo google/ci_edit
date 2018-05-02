@@ -106,6 +106,7 @@ getfilesystemencoding
 getframe
 getgid
 getgroups
+getitem
 getloadavg
 getlogin
 getmaxyx
@@ -129,6 +130,7 @@ getyx
 gid
 gmem
 goto
+hasattr
 hashlib
 hexdigest
 hexversion
@@ -343,4 +345,3 @@ wuntraced
 xclip
 xrange
 xsel
-hasattr

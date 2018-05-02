@@ -35,6 +35,7 @@ import app.unit_test_automatic_column_adjustment
 import app.unit_test_bookmarks
 import app.unit_test_brace_matching
 import app.unit_test_file_manager
+import app.unit_test_find_window
 import app.unit_test_parser
 import app.unit_test_performance
 import app.unit_test_prefs
@@ -52,6 +53,7 @@ tests = {
   'bookmarks': app.unit_test_bookmarks.BookmarkTestCases,
   'brace_matching': app.unit_test_brace_matching.BraceMatchingTestCases,
   'file_manager': app.unit_test_file_manager.FileManagerTestCases,
+  'find': app.unit_test_find_window.FindWindowTestCases,
   'parser': app.unit_test_parser.ParserTestCases,
   'performance': app.unit_test_performance.PerformanceTestCases,
   'prefs': app.unit_test_prefs.PrefsTestCases,
@@ -70,6 +72,36 @@ def runTests(tests, stopOnFailure=False):
       return -1
   return 0
 
+def parseArgList(argList):
+  testList = tests.values()
+  try:
+    argList.remove('--help')
+    print 'Help:'
+    print './unit_tests.py [--log] [<name>]'
+    print
+    print '  --log     Print output from app.log.* calls'
+    print '  <name>    Run the named set of tests (only)'
+    print
+    print 'The <name> argument is any of:'
+    testNames = tests.keys()
+    testNames.sort()
+    for i in testNames:
+      print ' ', i
+    sys.exit(0)
+  except ValueError:
+    pass
+  try:
+    useAppLog = False
+    argList.remove('--log')
+    useAppLog = True
+  except ValueError:
+    pass
+  if len(argList) > 1:
+    testList = [tests[argList[1]]]
+  if useAppLog:
+    app.log.wrapper(lambda: runTests(testList, True))
+  else:
+    runTests(testList, True)
+
 if __name__ == '__main__':
-  app.log.info("starting unit tests")
-  app.log.wrapper(runTests)
+  parseArgList(sys.argv)
