@@ -120,8 +120,15 @@ class Controller:
     app.log.fatal(windowName + ' not found');
     return None
 
+  def currentInputWindow(self):
+    return self.getNamedWindow('inputWindow')
+
   def findAndChangeTo(self, windowName):
     window = self.getNamedWindow(windowName)
+    window.bringToFront()
+    self.view.changeFocusTo(window)
+
+  def changeTo(self, window):
     window.bringToFront()
     self.view.changeFocusTo(window)
 

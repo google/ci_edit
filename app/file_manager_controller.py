@@ -129,7 +129,7 @@ class DirectoryListController(app.controller.Controller):
       path = os.path.dirname(path) + os.path.sep
     self.view.host.setPath(path + self.view.contents[row - 2])
     if not os.path.isdir(self.view.host.getPath()):
-      self.view.host.controller.doCreateOrOpen()
+      self.view.host.controller.performPrimaryAction()
 
   def optionChanged(self, name, value):
     self.shownDirectory = None
@@ -145,56 +145,9 @@ class FileManagerController(app.controller.Controller):
   """
   def __init__(self, view):
     app.controller.Controller.__init__(self, view, 'FileManagerController')
-    self.primaryActions = {
-      'open': self.doCreateOrOpen,
-      'saveAs': self.doSaveAs,
-      'selectDir': self.doSelectDir,
-    }
 
   def performPrimaryAction(self):
-    row = self.view.directoryList.textBuffer.penRow
-    if row == 0:
-      if not os.path.isdir(self.view.getPath()):
-        self.primaryActions[self.view.mode]()
-    else:
-      self.view.directoryList.controller.openFileOrDir(row)
-
-  def doCreateOrOpen(self):
-    path = self.textBuffer.lines[0]
-    if not os.access(path, os.R_OK):
-      if os.path.isfile(path):
-        clip = [path + ":", 'Error opening file.']
-        return
-    textBuffer = app.buffer_manager.buffers.loadTextBuffer(path)
-    assert textBuffer.parser
-    self.view.parent.host.inputWindow.setTextBuffer(textBuffer)
-    self.view.textBuffer.replaceLines(('',))
-    self.changeToInputWindow()
-
-  def doSaveAs(self):
-    path = self.textBuffer.lines[0]
-    tb = self.view.parent.host.inputWindow.textBuffer
-    tb.setFilePath(path);
-    self.changeToInputWindow()
-    if not len(path):
-      tb.setMessage('File not saved (file name was empty).')
-      return
-    if not tb.isSafeToWrite():
-      self.view.changeFocusTo(self.view.host.inputWindow.confirmOverwrite)
-      return
-    tb.fileWrite();
-    self.view.textBuffer.replaceLines(('',))
-
-  def doSelectDir(self):
-    # TODO(dschuyler): not yet implemented.
-    self.view.textBuffer.replaceLines(('',))
-    self.changeToInputWindow()
-
-  #def focus(self):
-  #  Should this just pass to pathWindow
-  #  self.view.pathWindow.focus()
-  #  self.view.directoryList.focus()
-  #  app.controller.Controller.focus(self)
+    self.view.pathWindow.controller.performPrimaryAction()
 
   def info(self):
     app.log.info('FileManagerController command set')
@@ -211,7 +164,7 @@ class FileManagerController(app.controller.Controller):
 
 
 class FilePathInputController(app.controller.Controller):
-  """Create or open files.
+  """Manipulate path string.
   """
   def __init__(self, view):
     app.controller.Controller.__init__(self, view, 'FilePathInputController')
@@ -235,11 +188,12 @@ class FilePathInputController(app.controller.Controller):
       if os.path.isfile(path):
         clip = [path + ":", 'Error opening file.']
         return
+    self.view.textBuffer.replaceLines(('',))
     textBuffer = app.buffer_manager.buffers.loadTextBuffer(path)
     assert textBuffer.parser
-    self.view.parent.parent.inputWindow.setTextBuffer(textBuffer)
-    self.view.textBuffer.replaceLines(('',))
-    self.changeToInputWindow()
+    inputWindow = self.currentInputWindow()
+    inputWindow.setTextBuffer(textBuffer)
+    self.changeTo(inputWindow)
 
   def doSaveAs(self):
     path = self.textBuffer.lines[0]
