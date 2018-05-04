@@ -175,12 +175,13 @@ class FilePathInputController(app.controller.Controller):
     }
 
   def performPrimaryAction(self):
-    row = self.view.parent.directoryList.textBuffer.penRow
+    directoryList = self.getNamedWindow('directoryList')
+    row = directoryList.textBuffer.penRow
     if row == 0:
       if not os.path.isdir(self.view.getPath()):
         self.primaryActions[self.view.parent.mode]()
     else:
-      self.view.parent.directoryList.controller.openFileOrDir(row)
+      directoryList.controller.openFileOrDir(row)
 
   def doCreateOrOpen(self):
     path = self.textBuffer.lines[0]
@@ -197,14 +198,15 @@ class FilePathInputController(app.controller.Controller):
 
   def doSaveAs(self):
     path = self.textBuffer.lines[0]
-    tb = self.view.parent.parent.inputWindow.textBuffer
+    inputWindow = self.currentInputWindow()
+    tb = inputWindow.textBuffer
     tb.setFilePath(path);
-    self.changeToInputWindow()
+    self.changeTo(inputWindow)
     if not len(path):
       tb.setMessage('File not saved (file name was empty).')
       return
     if not tb.isSafeToWrite():
-      self.view.changeFocusTo(self.view.host.inputWindow.confirmOverwrite)
+      self.view.changeFocusTo(inputWindow.confirmOverwrite)
       return
     tb.fileWrite();
     self.view.textBuffer.replaceLines(('',))
@@ -216,14 +218,15 @@ class FilePathInputController(app.controller.Controller):
 
   def focus(self):
     if self.view.textBuffer.isEmpty():
-      if len(self.view.parent.inputWindow.textBuffer.fullPath) == 0:
+      inputWindow = self.currentInputWindow()
+      if len(inputWindow.textBuffer.fullPath) == 0:
         path = os.getcwd()
       else:
-        path = os.path.dirname(self.view.parent.inputWindow.textBuffer.fullPath)
+        path = os.path.dirname(inputWindow.textBuffer.fullPath)
       if len(path) != 0:
         path += os.path.sep
       self.view.textBuffer.replaceLines((path,))
-    self.view.parent.directoryList.focus()
+    self.getNamedWindow('directoryList').focus()
     app.controller.Controller.focus(self)
 
   def info(self):
@@ -235,14 +238,14 @@ class FilePathInputController(app.controller.Controller):
       self.textBuffer.insert('/')
 
   def onChange(self):
-    self.view.parent.directoryList.controller.onChange()
+    self.getNamedWindow('directoryList').controller.onChange()
     app.controller.Controller.onChange(self)
 
   def optionChanged(self, name, value):
-    self.view.parent.directoryList.controller.shownDirectory = None
+    self.getNamedWindow('directoryList').controller.shownDirectory = None
 
   def passEventToDirectoryList(self):
-    self.view.parent.directoryList.controller.doCommand(self.savedCh, None)
+    self.getNamedWindow('directoryList').controller.doCommand(self.savedCh, None)
 
   def tabCompleteExtend(self):
     """Extend the selection to match characters in common."""
@@ -283,5 +286,5 @@ class FilePathInputController(app.controller.Controller):
     if expandedPath == os.path.expandvars(os.path.expanduser(
         self.textBuffer.lines[0])):
       # No further expansion found.
-      self.view.parent.directoryList.controller.setFilter(fileName)
+      self.getNamedWindow('directoryList').controller.setFilter(fileName)
     self.onChange()
