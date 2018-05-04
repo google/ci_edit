@@ -396,7 +396,7 @@ class Window(ActiveWindow):
 
 class LabelWindow(ViewWindow):
   """A text label. The label is inert, it will pass events to its parent."""
-  def __init__(self, parent, label, preferredWidth=None, align='right'):
+  def __init__(self, parent, label, preferredWidth=None, align='left'):
     if app.config.strict_debug:
       assert issubclass(parent.__class__, ViewWindow), parent
       assert type(label) == str
@@ -405,7 +405,7 @@ class LabelWindow(ViewWindow):
     ViewWindow.__init__(self, parent)
     self.label = label
     self.preferredWidth = preferredWidth
-    self.align = 1 if align == 'right' else -1
+    self.align = -1 if align == 'left' else 1
     self.color = app.color.get('keyword')
 
   def preferredSize(self, rowLimit, colLimit):
@@ -413,14 +413,17 @@ class LabelWindow(ViewWindow):
       assert self.parent
       assert rowLimit >= 0
       assert colLimit >= 0
-    return (min(rowLimit, 1), min(colLimit, len(self.label)))
+    preferredWidth = self.preferredWidth if self.preferredWidth is not None \
+        else len(self.label)
+    return (min(rowLimit, 1), min(colLimit, preferredWidth))
 
   def render(self):
     ViewWindow.render(self)
     if self.rows <= 0:
       return
-    #app.log.info(self.top, self.left, self.rows, self.cols, self.label)
-    self.addStr(0, 0, self.label, self.color)
+    line = self.label[:self.cols]
+    line = unicode("%*s") % (self.cols * self.align, line)
+    self.addStr(0, 0, line, self.color)
 
 
 class LabeledLine(Window):
@@ -441,6 +444,8 @@ class LabeledLine(Window):
 
   def focus(self):
     self.bringToFront()
+    if not self.controller:
+      app.log.info(self, repr(self.label))
     Window.focus(self)
 
   def preferredSize(self, rowLimit, colLimit):

@@ -299,6 +299,34 @@ class FileOpener(app.file_manager_controller.FileManagerController):
     self.commandDefault = self.textBuffer.insertPrintable
 
 
+class FilePathInput(app.file_manager_controller.FilePathInputController):
+  """Open a file to edit."""
+  def __init__(self, view):
+    app.file_manager_controller.FilePathInputController.__init__(self, view)
+
+  def setTextBuffer(self, textBuffer):
+    app.file_manager_controller.FilePathInputController.setTextBuffer(self,
+        textBuffer)
+    commandSet = initCommandSet(self, textBuffer)
+    commandSet.update({
+      KEY_ESCAPE: self.changeToInputWindow,
+      KEY_F1: self.info,
+      KEY_PAGE_DOWN: self.passEventToDirectoryList,
+      KEY_PAGE_UP: self.passEventToDirectoryList,
+      KEY_DOWN: self.passEventToDirectoryList,
+      KEY_UP: self.passEventToDirectoryList,
+      CTRL_I: self.tabCompleteExtend,
+      CTRL_J: self.performPrimaryAction,
+      CTRL_N: self.saveEventChangeToHostWindow,
+      CTRL_O: self.performPrimaryAction,
+      CTRL_P: self.changeToPrediction,
+      CTRL_Q: self.saveEventChangeToHostWindow,
+      CTRL_S: self.saveEventChangeToHostWindow,
+    })
+    self.commandSet = commandSet
+    self.commandDefault = self.textBuffer.insertPrintable
+
+
 class InteractivePrediction(app.editor.InteractivePrediction):
   """Make a guess."""
   def __init__(self, view):

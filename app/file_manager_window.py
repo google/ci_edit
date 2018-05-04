@@ -57,6 +57,7 @@ class DirectoryList(app.window.Window):
       assert self is not host
     app.window.Window.__init__(self, host)
     self.host = host
+    self.isFocusable = False
     self.inputWindow = inputWindow
     self.controller = app.cu_editor.DirectoryList(self)
     self.setTextBuffer(app.text_buffer.TextBuffer())
@@ -128,15 +129,46 @@ class DirectoryList(app.window.Window):
     self.controller.setTextBuffer(textBuffer)
 
 
-class FileManagerWindow(app.window.Window):
-  def __init__(self, host, inputWindow):
+class PathWindow(app.window.Window):
+  def __init__(self, host):
     if app.config.strict_debug:
       assert host
       assert issubclass(host.__class__, app.window.ActiveWindow), host
     app.window.Window.__init__(self, host)
     self.host = host
+    self.controller = app.cu_editor.FilePathInput(self)
+    self.setTextBuffer(app.text_buffer.TextBuffer())
+
+  def getPath(self):
+    return self.textBuffer.lines[0]
+
+  def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
+    row = self.scrollRow + paneRow
+    col = self.scrollCol + paneCol
+    line = self.textBuffer.lines[0]
+    col = self.scrollCol + paneCol
+    self.parent.directoryList.controller.shownDirectory = None
+    if col >= len(line):
+      return
+    slash = line[col:].find('/')
+    self.setPath(line[:col + slash + 1])
+
+  def setPath(self, path):
+    self.textBuffer.replaceLines((path,))
+
+  def setTextBuffer(self, textBuffer):
+    textBuffer.lineLimitIndicator = 0
+    textBuffer.highlightTrailingWhitespace = False
+    app.window.Window.setTextBuffer(self, textBuffer)
+    self.controller.setTextBuffer(textBuffer)
+
+
+class FileManagerWindow(app.window.Window):
+  def __init__(self, host, inputWindow):
+    app.window.Window.__init__(self, host)
     self.inputWindow = inputWindow
     self.inputWindow.fileManagerWindow = self
+
     self.mode = 'open'
     self.showTips = False
     self.controller = app.cu_editor.FileOpener(self)
@@ -148,10 +180,11 @@ class FileManagerWindow(app.window.Window):
     self.setMode('open')
     self.titleRow.setParent(self, 0)
 
+    self.pathWindow = PathWindow(self)
+    self.pathWindow.setParent(self, 0)
+
     self.directoryList = DirectoryList(self, inputWindow)
     self.directoryList.setParent(self, 0)
-    self.messageLine = app.window.LabeledLine(self, "")
-    self.messageLine.setParent(self, 0)
 
     if 1:
       self.optionsRow = app.window.RowWindow(self, 2)
@@ -170,36 +203,38 @@ class FileManagerWindow(app.window.Window):
           'filesShowModifiedDates')
       toggle.color = app.color.get('top_info')
 
-  def getPath(self):
-    return self.textBuffer.lines[0]
+    self.messageLine = app.window.LabelWindow(self, "")
+    self.messageLine.setParent(self)
 
-  def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
-    row = self.scrollRow + paneRow
-    col = self.scrollCol + paneCol
-    line = self.textBuffer.lines[0]
-    col = self.scrollCol + paneCol
-    self.directoryList.controller.shownDirectory = None
-    if col >= len(line):
-      return
-    slash = line[col:].find('/')
-    self.setPath(line[:col + slash + 1])
+  def bringChildToFront(self, child):
+    # The FileManagerWindow window doesn't reorder children.
+    pass
+
+  def focus(self):
+    self.controller.focus()
+    self.changeFocusTo(self.pathWindow)
+
+  def getPath(self):
+    return self.pathWindow.getPath()
+
+  def nextFocusableWindow(self, start, reverse=False):
+    # Keep the tab focus in the child branch. (The child view will call this,
+    # tell the child there is nothing to tab to up here).
+    return None
 
   def onPrefChanged(self, category, name):
     self.directoryList.controller.optionChanged(category, name)
     app.window.Window.onPrefChanged(self, category, name)
 
-  def quitNow(self):
-    app.log.debug()
-    self.host.quitNow()
-
   def reshape(self, top, left, rows, cols):
     """Change self and sub-windows to fit within the given rectangle."""
     app.log.detail('reshape', top, left, rows, cols)
+    app.window.Window.reshape(self, top, left, rows, cols)
     originalRows = rows
     self.titleRow.reshape(top, left, 1, cols)
     top += 1
     rows -= 1
-    app.window.Window.reshape(self, top, left, 1, cols)
+    self.pathWindow.reshape(top, left, 1, cols)
     top += 1
     rows -= 1
     self.optionsRow.reshape(originalRows - 2, left, 1, cols)
@@ -217,12 +252,5 @@ class FileManagerWindow(app.window.Window):
     }
     self.modeTitle['name'] = modeTitles[mode]
 
-  def setTextBuffer(self, textBuffer):
-    textBuffer.lineLimitIndicator = 0
-    textBuffer.highlightTrailingWhitespace = False
-    app.window.Window.setTextBuffer(self, textBuffer)
-    self.controller.setTextBuffer(textBuffer)
-
   def setPath(self, path):
-    self.textBuffer.replaceLines((path,))
-
+    self.pathWindow.setPath(path)
