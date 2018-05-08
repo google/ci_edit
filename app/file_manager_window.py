@@ -178,13 +178,13 @@ class FileManagerWindow(app.window.Window):
     self.titleRow.addLabel(' ci   ')
     self.modeTitle = self.titleRow.addLabel('x')
     self.setMode('open')
-    self.titleRow.setParent(self, 0)
+    self.titleRow.setParent(self)
 
     self.pathWindow = PathWindow(self)
-    self.pathWindow.setParent(self, 0)
+    self.pathWindow.setParent(self)
 
     self.directoryList = DirectoryList(self, inputWindow)
-    self.directoryList.setParent(self, 0)
+    self.directoryList.setParent(self)
 
     if 1:
       self.optionsRow = app.window.RowWindow(self, 2)
