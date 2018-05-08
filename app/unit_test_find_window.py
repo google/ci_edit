@@ -40,7 +40,7 @@ class FindWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
         self.displayCheck(-1, 0, ["      "]),
         CTRL_F, self.displayCheck(-1, 0, ["Find: "]),
         CTRL_I, self.displayCheck(-3, 0, ["Find: ", "Replace: ", "["]),
-        KEY_BTAB, KEY_BTAB, self.displayCheck(-1, 0, ["Find: "]),
+        #KEY_BTAB, KEY_BTAB, self.displayCheck(-1, 0, ["Find: "]),
         CTRL_Q])
 
   def test_find_esc_from_find(self):

@@ -217,9 +217,9 @@ class InteractiveFindInput(app.controller.Controller):
     self.view.parent.expandFindWindow(True)
     app.controller.Controller.nextFocusableWindow(self)
 
-  def priorFocusableWindow(self):
-    if not app.controller.Controller.priorFocusableWindow(self):
-      self.view.host.expandFindWindow(False)
+  #def priorFocusableWindow(self):
+  #  if not app.controller.Controller.priorFocusableWindow(self):
+  #    self.view.host.expandFindWindow(False)
 
   def findNext(self):
     self.parentController().findNext()

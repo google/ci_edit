@@ -156,7 +156,7 @@ class InteractiveFindInput(app.editor.InteractiveFindInput):
   def focus(self):
     if self.view.parent.expanded:
       self.view.parent.parent.textBuffer.setMessage(
-          'Press shift+tab for fewer options; ctrl+g find; ctrl+r find prior.')
+          'Press ctrl+g to find again; ctrl+r find prior.')
     else:
       self.view.parent.parent.textBuffer.setMessage(
           'Press tab for more options; ctrl+g to find next; ctrl+r find prior.')
@@ -309,6 +309,7 @@ class FilePathInput(app.file_manager_controller.FilePathInputController):
         textBuffer)
     commandSet = initCommandSet(self, textBuffer)
     commandSet.update({
+      KEY_BTAB: self.priorFocusableWindow,
       KEY_ESCAPE: self.changeToInputWindow,
       KEY_F1: self.info,
       KEY_PAGE_DOWN: self.passEventToDirectoryList,

@@ -217,11 +217,6 @@ class FileManagerWindow(app.window.Window):
   def getPath(self):
     return self.pathWindow.getPath()
 
-  def nextFocusableWindow(self, start, reverse=False):
-    # Keep the tab focus in the child branch. (The child view will call this,
-    # tell the child there is nothing to tab to up here).
-    return None
-
   def onPrefChanged(self, category, name):
     self.directoryList.controller.optionChanged(category, name)
     app.window.Window.onPrefChanged(self, category, name)

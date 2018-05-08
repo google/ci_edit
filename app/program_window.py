@@ -271,6 +271,11 @@ class ProgramWindow(app.window.ActiveWindow):
     self.zOrder[-1].reshape(
         eachRows * (count - 1), 0, rows - eachRows * (count - 1), inputWidth)
 
+  def nextFocusableWindow(self, start, reverse=False):
+    # Keep the tab focus in the child branch. (The child view will call this,
+    # tell the child there is nothing to tab to up here).
+    return None
+
   def normalize(self):
     self.presentModal(None)
 

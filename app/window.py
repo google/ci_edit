@@ -172,42 +172,39 @@ class ViewWindow:
     self.top += top
     self.left += left
 
-  def nextFocusableWindow(self, start, reverse=False):
+  def __childFocusableWindow(self, reverse=False):
     windows = self.zOrder[:]
     if reverse:
-      app.log.info('reverse')
       windows.reverse()
-    try:
-      found = windows.index(start)
-      windows = windows[found + 1:]
-      for i in windows:
-        app.log.info(self, i)
-        if i.isFocusable:
-          app.log.info(self, i)
-          return i
-        else:
-          r = i.nextFocusableWindow(start, reverse)
-          if r is not None:
-            app.log.info(self, r)
-            return r
-      windows = windows[:found]
-    except ValueError:
-      app.log.info('ValueError')
-      pass
-    if self.parent is not None:
-      r = self.parent.nextFocusableWindow(self, reverse)
-      if r is not None:
-        return r
     for i in windows:
-      app.log.info(self, i)
       if i.isFocusable:
         return i
       else:
-        r = i.nextFocusableWindow(start, reverse)
+        r = i.__childFocusableWindow(reverse)
         if r is not None:
           return r
-    app.log.info(self)
-    return None
+
+  def nextFocusableWindow(self, start, reverse=False):
+    """Ignore |start| when searching."""
+    windows = self.zOrder[:]
+    if reverse:
+      windows.reverse()
+    try:
+      found = windows.index(start)
+    except ValueError:
+      found = -1
+    windows = windows[found + 1:]
+    for i in windows:
+      if i.isFocusable:
+        return i
+      else:
+        r = i.__childFocusableWindow(reverse)
+        if r is not None:
+          return r
+    r = self.parent.nextFocusableWindow(self, reverse)
+    if r is not None:
+      return r
+    return self.__childFocusableWindow(reverse)
 
   def normalize(self):
     self.parent.normalize()
