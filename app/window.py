@@ -728,6 +728,9 @@ class InteractiveFind(Window):
 
   def reattach(self):
     Window.reattach(self)
+    # TODO(dschuyler): consider removing expanded control.
+    # See https://github.com/google/ci_edit/issues/170
+    self.expanded = True
     self.parent.layout()
 
   def detach(self):
