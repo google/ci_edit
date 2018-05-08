@@ -246,9 +246,21 @@ class ViewWindow:
 
   def showWindowHierarchy(self, indent='  '):
     """For debugging."""
-    app.log.info("%s%s" % (indent, self))
+    focus = '[f]' if self.isFocusable else '[ ]'
+    extra = ''
+    if hasattr(self, 'label'):
+      extra += ' "' + self.label + '"'
+    app.log.info("%s%s%s%s" % (indent, focus, self, extra))
     for child in self.zOrder:
       child.showWindowHierarchy(indent + '  ')
+
+  def showFullWindowHierarchy(self, indent='  '):
+    """For debugging."""
+    f = self
+    while f.parent is not None:
+      f = f.parent
+    assert f
+    f.showWindowHierarchy()
 
   def shortTimeSlice(self):
     pass
