@@ -527,4 +527,6 @@ class ToggleController(app.editor.ToggleController):
       ord(' '): self.toggleValue,
     })
     self.commandSet = commandSet
-    self.commandDefault = self.textBuffer.insertPrintable
+    def noOp(ch, meta):
+      app.log.info('noOp in ToggleController')
+    self.commandDefault = noOp
