@@ -29,18 +29,21 @@ class PredictionListController(app.controller.Controller):
     assert self is not view
     app.controller.Controller.__init__(self, view, 'PredictionListController')
     self.filter = None
+    # |items| is a tuple of: buffer, path, flags, type.
+    self.items = None
     self.shownList = None
 
   def buildFileList(self, currentFile):
     if app.config.strict_debug:
       assert type(currentFile) is str
+
     self.items = []
     for i in app.buffer_manager.buffers.buffers:
       dirty = '*' if i.isDirty() else '.'
       if i.fullPath:
-        self.items.append((i, i.fullPath, dirty))
+        self.items.append((i, i.fullPath, dirty, 'file'))
       else:
-        self.items.append((i, '<new file> %s'%(i.lines[0][:20]), dirty))
+        self.items.append((i, '<new file> %s'%(i.lines[0][:20]), dirty, 'new'))
     dirPath, fileName = os.path.split(currentFile)
     file, ext = os.path.splitext(fileName)
     # TODO(dschuyler): rework this ignore list.
@@ -54,7 +57,7 @@ class PredictionListController(app.controller.Controller):
     for i in contents:
       f, e = os.path.splitext(i)
       if file == f and ext != e and e not in ignoreExt:
-        self.items.append((None, os.path.join(dirPath, i), '='))
+        self.items.append((None, os.path.join(dirPath, i), '=', ''))
     if 1:
       app.log.info()
       # Chromium specific hack.
@@ -63,13 +66,13 @@ class PredictionListController(app.controller.Controller):
         app.log.info(chromiumPath)
         if os.path.isfile(chromiumPath):
           app.log.info()
-          self.items.append((None, chromiumPath, '='))
+          self.items.append((None, chromiumPath, '=', 'alt'))
       elif currentFile.endswith('.html'):
         app.log.info()
         chromiumPath = currentFile[:-len('.html')] + '-extracted.js'
         if os.path.isfile(chromiumPath):
           app.log.info()
-          self.items.append((None, chromiumPath, '='))
+          self.items.append((None, chromiumPath, '=', 'alt'))
     # Suggest item.
     return len(app.buffer_manager.buffers.buffers) % len(self.items)
 
@@ -81,101 +84,29 @@ class PredictionListController(app.controller.Controller):
     app.log.info('PredictionListController command set')
 
   def onChange(self):
+    app.log.info(repr(self.items), repr(self.shownList))
     app.log.info(self.view.textBuffer.penRow)
-    savedRow = self.view.textBuffer.penRow
-    self.index = self.buildFileList(self.view.host.textBuffer.fullPath)
-    app.log.info(self.items)
-    self.view.textBuffer.replaceLines(tuple([
-        "%*s %.*s" % (16, '', 41, i[1][-41:]) for i in self.items
-        ]))
-    self.view.textBuffer.penRow = max(savedRow, self.index)
-    self.view.textBuffer.penCol = 0
-    self.view.scrollRow = 0
-    self.view.scrollCol = 0
-    self.filter = None
 
-
-
-
-
-
-    return
     input = self.view.parent.getPath()
     if self.shownList == input:
       return
     self.shownList = input
-    fullPath = app.buffer_file.fullPath(input)
-    dirPath = fullPath
-    fileName = ''
-    if len(input) > 0 and input[-1] != os.sep:
-      dirPath, fileName = os.path.split(fullPath)
-      self.view.textBuffer.findRe = re.compile('()^' + re.escape(fileName))
-    else:
-      self.view.textBuffer.findRe = None
-    dirPath = dirPath or '.'
-    if os.path.isdir(dirPath):
-      showDotFiles = app.prefs.editor['predictionShowOpenFiles']
-      showSizes = app.prefs.editor['predictionShowAlternateFiles']
-      showModified = app.prefs.editor['predictionShowRecentFiles']
 
-      sortByType = app.prefs.editor['predictionSortAscendingByType']
-      sortByName = app.prefs.editor['predictionSortAscendingByName']
-      sortByStatus = app.prefs.editor['predictionSortAscendingByStatus']
-
-      lines = []
-      try:
-        fileLines = []
-        contents = os.listdir(dirPath)
-        for i in contents:
-          if not showDotFiles and i[0] == '.':
-            continue
-          if self.filter is not None and not i.startswith(self.filter):
-            continue
-          fullPath = os.path.join(dirPath, i)
-          if os.path.isdir(fullPath):
-            i += os.path.sep
-          iSize = None
-          iModified = 0
-          if showSizes and os.path.isfile(fullPath):
-            iSize = os.path.getsize(fullPath)
-          if showModified:
-            iModified = os.path.getmtime(fullPath)
-          fileLines.append([i, iSize, iModified])
-        if sortByName is not None:
-          # Sort by name.
-          fileLines.sort(reverse=not sortByName,
-              key=lambda x: x[1])
-        elif sortByStatus is not None:
-          # Sort by status.
-          fileLines.sort(reverse=not sortByStatus,
-              key=lambda x: x[2])
-        else:
-          # Sort by type
-          fileLines.sort(reverse=not sortByType,
-              key=lambda x: unicode.lower(x[0]))
-        lines = ['%-40s  %16s  %24s' % (
-            i[0], '%s bytes' % (i[1],) if i[1] is not None else '',
-            unicode(time.strftime('%c', time.localtime(i[2]))) if i[2] else '')
-            for i in fileLines]
-        self.view.contents = [i[0] for i in fileLines]
-      except OSError as e:
-        lines = ['Error creating list.']
-        lines.append(unicode(e))
-      clip = lines
-    else:
-      clip = [dirPath + ": not found"]
-    self.view.textBuffer.replaceLines(tuple(clip))
-    self.view.textBuffer.penRow = 0
-    self.view.textBuffer.penCol = 0
-    self.view.scrollRow = 0
-    self.view.scrollCol = 0
+    self.index = self.buildFileList(self.view.host.textBuffer.fullPath)
+    app.log.info(self.items)
+    if self.items is not None:
+      self.view.update(self.items)
     self.filter = None
 
   def openFileOrDir(self, row):
+    if app.config.strict_debug:
+      assert type(row) is int
     if self.items is None:
       return
     textBuffer, fullPath = self.items[row][:2]
     self.items = None
+    self.shownList = None
+    app.log.info(self.items)
     if textBuffer is not None:
       textBuffer = app.buffer_manager.buffers.getValidTextBuffer(textBuffer)
     else:
@@ -186,12 +117,21 @@ class PredictionListController(app.controller.Controller):
     self.changeTo(inputWindow)
 
   def optionChanged(self, name, value):
+    if app.config.strict_debug:
+      assert type(name) is str
+      assert type(value) is str
     self.shownList = None
     self.onChange()
 
   def setFilter(self, filter):
+    if app.config.strict_debug:
+      assert type(filter) is str
     self.filter = filter
     self.shownList = None  # Cause a refresh.
+
+  def unfocus(self):
+    self.items = None
+    self.shownList = None
 
 
 class PredictionController(app.controller.Controller):
@@ -235,6 +175,9 @@ class PredictionInputController(app.controller.Controller):
     app.controller.Controller.onChange(self)
 
   def optionChanged(self, name, value):
+    if app.config.strict_debug:
+      assert type(name) is str
+      assert type(value) is str
     self.getNamedWindow('predictionList').controller.shownList = None
 
   def passEventToPredictionList(self):
@@ -242,6 +185,11 @@ class PredictionInputController(app.controller.Controller):
         None)
 
   def performPrimaryAction(self):
+    app.log.info()
     predictionList = self.getNamedWindow('predictionList')
     row = predictionList.textBuffer.penRow
     predictionList.controller.openFileOrDir(row)
+
+  def unfocus(self):
+    self.getNamedWindow('predictionList').unfocus()
+    app.controller.Controller.unfocus(self)

@@ -35,18 +35,18 @@ class PredictionList(app.window.Window):
     color = app.color.get('top_info')
     self.optionsRow = app.window.OptionsSelectionWindow(self)
     self.optionsRow.setParent(self)
-    app.window.SortableHeaderWindow(self.optionsRow, 'Type', 'editor',
-        'predictionSortAscendingByType', 16)
+    self.typeColumn = app.window.SortableHeaderWindow(self.optionsRow, 'Type',
+        'editor', 'predictionSortAscendingByType', 8)
     label = app.window.LabelWindow(self.optionsRow, '|')
     label.setParent(self.optionsRow)
     label.color = color
-    app.window.SortableHeaderWindow(self.optionsRow, 'Name', 'editor',
-        'predictionSortAscendingByName', -41)
+    self.nameColumn = app.window.SortableHeaderWindow(self.optionsRow, 'Name',
+        'editor', 'predictionSortAscendingByName', -61)
     label = app.window.LabelWindow(self.optionsRow, '|')
     label.setParent(self.optionsRow)
     label.color = color
-    app.window.SortableHeaderWindow(self.optionsRow, 'Status ', 'editor',
-        'predictionSortAscendingByStatus', 16)
+    self.statusColumn = app.window.SortableHeaderWindow(self.optionsRow,
+        'Status ', 'editor', 'predictionSortAscendingByStatus', -7)
     label = app.window.LabelWindow(self.optionsRow, '|')
     label.setParent(self.optionsRow)
     label.color = color
@@ -84,6 +84,22 @@ class PredictionList(app.window.Window):
   def mouseWheelUp(self, shift, ctrl, alt):
     self.textBuffer.mouseWheelUp(shift, ctrl, alt)
     self.changeFocusTo(self.host)
+
+  def update(self, items):
+    app.log.info()
+    savedRow = self.textBuffer.penRow
+    self.textBuffer.replaceLines(tuple([
+        "%*s %*s %.*s" % (
+            self.typeColumn.cols, i[3],
+            self.nameColumn.cols, i[1][-self.nameColumn.cols:],
+            self.statusColumn.cols, i[2]
+            ) for i in items
+        ]+['']))
+    self.textBuffer.penRow = max(savedRow, len(items) - 1)
+    self.textBuffer.penRow = 0
+    self.textBuffer.penCol = 0
+    self.scrollRow = 0
+    self.scrollCol = 0
 
   def onPrefChanged(self, category, name):
     self.controller.optionChanged(category, name)
@@ -165,7 +181,7 @@ class PredictionWindow(app.window.Window):
     pass
 
   def focus(self):
-    self.controller.focus()
+    app.window.Window.focus(self)
     self.changeFocusTo(self.predictionInputWindow)
 
   def getPath(self):
