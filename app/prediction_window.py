@@ -88,6 +88,21 @@ class PredictionList(app.window.Window):
   def update(self, items):
     app.log.info()
 
+    showOpen = app.prefs.editor['predictionShowOpenFiles']
+    showAlternate = app.prefs.editor['predictionShowAlternateFiles']
+    showRecent = app.prefs.editor['predictionShowRecentFiles']
+    if not (showOpen and showAlternate and showRecent):
+      i = 0
+      while i < len(items):
+        if not showOpen and items[i][3] == 'open':
+          items.pop(i)
+        elif not showAlternate and items[i][3] == 'alt':
+          items.pop(i)
+        elif not showRecent and items[i][3] == 'recent':
+          items.pop(i)
+        else:
+          i += 1
+
     sortByType = app.prefs.editor['predictionSortAscendingByType']
     sortByName = app.prefs.editor['predictionSortAscendingByName']
     sortByStatus = app.prefs.editor['predictionSortAscendingByStatus']
