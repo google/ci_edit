@@ -57,7 +57,7 @@ class PredictionListController(app.controller.Controller):
     for i in contents:
       f, e = os.path.splitext(i)
       if file == f and ext != e and e not in ignoreExt:
-        self.items.append((None, os.path.join(dirPath, i), '=', ''))
+        self.items.append((None, os.path.join(dirPath, i), '=', 'alt'))
     if 1:
       app.log.info()
       # Chromium specific hack.
@@ -92,7 +92,8 @@ class PredictionListController(app.controller.Controller):
       return
     self.shownList = input
 
-    self.index = self.buildFileList(self.view.host.textBuffer.fullPath)
+    inputWindow = self.currentInputWindow()
+    self.index = self.buildFileList(inputWindow.textBuffer.fullPath)
     app.log.info(self.items)
     if self.items is not None:
       self.view.update(self.items)

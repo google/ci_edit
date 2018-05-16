@@ -87,11 +87,15 @@ class PredictionList(app.window.Window):
 
   def update(self, items):
     app.log.info()
+    def fitPathToWidth(path, width):
+      if len(path) < width:
+        return path
+      return path[-width:]
     savedRow = self.textBuffer.penRow
     self.textBuffer.replaceLines(tuple([
         "%*s %*s %.*s" % (
             self.typeColumn.cols, i[3],
-            self.nameColumn.cols, i[1][-self.nameColumn.cols:],
+            -self.nameColumn.cols, fitPathToWidth(i[1], self.nameColumn.cols),
             self.statusColumn.cols, i[2]
             ) for i in items
         ]+['']))
@@ -147,7 +151,7 @@ class PredictionWindow(app.window.Window):
     self.setTextBuffer(app.text_buffer.TextBuffer())
 
     self.titleRow = app.window.OptionsRow(self)
-    self.titleRow.addLabel(' ci   ')
+    self.titleRow.addLabel(' ci (This UI is a work in progress. Some elements don\'t work).   ')
     self.titleRow.setParent(self)
 
     self.predictionInputWindow = PredictionInputWindow(self)
