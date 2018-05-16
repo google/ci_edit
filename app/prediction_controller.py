@@ -43,7 +43,7 @@ class PredictionListController(app.controller.Controller):
       if i.fullPath:
         self.items.append((i, i.fullPath, dirty, 'open'))
       else:
-        self.items.append((i, '<new file> %s'%(i.lines[0][:20]), dirty, 'new'))
+        self.items.append((i, '<new file> %s'%(i.lines[0][:20]), dirty, 'open'))
     dirPath, fileName = os.path.split(currentFile)
     file, ext = os.path.splitext(fileName)
     # TODO(dschuyler): rework this ignore list.
@@ -100,7 +100,7 @@ class PredictionListController(app.controller.Controller):
   def openFileOrDir(self, row):
     if app.config.strict_debug:
       assert type(row) is int
-    if self.items is None:
+    if self.items is None or len(self.items) == 0:
       return
     textBuffer, fullPath = self.items[row][:2]
     self.items = None

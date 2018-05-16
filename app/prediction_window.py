@@ -87,7 +87,8 @@ class PredictionList(app.window.Window):
 
   def update(self, items):
     app.log.info()
-
+    # Filter the list. (The filter function is not used so as to edit the list
+    # in place).
     showOpen = app.prefs.editor['predictionShowOpenFiles']
     showAlternate = app.prefs.editor['predictionShowAlternateFiles']
     showRecent = app.prefs.editor['predictionShowRecentFiles']
@@ -102,7 +103,7 @@ class PredictionList(app.window.Window):
           items.pop(i)
         else:
           i += 1
-
+    # Sort the list
     sortByType = app.prefs.editor['predictionSortAscendingByType']
     sortByName = app.prefs.editor['predictionSortAscendingByName']
     sortByStatus = app.prefs.editor['predictionSortAscendingByStatus']
@@ -112,19 +113,22 @@ class PredictionList(app.window.Window):
       items.sort(reverse=not sortByStatus, key=lambda x: x[2])
     elif sortByName is not None:
       items.sort(reverse=not sortByName, key=lambda x: x[1])
-
+    # Write the lines to the text buffer.
     def fitPathToWidth(path, width):
       if len(path) < width:
         return path
       return path[-width:]
     savedRow = self.textBuffer.penRow
-    self.textBuffer.replaceLines(tuple([
-        "%*s %*s %.*s" % (
-            self.typeColumn.cols, i[3],
-            -self.nameColumn.cols, fitPathToWidth(i[1], self.nameColumn.cols),
-            self.statusColumn.cols, i[2]
-            ) for i in items
-        ]))
+    if len(items) == 0:
+      self.textBuffer.replaceLines(('',))
+    else:
+      self.textBuffer.replaceLines(tuple([
+          "%*s %*s %.*s" % (
+              self.typeColumn.cols, i[3],
+              -self.nameColumn.cols, fitPathToWidth(i[1], self.nameColumn.cols),
+              self.statusColumn.cols, i[2]
+              ) for i in items
+          ]))
     self.textBuffer.penRow = max(savedRow, len(items) - 1)
     self.textBuffer.penRow = 0
     self.textBuffer.penCol = 0
