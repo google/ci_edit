@@ -41,7 +41,7 @@ class PredictionListController(app.controller.Controller):
     for i in app.buffer_manager.buffers.buffers:
       dirty = '*' if i.isDirty() else '.'
       if i.fullPath:
-        self.items.append((i, i.fullPath, dirty, 'file'))
+        self.items.append((i, i.fullPath, dirty, 'open'))
       else:
         self.items.append((i, '<new file> %s'%(i.lines[0][:20]), dirty, 'new'))
     dirPath, fileName = os.path.split(currentFile)
@@ -73,8 +73,6 @@ class PredictionListController(app.controller.Controller):
         if os.path.isfile(chromiumPath):
           app.log.info()
           self.items.append((None, chromiumPath, '=', 'alt'))
-    # Suggest item.
-    return len(app.buffer_manager.buffers.buffers) % len(self.items)
 
   def focus(self):
     self.onChange()
@@ -93,7 +91,7 @@ class PredictionListController(app.controller.Controller):
     self.shownList = input
 
     inputWindow = self.currentInputWindow()
-    self.index = self.buildFileList(inputWindow.textBuffer.fullPath)
+    self.buildFileList(inputWindow.textBuffer.fullPath)
     app.log.info(self.items)
     if self.items is not None:
       self.view.update(self.items)

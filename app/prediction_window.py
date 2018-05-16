@@ -87,6 +87,17 @@ class PredictionList(app.window.Window):
 
   def update(self, items):
     app.log.info()
+
+    sortByType = app.prefs.editor['predictionSortAscendingByType']
+    sortByName = app.prefs.editor['predictionSortAscendingByName']
+    sortByStatus = app.prefs.editor['predictionSortAscendingByStatus']
+    if sortByType is not None:
+      items.sort(reverse=not sortByType, key=lambda x: x[3])
+    elif sortByStatus is not None:
+      items.sort(reverse=not sortByStatus, key=lambda x: x[2])
+    elif sortByName is not None:
+      items.sort(reverse=not sortByName, key=lambda x: x[1])
+
     def fitPathToWidth(path, width):
       if len(path) < width:
         return path
@@ -98,7 +109,7 @@ class PredictionList(app.window.Window):
             -self.nameColumn.cols, fitPathToWidth(i[1], self.nameColumn.cols),
             self.statusColumn.cols, i[2]
             ) for i in items
-        ]+['']))
+        ]))
     self.textBuffer.penRow = max(savedRow, len(items) - 1)
     self.textBuffer.penRow = 0
     self.textBuffer.penCol = 0
