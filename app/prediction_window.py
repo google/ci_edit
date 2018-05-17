@@ -51,39 +51,41 @@ class PredictionList(app.window.Window):
     label.setParent(self.optionsRow)
     label.color = color
 
-  def reshape(self, top, left, rows, cols):
-    """Change self and sub-windows to fit within the given rectangle."""
-    app.log.detail('reshape', top, left, rows, cols)
-    self.optionsRow.reshape(top, left, 1, cols)
-    top += 1
-    rows -= 1
-    app.window.Window.reshape(self, top, left, rows, cols)
+  def highlightLine(self, row):
+    self.textBuffer.penRow = min(row, len(self.textBuffer.lines) - 1)
+    self.textBuffer.penCol = 0
+    app.log.info(self.textBuffer.penRow)
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
+    app.log.info()
+    self.highlightLine(self.scrollRow + paneRow)
+
+  def mouseDoubleClick(self, paneRow, paneCol, shift, ctrl, alt):
+    app.log.info()
+    self.mouseRelease(paneRow, paneCol, shift, ctrl, alt)
+
+  def mouseMoved(self, paneRow, paneCol, shift, ctrl, alt):
+    app.log.info()
+    self.highlightLine(self.scrollRow + paneRow)
+
+  def mouseRelease(self, paneRow, paneCol, shift, ctrl, alt):
+    app.log.info()
     row = self.scrollRow + paneRow
     if row >= len(self.textBuffer.lines):
       return
     self.controller.openFileOrDir(row)
 
-  def mouseDoubleClick(self, paneRow, paneCol, shift, ctrl, alt):
-    self.changeFocusTo(self.host)
-
-  def mouseMoved(self, paneRow, paneCol, shift, ctrl, alt):
-    self.changeFocusTo(self.host)
-
-  def mouseRelease(self, paneRow, paneCol, shift, ctrl, alt):
-    self.changeFocusTo(self.host)
-
   def mouseTripleClick(self, paneRow, paneCol, shift, ctrl, alt):
-    self.changeFocusTo(self.host)
+    app.log.info()
+    self.mouseRelease(paneRow, paneCol, shift, ctrl, alt)
 
   def mouseWheelDown(self, shift, ctrl, alt):
+    app.log.info()
     self.textBuffer.mouseWheelDown(shift, ctrl, alt)
-    self.changeFocusTo(self.host)
 
   def mouseWheelUp(self, shift, ctrl, alt):
+    app.log.info()
     self.textBuffer.mouseWheelUp(shift, ctrl, alt)
-    self.changeFocusTo(self.host)
 
   def update(self, items):
     app.log.info()
@@ -138,6 +140,14 @@ class PredictionList(app.window.Window):
   def onPrefChanged(self, category, name):
     self.controller.optionChanged(category, name)
     app.window.Window.onPrefChanged(self, category, name)
+
+  def reshape(self, top, left, rows, cols):
+    """Change self and sub-windows to fit within the given rectangle."""
+    app.log.detail('reshape', top, left, rows, cols)
+    self.optionsRow.reshape(top, left, 1, cols)
+    top += 1
+    rows -= 1
+    app.window.Window.reshape(self, top, left, rows, cols)
 
   def setTextBuffer(self, textBuffer):
     if app.config.strict_debug:

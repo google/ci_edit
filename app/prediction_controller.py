@@ -82,9 +82,6 @@ class PredictionListController(app.controller.Controller):
     app.log.info('PredictionListController command set')
 
   def onChange(self):
-    app.log.info(repr(self.items), repr(self.shownList))
-    app.log.info(self.view.textBuffer.penRow)
-
     input = self.view.parent.getPath()
     if self.shownList == input:
       return

@@ -13,6 +13,8 @@
 # limitations under the License.
 
 import curses
+import os
+import signal
 import sys
 
 import app.curses_util
@@ -176,6 +178,8 @@ class ProgramWindow(app.window.ActiveWindow):
         if self.priorClick + rapidClickTimeout <= eventTime:
           window.mouseRelease(mouseRow, mouseCol, bState&curses.BUTTON_SHIFT,
               bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
+        #else:
+        #  signal.setitimer(signal.ITIMER_REAL, rapidClickTimeout)
       else:
         # Some terminals (linux?) send BUTTON1_RELEASED after moving the mouse.
         # Specifically if the terminal doesn't use button 4 for mouse movement.
