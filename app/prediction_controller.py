@@ -189,6 +189,14 @@ class PredictionInputController(app.controller.Controller):
     row = predictionList.textBuffer.penRow
     predictionList.controller.openFileOrDir(row)
 
+  def predictionListPrior(self):
+    predictionList = self.getNamedWindow('predictionList')
+    if predictionList.textBuffer.penRow == 0:
+      predictionList.textBuffer.cursorMoveTo(
+          len(predictionList.textBuffer.lines), 0)
+    else:
+      predictionList.textBuffer.cursorUp()
+
   def unfocus(self):
     self.getNamedWindow('predictionList').unfocus()
     app.controller.Controller.unfocus(self)

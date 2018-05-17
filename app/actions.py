@@ -358,7 +358,8 @@ class Actions(app.mutator.Mutator):
       if len(self.lines[self.penRow]) < self.view.cols:
         # The whole line fits on screen.
         self.view.scrollCol = 0
-      elif self.view.scrollCol == self.penCol and self.penCol == len(self.lines[self.penRow]):
+      elif (self.view.scrollCol == self.penCol and
+          self.penCol == len(self.lines[self.penRow])):
         self.view.scrollCol = max(0, self.view.scrollCol - self.view.cols / 4)
 
   def cursorMoveLeft(self):

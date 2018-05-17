@@ -575,7 +575,7 @@ class PredictionInputController(
       CTRL_J: self.performPrimaryAction,
       CTRL_N: self.saveEventChangeToHostWindow,
       CTRL_O: self.performPrimaryAction,
-      CTRL_P: self.changeToPrediction,
+      CTRL_P: self.predictionListPrior,
       CTRL_Q: self.saveEventChangeToHostWindow,
       CTRL_S: self.saveEventChangeToHostWindow,
     })
