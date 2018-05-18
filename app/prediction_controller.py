@@ -38,12 +38,17 @@ class PredictionListController(app.controller.Controller):
       assert type(currentFile) is str
 
     self.items = []
+    # Add open buffers.
     for i in app.buffer_manager.buffers.buffers:
       dirty = '*' if i.isDirty() else '.'
       if i.fullPath:
         self.items.append((i, i.fullPath, dirty, 'open'))
       else:
         self.items.append((i, '<new file> %s'%(i.lines[0][:20]), dirty, 'open'))
+    # Add recent files.
+    for recentFile in app.history.getRecentFiles():
+      self.items.append((None, recentFile, '=', 'recent'))
+    # Add alternate files.
     dirPath, fileName = os.path.split(currentFile)
     file, ext = os.path.splitext(fileName)
     # TODO(dschuyler): rework this ignore list.

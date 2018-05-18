@@ -359,6 +359,7 @@ class CiProgram:
     self.setUpPalette()
     homePath = app.prefs.prefs['userData'].get('homePath')
     self.makeHomeDirs(homePath)
+    app.history.loadUserHistory()
     app.curses_util.hackCursesFixes()
     if app.prefs.editor['useBgThread']:
       self.bg = app.background.startupBackground()

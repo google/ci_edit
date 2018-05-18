@@ -852,7 +852,6 @@ class Actions(app.mutator.Mutator):
     self.dataToLines()
 
     # Restore all user history.
-    app.history.loadUserHistory(self.fullPath)
     self.restoreUserHistory()
 
   def replaceLines(self, clip):
@@ -1015,6 +1014,7 @@ class Actions(app.mutator.Mutator):
           self.stripTrailingWhiteSpace()
           self.compoundChangePush()
         # Save user data that applies to read-only files into history.
+        self.fileHistory['path'] = self.fullPath
         self.fileHistory['pen'] = (self.penRow, self.penCol)
         if self.view is not None:
           self.fileHistory['scroll'] = (self.view.scrollRow,
