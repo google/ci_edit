@@ -57,38 +57,32 @@ class PredictionList(app.window.Window):
     app.log.info(self.textBuffer.penRow)
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
-    app.log.info()
     self.highlightLine(self.scrollRow + paneRow)
-
-  def mouseDoubleClick(self, paneRow, paneCol, shift, ctrl, alt):
-    app.log.info()
-    self.mouseRelease(paneRow, paneCol, shift, ctrl, alt)
-
-  def mouseMoved(self, paneRow, paneCol, shift, ctrl, alt):
-    app.log.info()
-    self.highlightLine(self.scrollRow + paneRow)
-
-  def mouseRelease(self, paneRow, paneCol, shift, ctrl, alt):
-    app.log.info()
     row = self.scrollRow + paneRow
     if row >= len(self.textBuffer.lines):
       return
     self.controller.openFileOrDir(row)
 
-  def mouseTripleClick(self, paneRow, paneCol, shift, ctrl, alt):
+  def mouseDoubleClick(self, paneRow, paneCol, shift, ctrl, alt):
     app.log.info()
-    self.mouseRelease(paneRow, paneCol, shift, ctrl, alt)
+    assert False
+
+  #def mouseMoved(self, paneRow, paneCol, shift, ctrl, alt):
+  #  app.log.info()
+
+  #def mouseRelease(self, paneRow, paneCol, shift, ctrl, alt):
+  #  app.log.info()
+
+  #def mouseTripleClick(self, paneRow, paneCol, shift, ctrl, alt):
+  #  app.log.info()
 
   def mouseWheelDown(self, shift, ctrl, alt):
-    app.log.info()
     self.textBuffer.mouseWheelDown(shift, ctrl, alt)
 
   def mouseWheelUp(self, shift, ctrl, alt):
-    app.log.info()
     self.textBuffer.mouseWheelUp(shift, ctrl, alt)
 
   def update(self, items):
-    app.log.info()
     # Filter the list. (The filter function is not used so as to edit the list
     # in place).
     showOpen = app.prefs.editor['predictionShowOpenFiles']
