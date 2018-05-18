@@ -82,8 +82,8 @@ class Controller:
     self.findAndChangeTo('popupWindow')
 
   def changeToPrediction(self):
-    self.findAndChangeTo('predictionWindow')
-    #self.findAndChangeTo('interactivePrediction')
+    #self.findAndChangeTo('predictionWindow')
+    self.findAndChangeTo('interactivePrediction')
 
   def changeToPrompt(self):
     self.findAndChangeTo('interactivePrompt')
