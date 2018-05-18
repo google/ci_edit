@@ -391,6 +391,13 @@ class Actions(app.mutator.Mutator):
     self.goalCol = savedGoal
     self.adjustHorizontalScroll()
 
+  def cursorMoveToBegin(self):
+    savedGoal = self.goalCol
+    self.setMessage('Top of file')
+    self.cursorMove(-self.penRow, -self.penCol)
+    self.goalCol = savedGoal
+    self.updateBasicScrollPosition()
+
   def cursorMoveUpOrBegin(self):
     savedGoal = self.goalCol
     if self.penRow <= 0:

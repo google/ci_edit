@@ -114,7 +114,6 @@ class PredictionList(app.window.Window):
       if len(path) < width:
         return path
       return path[-width:]
-    savedRow = self.textBuffer.penRow
     if len(items) == 0:
       self.textBuffer.replaceLines(('',))
     else:
@@ -125,11 +124,7 @@ class PredictionList(app.window.Window):
               self.statusColumn.cols, i[2]
               ) for i in items
           ]))
-    self.textBuffer.penRow = max(savedRow, len(items) - 1)
-    self.textBuffer.penRow = 0
-    self.textBuffer.penCol = 0
-    self.scrollRow = 0
-    self.scrollCol = 0
+    self.textBuffer.cursorMoveToBegin()
 
   def onPrefChanged(self, category, name):
     self.controller.optionChanged(category, name)
