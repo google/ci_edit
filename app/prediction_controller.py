@@ -37,17 +37,17 @@ class PredictionListController(app.controller.Controller):
     if app.config.strict_debug:
       assert type(currentFile) is str
 
-    self.items = []
+    items = self.items = []
     # Add open buffers.
     for i in app.buffer_manager.buffers.buffers:
       dirty = '*' if i.isDirty() else '.'
       if i.fullPath:
-        self.items.append((i, i.fullPath, dirty, 'open'))
+        items.append((i, i.fullPath, dirty, 'open'))
       else:
-        self.items.append((i, '<new file> %s'%(i.lines[0][:20]), dirty, 'open'))
+        items.append((i, '<new file> %s'%(i.lines[0][:20]), dirty, 'open'))
     # Add recent files.
     for recentFile in app.history.getRecentFiles():
-      self.items.append((None, recentFile, '=', 'recent'))
+      items.append((None, recentFile, '=', 'recent'))
     # Add alternate files.
     dirPath, fileName = os.path.split(currentFile)
     file, ext = os.path.splitext(fileName)
@@ -62,7 +62,7 @@ class PredictionListController(app.controller.Controller):
     for i in contents:
       f, e = os.path.splitext(i)
       if file == f and ext != e and e not in ignoreExt:
-        self.items.append((None, os.path.join(dirPath, i), '=', 'alt'))
+        items.append((None, os.path.join(dirPath, i), '=', 'alt'))
     if 1:
       app.log.info()
       # Chromium specific hack.
@@ -71,13 +71,23 @@ class PredictionListController(app.controller.Controller):
         app.log.info(chromiumPath)
         if os.path.isfile(chromiumPath):
           app.log.info()
-          self.items.append((None, chromiumPath, '=', 'alt'))
+          items.append((None, chromiumPath, '=', 'alt'))
       elif currentFile.endswith('.html'):
         app.log.info()
         chromiumPath = currentFile[:-len('.html')] + '-extracted.js'
         if os.path.isfile(chromiumPath):
           app.log.info()
-          self.items.append((None, chromiumPath, '=', 'alt'))
+          items.append((None, chromiumPath, '=', 'alt'))
+    if self.filter is not None:
+      regex = re.compile(self.filter)
+      i = 0
+      while i < len(items):
+        app.log.info(items[i][2])
+        if not regex.search(items[i][1]):
+          # Filter the list in-place.
+          items.pop(i)
+        else:
+          i += 1
 
   def focus(self):
     self.onChange()
@@ -87,10 +97,11 @@ class PredictionListController(app.controller.Controller):
     app.log.info('PredictionListController command set')
 
   def onChange(self):
-    input = self.view.parent.getPath()
-    if self.shownList == input:
+    self.filter = self.view.parent.getPath()
+    app.log.info(self.filter)
+    if self.shownList == self.filter:
       return
-    self.shownList = input
+    self.shownList = self.filter
 
     inputWindow = self.currentInputWindow()
     self.buildFileList(inputWindow.textBuffer.fullPath)
