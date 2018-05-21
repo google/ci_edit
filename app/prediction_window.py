@@ -242,3 +242,7 @@ class PredictionWindow(app.window.Window):
 
   def setPath(self, path):
     self.predictionInputWindow.setPath(path)
+
+  def unfocus(self):
+    app.log.info()
+    app.window.Window.unfocus(self)

@@ -64,25 +64,19 @@ class PredictionListController(app.controller.Controller):
       if file == f and ext != e and e not in ignoreExt:
         items.append((None, os.path.join(dirPath, i), '=', 'alt'))
     if 1:
-      app.log.info()
       # Chromium specific hack.
       if currentFile.endswith('-extracted.js'):
         chromiumPath = currentFile[:-len('-extracted.js')] + '.html'
-        app.log.info(chromiumPath)
         if os.path.isfile(chromiumPath):
-          app.log.info()
           items.append((None, chromiumPath, '=', 'alt'))
       elif currentFile.endswith('.html'):
-        app.log.info()
         chromiumPath = currentFile[:-len('.html')] + '-extracted.js'
         if os.path.isfile(chromiumPath):
-          app.log.info()
           items.append((None, chromiumPath, '=', 'alt'))
     if self.filter is not None:
       regex = re.compile(self.filter)
       i = 0
       while i < len(items):
-        app.log.info(items[i][2])
         if not regex.search(items[i][1]):
           # Filter the list in-place.
           items.pop(i)
@@ -98,14 +92,12 @@ class PredictionListController(app.controller.Controller):
 
   def onChange(self):
     self.filter = self.view.parent.getPath()
-    app.log.info(self.filter)
     if self.shownList == self.filter:
       return
     self.shownList = self.filter
 
     inputWindow = self.currentInputWindow()
     self.buildFileList(inputWindow.textBuffer.fullPath)
-    app.log.info(self.items)
     if self.items is not None:
       self.view.update(self.items)
     self.filter = None
@@ -118,7 +110,6 @@ class PredictionListController(app.controller.Controller):
     textBuffer, fullPath = self.items[row][:2]
     self.items = None
     self.shownList = None
-    app.log.info(self.items)
     if textBuffer is not None:
       textBuffer = app.buffer_manager.buffers.getValidTextBuffer(textBuffer)
     else:
