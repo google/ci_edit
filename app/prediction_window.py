@@ -180,7 +180,7 @@ class PredictionWindow(app.window.Window):
     self.setTextBuffer(app.text_buffer.TextBuffer())
 
     self.titleRow = app.window.OptionsRow(self)
-    self.titleRow.addLabel(' ci (This UI is a work in progress. Some elements don\'t work).   ')
+    self.titleRow.addLabel(' ci   ')
     self.titleRow.setParent(self)
 
     self.predictionInputWindow = PredictionInputWindow(self)
