@@ -41,6 +41,10 @@ class FakeCursesTestCase(unittest.TestCase):
       curses.BUTTON_CTRL
       curses.BUTTON_ALT
     """
+    assert type(timeStamp) is int
+    assert type(mouseRow) is int
+    assert type(mouseCol) is int
+    assert type(bState) is int
     info = (timeStamp, mouseCol, mouseRow, 0, bState)
     def createEvent(display, cmdIndex):
       curses.addMouseEvent(info)
@@ -48,6 +52,7 @@ class FakeCursesTestCase(unittest.TestCase):
     return createEvent
 
   def displayCheck(self, *args):
+    assert type(args[0]) is int
     caller = inspect.stack()[1]
     callerText = "\n  %s:%s:%s(): " % (
         os.path.split(caller[1])[1], caller[2], caller[3])
@@ -78,6 +83,8 @@ class FakeCursesTestCase(unittest.TestCase):
     return displayStyleChecker
 
   def cursorCheck(self, expectedRow, expectedCol):
+    assert type(expectedRow) is int
+    assert type(expectedCol) is int
     caller = inspect.stack()[1]
     callerText = "in %s:%s:%s(): " % (
         os.path.split(caller[1])[1], caller[2], caller[3])
@@ -90,6 +97,8 @@ class FakeCursesTestCase(unittest.TestCase):
     return cursorChecker
 
   def resizeScreen(self, rows, cols):
+    assert type(rows) is int
+    assert type(cols) is int
     caller = inspect.stack()[1]
     callerText = "in %s:%s:%s(): " % (
         os.path.split(caller[1])[1], caller[2], caller[3])
@@ -99,6 +108,7 @@ class FakeCursesTestCase(unittest.TestCase):
     return setScreenSize
 
   def setClipboard(self, text):
+    assert type(text) is str
     caller = inspect.stack()[1]
     callerText = "in %s:%s:%s(): " % (
         os.path.split(caller[1])[1], caller[2], caller[3])
@@ -113,6 +123,7 @@ class FakeCursesTestCase(unittest.TestCase):
     self.cursesScreen.fakeInput.isVerbose = enabled
 
   def writeText(self, text):
+    assert type(text) is str
     caller = inspect.stack()[1]
     callerText = "in %s:%s:%s(): " % (
         os.path.split(caller[1])[1], caller[2], caller[3])
@@ -128,6 +139,7 @@ class FakeCursesTestCase(unittest.TestCase):
     self.fail('Called notReached!')
 
   def runWithFakeInputs(self, fakeInputs):
+    assert hasattr(fakeInputs, "__getitem__") or hasattr(fakeInputs, "__iter__")
     app.color.reset(),
     self.cursesScreen.setFakeInputs(fakeInputs + [self.notReached,])
     self.assertTrue(self.prg)

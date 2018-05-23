@@ -27,12 +27,11 @@ import app.prefs
 userHistory = {}
 pathToHistory = app.prefs.prefs['userData'].get('historyPath')
 
-def loadUserHistory(filePath, historyPath=pathToHistory):
+def loadUserHistory(historyPath=pathToHistory):
   """
   Retrieves the user's complete edit history for all files.
 
   Args:
-    filePath (str): The absolute path to the file.
     historyPath (str): Defaults to pathToHistory.
       The path to the user's saved history.
 
@@ -111,6 +110,18 @@ def getFileInfo(filePath, data=None):
   checksum = calculateChecksum(filePath, data)
   fileSize = calculateFileSize(filePath)
   return (checksum, fileSize)
+
+def getRecentFiles():
+  """
+  Returns:
+    A list of file paths to recently accessed files.
+  """
+  files = []
+  for entry in userHistory.values():
+    path = entry.get('path')
+    if path is not None:
+      files.append(path)
+  return files
 
 def calculateChecksum(filePath, data=None):
   """

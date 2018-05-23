@@ -82,7 +82,8 @@ class Controller:
     self.findAndChangeTo('popupWindow')
 
   def changeToPrediction(self):
-    self.findAndChangeTo('interactivePrediction')
+    self.findAndChangeTo('predictionWindow')
+    #self.findAndChangeTo('interactivePrediction')
 
   def changeToPrompt(self):
     self.findAndChangeTo('interactivePrompt')
@@ -120,8 +121,15 @@ class Controller:
     app.log.fatal(windowName + ' not found');
     return None
 
+  def currentInputWindow(self):
+    return self.getNamedWindow('inputWindow')
+
   def findAndChangeTo(self, windowName):
     window = self.getNamedWindow(windowName)
+    window.bringToFront()
+    self.view.changeFocusTo(window)
+
+  def changeTo(self, window):
     window.bringToFront()
     self.view.changeFocusTo(window)
 

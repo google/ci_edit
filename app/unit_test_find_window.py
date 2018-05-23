@@ -36,11 +36,11 @@ class FindWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
   def test_find(self):
     self.runWithFakeInputs([
         self.displayCheck(-1, 0, ["      "]),
-        CTRL_F, self.displayCheck(-1, 0, ["Find: "]), CTRL_J,
+        CTRL_F, self.displayCheck(-3, 0, ["Find: "]), CTRL_J,
         self.displayCheck(-1, 0, ["      "]),
-        CTRL_F, self.displayCheck(-1, 0, ["Find: "]),
+        CTRL_F, self.displayCheck(-3, 0, ["Find: "]),
         CTRL_I, self.displayCheck(-3, 0, ["Find: ", "Replace: ", "["]),
-        KEY_BTAB, KEY_BTAB, self.displayCheck(-1, 0, ["Find: "]),
+        #KEY_BTAB, KEY_BTAB, self.displayCheck(-1, 0, ["Find: "]),
         CTRL_Q])
 
   def test_find_esc_from_find(self):
@@ -50,12 +50,12 @@ class FindWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
         self.displayCheckStyle(-2, 0, 1, 10, app.prefs.color['status_line']),
 
         # Basic open and close.
-        CTRL_F, self.displayCheck(-1, 0, ["Find: "]),
+        CTRL_F, self.displayCheck(-3, 0, ["Find: "]),
         KEY_ESCAPE, curses.ERR, self.displayCheck(-3, 0, ["   ", "   ", "   "]),
         self.displayCheckStyle(-2, 0, 1, 10, app.prefs.color['status_line']),
 
         # Open, expand, and close.
-        CTRL_F, self.displayCheck(-1, 0, ["Find: "]),
+        CTRL_F, self.displayCheck(-3, 0, ["Find: "]),
         CTRL_I, self.displayCheck(-3, 0, ["Find: ", "Replace: ", "["]),
         KEY_ESCAPE, curses.ERR, self.displayCheck(-3, 0, ["   ", "   ", "   "]),
         self.displayCheckStyle(-2, 0, 1, 10, app.prefs.color['status_line']),
@@ -73,3 +73,20 @@ class FindWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
         #self.displayCheck(-3, 0, ["   ", "   ", "   "]),
         self.displayCheckStyle(-2, 0, 1, 10, app.prefs.color['status_line']),
         CTRL_Q])
+
+  def test_replace_style_parse(self):
+    self.runWithFakeInputs([
+        #self.displayCheck(2, 7, ["      "]),
+        #self.displayCheckStyle(2, 7, 1, 10, app.prefs.color['text']),
+        self.writeText('focusedWindow\n'),
+        CTRL_F,
+        #self.displayCheck(-1, 0, ["Find:         "]),
+        self.writeText('focused'),
+        CTRL_I,
+        #self.displayCheck(-3, 0, ["Find: focused", "Replace:          ", "["]),
+        self.writeText('  focused'),
+        #self.displayCheck(-3, 0, ["Find: focused", "Replace:   focused", "["]),
+        CTRL_G,
+        # Regression, replace causes 'Windo' to show as a misspelling.
+        self.displayCheckStyle(2, 17, 1, 10, app.prefs.color['text']),
+        CTRL_Q, ord('n')])

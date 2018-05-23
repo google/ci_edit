@@ -272,8 +272,9 @@ class Actions(app.mutator.Mutator):
     self.updateBasicScrollPosition()
 
   def cursorColDelta(self, toRow):
-    if toRow >= len(self.lines):
-      return
+    if app.config.strict_debug:
+      assert type(toRow) is int
+      assert 0 <= toRow < len(self.lines)
     lineLen = len(self.lines[toRow])
     if self.goalCol <= lineLen:
       return self.goalCol - self.penCol
@@ -281,7 +282,7 @@ class Actions(app.mutator.Mutator):
 
   def cursorDown(self):
     self.selectionNone()
-    self.cursorMoveDown()
+    self.cursorMoveDownOrEnd()
 
   def cursorDownScroll(self):
     self.selectionNone()
@@ -292,6 +293,9 @@ class Actions(app.mutator.Mutator):
     self.cursorMoveLeft()
 
   def getCursorMove(self, rowDelta, colDelta):
+    if app.config.strict_debug:
+      assert type(rowDelta) is int
+      assert type(colDelta) is int
     return self.getCursorMoveAndMark(rowDelta, colDelta, 0, 0, 0)
 
   def cursorMove(self, rowDelta, colDelta):
@@ -299,6 +303,12 @@ class Actions(app.mutator.Mutator):
 
   def getCursorMoveAndMark(self, rowDelta, colDelta, markRowDelta,
       markColDelta, selectionModeDelta):
+    if app.config.strict_debug:
+      assert type(rowDelta) is int
+      assert type(colDelta) is int
+      assert type(markRowDelta) is int
+      assert type(markColDelta) is int
+      assert type(selectionModeDelta) is int
     if self.penCol + colDelta < 0:  # Catch cursor at beginning of line.
       colDelta = -self.penCol
     self.goalCol = self.penCol + colDelta
@@ -307,6 +317,9 @@ class Actions(app.mutator.Mutator):
 
   def cursorMoveAndMark(self, rowDelta, colDelta, markRowDelta,
       markColDelta, selectionModeDelta):
+    if app.config.strict_debug:
+      assert type(rowDelta) is int
+      assert type(colDelta) is int
     change = self.getCursorMoveAndMark(rowDelta, colDelta, markRowDelta,
                                        markColDelta, selectionModeDelta)
     self.redoAddChange(change)
@@ -321,7 +334,7 @@ class Actions(app.mutator.Mutator):
     self.updateScrollPosition(scrollRowDelta, scrollColDelta)
     self.redoAddChange(('m', (rowDelta, colDelta, 0, 0, 0)))
 
-  def cursorMoveDown(self):
+  def unused_____cursorMoveDown(self):
     if self.penRow == len(self.lines) - 1:
       self.setMessage('Bottom of file')
       return
@@ -330,12 +343,23 @@ class Actions(app.mutator.Mutator):
     self.goalCol = savedGoal
     self.adjustHorizontalScroll()
 
+  def cursorMoveDownOrEnd(self):
+    savedGoal = self.goalCol
+    if self.penRow == len(self.lines) - 1:
+      self.setMessage('End of file')
+      self.cursorMove(0, len(self.lines[self.penRow]) - self.penCol)
+    else:
+      self.cursorMove(1, self.cursorColDelta(self.penRow + 1))
+    self.goalCol = savedGoal
+    self.adjustHorizontalScroll()
+
   def adjustHorizontalScroll(self):
     if self.view.scrollCol:
       if len(self.lines[self.penRow]) < self.view.cols:
         # The whole line fits on screen.
         self.view.scrollCol = 0
-      elif self.view.scrollCol == self.penCol and self.penCol == len(self.lines[self.penRow]):
+      elif (self.view.scrollCol == self.penCol and
+          self.penCol == len(self.lines[self.penRow])):
         self.view.scrollCol = max(0, self.view.scrollCol - self.view.cols / 4)
 
   def cursorMoveLeft(self):
@@ -354,7 +378,7 @@ class Actions(app.mutator.Mutator):
     else:
       self.setMessage('Bottom of file')
 
-  def cursorMoveUp(self):
+  def unused_____cursorMoveUp(self):
     if self.penRow <= 0:
       self.setMessage('Top of file')
       return
@@ -364,6 +388,27 @@ class Actions(app.mutator.Mutator):
       self.cursorMove(-1, self.goalCol - self.penCol)
     else:
       self.cursorMove(-1, lineLen - self.penCol)
+    self.goalCol = savedGoal
+    self.adjustHorizontalScroll()
+
+  def cursorMoveToBegin(self):
+    savedGoal = self.goalCol
+    self.setMessage('Top of file')
+    self.cursorMove(-self.penRow, -self.penCol)
+    self.goalCol = savedGoal
+    self.updateBasicScrollPosition()
+
+  def cursorMoveUpOrBegin(self):
+    savedGoal = self.goalCol
+    if self.penRow <= 0:
+      self.setMessage('Top of file')
+      self.cursorMove(0, -self.penCol)
+    else:
+      lineLen = len(self.lines[self.penRow - 1])
+      if self.goalCol <= lineLen:
+        self.cursorMove(-1, self.goalCol - self.penCol)
+      else:
+        self.cursorMove(-1, lineLen - self.penCol)
     self.goalCol = savedGoal
     self.adjustHorizontalScroll()
 
@@ -420,7 +465,7 @@ class Actions(app.mutator.Mutator):
   def cursorSelectDown(self):
     if self.selectionMode == app.selectable.kSelectionNone:
       self.selectionCharacter()
-    self.cursorMoveDown()
+    self.cursorMoveDownOrEnd()
 
   def cursorSelectDownScroll(self):
     """Move the line below the selection to above the selection."""
@@ -470,7 +515,7 @@ class Actions(app.mutator.Mutator):
   def cursorSelectUp(self):
     if self.selectionMode == app.selectable.kSelectionNone:
       self.selectionCharacter()
-    self.cursorMoveUp()
+    self.cursorMoveUpOrBegin()
 
   def cursorSelectUpScroll(self):
     """Move the line above the selection to below the selection."""
@@ -647,7 +692,7 @@ class Actions(app.mutator.Mutator):
 
   def cursorUp(self):
     self.selectionNone()
-    self.cursorMoveUp()
+    self.cursorMoveUpOrBegin()
 
   def cursorUpScroll(self):
     self.selectionNone()
@@ -807,7 +852,6 @@ class Actions(app.mutator.Mutator):
     self.dataToLines()
 
     # Restore all user history.
-    app.history.loadUserHistory(self.fullPath)
     self.restoreUserHistory()
 
   def replaceLines(self, clip):
@@ -970,6 +1014,7 @@ class Actions(app.mutator.Mutator):
           self.stripTrailingWhiteSpace()
           self.compoundChangePush()
         # Save user data that applies to read-only files into history.
+        self.fileHistory['path'] = self.fullPath
         self.fileHistory['pen'] = (self.penRow, self.penCol)
         if self.view is not None:
           self.fileHistory['scroll'] = (self.view.scrollRow,

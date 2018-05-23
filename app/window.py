@@ -112,6 +112,9 @@ class ViewWindow:
       programWindow = programWindow.parent
     programWindow.debugDraw(self)
 
+  def deselect(self):
+    pass
+
   def detach(self):
     """Hide the window by removing self from parents' children, but keep same
     parent to be reattached later."""
@@ -169,42 +172,39 @@ class ViewWindow:
     self.top += top
     self.left += left
 
-  def nextFocusableWindow(self, start, reverse=False):
+  def __childFocusableWindow(self, reverse=False):
     windows = self.zOrder[:]
     if reverse:
-      app.log.info('reverse')
       windows.reverse()
-    try:
-      found = windows.index(start)
-      windows = windows[found + 1:]
-      for i in windows:
-        app.log.info(self, i)
-        if i.isFocusable:
-          app.log.info(self, i)
-          return i
-        else:
-          r = i.nextFocusableWindow(start, reverse)
-          if r is not None:
-            app.log.info(self, r)
-            return r
-      windows = windows[:found]
-    except ValueError:
-      app.log.info('ValueError')
-      pass
-    if self.parent is not None:
-      r = self.parent.nextFocusableWindow(self, reverse)
-      if r is not None:
-        return r
     for i in windows:
-      app.log.info(self, i)
       if i.isFocusable:
         return i
       else:
-        r = i.nextFocusableWindow(start, reverse)
+        r = i.__childFocusableWindow(reverse)
         if r is not None:
           return r
-    app.log.info(self)
-    return None
+
+  def nextFocusableWindow(self, start, reverse=False):
+    """Ignore |start| when searching."""
+    windows = self.zOrder[:]
+    if reverse:
+      windows.reverse()
+    try:
+      found = windows.index(start)
+    except ValueError:
+      found = -1
+    windows = windows[found + 1:]
+    for i in windows:
+      if i.isFocusable:
+        return i
+      else:
+        r = i.__childFocusableWindow(reverse)
+        if r is not None:
+          return r
+    r = self.parent.nextFocusableWindow(self, reverse)
+    if r is not None:
+      return r
+    return self.__childFocusableWindow(reverse)
 
   def normalize(self):
     self.parent.normalize()
@@ -243,9 +243,24 @@ class ViewWindow:
 
   def showWindowHierarchy(self, indent='  '):
     """For debugging."""
-    app.log.info("%s%s" % (indent, self))
+    focus = '[f]' if self.isFocusable else '[ ]'
+    extra = ''
+    if hasattr(self, 'label'):
+      extra += ' "' + self.label + '"'
+    app.log.info("%s%s%s%s" % (indent, focus, self, extra))
     for child in self.zOrder:
       child.showWindowHierarchy(indent + '  ')
+
+  def showFullWindowHierarchy(self, indent='  '):
+    """For debugging."""
+    f = self
+    while f.parent is not None:
+      f = f.parent
+    assert f
+    f.showWindowHierarchy()
+
+  def shortTimeSlice(self):
+    pass
 
   def reshape(self, top, left, rows, cols):
     self.moveTo(top, left)
@@ -383,10 +398,14 @@ class Window(ActiveWindow):
     textBuffer.setView(self)
     self.textBuffer = textBuffer
 
+  def shortTimeSlice(self):
+    if self.textBuffer is not None:
+      self.textBuffer.parseScreenMaybe()
+
 
 class LabelWindow(ViewWindow):
   """A text label. The label is inert, it will pass events to its parent."""
-  def __init__(self, parent, label, preferredWidth=None, align='right'):
+  def __init__(self, parent, label, preferredWidth=None, align='left'):
     if app.config.strict_debug:
       assert issubclass(parent.__class__, ViewWindow), parent
       assert type(label) == str
@@ -395,7 +414,7 @@ class LabelWindow(ViewWindow):
     ViewWindow.__init__(self, parent)
     self.label = label
     self.preferredWidth = preferredWidth
-    self.align = 1 if align == 'right' else -1
+    self.align = -1 if align == 'left' else 1
     self.color = app.color.get('keyword')
 
   def preferredSize(self, rowLimit, colLimit):
@@ -403,14 +422,17 @@ class LabelWindow(ViewWindow):
       assert self.parent
       assert rowLimit >= 0
       assert colLimit >= 0
-    return (min(rowLimit, 1), min(colLimit, len(self.label)))
+    preferredWidth = self.preferredWidth if self.preferredWidth is not None \
+        else len(self.label)
+    return (min(rowLimit, 1), min(colLimit, preferredWidth))
 
   def render(self):
     ViewWindow.render(self)
     if self.rows <= 0:
       return
-    #app.log.info(self.top, self.left, self.rows, self.cols, self.label)
-    self.addStr(0, 0, self.label, self.color)
+    line = self.label[:self.cols]
+    line = unicode("%*s") % (self.cols * self.align, line)
+    self.addStr(0, 0, line, self.color)
 
 
 class LabeledLine(Window):
@@ -431,6 +453,8 @@ class LabeledLine(Window):
 
   def focus(self):
     self.bringToFront()
+    if not self.controller:
+      app.log.info(self, repr(self.label))
     Window.focus(self)
 
   def preferredSize(self, rowLimit, colLimit):
@@ -704,6 +728,9 @@ class InteractiveFind(Window):
 
   def reattach(self):
     Window.reattach(self)
+    # TODO(dschuyler): consider removing expanded control.
+    # See https://github.com/google/ci_edit/issues/170
+    self.expanded = True
     self.parent.layout()
 
   def detach(self):
@@ -1151,6 +1178,29 @@ class InputWindow(Window):
     Window.unfocus(self)
 
 
+class OptionsSelectionWindow(ViewWindow):
+  """Mutex window."""
+  def __init__(self, parent):
+    if app.config.strict_debug:
+      assert parent is not None
+    ViewWindow.__init__(self, parent)
+    self.color = app.color.get('top_info')
+
+  def reshape(self, top, left, rows, cols):
+    ViewWindow.reshape(self, top, left, rows, cols)
+    self.layoutHorizontally(self.zOrder)
+
+  def childSelected(self, selectedChild):
+    app.log.info(self.zOrder)
+    for child in self.zOrder:
+      if child is not selectedChild:
+        child.deselect()
+
+  def render(self):
+    self.blank(self.color)
+    ViewWindow.render(self)
+
+
 class OptionsTrinaryStateWindow(Window):
   def __init__(self, parent, label, prefCategory, prefName):
     if app.config.strict_debug:
@@ -1194,7 +1244,10 @@ class OptionsTrinaryStateWindow(Window):
 
   def updateLabel(self):
     pref = app.prefs.prefs[self.prefCategory][self.prefName]
-    label = self.toggleOn if pref else self.toggleOff
+    if pref is None:
+      label = self.toggleUndefined
+    else:
+      label = self.toggleOn if pref else self.toggleOff
     self.label = '%*s' % (self.width, label)
 
   def preferredSize(self, rowLimit, colLimit):
@@ -1484,3 +1537,31 @@ class PaletteWindow(Window):
   def unfocus(self):
     self.detach()
     Window.unfocus(self)
+
+
+class SortableHeaderWindow(OptionsTrinaryStateWindow):
+  def __init__(self, parent, label, prefCategory, prefName, width=None):
+    if app.config.strict_debug:
+      assert type(label) == str
+      assert type(prefCategory) == str
+      assert type(prefName) == str
+    OptionsTrinaryStateWindow.__init__(self, parent, label, prefCategory,
+        prefName)
+    self.color = app.color.get('top_info')
+    def draw(label, decoration, width):
+      if width < 0:
+        x = '%s %s' % (label, decoration)
+      else:
+        x = '%s %s' % (decoration, label)
+      return '%*s' % (width, x)
+    OptionsTrinaryStateWindow.setUp(self,
+        draw(label, 'v', width),
+        draw(label, '^', width),
+        draw(label, '-', width))
+
+  def deselect(self):
+    self.controller.clearValue()
+
+  def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
+    self.parent.childSelected(self)
+    self.controller.toggleValue()

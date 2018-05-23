@@ -217,9 +217,9 @@ class InteractiveFindInput(app.controller.Controller):
     self.view.parent.expandFindWindow(True)
     app.controller.Controller.nextFocusableWindow(self)
 
-  def priorFocusableWindow(self):
-    if not app.controller.Controller.priorFocusableWindow(self):
-      self.view.host.expandFindWindow(False)
+  #def priorFocusableWindow(self):
+  #  if not app.controller.Controller.priorFocusableWindow(self):
+  #    self.view.host.expandFindWindow(False)
 
   def findNext(self):
     self.parentController().findNext()
@@ -297,6 +297,13 @@ class ToggleController(app.controller.Controller):
       assert issubclass(self.__class__, ToggleController), self
       assert issubclass(view.__class__, app.window.ViewWindow), view
     app.controller.Controller.__init__(self, view, 'toggle')
+
+  def clearValue(self):
+    category = self.view.prefCategory
+    name = self.view.prefName
+    prefs = app.prefs
+    prefs.save(category, name, None)
+    self.view.onPrefChanged(category, name)
 
   def toggleValue(self):
     category = self.view.prefCategory
