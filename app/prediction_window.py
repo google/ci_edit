@@ -244,5 +244,5 @@ class PredictionWindow(app.window.Window):
     self.predictionInputWindow.setPath(path)
 
   def unfocus(self):
-    app.log.info()
+    self.detach()
     app.window.Window.unfocus(self)
