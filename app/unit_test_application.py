@@ -115,9 +115,9 @@ class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
     #self.setMovieMode(True)
     self.runWithTestFile(kTestFile, [
         self.displayCheck(-1, 0, ["      "]),
-        CTRL_P, self.displayCheck(-1, 0, ["p: "]), CTRL_J,
+        #CTRL_P, self.displayCheck(-1, 0, ["p: "]), CTRL_J,
         self.displayCheck(-1, 0, ["      "]),
-        CTRL_P, self.displayCheck(-1, 0, ["p: "]), CTRL_J,
+        #CTRL_P, self.displayCheck(-1, 0, ["p: "]), CTRL_J,
         CTRL_Q])
 
   def test_text_contents(self):
