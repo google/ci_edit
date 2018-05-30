@@ -39,10 +39,19 @@ __c_keywords = __common_keywords + [
 ]
 
 __c_primitive_types = [
-  'bool', 'char', 'double', 'float', 'int', 'long', 'signed', 'short',
-  'unsigned',
+  'bool', 'char', 'double', 'float', 'int',
   'int8_t', 'int16_t', 'int32_t', 'int64_t',
+  'int_fast8_t', 'int_fast16_t', 'int_fast32_t', 'int_fast64_t',
+  'int_least8_t', 'int_least16_t', 'int_least32_t', 'int_least64_t',
+  'int_max_t',
+  'int8_t', 'int16_t', 'int32_t', 'int64_t',
+  'intptr_t', 'ptrdiff_t', 'size_t',
+  'long', 'signed', 'short',
   'uint8_t', 'uint16_t', 'uint32_t', 'uint64_t',
+  'uint_fast8_t', 'uint_fast16_t', 'uint_fast32_t', 'uint_fast64_t',
+  'uint_least8_t', 'uint_least16_t', 'uint_least32_t', 'uint_least64_t',
+  'uint_max_t', 'uintptr_t',
+  'unsigned',
   'void', 'wchar_t',
 ]
 
@@ -328,8 +337,8 @@ prefs = {
     'cpp': {
       'indent': '  ',
       'keywords': __c_keywords + [
-        'auto', 'catch', 'class', 'constexpr', 'explicit', 'false',
-        'namespace', 'nullptr', 'override',
+        'auto', 'catch', 'class', 'constexpr', 'delete', 'explicit', 'false',
+        'mutable', 'namespace', 'new', 'nullptr', 'override',
         'private', 'protected', 'public',
         'template', 'this', 'throw', 'true', 'typename',
       ],
@@ -530,7 +539,7 @@ prefs = {
       'keywords': [
         'arguments', 'break', 'case', 'class', 'const', 'continue', 'default',
         'document', 'else', 'false', 'for', 'function', 'if', 'let', 'of',
-        'return', 'switch', 'this', 'true', 'var', 'while',
+        'return', 'switch', 'this', 'true', 'undefined', 'var', 'while',
         'instanceof', 'static', 'yield', 'super', 'delete',
        ],
       'special': [
