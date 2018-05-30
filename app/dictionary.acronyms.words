@@ -32,6 +32,7 @@ brt
 bs
 bsd
 btw
+cb
 cisc
 cjk
 cn
@@ -51,6 +52,7 @@ drm
 et
 eula
 eulas
+faq
 fc
 fil
 fpu
@@ -150,12 +152,14 @@ nt
 ntfs
 ntp
 nv
+oem
 oobe
 oop
 os
 oses
 oss
 osx
+otoh
 pb
 pbs
 pc
@@ -183,6 +187,7 @@ ru
 saml
 sdk
 sdks
+serp
 sgml
 sgmls
 simd
@@ -209,6 +214,7 @@ tifs
 tld
 tlds
 tls
+toc
 tp
 tpm
 ttfn

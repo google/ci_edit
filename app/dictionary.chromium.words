@@ -54,6 +54,8 @@ cryptohome
 cws
 darkconnect
 dcheck
+decltype
+declval
 deletability
 displaymode
 dlog
@@ -133,6 +135,7 @@ rendertext
 rlz
 rtlui
 safebrowsing
+scoper
 scrollview
 sel
 sideload
@@ -148,6 +151,8 @@ tabstrip
 tbr
 textfield
 tooltips
+triggerer
+triggerers
 tryserver
 uitest
 ukm

@@ -147,9 +147,12 @@ ff
 fi
 fifo
 filename
+filenames
 fixme
 fn
 formatter
+forwardability
+forwardable
 freebsd
 ftp
 func
@@ -183,6 +186,7 @@ img
 infographic
 ini
 init
+inlinability
 inlined
 inlines
 inlining
@@ -211,6 +215,8 @@ localhost
 loopback
 lorem
 ltgray
+lvalue
+lvalues
 makefile
 makefiles
 memoized
@@ -251,6 +257,7 @@ precompiled
 precompiling
 prefetch
 prerender
+prerendered
 prev
 prg
 proc
@@ -264,6 +271,8 @@ py
 pyc
 pyo
 rar
+rastered
+rastering
 rb
 readme
 rect
@@ -285,6 +294,8 @@ rrggbbaa
 rtti
 runtime
 rv
+rvalue
+rvalues
 scrollback
 scrollbar
 serializable
@@ -323,6 +334,7 @@ tar
 templated
 templatizer
 templatizers
+textbox
 tgz
 throbber
 tk
