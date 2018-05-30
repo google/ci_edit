@@ -258,9 +258,11 @@ class Actions(app.mutator.Mutator):
       while indent < len(line) and line[indent] == ' ':
         indent += 1
       if len(line):
-        stripped = line.rstrip()
-        if stripped and line[-1] in [':', '[', '{']:
+        lastChar = line.rstrip()[-1:]
+        if lastChar in [':', '[', '{']:
           indent += commonIndent
+        elif lastChar in ['=', '+', '-', '/', '*']:
+          indent += commonIndent * 2
         # Good idea or bad idea?
         #elif indent >= 2 and line.lstrip()[:6] == 'return':
         #  indent -= commonIndent
