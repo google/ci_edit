@@ -537,10 +537,10 @@ prefs = {
       'end': '</script>',
       'indent': '  ',
       'keywords': [
-        'arguments', 'break', 'case', 'class', 'const', 'continue', 'default',
-        'document', 'else', 'false', 'for', 'function', 'if', 'let', 'of',
-        'return', 'switch', 'this', 'true', 'undefined', 'var', 'while',
-        'instanceof', 'static', 'yield', 'super', 'delete',
+        'arguments', 'break', 'case', 'class', 'const', 'continue',
+        'default', 'delete', 'document', 'else', 'false', 'for', 'function',
+        'if', 'instanceof', 'let', 'of', 'return', 'static', 'switch', 'super',
+        'this', 'true', 'undefined', 'var', 'while', 'yield',
        ],
       'special': [
         '\bsetTimeout\b', '\brequestCallback\b', '\bconsole\b', '\bwindow\b',
