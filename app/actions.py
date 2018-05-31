@@ -849,6 +849,17 @@ class Actions(app.mutator.Mutator):
     else:
       self.data = unicode("")
     self.fileExtension = os.path.splitext(self.fullPath)[1]
+    if self.fileExtension == "" and len(self.lines) > 0:
+      line = self.lines[0]
+      if line.startswith('#!'):
+        if 'python' in line:
+          self.fileExtension = '.py'
+        elif 'bash' in line:
+          self.fileExtension = '.sh'
+        elif 'node' in line:
+          self.fileExtension = '.js'
+        elif 'sh' in line:
+          self.fileExtension = '.sh'
     self.rootGrammar = app.prefs.getGrammar(self.fileExtension)
     self.parseGrammars()
     self.dataToLines()
