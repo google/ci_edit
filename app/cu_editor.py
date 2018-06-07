@@ -437,6 +437,7 @@ class CuaPlusEdit(CuaEdit):
       KEY_SHIFT_F3: textBuffer.findBack,
     })
     self.commandSet = commandSet
+    self.commandDefault = self.textBuffer.insertPrintableWithPairing
 
 class PopupController(app.controller.Controller):
   """

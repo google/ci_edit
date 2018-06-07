@@ -44,8 +44,10 @@ class Actions(app.mutator.Mutator):
     self.debugUpperChangedRow = -1
     self.parser = app.parser.Parser()
 
-  def setView(self, view):
-    self.view = view
+  def charAt(self, row, col):
+    if row >= len(self.lines) or col >= len(self.lines[row]):
+      return None
+    return self.lines[row][col]
 
   def performDelete(self):
     if self.selectionMode != app.selectable.kSelectionNone:
@@ -1334,6 +1336,31 @@ class Actions(app.mutator.Mutator):
     elif ch is app.curses_util.UNICODE_INPUT:
       self.insert(meta)
 
+  def insertPrintableWithPairing(self, ch, meta):
+    #app.log.info(ch, meta)
+    if curses.ascii.isprint(ch):
+      pairs = {
+        ord("'"): unicode("'"),
+        ord('"'): unicode('"'),
+        ord('('): unicode(')'),
+        ord('{'): unicode('}'),
+        ord('['): unicode(']'),
+      }
+      skips = pairs.values()
+      mate = pairs.get(ch)
+      if chr(ch) in skips and chr(ch) == self.charAt(self.penRow,
+          self.penCol):
+        self.cursorMove(0, 1)
+      elif mate is not None:
+        self.insert(unichr(ch) + mate)
+        self.cursorMove(0, -1)
+      else:
+        self.insert(unichr(ch))
+    elif ch is app.curses_util.BRACKETED_PASTE:
+      self.editPasteData(meta.decode('utf-8'))
+    elif ch is app.curses_util.UNICODE_INPUT:
+      self.insert(meta)
+
   def joinLines(self):
     """join the next line onto the current line."""
     self.redoAddChange(('j',))
@@ -1600,6 +1627,9 @@ class Actions(app.mutator.Mutator):
     self.selectText(row, col, 0, app.selectable.kSelectionWord)
     if col < len(self.lines[self.penRow]):
       self.cursorSelectWordRight()
+
+  def setView(self, view):
+    self.view = view
 
   def toggleShowTips(self):
     self.view.toggleShowTips()
