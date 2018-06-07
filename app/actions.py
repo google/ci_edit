@@ -259,7 +259,19 @@ class Actions(app.mutator.Mutator):
         indent += 1
       if len(line):
         lastChar = line.rstrip()[-1:]
-        if lastChar in [':', '[', '{']:
+        if lastChar == ':':
+          indent += commonIndent
+        elif lastChar in ['[', '{']:
+          # Check whether a \n is inserted in {} or []; if so add another line
+          # and unindent the closing character.
+          splitLine = self.lines[self.penRow]
+          if splitLine[self.penCol:self.penCol+1] in [']', '}']:
+            self.redoAddChange(('i', ' ' * indent));
+            self.redo()
+            self.cursorMove(0, -indent);
+            self.redo()
+            self.redoAddChange(('n', 1, self.getCursorMove(0, 0)))
+            self.redo()
           indent += commonIndent
         elif lastChar in ['=', '+', '-', '/', '*']:
           indent += commonIndent * 2
