@@ -851,18 +851,21 @@ class Actions(app.mutator.Mutator):
     self.determineFileExtension()
 
   def determineFileExtension(self):
-    self.fileExtension = os.path.splitext(self.fullPath)[1]
-    if self.fileExtension == "" and len(self.lines) > 0:
+    extension = os.path.splitext(self.fullPath)[1]
+    if extension == "" and len(self.lines) > 0:
       line = self.lines[0]
       if line.startswith('#!'):
         if 'python' in line:
-          self.fileExtension = '.py'
+          extension = '.py'
         elif 'bash' in line:
-          self.fileExtension = '.sh'
+          extension = '.sh'
         elif 'node' in line:
-          self.fileExtension = '.js'
+          extension = '.js'
         elif 'sh' in line:
-          self.fileExtension = '.sh'
+          extension = '.sh'
+    if self.fileExtension != extension:
+      self.fileExtension = extension
+      self.upperChangedRow = 0
     self.rootGrammar = app.prefs.getGrammar(self.fileExtension)
     self.parseGrammars()
     self.dataToLines()
@@ -1076,7 +1079,6 @@ class Actions(app.mutator.Mutator):
         app.log.exception(e)
     except Exception:
       app.log.info('except had exception')
-    self.upperChangedRow = 0
     self.determineFileExtension()
 
   def selectText(self, row, col, length, mode):
