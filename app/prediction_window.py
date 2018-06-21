@@ -214,6 +214,8 @@ class PredictionWindow(app.window.Window):
     pass
 
   def focus(self):
+    self.reattach()
+    self.parent.layout()
     app.window.Window.focus(self)
     self.changeFocusTo(self.predictionInputWindow)
 
@@ -244,5 +246,5 @@ class PredictionWindow(app.window.Window):
     self.predictionInputWindow.setPath(path)
 
   def unfocus(self):
-    self.detach()
     app.window.Window.unfocus(self)
+    self.detach()

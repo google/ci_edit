@@ -211,6 +211,8 @@ class FileManagerWindow(app.window.Window):
     pass
 
   def focus(self):
+    self.reattach()
+    self.parent.layout()
     self.controller.focus()
     self.changeFocusTo(self.pathWindow)
 
@@ -249,3 +251,7 @@ class FileManagerWindow(app.window.Window):
 
   def setPath(self, path):
     self.pathWindow.setPath(path)
+
+  def unfocus(self):
+    app.window.Window.unfocus(self)
+    self.detach()

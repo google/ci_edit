@@ -49,16 +49,16 @@ class ProgramWindow(app.window.ActiveWindow):
     self.paletteWindow = app.window.PaletteWindow(self)
     # The input window is the main document window.
     self.inputWindow = app.window.InputWindow(self)
-    self.zOrder.append(self.inputWindow)
+    self.inputWindow.parent = self
     # Set up file manager.
     self.fileManagerWindow = app.file_manager_window.FileManagerWindow(self,
         self.inputWindow)
-    self.zOrder.append(self.fileManagerWindow)
+    self.fileManagerWindow.parent = self
     # Set up prediction.
     self.predictionWindow = app.prediction_window.PredictionWindow(self)
-    self.zOrder.append(self.predictionWindow)
+    self.predictionWindow.parent = self
     # Put the input window in front on startup.
-    self.inputWindow.bringToFront()
+    self.inputWindow.reattach()
 
   def changeFocusTo(self, changeTo):
     self.focusedWindow.controller.onChange()
