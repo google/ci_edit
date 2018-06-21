@@ -427,12 +427,12 @@ class LabelWindow(ViewWindow):
     return (min(rowLimit, 1), min(colLimit, preferredWidth))
 
   def render(self):
-    ViewWindow.render(self)
     if self.rows <= 0:
       return
     line = self.label[:self.cols]
     line = unicode("%*s") % (self.cols * self.align, line)
     self.addStr(0, 0, line, self.color)
+    ViewWindow.render(self)
 
 
 class LabeledLine(Window):
@@ -487,7 +487,7 @@ class Menu(ViewWindow):
       assert issubclass(host.__class__, ActiveWindow), parent
     ViewWindow.__init__(self, host)
     self.host = host
-    self.controller = None
+    self.label = ''
     self.lines = []
     self.commands = []
 
@@ -1445,6 +1445,7 @@ class OptionsRow(ViewWindow):
     self.writeLineRow = 0
     self.writeLine(line[:self.cols], self.color)
 
+
 class PopupWindow(Window):
   def __init__(self, host):
     if app.config.strict_debug:
@@ -1511,6 +1512,7 @@ class PopupWindow(Window):
   def unfocus(self):
     self.detach()
     Window.unfocus(self)
+
 
 class PaletteWindow(Window):
   """A window with example foreground and background text colors."""
