@@ -229,16 +229,15 @@ class PredictionWindow(app.window.Window):
   def reshape(self, top, left, rows, cols):
     """Change self and sub-windows to fit within the given rectangle."""
     app.window.Window.reshape(self, top, left, rows, cols)
-    originalRows = rows
     self.titleRow.reshape(top, left, 1, cols)
     top += 1
     rows -= 1
     self.predictionInputWindow.reshape(top, left, 1, cols)
     top += 1
     rows -= 1
-    self.optionsRow.reshape(originalRows - 2, left, 1, cols)
+    self.messageLine.reshape(top + rows - 1, left, 1, cols)
     rows -= 1
-    self.messageLine.reshape(originalRows - 1, left, 1, cols)
+    self.optionsRow.reshape(top + rows - 1, left, 1, cols)
     rows -= 1
     self.predictionList.reshape(top, left, rows, cols)
 

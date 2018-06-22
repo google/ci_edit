@@ -227,16 +227,15 @@ class FileManagerWindow(app.window.Window):
     """Change self and sub-windows to fit within the given rectangle."""
     app.log.detail('reshape', top, left, rows, cols)
     app.window.Window.reshape(self, top, left, rows, cols)
-    originalRows = rows
     self.titleRow.reshape(top, left, 1, cols)
     top += 1
     rows -= 1
     self.pathWindow.reshape(top, left, 1, cols)
     top += 1
     rows -= 1
-    self.optionsRow.reshape(originalRows - 2, left, 1, cols)
+    self.messageLine.reshape(top + rows - 1, left, 1, cols)
     rows -= 1
-    self.messageLine.reshape(originalRows - 1, left, 1, cols)
+    self.optionsRow.reshape(top + rows - 1, left, 1, cols)
     rows -= 1
     self.directoryList.reshape(top, left, rows, cols)
 

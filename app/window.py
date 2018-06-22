@@ -1047,6 +1047,9 @@ class InputWindow(Window):
     topRows = self.topRows
     bottomRows = max(1, self.interactiveFind.preferredSize(rows, cols)[0])
 
+    # The top, left of the main window is the rows, cols of the logo corner.
+    self.logoCorner.reshape(top, left, 2, lineNumbersCols)
+
     if self.showTopInfo and rows > topRows and cols > lineNumbersCols:
       self.topInfo.reshape(top,
           left + lineNumbersCols, topRows, cols - lineNumbersCols)
@@ -1078,8 +1081,6 @@ class InputWindow(Window):
     if self.showRightColumn and cols > 0:
       self.rightColumn.reshape(top, left + cols - 1, rows, 1)
       cols -= 1
-    # The top, left of the main window is the rows, cols of the logo corner.
-    self.logoCorner.reshape(0, 0, top, left)
     Window.reshape(self, top, left, rows, cols)
 
   def drawLogoCorner(self):

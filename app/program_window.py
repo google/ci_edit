@@ -248,7 +248,7 @@ class ProgramWindow(app.window.ActiveWindow):
       # to the application to resize the curses terminal.
       rows, cols = app.curses_util.terminalSize()
       curses.resizeterm(rows, cols)
-    self.top, self.left = app.window.mainCursesWindow.getyx()
+    self.top = self.left = 0
     self.rows, self.cols = app.window.mainCursesWindow.getmaxyx()
     self.layout()
     window.controller.onChange()
@@ -265,8 +265,7 @@ class ProgramWindow(app.window.ActiveWindow):
       inputWidth = min(88, cols)
       debugWidth = max(cols - inputWidth - 1, 0)
       debugRows = 20
-      self.debugWindow.reshape(0,
-          inputWidth + 1, debugRows, debugWidth)
+      self.debugWindow.reshape(0, inputWidth + 1, debugRows, debugWidth)
       self.debugUndoWindow.reshape(debugRows,
           inputWidth + 1, rows - debugRows, debugWidth)
       self.logWindow.reshape(debugRows, 0, rows - debugRows, inputWidth)
@@ -274,7 +273,7 @@ class ProgramWindow(app.window.ActiveWindow):
     else:
       inputWidth = cols
     if 1:  # Full screen.
-      for i, window in enumerate(self.zOrder):
+      for window in self.zOrder:
         window.reshape(0, 0, rows, inputWidth)
     else:  # Split horizontally.
       count = len(self.zOrder)
