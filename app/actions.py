@@ -251,9 +251,10 @@ class Actions(app.mutator.Mutator):
 
   def carriageReturn(self):
     self.performDelete()
+    grammar = self.parser.grammarAt(self.penRow, self.penCol)
     self.redoAddChange(('n', 1, self.getCursorMove(1, -self.penCol)))
     self.redo()
-    if 1:  # TODO(dschuyler): if indent on CR
+    if grammar.get('indent_on_cr'):
       line = self.lines[self.penRow - 1]
       commonIndent = len(app.prefs.editor['indentation'])
       indent = 0

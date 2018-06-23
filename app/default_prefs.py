@@ -581,6 +581,7 @@ prefs = {
     },
     'py': {
       'indent': '  ',
+      'indent_on_cr': True,
       'keywords': __common_keywords + [
         'and', 'as', 'assert', 'class',
         'def', 'dict', 'elif', 'except',

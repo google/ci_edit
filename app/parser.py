@@ -79,6 +79,17 @@ class Parser:
       else:
         return index
 
+  def grammarAt(self, row, col):
+    """
+    Get the grammar at row, col.
+    It's more efficient to use grammarIndexFromRowCol() and grammarAtIndex()
+    individually if grammars are requested contiguously. This function is just
+    for one-off needs.
+    """
+    grammarIndex = self.grammarIndexFromRowCol(row, col)
+    node, _, _ = self.grammarAtIndex(row, col, grammarIndex)
+    return node.grammar
+
   def grammarAtIndex(self, row, col, index):
     """
     Call grammarIndexFromRowCol() to get the index parameter.
