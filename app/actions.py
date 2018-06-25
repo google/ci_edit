@@ -1349,10 +1349,11 @@ class Actions(app.mutator.Mutator):
       }
       skips = pairs.values()
       mate = pairs.get(ch)
-      if chr(ch) in skips and chr(ch) == self.charAt(self.penRow,
+      doPairing = False
+      if doPairing and chr(ch) in skips and chr(ch) == self.charAt(self.penRow,
           self.penCol):
         self.cursorMove(0, 1)
-      elif mate is not None:
+      elif doPairing and mate is not None:
         self.insert(unichr(ch) + mate)
         self.cursorMove(0, -1)
       else:
