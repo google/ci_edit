@@ -384,6 +384,8 @@ class Actions(app.mutator.Mutator):
       self.cursorMove(0, -1)
     elif self.penRow > 0:
       self.cursorMove(-1, len(self.lines[self.penRow - 1]))
+    else:
+      self.setMessage('Top of file')
 
   def cursorMoveRight(self):
     if not self.lines:
