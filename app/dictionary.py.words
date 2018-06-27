@@ -75,6 +75,7 @@ execve
 execvp
 execvpe
 exlock
+expandtabs
 expanduser
 expandvars
 extsep
@@ -146,15 +147,21 @@ ino
 insort
 inventwithpython
 ioerr
+isalnum
+isalpha
 isatty
+isdecimal
 isdigit
 isdir
 isfile
 islink
 islower
 ismount
+isnumeric
 isprint
+isspace
 issubclass
+istitle
 isupper
 iteritems
 itertools
@@ -171,6 +178,7 @@ len
 lft
 linesep
 listdir
+ljust
 localtime
 lpcstr
 lpvoid
@@ -345,3 +353,4 @@ wuntraced
 xclip
 xrange
 xsel
+zfill
