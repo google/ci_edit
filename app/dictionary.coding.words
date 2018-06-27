@@ -214,6 +214,7 @@ loc
 localhost
 loopback
 lorem
+lossless
 ltgray
 lvalue
 lvalues
@@ -266,6 +267,7 @@ psec
 ptr
 ptrs
 pv
+pwd
 px
 py
 pyc
@@ -324,6 +326,7 @@ stylesheet
 sudo
 svg
 svn
+symlink
 symlinks
 syncable
 sys
