@@ -188,6 +188,7 @@ prefs = {
   'devTest': {
   },
   'editor': {
+    'autoInsertClosingCharacter': False,
     'captiveCursor': False,
     'colorScheme': 'default',
     'filesShowDotFiles': True,

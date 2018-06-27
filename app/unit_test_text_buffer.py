@@ -152,3 +152,62 @@ void blah();
     self.assertEqual(self.textBuffer.markerCol, wordEnd)
     self.assertEqual(self.textBuffer.penRow, row)
     self.assertEqual(self.textBuffer.penCol, 0)
+
+
+class TextInsert(unittest.TestCase):
+  def setUp(self):
+    app.log.shouldWritePrintLog = False
+    self.textBuffer = app.text_buffer.TextBuffer()
+    self.textBuffer.setView(FakeView())
+    #self.assertEqual(self.textBuffer.scrollRow, 0)
+    #self.assertEqual(self.textBuffer.scrollCol, 0)
+
+  def tearDown(self):
+    self.textBuffer = None
+
+  def test_auto_insert_pair_disable(self):
+    app.prefs.editor['autoInsertClosingCharacter'] = False
+    tb = self.textBuffer
+    insert = self.textBuffer.insertPrintableWithPairing
+    self.assertEqual(len(tb.lines), 1)
+    insert(ord('o'), None)
+    insert(ord('('), None)
+    self.assertEqual(tb.lines[0], 'o(')
+    insert(ord('a'), None)
+    self.assertEqual(tb.lines[0], 'o(a')
+    tb.editUndo()
+    self.assertEqual(tb.lines[0], 'o(')
+    tb.editUndo()
+    self.assertEqual(tb.lines[0], 'o')
+    tb.editUndo()
+    self.assertEqual(tb.lines[0], '')
+    # Don't insert pair if the next char is not whitespace.
+    insert(ord('o'), None)
+    self.assertEqual(tb.lines[0], 'o')
+    tb.cursorLeft()
+    self.assertEqual(tb.lines[0], 'o')
+    insert(ord('('), None)
+    self.assertEqual(tb.lines[0], '(o')
+
+  def test_auto_insert_pair_enable(self):
+    app.prefs.editor['autoInsertClosingCharacter'] = True
+    tb = self.textBuffer
+    insert = self.textBuffer.insertPrintableWithPairing
+    self.assertEqual(len(tb.lines), 1)
+    insert(ord('o'), None)
+    insert(ord('('), None)
+    self.assertEqual(tb.lines[0], 'o()')
+    insert(ord('a'), None)
+    self.assertEqual(tb.lines[0], 'o(a)')
+    tb.editUndo()
+    self.assertEqual(tb.lines[0], 'o()')
+    tb.editUndo()
+    self.assertEqual(tb.lines[0], '')
+    # Don't insert pair if the next char is not whitespace.
+    insert(ord('o'), None)
+    self.assertEqual(tb.lines[0], 'o')
+    tb.cursorLeft()
+    self.assertEqual(tb.lines[0], 'o')
+    insert(ord('('), None)
+    self.assertEqual(tb.lines[0], '(o')
+

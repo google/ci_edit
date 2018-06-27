@@ -1342,22 +1342,25 @@ class Actions(app.mutator.Mutator):
   def insertPrintableWithPairing(self, ch, meta):
     #app.log.info(ch, meta)
     if curses.ascii.isprint(ch):
-      pairs = {
-        ord("'"): unicode("'"),
-        ord('"'): unicode('"'),
-        ord('('): unicode(')'),
-        ord('{'): unicode('}'),
-        ord('['): unicode(']'),
-      }
-      skips = pairs.values()
-      mate = pairs.get(ch)
-      doPairing = False
-      if doPairing and chr(ch) in skips and chr(ch) == self.charAt(self.penRow,
-          self.penCol):
-        self.cursorMove(0, 1)
-      elif doPairing and mate is not None:
-        self.insert(unichr(ch) + mate)
-        self.cursorMove(0, -1)
+      if app.prefs.editor['autoInsertClosingCharacter']:
+        pairs = {
+          ord("'"): unicode("'"),
+          ord('"'): unicode('"'),
+          ord('('): unicode(')'),
+          ord('{'): unicode('}'),
+          ord('['): unicode(']'),
+        }
+        skips = pairs.values()
+        mate = pairs.get(ch)
+        nextChr = self.charAt(self.penRow, self.penCol)
+        if chr(ch) in skips and chr(ch) == nextChr:
+          self.cursorMove(0, 1)
+        elif mate is not None and (nextChr is None or nextChr.isspace()):
+          self.insert(unichr(ch) + mate)
+          self.compoundChangePush()
+          self.cursorMove(0, -1)
+        else:
+          self.insert(unichr(ch))
       else:
         self.insert(unichr(ch))
     elif ch is app.curses_util.BRACKETED_PASTE:

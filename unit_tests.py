@@ -59,7 +59,8 @@ tests = {
   'prefs': app.unit_test_prefs.PrefsTestCases,
   'regex': app.unit_test_regex.RegexTestCases,
   'selectable': app.unit_test_selectable.SelectableTestCases,
-  'text_buffer': app.unit_test_text_buffer.MouseTestCases,
+  'text_buffer_mouse': app.unit_test_text_buffer.MouseTestCases,
+  'text_buffer_insert': app.unit_test_text_buffer.TextInsert,
 }
 
 
