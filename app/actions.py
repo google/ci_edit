@@ -254,7 +254,7 @@ class Actions(app.mutator.Mutator):
     grammar = self.parser.grammarAt(self.penRow, self.penCol)
     self.redoAddChange(('n', 1, self.getCursorMove(1, -self.penCol)))
     self.redo()
-    if grammar.get('indent_on_cr'):
+    if grammar.get('indent'):
       line = self.lines[self.penRow - 1]
       commonIndent = len(app.prefs.editor['indentation'])
       indent = 0

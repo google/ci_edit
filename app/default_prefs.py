@@ -582,7 +582,6 @@ prefs = {
     },
     'py': {
       'indent': '  ',
-      'indent_on_cr': True,
       'keywords': __common_keywords + [
         'and', 'as', 'assert', 'class',
         'def', 'dict', 'elif', 'except',
@@ -671,7 +670,6 @@ prefs = {
       'spelling': False,
     },
     'text': {
-      'indent': '  ',
       'special': [__sha_1,],
       'contains': ['quoted_string1', 'quoted_string2'],
     },
