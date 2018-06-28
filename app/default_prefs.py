@@ -252,6 +252,14 @@ prefs = {
       'ext': ['.css', '_css.html'],
       'grammar': 'css',
     },
+    'dart': {
+      'ext': ['.dart',],
+      'grammar': 'dart',
+    },
+    'golang': {
+      'ext': ['.go',],
+      'grammar': 'golang',
+    },
     'grd': {
       'ext': ['.grd', '.grdp'],
       'grammar': 'grd',
@@ -275,6 +283,10 @@ prefs = {
     'python': {
       'ext': ['.py'],
       'grammar': 'py',
+    },
+    'rust': {
+      'ext': ['.rust'],
+      'grammar': 'rust',
     },
     'text': {
       'ext': ['.txt', ''],
@@ -469,6 +481,24 @@ prefs = {
       ],
       'contains': ['cpp_block_comment',],
     },
+    'dart': {
+      'indent': '  ',
+      'keywords': [
+        'abstract', 'as', 'assert', 'async', 'async', 'await', 'break', 'case',
+        'catch', 'class', 'const', 'continue', 'covariant', 'default',
+        'deferred', 'do', 'dynamic', 'else', 'enum', 'export', 'extends',
+        'external', 'factory', 'false', 'final', 'finally', 'for', 'get', 'if',
+        'implements', 'import', 'in', 'interface', 'is', 'library', 'mixin',
+        'new', 'null', 'operator', 'part', 'rethrow', 'return', 'set', 'static',
+        'super', 'switch', 'sync', 'this', 'throw', 'true', 'try', 'typedef',
+        'var', 'void', 'while', 'with', 'yield',
+      ],
+      'special': [
+        #r'(?<!\w)__.*?__(?!\w)',
+      ],
+      'contains': [
+      ],
+    },
     'doc_block_comment': {
       'begin': r'/\*\*',
       'continued': ' * ',
@@ -483,6 +513,20 @@ prefs = {
     },
     'error': {
       'spelling': False,
+    },
+    'golang': {
+      'indent': '  ',
+      'keywords': [
+        'break', 'case', 'chan', 'const', 'continue', 'default', 'defer',
+        'else', 'fallthrough', 'for', 'func', 'go', 'goto', 'if', 'import',
+        'interface', 'map', 'package', 'range', 'return', 'select', 'struct',
+        'switch', 'type', 'var',
+      ],
+      'special': [
+        #r'(?<!\w)__.*?__(?!\w)',
+      ],
+      'contains': [
+      ],
     },
     'grd': {
       'keywords': [ 'flattenhtml', 'allowexternalscript' ],
@@ -665,6 +709,23 @@ prefs = {
       'indent': '  ',
       'special': __special_string_escapes + [r"\\/"],
       'single_line': True,
+    },
+    'rust': {
+      'indent': '  ',
+      'keywords': [
+        'abstract', 'alignof', 'as', 'become', 'box', 'break', 'const',
+        'continue', 'crate', 'do', 'else', 'enum', 'extern', 'false', 'final',
+        'fn', 'for', 'if', 'impl', 'in', 'let', 'loop', 'macro', 'match', 'mod',
+        'move', 'mut', 'offsetof', 'override', 'priv', 'pub', 'pure', 'ref',
+        'return', 'Self', 'self', 'sizeof', 'static', 'struct', 'super',
+        'trait', 'true', 'type', 'typeof', 'unsafe', 'unsized', 'use',
+        'virtual', 'where', 'while', 'yield',
+      ],
+      'special': [
+        #r'(?<!\w)__.*?__(?!\w)',
+      ],
+      'contains': [
+      ],
     },
     'special': {
       'spelling': False,
