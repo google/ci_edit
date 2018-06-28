@@ -37,42 +37,54 @@ class PredictionListController(app.controller.Controller):
     if app.config.strict_debug:
       assert type(currentFile) is str
 
+    added = set()
     items = self.items = []
-    # Add open buffers.
-    for i in app.buffer_manager.buffers.buffers:
-      dirty = '*' if i.isDirty() else '.'
-      if i.fullPath:
-        items.append((i, i.fullPath, dirty, 'open'))
-      else:
-        items.append((i, '<new file> %s'%(i.lines[0][:20]), dirty, 'open'))
-    # Add recent files.
-    for recentFile in app.history.getRecentFiles():
-      items.append((None, recentFile, '=', 'recent'))
-    # Add alternate files.
-    dirPath, fileName = os.path.split(currentFile)
-    file, ext = os.path.splitext(fileName)
-    # TODO(dschuyler): rework this ignore list.
-    ignoreExt = set(('.pyc', '.pyo', '.o', '.obj', '.tgz', '.zip', '.tar',))
-    try:
-      contents = os.listdir(
-          os.path.expandvars(os.path.expanduser(dirPath)) or '.')
-    except OSError:
-      contents = []
-    contents.sort()
-    for i in contents:
-      f, e = os.path.splitext(i)
-      if file == f and ext != e and e not in ignoreExt:
-        items.append((None, os.path.join(dirPath, i), '=', 'alt'))
     if 1:
-      # Chromium specific hack.
-      if currentFile.endswith('-extracted.js'):
-        chromiumPath = currentFile[:-len('-extracted.js')] + '.html'
-        if os.path.isfile(chromiumPath):
-          items.append((None, chromiumPath, '=', 'alt'))
-      elif currentFile.endswith('.html'):
-        chromiumPath = currentFile[:-len('.html')] + '-extracted.js'
-        if os.path.isfile(chromiumPath):
-          items.append((None, chromiumPath, '=', 'alt'))
+      # Add open buffers.
+      for i in app.buffer_manager.buffers.buffers:
+        dirty = '*' if i.isDirty() else '.'
+        if i.fullPath:
+          items.append((i, i.fullPath, dirty, 'open'))
+          added.add(i.fullPath)
+        else:
+          items.append((i, '<new file> %s'%(i.lines[0][:20]), dirty, 'open'))
+    if 1:
+      # Add recent files.
+      for recentFile in app.history.getRecentFiles():
+        if recentFile not in added:
+          items.append((None, recentFile, '=', 'recent'))
+          added.add(recentFile)
+    if 1:
+      # Add alternate files.
+      dirPath, fileName = os.path.split(currentFile)
+      file, ext = os.path.splitext(fileName)
+      # TODO(dschuyler): rework this ignore list.
+      ignoreExt = set(('.pyc', '.pyo', '.o', '.obj', '.tgz', '.zip', '.tar',))
+      try:
+        contents = os.listdir(
+            os.path.expandvars(os.path.expanduser(dirPath)) or '.')
+      except OSError:
+        contents = []
+      contents.sort()
+      for i in contents:
+        f, e = os.path.splitext(i)
+        if file == f and ext != e and e not in ignoreExt:
+          fullPath = os.path.join(dirPath, i)
+          if fullPath not in added:
+            items.append((None, fullPath, '=', 'alt'))
+            added.add(fullPath)
+      if 1:
+        # Chromium specific hack.
+        if currentFile.endswith('-extracted.js'):
+          chromiumPath = currentFile[:-len('-extracted.js')] + '.html'
+          if os.path.isfile(chromiumPath) and chromiumPath not in added:
+            items.append((None, chromiumPath, '=', 'alt'))
+            added.add(chromiumPath)
+        elif currentFile.endswith('.html'):
+          chromiumPath = currentFile[:-len('.html')] + '-extracted.js'
+          if os.path.isfile(chromiumPath) and chromiumPath not in added:
+            items.append((None, chromiumPath, '=', 'alt'))
+            added.add(chromiumPath)
     if self.filter is not None:
       regex = re.compile(self.filter)
       i = 0
