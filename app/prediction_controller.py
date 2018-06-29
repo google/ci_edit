@@ -114,6 +114,11 @@ class PredictionListController(app.controller.Controller):
       self.view.update(self.items)
     self.filter = None
 
+  def openAltFile(self):
+    for row,item in enumerate(self.items):
+      if item[3] == 'alt':
+        self.openFileOrDir(row)
+
   def openFileOrDir(self, row):
     if app.config.strict_debug:
       assert type(row) is int
@@ -198,6 +203,11 @@ class PredictionInputController(app.controller.Controller):
   def passEventToPredictionList(self):
     self.getNamedWindow('predictionList').controller.doCommand(self.savedCh,
         None)
+
+  def openAlternateFile(self):
+    app.log.info()
+    predictionList = self.getNamedWindow('predictionList')
+    predictionList.controller.openAltFile()
 
   def performPrimaryAction(self):
     app.log.info()

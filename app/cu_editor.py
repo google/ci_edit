@@ -572,6 +572,7 @@ class PredictionInputController(
       KEY_PAGE_UP: self.passEventToPredictionList,
       KEY_DOWN: self.passEventToPredictionList,
       KEY_UP: self.passEventToPredictionList,
+      CTRL_L: self.openAlternateFile,
       CTRL_I: self.nextFocusableWindow,
       CTRL_J: self.performPrimaryAction,
       CTRL_N: self.saveEventChangeToHostWindow,
