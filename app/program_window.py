@@ -13,12 +13,15 @@
 # limitations under the License.
 
 import curses
+import os
+import signal
 import sys
 
 import app.curses_util
 import app.debug_window
 import app.file_manager_window
 import app.log
+import app.prediction_window
 import app.prefs
 import app.window
 
@@ -44,12 +47,18 @@ class ProgramWindow(app.window.ActiveWindow):
     self.logWindow = app.window.LogWindow(self)
     self.popupWindow = app.window.PopupWindow(self)
     self.paletteWindow = app.window.PaletteWindow(self)
+    # The input window is the main document window.
     self.inputWindow = app.window.InputWindow(self)
-    self.zOrder.append(self.inputWindow)
+    self.inputWindow.parent = self
+    # Set up file manager.
     self.fileManagerWindow = app.file_manager_window.FileManagerWindow(self,
         self.inputWindow)
-    self.zOrder.append(self.fileManagerWindow)
-    self.inputWindow.bringToFront()
+    self.fileManagerWindow.parent = self
+    # Set up prediction.
+    self.predictionWindow = app.prediction_window.PredictionWindow(self)
+    self.predictionWindow.parent = self
+    # Put the input window in front on startup.
+    self.inputWindow.reattach()
 
   def changeFocusTo(self, changeTo):
     self.focusedWindow.controller.onChange()
@@ -169,6 +178,8 @@ class ProgramWindow(app.window.ActiveWindow):
         if self.priorClick + rapidClickTimeout <= eventTime:
           window.mouseRelease(mouseRow, mouseCol, bState&curses.BUTTON_SHIFT,
               bState&curses.BUTTON_CTRL, bState&curses.BUTTON_ALT)
+        #else:
+        #  signal.setitimer(signal.ITIMER_REAL, rapidClickTimeout)
       else:
         # Some terminals (linux?) send BUTTON1_RELEASED after moving the mouse.
         # Specifically if the terminal doesn't use button 4 for mouse movement.
@@ -237,7 +248,7 @@ class ProgramWindow(app.window.ActiveWindow):
       # to the application to resize the curses terminal.
       rows, cols = app.curses_util.terminalSize()
       curses.resizeterm(rows, cols)
-    self.top, self.left = app.window.mainCursesWindow.getyx()
+    self.top = self.left = 0
     self.rows, self.cols = app.window.mainCursesWindow.getmaxyx()
     self.layout()
     window.controller.onChange()
@@ -254,22 +265,28 @@ class ProgramWindow(app.window.ActiveWindow):
       inputWidth = min(88, cols)
       debugWidth = max(cols - inputWidth - 1, 0)
       debugRows = 20
-      self.debugWindow.reshape(0,
-          inputWidth + 1, debugRows, debugWidth)
+      self.debugWindow.reshape(0, inputWidth + 1, debugRows, debugWidth)
       self.debugUndoWindow.reshape(debugRows,
           inputWidth + 1, rows - debugRows, debugWidth)
       self.logWindow.reshape(debugRows, 0, rows - debugRows, inputWidth)
       rows = debugRows
     else:
       inputWidth = cols
-    count = len(self.zOrder)
     if 1:  # Full screen.
-      count = 1
-    eachRows = rows / count
-    for i, window in enumerate(self.zOrder[:-1]):
-      window.reshape(eachRows * i, 0, eachRows, inputWidth)
-    self.zOrder[-1].reshape(
-        eachRows * (count - 1), 0, rows - eachRows * (count - 1), inputWidth)
+      for window in self.zOrder:
+        window.reshape(0, 0, rows, inputWidth)
+    else:  # Split horizontally.
+      count = len(self.zOrder)
+      eachRows = rows / count
+      for i, window in enumerate(self.zOrder[:-1]):
+        window.reshape(eachRows * i, 0, eachRows, inputWidth)
+      self.zOrder[-1].reshape(
+          eachRows * (count - 1), 0, rows - eachRows * (count - 1), inputWidth)
+
+  def nextFocusableWindow(self, start, reverse=False):
+    # Keep the tab focus in the child branch. (The child view will call this,
+    # tell the child there is nothing to tab to up here).
+    return None
 
   def normalize(self):
     self.presentModal(None)

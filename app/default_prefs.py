@@ -39,10 +39,19 @@ __c_keywords = __common_keywords + [
 ]
 
 __c_primitive_types = [
-  'bool', 'char', 'double', 'float', 'int', 'long', 'signed', 'short',
-  'unsigned',
+  'bool', 'char', 'double', 'float', 'int',
   'int8_t', 'int16_t', 'int32_t', 'int64_t',
+  'int_fast8_t', 'int_fast16_t', 'int_fast32_t', 'int_fast64_t',
+  'int_least8_t', 'int_least16_t', 'int_least32_t', 'int_least64_t',
+  'int_max_t',
+  'int8_t', 'int16_t', 'int32_t', 'int64_t',
+  'intptr_t', 'ptrdiff_t', 'size_t',
+  'long', 'signed', 'short',
   'uint8_t', 'uint16_t', 'uint32_t', 'uint64_t',
+  'uint_fast8_t', 'uint_fast16_t', 'uint_fast32_t', 'uint_fast64_t',
+  'uint_least8_t', 'uint_least16_t', 'uint_least32_t', 'uint_least64_t',
+  'uint_max_t', 'uintptr_t',
+  'unsigned',
   'void', 'wchar_t',
 ]
 
@@ -179,11 +188,15 @@ prefs = {
   'devTest': {
   },
   'editor': {
+    'autoInsertClosingCharacter': False,
     'captiveCursor': False,
     'colorScheme': 'default',
     'filesShowDotFiles': True,
     'filesShowSizes': True,
     'filesShowModifiedDates': True,
+    'filesSortAscendingByName': True,
+    'filesSortAscendingBySize': None,
+    'filesSortAscendingByModifiedDate': None,
     'findDotAll': False,
     'findIgnoreCase': True,
     'findLocale': False,
@@ -200,6 +213,12 @@ prefs = {
     'optimalCursorRow': 0.28,  # Ratio of rows: 0 top, 0.5 middle, 1.0 bottom.
     'palette': 'default',
     'palette8': 'default8',
+    'predictionShowOpenFiles': True,
+    'predictionShowAlternateFiles': True,
+    'predictionShowRecentFiles': True,
+    'predictionSortAscendingByType': True,
+    'predictionSortAscendingByName': None,
+    'predictionSortAscendingByStatus': None,
     'saveUndo': True,
     'showLineNumbers': True,
     'showStatusLine': True,
@@ -233,6 +252,14 @@ prefs = {
       'ext': ['.css', '_css.html'],
       'grammar': 'css',
     },
+    'dart': {
+      'ext': ['.dart',],
+      'grammar': 'dart',
+    },
+    'golang': {
+      'ext': ['.go',],
+      'grammar': 'golang',
+    },
     'grd': {
       'ext': ['.grd', '.grdp'],
       'grammar': 'grd',
@@ -256,6 +283,10 @@ prefs = {
     'python': {
       'ext': ['.py'],
       'grammar': 'py',
+    },
+    'rust': {
+      'ext': ['.rust'],
+      'grammar': 'rust',
     },
     'text': {
       'ext': ['.txt', ''],
@@ -319,8 +350,8 @@ prefs = {
     'cpp': {
       'indent': '  ',
       'keywords': __c_keywords + [
-        'auto', 'catch', 'class', 'constexpr', 'explicit', 'false',
-        'namespace', 'nullptr', 'override',
+        'auto', 'catch', 'class', 'constexpr', 'delete', 'explicit', 'false',
+        'mutable', 'namespace', 'new', 'nullptr', 'override',
         'private', 'protected', 'public',
         'template', 'this', 'throw', 'true', 'typename',
       ],
@@ -450,6 +481,24 @@ prefs = {
       ],
       'contains': ['cpp_block_comment',],
     },
+    'dart': {
+      'indent': '  ',
+      'keywords': [
+        'abstract', 'as', 'assert', 'async', 'async', 'await', 'break', 'case',
+        'catch', 'class', 'const', 'continue', 'covariant', 'default',
+        'deferred', 'do', 'dynamic', 'else', 'enum', 'export', 'extends',
+        'external', 'factory', 'false', 'final', 'finally', 'for', 'get', 'if',
+        'implements', 'import', 'in', 'interface', 'is', 'library', 'mixin',
+        'new', 'null', 'operator', 'part', 'rethrow', 'return', 'set', 'static',
+        'super', 'switch', 'sync', 'this', 'throw', 'true', 'try', 'typedef',
+        'var', 'void', 'while', 'with', 'yield',
+      ],
+      'special': [
+        #r'(?<!\w)__.*?__(?!\w)',
+      ],
+      'contains': [
+      ],
+    },
     'doc_block_comment': {
       'begin': r'/\*\*',
       'continued': ' * ',
@@ -464,6 +513,20 @@ prefs = {
     },
     'error': {
       'spelling': False,
+    },
+    'golang': {
+      'indent': '  ',
+      'keywords': [
+        'break', 'case', 'chan', 'const', 'continue', 'default', 'defer',
+        'else', 'fallthrough', 'for', 'func', 'go', 'goto', 'if', 'import',
+        'interface', 'map', 'package', 'range', 'return', 'select', 'struct',
+        'switch', 'type', 'var',
+      ],
+      'special': [
+        #r'(?<!\w)__.*?__(?!\w)',
+      ],
+      'contains': [
+      ],
     },
     'grd': {
       'keywords': [ 'flattenhtml', 'allowexternalscript' ],
@@ -519,10 +582,10 @@ prefs = {
       'end': '</script>',
       'indent': '  ',
       'keywords': [
-        'arguments', 'break', 'case', 'class', 'const', 'continue', 'default',
-        'document', 'else', 'false', 'for', 'function', 'if', 'let', 'of',
-        'return', 'switch', 'this', 'true', 'var', 'while',
-        'instanceof', 'static', 'yield', 'super', 'delete',
+        'arguments', 'break', 'case', 'class', 'const', 'continue',
+        'default', 'delete', 'document', 'else', 'false', 'for', 'function',
+        'if', 'instanceof', 'let', 'of', 'return', 'static', 'switch', 'super',
+        'this', 'true', 'undefined', 'var', 'while', 'yield',
        ],
       'special': [
         '\bsetTimeout\b', '\brequestCallback\b', '\bconsole\b', '\bwindow\b',
@@ -647,11 +710,27 @@ prefs = {
       'special': __special_string_escapes + [r"\\/"],
       'single_line': True,
     },
+    'rust': {
+      'indent': '  ',
+      'keywords': [
+        'abstract', 'alignof', 'as', 'become', 'box', 'break', 'const',
+        'continue', 'crate', 'do', 'else', 'enum', 'extern', 'false', 'final',
+        'fn', 'for', 'if', 'impl', 'in', 'let', 'loop', 'macro', 'match', 'mod',
+        'move', 'mut', 'offsetof', 'override', 'priv', 'pub', 'pure', 'ref',
+        'return', 'Self', 'self', 'sizeof', 'static', 'struct', 'super',
+        'trait', 'true', 'type', 'typeof', 'unsafe', 'unsized', 'use',
+        'virtual', 'where', 'while', 'yield',
+      ],
+      'special': [
+        #r'(?<!\w)__.*?__(?!\w)',
+      ],
+      'contains': [
+      ],
+    },
     'special': {
       'spelling': False,
     },
     'text': {
-      'indent': '  ',
       'special': [__sha_1,],
       'contains': ['quoted_string1', 'quoted_string2'],
     },

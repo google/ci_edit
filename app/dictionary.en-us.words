@@ -283,6 +283,7 @@ adjunct
 adjust
 adjustable
 adjusted
+adjuster
 adjusting
 adjustment
 adjustments
@@ -551,6 +552,7 @@ alphabetizes
 alphabets
 alphanumeric
 alphanumerical
+alphanumerics
 alphas
 alpine
 alps
@@ -698,6 +700,7 @@ annotating
 annotation
 annotations
 annotator
+annotators
 announce
 announced
 announcement
@@ -725,6 +728,7 @@ ans
 answer
 answerable
 answered
+answering
 answers
 ant
 ante
@@ -896,6 +900,7 @@ aristocrat
 arithmetic
 arithmetically
 arithmetician
+arity
 ark
 arm
 armed
@@ -921,6 +926,7 @@ arrives
 arriving
 arrow
 arrowhead
+arrowing
 arrows
 arsenic
 art
@@ -1279,6 +1285,7 @@ bacon
 bad
 bade
 badge
+badged
 badger
 badges
 badly
@@ -1822,6 +1829,7 @@ booty
 bop
 border
 bordered
+borderless
 borderline
 borders
 bore
@@ -2410,6 +2418,7 @@ cede
 ceder
 cedilla
 ceding
+ceiled
 ceiling
 celebrate
 celebrated
@@ -3418,6 +3427,7 @@ constraint
 constraints
 construct
 constructed
+constructible
 constructing
 construction
 constructions
@@ -3991,6 +4001,7 @@ cyan
 cyborg
 cycle
 cycled
+cycler
 cycles
 cyclic
 cyclical
@@ -4109,6 +4120,7 @@ deal
 dealer
 dealing
 dealings
+deallocated
 deals
 dealt
 dean
@@ -5590,6 +5602,8 @@ encrypts
 encumbered
 encyclopedia
 end
+endcap
+endcaps
 ended
 ending
 endings
@@ -6236,6 +6250,7 @@ fault
 faulted
 faults
 faulty
+faux
 fave
 favicon
 favicons
@@ -7151,6 +7166,7 @@ glued
 glues
 glut
 glyph
+glyphs
 gm
 gnarly
 gnome
@@ -7284,6 +7300,8 @@ grape
 grapefruit
 grapevine
 graph
+grapheme
+graphemes
 graphic
 graphical
 graphically
@@ -8014,6 +8032,7 @@ identities
 identity
 ideograms
 ideograph
+ideographic
 ideographs
 ideologically
 ides
@@ -8638,6 +8657,7 @@ interactivity
 interacts
 intercede
 intercedes
+intercell
 intercept
 intercepted
 intercepting
@@ -10646,6 +10666,8 @@ mullion
 multi
 multicolored
 multifarious
+multilayer
+multilayered
 multilingual
 multimedia
 multiple
@@ -11960,6 +11982,7 @@ performing
 performs
 perfume
 perhaps
+peridot
 peril
 period
 periodic
@@ -12011,6 +12034,7 @@ persona
 personal
 personalities
 personality
+personalization
 personalize
 personalized
 personalizes
@@ -12452,6 +12476,7 @@ posterior
 posteriors
 posterity
 posters
+postfix
 posting
 postings
 postlude
@@ -12526,6 +12551,8 @@ precision
 preclude
 precludes
 precluding
+precomputation
+precomputed
 precondition
 preconditions
 preconnection
@@ -12693,6 +12720,7 @@ previewing
 previews
 previous
 previously
+prevision
 prey
 price
 priced
@@ -13641,6 +13669,7 @@ reeks
 reel
 reenrollment
 reenter
+reentrant
 reentry
 reevaluate
 reevaluation
@@ -14028,6 +14057,9 @@ repositions
 repositories
 repository
 repost
+reposted
+reposting
+reposts
 reprehension
 represent
 representation
@@ -14562,6 +14594,7 @@ rundown
 rune
 rung
 runic
+runnable
 runner
 runners
 running
@@ -16683,6 +16716,7 @@ syntactic
 syntactical
 syntactically
 syntax
+syntaxes
 synth
 synthesis
 synthesize
@@ -17014,6 +17048,7 @@ them
 theme
 themed
 themes
+theming
 themselves
 then
 theocracy
@@ -17130,6 +17165,7 @@ thunderstorm
 thunk
 thursday
 thus
+thusly
 thwart
 thy
 ti
@@ -17901,6 +17937,7 @@ unedited
 unencumbered
 unenforceable
 unequal
+unescapable
 uneven
 unevenly
 unexceptional
@@ -18187,7 +18224,9 @@ unzipping
 unzips
 up
 upcoming
+updatable
 update
+updateable
 updated
 updater
 updates

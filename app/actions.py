@@ -44,8 +44,10 @@ class Actions(app.mutator.Mutator):
     self.debugUpperChangedRow = -1
     self.parser = app.parser.Parser()
 
-  def setView(self, view):
-    self.view = view
+  def charAt(self, row, col):
+    if row >= len(self.lines) or col >= len(self.lines[row]):
+      return None
+    return self.lines[row][col]
 
   def performDelete(self):
     if self.selectionMode != app.selectable.kSelectionNone:
@@ -249,18 +251,33 @@ class Actions(app.mutator.Mutator):
 
   def carriageReturn(self):
     self.performDelete()
+    grammar = self.parser.grammarAt(self.penRow, self.penCol)
     self.redoAddChange(('n', 1, self.getCursorMove(1, -self.penCol)))
     self.redo()
-    if 1:  # TODO(dschuyler): if indent on CR
+    if grammar.get('indent'):
       line = self.lines[self.penRow - 1]
       commonIndent = len(app.prefs.editor['indentation'])
       indent = 0
       while indent < len(line) and line[indent] == ' ':
         indent += 1
       if len(line):
-        stripped = line.rstrip()
-        if stripped and line[-1] in [':', '[', '{']:
+        lastChar = line.rstrip()[-1:]
+        if lastChar == ':':
           indent += commonIndent
+        elif lastChar in ['[', '{']:
+          # Check whether a \n is inserted in {} or []; if so add another line
+          # and unindent the closing character.
+          splitLine = self.lines[self.penRow]
+          if splitLine[self.penCol:self.penCol+1] in [']', '}']:
+            self.redoAddChange(('i', ' ' * indent));
+            self.redo()
+            self.cursorMove(0, -indent);
+            self.redo()
+            self.redoAddChange(('n', 1, self.getCursorMove(0, 0)))
+            self.redo()
+          indent += commonIndent
+        elif lastChar in ['=', '+', '-', '/', '*']:
+          indent += commonIndent * 2
         # Good idea or bad idea?
         #elif indent >= 2 and line.lstrip()[:6] == 'return':
         #  indent -= commonIndent
@@ -358,7 +375,8 @@ class Actions(app.mutator.Mutator):
       if len(self.lines[self.penRow]) < self.view.cols:
         # The whole line fits on screen.
         self.view.scrollCol = 0
-      elif self.view.scrollCol == self.penCol and self.penCol == len(self.lines[self.penRow]):
+      elif (self.view.scrollCol == self.penCol and
+          self.penCol == len(self.lines[self.penRow])):
         self.view.scrollCol = max(0, self.view.scrollCol - self.view.cols / 4)
 
   def cursorMoveLeft(self):
@@ -366,6 +384,8 @@ class Actions(app.mutator.Mutator):
       self.cursorMove(0, -1)
     elif self.penRow > 0:
       self.cursorMove(-1, len(self.lines[self.penRow - 1]))
+    else:
+      self.setMessage('Top of file')
 
   def cursorMoveRight(self):
     if not self.lines:
@@ -389,6 +409,13 @@ class Actions(app.mutator.Mutator):
       self.cursorMove(-1, lineLen - self.penCol)
     self.goalCol = savedGoal
     self.adjustHorizontalScroll()
+
+  def cursorMoveToBegin(self):
+    savedGoal = self.goalCol
+    self.setMessage('Top of file')
+    self.cursorMove(-self.penRow, -self.penCol)
+    self.goalCol = savedGoal
+    self.updateBasicScrollPosition()
 
   def cursorMoveUpOrBegin(self):
     savedGoal = self.goalCol
@@ -838,13 +865,29 @@ class Actions(app.mutator.Mutator):
       inputFile.close()
     else:
       self.data = unicode("")
-    self.fileExtension = os.path.splitext(self.fullPath)[1]
+    self.determineFileExtension()
+
+  def determineFileExtension(self):
+    extension = os.path.splitext(self.fullPath)[1]
+    if extension == "" and len(self.lines) > 0:
+      line = self.lines[0]
+      if line.startswith('#!'):
+        if 'python' in line:
+          extension = '.py'
+        elif 'bash' in line:
+          extension = '.sh'
+        elif 'node' in line:
+          extension = '.js'
+        elif 'sh' in line:
+          extension = '.sh'
+    if self.fileExtension != extension:
+      self.fileExtension = extension
+      self.upperChangedRow = 0
     self.rootGrammar = app.prefs.getGrammar(self.fileExtension)
     self.parseGrammars()
     self.dataToLines()
 
     # Restore all user history.
-    app.history.loadUserHistory(self.fullPath)
     self.restoreUserHistory()
 
   def replaceLines(self, clip):
@@ -1007,6 +1050,7 @@ class Actions(app.mutator.Mutator):
           self.stripTrailingWhiteSpace()
           self.compoundChangePush()
         # Save user data that applies to read-only files into history.
+        self.fileHistory['path'] = self.fullPath
         self.fileHistory['pen'] = (self.penRow, self.penCol)
         if self.view is not None:
           self.fileHistory['scroll'] = (self.view.scrollRow,
@@ -1052,6 +1096,7 @@ class Actions(app.mutator.Mutator):
         app.log.exception(e)
     except Exception:
       app.log.info('except had exception')
+    self.determineFileExtension()
 
   def selectText(self, row, col, length, mode):
     row = max(0, min(row, len(self.lines) - 1))
@@ -1289,6 +1334,35 @@ class Actions(app.mutator.Mutator):
     #app.log.info(ch, meta)
     if curses.ascii.isprint(ch):
       self.insert(unichr(ch))
+    elif ch is app.curses_util.BRACKETED_PASTE:
+      self.editPasteData(meta.decode('utf-8'))
+    elif ch is app.curses_util.UNICODE_INPUT:
+      self.insert(meta)
+
+  def insertPrintableWithPairing(self, ch, meta):
+    #app.log.info(ch, meta)
+    if curses.ascii.isprint(ch):
+      if app.prefs.editor['autoInsertClosingCharacter']:
+        pairs = {
+          ord("'"): unicode("'"),
+          ord('"'): unicode('"'),
+          ord('('): unicode(')'),
+          ord('{'): unicode('}'),
+          ord('['): unicode(']'),
+        }
+        skips = pairs.values()
+        mate = pairs.get(ch)
+        nextChr = self.charAt(self.penRow, self.penCol)
+        if chr(ch) in skips and chr(ch) == nextChr:
+          self.cursorMove(0, 1)
+        elif mate is not None and (nextChr is None or nextChr.isspace()):
+          self.insert(unichr(ch) + mate)
+          self.compoundChangePush()
+          self.cursorMove(0, -1)
+        else:
+          self.insert(unichr(ch))
+      else:
+        self.insert(unichr(ch))
     elif ch is app.curses_util.BRACKETED_PASTE:
       self.editPasteData(meta.decode('utf-8'))
     elif ch is app.curses_util.UNICODE_INPUT:
@@ -1560,6 +1634,9 @@ class Actions(app.mutator.Mutator):
     self.selectText(row, col, 0, app.selectable.kSelectionWord)
     if col < len(self.lines[self.penRow]):
       self.cursorSelectWordRight()
+
+  def setView(self, view):
+    self.view = view
 
   def toggleShowTips(self):
     self.view.toggleShowTips()

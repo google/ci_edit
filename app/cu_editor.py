@@ -22,6 +22,7 @@ import app.controller
 import app.editor
 import app.file_manager_controller
 import app.interactive_prompt
+import app.prediction_controller
 
 
 def initCommandSet(controller, textBuffer):
@@ -156,7 +157,7 @@ class InteractiveFindInput(app.editor.InteractiveFindInput):
   def focus(self):
     if self.view.parent.expanded:
       self.view.parent.parent.textBuffer.setMessage(
-          'Press shift+tab for fewer options; ctrl+g find; ctrl+r find prior.')
+          'Press ctrl+g to find again; ctrl+r find prior.')
     else:
       self.view.parent.parent.textBuffer.setMessage(
           'Press tab for more options; ctrl+g to find next; ctrl+r find prior.')
@@ -299,6 +300,35 @@ class FileOpener(app.file_manager_controller.FileManagerController):
     self.commandDefault = self.textBuffer.insertPrintable
 
 
+class FilePathInput(app.file_manager_controller.FilePathInputController):
+  """Open a file to edit."""
+  def __init__(self, view):
+    app.file_manager_controller.FilePathInputController.__init__(self, view)
+
+  def setTextBuffer(self, textBuffer):
+    app.file_manager_controller.FilePathInputController.setTextBuffer(self,
+        textBuffer)
+    commandSet = initCommandSet(self, textBuffer)
+    commandSet.update({
+      KEY_BTAB: self.priorFocusableWindow,
+      KEY_ESCAPE: self.changeToInputWindow,
+      KEY_F1: self.info,
+      KEY_PAGE_DOWN: self.passEventToDirectoryList,
+      KEY_PAGE_UP: self.passEventToDirectoryList,
+      KEY_DOWN: self.passEventToDirectoryList,
+      KEY_UP: self.passEventToDirectoryList,
+      CTRL_I: self.tabCompleteExtend,
+      CTRL_J: self.performPrimaryAction,
+      CTRL_N: self.saveEventChangeToHostWindow,
+      CTRL_O: self.performPrimaryAction,
+      CTRL_P: self.changeToPrediction,
+      CTRL_Q: self.saveEventChangeToHostWindow,
+      CTRL_S: self.saveEventChangeToHostWindow,
+    })
+    self.commandSet = commandSet
+    self.commandDefault = self.textBuffer.insertPrintable
+
+
 class InteractivePrediction(app.editor.InteractivePrediction):
   """Make a guess."""
   def __init__(self, view):
@@ -407,6 +437,7 @@ class CuaPlusEdit(CuaEdit):
       KEY_SHIFT_F3: textBuffer.findBack,
     })
     self.commandSet = commandSet
+    self.commandDefault = self.textBuffer.insertPrintableWithPairing
 
 class PopupController(app.controller.Controller):
   """
@@ -473,6 +504,87 @@ class PaletteDialogController(app.controller.Controller):
     self.textBuffer = textBuffer
 
 
+class PredictionList(app.prediction_controller.PredictionListController):
+  """Open a file to edit."""
+  def __init__(self, view):
+    app.prediction_controller.PredictionListController.__init__(self, view)
+
+  def setTextBuffer(self, textBuffer):
+    assert textBuffer is self.view.textBuffer, textBuffer
+    app.prediction_controller.PredictionListController.setTextBuffer(self,
+        textBuffer)
+    commandSet = initCommandSet(self, textBuffer)
+    commandSet.update({
+      KEY_ESCAPE: self.changeToInputWindow,
+      KEY_F1: self.info,
+      KEY_PAGE_DOWN: textBuffer.cursorSelectNonePageDown,
+      KEY_PAGE_UP: textBuffer.cursorSelectNonePageUp,
+      KEY_DOWN: textBuffer.cursorDown,
+      KEY_UP: textBuffer.cursorUp,
+    })
+    self.commandSet = commandSet
+    self.commandDefault = self.textBuffer.insertPrintable
+
+
+class PredictionController(app.prediction_controller.PredictionController):
+  """Open a file to edit."""
+  def __init__(self, view):
+    app.prediction_controller.PredictionController.__init__(self, view)
+
+  def setTextBuffer(self, textBuffer):
+    app.prediction_controller.PredictionController.setTextBuffer(self,
+        textBuffer)
+    commandSet = initCommandSet(self, textBuffer)
+    commandSet.update({
+      KEY_ESCAPE: self.changeToInputWindow,
+      KEY_F1: self.info,
+      KEY_PAGE_DOWN: self.passEventToDirectoryList,
+      KEY_PAGE_UP: self.passEventToDirectoryList,
+      KEY_DOWN: self.passEventToDirectoryList,
+      KEY_UP: self.passEventToDirectoryList,
+      #CTRL_I: self.tabCompleteExtend,
+      CTRL_J: self.performPrimaryAction,
+      CTRL_N: self.saveEventChangeToHostWindow,
+      CTRL_O: self.performPrimaryAction,
+      CTRL_P: self.changeToPrediction,
+      CTRL_Q: self.saveEventChangeToHostWindow,
+      CTRL_S: self.saveEventChangeToHostWindow,
+    })
+    self.commandSet = commandSet
+    self.commandDefault = self.textBuffer.insertPrintable
+
+
+class PredictionInputController(
+    app.prediction_controller.PredictionInputController):
+  """Open a file to edit."""
+  def __init__(self, view):
+    app.prediction_controller.PredictionInputController.__init__(self, view)
+
+  def setTextBuffer(self, textBuffer):
+    app.prediction_controller.PredictionInputController.setTextBuffer(self,
+        textBuffer)
+    commandSet = initCommandSet(self, textBuffer)
+    commandSet.update({
+      KEY_BTAB: self.priorFocusableWindow,
+      KEY_ESCAPE: self.changeToInputWindow,
+      KEY_F1: self.info,
+      KEY_PAGE_DOWN: self.passEventToPredictionList,
+      KEY_PAGE_UP: self.passEventToPredictionList,
+      KEY_DOWN: self.passEventToPredictionList,
+      KEY_UP: self.passEventToPredictionList,
+      CTRL_L: self.openAlternateFile,
+      CTRL_I: self.nextFocusableWindow,
+      CTRL_J: self.performPrimaryAction,
+      CTRL_N: self.saveEventChangeToHostWindow,
+      CTRL_O: self.performPrimaryAction,
+      CTRL_P: self.predictionListPrior,
+      CTRL_Q: self.saveEventChangeToHostWindow,
+      CTRL_S: self.saveEventChangeToHostWindow,
+    })
+    self.commandSet = commandSet
+    self.commandDefault = self.textBuffer.insertPrintable
+
+
 class ToggleController(app.editor.ToggleController):
   """Find text within the current document."""
   def __init__(self, view):
@@ -498,4 +610,6 @@ class ToggleController(app.editor.ToggleController):
       ord(' '): self.toggleValue,
     })
     self.commandSet = commandSet
-    self.commandDefault = self.textBuffer.insertPrintable
+    def noOp(ch, meta):
+      app.log.info('noOp in ToggleController')
+    self.commandDefault = noOp
