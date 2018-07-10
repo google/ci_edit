@@ -34,12 +34,6 @@ class TextBuffer(app.actions.Actions):
     self.highlightRe = None
     self.highlightCursorLine = False
     self.highlightTrailingWhitespace = True
-    self.fileHistory = {}
-    self.fileEncoding = None
-    self.lastChecksum = None
-    self.lastFileSize = 0
-    self.bookmarks = []
-    self.nextBookmarkColorPos = 0
 
   def checkScrollToCursor(self, window):
     """Move the selected view rectangle so that the cursor is visible."""

@@ -39,7 +39,13 @@ class Actions(app.mutator.Mutator):
   def __init__(self):
     app.mutator.Mutator.__init__(self)
     self.view = None
+    self.bookmarks = []
+    self.nextBookmarkColorPos = 0
+    self.fileEncoding = None
+    self.fileHistory = {}
     self.isBinary = False
+    self.lastChecksum = None
+    self.lastFileSize = 0
     self.rootGrammar = app.prefs.getGrammar(None)
     self.debugUpperChangedRow = -1
     self.parser = app.parser.Parser()
