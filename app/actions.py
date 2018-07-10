@@ -260,37 +260,38 @@ class Actions(app.mutator.Mutator):
     grammar = self.parser.grammarAt(self.penRow, self.penCol)
     self.redoAddChange(('n', 1, self.getCursorMove(1, -self.penCol)))
     self.redo()
-    if grammar.get('indent'):
+    grammarIndent = grammar.get('indent')
+    if grammarIndent:
       line = self.lines[self.penRow - 1]
       commonIndent = len(app.prefs.editor['indentation'])
-      indent = 0
+      indent = ''
       while indent < len(line) and line[indent] == ' ':
-        indent += 1
+        indent += ' '
       if len(line):
         lastChar = line.rstrip()[-1:]
         if lastChar == ':':
-          indent += commonIndent
+          indent += grammarIndent
         elif lastChar in ['[', '{']:
           # Check whether a \n is inserted in {} or []; if so add another line
           # and unindent the closing character.
           splitLine = self.lines[self.penRow]
           if splitLine[self.penCol:self.penCol+1] in [']', '}']:
-            self.redoAddChange(('i', ' ' * indent));
+            self.redoAddChange(('i', indent));
             self.redo()
-            self.cursorMove(0, -indent);
+            self.cursorMove(0, -len(indent));
             self.redo()
             self.redoAddChange(('n', 1, self.getCursorMove(0, 0)))
             self.redo()
-          indent += commonIndent
+          indent += grammarIndent
         elif lastChar in ['=', '+', '-', '/', '*']:
-          indent += commonIndent * 2
+          indent += grammarIndent * 2
         # Good idea or bad idea?
         #elif indent >= 2 and line.lstrip()[:6] == 'return':
-        #  indent -= commonIndent
+        #  indent -= grammarIndent
         elif line.count('(') > line.count(')'):
-          indent += commonIndent * 2
+          indent += grammarIndent * 2
       if indent:
-        self.redoAddChange(('i', ' ' * indent));
+        self.redoAddChange(('i', indent));
         self.redo()
     self.updateBasicScrollPosition()
 
