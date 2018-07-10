@@ -494,9 +494,10 @@ prefs = {
         'var', 'void', 'while', 'with', 'yield',
       ],
       'special': [
-        #r'(?<!\w)__.*?__(?!\w)',
+        r'@override',
       ],
       'contains': [
+        'cpp_line_comment', 'c_string1', 'c_string2',
       ],
     },
     'doc_block_comment': {
