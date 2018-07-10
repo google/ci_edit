@@ -871,9 +871,9 @@ class Actions(app.mutator.Mutator):
       inputFile.close()
     else:
       self.data = unicode("")
-    self.determineFileExtension()
+    self.determineFileType()
 
-  def determineFileExtension(self):
+  def determineFileType(self):
     extension = os.path.splitext(self.fullPath)[1]
     if extension == "" and len(self.lines) > 0:
       line = self.lines[0]
@@ -889,7 +889,7 @@ class Actions(app.mutator.Mutator):
     if self.fileExtension != extension:
       self.fileExtension = extension
       self.upperChangedRow = 0
-    self.rootGrammar = app.prefs.getGrammar(self.fileExtension)
+    self.rootGrammar = app.prefs.getGrammar(self.fullPath)
     self.parseGrammars()
     self.dataToLines()
 
@@ -1102,7 +1102,7 @@ class Actions(app.mutator.Mutator):
         app.log.exception(e)
     except Exception:
       app.log.info('except had exception')
-    self.determineFileExtension()
+    self.determineFileType()
 
   def selectText(self, row, col, length, mode):
     row = max(0, min(row, len(self.lines) - 1))

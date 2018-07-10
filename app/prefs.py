@@ -132,9 +132,12 @@ for k,v in prefs['grammar'].items():
 # Reset the re.cache for user regexes.
 re.purge()
 
+nameToType = {}
 extensions = {}
 fileTypes = {}
 for k,v in prefs['fileType'].items():
+  for name in v.get('name', []):
+    nameToType[name] = v.get('grammar')
   for ext in v['ext']:
     extensions[ext] = v.get('grammar')
   fileTypes[k] = v
@@ -160,8 +163,14 @@ def init():
           prefs['color'].get(k+'_special_color', defaultSpecialsColor))
   app.log.info('prefs init')
 
-def getGrammar(fileExtension):
-  fileType = extensions.get(fileExtension, 'text')
+def getGrammar(filePath):
+  if filePath is None:
+    return grammars.get('text')
+  name = os.path.split(filePath)[1]
+  fileType = nameToType.get(name)
+  if fileType is None:
+    fileExtension = os.path.splitext(name)[1]
+    fileType = extensions.get(fileExtension, 'text')
   return grammars.get(fileType)
 
 def save(category, label, value):
