@@ -497,7 +497,10 @@ prefs = {
         r'@override',
       ],
       'contains': [
-        'cpp_line_comment', 'c_string1', 'c_string2',
+        # This list is carefully ordered. Don't sort it.
+        'py_string1', 'py_string2', 'py_raw_string1', 'py_raw_string2',
+        'c_raw_string1', 'c_raw_string2', 'c_string1', 'c_string2',
+        'cpp_line_comment',
       ],
     },
     'doc_block_comment': {
