@@ -15,8 +15,6 @@
 # This word list is a fallback for times when an OS dictionary is not available.
 # It's not a full list of English words (not by a long way).
 # Additional abbreviations, acronyms, and names are in dictionary.en-misc.words.
-prebuilt
-prefabricated
 a
 aah
 aardvark
@@ -905,6 +903,7 @@ arithmetician
 arity
 ark
 arm
+armadillo
 armed
 arms
 army
@@ -8729,6 +8728,7 @@ interned
 internet
 interns
 internship
+interoperability
 interplay
 interpolate
 interpolated
@@ -10272,6 +10272,7 @@ mick
 micro
 microchip
 microcomputer
+microcontroller
 microcosm
 microelectronic
 microelectronics
@@ -11868,6 +11869,7 @@ pause
 paused
 pauses
 pausing
+paver
 pavilion
 paw
 pawn
@@ -12534,6 +12536,7 @@ pre
 preamble
 preambles
 prearranged
+prebuilt
 precarious
 precaution
 precautions
@@ -12591,6 +12594,7 @@ preemptive
 preemptively
 preexisting
 pref
+prefabricated
 preface
 prefecture
 prefer
@@ -17905,6 +17909,7 @@ underlying
 undermentioned
 undermine
 underneath
+underperformed
 underrate
 underscore
 underscored

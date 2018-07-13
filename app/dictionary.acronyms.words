@@ -33,11 +33,13 @@ bs
 bsd
 btw
 cb
+cd
 cisc
 cjk
 cn
 cpu
 cpus
+ctl
 cua
 da
 dbs
@@ -102,13 +104,16 @@ ipps
 ips
 iso
 ja
+jdk
 jni
+jvm
 kb
 kbs
 kde
 kh
 ko
 kos
+kvm
 lcd
 ld
 lds
@@ -144,6 +149,7 @@ nasa
 nb
 ncsa
 nfs
+nin
 nl
 nls
 ns
@@ -171,6 +177,7 @@ pgp
 php
 ppc
 ppd
+ps
 pst
 qa
 rc
@@ -232,6 +239,7 @@ usb
 usbs
 utc
 utcs
+vm
 vr
 wep
 wip
@@ -241,7 +249,9 @@ wysiwyg
 xl
 xml
 xmls
+xmm
 xssi
 xxl
 xxxl
+yaml
 zh

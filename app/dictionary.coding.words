@@ -41,10 +41,13 @@ abcdefghijklmnopqrstuvw
 abcdefghijklmnopqrstuvwx
 abcdefghijklmnopqrstuvwxy
 abcdefghijklmnopqrstuvwxyz
+abi
+abis
 accessor
 accessors
 acos
 adate
+addr
 alloc
 apis
 arg
@@ -83,6 +86,7 @@ cli
 cmake
 cmd
 cntl
+codebase
 codec
 codeview
 conf
@@ -99,6 +103,7 @@ ctx
 cua
 cwd
 cxx
+datagram
 dbus
 def
 del
@@ -142,6 +147,7 @@ exec
 exts
 fcntl
 fd
+fdio
 fds
 ff
 fi
@@ -154,6 +160,7 @@ formatter
 forwardability
 forwardable
 freebsd
+fs
 ftp
 func
 functor
@@ -208,8 +215,10 @@ le
 len
 lf
 lhs
+libc
 libs
 lifo
+lk
 loc
 localhost
 loopback
@@ -221,9 +230,12 @@ lvalues
 makefile
 makefiles
 memoized
+microkernel
 minified
 mixin
 mixins
+mmu
+mmus
 msg
 mutex
 na
@@ -289,8 +301,10 @@ renderer
 reparented
 reparenting
 reparents
+repo
 rhs
 ro
+rpc
 rrggbb
 rrggbbaa
 rtti
