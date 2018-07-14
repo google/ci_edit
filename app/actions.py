@@ -263,10 +263,11 @@ class Actions(app.mutator.Mutator):
     grammarIndent = grammar.get('indent')
     if grammarIndent:
       line = self.lines[self.penRow - 1]
-      commonIndent = len(app.prefs.editor['indentation'])
-      indent = ''
-      while indent < len(line) and line[indent] == ' ':
-        indent += ' '
+      #commonIndent = len(app.prefs.editor['indentation'])
+      nonSpace = 0
+      while nonSpace < len(line) and line[nonSpace].isspace():
+        nonSpace += 1
+      indent = line[:nonSpace]
       if len(line):
         lastChar = line.rstrip()[-1:]
         if lastChar == ':':
