@@ -52,7 +52,10 @@ class Parser:
     self.endNode.grammar = {}
     self.endNode.begin = sys.maxint
     self.endNode.col = sys.maxint
+    # A row on screen will consist of one or more parserNodes.
     self.parserNodes = []
+    # Each entry in |self.rows| is an index into the |self.parserNodes| array to
+    # the parerNode that begins that row.
     self.rows = []  # Row parserNodes index.
     app.log.parser('__init__')
 
