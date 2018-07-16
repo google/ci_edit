@@ -51,6 +51,8 @@ dataerr
 def
 defpath
 del
+delitem
+delslice
 dev
 devnull
 difflib
@@ -124,6 +126,7 @@ getrefcount
 getsid
 getsize
 getsizeof
+getslice
 gettrace
 getuid
 getvalue
@@ -268,6 +271,7 @@ setegid
 seteuid
 setgid
 setgroups
+setitem
 setlocale
 setpgid
 setpgrp
@@ -276,6 +280,7 @@ setrecursionlimit
 setregid
 setreuid
 setsid
+setslice
 settrace
 setuid
 shlock
