@@ -297,7 +297,7 @@ prefs = {
     # A grammar is
     # 'grammar_name': {
     #   'begin': None or regex,
-    #   'continued': None or string,
+    #   'continuation': None or string,
     #       Prefixed used when continuing to another line,
     #   'end': None or regex,
     #   'end_key': None or regex to determine dynamic end tag. For 'here
@@ -364,7 +364,7 @@ prefs = {
     },
     'cpp_block_comment': {
       'begin': r'/\*',
-      'continued': ' * ',
+      'continuation': ' * ',
       'end': r'\*/',
       'indent': '  ',
       'keywords': [],
@@ -374,7 +374,7 @@ prefs = {
     },
     'cpp_line_comment': {
       'begin': '//',
-      'continued': '// ',
+      'continuation': '// ',
       'end': r'(?<!\\)\n',
       'indent': '  ',
       'keywords': [],
@@ -505,7 +505,7 @@ prefs = {
     },
     'doc_block_comment': {
       'begin': r'/\*\*',
-      'continued': ' * ',
+      'continuation': ' * ',
       'end': r'\*/',
       'indent': '  ',
       'keywords': [],
@@ -516,6 +516,7 @@ prefs = {
       'types': ['Array', 'boolean', 'string', 'Object'],
     },
     'error': {
+      'indent': '  ',
       'spelling': False,
     },
     'golang': {
@@ -608,6 +609,7 @@ prefs = {
       'single_line': False,
     },
     'keyword': {
+      'indent': '  ',
       'spelling': False,
     },
     'md': {
@@ -686,14 +688,14 @@ prefs = {
       'begin': "[uU]?'''",
       'end': "'''",
       'escaped': r"\\'",
-      'indent': '  ',
+      #'indent': '  ',
       'special': __special_string_escapes + [r"\\'"],
     },
     'py_string2': {
       'begin': '[uU]?"""',
       'end': '"""',
       'escaped': r'\\"',
-      'indent': '  ',
+      #'indent': '  ',
       'special': __special_string_escapes + [r'\\"'],
     },
     'quoted_string1': {
@@ -732,6 +734,7 @@ prefs = {
       ],
     },
     'special': {
+      'indent': '  ',
       'spelling': False,
     },
     'text': {
@@ -739,6 +742,7 @@ prefs = {
       'contains': ['quoted_string1', 'quoted_string2'],
     },
     'type': {
+      'indent': '  ',
       'spelling': False,
     },
   },
