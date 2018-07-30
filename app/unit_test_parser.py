@@ -12,11 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from timeit import timeit
 import unittest
 
 import app.parser
 import app.prefs
 
+performance1 = '''
+import app.parser
+path = 'app/actions.py'
+data = open(path).read()
+grammar = app.prefs.getGrammar(path)
+'''
 
 class ParserTestCases(unittest.TestCase):
   def setUp(self):
@@ -34,3 +41,12 @@ void blah();
 """
     self.parser.parse(test, app.prefs.grammars['cpp'], 0, 99999)
     #self.assertEqual(selectable.selection(), (0, 0, 0, 0))
+
+  if 1:
+    def test_parse_performance(self):
+      a = timeit(
+          '''parser = app.parser.Parser()
+parser.parse(data, grammar, 0, sys.maxint)''',
+          setup=performance1,
+          number=10)
+
