@@ -180,12 +180,6 @@ class Parser:
         # todo(dschuyler): mark parent grammars as unterminated (if they expect
         # be terminated). e.g. unmatched string quote or xml tag.
         break
-      parent = self.parserNodes[-1].grammar
-      newGrammarIndexLimit = 2 + len(parent.get('contains', []))
-      errorIndexLimit = newGrammarIndexLimit + len(parent.get('error', []))
-      keywordIndexLimit = errorIndexLimit + len(parent.get('keywords', []))
-      typeIndexLimit = keywordIndexLimit + len(parent.get('types', []))
-      specialIndexLimit = typeIndexLimit + len(parent.get('special', []))
       index = -1
       for i,k in enumerate(found.groups()):
         if k is not None:
@@ -214,73 +208,76 @@ class Parser:
         if subdata[reg[1] - 1:reg[1]] == '\n':
           # This 'end' ends with a new line.
           self.rows.append(len(self.parserNodes))
-      elif index < newGrammarIndexLimit:
-        # A new grammar within this grammar (a 'contains').
-        if subdata[reg[0]:reg[0] + 1] == '\n':
-          # This 'begin' begins with a new line.
-          self.rows.append(len(self.parserNodes))
-        child.grammar = self.parserNodes[-1].grammar.get(
-            'matchGrammars', [])[index]
-        if child.grammar.get('end_key'):
-          # A dynamic end tag.
-          hereKey = re.search(
-              child.grammar['end_key'], subdata[reg[1]:]).groups()[0]
-          markers = child.grammar['markers']
-          markers[1] = child.grammar['end'].replace(r'\0', re.escape(hereKey))
-          child.grammar['matchRe'] = re.compile(app.prefs.joinReList(markers))
-        child.begin = cursor + reg[0]
-        cursor += reg[1]
-        child.prior = len(self.parserNodes) - 1
-      elif index < errorIndexLimit:
-        # A special doesn't change the nodeIndex.
-        specialNode = ParserNode()
-        specialNode.grammar = app.prefs.grammars['error']
-        specialNode.begin = cursor + reg[0]
-        specialNode.prior = len(self.parserNodes) - 1
-        self.parserNodes.append(specialNode)
-        # Resume the current grammar.
-        child.grammar = self.parserNodes[self.parserNodes[-1].prior].grammar
-        child.begin = cursor + reg[1]
-        child.prior = self.parserNodes[self.parserNodes[-1].prior].prior
-        cursor += reg[1]
-      elif index < keywordIndexLimit:
-        # A keyword doesn't change the nodeIndex.
-        keywordNode = ParserNode()
-        keywordNode.grammar = app.prefs.grammars['keyword']
-        keywordNode.begin = cursor + reg[0]
-        keywordNode.prior = len(self.parserNodes) - 1
-        self.parserNodes.append(keywordNode)
-        # Resume the current grammar.
-        child.grammar = self.parserNodes[self.parserNodes[-1].prior].grammar
-        child.begin = cursor + reg[1]
-        child.prior = self.parserNodes[self.parserNodes[-1].prior].prior
-        cursor += reg[1]
-      elif index < typeIndexLimit:
-        # A keyword doesn't change the nodeIndex.
-        keywordNode = ParserNode()
-        keywordNode.grammar = app.prefs.grammars['type']
-        keywordNode.begin = cursor + reg[0]
-        keywordNode.prior = len(self.parserNodes) - 1
-        self.parserNodes.append(keywordNode)
-        # Resume the current grammar.
-        child.grammar = self.parserNodes[self.parserNodes[-1].prior].grammar
-        child.begin = cursor + reg[1]
-        child.prior = self.parserNodes[self.parserNodes[-1].prior].prior
-        cursor += reg[1]
-      elif index < specialIndexLimit:
-        # A special doesn't change the nodeIndex.
-        specialNode = ParserNode()
-        specialNode.grammar = app.prefs.grammars['special']
-        specialNode.begin = cursor + reg[0]
-        specialNode.prior = len(self.parserNodes) - 1
-        self.parserNodes.append(specialNode)
-        # Resume the current grammar.
-        child.grammar = self.parserNodes[self.parserNodes[-1].prior].grammar
-        child.begin = cursor + reg[1]
-        child.prior = self.parserNodes[self.parserNodes[-1].prior].prior
-        cursor += reg[1]
       else:
-        app.log.error('invalid grammar index')
+        [newGrammarIndexLimit, errorIndexLimit, keywordIndexLimit, typeIndexLimit,
+            specialIndexLimit] = self.parserNodes[-1].grammar['indexLimits']
+        if index < newGrammarIndexLimit:
+          # A new grammar within this grammar (a 'contains').
+          if subdata[reg[0]:reg[0] + 1] == '\n':
+            # This 'begin' begins with a new line.
+            self.rows.append(len(self.parserNodes))
+          child.grammar = self.parserNodes[-1].grammar.get(
+              'matchGrammars', [])[index]
+          if child.grammar.get('end_key'):
+            # A dynamic end tag.
+            hereKey = re.search(
+                child.grammar['end_key'], subdata[reg[1]:]).groups()[0]
+            markers = child.grammar['markers']
+            markers[1] = child.grammar['end'].replace(r'\0', re.escape(hereKey))
+            child.grammar['matchRe'] = re.compile(app.prefs.joinReList(markers))
+          child.begin = cursor + reg[0]
+          cursor += reg[1]
+          child.prior = len(self.parserNodes) - 1
+        elif index < errorIndexLimit:
+          # A special doesn't change the nodeIndex.
+          specialNode = ParserNode()
+          specialNode.grammar = app.prefs.grammars['error']
+          specialNode.begin = cursor + reg[0]
+          specialNode.prior = len(self.parserNodes) - 1
+          self.parserNodes.append(specialNode)
+          # Resume the current grammar.
+          child.grammar = self.parserNodes[self.parserNodes[-1].prior].grammar
+          child.begin = cursor + reg[1]
+          child.prior = self.parserNodes[self.parserNodes[-1].prior].prior
+          cursor += reg[1]
+        elif index < keywordIndexLimit:
+          # A keyword doesn't change the nodeIndex.
+          keywordNode = ParserNode()
+          keywordNode.grammar = app.prefs.grammars['keyword']
+          keywordNode.begin = cursor + reg[0]
+          keywordNode.prior = len(self.parserNodes) - 1
+          self.parserNodes.append(keywordNode)
+          # Resume the current grammar.
+          child.grammar = self.parserNodes[self.parserNodes[-1].prior].grammar
+          child.begin = cursor + reg[1]
+          child.prior = self.parserNodes[self.parserNodes[-1].prior].prior
+          cursor += reg[1]
+        elif index < typeIndexLimit:
+          # A keyword doesn't change the nodeIndex.
+          keywordNode = ParserNode()
+          keywordNode.grammar = app.prefs.grammars['type']
+          keywordNode.begin = cursor + reg[0]
+          keywordNode.prior = len(self.parserNodes) - 1
+          self.parserNodes.append(keywordNode)
+          # Resume the current grammar.
+          child.grammar = self.parserNodes[self.parserNodes[-1].prior].grammar
+          child.begin = cursor + reg[1]
+          child.prior = self.parserNodes[self.parserNodes[-1].prior].prior
+          cursor += reg[1]
+        elif index < specialIndexLimit:
+          # A special doesn't change the nodeIndex.
+          specialNode = ParserNode()
+          specialNode.grammar = app.prefs.grammars['special']
+          specialNode.begin = cursor + reg[0]
+          specialNode.prior = len(self.parserNodes) - 1
+          self.parserNodes.append(specialNode)
+          # Resume the current grammar.
+          child.grammar = self.parserNodes[self.parserNodes[-1].prior].grammar
+          child.begin = cursor + reg[1]
+          child.prior = self.parserNodes[self.parserNodes[-1].prior].prior
+          cursor += reg[1]
+        else:
+          app.log.error('invalid grammar index')
       self.parserNodes.append(child)
 
   def debugLog(self, out, data):

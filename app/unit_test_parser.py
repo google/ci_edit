@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import cProfile
+import pstats
+import StringIO
+import sys
 from timeit import timeit
 import unittest
 
@@ -42,11 +46,28 @@ void blah();
     self.parser.parse(test, app.prefs.grammars['cpp'], 0, 99999)
     #self.assertEqual(selectable.selection(), (0, 0, 0, 0))
 
-  if 1:
+  if 0:
     def test_parse_performance(self):
       a = timeit(
           '''parser = app.parser.Parser()
 parser.parse(data, grammar, 0, sys.maxint)''',
           setup=performance1,
           number=10)
+
+  if 0:
+    def test_profile_parse(self):
+      profile = cProfile.Profile()
+      parser = app.parser.Parser()
+      path = 'app/actions.py'
+      data = open(path).read()
+      grammar = app.prefs.getGrammar(path)
+
+      profile.enable()
+      parser.parse(data, grammar, 0, sys.maxint)
+      profile.disable()
+
+      output = StringIO.StringIO()
+      stats = pstats.Stats(profile, stream=output).sort_stats('cumulative')
+      stats.print_stats()
+      print output.getvalue()
 

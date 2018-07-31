@@ -129,6 +129,13 @@ for k,v in prefs['grammar'].items():
   v['matchRe'] = re.compile(joinReList(markers))
   v['markers'] = markers
   v['matchGrammars'] = matchGrammars
+  newGrammarIndexLimit = 2 + len(v.get('contains', []))
+  errorIndexLimit = newGrammarIndexLimit + len(v.get('error', []))
+  keywordIndexLimit = errorIndexLimit + len(v.get('keywords', []))
+  typeIndexLimit = keywordIndexLimit + len(v.get('types', []))
+  specialIndexLimit = typeIndexLimit + len(v.get('special', []))
+  v['indexLimits'] = (newGrammarIndexLimit, errorIndexLimit, keywordIndexLimit, typeIndexLimit, specialIndexLimit)
+
 # Reset the re.cache for user regexes.
 re.purge()
 
