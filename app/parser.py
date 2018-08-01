@@ -205,7 +205,7 @@ class Parser:
         child.begin = cursor + reg[1]
         child.prior = self.parserNodes[self.parserNodes[-1].prior].prior
         cursor = child.begin
-        if subdata[reg[1] - 1:reg[1]] == '\n':
+        if subdata[reg[1] - 1] == '\n':
           # This 'end' ends with a new line.
           self.rows.append(len(self.parserNodes))
       else:
@@ -214,7 +214,7 @@ class Parser:
             ] = self.parserNodes[-1].grammar['indexLimits']
         if index < newGrammarIndexLimit:
           # A new grammar within this grammar (a 'contains').
-          if subdata[reg[0]:reg[0] + 1] == '\n':
+          if subdata[reg[0]] == '\n':
             # This 'begin' begins with a new line.
             self.rows.append(len(self.parserNodes))
           child.grammar = self.parserNodes[-1].grammar.get(
