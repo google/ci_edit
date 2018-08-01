@@ -181,11 +181,11 @@ class Parser:
         # be terminated). e.g. unmatched string quote or xml tag.
         break
       index = -1
-      for i,k in enumerate(found.groups()):
+      for k in found.groups():
+        index += 1
         if k is not None:
-          index = i
           break
-      assert index >= 0
+      #assert index >= 0
       reg = found.regs[index + 1]
       if index == 0:
         # Found escaped value.
@@ -209,8 +209,9 @@ class Parser:
           # This 'end' ends with a new line.
           self.rows.append(len(self.parserNodes))
       else:
-        [newGrammarIndexLimit, errorIndexLimit, keywordIndexLimit, typeIndexLimit,
-            specialIndexLimit] = self.parserNodes[-1].grammar['indexLimits']
+        [newGrammarIndexLimit, errorIndexLimit, keywordIndexLimit,
+            typeIndexLimit, specialIndexLimit
+            ] = self.parserNodes[-1].grammar['indexLimits']
         if index < newGrammarIndexLimit:
           # A new grammar within this grammar (a 'contains').
           if subdata[reg[0]:reg[0] + 1] == '\n':
