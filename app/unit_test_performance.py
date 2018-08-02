@@ -170,3 +170,36 @@ class PerformanceTestCases(unittest.TestCase):
           number=10000)
       print "\n%9s: %s %s" % (lineCount, a, b)
 
+  def test_instance_vs_tuple(self):
+    #return  # Remove to enable test (disabled due to running time).
+    # This tests a performance assumption. If this test fails, the program
+    # should still work fine, but it may not run as fast as it could by using
+    # different assumptions.
+    for lineCount in (100, 1000, 5000):
+      half = lineCount / 2
+      a = timeit(r'''
+a = Node()
+a.foo = 5
+a.bar = 'hi'
+a.blah = 7
+foo.append(a)
+''',
+              setup=r'''
+foo = []
+class Node:
+  def __init__(self):
+    self.foo = None
+    self.bar = None
+    self.blah = None
+''',
+          number=10000)
+      b = timeit(r'''
+a = (5, 'hi', 7)
+foo.append(a)
+''',
+              setup=r'''
+foo = []
+''',
+          number=10000)
+      print "\n%9s: %s %s" % (lineCount, a, b)
+
