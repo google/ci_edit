@@ -171,7 +171,7 @@ class PerformanceTestCases(unittest.TestCase):
       print "\n%9s: %s %s" % (lineCount, a, b)
 
   def test_instance_vs_tuple(self):
-    #return  # Remove to enable test (disabled due to running time).
+    return  # Remove to enable test (disabled due to running time).
     # This tests a performance assumption. If this test fails, the program
     # should still work fine, but it may not run as fast as it could by using
     # different assumptions.

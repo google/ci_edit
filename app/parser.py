@@ -165,7 +165,8 @@ class Parser:
         sre = re.match(beginRegex, self.data[cursor:])
         if sre is not None:
           cursor += sre.regs[0][1]
-    while self.endRow > len(self.rows):
+    lenRows = len(self.rows)  # Caching this value saves ~0.15% parsing time.
+    while self.endRow > lenRows:
       if not leash:
         #app.log.error('grammar likely caught in a loop')
         break
@@ -180,7 +181,8 @@ class Parser:
         # be terminated). e.g. unmatched string quote or xml tag.
         break
       index = -1
-      for k in found.groups():
+      foundGroups = found.groups()
+      for k in foundGroups:
         index += 1
         if k is not None:
           break
@@ -190,8 +192,7 @@ class Parser:
         # Found escaped value.
         cursor += reg[1]
         continue
-      #child = ({}, None, None)
-      if index == len(found.groups()) - 1:
+      if index == len(foundGroups) - 1:
         # Found new line.
         child = (self.parserNodes[-1][kGrammar], cursor + reg[1],
             self.parserNodes[-1][kPrior])
@@ -237,19 +238,17 @@ class Parser:
           cursor += reg[1]
         elif index < keywordIndexLimit:
           # A keyword doesn't change the nodeIndex.
-          keywordNode = (app.prefs.grammars['keyword'], cursor + reg[0],
-              len(self.parserNodes) - 1)
-          self.parserNodes.append(keywordNode)
+          self.parserNodes.append((app.prefs.grammars['keyword'],
+              cursor + reg[0], len(self.parserNodes) - 1))
           # Resume the current grammar.
           child = (self.parserNodes[self.parserNodes[-1][kPrior]][kGrammar],
               cursor + reg[1],
               self.parserNodes[self.parserNodes[-1][kPrior]][kPrior])
           cursor += reg[1]
         elif index < typeIndexLimit:
-          # A keyword doesn't change the nodeIndex.
-          keywordNode = (app.prefs.grammars['type'], cursor + reg[0],
-              len(self.parserNodes) - 1)
-          self.parserNodes.append(keywordNode)
+          # A type doesn't change the nodeIndex.
+          self.parserNodes.append((app.prefs.grammars['type'], cursor + reg[0],
+              len(self.parserNodes) - 1))
           # Resume the current grammar.
           child = (self.parserNodes[self.parserNodes[-1][kPrior]][kGrammar],
               cursor + reg[1],

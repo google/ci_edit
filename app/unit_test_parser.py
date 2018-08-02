@@ -54,7 +54,7 @@ parser.parse(data, grammar, 0, sys.maxint)''',
           setup=performance1,
           number=10)
 
-  if 1:
+  if 0:
     def test_profile_parse(self):
       profile = cProfile.Profile()
       parser = app.parser.Parser()
