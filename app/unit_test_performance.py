@@ -31,6 +31,8 @@ class PerformanceTestCases(unittest.TestCase):
     setup += '''def get(n):\n'''
     setup += '''  return data[n]\n'''
     setup += '''class B:\n'''
+    setup += '''  def getViaMember(self, n):\n'''
+    setup += '''    return data[n]\n'''
     setup += '''  def __getitem__(self, n):\n'''
     setup += '''    return data[n]\n'''
     setup += '''b = B()\n'''
@@ -43,13 +45,18 @@ class PerformanceTestCases(unittest.TestCase):
         setup=setup,
         number=10000)
     c = timeit(
+        '''x = b.getViaMember(5)\n''',
+        setup=setup,
+        number=10000)
+    d = timeit(
         '''x = b[5]\n''',
         setup=setup,
         number=10000)
-    #print "\n%s %s %s | %s %s" % (a, b, a/b, c, a/c)
+    #print "\n%s | %s %s | %s %s | %s %s" % (a, b, a/b, c, a/c, d, a/d)
     # Calling a function or member is significantly slower than direct access.
     self.assertGreater(b, a * 1.6)
     self.assertGreater(c, a * 2)
+    self.assertGreater(d, a * 2)
 
   def test_slice_vs_startswith(self):
     setup = '''x = 'a' * 100\n'''

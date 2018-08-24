@@ -49,6 +49,7 @@ class Actions(app.mutator.Mutator):
     self.rootGrammar = app.prefs.getGrammar(None)
     self.debugUpperChangedRow = -1
     self.parser = app.parser.Parser()
+    self.fileFilter(unicode(''))
 
   def charAt(self, row, col):
     if row >= len(self.lines) or col >= len(self.lines[row]):
