@@ -165,8 +165,7 @@ class Parser:
         sre = re.match(beginRegex, self.data[cursor:])
         if sre is not None:
           cursor += sre.regs[0][1]
-    lenRows = len(self.rows)  # Caching this value saves ~0.15% parsing time.
-    while self.endRow > lenRows:
+    while self.endRow > len(self.rows):
       if not leash:
         #app.log.error('grammar likely caught in a loop')
         break
