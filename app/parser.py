@@ -152,6 +152,19 @@ class Parser:
       self.debugLog(app.log.parser, data)
     #app.log.startup('parsing took', time.time() - startTime)
 
+  def rowCount(self):
+    return len(self.rows)
+
+  def rowText(self, row):
+    begin = self.parserNodes[self.rows[row]][kBegin]
+    if row + 1 < len(self.rows):
+      end = self.parserNodes[self.rows[row + 1]][kBegin]
+      if self.data[end-1] == '\n':
+        end -= 1
+    else:
+      end = sys.maxint
+    return self.data[begin:end]
+
   def __buildGrammarList(self):
     # An arbitrary limit to avoid run-away looping.
     leash = 50000

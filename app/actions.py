@@ -1542,9 +1542,12 @@ class Actions(app.mutator.Mutator):
     self.view.normalize()
 
   def doParse(self, begin, end):
+    start = time.time()
     self.linesToData()
     self.parser.parse(self.data, self.rootGrammar, begin, end)
+    self.debugUpperChangedRow = self.upperChangedRow
     self.upperChangedRow = len(self.parser.rows)
+    self.parserTime = time.time() - start
 
   def parseDocument(self):
     begin = min(len(self.parser.rows), self.upperChangedRow)
@@ -1562,21 +1565,12 @@ class Actions(app.mutator.Mutator):
   def parseGrammars(self):
     if not self.view:
       return
-    if not self.parser:
-      self.parser = app.parser.Parser()
     scrollRow = self.view.scrollRow
     # If there is a gap, leave it to the background parsing.
     if self.parser.rows < scrollRow or self.upperChangedRow < scrollRow:
       return
     end = self.view.scrollRow + self.view.rows + 1
-    # Reset the self.data to get recent changes in self.lines.
-    self.linesToData()
-    start = time.time()
-    self.parser.parse(self.data, self.rootGrammar,
-        self.upperChangedRow, end)
-    self.debugUpperChangedRow = self.upperChangedRow
-    self.upperChangedRow = len(self.lines)
-    self.parserTime = time.time() - start
+    self.doParse(self.upperChangedRow, end)
 
   def doSelectionMode(self, mode):
     if self.selectionMode != mode:
