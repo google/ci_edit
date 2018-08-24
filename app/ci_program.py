@@ -116,14 +116,15 @@ class CiProgram:
               userMessage(line[:-1])
             self.exiting = True
             return
-          self.refresh(frame[0], frame[1])
+          drawList, cursor, cmdCount = frame
+          self.refresh(drawList, cursor, cmdCount)
       elif 1:
-        frame = app.render.frame.grabFrame()
-        self.refresh(frame[0], frame[1])
+        drawList, cursor, cmdCount = app.render.frame.grabFrame()
+        self.refresh(drawList, cursor, cmdCount)
       else:
         profile = cProfile.Profile()
         profile.enable()
-        self.refresh(frame[0], frame[1])
+        self.refresh(drawList, cursor, cmdCount)
         profile.disable()
         output = StringIO.StringIO()
         stats = pstats.Stats(profile, stream=output).sort_stats('cumulative')
@@ -206,7 +207,8 @@ class CiProgram:
                 self.exiting = True
                 return
             if frame is not None:
-              self.refresh(frame[0], frame[1])
+              drawList, cursor, cmdCount = frame
+              self.refresh(drawList, cursor, cmdCount)
           elif ch != curses.ERR:
             self.ch = ch
             if ch == curses.KEY_MOUSE:
@@ -318,7 +320,7 @@ class CiProgram:
     app.log.info()
     self.exiting = True
 
-  def refresh(self, drawList, cursor):
+  def refresh(self, drawList, cursor, cmdCount):
     """Paint the drawList to the screen in the main thread."""
     # Ask curses to hold the back buffer until curses refresh().
     cursesWindow = app.window.mainCursesWindow
@@ -340,6 +342,11 @@ class CiProgram:
         cursesWindow.leaveok(1)  # Don't update cursor position.
       except:
         pass
+    # This is a workaround to allow background processing (and parser screen
+    # redraw) to interact well with the test harness. The intent is to tell the
+    # test that the screen includes all commands executed up to N.
+    if hasattr(cursesWindow, 'rendered_command_count'):
+      cursesWindow.rendered_command_count(cmdCount)
 
   def makeHomeDirs(self, homePath):
     try:

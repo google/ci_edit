@@ -78,6 +78,7 @@ class ProgramWindow(app.window.ActiveWindow):
 
   def executeCommandList(self, cmdList):
     for cmd, eventInfo in cmdList:
+      self.doPreCommand()
       if cmd == curses.KEY_RESIZE:
         self.handleScreenResize(self.focusedWindow)
         continue
@@ -132,6 +133,22 @@ class ProgramWindow(app.window.ActiveWindow):
       depth += possibility.zOrder
       app.log.info(depth)
     app.log.error("focusable window not found")
+
+  def doPreCommand(self):
+    # Reset UI elements that adjust when new commands are issued.
+    # E.g. setMessage()
+    win = self.focusedWindow
+    while win is not None and win is not self:
+      win.doPreCommand()
+      win = win.parent
+
+  def longTimeSlice(self):
+    win = self.focusedWindow
+    finished = True
+    while win is not None and win is not self:
+      finished = finished and win.longTimeSlice()
+      win = win.parent
+    return finished
 
   def shortTimeSlice(self):
     win = self.focusedWindow

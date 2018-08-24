@@ -259,6 +259,13 @@ class ViewWindow:
     assert f
     f.showWindowHierarchy()
 
+  def doPreCommand(self):
+    pass
+
+  def longTimeSlice(self):
+    """returns whether work is finished (no need to call again)."""
+    return True
+
   def shortTimeSlice(self):
     pass
 
@@ -397,6 +404,21 @@ class Window(ActiveWindow):
   def setTextBuffer(self, textBuffer):
     textBuffer.setView(self)
     self.textBuffer = textBuffer
+
+  def doPreCommand(self):
+    if self.textBuffer is not None:
+      self.textBuffer.setMessage()
+
+  def longTimeSlice(self):
+    """returns whether work is finished (no need to call again)."""
+    finished = True
+    tb = self.textBuffer
+    if tb is not None and len(tb.parser.rows) < len(tb.lines):
+      tb.parseDocument()
+      finished = len(tb.parser.rows) >= len(tb.lines)
+    for child in self.zOrder:
+      finished = finished and child.longTimeSlice()
+    return finished
 
   def shortTimeSlice(self):
     if self.textBuffer is not None:
@@ -833,7 +855,6 @@ class StatusLine(ViewWindow):
       color = (tb.message[1]
           if tb.message[1] is not None
           else app.color.get('status_line'))
-      tb.setMessage()
     if 0:
       if tb.isDirty():
         statusLine += ' * '

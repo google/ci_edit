@@ -291,6 +291,7 @@ class StandardScreen(FakeCursesWindow):
     global fakeDisplay, fakeInput
     testLog()
     FakeCursesWindow.__init__(self, 0, 0)
+    self.cmdCount = -1
     fakeDisplay = FakeDisplay()
     self.fakeDisplay = fakeDisplay
     fakeInput = FakeInput(fakeDisplay)
@@ -308,7 +309,11 @@ class StandardScreen(FakeCursesWindow):
     testLog(*args)
     if self.movie:
       fakeDisplay.show()
-    fakeInput.waitingForRefresh = False
+
+  def rendered_command_count(self, cmdCount):
+    if self.cmdCount != cmdCount:
+      fakeInput.waitingForRefresh = False
+      self.cmdCount = cmdCount
 
 
 def baudrate(*args):

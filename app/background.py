@@ -47,6 +47,7 @@ class BackgroundThread(threading.Thread):
 
 
 def background(inputQueue, outputQueue):
+  cmdCount = 0
   block = True
   pid = os.getpid()
   signalNumber = signal.SIGUSR1
@@ -62,23 +63,19 @@ def background(inputQueue, outputQueue):
         program.shortTimeSlice()
         program.render()
         # debugging only: program.showWindowHierarchy()
-        outputQueue.put(app.render.frame.grabFrame())
+        cmdCount += len(message)
+        outputQueue.put(app.render.frame.grabFrame() + (cmdCount,))
         os.kill(pid, signalNumber)
         #app.profile.endPythonProfile(profile)
         if not inputQueue.empty():
           continue
       except Queue.Empty:
         pass
-      #continue
-      tb = program.focusedWindow.textBuffer
-      block = len(tb.parser.rows) >= len(tb.lines)
-      if not block:
-        program.focusedWindow.textBuffer.parseDocument()
-        block = len(tb.parser.rows) >= len(tb.lines)
-        if block:
-          program.render()
-          outputQueue.put(app.render.frame.grabFrame())
-          os.kill(pid, signalNumber)
+      block = program.longTimeSlice()
+      if block:
+        program.render()
+        outputQueue.put(app.render.frame.grabFrame() + (cmdCount,))
+        os.kill(pid, signalNumber)
     except Exception as e:
       app.log.exception(e)
       app.log.error('bg thread exception', e)
