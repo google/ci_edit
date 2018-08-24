@@ -61,8 +61,12 @@ class FakeInput:
         cmd = self.inputs[self.inputsIndex]
         if type(cmd) == types.FunctionType:
           result = cmd(self.fakeDisplay, self.inputsIndex)
+          if self.isVerbose:
+            print repr(cmd), repr(result)
           if result is not None:
             self.waitingForRefresh = True
+            if self.isVerbose:
+              print repr(cmd), repr(result), 'waitingForRefresh'
             return result
         elif type(cmd) == types.StringType and len(cmd) == 1:
           if (not self.inBracketedPaste) and cmd != ascii.ESC:
@@ -82,8 +86,12 @@ class FakeInput:
             if cmd == BRACKETED_PASTE_END:
               self.inBracketedPaste = False
               self.waitingForRefresh = True
+            if self.isVerbose:
+              print cmd, type(cmd)
             return ERR
           self.inputsIndex -= 1
+          if self.isVerbose:
+            print cmd, type(cmd)
           return cmd[self.tupleIndex]
         else:
           if (not self.inBracketedPaste) and cmd != ascii.ESC:
