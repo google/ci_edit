@@ -1546,16 +1546,16 @@ class Actions(app.mutator.Mutator):
     self.linesToData()
     self.parser.parse(self.data, self.rootGrammar, begin, end)
     self.debugUpperChangedRow = self.upperChangedRow
-    self.upperChangedRow = len(self.parser.rows)
+    self.upperChangedRow = self.parser.fullyParsedToLine
     self.parserTime = time.time() - start
 
   def parseDocument(self):
-    begin = min(len(self.parser.rows), self.upperChangedRow)
+    begin = min(self.parser.fullyParsedToLine, self.upperChangedRow)
     end = len(self.lines)
     self.doParse(begin, end)
 
   def parseScreenMaybe(self):
-    begin = min(len(self.parser.rows), self.upperChangedRow)
+    begin = min(self.parser.fullyParsedToLine, self.upperChangedRow)
     end = self.view.scrollRow + self.view.rows + 1
     if end > begin + 100:
       # Call doParse with an empty range.
@@ -1567,7 +1567,8 @@ class Actions(app.mutator.Mutator):
       return
     scrollRow = self.view.scrollRow
     # If there is a gap, leave it to the background parsing.
-    if self.parser.rows < scrollRow or self.upperChangedRow < scrollRow:
+    if (self.parser.fullyParsedToLine < scrollRow or
+        self.upperChangedRow < scrollRow):
       return
     end = self.view.scrollRow + self.view.rows + 1
     self.doParse(self.upperChangedRow, end)

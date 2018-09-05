@@ -284,6 +284,7 @@ class InteractiveGoto(app.controller.Controller):
 
   def onChange(self):
     app.log.info()
+    self.textBuffer.parseDocument()
     line = U''
     try: line = self.textBuffer.lines[0]
     except: pass

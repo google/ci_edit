@@ -103,7 +103,7 @@ class DirectoryListController(app.controller.Controller):
     else:
       clip = [dirPath + ": not found"]
     self.view.textBuffer.replaceLines(tuple(clip))
-    #self.view.textBuffer.findPlainText(fileName)
+    self.view.textBuffer.parseScreenMaybe()
     self.view.textBuffer.penRow = 0
     self.view.textBuffer.penCol = 0
     self.view.scrollRow = 0

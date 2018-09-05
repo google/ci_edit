@@ -413,9 +413,11 @@ class Window(ActiveWindow):
     """returns whether work is finished (no need to call again)."""
     finished = True
     tb = self.textBuffer
-    if tb is not None and len(tb.parser.rows) < len(tb.lines):
+    if tb is not None and tb.parser.fullyParsedToLine < len(tb.lines):
       tb.parseDocument()
-      finished = len(tb.parser.rows) >= len(tb.lines)
+      # If a user event came in while parsing, the parsing will be paused (to be
+      # resumed after handling the event).
+      finished = tb.parser.fullyParsedToLine >= len(tb.lines)
     for child in self.zOrder:
       finished = finished and child.longTimeSlice()
     return finished

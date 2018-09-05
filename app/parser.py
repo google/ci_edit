@@ -52,14 +52,15 @@ class Parser:
     self.data = ""
     self.emptyNode = ParserNode({}, None, None)
     self.endNode = ({}, sys.maxint, sys.maxint)
+    self.fullyParsedToLine = -1
     # A row on screen will consist of one or more ParserNodes. When a ParserNode
     # is returned from the parser it will be an instance of ParserNode, but
     # internally tuples are used in place of ParserNodes. This makes for some
     # ugly code, but the performance difference (~5%) is worth it.
-    self.parserNodes = []
+    self.parserNodes = [({}, 0, None)]
     # Each entry in |self.rows| is an index into the |self.parserNodes| array to
     # the parerNode that begins that row.
-    self.rows = []  # Row parserNodes index.
+    self.rows = [0]  # Row parserNodes index.
     app.log.parser('__init__')
 
   def grammarIndexFromRowCol(self, row, col):
@@ -135,22 +136,40 @@ class Parser:
             rows are needed (which can save a lot of cpu time).
     """
     app.log.parser('grammar', grammar['name'])
+    # Trim partially parsed data.
+    if self.fullyParsedToLine < beginRow:
+      beginRow = self.fullyParsedToLine
+
     self.emptyNode = ParserNode(grammar, None, None)
     self.data = data
     self.endRow = endRow
-    if beginRow > 0 and len(self.rows):
+    if beginRow > 0: # and len(self.rows):
       if beginRow < len(self.rows):
         self.parserNodes = self.parserNodes[:self.rows[beginRow]]
         self.rows = self.rows[:beginRow]
     else:
+      # First time parse. Do a fast parse of the whole file.
       self.parserNodes = [(grammar, 0, None)]
       self.rows = [0]
-    #startTime = time.time()
     if self.endRow > len(self.rows):
       self.__buildGrammarList()
+    self.fullyParsedToLine = len(self.rows)
+    self.fastLineParse(grammar)
+    #startTime = time.time()
     if app.log.enabledChannels.get('parser', False):
       self.debugLog(app.log.parser, data)
     #app.log.startup('parsing took', time.time() - startTime)
+
+  def fastLineParse(self, grammar):
+    data = self.data
+    index = self.parserNodes[self.rows[-1]][kBegin]
+    while True:
+      index = data.find('\n', index)
+      if index == -1:
+        break
+      index += 1
+      self.rows.append(len(self.parserNodes))
+      self.parserNodes.append((grammar, index, None))
 
   def rowCount(self):
     return len(self.rows)
@@ -159,7 +178,7 @@ class Parser:
     begin = self.parserNodes[self.rows[row]][kBegin]
     if row + 1 < len(self.rows):
       end = self.parserNodes[self.rows[row + 1]][kBegin]
-      if self.data[end-1] == '\n':
+      if len(self.data) and self.data[end - 1] == '\n':
         end -= 1
     else:
       end = sys.maxint
@@ -184,6 +203,8 @@ class Parser:
         break
       leash -= 1
       if app.background.bg and app.background.bg.hasUserEvent():
+        #assert False, "%r %r" %  app.background.bg.toBackground.get(True)
+
         break
       subdata = self.data[cursor:]
       found = self.parserNodes[-1][kGrammar].get('matchRe').search(subdata)
@@ -292,4 +313,7 @@ class Parser:
         if node is None:
           out('a None')
           continue
-        node.debugLog(out, '  ', data)
+        nodeBegin = node[kBegin]
+        out('  ParserNode %26s prior %4s %4d %s' % (
+            node[kGrammar].get('name', 'None'),
+            node[kPrior], nodeBegin, repr(data[nodeBegin:nodeBegin+15])[1:-1]))
