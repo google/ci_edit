@@ -124,6 +124,7 @@ class PredictionList(app.window.Window):
               self.statusColumn.cols, i[2]
               ) for i in items
           ]))
+    self.textBuffer.parseScreenMaybe()  # TODO(dschuyler): Add test.
     self.textBuffer.cursorMoveToBegin()
 
   def onPrefChanged(self, category, name):
