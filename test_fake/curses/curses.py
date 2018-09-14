@@ -170,12 +170,22 @@ class FakeDisplay:
             expectedText = ''.join(line)
             expectedLine = (actualLine[:col] + expectedText +
                 actualLine[col + len(expectedText):])
-            result += unicode("\n  expected: |%s|") % expectedLine
+            result += unicode("\n  expected: %s|%s|") % (' ' * col,
+                expectedText)
           if verbose >= 3:
             result += unicode("\n  mismatch:  %*s^") % (col + k, '')
           return result
     return None
 
+  def findText(self, screenText):
+    for row in range(len(self.displayText)):
+      line = self.displayText[row]
+      col = ''.join(line).find(screenText)
+      if col != -1:
+        return row, col
+    print "did not find", screenText
+    self.show()
+    return -1, -1
 
   def getColorPair(self, colorIndex):
     return self.colors.setdefault(colorIndex, 91 + len(self.colors))
@@ -318,7 +328,10 @@ class StandardScreen(FakeCursesWindow):
     if self.movie:
       fakeDisplay.show()
 
-  def rendered_command_count(self, cmdCount):
+  def test_find_text(self, screenText):
+    return fakeDisplay.findText(screenText)
+
+  def test_rendered_command_count(self, cmdCount):
     if self.cmdCount != cmdCount:
       fakeInput.waitingForRefresh = False
       self.cmdCount = cmdCount

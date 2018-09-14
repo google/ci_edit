@@ -345,8 +345,8 @@ class CiProgram:
     # This is a workaround to allow background processing (and parser screen
     # redraw) to interact well with the test harness. The intent is to tell the
     # test that the screen includes all commands executed up to N.
-    if hasattr(cursesWindow, 'rendered_command_count'):
-      cursesWindow.rendered_command_count(cmdCount)
+    if hasattr(cursesWindow, 'test_rendered_command_count'):
+      cursesWindow.test_rendered_command_count(cmdCount)
 
   def makeHomeDirs(self, homePath):
     try:

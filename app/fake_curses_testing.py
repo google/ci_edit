@@ -82,6 +82,11 @@ class FakeCursesTestCase(unittest.TestCase):
       return None
     return displayStyleChecker
 
+  def findText(self, screenText):
+    """Locate |screenText| on the display, returning row, col.
+    """
+    return self.cursesScreen.test_find_text(screenText)
+
   def cursorCheck(self, expectedRow, expectedCol):
     assert type(expectedRow) is int
     assert type(expectedCol) is int
