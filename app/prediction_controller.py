@@ -35,7 +35,7 @@ class PredictionListController(app.controller.Controller):
 
   def buildFileList(self, currentFile):
     if app.config.strict_debug:
-      assert type(currentFile) is str
+      assert type(currentFile) is unicode, repr(currentFile)
 
     added = set()
     items = self.items = []

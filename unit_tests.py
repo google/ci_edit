@@ -38,6 +38,7 @@ import app.unit_test_file_manager
 import app.unit_test_find_window
 import app.unit_test_parser
 import app.unit_test_performance
+import app.unit_test_prediction_window
 import app.unit_test_prefs
 import app.unit_test_regex
 import app.unit_test_selectable
@@ -56,6 +57,7 @@ tests = {
   'find': app.unit_test_find_window.FindWindowTestCases,
   'parser': app.unit_test_parser.ParserTestCases,
   'performance': app.unit_test_performance.PerformanceTestCases,
+  'prediction': app.unit_test_prediction_window.PredictionWindowTestCases,
   'prefs': app.unit_test_prefs.PrefsTestCases,
   'regex': app.unit_test_regex.RegexTestCases,
   'selectable': app.unit_test_selectable.SelectableTestCases,

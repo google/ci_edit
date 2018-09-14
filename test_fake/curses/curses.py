@@ -160,7 +160,7 @@ class FakeDisplay:
         d = self.displayText[row + i][col + k]
         c = line[k]
         if d != c:
-          self.show()
+          #self.show()
           result = "\n  row %s, col %s mismatch '%s' != '%s'" % (
               row + i, col + k, d, c)
           if verbose >= 1:

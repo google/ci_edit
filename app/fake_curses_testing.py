@@ -31,6 +31,14 @@ class FakeCursesTestCase(unittest.TestCase):
     self.cursesScreen = curses.StandardScreen()
     self.prg = app.ci_program.CiProgram(self.cursesScreen)
 
+  def addClickInfo(self, timeStamp, screenText, bState):
+    def createEvent(display, cmdIndex):
+      row, col = self.findText(screenText)
+      info = (timeStamp, row, col, 0, bState)
+      curses.addMouseEvent(info)
+      return None
+    return createEvent
+
   def addMouseInfo(self, timeStamp, mouseRow, mouseCol, bState):
     """
     bState may be a logical or of:
@@ -66,6 +74,25 @@ class FakeCursesTestCase(unittest.TestCase):
           self.fail(output)
       return None
     return displayChecker
+
+  def displayCheckNot(self, *args):
+    """
+    Verify that the display does not match.
+    """
+    assert type(args[0]) is int
+    caller = inspect.stack()[1]
+    callerText = "\n  %s:%s:%s(): " % (
+        os.path.split(caller[1])[1], caller[2], caller[3])
+    def displayCheckerNot(display, cmdIndex):
+      result = display.checkText(*args)
+      if result is None:
+        output = callerText + ' at index ' + str(cmdIndex)
+        if self.cursesScreen.movie:
+          print output
+        else:
+          self.fail(output)
+      return None
+    return displayCheckerNot
 
   def displayCheckStyle(self, *args):
     caller = inspect.stack()[1]

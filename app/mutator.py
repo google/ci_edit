@@ -45,7 +45,7 @@ class Mutator(app.selectable.Selectable):
     self.findRe = None
     self.findBackRe = None
     self.fileExtension = None
-    self.fullPath = ''
+    self.fullPath = u''
     self.fileStat = None
     self.goalCol = 0
     self.isReadOnly = False
