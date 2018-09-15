@@ -15,6 +15,7 @@
 import bisect
 import curses.ascii
 import difflib
+import binascii
 import io
 import os
 import re
@@ -810,8 +811,14 @@ class Actions(app.mutator.Mutator):
     return re.sub('\x01([0-9a-fA-F][0-9a-fA-F])', encode, "\n".join(lines))
 
   def doBinaryDataToLines(self, data):
-    # TODO(dschuyler): convert binary data to lines.
-    return ["Binary file.", "Editing this text won't change the file."]
+    long_hex = binascii.hexlify(data)
+    hex_list = []
+    i = 0
+    width = 32
+    while i < len(long_hex):
+      hex_list.append(long_hex[i:i + width] + '\n')
+      i += width
+    return hex_list
 
   def doDataToLines(self, data):
     # Performance: in a 1000 line test it appears fastest to do some simple
@@ -827,7 +834,8 @@ class Actions(app.mutator.Mutator):
 
   def dataToLines(self):
     if self.isBinary:
-      self.lines = self.doBinaryDataToLines(self.data)
+      self.lines = self.doDataToLines(self.data)
+      #self.lines = self.doBinaryDataToLines(self.data)
     else:
       self.lines = self.doDataToLines(self.data)
 
@@ -843,6 +851,7 @@ class Actions(app.mutator.Mutator):
     self.isReadOnly = (os.path.isfile(self.fullPath) and
         not os.access(self.fullPath, os.W_OK))
     if not os.path.exists(self.fullPath):
+      data = unicode('')
       self.setMessage('Creating new file')
     else:
       try:
@@ -856,11 +865,24 @@ class Actions(app.mutator.Mutator):
       except Exception:
         try:
           inputFile = io.open(self.fullPath, 'rb')
-          data = inputFile.read()
-          self.fileEncoding = None
+          if 1:
+            binary_data = inputFile.read()
+            long_hex = binascii.hexlify(binary_data)
+            hex_list = []
+            i = 0
+            width = 32
+            while i < len(long_hex):
+              hex_list.append(long_hex[i:i + width] + '\n')
+              i += width
+            data = u''.join(hex_list)
+          else:
+            data = inputFile.read()
           self.isBinary = True
+          self.fileEncoding = None
+          app.log.info('Opened file as a binary file')
           self.setMessage('Opened file as a binary file')
-        except Exception:
+        except Exception as e:
+          app.log.info(e)
           app.log.info('error opening file', self.fullPath)
           self.setMessage('error opening file', self.fullPath)
           return
@@ -869,11 +891,9 @@ class Actions(app.mutator.Mutator):
     app.log.info('fullPath', self.fullPath)
     app.log.info('cwd', os.getcwd())
     app.log.info('relativePath', self.relativePath)
+    self.fileFilter(data)
     if inputFile:
-      self.fileFilter(data)
       inputFile.close()
-    else:
-      self.data = unicode("")
     self.determineFileType()
 
   def determineFileType(self):
@@ -1044,6 +1064,7 @@ class Actions(app.mutator.Mutator):
 
   def linesToData(self):
     if self.isBinary:
+      self.data = self.doLinesToData(self.lines)
       # TODO(dschuyler): convert binary data.
       pass #self.data = self.doLinesToBinaryData(self.lines)
     else:
@@ -1068,13 +1089,24 @@ class Actions(app.mutator.Mutator):
         self.fileHistory['selectionMode'] = self.selectionMode
         self.fileHistory['bookmarks'] = self.bookmarks
         self.linesToData()
-        if self.fileEncoding is None:
+        if self.isBinary:
+          removeWhitespace = {
+            ord(' '): None,
+            ord('\n'): None,
+            ord('\r'): None,
+            ord('\t'): None,
+          }
+          outputData = binascii.unhexlify(self.data.translate(removeWhitespace))
+          outputFile = io.open(self.fullPath, 'wb+')
+        elif self.fileEncoding is None:
+          outputData = self.data
           outputFile = io.open(self.fullPath, 'w+', encoding='UTF-8')
         else:
+          outputData = self.data
           outputFile = io.open(self.fullPath, 'w+', encoding=self.fileEncoding)
         outputFile.seek(0)
         outputFile.truncate()
-        outputFile.write(self.data)
+        outputFile.write(outputData)
         outputFile.close()
         # Save user data that applies to writable files.
         self.savedAtRedoIndex = self.redoIndex
