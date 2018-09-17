@@ -27,6 +27,8 @@ specialsColorIndex = 20
 stringColorIndex = 5
 outsideOfBufferColorIndex = 211
 
+_todo = r'TODO\([\S@.]+\)'
+
 __common_keywords = [
   'break', 'continue', 'else',
   'for', 'if', 'return', 'while',
@@ -369,7 +371,7 @@ prefs = {
       'indent': '  ',
       'keywords': [],
       'special': [
-        r'\bNOTE:', r'TODO\([^)]+\)', __chrome_extension, __sha_1,
+        r'\bNOTE:', _todo, __chrome_extension, __sha_1,
       ],
     },
     'cpp_line_comment': {
@@ -379,7 +381,7 @@ prefs = {
       'indent': '  ',
       'keywords': [],
       'special': [
-        r'\bNOTE:', r'TODO\([^)]+\)', __chrome_extension, __sha_1,
+        r'\bNOTE:', _todo, __chrome_extension, __sha_1,
       ],
     },
     'c_preprocessor': {
@@ -511,7 +513,7 @@ prefs = {
       'keywords': [],
       'special': [
         r'@param\b', r'@private\b', r'@protected\b', r'@type\b', r'@typedef\b',
-        r'@return\b', r'\bNOTE:', r'TODO\([^)]+\)',
+        r'@return\b', r'\bNOTE:', _todo,
       ],
       'types': ['Array', 'boolean', 'string', 'Object'],
     },
@@ -667,7 +669,7 @@ prefs = {
       'indent': '  ',
       'keywords': [],
       'special': [
-        r'\bNOTE:', r'TODO\([^)]+\)',
+        r'\bNOTE:', _todo,
       ],
     },
     'py_raw_string1': {
