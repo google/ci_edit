@@ -169,7 +169,7 @@ class TextBuffer(app.actions.Actions):
       # For testing, draw without parser.
       rowLimit = min(max(self.parser.rowCount() - startRow, 0), rows)
       for i in range(rowLimit):
-        line = self.lines[startRow + i][startCol:endCol]
+        line = self.parser.rowText(startRow + i)[startCol:endCol]
         window.addStr(top + i, left, line + ' ' * (cols - len(line)),
             app.color.get('default', colorDelta))
     self.drawOverlays(window, top, left, rows, cols, colorDelta)
@@ -224,7 +224,7 @@ class TextBuffer(app.actions.Actions):
               min(self.parser.rowCount(), startRow + maxRow)):
             if row != self.penRow:
               textCol = 0
-            line = self.lines[row][textCol:]
+            line = self.parser.rowText(row)[textCol:]
             for match in re.finditer("(\\" + openCh + ")|(\\" + closeCh + ")",
                 line):
               if match.group() == openCh:
@@ -252,7 +252,7 @@ class TextBuffer(app.actions.Actions):
           window.addStr(
               top + self.penRow - startRow,
               self.penCol - self.view.scrollCol,
-              self.lines[self.penRow][self.penCol],
+              self.parser.rowText(self.penRow)[self.penCol],
               app.color.get('matching_bracket', colorDelta))
     if 1:
       # Highlight numbers.
@@ -265,7 +265,7 @@ class TextBuffer(app.actions.Actions):
     if self.highlightCursorLine:
       # Highlight the whole line at the cursor location.
       if startRow <= self.penRow < startRow + rowLimit:
-        line = self.lines[self.penRow][startCol:endCol]
+        line = self.parser.rowText(self.penRow)[startCol:endCol]
         window.addStr(top + self.penRow - startRow, left, line,
             app.color.get('trailing_space', colorDelta))
     if self.highlightTrailingWhitespace:
@@ -284,7 +284,7 @@ class TextBuffer(app.actions.Actions):
       if endCol >= lengthLimit:
         # Highlight long lines.
         for i in range(rowLimit):
-          line = self.lines[startRow + i]
+          line = self.parser.rowText(startRow + i)
           if len(line) < lengthLimit or startCol > lengthLimit:
             continue
           window.addStr(top + i, left + lengthLimit - startCol,
@@ -292,7 +292,7 @@ class TextBuffer(app.actions.Actions):
     if self.findRe is not None:
       # Highlight find.
       for i in range(rowLimit):
-        line = self.lines[startRow + i][startCol:endCol]
+        line = self.parser.rowText(startRow + i)[startCol:endCol]
         for k in self.findRe.finditer(line):
           reg = k.regs[0]
           #for ref in k.regs[1:]:
@@ -312,7 +312,7 @@ class TextBuffer(app.actions.Actions):
               lowerCol < startCol or upperCol >= endCol):
             # There is an overlap.
             for i in range(start, end + 1):
-              line = self.lines[startRow + i][selStartCol:selEndCol]
+              line = self.parser.rowText(startRow + i)[selStartCol:selEndCol]
               window.addStr(top + i, selStartCol, line, colorSelected)
         elif (self.selectionMode == app.selectable.kSelectionAll or
             self.selectionMode == app.selectable.kSelectionCharacter or
@@ -322,12 +322,12 @@ class TextBuffer(app.actions.Actions):
             # There is an overlap.
             # Go one row past the selection or to the last line.
             for i in range(start, min(end + 1, self.parser.rowCount() - startRow)):
-              line = self.lines[startRow + i]
+              line = self.parser.rowText(startRow + i)
               # TODO(dschuyler): This is essentially
               # left + (upperCol or (scrollCol + left)) - scrollCol - left
               # which seems like it could be simplified.
               paneCol = left + selStartCol - startCol
-              if len(line) == len(self.lines[startRow + i]):
+              if len(line) == len(self.parser.rowText(startRow + i)):
                 line += " "  # Maybe do: "\\n".
               if i == lowerRow - startRow and i == upperRow - startRow:
                 # Selection entirely on one line.
