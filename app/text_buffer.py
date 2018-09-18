@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import curses
 import re
 import sys
@@ -97,11 +101,13 @@ class TextBuffer(app.actions.Actions):
             colorDelta)
     else:
       # Draw debug checker board.
-      splitRow = rows / 2
+      splitRow = rows // 2
       splitCol = 17
       self.drawTextArea(window, 0, 0, splitRow, splitCol, 0)
-      self.drawTextArea(window, 0, splitCol, splitRow, cols-splitCol, colorDelta)
-      self.drawTextArea(window, splitRow, 0, rows - splitRow, splitCol, colorDelta)
+      self.drawTextArea(window, 0, splitCol, splitRow, cols-splitCol,
+          colorDelta)
+      self.drawTextArea(window, splitRow, 0, rows - splitRow, splitCol,
+          colorDelta)
       self.drawTextArea(window, splitRow, splitCol, rows - splitRow,
           cols-splitCol, 0)
     # Blank screen past the end of the buffer.

@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import bisect
 import os
 import sys
@@ -867,10 +871,10 @@ class StatusLine(ViewWindow):
     colPercentage = 0
     lineCount = len(tb.lines)
     if lineCount:
-      rowPercentage = self.host.textBuffer.penRow * 100 / lineCount
+      rowPercentage = self.host.textBuffer.penRow * 100 // lineCount
       charCount = len(tb.lines[self.host.textBuffer.penRow])
       if self.host.textBuffer.penCol != 0:
-        colPercentage = self.host.textBuffer.penCol * 100 / charCount
+        colPercentage = self.host.textBuffer.penCol * 100 // charCount
     # Format.
     rightSide = ''
     if len(statusLine):
@@ -1493,7 +1497,7 @@ class PopupWindow(Window):
     cols = min(self.longestLineLength + 6, maxCols)
     rows = min(len(self.__message) + 4, maxRows)
     self.resizeTo(rows, cols)
-    self.moveTo(maxRows / 2 - rows / 2, maxCols / 2 - cols / 2)
+    self.moveTo(maxRows // 2 - rows // 2, maxCols // 2 - cols // 2)
     color = app.color.get('popup_window')
     for row in range(rows):
       if row == rows - 2 and self.showOptions:
@@ -1504,7 +1508,7 @@ class PopupWindow(Window):
       else:
         message = self.__message[row - 1]
       lineLength = len(message)
-      spacing1 = (cols - lineLength) / 2
+      spacing1 = (cols - lineLength) // 2
       spacing2 = cols - lineLength - spacing1
       self.addStr(row, 0, ' ' * spacing1 + message + ' ' * spacing2, color)
 

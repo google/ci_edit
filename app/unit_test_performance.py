@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 from timeit import timeit
 import unittest
 
@@ -52,7 +56,7 @@ class PerformanceTestCases(unittest.TestCase):
         '''x = b[5]\n''',
         setup=setup,
         number=10000)
-    #print "\n%s | %s %s | %s %s | %s %s" % (a, b, a/b, c, a/c, d, a/d)
+    #print("\n%s | %s %s | %s %s | %s %s" % (a, b, a/b, c, a/c, d, a/d))
     # Calling a function or member is significantly slower than direct access.
     self.assertGreater(b, a * 1.6)
     self.assertGreater(c, a * 2)
@@ -72,7 +76,7 @@ class PerformanceTestCases(unittest.TestCase):
         '''x[0] == " " and x[1] == " "\n''',
         setup=setup,
         number=100000)
-    #print "\na %s, b %s, c %s | %s %s" % (a, b, c, c, a/c)
+    #print("\na %s, b %s, c %s | %s %s" % (a, b, c, c, a/c))
     # Calling a function or member is significantly slower than direct access.
     self.assertGreater(b, a * 1.7)  # b is much slower.
     self.assertGreater(b, c * 1.9)  # b is much slower.
@@ -146,7 +150,7 @@ class PerformanceTestCases(unittest.TestCase):
     #
     # With frequent splitting the performance reverses.
     for lineCount in (100, 1000, 5000):
-      half = lineCount / 2
+      half = lineCount // 2
       a = timeit(r'''data2 = data1.split('\n'); \
               data2[%s] = data2[%s][:50] + "x" + data2[%s][50:]; \
               ''' % (half, half, half),
@@ -155,7 +159,7 @@ class PerformanceTestCases(unittest.TestCase):
       b = timeit('data1 = data1[:%s] + "x" + data1[%s:]' % (half, half),
           setup=r'''data1 = ("a" * 100 + '\n') * %s''' % (lineCount,),
           number=10000)
-      print "\n%9s: %s %s" % (lineCount, a, b)
+      print("\n%9s: %s %s" % (lineCount, a, b))
       self.assertGreater(a, b)
 
   def test_split_insert_balance(self):
@@ -166,7 +170,7 @@ class PerformanceTestCases(unittest.TestCase):
     #
     # With 5 inserts between splits, the performance is nearly the same.
     for lineCount in (100, 1000, 5000):
-      half = lineCount / 2
+      half = lineCount // 2
       a = timeit(r'''data2 = data1.split('\n');'''+
               (r'''data2[%s] = data2[%s][:50] + "x" + data2[%s][50:]; \
               ''' % (half, half, half)) * 5,
@@ -175,7 +179,7 @@ class PerformanceTestCases(unittest.TestCase):
       b = timeit(('data1 = data1[:%s] + "x" + data1[%s:]; ' % (half, half)) * 5,
           setup=r'''data1 = ("a" * 100 + '\n') * %s''' % (lineCount,),
           number=10000)
-      print "\n%9s: %s %s" % (lineCount, a, b)
+      print("\n%9s: %s %s" % (lineCount, a, b))
 
   def test_instance_vs_tuple(self):
     return  # Remove to enable test (disabled due to running time).
@@ -183,7 +187,7 @@ class PerformanceTestCases(unittest.TestCase):
     # should still work fine, but it may not run as fast as it could by using
     # different assumptions.
     for lineCount in (100, 1000, 5000):
-      half = lineCount / 2
+      half = lineCount // 2
       a = timeit(r'''
 a = Node()
 a.foo = 5
@@ -208,5 +212,5 @@ foo.append(a)
 foo = []
 ''',
           number=10000)
-      print "\n%9s: %s %s" % (lineCount, a, b)
+      print("\n%9s: %s %s" % (lineCount, a, b))
 

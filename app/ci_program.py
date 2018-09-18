@@ -12,14 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import cProfile
 import pstats
-import cPickle as pickle
+try:
+  import cPickle as pickle
+except:
+  import pickle
 import curses
 import locale
 import io
 import os
-import StringIO
 import sys
 import time
 import traceback
@@ -126,7 +132,7 @@ class CiProgram:
         profile.enable()
         self.refresh(drawList, cursor, cmdCount)
         profile.disable()
-        output = StringIO.StringIO()
+        output = io.StringIO.StringIO()
         stats = pstats.Stats(profile, stream=output).sort_stats('cumulative')
         stats.print_stats()
         app.log.info(output.getvalue())
@@ -376,7 +382,7 @@ class CiProgram:
       profile.enable()
       self.commandLoop()
       profile.disable()
-      output = StringIO.StringIO()
+      output = io.StringIO.StringIO()
       stats = pstats.Stats(profile, stream=output).sort_stats('cumulative')
       stats.print_stats()
       app.log.info(output.getvalue())

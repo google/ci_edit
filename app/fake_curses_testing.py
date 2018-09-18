@@ -14,6 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import curses
 import inspect
 import os
@@ -69,7 +73,7 @@ class FakeCursesTestCase(unittest.TestCase):
       if result is not None:
         output = callerText + ' at index ' + str(cmdIndex) + result
         if self.cursesScreen.movie:
-          print output
+          print(output)
         else:
           self.fail(output)
       return None
@@ -88,7 +92,7 @@ class FakeCursesTestCase(unittest.TestCase):
       if result is None:
         output = callerText + ' at index ' + str(cmdIndex)
         if self.cursesScreen.movie:
-          print output
+          print(output)
         else:
           self.fail(output)
       return None
@@ -103,7 +107,7 @@ class FakeCursesTestCase(unittest.TestCase):
       if result is not None:
         output = callerText + ' at index ' + str(cmdIndex) + result
         if self.cursesScreen.movie:
-          print output
+          print(output)
         else:
           self.fail(output)
       return None
@@ -192,7 +196,7 @@ class FakeCursesTestCase(unittest.TestCase):
       caller = inspect.stack()[1]
       callerText = "  %s:%s:%s(): " % (
           os.path.split(caller[1])[1], caller[2], caller[3])
-      print '\n-------- finished', callerText
+      print('\n-------- finished', callerText)
 
   def runWithTestFile(self, kTestFile, fakeInputs):
     sys.argv = [kTestFile]

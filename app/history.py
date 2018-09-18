@@ -16,7 +16,15 @@
   Track user history to provide features such as resuming editing at the same
   cursor position after reloading a file; or a recent file list.
 """
-import cPickle as pickle
+
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
+try:
+  import cPickle as pickle
+except:
+  import pickle
 import hashlib
 import os
 import time

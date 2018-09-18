@@ -14,14 +14,18 @@
 
 """Interactive UIs for the ciEditor."""
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import os
 import re
-import text_buffer
 
 import app.buffer_manager
 import app.config
 import app.controller
 #import app.window
+import app.text_buffer
 
 
 def parseInt(inStr):
@@ -265,7 +269,7 @@ class InteractiveGoto(app.controller.Controller):
 
   def gotoHalfway(self):
     self.textBuffer.selectionAll()
-    self.textBuffer.insert(str(len(self.view.host.textBuffer.lines) / 2 + 1))
+    self.textBuffer.insert(str(len(self.view.host.textBuffer.lines) // 2 + 1))
     self.changeToHostWindow()
 
   def gotoTop(self):

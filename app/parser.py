@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import curses.ascii
 import os
 import re
@@ -78,7 +82,7 @@ class Parser:
     low = 0
     high = len(gl) - 1
     while True:
-      index = (high + low) / 2
+      index = (high + low) // 2
       if offset >= gl[index + 1][kBegin]:
         low = index
       elif offset < gl[index][kBegin]:

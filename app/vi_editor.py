@@ -14,15 +14,19 @@
 
 """Key bindings for the vi-like editor."""
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import curses
 import curses.ascii
 import os
 import re
-import text_buffer
 
 from app.curses_util import *
 import app.controller
 import app.log
+import app.text_buffer
 
 
 class ViEdit(app.controller.Controller):

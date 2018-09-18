@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import os
 import sys
 import unittest
@@ -301,7 +305,7 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
           "https://pypi.python.org/pypi/mock " + startYellow + "or you can " +
           "try running " + startBlue + "pip install mock." + disableColor)
       #raise Exception(exceptionMessage)
-      print exceptionMessage
+      print(exceptionMessage)
       return
     def test_with_an_x_colored_terminal(x):
       mock.patch.dict(app.prefs.startup, {'numColors': x}, clear=True)

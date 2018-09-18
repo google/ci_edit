@@ -14,8 +14,11 @@
 
 """Key bindings for the cua-like editor."""
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import curses
-import text_buffer
 
 from app.curses_util import *
 import app.controller
@@ -23,6 +26,7 @@ import app.editor
 import app.file_manager_controller
 import app.interactive_prompt
 import app.prediction_controller
+import app.text_buffer
 
 
 def initCommandSet(controller, textBuffer):

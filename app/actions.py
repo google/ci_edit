@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import bisect
 import curses.ascii
 import difflib
@@ -228,7 +232,7 @@ class Actions(app.mutator.Mutator):
     high = len(rangeList)
     offset = needle.end
     while True:
-      index = (high + low) / 2
+      index = (high + low) // 2
       if low == high:
         break
       if offset >= rangeList[index].end:
@@ -387,7 +391,7 @@ class Actions(app.mutator.Mutator):
         self.view.scrollCol = 0
       elif (self.view.scrollCol == self.penCol and
           self.penCol == len(self.lines[self.penRow])):
-        self.view.scrollCol = max(0, self.view.scrollCol - self.view.cols / 4)
+        self.view.scrollCol = max(0, self.view.scrollCol - self.view.cols // 4)
 
   def cursorMoveLeft(self):
     if self.penCol > 0:
@@ -713,7 +717,7 @@ class Actions(app.mutator.Mutator):
   def cursorScrollToMiddle(self):
     maxRow = self.view.rows
     rowDelta = min(max(0, len(self.lines) - maxRow),
-                   max(0, self.penRow - maxRow / 2)) - self.view.scrollRow
+                   max(0, self.penRow - maxRow // 2)) - self.view.scrollRow
     self.cursorMoveScroll(0, 0, rowDelta, 0)
 
   def cursorStartOfLine(self):

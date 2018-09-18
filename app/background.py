@@ -12,8 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import os
-import Queue
+try:
+  import Queue as queue
+except:
+  import queue
 import signal
 import sys
 import threading
@@ -91,8 +98,8 @@ def background(inputQueue, outputQueue):
 
 def startupBackground():
   global bg
-  toBackground = Queue.Queue()
-  fromBackground = Queue.Queue()
+  toBackground = queue.Queue()
+  fromBackground = queue.Queue()
   bg = BackgroundThread(
       target=background, args=(toBackground, fromBackground))
   bg.setName('ci_edit_bg')

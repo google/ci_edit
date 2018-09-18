@@ -12,9 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import cProfile
+import io
 import pstats
-import StringIO
 import sys
 from timeit import timeit
 import unittest
@@ -66,8 +70,8 @@ parser.parse(data, grammar, 0, sys.maxint)''',
       parser.parse(data, grammar, 0, sys.maxint)
       profile.disable()
 
-      output = StringIO.StringIO()
+      output = io.StringIO.StringIO()
       stats = pstats.Stats(profile, stream=output).sort_stats('cumulative')
       stats.print_stats()
-      print output.getvalue()
+      print(output.getvalue())
 

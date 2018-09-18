@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import curses
 import os
 import signal
@@ -294,7 +298,7 @@ class ProgramWindow(app.window.ActiveWindow):
         window.reshape(0, 0, rows, inputWidth)
     else:  # Split horizontally.
       count = len(self.zOrder)
-      eachRows = rows / count
+      eachRows = rows // count
       for i, window in enumerate(self.zOrder[:-1]):
         window.reshape(eachRows * i, 0, eachRows, inputWidth)
       self.zOrder[-1].reshape(

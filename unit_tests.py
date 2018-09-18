@@ -14,6 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 
 import os
 import sys
@@ -80,17 +83,15 @@ def parseArgList(argList):
   testList = tests.values()
   try:
     argList.remove('--help')
-    print 'Help:'
-    print './unit_tests.py [--log] [<name>]'
-    print
-    print '  --log     Print output from app.log.* calls'
-    print '  <name>    Run the named set of tests (only)'
-    print
-    print 'The <name> argument is any of:'
+    print('Help:')
+    print('./unit_tests.py [--log] [<name>]\n')
+    print('  --log     Print output from app.log.* calls')
+    print('  <name>    Run the named set of tests (only)')
+    print('The <name> argument is any of:')
     testNames = tests.keys()
     testNames.sort()
     for i in testNames:
-      print ' ', i
+      print(' ', i)
     sys.exit(0)
   except ValueError:
     pass
