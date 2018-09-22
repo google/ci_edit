@@ -12,11 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import app.render
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import os
-import Queue
+try:
+  import Queue as queue
+except:
+  import queue
 import signal
+import sys
 import threading
+import traceback
+
+import app.profile
+import app.render
 
 
 # The instance of the background thread.
@@ -43,6 +54,7 @@ class BackgroundThread(threading.Thread):
 
 
 def background(inputQueue, outputQueue):
+  cmdCount = 0
   block = True
   pid = os.getpid()
   signalNumber = signal.SIGUSR1
@@ -50,36 +62,33 @@ def background(inputQueue, outputQueue):
     try:
       try:
         program, message = inputQueue.get(block)
+        #profile = app.profile.beginPythonProfile()
         if message == 'quit':
           app.log.info('bg received quit message')
           return
         program.executeCommandList(message)
+        program.shortTimeSlice()
         program.render()
-        outputQueue.put(app.render.frame.grabFrame())
+        # debugging only: program.showWindowHierarchy()
+        cmdCount += len(message)
+        outputQueue.put(app.render.frame.grabFrame() + (cmdCount,))
         os.kill(pid, signalNumber)
+        #app.profile.endPythonProfile(profile)
         if not inputQueue.empty():
           continue
       except Queue.Empty:
         pass
-      tb = program.focusedWindow.textBuffer
-      if not tb.parser:
-        block = True
-        continue
-      block = len(tb.parser.rows) >= len(tb.lines)
-      if not block:
-        tb.linesToData()
-        tb.parser.parse(tb.data, tb.rootGrammar,
-            len(tb.parser.rows),
-            len(tb.lines))
-        block = len(tb.parser.rows) >= len(tb.lines)
-        if block:
-          program.render()
-          outputQueue.put(app.render.frame.grabFrame())
-          os.kill(pid, signalNumber)
+      block = program.longTimeSlice()
+      if block:
+        program.render()
+        outputQueue.put(app.render.frame.grabFrame() + (cmdCount,))
+        os.kill(pid, signalNumber)
     except Exception as e:
       app.log.exception(e)
       app.log.error('bg thread exception', e)
-      outputQueue.put('quit')
+      errorType, value, tracebackInfo = sys.exc_info()
+      out = traceback.format_exception(errorType, value, tracebackInfo)
+      outputQueue.put(('exception', out))
       os.kill(pid, signalNumber)
       while True:
         program, message = inputQueue.get()
@@ -89,8 +98,8 @@ def background(inputQueue, outputQueue):
 
 def startupBackground():
   global bg
-  toBackground = Queue.Queue()
-  fromBackground = Queue.Queue()
+  toBackground = queue.Queue()
+  fromBackground = queue.Queue()
   bg = BackgroundThread(
       target=background, args=(toBackground, fromBackground))
   bg.setName('ci_edit_bg')

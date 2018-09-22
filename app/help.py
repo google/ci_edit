@@ -12,8 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import os
 import sys
+
 
 dirPath = os.path.split(os.path.abspath(os.path.dirname(
     __file__)))[0]
@@ -121,7 +126,7 @@ Within the Goto line prompt:
 
   'version': \
 """\
-  Version (build iteration): v31
+  Version (build iteration): v35
   See LICENSE for license information
   See readme.md for an introduction
   Both files may be found in "%s"

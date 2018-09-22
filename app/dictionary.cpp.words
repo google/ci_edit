@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+alloca
 atexit
 calloc
 cassert
@@ -21,12 +22,15 @@ cout
 cplusplus
 cstream
 cstring
+dirent
 endl
 extern
+fstream
 intptr
 intrinsics
 iomanip
 iostream
+istreambuf
 lu
 malloc
 memcmp
@@ -34,10 +38,12 @@ memcpy
 memset
 multimap
 npos
+opendir
 ostream
 ostringstream
 printf
 rbegin
+readdir
 refcounted
 setprecision
 setw
@@ -46,7 +52,10 @@ std
 stddef
 stdint
 stdlib
+strcmp
 strerror
+stricmp
+strlen
 toupper
 typename
 uint

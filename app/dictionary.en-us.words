@@ -141,6 +141,8 @@ accordion
 accordionist
 accords
 account
+accountability
+accountable
 accounted
 accounting
 accounts
@@ -225,6 +227,7 @@ activities
 activity
 actor
 actors
+actress
 actresses
 acts
 actual
@@ -234,6 +237,7 @@ actuate
 actuated
 actuator
 acute
+acyclic
 ad
 adapt
 adaptability
@@ -279,6 +283,7 @@ adjunct
 adjust
 adjustable
 adjusted
+adjuster
 adjusting
 adjustment
 adjustments
@@ -304,6 +309,7 @@ adobes
 adopt
 adopted
 adopter
+adopting
 adoption
 adopts
 adornment
@@ -324,6 +330,9 @@ adventure
 adverb
 adverbial
 adverbs
+adversarial
+adversaries
+adversary
 adverse
 adversely
 advert
@@ -476,6 +485,7 @@ algebra
 algebraic
 algorithm
 algorithmic
+algorithmically
 algorithms
 alias
 aliased
@@ -512,6 +522,7 @@ allocates
 allocating
 allocation
 allocations
+allocator
 allotted
 allow
 allowable
@@ -541,6 +552,7 @@ alphabetizes
 alphabets
 alphanumeric
 alphanumerical
+alphanumerics
 alphas
 alpine
 alps
@@ -688,6 +700,7 @@ annotating
 annotation
 annotations
 annotator
+annotators
 announce
 announced
 announcement
@@ -715,6 +728,7 @@ ans
 answer
 answerable
 answered
+answering
 answers
 ant
 ante
@@ -886,8 +900,10 @@ aristocrat
 arithmetic
 arithmetically
 arithmetician
+arity
 ark
 arm
+armadillo
 armed
 arms
 army
@@ -911,6 +927,7 @@ arrives
 arriving
 arrow
 arrowhead
+arrowing
 arrows
 arsenic
 art
@@ -992,6 +1009,7 @@ assist
 assistance
 assistant
 assisted
+assistive
 assists
 assoc
 associate
@@ -1040,6 +1058,7 @@ atlases
 atom
 atomic
 atomically
+atomicity
 atoms
 atop
 attach
@@ -1053,6 +1072,7 @@ attack
 attacked
 attacker
 attackers
+attacking
 attacks
 attain
 attaining
@@ -1141,6 +1161,7 @@ authors
 authorship
 autism
 auto
+autocompletions
 autoconfiguration
 autofill
 automate
@@ -1265,6 +1286,7 @@ bacon
 bad
 bade
 badge
+badged
 badger
 badges
 badly
@@ -1564,6 +1586,8 @@ big
 bigamous
 bigger
 biggest
+bijection
+bijections
 bilabial
 bile
 bilge
@@ -1753,6 +1777,10 @@ bolas
 bold
 bolder
 boldfaced
+bolt
+bolted
+bolthole
+bolts
 bomb
 bombed
 bombing
@@ -1802,6 +1830,7 @@ booty
 bop
 border
 bordered
+borderless
 borderline
 borders
 bore
@@ -2027,6 +2056,7 @@ bulk
 bulked
 bull
 bullet
+bulleted
 bulletin
 bulletins
 bullets
@@ -2081,6 +2111,8 @@ busiest
 business
 businesses
 businessman
+businessperson
+businesswoman
 busker
 buss
 bust
@@ -2194,6 +2226,7 @@ camp
 campaign
 campaigning
 campaigns
+camping
 camps
 campus
 cams
@@ -2225,6 +2258,7 @@ canned
 cannot
 canon
 canonical
+canonicalizing
 canonize
 canopy
 cans
@@ -2274,6 +2308,8 @@ card
 cardholder
 cardholders
 cardinal
+cardinalities
+cardinality
 cardiovascular
 cards
 care
@@ -2305,6 +2341,7 @@ carryover
 cars
 cart
 carter
+cartesian
 cartoon
 carts
 carve
@@ -2382,6 +2419,7 @@ cede
 ceder
 cedilla
 ceding
+ceiled
 ceiling
 celebrate
 celebrated
@@ -2640,6 +2678,8 @@ cinema
 cipher
 ciphered
 ciphers
+ciphertext
+ciphertexts
 cir
 circa
 circle
@@ -3388,6 +3428,7 @@ constraint
 constraints
 construct
 constructed
+constructible
 constructing
 construction
 constructions
@@ -3736,6 +3777,7 @@ crank
 crankshaft
 crap
 crappy
+crapshoot
 crash
 crashed
 crashes
@@ -3824,6 +3866,7 @@ crossing
 crossings
 crossover
 crossword
+crostini
 crow
 crowd
 crowded
@@ -3849,6 +3892,8 @@ cry
 crypt
 cryptic
 cryptographer
+cryptographic
+cryptographically
 cryptography
 crystal
 cs
@@ -3864,6 +3909,7 @@ cubit
 cubs
 cuckoo
 cucumber
+cucumbers
 cud
 cuddle
 cue
@@ -3891,6 +3937,8 @@ cupcake
 cups
 cur
 curacao
+curated
+curating
 curator
 curd
 cure
@@ -3954,6 +4002,7 @@ cyan
 cyborg
 cycle
 cycled
+cycler
 cycles
 cyclic
 cyclical
@@ -4072,6 +4121,7 @@ deal
 dealer
 dealing
 dealings
+deallocated
 deals
 dealt
 dean
@@ -4180,6 +4230,7 @@ decreasing
 decreasingly
 decrement
 decremented
+decrementing
 decrements
 decrescendo
 decrypt
@@ -4194,9 +4245,15 @@ deducted
 deductible
 deduction
 deduped
+deduplicated
+deduplicating
+deduplication
 deed
 deem
 deemed
+deemphasize
+deemphasized
+deemphasizing
 deems
 deep
 deeper
@@ -4396,6 +4453,7 @@ depths
 deputy
 derailments
 deranged
+dereference
 derelict
 derivation
 derivative
@@ -4429,6 +4487,7 @@ deselected
 deselecting
 deselection
 deselects
+deserialize
 deserves
 design
 designate
@@ -4480,6 +4539,9 @@ detailed
 detailing
 details
 detaining
+detangle
+detangled
+detangling
 detect
 detectable
 detected
@@ -5462,6 +5524,7 @@ emphasizes
 emphasizing
 empire
 empirically
+emplace
 emplacement
 emplacements
 employ
@@ -5535,10 +5598,13 @@ encrypt
 encrypted
 encrypting
 encryption
+encryptions
 encrypts
 encumbered
 encyclopedia
 end
+endcap
+endcaps
 ended
 ending
 endings
@@ -5649,6 +5715,7 @@ enumerating
 enumeration
 enumerations
 enumerator
+enumerators
 envelope
 enveloped
 envelopes
@@ -6131,6 +6198,7 @@ fakes
 faking
 fall
 fallback
+fallbacks
 fallen
 falling
 falls
@@ -6183,6 +6251,7 @@ fault
 faulted
 faults
 faulty
+faux
 fave
 favicon
 favicons
@@ -7098,6 +7167,7 @@ glued
 glues
 glut
 glyph
+glyphs
 gm
 gnarly
 gnome
@@ -7231,6 +7301,8 @@ grape
 grapefruit
 grapevine
 graph
+grapheme
+graphemes
 graphic
 graphical
 graphically
@@ -7961,6 +8033,7 @@ identities
 identity
 ideograms
 ideograph
+ideographic
 ideographs
 ideologically
 ides
@@ -7980,6 +8053,7 @@ ids
 if
 ifs
 ignition
+ignorable
 ignorance
 ignorant
 ignore
@@ -8067,6 +8141,7 @@ implementations
 implemented
 implementer
 implementing
+implementors
 implements
 implicated
 implication
@@ -8213,6 +8288,7 @@ incremental
 incrementalist
 incrementally
 incremented
+incrementing
 increments
 incs
 incumbency
@@ -8311,10 +8387,12 @@ infected
 infection
 infectious
 infer
+inferable
 inference
 inferential
 inferior
 inferno
+inferrable
 inferred
 inferring
 infinite
@@ -8328,6 +8406,7 @@ inflates
 inflating
 inflation
 inflicted
+inflight
 influence
 influences
 influential
@@ -8407,6 +8486,7 @@ inking
 inky
 inland
 inlet
+inlinable
 inline
 inmate
 inn
@@ -8578,6 +8658,7 @@ interactivity
 interacts
 intercede
 intercedes
+intercell
 intercept
 intercepted
 intercepting
@@ -8647,6 +8728,7 @@ interned
 internet
 interns
 internship
+interoperability
 interplay
 interpolate
 interpolated
@@ -8696,6 +8778,7 @@ interviews
 interweaving
 intimate
 into
+intra
 intractable
 intranet
 intranets
@@ -8748,6 +8831,7 @@ inverses
 inversion
 invert
 inverted
+invertible
 inverts
 invested
 investigate
@@ -8847,6 +8931,7 @@ iterating
 iteration
 iterations
 iterative
+iteratively
 iterator
 iterators
 itinerary
@@ -8937,6 +9022,7 @@ jots
 joule
 joules
 journal
+journaling
 journalist
 journalists
 journals
@@ -9005,8 +9091,10 @@ keg
 kelvin
 ken
 kept
+kern
 kernel
 kernels
+kerning
 kestrel
 ketchup
 key
@@ -9486,6 +9574,7 @@ linguistics
 linguists
 lining
 link
+linkable
 linkage
 linked
 linker
@@ -9558,6 +9647,7 @@ locality
 localization
 localize
 localized
+localizer
 localizes
 localizing
 locally
@@ -9572,6 +9662,7 @@ locator
 loci
 lock
 lockable
+lockdown
 locked
 locker
 locking
@@ -9624,6 +9715,7 @@ lookup
 loon
 loop
 looped
+looper
 loophole
 looping
 loops
@@ -9693,6 +9785,7 @@ lug
 lulling
 lulu
 lulus
+luminance
 luminary
 luminescent
 luminosity
@@ -9752,6 +9845,7 @@ magnet
 magnetic
 magnetism
 magnification
+magnified
 magnifier
 magnify
 magnifying
@@ -9817,6 +9911,7 @@ managing
 mandarin
 mandate
 mandated
+mandates
 mandatory
 mandrake
 mane
@@ -9860,6 +9955,7 @@ manufacture
 manufactured
 manufacturer
 manufacturers
+manufactures
 manufacturing
 many
 map
@@ -10116,6 +10212,7 @@ mere
 merely
 meres
 merge
+mergeable
 merged
 merger
 merges
@@ -10175,6 +10272,7 @@ mick
 micro
 microchip
 microcomputer
+microcontroller
 microcosm
 microelectronic
 microelectronics
@@ -10413,6 +10511,7 @@ modify
 modifying
 mods
 modular
+modularity
 modulate
 modulated
 modulation
@@ -10570,6 +10669,8 @@ mullion
 multi
 multicolored
 multifarious
+multilayer
+multilayered
 multilingual
 multimedia
 multiple
@@ -10838,6 +10939,7 @@ nip
 nit
 niter
 nits
+nitty
 nix
 no
 nob
@@ -11352,6 +11454,7 @@ ought
 ounce
 our
 ours
+ourself
 ourselves
 out
 outage
@@ -11406,6 +11509,7 @@ oval
 ovation
 over
 overage
+overaggressively
 overall
 overcame
 overclock
@@ -11574,6 +11678,7 @@ panache
 panama
 panda
 pane
+paned
 panel
 panels
 panes
@@ -11605,6 +11710,9 @@ paragraph
 paragraphs
 parallel
 parallelism
+parallelizable
+parallelize
+parallellized
 parallelogram
 parallels
 param
@@ -11761,6 +11869,7 @@ pause
 paused
 pauses
 pausing
+paver
 pavilion
 paw
 pawn
@@ -11877,6 +11986,7 @@ performing
 performs
 perfume
 perhaps
+peridot
 peril
 period
 periodic
@@ -11928,6 +12038,7 @@ persona
 personal
 personalities
 personality
+personalization
 personalize
 personalized
 personalizes
@@ -12134,6 +12245,8 @@ plain
 plainly
 plains
 plaint
+plaintext
+plaintexts
 plan
 planar
 plane
@@ -12333,6 +12446,7 @@ ports
 pose
 poser
 poses
+posesses
 posit
 position
 positional
@@ -12358,12 +12472,15 @@ postal
 postbox
 postcard
 postcode
+postcondition
+postconditions
 posted
 poster
 posterior
 posteriors
 posterity
 posters
+postfix
 posting
 postings
 postlude
@@ -12419,6 +12536,7 @@ pre
 preamble
 preambles
 prearranged
+prebuilt
 precarious
 precaution
 precautions
@@ -12438,8 +12556,11 @@ precision
 preclude
 precludes
 precluding
+precomputation
+precomputed
 precondition
 preconditions
+preconnection
 precursor
 predate
 predates
@@ -12473,6 +12594,7 @@ preemptive
 preemptively
 preexisting
 pref
+prefabricated
 preface
 prefecture
 prefer
@@ -12484,6 +12606,8 @@ preferentially
 preferred
 preferring
 prefers
+prefetched
+prefetching
 prefix
 prefixed
 prefixes
@@ -12517,11 +12641,15 @@ prepares
 preparing
 prepend
 prepended
+prepending
+prepends
 preponderance
+prepopulated
 preposition
 prepositional
 prepositions
 preprocess
+preprocessed
 preprocessor
 preps
 prerecorded
@@ -12588,6 +12716,7 @@ prevails
 prevent
 preventable
 prevented
+preventer
 preventing
 prevention
 prevents
@@ -12597,6 +12726,7 @@ previewing
 previews
 previous
 previously
+prevision
 prey
 price
 priced
@@ -12641,6 +12771,7 @@ printout
 printouts
 prints
 prior
+priori
 priorities
 prioritize
 prioritized
@@ -13052,6 +13183,7 @@ quarters
 quarto
 quartz
 quasi
+quaternion
 quay
 queen
 quench
@@ -13130,6 +13262,7 @@ rad
 radar
 radial
 radially
+radians
 radiant
 radical
 radically
@@ -13328,6 +13461,7 @@ reattaching
 reattachment
 reattempt
 reattempts
+reauthentication
 reauthorize
 rebase
 rebate
@@ -13368,6 +13502,7 @@ receiver
 receivers
 receives
 receiving
+recency
 recent
 recenter
 recentered
@@ -13507,6 +13642,8 @@ redirection
 redirects
 rediscovered
 rediscovery
+redisplayed
+redisplaying
 redistribute
 redistributing
 redistribution
@@ -13538,6 +13675,7 @@ reeks
 reel
 reenrollment
 reenter
+reentrant
 reentry
 reevaluate
 reevaluation
@@ -13561,6 +13699,8 @@ referrer
 referrers
 referring
 refers
+refetch
+refetches
 refiling
 refill
 refine
@@ -13867,6 +14007,8 @@ repairing
 repairs
 reparation
 reparent
+reparented
+reparenting
 reparse
 repeat
 repeatable
@@ -13914,9 +14056,16 @@ reporters
 reporting
 reports
 repose
+reposition
+repositioned
+repositioning
+repositions
 repositories
 repository
 repost
+reposted
+reposting
+reposts
 reprehension
 represent
 representation
@@ -13964,6 +14113,7 @@ rerunning
 res
 resale
 rescale
+rescan
 reschedule
 rescheduled
 reschedules
@@ -14019,6 +14169,7 @@ resizable
 resize
 resizeable
 resized
+resizes
 resizing
 resolute
 resolution
@@ -14037,6 +14188,7 @@ resorts
 resource
 resources
 resp
+respawn
 respect
 respected
 respecter
@@ -14156,6 +14308,7 @@ reused
 reuses
 reusing
 rev
+revalidate
 revalue
 revamp
 reveal
@@ -14447,6 +14600,7 @@ rundown
 rune
 rung
 runic
+runnable
 runner
 runners
 running
@@ -14545,6 +14699,7 @@ sanely
 saner
 sang
 sanitation
+sanitization
 sanitize
 sanitized
 sanitizes
@@ -14599,6 +14754,7 @@ says
 scad
 scaffolding
 scag
+scalability
 scalable
 scalar
 scalars
@@ -16046,6 +16202,7 @@ stopper
 stopping
 stops
 stopwatch
+storable
 storage
 store
 stored
@@ -16565,6 +16722,7 @@ syntactic
 syntactical
 syntactically
 syntax
+syntaxes
 synth
 synthesis
 synthesize
@@ -16896,6 +17054,7 @@ them
 theme
 themed
 themes
+theming
 themselves
 then
 theocracy
@@ -17012,6 +17171,7 @@ thunderstorm
 thunk
 thursday
 thus
+thusly
 thwart
 thy
 ti
@@ -17198,6 +17358,7 @@ tornado
 torrent
 tors
 tort
+tortious
 tortoise
 tortuous
 torture
@@ -17405,6 +17566,7 @@ tremolo
 trend
 trending
 trends
+tri
 triage
 trial
 trials
@@ -17430,6 +17592,7 @@ trier
 tries
 trig
 trigger
+triggerable
 triggered
 triggering
 triggers
@@ -17442,6 +17605,7 @@ trimmer
 trimming
 trimmings
 trims
+trinary
 trinity
 trio
 trip
@@ -17652,6 +17816,7 @@ unambiguous
 unambiguously
 unanswered
 unapproved
+unary
 unassigned
 unattached
 unattended
@@ -17744,6 +17909,7 @@ underlying
 undermentioned
 undermine
 underneath
+underperformed
 underrate
 underscore
 underscored
@@ -17778,6 +17944,7 @@ unedited
 unencumbered
 unenforceable
 unequal
+unescapable
 uneven
 unevenly
 unexceptional
@@ -18064,7 +18231,9 @@ unzipping
 unzips
 up
 upcoming
+updatable
 update
+updateable
 updated
 updater
 updates
@@ -18267,6 +18436,7 @@ verifiable
 verification
 verified
 verifier
+verifiers
 verifies
 verify
 verifying
@@ -18690,6 +18860,7 @@ whittling
 whiz
 who
 whoa
+whoah
 whoever
 whole
 wholesale

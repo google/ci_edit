@@ -19,6 +19,17 @@
 
 // comment with \
 a line continuation.
+override a
+2323ull a
+2422u a
+3.3 a
+3.4f a
+5.3x a
+2.5d a
+.3 a
+.3f a
+3.d a
+3.f a
 
 namespace sample {
 
@@ -26,6 +37,20 @@ namespace sample {
     defined(bar)
 // a comment.
 #endif
+
+enum Blah {
+  zero,
+  one,
+  two
+};
+
+void int bool goto sizeof char double case const switch typedef bool
+
+constexpr char string[] = R"foo(
+    foo: "5 apples", R"(carrot)"
+    bar: "6 bananas",
+    a lone "
+    )foo";
 
 
 /**

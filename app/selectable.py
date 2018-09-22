@@ -12,24 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import app.log
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import re
 
-
-kReBrackets = re.compile('[[\]{}()]')
-kReComments = re.compile('(?:#|//).*$|/\*.*?\*/|<!--.*?-->')
-kReEndSpaces = re.compile(r'\s+$')
-kReNumbers = re.compile('0x[0-9a-fA-F]+|\d+')
-kReStrings = re.compile(
-    r"(\"\"\".*?(?<!\\)\"\"\")|('''.*?(?<!\\)''')|(\".*?(?<!\\)\")|('.*?(?<!\\)')")
-# The first group is a hack to allow upper case pluralized, e.g. URLs.
-kReSubwords = re.compile(
-    r'(?:[A-Z]{2,}s\b)|(?:[A-Z][a-z]+)|(?:[A-Z]+(?![a-z]))|(?:[a-z]+)')
-kReSubwordBoundaryFwd = re.compile(
-    '(?:[_-]?[A-Z][a-z-]+)|(?:[_-]?[A-Z]+(?![a-z]))|(?:[_-]?[a-z]+)|(?:\W+)')
-kReSubwordBoundaryRvr = re.compile(
-    '(?:[A-Z][a-z-]+[_-]?)|(?:[A-Z]+(?![a-z])[_-]?)|(?:[a-z]+[_-]?)|(?:\W+)')
-kReWordBoundary = re.compile('(?:\w+)|(?:\W+)')
+import app.log
+import app.regex
 
 
 # No selection.
@@ -60,7 +50,10 @@ kSelectionModeNames = [
 class BaseLineBuffer:
   def __init__(self):
     self.lines = [unicode("")]
-    self.message = ('New buffer', 0)
+    self.message = ('New buffer', None)
+
+  def isEmpty(self):
+    return len(self.lines) == 1 and len(self.lines[0]) == 0
 
   def setMessage(self, *args, **dict):
     if not len(args):
@@ -75,7 +68,7 @@ class BaseLineBuffer:
       prior = str(i)
       msg += prior
     #app.log.caller("\n", msg)
-    self.message = (repr(msg)[1:-1], dict.get('color', 0))
+    self.message = (repr(msg)[1:-1], dict.get('color'))
 
 
 class Selectable(BaseLineBuffer):
@@ -87,6 +80,13 @@ class Selectable(BaseLineBuffer):
     self.markerCol = 0
     self.selectionMode = kSelectionNone
     self.upperChangedRow = 0
+
+  def countSelected(self):
+    lines = self.getSelectedText()
+    chars = len(lines) - 1  # Count carriage returns.
+    for line in lines:
+      chars += len(line)
+    return chars, len(lines)
 
   def selection(self):
     return (self.penRow, self.penCol, self.markerRow, self.markerCol)
@@ -155,9 +155,9 @@ class Selectable(BaseLineBuffer):
       self.upperChangedRow = row
     if selectionMode == kSelectionBlock:
       for i, line in enumerate(lines):
-        self.lines[row+i] = (
-            self.lines[row+i][:col] + line +
-            self.lines[row+i][col:])
+        self.lines[row + i] = (
+            self.lines[row + i][:col] + line +
+            self.lines[row + i][col:])
         self.lines.insert(row, line)
     elif (selectionMode == kSelectionNone or
         selectionMode == kSelectionAll or
@@ -185,12 +185,12 @@ class Selectable(BaseLineBuffer):
         and marker will be extended away from each other. The extension may
         occur in one, both, or neither direction."""
     line = self.lines[upperRow]
-    for segment in re.finditer(kReWordBoundary, line):
+    for segment in re.finditer(app.regex.kReWordBoundary, line):
       if segment.start() <= upperCol < segment.end():
         upperCol = segment.start()
         break
     line = self.lines[lowerRow]
-    for segment in re.finditer(kReWordBoundary, line):
+    for segment in re.finditer(app.regex.kReWordBoundary, line):
       if segment.start() < lowerCol < segment.end():
         lowerCol = segment.end()
         break

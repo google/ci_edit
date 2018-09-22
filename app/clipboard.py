@@ -12,16 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import third_party.pyperclip as clipboard
 
 
-clipList = []
+_clipList = []
 
 def copy(text):
   """Add text onto clipList. Empty |text| is not stored."""
   if text and len(text):
-    global clipList
-    clipList.append(text)
+    global _clipList
+    _clipList.append(text)
     if clipboard.copy:
       clipboard.copy(text)
 
@@ -34,7 +38,7 @@ def paste(clipIndex=None):
       return osClip
     # Get the top of the clipList instead.
     clipIndex = -1
-  global clipList
-  if len(clipList):
-    return clipList[clipIndex%len(clipList)]
+  global _clipList
+  if len(_clipList):
+    return _clipList[clipIndex % len(_clipList)]
   return None

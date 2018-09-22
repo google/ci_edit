@@ -14,14 +14,19 @@
 
 """Key bindings for the slash-menu editor."""
 
-from app.curses_util import *
-import app.controller
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import curses
 import curses.ascii
 import app.editor
 import os
 import re
 import text_buffer
+
+from app.curses_util import *
+import app.controller
 
 
 class CiEdit(app.controller.Controller):

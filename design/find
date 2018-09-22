@@ -70,6 +70,75 @@ that is: -marked -selected -changed
 exit^w  forward^f  reverse^r  replace^s  all^e  mark^m
 ```
 
+
+or
+
+
+
+```
+   find: dog
+         +regex -words -matchCase +multiLine #  +marked
+replace: cat
+         case(simple smart upper +lower) # +mark
+ within: +code +comments +content +markup +quotes +license
+         ~selected +changed #  !marked
+  paths: +example.txt
+<exit>  <reverse>  <forward>  <replace>  <all>  #  mark^m
+```
+
+
+
+
+
+```
+   find: dog
+replace: cat
+         [*]regex, [ ]words, [ ]matchCase, [ ]multiLine
+         within: ( )code, ( )comments, ( )markup, ( )quotes, ( )license, ( )any;
+         selected: ( )yes, ( )no, (*)any;
+         changed: ( )yes, ( )no, (*)any;
+         paths: +example.txt
+         changeCase: (*)none, ( )smart, ( )upper, ( )lower;
+<exit>  <reverse>  <forward>  <replace>  <all>  #  mark^m
+```
+
+
+
+
+
+
+```
+   find: dog
+replace: cat
+         [*]regex [ ]words [ ]matchCase [ ]multiLine
+         within: ( )code ( )comments ( )markup ( )quotes ( )license (*)any
+         selected: ( )yes ( )no (*)any
+         changed: ( )yes ( )no (*)any
+         paths: +example.txt
+         changeCase: (*)none ( )smart ( )upper ( )lower
+<exit>  <reverse>  <forward>  <replace>  <all>  #  mark^m
+```
+
+
+
+
+
+
+
+```
+   find: dog
+replace: cat
+         [*]regex [ ]words [ ]matchCase [ ]multiLine
+         changeCase: {none}
+         within: {any}
+         selected: {any}
+         changed: {any}
+  paths: +example.txt
+<exit>  <reverse>  <forward>  <replace>  <all>  #  mark^m
+```
+
+
+
 ## There are some options that I'd like to operate on the main document
 undo/redo/save/quit if these actions are done in the find UI, they should affect the current file.
 

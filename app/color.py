@@ -12,8 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import app.prefs
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import curses
+
+import app.prefs
+
 
 colors = 256
 cache__ = {}
@@ -22,15 +28,15 @@ def reset():
   global cache__
   cache__ = {}
 
-def get(colorType):
+def get(colorType, delta=0):
   global cache__
-  r = cache__.get(colorType)
-  if r is not None:
-    return r
   if type(colorType) == type(0):
-    colorIndex = min(colors - 1, colorType)
+    colorIndex = colorType
   else:
     colorIndex = app.prefs.color[colorType]
-  color = curses.color_pair(colorIndex)
-  cache__[colorType] = color
+  colorIndex = min(colors - 1, colorIndex + delta)
+  color = cache__.get(colorIndex) or curses.color_pair(colorIndex)
+  cache__[colorIndex] = color
+  if colorType in ('error', 'misspelling'):
+    color |= curses.A_BOLD | curses.A_REVERSE
   return color

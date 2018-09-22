@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import io
 import inspect
 import os
@@ -22,15 +26,13 @@ import traceback
 
 screenLog = ["--- screen log ---"]
 fullLog = ["--- begin log ---"]
-enabledChannels = {'meta': True, 'mouse': True, 'startup': True}
+enabledChannels = {
+  'meta': True,
+  #'mouse': True,
+  'startup': True,
+}
 shouldWritePrintLog = False
 startTime = time.time()
-
-if os.getenv('CI_EDIT_USE_FAKE_CURSES'):
-  enabledChannels = {
-    'error': True, 'info': True, 'meta': True, 'mouse': True, 'startup': True
-  }
-  shouldWritePrintLog = True
 
 def getLines():
   global screenLog

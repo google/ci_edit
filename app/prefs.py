@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import app.default_prefs
-import app.log
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import curses
 import io
 import json
@@ -22,9 +24,11 @@ import re
 import sys
 import time
 
+import app.default_prefs
+import app.log
+import app.regex
+
 importStartTime = time.time()
-kNonMatchingRegex = r'^\b$'
-kReNonMatching = re.compile(kNonMatchingRegex)
 prefs = app.default_prefs.prefs
 
 def joinReList(reList):
@@ -54,26 +58,19 @@ def loadPrefs(fileName, category):
 
 color8 = app.default_prefs.color8
 color256 = app.default_prefs.color256
-
-builtInColorSchemes = {
-  'dark': {},
-  'light': {},
-  'sky': {},
-}
+prefs['color'] = color256
 
 colorSchemeName = prefs['editor']['colorScheme']
 if colorSchemeName == 'custom':
   # Check the user home directory for a color scheme preference. If found load
   # it to replace the default color scheme.
   prefs['color'].update(loadPrefs('color_scheme', 'color'))
-elif colorSchemeName in builtInColorSchemes:
-  prefs['color'].update(builtInColorSchemes[colorSchemeName])
-
 
 color = prefs['color']
 editor = loadPrefs('editor', 'editor')
 devTest = prefs['devTest']
 palette = prefs['palette']
+startup = {}
 status = loadPrefs('status', 'status')
 
 
@@ -85,10 +82,12 @@ for k,v in prefs['grammar'].items():
 
 # Compile regexes for each grammar.
 for k,v in prefs['grammar'].items():
-  # keywords re.
-  v['keywordsRe'] = re.compile(
-      joinReWordList(v.get('keywords', []) + v.get('types', [])))
-  v['specialsRe'] = re.compile(joinReList(v.get('special', [])))
+  if 0:
+    # keywords re.
+    v['keywordsRe'] = re.compile(
+        joinReWordList(v.get('keywords', []) + v.get('types', [])))
+    v['errorsRe'] = re.compile(joinReList(v.get('error', [])))
+    v['specialsRe'] = re.compile(joinReList(v.get('special', [])))
   # contains and end re.
   matchGrammars = []
   markers = []
@@ -98,7 +97,7 @@ for k,v in prefs['grammar'].items():
     matchGrammars.append(v)
   else:
     # Add a non-matchable placeholder.
-    markers.append(kNonMatchingRegex)
+    markers.append(app.regex.kNonMatchingRegex)
     matchGrammars.append(None)
   # Index [1]
   if v.get('end'):
@@ -106,7 +105,7 @@ for k,v in prefs['grammar'].items():
     matchGrammars.append(v)
   else:
     # Add a non-matchable placeholder.
-    markers.append(kNonMatchingRegex)
+    markers.append(app.regex.kNonMatchingRegex)
     matchGrammars.append(None)
   # Index [2..len(contains)]
   for grammarName in v.get('contains', []):
@@ -119,21 +118,37 @@ for k,v in prefs['grammar'].items():
     markers.append(g['begin'])
     matchGrammars.append(g)
   # Index [2+len(contains)..]
+  markers += v.get('error', [])
+  # Index [2+len(contains)+len(error)..]
   for keyword in v.get('keywords', []):
     markers.append(r'\b' + keyword + r'\b')
-  # Index [2+len(contains)+len(keywords)..]
+  # Index [2+len(contains)+len(error)+len(keywords)..]
+  for types in v.get('types', []):
+    markers.append(r'\b' + types + r'\b')
+  # Index [2+len(contains)+len(error)+len(keywords)+len(types)..]
   markers += v.get('special', [])
   # Index [-1]
   markers.append(r'\n')
   #app.log.startup('markers', v['name'], markers)
   v['matchRe'] = re.compile(joinReList(markers))
+  v['markers'] = markers
   v['matchGrammars'] = matchGrammars
+  newGrammarIndexLimit = 2 + len(v.get('contains', []))
+  errorIndexLimit = newGrammarIndexLimit + len(v.get('error', []))
+  keywordIndexLimit = errorIndexLimit + len(v.get('keywords', []))
+  typeIndexLimit = keywordIndexLimit + len(v.get('types', []))
+  specialIndexLimit = typeIndexLimit + len(v.get('special', []))
+  v['indexLimits'] = (newGrammarIndexLimit, errorIndexLimit, keywordIndexLimit, typeIndexLimit, specialIndexLimit)
+
 # Reset the re.cache for user regexes.
 re.purge()
 
+nameToType = {}
 extensions = {}
 fileTypes = {}
 for k,v in prefs['fileType'].items():
+  for name in v.get('name', []):
+    nameToType[name] = v.get('grammar')
   for ext in v['ext']:
     extensions[ext] = v.get('grammar')
   fileTypes[k] = v
@@ -159,8 +174,14 @@ def init():
           prefs['color'].get(k+'_special_color', defaultSpecialsColor))
   app.log.info('prefs init')
 
-def getGrammar(fileExtension):
-  fileType = extensions.get(fileExtension, 'text')
+def getGrammar(filePath):
+  if filePath is None:
+    return grammars.get('text')
+  name = os.path.split(filePath)[1]
+  fileType = nameToType.get(name)
+  if fileType is None:
+    fileExtension = os.path.splitext(name)[1]
+    fileType = extensions.get(fileExtension, 'text')
   return grammars.get(fileType)
 
 def save(category, label, value):

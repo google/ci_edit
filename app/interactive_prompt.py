@@ -14,10 +14,15 @@
 
 """Interactive prompt to run advanced commands and sub-processes."""
 
-import app.controller
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import os
 import re
 import subprocess
+
+import app.controller
 
 
 def functionTestEq(a, b):
@@ -113,8 +118,8 @@ functionTestEq(kReUnquote.sub('\\2', '"da\\"te"'),
 
 class InteractivePrompt(app.controller.Controller):
   """Extended commands prompt."""
-  def __init__(self, host):
-    app.controller.Controller.__init__(self, host, 'prompt')
+  def __init__(self, view):
+    app.controller.Controller.__init__(self, view, 'prompt')
 
   def setTextBuffer(self, textBuffer):
     app.controller.Controller.setTextBuffer(self, textBuffer)
@@ -146,12 +151,12 @@ class InteractivePrompt(app.controller.Controller):
   def bookmarkCommand(self, cmdLine, view):
     args = kReSplitCmdLine.findall(cmdLine)
     if len(args) > 1 and args[1][0] == '-':
-      if self.host.textBuffer.bookmarkRemove():
+      if self.view.host.textBuffer.bookmarkRemove():
         return {}, 'Removed bookmark'
       else:
         return {}, 'No bookmarks to remove'
     else:
-      self.host.textBuffer.bookmarkAdd()
+      self.view.host.textBuffer.bookmarkAdd()
       return {}, 'Added bookmark'
 
   def buildCommand(self, cmdLine, view):
@@ -178,10 +183,10 @@ class InteractivePrompt(app.controller.Controller):
     }
     def noOp(data):
       return data
-    file, ext = os.path.splitext(self.host.textBuffer.fullPath)
+    file, ext = os.path.splitext(self.view.host.textBuffer.fullPath)
     app.log.info(file, ext)
-    lines = self.host.textBuffer.doDataToLines(
-        formatter.get(ext, noOp)(self.host.textBuffer.doLinesToData(lines)))
+    lines = self.view.host.textBuffer.doDataToLines(
+        formatter.get(ext, noOp)(self.view.host.textBuffer.doLinesToData(lines)))
     return lines, 'Changed %d lines'%(len(lines),)
 
   def makeCommand(self, cmdLine, view):
@@ -199,15 +204,13 @@ class InteractivePrompt(app.controller.Controller):
       if not len(cmdLine):
         self.changeToHostWindow()
         return
-      tb = self.host.textBuffer
+      tb = self.view.host.textBuffer
       lines = list(tb.getSelectedText())
       if cmdLine[0] in self.subExecute:
-        data = self.host.textBuffer.doLinesToData(lines)
+        data = self.view.host.textBuffer.doLinesToData(lines)
         output, message = self.subExecute.get(cmdLine[0])(
             cmdLine[1:], data)
         output = tb.doDataToLines(output)
-        if tb.selectionMode == app.selectable.kSelectionLine:
-          output.append('')
         tb.editPasteLines(tuple(output))
         tb.setMessage(message)
       else:
@@ -221,12 +224,10 @@ class InteractivePrompt(app.controller.Controller):
             tb.setMessage(message)
             if not len(lines):
               lines.append('')
-            if tb.selectionMode == app.selectable.kSelectionLine:
-              lines.append('')
             tb.editPasteLines(tuple(lines))
         else:
           command = self.commands.get(cmd, self.unknownCommand)
-          message = command(cmdLine, self.host)[1]
+          message = command(cmdLine, self.view.host)[1]
           tb.setMessage(message)
     except Exception as e:
       app.log.exception(e)
@@ -298,9 +299,9 @@ class InteractivePrompt(app.controller.Controller):
     except:
       return lines, '''Separator punctuation missing, there should be''' \
           ''' three '%s'.''' % (separator,)
-    data = self.host.textBuffer.doLinesToData(lines)
-    output = self.host.textBuffer.findReplaceText(find, replace, flags, data)
-    lines = self.host.textBuffer.doDataToLines(output)
+    data = self.view.host.textBuffer.doLinesToData(lines)
+    output = self.view.host.textBuffer.findReplaceText(find, replace, flags, data)
+    lines = self.view.host.textBuffer.doDataToLines(output)
     return lines, 'Changed %d lines'%(len(lines),)
 
   def upperSelectedLines(self, cmdLine, lines):
@@ -308,5 +309,5 @@ class InteractivePrompt(app.controller.Controller):
     return lines, 'Changed %d lines'%(len(lines),)
 
   def unknownCommand(self, cmdLine, view):
-    self.host.textBuffer.setMessage('Unknown command')
+    self.view.host.textBuffer.setMessage('Unknown command')
     return {}, 'Unknown command %s' % (cmdLine,)

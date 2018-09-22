@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import time
 
 profiles = {}
@@ -42,5 +46,25 @@ def runningDelta(key, start):
 
 def results():
   return "one\ntwo\nthree"
+
+#----------------------------
+# TODO(dschuyler): consider moving this python profile code out of this file.
+import app.log
+import cProfile
+import pstats
+import io
+
+def beginPythonProfile():
+  profile = cProfile.Profile()
+  profile.enable()
+  return profile
+
+def endPythonProfile(profile):
+  profile.disable()
+  output = io.StringIO.StringIO()
+  stats = pstats.Stats(profile, stream=output).sort_stats('cumulative')
+  stats.print_stats()
+  app.log.info(output.getvalue())
+
 
 
