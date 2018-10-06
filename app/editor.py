@@ -194,7 +194,7 @@ class InteractiveFind(app.controller.Controller):
     searchFor = self.view.findLine.textBuffer.lines[0]
     try:
       self.findCmd(searchFor)
-    except re.error, e:
+    except re.error as e:
       self.error = e.message
     self.findCmd = self.view.host.textBuffer.find
 

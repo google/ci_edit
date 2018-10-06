@@ -297,7 +297,7 @@ class ViewWindow:
     self.top += rows
     self.rows -= rows
 
-  def setParent(self, parent, layerIndex=sys.maxint):
+  def setParent(self, parent, layerIndex=sys.maxsize):
     """Setting the parent will cause the the window to refresh (i.e. if self
     was hidden with detach() it will no longer be hidden).
     """
@@ -315,10 +315,12 @@ class ViewWindow:
 
   def writeLine(self, text, color):
     """Simple line writer for static windows."""
-    text = unicode(text)[:self.cols]
-    text = text + ' ' * max(0, self.cols - len(text))
+    if app.config.strict_debug:
+      type(text) is unicode
+    text = text[:self.cols]
+    text = text + u' ' * max(0, self.cols - len(text))
     app.render.frame.addStr(self.top + self.writeLineRow, self.left,
-        text.encode('utf-8'), color)
+        text.encode(u'utf-8'), color)
     self.writeLineRow += 1
 
 
@@ -346,7 +348,6 @@ class ActiveWindow(ViewWindow):
   def setController(self, controller):
     if app.config.strict_debug:
       assert issubclass(self.__class__, Window), self
-      assert type(controller) == types.ClassType, type(controller)
     self.controller = controller(self)
 
   def unfocus(self):
@@ -458,7 +459,7 @@ class LabelWindow(ViewWindow):
     if self.rows <= 0:
       return
     line = self.label[:self.cols]
-    line = unicode("%*s") % (self.cols * self.align, line)
+    line = u"%*s" % (self.cols * self.align, line)
     self.addStr(0, 0, line, self.color)
     ViewWindow.render(self)
 

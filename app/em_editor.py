@@ -266,7 +266,7 @@ class InteractiveFind(EditText):
     searchFor = self.textBuffer.lines[0]
     try:
       self.findCmd(searchFor)
-    except re.error, e:
+    except re.error as e:
       self.error = e.message
     self.findCmd = self.document.textBuffer.find
 

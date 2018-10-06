@@ -144,20 +144,20 @@ class TextBuffer(app.actions.Actions):
           line = self.parser.rowText(startRow + i)
           remaining = min(len(line) - k, remaining)
           length = min(endCol - k, remaining)
-          color = app.color.get(node.grammar.get('colorIndex', defaultColor),
+          color = app.color.get(node.grammar.get(u'colorIndex', defaultColor),
               colorDelta)
           if length <= 0:
-            window.addStr(top + i, left + k - startCol, ' ' * (endCol - k),
+            window.addStr(top + i, left + k - startCol, u' ' * (endCol - k),
                 color)
             break
           window.addStr(top + i, left + k - startCol, line[k:k + length], color)
           subStart = k - preceding
           subEnd = k + remaining
           subLine = line[subStart:subEnd]
-          if spellChecking and node.grammar.get('spelling', True):
+          if spellChecking and node.grammar.get(u'spelling', True):
             # Highlight spelling errors
-            grammarName = node.grammar.get('name', 'unknown')
-            misspellingColor = app.color.get('misspelling', colorDelta)
+            grammarName = node.grammar.get(u'name', 'unknown')
+            misspellingColor = app.color.get(u'misspelling', colorDelta)
             for found in re.finditer(app.regex.kReSubwords, subLine):
               reg = found.regs[0]  # Mispelllled word
               offsetStart = subStart + reg[0]
@@ -177,11 +177,11 @@ class TextBuffer(app.actions.Actions):
       for i in range(rowLimit):
         line = self.parser.rowText(startRow + i)[startCol:endCol]
         window.addStr(top + i, left, line + ' ' * (cols - len(line)),
-            app.color.get('default', colorDelta))
+            app.color.get(u'default', colorDelta))
     self.drawOverlays(window, top, left, rows, cols, colorDelta)
     if 0: # Experiment: draw our own cursor.
       if startRow <= self.penRow < endRow and  startCol <= self.penCol < endCol:
-        window.addStr(self.penRow - startRow, self.penCol - startCol, 'X', 200)
+        window.addStr(self.penRow - startRow, self.penCol - startCol, u'X', 200)
 
   def drawOverlays(self, window, top, left, maxRow, maxCol, colorDelta):
     startRow = self.view.scrollRow + top
@@ -192,7 +192,7 @@ class TextBuffer(app.actions.Actions):
     colors = app.prefs.color
     if 1:
       # Highlight brackets.
-      color = app.color.get('bracket', colorDelta)
+      color = app.color.get(u'bracket', colorDelta)
       for i in range(rowLimit):
         line = self.parser.rowText(startRow + i)[startCol:endCol]
         for k in re.finditer(app.regex.kReBrackets, line):
@@ -210,7 +210,7 @@ class TextBuffer(app.actions.Actions):
             if row == self.penRow:
               line = line[:self.penCol]
             found = [i for i in
-                re.finditer("(\\" + openCh + ")|(\\" + closeCh + ")", line)]
+                re.finditer(u"(\\" + openCh + u")|(\\" + closeCh + u")", line)]
             for match in reversed(found):
               if match.group() == openCh:
                 count += 1
@@ -221,7 +221,7 @@ class TextBuffer(app.actions.Actions):
                 if not (textCol < startCol or textCol >= endCol):
                   window.addStr(top + row - startRow,
                       textCol - self.view.scrollCol, openCh,
-                      app.color.get('matching_bracket', colorDelta))
+                      app.color.get(u'matching_bracket', colorDelta))
                 return
         def searchForward(openCh, closeCh):
           count = 1
@@ -231,7 +231,7 @@ class TextBuffer(app.actions.Actions):
             if row != self.penRow:
               textCol = 0
             line = self.parser.rowText(row)[textCol:]
-            for match in re.finditer("(\\" + openCh + ")|(\\" + closeCh + ")",
+            for match in re.finditer(u"(\\" + openCh + u")|(\\" + closeCh + u")",
                 line):
               if match.group() == openCh:
                 count += 1
@@ -242,15 +242,15 @@ class TextBuffer(app.actions.Actions):
                 if not (textCol < startCol or textCol >= endCol):
                   window.addStr(top + row - startRow,
                       textCol - self.view.scrollCol, closeCh,
-                      app.color.get('matching_bracket', colorDelta))
+                      app.color.get(u'matching_bracket', colorDelta))
                 return
         matcher = {
-          '(': (')', searchForward),
-          '[': (']', searchForward),
-          '{': ('}', searchForward),
-          ')': ('(', searchBack),
-          ']': ('[', searchBack),
-          '}': ('{', searchBack),
+          u'(': (u')', searchForward),
+          u'[': (u']', searchForward),
+          u'{': (u'}', searchForward),
+          u')': (u'(', searchBack),
+          u']': (u'[', searchBack),
+          u'}': (u'{', searchBack),
         }
         look = matcher.get(ch)
         if look:
@@ -259,7 +259,7 @@ class TextBuffer(app.actions.Actions):
               top + self.penRow - startRow,
               self.penCol - self.view.scrollCol,
               self.parser.rowText(self.penRow)[self.penCol],
-              app.color.get('matching_bracket', colorDelta))
+              app.color.get(u'matching_bracket', colorDelta))
     if 1:
       # Highlight numbers.
       for i in range(rowLimit):
@@ -267,13 +267,13 @@ class TextBuffer(app.actions.Actions):
         for k in re.finditer(app.regex.kReNumbers, line):
           for f in k.regs:
             window.addStr(top + i, left + f[0], line[f[0]:f[1]],
-                app.color.get('number', colorDelta))
+                app.color.get(u'number', colorDelta))
     if self.highlightCursorLine:
       # Highlight the whole line at the cursor location.
       if startRow <= self.penRow < startRow + rowLimit:
         line = self.parser.rowText(self.penRow)[startCol:endCol]
         window.addStr(top + self.penRow - startRow, left, line,
-            app.color.get('trailing_space', colorDelta))
+            app.color.get(u'trailing_space', colorDelta))
     if self.highlightTrailingWhitespace:
       # Highlight space ending lines.
       for i in range(rowLimit):
@@ -284,7 +284,7 @@ class TextBuffer(app.actions.Actions):
         for k in app.regex.kReEndSpaces.finditer(line):
           for f in k.regs:
             window.addStr(top + i, left + f[0], line[f[0]:f[1]],
-                app.color.get('trailing_space', colorDelta))
+                app.color.get(u'trailing_space', colorDelta))
     if 0:
       lengthLimit = self.lineLimitIndicator
       if endCol >= lengthLimit:

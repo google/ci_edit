@@ -55,7 +55,7 @@ class Parser:
   def __init__(self):
     self.data = ""
     self.emptyNode = ParserNode({}, None, None)
-    self.endNode = ({}, sys.maxint, sys.maxint)
+    self.endNode = ({}, sys.maxsize, sys.maxsize)
     self.fullyParsedToLine = -1
     # A row on screen will consist of one or more ParserNodes. When a ParserNode
     # is returned from the parser it will be an instance of ParserNode, but
@@ -109,21 +109,21 @@ class Parser:
         (node, preceding, remaining). |proceeding| and |remaining| are relative
         to the |col| parameter.
     """
-    finalResult = (self.emptyNode, col, sys.maxint)
+    finalResult = (self.emptyNode, col, sys.maxsize)
     if row >= len(self.rows):
       return finalResult
     rowIndex = self.rows[row]
     if rowIndex + index >= len(self.parserNodes):
       return finalResult
     offset = self.parserNodes[rowIndex][kBegin] + col
-    nextOffset = sys.maxint
+    nextOffset = sys.maxsize
     if rowIndex + index + 1 < len(self.parserNodes):
       nextOffset = self.parserNodes[rowIndex + index + 1][kBegin]
     remaining = nextOffset - offset
     if remaining < 0:
       return finalResult
     node = self.parserNodes[rowIndex + index]
-    return apply(ParserNode, node), offset - node[kBegin], remaining
+    return ParserNode(*node), offset - node[kBegin], remaining
 
   def parse(self, data, grammar, beginRow, endRow):
     """
@@ -185,7 +185,7 @@ class Parser:
       if len(self.data) and self.data[end - 1] == '\n':
         end -= 1
     else:
-      end = sys.maxint
+      end = sys.maxsize
     return self.data[begin:end]
 
   def __buildGrammarList(self):
@@ -311,7 +311,7 @@ class Parser:
       if i + 1 < len(self.rows):
         end = self.rows[i + 1]
       else:
-        end = sys.maxint
+        end = sys.maxsize
       out('row', i, '(line', str(i + 1) + ') index', start, 'to', end)
       for node in self.parserNodes[start:end]:
         if node is None:

@@ -138,7 +138,8 @@ for k,v in prefs['grammar'].items():
   keywordIndexLimit = errorIndexLimit + len(v.get('keywords', []))
   typeIndexLimit = keywordIndexLimit + len(v.get('types', []))
   specialIndexLimit = typeIndexLimit + len(v.get('special', []))
-  v['indexLimits'] = (newGrammarIndexLimit, errorIndexLimit, keywordIndexLimit, typeIndexLimit, specialIndexLimit)
+  v['indexLimits'] = (newGrammarIndexLimit, errorIndexLimit, keywordIndexLimit,
+      typeIndexLimit, specialIndexLimit)
 
 # Reset the re.cache for user regexes.
 re.purge()

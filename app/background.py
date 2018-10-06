@@ -76,7 +76,7 @@ def background(inputQueue, outputQueue):
         #app.profile.endPythonProfile(profile)
         if not inputQueue.empty():
           continue
-      except Queue.Empty:
+      except queue.Empty:
         pass
       block = program.longTimeSlice()
       if block:

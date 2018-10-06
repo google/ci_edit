@@ -16,6 +16,12 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+try:
+  unicode('')
+except:
+  def unicode(a):
+    return str(a)
+
 import cProfile
 import pstats
 try:
@@ -46,7 +52,7 @@ def userMessage(*args):
   if not userConsoleMessage:
     userConsoleMessage = ''
   args = [str(i) for i in args]
-  userConsoleMessage += unicode(' '.join(args) + '\n')
+  userConsoleMessage += u' '.join(args) + u'\n'
 
 
 class CiProgram:
@@ -148,6 +154,7 @@ class CiProgram:
           if self.exiting:
             return
           ch = cursesWindow.getch()
+          # assert type(ch) is int, type(ch)
           if ch == curses.ascii.ESC:
             # Some keys are sent from the terminal as a sequence of bytes
             # beginning with an Escape character. To help reason about these

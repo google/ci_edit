@@ -101,18 +101,18 @@ class DebugUndoWindow(app.window.ActiveWindow):
     # Display some of the redo chain.
     redoColorA = app.color.get(100)
     self.writeLine(
-        "procTemp %d temp %r"
+        u"procTemp %d temp %r"
         %(textBuffer.processTempChange, textBuffer.tempChange,),
         redoColorA)
     self.writeLine(
-        "redoIndex %3d savedAt %3d depth %3d"
+        u"redoIndex %3d savedAt %3d depth %3d"
         %(textBuffer.redoIndex, textBuffer.savedAtRedoIndex,
           len(textBuffer.redoChain)),
         redoColorA)
     redoColorB = app.color.get(101)
     split = 8
     for i in range(textBuffer.redoIndex - split, textBuffer.redoIndex):
-      text = i >= 0 and textBuffer.redoChain[i] or ''
+      text = i >= 0 and repr(textBuffer.redoChain[i]) or u''
       self.writeLine(text, redoColorB)
     redoColorC = app.color.get(1)
     for i in range(textBuffer.redoIndex, textBuffer.redoIndex + split - 1):

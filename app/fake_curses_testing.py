@@ -66,12 +66,12 @@ class FakeCursesTestCase(unittest.TestCase):
   def displayCheck(self, *args):
     assert type(args[0]) is int
     caller = inspect.stack()[1]
-    callerText = "\n  %s:%s:%s(): " % (
+    callerText = u"\n  %s:%s:%s(): " % (
         os.path.split(caller[1])[1], caller[2], caller[3])
     def displayChecker(display, cmdIndex):
       result = display.checkText(*args)
       if result is not None:
-        output = callerText + ' at index ' + str(cmdIndex) + result
+        output = callerText + u' at index ' + str(cmdIndex) + result
         if self.cursesScreen.movie:
           print(output)
         else:
@@ -90,7 +90,7 @@ class FakeCursesTestCase(unittest.TestCase):
     def displayCheckerNot(display, cmdIndex):
       result = display.checkText(*args)
       if result is None:
-        output = callerText + ' at index ' + str(cmdIndex)
+        output = callerText + u' at index ' + str(cmdIndex)
         if self.cursesScreen.movie:
           print(output)
         else:
@@ -100,12 +100,12 @@ class FakeCursesTestCase(unittest.TestCase):
 
   def displayCheckStyle(self, *args):
     caller = inspect.stack()[1]
-    callerText = "\n  %s:%s:%s(): " % (
+    callerText = u"\n  %s:%s:%s(): " % (
         os.path.split(caller[1])[1], caller[2], caller[3])
     def displayStyleChecker(display, cmdIndex):
       result = display.checkStyle(*args)
       if result is not None:
-        output = callerText + ' at index ' + str(cmdIndex) + result
+        output = callerText + u' at index ' + str(cmdIndex) + result
         if self.cursesScreen.movie:
           print(output)
         else:
@@ -122,7 +122,7 @@ class FakeCursesTestCase(unittest.TestCase):
     assert type(expectedRow) is int
     assert type(expectedCol) is int
     caller = inspect.stack()[1]
-    callerText = "in %s:%s:%s(): " % (
+    callerText = u"in %s:%s:%s(): " % (
         os.path.split(caller[1])[1], caller[2], caller[3])
     def cursorChecker(display, cmdIndex):
       penRow, penCol = self.cursesScreen.getyx()
@@ -136,7 +136,7 @@ class FakeCursesTestCase(unittest.TestCase):
     assert type(rows) is int
     assert type(cols) is int
     caller = inspect.stack()[1]
-    callerText = "in %s:%s:%s(): " % (
+    callerText = u"in %s:%s:%s(): " % (
         os.path.split(caller[1])[1], caller[2], caller[3])
     def setScreenSize(display, cmdIndex):
       self.cursesScreen.fakeDisplay.setScreenSize(rows, cols)
@@ -146,7 +146,7 @@ class FakeCursesTestCase(unittest.TestCase):
   def setClipboard(self, text):
     assert type(text) is str
     caller = inspect.stack()[1]
-    callerText = "in %s:%s:%s(): " % (
+    callerText = u"in %s:%s:%s(): " % (
         os.path.split(caller[1])[1], caller[2], caller[3])
     def copyToClipboard(display, cmdIndex):
       self.assertTrue(clipboard.copy)  # Check that copy exists.
@@ -159,9 +159,9 @@ class FakeCursesTestCase(unittest.TestCase):
     self.cursesScreen.fakeInput.isVerbose = enabled
 
   def writeText(self, text):
-    assert type(text) is str
+    assert type(text) is unicode, type(text)
     caller = inspect.stack()[1]
-    callerText = "in %s:%s:%s(): " % (
+    callerText = u"in %s:%s:%s(): " % (
         os.path.split(caller[1])[1], caller[2], caller[3])
     def copyToClipboard(display, cmdIndex):
       self.assertTrue(clipboard.copy)  # Check that copy exists.
@@ -194,9 +194,9 @@ class FakeCursesTestCase(unittest.TestCase):
     # Handy for debugging.
     if 0:
       caller = inspect.stack()[1]
-      callerText = "  %s:%s:%s(): " % (
+      callerText = u"  %s:%s:%s(): " % (
           os.path.split(caller[1])[1], caller[2], caller[3])
-      print('\n-------- finished', callerText)
+      print(u'\n-------- finished', callerText)
 
   def runWithTestFile(self, kTestFile, fakeInputs):
     sys.argv = [kTestFile]
@@ -206,7 +206,7 @@ class FakeCursesTestCase(unittest.TestCase):
   def selectionCheck(self, expectedPenRow, expectedPenCol, expectedMarkerRow,
       expectedMarkerCol, expectedMode):
     caller = inspect.stack()[1]
-    callerText = "in %s:%s:%s(): " % (
+    callerText = u"in %s:%s:%s(): " % (
         os.path.split(caller[1])[1], caller[2], caller[3])
     def checker(display, cmdIndex):
       selection = self.prg.getSelection()
@@ -216,6 +216,6 @@ class FakeCursesTestCase(unittest.TestCase):
 
   def tearDown(self):
     # Disable mouse tracking in xterm.
-    sys.stdout.write('\033[?1002l\n')
+    sys.stdout.write(b'\033[?1002l\n')
     # Disable Bracketed Paste Mode.
-    sys.stdout.write('\033[?2004l\n')
+    sys.stdout.write(b'\033[?2004l\n')

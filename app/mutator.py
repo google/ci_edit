@@ -307,7 +307,7 @@ class Mutator(app.selectable.Selectable):
       self.lines.insert(self.penRow + 1, line[self.penCol:])
       self.lines[self.penRow] = line[:self.penCol]
       for i in range(max(change[1] - 1, 0)):
-        self.lines.insert(self.penRow + 1, unicode(""))
+        self.lines.insert(self.penRow + 1, u"")
       if self.upperChangedRow > self.penRow:
         self.upperChangedRow = self.penRow
       self.__redoMove(change[2])
