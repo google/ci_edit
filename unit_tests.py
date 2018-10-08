@@ -79,19 +79,22 @@ def runTests(tests, stopOnFailure=False):
       return -1
   return 0
 
+def usage():
+  print('Help:')
+  print('./unit_tests.py [--log] [<name>]\n')
+  print('  --log     Print output from app.log.* calls')
+  print('  <name>    Run the named set of tests (only)')
+  print('The <name> argument is any of:')
+  testNames = tests.keys()
+  testNames.sort()
+  for i in testNames:
+    print(' ', i)
+
 def parseArgList(argList):
   testList = tests.values()
   try:
     argList.remove('--help')
-    print('Help:')
-    print('./unit_tests.py [--log] [<name>]\n')
-    print('  --log     Print output from app.log.* calls')
-    print('  <name>    Run the named set of tests (only)')
-    print('The <name> argument is any of:')
-    testNames = tests.keys()
-    testNames.sort()
-    for i in testNames:
-      print(' ', i)
+    usage()
     sys.exit(0)
   except ValueError:
     pass
@@ -102,6 +105,9 @@ def parseArgList(argList):
   except ValueError:
     pass
   if len(argList) > 1:
+    if argList[1] not in tests:
+      usage()
+      sys.exit(-1)
     testList = [tests[argList[1]]]
   if useAppLog:
     app.log.wrapper(lambda: runTests(testList, True))
