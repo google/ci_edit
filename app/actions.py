@@ -1185,9 +1185,22 @@ class Actions(app.mutator.Mutator):
       searchFor = r"\b%s\b" % searchFor
     #app.log.info(searchFor, flags)
     # The saved re is also used for highlighting.
-    self.findRe = re.compile(u'()'+searchFor, flags)
-    self.findBackRe = re.compile(u'(.*)'+searchFor, flags)
+    self.findRe = re.compile(u'(?:)' + searchFor, flags)
+    self.findBackRe = re.compile(u'(?:.*)' + searchFor, flags)
     self.findCurrentPattern(direction)
+
+  def replaceFound(self, replaceWith):
+    """direction is -1 for findPrior, 0 for at pen, 1 for findNext."""
+    if app.config.strict_debug:
+      assert type(replaceWith) is unicode
+    if not self.findRe:
+      return
+    if app.prefs.editor.get(u'findUseRegex'):
+      toReplace = "\n".join(self.getSelectedText())
+      toReplace = self.findRe.sub(replaceWith, toReplace)
+      self.editPasteData(toReplace)
+    else:
+      self.editPasteData(replaceWith)
 
   def findPlainText(self, text):
     searchFor = re.escape(text)
@@ -1320,8 +1333,8 @@ class Actions(app.mutator.Mutator):
           found = localRe.search(text)
           rowFound = self.penRow
     if found:
-      #app.log.info(u'c found on line', rowFound, repr(found))
-      start = found.regs[1][1]
+      #app.log.info(u'c found on line', rowFound, repr(found.regs))
+      start = found.regs[0][0]
       end = found.regs[0][1]
       self.selectText(rowFound, offset + start, end - start,
                       app.selectable.kSelectionCharacter)

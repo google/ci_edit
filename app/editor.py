@@ -200,12 +200,12 @@ class InteractiveFind(app.controller.Controller):
 
   def replaceAndNext(self):
     replaceWith = self.view.replaceLine.textBuffer.lines[0]
-    self.view.host.textBuffer.editPasteData(replaceWith)
+    self.view.host.textBuffer.replaceFound(replaceWith)
     self.findCmd = self.view.host.textBuffer.findNext
 
   def replaceAndPrior(self):
     replaceWith = self.view.replaceLine.textBuffer.lines[0]
-    self.view.host.textBuffer.editPasteData(replaceWith)
+    self.view.host.textBuffer.replaceFound(replaceWith)
     self.findCmd = self.view.host.textBuffer.findPrior
 
 

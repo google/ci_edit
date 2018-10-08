@@ -47,6 +47,19 @@ class FindWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
         #KEY_BTAB, KEY_BTAB, self.displayCheck(-1, 0, [u"Find: "]),
         CTRL_Q])
 
+  def test_find_replace_groups(self):
+    #self.setMovieMode(True)
+    self.runWithFakeInputs([
+        self.writeText(u'aDog\n'),
+        self.displayCheck(2, 7, [u"aDog  "]),
+        CTRL_F, self.writeText(u'a(.*)'),
+        self.displayCheck(-3, 0, [u"Find: a(.*)  "]),
+        CTRL_I, self.writeText(u'x\\1\\1'),
+        self.displayCheck(-2, 0, [u"Replace: x\\1\\1  "]),
+        CTRL_G,
+        self.displayCheck(2, 7, [u"xDogDog  "]),
+        CTRL_Q, u"n"])
+
   def test_find_esc_from_find(self):
     self.runWithFakeInputs([
         # Check initial state.
