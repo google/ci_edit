@@ -48,6 +48,7 @@ accessors
 acos
 adate
 addr
+alignof
 alloc
 apis
 arg
@@ -70,6 +71,7 @@ bitmask
 blitter
 bool
 booleans
+bools
 buf
 bugzilla
 bzip
@@ -78,8 +80,10 @@ canonicalize
 canonicalized
 cfg
 cgi
+chan
 changelist
 changelog
+chans
 checkbox
 chr
 cli
@@ -88,6 +92,7 @@ cmd
 cntl
 codebase
 codec
+codecs
 codeview
 conf
 configs
@@ -115,6 +120,8 @@ deserializer
 deserializing
 dest
 dhcp
+dialer
+dialers
 directionality
 dirname
 dirs
@@ -132,6 +139,7 @@ emacs
 enablement
 encodings
 endian
+endianness
 endif
 enums
 env
@@ -184,6 +192,7 @@ htm
 https
 hxx
 idr
+ifconfig
 iff
 ifndef
 ij
@@ -211,6 +220,7 @@ json
 keyframe
 keyframed
 keyframes
+lambdas
 le
 len
 lf
@@ -243,6 +253,8 @@ namespaces
 ndebug
 ne
 neq
+nullability
+nullable
 nulled
 nulling
 nullptr
@@ -259,6 +271,7 @@ overscroll
 patcher
 pem
 pid
+pkgs
 png
 popups
 pos
@@ -302,6 +315,9 @@ reparented
 reparenting
 reparents
 repo
+repos
+req
+reqs
 rhs
 ro
 rpc
@@ -312,6 +328,7 @@ runtime
 rv
 rvalue
 rvalues
+scp
 scrollback
 scrollbar
 serializable
@@ -321,6 +338,7 @@ sig
 sigbus
 signin
 sigtrap
+sizeof
 skia
 solaris
 sql
@@ -335,6 +353,7 @@ stl
 str
 stringified
 struct
+structs
 stty
 stylesheet
 sudo
@@ -378,6 +397,8 @@ unobserve
 unparsable
 unserializable
 utf
+variadic
+versioning
 vimrc
 vkey
 vpn

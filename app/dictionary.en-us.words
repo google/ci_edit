@@ -15,7 +15,6 @@
 # This word list is a fallback for times when an OS dictionary is not available.
 # It's not a full list of English words (not by a long way).
 # Additional abbreviations, acronyms, and names are in dictionary.en-misc.words.
-stateful
 a
 aah
 aardvark
@@ -148,6 +147,7 @@ accounted
 accounting
 accounts
 accreditation
+accrete
 accrue
 accrued
 accruing
@@ -599,6 +599,7 @@ ambiguities
 ambiguity
 ambiguous
 ambit
+ambition
 ambitious
 ambler
 ambrosia
@@ -619,6 +620,7 @@ among
 amortize
 amortized
 amount
+amounting
 amounts
 amp
 ampersand
@@ -1001,6 +1003,7 @@ assets
 assign
 assignable
 assigned
+assignee
 assigner
 assigning
 assignment
@@ -1094,6 +1097,7 @@ attenuated
 attenuation
 attest
 attestation
+attestations
 attic
 attitude
 attn
@@ -1730,6 +1734,7 @@ blouse
 blow
 blowing
 blown
+blows
 blowup
 blue
 blueberries
@@ -2453,6 +2458,7 @@ centralize
 centralized
 centralizes
 centralizing
+centric
 cents
 century
 cert
@@ -3314,6 +3320,7 @@ conflicting
 conflicts
 conform
 conformance
+conformant
 conformer
 conforming
 conforms
@@ -5731,6 +5738,7 @@ eon
 ephemeral
 ephemerally
 epic
+epilog
 epilogue
 epiphany
 episode
@@ -6711,6 +6719,7 @@ format
 formation
 formats
 formatted
+formatters
 formatting
 formed
 former
@@ -8142,6 +8151,7 @@ implementations
 implemented
 implementer
 implementing
+implementor
 implementors
 implements
 implicated
@@ -8580,6 +8590,7 @@ instantiate
 instantiated
 instantiates
 instantiating
+instantiation
 instantiations
 instantly
 instants
@@ -8730,6 +8741,9 @@ internet
 interns
 internship
 interoperability
+interoperate
+interoperated
+interoperation
 interplay
 interpolate
 interpolated
@@ -10674,6 +10688,7 @@ multilayer
 multilayered
 multilingual
 multimedia
+multipart
 multiple
 multiples
 multiplex
@@ -11368,6 +11383,7 @@ optimum
 opting
 option
 optional
+optionality
 optionally
 options
 opts
@@ -12482,6 +12498,7 @@ posteriors
 posterity
 posters
 postfix
+postfixed
 posting
 postings
 postlude
@@ -14044,6 +14061,7 @@ replication
 replicator
 replied
 replies
+replugging
 reply
 replying
 repopulate
@@ -16099,6 +16117,7 @@ stashing
 stat
 state
 stated
+stateful
 stateless
 statement
 statements
@@ -17453,6 +17472,7 @@ tranquility
 trans
 transact
 transaction
+transactional
 transactions
 transatlantic
 transceiver

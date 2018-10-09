@@ -1,4 +1,4 @@
-# Copyright 2017 Google Inc.
+# Copyright 2018 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,23 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This is a list of non-English words that are in Bash/shell scripts.
-autoconf
-awk
-cd
-chmod
-chown
-cp
-env
-grep
-ls
+# This is a list of non-English words that are in the Go programming language
+# libraries.
+strconv
+readdirnames
+strconv
+rdwr
+getenv
+cond
+fprintln
+bufio
+fatalf
 mkdir
-rf
-rm
-rmdir
-rsync
-sbin
-sed
-symlink
-uname
-xserver
+tabwriter
+ioutil
+fmt
+filepath
+println
+fprintln
+sprintf

@@ -32,13 +32,18 @@ brt
 bs
 bsd
 btw
+cas
 cb
 cd
+ci
 cisc
 cjk
+cla
 cn
 cpu
 cpus
+cq
+csv
 ctl
 cua
 da
@@ -50,12 +55,15 @@ dlls
 dmm
 dmms
 dns
+dq
 drm
+ebnf
 et
 eula
 eulas
 faq
 fc
+fg
 fil
 fpu
 fpus
@@ -90,6 +98,7 @@ ico
 icos
 icu
 idc
+ide
 ie
 ieee
 ietf
@@ -102,9 +111,11 @@ ipcs
 ipp
 ipps
 ips
+ir
 iso
 ja
 jdk
+jit
 jni
 jvm
 kb
@@ -165,6 +176,7 @@ os
 oses
 oss
 osx
+ota
 otoh
 pb
 pbs
@@ -192,6 +204,7 @@ rtc
 rtl
 ru
 saml
+sde
 sdk
 sdks
 serp
@@ -199,6 +212,7 @@ sgml
 sgmls
 simd
 sk
+sku
 sl
 smb
 sms
@@ -214,6 +228,7 @@ sw
 swf
 tb
 tbd
+tc
 tcp
 te
 tif
@@ -239,7 +254,9 @@ usb
 usbs
 utc
 utcs
+uuid
 vm
+vmo
 vr
 wep
 wip
@@ -255,3 +272,4 @@ xxl
 xxxl
 yaml
 zh
+zx

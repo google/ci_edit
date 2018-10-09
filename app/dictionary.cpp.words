@@ -12,25 +12,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# This is a list of non-English words that are in the C++ programming language
+# libraries.
 alloca
 atexit
 calloc
 cassert
 ceil
+cin
 cmath
 cout
 cplusplus
+cstdio
 cstream
 cstring
+demangle
 dirent
+ebadf
 endl
+enomem
+enotdir
 extern
+fileno
+fprintf
 fstream
+getline
+gflags
+grpc
+ifstream
 intptr
 intrinsics
 iomanip
 iostream
+isatty
+istream
 istreambuf
+istringstream
 lu
 malloc
 memcmp
@@ -43,21 +60,28 @@ ostream
 ostringstream
 printf
 rbegin
+rdbuf
 readdir
 refcounted
 setprecision
 setw
 snprintf
+ss
+ssize
+sstream
 std
+stdbool
 stddef
 stdint
 stdlib
 strcmp
 strerror
 stricmp
+stringstream
 strlen
 toupper
 typename
 uint
+unistd
 va
 wchar
