@@ -835,7 +835,8 @@ class Actions(app.mutator.Mutator):
     # .replace() calls to minimize the number of calls to parse().
     data = data.replace(u'\r\n', u'\n')
     data = data.replace(u'\r', u'\n')
-    data = data.expandtabs()
+    tabSize = app.prefs.editor.get(u"tabSize", 8)
+    data = data.expandtabs(tabSize)
     def parse(sre):
       return u"\x01%02x" % ord(sre.groups()[0])
     #data = re.sub(u'([\0-\x09\x0b-\x1f\x7f-\xff])', parse, data)

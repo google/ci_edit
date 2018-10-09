@@ -229,6 +229,7 @@ prefs = {
     'showLineNumbers': True,
     'showStatusLine': True,
     'showTopInfo': True,
+    'tabSize': 8,
     'useBgThread': True,
   },
   'fileType': {
