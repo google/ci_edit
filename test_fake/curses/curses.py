@@ -106,9 +106,10 @@ class FakeInput:
     return ERR
 
 
-def testLog(*msg):
-  # Remove return to get function call trace.
-  return
+def testLog(log_level, *msg):
+  # Adjust constant to increase verbosity.
+  if log_level >= 0:
+    return
   functionLine = inspect.stack()[1][2]
   function = inspect.stack()[1][3]
   frame = inspect.stack()[2]
@@ -245,7 +246,7 @@ class FakeCursesWindow:
   def addstr(self, *args):
     global fakeDisplay
     try:
-      testLog(*args)
+      testLog(3, *args)
       cursorRow = args[0]
       cursorCol = args[1]
       text = args[2].decode("utf-8")
@@ -262,7 +263,7 @@ class FakeCursesWindow:
       sys.exit(1)
 
   def getch(self):
-    testLog()
+    testLog(3)
     if 1:
       global getchCallback
       if getchCallback:
@@ -274,21 +275,21 @@ class FakeCursesWindow:
     return val
 
   def getyx(self):
-    testLog()
+    testLog(1)
     return (self.cursorRow, self.cursorCol)
 
   def getmaxyx(self):
-    testLog()
+    testLog(1)
     return (fakeDisplay.rows, fakeDisplay.cols)
 
   def keypad(self, *args):
-    testLog(*args)
+    testLog(1, *args)
 
   def leaveok(self, *args):
-    testLog(*args)
+    testLog(1, *args)
 
   def move(self, a, b):
-    testLog(a, b)
+    testLog(1, a, b)
     self.cursorRow = a
     self.cursorCol = b
 
@@ -296,22 +297,22 @@ class FakeCursesWindow:
     pass
 
   def refresh(self):
-    testLog()
+    testLog(1)
 
   def resize(self, a, b):
-    testLog(a, b)
+    testLog(1, a, b)
 
   def scrollok(self, *args):
-    testLog(*args)
+    testLog(1, *args)
 
   def timeout(self, *args):
-    testLog(*args)
+    testLog(1, *args)
 
 
 class StandardScreen(FakeCursesWindow):
   def __init__(self):
     global fakeDisplay, fakeInput
-    testLog()
+    testLog(1)
     FakeCursesWindow.__init__(self, 0, 0)
     self.cmdCount = -1
     fakeDisplay = FakeDisplay()
@@ -324,11 +325,11 @@ class StandardScreen(FakeCursesWindow):
     self.fakeInput.setInputs(cmdList)
 
   def getmaxyx(self):
-    testLog()
+    testLog(1)
     return (self.fakeDisplay.rows, self.fakeDisplay.cols)
 
   def refresh(self, *args):
-    testLog(*args)
+    testLog(1, *args)
     if self.movie:
       fakeDisplay.show()
 
@@ -342,84 +343,84 @@ class StandardScreen(FakeCursesWindow):
 
 
 def baudrate(*args):
-  testLog(*args)
+  testLog(1, *args)
   return -1
 
 def can_change_color(*args):
-  testLog(*args)
+  testLog(1, *args)
   return 1
 
 def color_content(*args):
-  testLog(*args)
+  testLog(1, *args)
 
 def color_pair(*args):
-  testLog(*args)
+  testLog(1, *args)
   return fakeDisplay.getColorPair(*args)
 
 def curs_set(*args):
-  testLog(*args)
+  testLog(1, *args)
 
 def error(*args):
-  testLog(*args)
+  testLog(1, *args)
 
 def errorpass(*args):
-  testLog(*args)
+  testLog(1, *args)
 
 def getch(*args):
-  testLog(*args)
+  testLog(1, *args)
   return ERR
 
 def addMouseEvent(mouseEvent):
-  testLog()
+  testLog(1)
   return mouseEvents.append(mouseEvent)
 
 def getmouse(*args):
-  testLog(*args)
+  testLog(1, *args)
   return mouseEvents.pop()
 
 def has_colors(*args):
-  testLog(*args)
+  testLog(1, *args)
 
 def init_color(*args):
-  testLog(*args)
+  testLog(1, *args)
 
 def init_pair(*args):
-  testLog(*args)
+  testLog(3, *args)
 
 def keyname(*args):
-  testLog(*args)
+  testLog(1, *args)
 
 def meta(*args):
-  testLog(*args)
+  testLog(1, *args)
 
 def mouseinterval(*args):
-  testLog(*args)
+  testLog(1, *args)
 
 def mousemask(*args):
-  testLog(*args)
+  testLog(1, *args)
 
 def newwin(*args):
-  testLog(*args)
+  testLog(1, *args)
   return FakeCursesWindow(args[0], args[1])
 
 def raw(*args):
-  testLog(*args)
+  testLog(1, *args)
 
 def resizeterm(*args):
-  testLog(*args)
+  testLog(1, *args)
 
 def start_color(*args):
-  testLog(*args)
+  testLog(1, *args)
 
 def ungetch(*args):
-  testLog(*args)
+  testLog(1, *args)
 
 def use_default_colors(*args):
-  testLog(*args)
+  testLog(1, *args)
 
 def get_pair(*args):
   fakeDisplay.getColorPair(*args)
-  testLog(*args)
+  testLog(1, *args)
 
 def wrapper(fun, *args, **kw):
   standardScreen = StandardScreen()

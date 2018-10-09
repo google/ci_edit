@@ -47,10 +47,33 @@ class FindWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
         #KEY_BTAB, KEY_BTAB, self.displayCheck(-1, 0, [u"Find: "]),
         CTRL_Q])
 
+  def test_find_forward_and_reverse(self):
+    self.runWithFakeInputs([
+        self.writeText(u"ten one two three\nfour one one five\n"
+            u" six seven one\none\n"),
+        self.displayCheck(2, 7, [u"ten one two three  "]),
+        self.displayCheck(-1, 0, [u"      "]),
+        CTRL_F, self.displayCheck(-3, 0, [u"Find: "]),
+        self.writeText(u'one'), self.selectionDocumentCheck(0, 4, 0, 7, 3),
+        CTRL_F, self.selectionDocumentCheck(1, 5, 1, 8, 3),
+        CTRL_F, self.selectionDocumentCheck(1, 9, 1, 12, 3),
+        CTRL_R, self.selectionDocumentCheck(1, 5, 1, 8, 3),
+        CTRL_R, self.selectionDocumentCheck(0, 4, 0, 7, 3),
+        CTRL_R, self.selectionDocumentCheck(3, 0, 3, 3, 3),
+        CTRL_R, self.selectionDocumentCheck(2, 11, 2, 14, 3),
+        CTRL_R, self.selectionDocumentCheck(1, 9, 1, 12, 3),
+        CTRL_R, self.selectionDocumentCheck(1, 5, 1, 8, 3),
+        CTRL_F, self.selectionDocumentCheck(1, 9, 1, 12, 3),
+        CTRL_F, self.selectionDocumentCheck(2, 11, 2, 14, 3),
+        CTRL_F, self.selectionDocumentCheck(3, 0, 3, 3, 3),
+        CTRL_F, self.selectionDocumentCheck(0, 4, 0, 7, 3),
+        CTRL_F, self.selectionDocumentCheck(1, 5, 1, 8, 3),
+        CTRL_Q, u"n"])
+
   def test_find_replace_groups(self):
     #self.setMovieMode(True)
     self.runWithFakeInputs([
-        self.writeText(u'aDog\n'),
+        self.writeText(u"aDog\n"),
         self.displayCheck(2, 7, [u"aDog  "]),
         CTRL_F, self.writeText(u'a(.*)'),
         self.displayCheck(-3, 0, [u"Find: a(.*)  "]),
@@ -58,6 +81,38 @@ class FindWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
         self.displayCheck(-2, 0, [u"Replace: x\\1\\1  "]),
         CTRL_G,
         self.displayCheck(2, 7, [u"xDogDog  "]),
+        CTRL_Q, u"n"])
+
+  def test_find_replace_groups(self):
+    #self.setMovieMode(True)
+    self.runWithFakeInputs([
+        self.writeText(u'a\nb\na\nb\na\nb\n'),
+        self.displayCheck(2, 7, [u"a ", u"b ", u"a ", u"b ", u"a ", u"b "]),
+
+        # Enter Find and make two document replacements.
+        CTRL_F, self.writeText(u'(a)'),
+        self.displayCheck(-3, 0, [u"Find: (a)  "]),
+        CTRL_I, self.writeText(u'\\1!\\1'),
+        self.displayCheck(-2, 0, [u"Replace: \\1!\\1  "]),
+        CTRL_G,
+        self.displayCheck(2, 7, [u"a!a ", u"b ", u"a ", u"b ", u"a ", u"b "]),
+        CTRL_G,
+        self.displayCheck(2, 7, [u"a!a ", u"b ", u"a!a ", u"b ", u"a ", u"b "]),
+
+        # Leave Find and Undo the document changes.
+        KEY_ESCAPE, curses.ERR, CTRL_Z,
+        self.displayCheck(2, 7, [u"a ", u"b ", u"a ", u"b ", u"a ", u"b "]),
+
+        # Go to bottom of document.
+        CTRL_G, u"b", KEY_ESCAPE, curses.ERR,
+
+        # Enter Find and make a reverse search replacement.
+        CTRL_F, CTRL_R, CTRL_I, CTRL_R,
+        self.displayCheck(2, 7, [u"a ", u"b ", u"a ", u"b ", u"a!a ", u"b "]),
+        # TODO(dschuyler): CTRL_R,
+        # TODO(dschuyler): self.displayCheck(2, 7, [u"a ", u"b ", u"a!a ", u"b ", u"a!a ", u"b "]),
+
+        # Quit without saving.
         CTRL_Q, u"n"])
 
   def test_find_esc_from_find(self):

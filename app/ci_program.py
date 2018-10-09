@@ -435,6 +435,11 @@ class CiProgram:
       recurse(self.zOrder, '  ')
       app.log.info('top window', self.topWindow())
 
+    def getDocumentSelection(self):
+      """This is primarily for testing."""
+      tb = self.programWindow.inputWindow.textBuffer
+      return (tb.penRow, tb.penCol, tb.markerRow, tb.markerCol, tb.selectionMode)
+
     def getSelection(self):
       """This is primarily for testing."""
       tb = self.programWindow.focusedWindow.textBuffer

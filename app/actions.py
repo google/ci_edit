@@ -1185,8 +1185,9 @@ class Actions(app.mutator.Mutator):
       searchFor = r"\b%s\b" % searchFor
     #app.log.info(searchFor, flags)
     # The saved re is also used for highlighting.
-    self.findRe = re.compile(u'(?:)' + searchFor, flags)
-    self.findBackRe = re.compile(u'(?:.*)' + searchFor, flags)
+    self.findRe = re.compile(searchFor, flags)
+    self.findBackRe = re.compile(u"%s(?!.*%s.*)" % (searchFor, searchFor),
+        flags)
     self.findCurrentPattern(direction)
 
   def replaceFound(self, replaceWith):
@@ -1234,7 +1235,15 @@ class Actions(app.mutator.Mutator):
     return flags
 
   def findReplace(self, cmd):
-    """substitute/a/b/flags"""
+    """Replace (substitute) text using regex in entire document.
+
+    In a command such as `substitute/a/b/flags`, the `substitute` should already
+    be removed. The remaining |cmd| of `/a/b/flags` implies a separator of '/'
+    since that is the first character. The values between separators are:
+      - 'a': search string (regex)
+      - 'b': replacement string (may contain back references into the regex)
+      - 'flags': regex flags string to be parsed by |findReplaceFlags()|.
+    """
     if not len(cmd):
       return
     separator = cmd[0]

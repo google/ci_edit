@@ -203,6 +203,17 @@ class FakeCursesTestCase(unittest.TestCase):
     self.assertFalse(os.path.isfile(kTestFile))
     self.runWithFakeInputs(fakeInputs)
 
+  def selectionDocumentCheck(self, expectedPenRow, expectedPenCol, expectedMarkerRow,
+      expectedMarkerCol, expectedMode):
+    caller = inspect.stack()[1]
+    callerText = u"in %s:%s:%s(): " % (
+        os.path.split(caller[1])[1], caller[2], caller[3])
+    def checker(display, cmdIndex):
+      selection = self.prg.getDocumentSelection()
+      self.assertEqual((expectedPenRow, expectedPenCol, expectedMarkerRow,
+          expectedMarkerCol, expectedMode), selection, callerText)
+    return checker
+
   def selectionCheck(self, expectedPenRow, expectedPenCol, expectedMarkerRow,
       expectedMarkerCol, expectedMode):
     caller = inspect.stack()[1]
