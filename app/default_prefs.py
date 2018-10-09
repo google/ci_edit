@@ -640,7 +640,7 @@ prefs = {
       'indent': '  ',
       'keywords': __common_keywords + [
         'and', 'as', 'assert', 'class',
-        'def', 'dict', 'elif', 'except',
+        'def', 'del', 'dict', 'elif', 'except',
         'False', 'finally', 'from',
         'global', 'import', 'in', 'is', 'len', 'list',
         'None', 'not',
