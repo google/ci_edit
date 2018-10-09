@@ -530,13 +530,15 @@ prefs = {
       'keywords': [
         'break', 'case', 'chan', 'const', 'continue', 'default', 'defer',
         'else', 'fallthrough', 'for', 'func', 'go', 'goto', 'if', 'import',
-        'interface', 'map', 'package', 'range', 'return', 'select', 'struct',
-        'switch', 'type', 'var',
+        'interface', 'map', 'nil', 'package', 'range', 'return', 'select',
+        'struct', 'switch', 'type', 'var',
       ],
       'special': [
         #r'(?<!\w)__.*?__(?!\w)',
       ],
       'contains': [
+        'cpp_block_comment', 'cpp_line_comment',
+        'cpp_string_literal', 'c_string1', 'c_string2'
       ],
     },
     'grd': {

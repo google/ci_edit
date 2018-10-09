@@ -14,20 +14,18 @@
 
 # This is a list of non-English words that are in the Go programming language
 # libraries.
-strconv
-readdirnames
-strconv
-rdwr
-getenv
-cond
-fprintln
 bufio
+cond
 fatalf
-mkdir
-tabwriter
-ioutil
-fmt
 filepath
-println
+fmt
 fprintln
+getenv
+ioutil
+mkdir
+println
+rdwr
+readdirnames
 sprintf
+strconv
+tabwriter
