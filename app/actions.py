@@ -1199,7 +1199,11 @@ class Actions(app.mutator.Mutator):
       return
     if app.prefs.editor.get(u'findUseRegex'):
       toReplace = "\n".join(self.getSelectedText())
-      toReplace = self.findRe.sub(replaceWith, toReplace)
+      try:
+        toReplace = self.findRe.sub(replaceWith, toReplace)
+      except re.error as e:
+        # TODO(dschuyler): This is stomped by another setMessage().
+        self.setMessage(str(e))
       self.editPasteData(toReplace)
     else:
       self.editPasteData(replaceWith)

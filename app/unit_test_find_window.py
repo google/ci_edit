@@ -70,7 +70,7 @@ class FindWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
         CTRL_F, self.selectionDocumentCheck(1, 5, 1, 8, 3),
         CTRL_Q, u"n"])
 
-  def test_find_replace_groups(self):
+  def test_replace(self):
     #self.setMovieMode(True)
     self.runWithFakeInputs([
         self.writeText(u"aDog\n"),
