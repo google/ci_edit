@@ -47,7 +47,7 @@ class ParserNode:
   def debugLog(self, out, indent, data):
     out('%sParserNode %26s prior %4s %4d %s' % (indent,
         self.grammar.get('name', 'None'),
-        self.prior, self.begin, repr(data[self.begin:self.begin+15])[1:-1]))
+        self.prior, self.begin, repr(data[self.begin:self.begin + 15])[1:-1]))
 
 
 class Parser:

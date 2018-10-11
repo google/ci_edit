@@ -195,7 +195,7 @@ class FilePathInputController(app.controller.Controller):
         return
     self.view.textBuffer.replaceLines((u'',))
     textBuffer = app.buffer_manager.buffers.loadTextBuffer(path)
-    assert textBuffer.parser
+    #assert textBuffer.parser
     inputWindow = self.currentInputWindow()
     inputWindow.setTextBuffer(textBuffer)
     self.changeTo(inputWindow)

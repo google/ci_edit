@@ -97,7 +97,7 @@ class InteractivePrediction(app.controller.Controller):
       if i.fullPath:
         self.items.append((i, i.fullPath, dirty))
       else:
-        self.items.append((i, '<new file> %s'%(i.lines[0][:20]), dirty))
+        self.items.append((i, '<new file> %s'%(i.parser.rowText(0)[:20]), dirty))
     dirPath, fileName = os.path.split(currentFile)
     file, ext = os.path.splitext(fileName)
     # TODO(dschuyler): rework this ignore list.
@@ -191,7 +191,8 @@ class InteractiveFind(app.controller.Controller):
     self.view.findLine.textBuffer.selectionAll()
 
   def onChange(self):
-    searchFor = self.view.findLine.textBuffer.lines[0]
+    self.view.findLine.textBuffer.parseScreenMaybe()
+    searchFor = self.view.findLine.textBuffer.parser.rowText(0)
     try:
       self.findCmd(searchFor)
     except re.error as e:
@@ -199,12 +200,12 @@ class InteractiveFind(app.controller.Controller):
     self.findCmd = self.view.host.textBuffer.find
 
   def replaceAndNext(self):
-    replaceWith = self.view.replaceLine.textBuffer.lines[0]
+    replaceWith = self.view.replaceLine.textBuffer.parser.rowText(0)
     self.view.host.textBuffer.replaceFound(replaceWith)
     self.findCmd = self.view.host.textBuffer.findNext
 
   def replaceAndPrior(self):
-    replaceWith = self.view.replaceLine.textBuffer.lines[0]
+    replaceWith = self.view.replaceLine.textBuffer.parser.rowText(0)
     self.view.host.textBuffer.replaceFound(replaceWith)
     self.findCmd = self.view.host.textBuffer.findPrior
 
@@ -264,12 +265,13 @@ class InteractiveGoto(app.controller.Controller):
   def gotoBottom(self):
     app.log.info()
     self.textBuffer.selectionAll()
-    self.textBuffer.insert(str(len(self.view.host.textBuffer.lines)))
+    self.textBuffer.insert(str(self.view.host.textBuffer.parser.rowCount()))
     self.changeToHostWindow()
 
   def gotoHalfway(self):
     self.textBuffer.selectionAll()
-    self.textBuffer.insert(str(len(self.view.host.textBuffer.lines) // 2 + 1))
+    self.textBuffer.insert(str(
+        self.view.host.textBuffer.parser.rowCount() // 2 + 1))
     self.changeToHostWindow()
 
   def gotoTop(self):
@@ -289,8 +291,8 @@ class InteractiveGoto(app.controller.Controller):
   def onChange(self):
     app.log.info()
     self.textBuffer.parseDocument()
-    line = U''
-    try: line = self.textBuffer.lines[0]
+    line = u""
+    try: line = self.textBuffer.parser.rowText(0)
     except: pass
     gotoLine, gotoCol = (line.split(U',') + [U'0', U'0'])[:2]
     self.cursorMoveTo(parseInt(gotoLine)-1, parseInt(gotoCol))
