@@ -75,8 +75,15 @@ class CiProgram:
     curses.raw()
     # Enable Bracketed Paste Mode.
     sys.stdout.write('\033[?2004;h\n')
-    #curses.start_color()
-    curses.use_default_colors()
+    try:
+      curses.start_color()
+      if not curses.has_colors():
+        userMessage("This terminal does not support color.")
+        self.quitNow()
+      else:
+        curses.use_default_colors()
+    except curses.error as e:
+      app.log.error(e)
     if 0:
       assert(curses.COLORS == 256)
       assert(curses.can_change_color() == 1)
@@ -126,7 +133,7 @@ class CiProgram:
           if frame[0] == 'exception':
             for line in frame[1]:
               userMessage(line[:-1])
-            self.exiting = True
+            self.quitNow()
             return
           drawList, cursor, cmdCount = frame
           self.refresh(drawList, cursor, cmdCount)
@@ -217,7 +224,7 @@ class CiProgram:
               if frame[0] == 'exception':
                 for line in frame[1]:
                   userMessage(line[:-1])
-                self.exiting = True
+                self.quitNow()
                 return
             if frame is not None:
               drawList, cursor, cmdCount = frame
