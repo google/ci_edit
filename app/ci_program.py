@@ -425,7 +425,9 @@ class CiProgram:
         except:
           app.log.startup(u"No color scheme applied")
     app.color.colors = app.prefs.startup['numColors']
-    if app.prefs.startup['numColors'] == 8:
+    if app.prefs.startup['numColors'] == 0:
+      app.log.startup('using no colors')
+    elif app.prefs.startup['numColors'] == 8:
       app.prefs.prefs['color'] = app.prefs.color = app.prefs.color8
       app.log.startup('using 8 colors')
       twoTries(app.prefs.editor['palette8'], 'default8')
