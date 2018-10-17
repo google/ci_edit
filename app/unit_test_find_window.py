@@ -83,6 +83,27 @@ class FindWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
         self.displayCheck(2, 7, [u"xDogDog  "]),
         CTRL_Q, u"n"])
 
+  def test_invalid_replace(self):
+    #self.setMovieMode(True)
+    self.runWithFakeInputs([
+        self.writeText(u"aDog aDog\n"),
+        self.displayCheck(2, 7, [u"aDog aDog  "]),
+        CTRL_F, self.writeText(u"a"),
+        self.displayCheck(-3, 0, [u"Find: a  "]),
+        self.selectionDocumentCheck(0, 0, 0, 1, 3),
+        CTRL_I, self.writeText(u'x\\1\\1'),
+        self.displayCheck(-2, 0, [u"Replace: x\\1\\1  "]),
+        CTRL_G,
+        # The replacement will have failed (there is no \1 group). The display
+        # should not have changed.
+        self.displayCheck(2, 7, [u"aDog aDog  "]),
+        # Since the replacement has an error, the selection should not move.
+        #self.selectionDocumentCheck(0, 0, 0, 1, 3),
+        # Doing a find doesn't involve the error in the replacement string, so
+        # the selection should move.
+        #CTRL_F, self.selectionDocumentCheck(0, 5, 0, 6, 3),
+        CTRL_Q, u"n"])
+
   def test_find_replace_groups(self):
     #self.setMovieMode(True)
     self.runWithFakeInputs([
