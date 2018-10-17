@@ -22,15 +22,6 @@ import os
 import app.log
 import app.regex
 
-commentColorIndex = 2
-defaultColorIndex = 18
-foundColorIndex = 32
-keywordsColorIndex = 21
-selectedColor = 64  # Active find is a selection.
-specialsColorIndex = 20
-stringColorIndex = 5
-outsideOfBufferColorIndex = 211
-
 _todo = r'TODO\([\S@.]+\)'
 
 __common_keywords = [
@@ -126,6 +117,84 @@ color8 = {
 for i in color8.values():
   assert 0 <= i < 8, i
 
+commentColor16Index = 2
+defaultColor16Index = 1
+foundColor16Index = 3
+keywordsColor16Index = 2
+selectedColor16Index = 4  # Active find is a selection.
+specialsColor16Index = 5
+stringColor16Index = 6
+outsideOfBufferColor16Index = 7
+borderColor16Index = 8
+borderHighlightColor16Index = 9
+
+color16 = {
+  '_pre_selection': stringColor16Index,
+  'bracket': 6,
+  'c': defaultColor16Index,
+  'c_preprocessor': 1,
+  'c_raw_string1': stringColor16Index,
+  'c_raw_string2': stringColor16Index,
+  'c_string1': stringColor16Index,
+  'c_string2': stringColor16Index,
+  'context_menu': 15,
+  'cpp_block_comment': commentColor16Index,
+  'cpp_line_comment': commentColor16Index,
+  'cpp_string_literal': stringColor16Index,
+  'debug_window': defaultColor16Index,
+  'default': defaultColor16Index,
+  'doc_block_comment': commentColor16Index,
+  'error': 9,
+  'found_find': foundColor16Index,
+  'highlight': 15,
+  'html_block_comment': commentColor16Index,
+  'html_element': keywordsColor16Index,
+  'html_element_end': keywordsColor16Index,
+  'js_string': stringColor16Index,
+  'keyword': keywordsColor16Index,
+  'line_number': borderColor16Index,
+  'line_number_current': borderHighlightColor16Index,
+  'line_overflow': 15,
+  'logo': borderColor16Index,
+  'matching_bracket': 15,
+  'matching_find': 9,
+  'md_link': stringColor16Index,
+  'message_line': borderColor16Index,
+  'misspelling': 9,
+  'number': 2,
+  'outside_document': outsideOfBufferColor16Index,
+  'popup_window': borderColor16Index,
+  'pound_comment': commentColor16Index,
+  'py_raw_string1': stringColor16Index,
+  'py_raw_string2': stringColor16Index,
+  'py_string1': stringColor16Index,
+  'py_string2': stringColor16Index,
+  'quoted_string2': stringColor16Index,
+  'regex_string': stringColor16Index,
+  'right_column': outsideOfBufferColor16Index,
+  'selected': selectedColor16Index,
+  'special': specialsColor16Index,
+  'status_line': borderColor16Index,
+  'status_line_error': borderHighlightColor16Index,
+  'text': defaultColor16Index,
+  'top_info': borderColor16Index,
+  'trailing_space': 15,
+  'type': keywordsColor16Index,
+}
+
+for i in color16.values():
+  assert 0 <= i < 16, i
+
+
+commentColorIndex = 2
+defaultColorIndex = 18
+foundColorIndex = 32
+keywordsColorIndex = 21
+selectedColor = 64  # Active find is a selection.
+specialsColorIndex = 20
+stringColorIndex = 5
+outsideOfBufferColorIndex = 211
+
 color256 = {
   '_pre_selection': stringColorIndex,
   'bracket': 6,
@@ -185,6 +254,7 @@ for i in color256.values():
 
 # Please keep these color dictionaries in sync.
 assert color8.keys() == color256.keys()
+assert color16.keys() == color256.keys()
 
 
 # These prefs are not fully working.
@@ -219,6 +289,8 @@ prefs = {
     'optimalCursorRow': 0.28,  # Ratio of rows: 0 top, 0.5 middle, 1.0 bottom.
     'palette': 'default',
     'palette8': 'default8',
+    'palette16': 'default16',
+    'palette256': 'default256',
     'predictionShowOpenFiles': True,
     'predictionShowAlternateFiles': True,
     'predictionShowRecentFiles': True,
@@ -777,10 +849,21 @@ prefs = {
     },
     "default8": {
       # With only 8 colors, make a custom pair for each slot.
-      "foregroundIndexes": [0, 4, 2, 3, 4, 5, 6, 0],
-      "backgroundIndexes": [1, 7, 7, 7, 7, 7, 7, 7],
+      # 0: black, 1: red, 2: green, 3: yellow, 4: blue, 5: pink, 6: cyan,
+      # 7: gray.
+      "foregroundIndexes": [1, 4, 2, 3, 4, 5, 6, 0],
+      "backgroundIndexes": [0, 6, 7, 7, 7, 7, 7, 7],
     },
-    "default": {
+    "default16": {
+      # With only 16 colors, make a custom pair for each slot.
+      # 0: black, 1: red, 2: green, 3: yellow, 4: blue, 5: pink, 6: cyan,
+      # 7: gray.
+      "foregroundIndexes": [
+        0,  1,  2,  3,  4,  5,  6,  7,    8, 4, 2, 3, 4, 5, 6,  0],
+      "backgroundIndexes": [
+        0, 15, 15, 15, 15, 15, 15, 15,   7, 7, 7, 7, 7, 7, 7, 15],
+    },
+    "default256": {
       # This series repeats 8 times (32 * 8 = 256).
       "foregroundIndexes": [
         18,  1,  2,   3,   4,   5,  6,  7,   8,  9, 10, 11,   12, 13, 14,  15,
@@ -801,3 +884,6 @@ prefs = {
         'history.dat'),
   },
 }
+
+# Alias for old palette name.
+prefs[u"palette"][u"default"] = prefs[u"palette"][u"default256"]

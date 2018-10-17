@@ -84,6 +84,7 @@ class CiProgram:
         curses.use_default_colors()
     except curses.error as e:
       app.log.error(e)
+    app.log.startup(u"curses.COLORS", curses.COLORS)
     if 0:
       assert(curses.COLORS == 256)
       assert(curses.can_change_color() == 1)
@@ -416,17 +417,25 @@ class CiProgram:
     def twoTries(primary, fallback):
       try:
         applyPalette(primary)
+        app.log.startup(u"Primary color scheme applied")
       except:
         try:
           applyPalette(fallback)
+          app.log.startup(u"Fallback color scheme applied")
         except:
-          pass
+          app.log.startup(u"No color scheme applied")
     app.color.colors = app.prefs.startup['numColors']
     if app.prefs.startup['numColors'] == 8:
       app.prefs.prefs['color'] = app.prefs.color = app.prefs.color8
+      app.log.startup('using 8 colors')
       twoTries(app.prefs.editor['palette8'], 'default8')
+    elif app.prefs.startup['numColors'] == 16:
+      app.prefs.prefs['color'] = app.prefs.color = app.prefs.color16
+      app.log.startup('using 16 colors')
+      twoTries(app.prefs.editor['palette16'], 'default16')
     elif app.prefs.startup['numColors'] == 256:
       app.prefs.prefs['color'] = app.prefs.color = app.prefs.color256
+      app.log.startup('using 256 colors')
       twoTries(app.prefs.editor['palette'], 'default')
     else:
       raise Exception('unknown palette color count ' +

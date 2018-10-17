@@ -57,6 +57,7 @@ def loadPrefs(fileName, category):
   return prefs[category]
 
 color8 = app.default_prefs.color8
+color16 = app.default_prefs.color16
 color256 = app.default_prefs.color256
 prefs['color'] = color256
 
