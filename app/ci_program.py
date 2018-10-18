@@ -77,6 +77,7 @@ class CiProgram:
     sys.stdout.write('\033[?2004;h\n')
     try:
       curses.start_color()
+      app.log.startup('aaaaaaaaaa', curses.has_colors())
       if not curses.has_colors():
         userMessage("This terminal does not support color.")
         self.quitNow()

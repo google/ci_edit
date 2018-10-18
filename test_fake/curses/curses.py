@@ -380,6 +380,7 @@ def getmouse(*args):
 
 def has_colors(*args):
   testLog(1, *args)
+  return True
 
 def init_color(*args):
   testLog(1, *args)
