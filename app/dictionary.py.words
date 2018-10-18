@@ -23,6 +23,7 @@ ascii
 atime
 basename
 baudrate
+binascii
 btab
 builtins
 bytecode
@@ -141,6 +142,7 @@ goto
 hasattr
 hashlib
 hexdigest
+hexlify
 hexversion
 hglobal
 hinstance
