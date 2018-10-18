@@ -50,7 +50,10 @@ def loadUserHistory(historyPath=pathToHistory):
   pathToHistory = historyPath
   if os.path.isfile(historyPath):
     with open(historyPath, 'rb') as file:
-      userHistory = pickle.load(file)
+      try:
+        userHistory = pickle.load(file)
+      except ValueError as e:
+        app.log.info(unicode(e))
 
 def saveUserHistory(fileInfo, fileHistory, historyPath=pathToHistory):
   """

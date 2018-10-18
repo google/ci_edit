@@ -15,12 +15,11 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-
 try:
   unicode('')
 except:
-  def unicode(a):
-    return str(a)
+  unicode = str
+  unichr = chr
 
 import cProfile
 import pstats

@@ -15,12 +15,11 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-
 try:
-  unichr(23)
+  unicode('')
 except:
-  def unichr(a):
-    return chr(a)
+  unicode = str
+  unichr = chr
 
 import bisect
 import curses.ascii
@@ -893,7 +892,7 @@ class Actions(app.mutator.Mutator):
           app.log.info(u'Opened file as a binary file')
           self.setMessage(u'Opened file as a binary file')
         except Exception as e:
-          app.log.info(e)
+          app.log.info(unicode(e))
           app.log.info(u'error opening file', self.fullPath)
           self.setMessage(u'error opening file', self.fullPath)
           return
