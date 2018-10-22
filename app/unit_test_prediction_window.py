@@ -49,7 +49,7 @@ class PredictionWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
         self.addClickInfo(0, "[x]open", curses.BUTTON1_PRESSED),
         curses.KEY_MOUSE,
         self.displayCheckNot(3, 0, ["    open <new file> "]),
-        CTRL_Q])
+        CTRL_Q, CTRL_Q])  # TODO(dschuyler): fix need for extra CTRL_Q.
 
   def test_save_as_to_quit(self):
     #self.setMovieMode(True)

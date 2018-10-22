@@ -59,3 +59,12 @@ class FileManagerTestCases(app.fake_curses_testing.FakeCursesTestCase):
         self.displayCheck(0, 0, [" ci     "]),
         self.displayCheck(-2, 0, ["      "]),
         CTRL_Q, ord('n')])
+
+  def test_open(self):
+    #self.setMovieMode(True)
+    sys.argv = []
+    self.runWithFakeInputs([
+        self.displayCheck(0, 0, [" ci     "]),
+        self.displayCheck(2, 7, ["     "]), CTRL_O,
+        self.displayCheck(0, 0, [" ci    Open File  "]),
+        CTRL_Q, CTRL_Q])  # TODO(dschuyler): fix need for extra CTRL_Q.
