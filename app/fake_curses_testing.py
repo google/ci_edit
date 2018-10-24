@@ -38,7 +38,8 @@ class FakeCursesTestCase(unittest.TestCase):
   def addClickInfo(self, timeStamp, screenText, bState):
     def createEvent(display, cmdIndex):
       row, col = self.findText(screenText)
-      info = (timeStamp, row, col, 0, bState)
+      # Note that the mouse info is x,y (col, row).
+      info = (timeStamp, col, row, 0, bState)
       curses.addMouseEvent(info)
       return None
     return createEvent
@@ -57,6 +58,7 @@ class FakeCursesTestCase(unittest.TestCase):
     assert type(mouseRow) is int
     assert type(mouseCol) is int
     assert type(bState) is int
+    # Note that the mouse info is x,y (col, row).
     info = (timeStamp, mouseCol, mouseRow, 0, bState)
     def createEvent(display, cmdIndex):
       curses.addMouseEvent(info)
