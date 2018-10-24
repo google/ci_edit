@@ -271,7 +271,10 @@ class FakeCursesWindow:
         return val
     val = fakeInput.next()
     if self.movie and val != ERR:
-      print(u"val", val)
+      if val == 409:
+        print(u"val", val, u"mouse_info", mouseEvents[-1])
+      else:
+        print(u"val", val)
     return val
 
   def getyx(self):
