@@ -330,8 +330,6 @@ class StandardScreen(FakeCursesWindow):
 
   def refresh(self, *args):
     testLog(1, *args)
-    if self.movie:
-      fakeDisplay.show()
 
   def test_find_text(self, screenText):
     return fakeDisplay.findText(screenText)
@@ -340,6 +338,8 @@ class StandardScreen(FakeCursesWindow):
     if self.cmdCount != cmdCount:
       fakeInput.waitingForRefresh = False
       self.cmdCount = cmdCount
+      if self.movie:
+        fakeDisplay.show()
 
 
 def baudrate(*args):
