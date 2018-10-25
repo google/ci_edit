@@ -343,8 +343,8 @@ class CiProgram:
 
   def refresh(self, drawList, cursor, cmdCount):
     """Paint the drawList to the screen in the main thread."""
-    # Ask curses to hold the back buffer until curses refresh().
     cursesWindow = app.window.mainCursesWindow
+    # Ask curses to hold the back buffer until curses refresh().
     cursesWindow.noutrefresh()
     curses.curs_set(0)  # Hide cursor.
     for i in drawList:
