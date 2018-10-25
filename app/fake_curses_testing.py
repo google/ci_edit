@@ -64,8 +64,18 @@ class FakeCursesTestCase(unittest.TestCase):
     self.prg = app.ci_program.CiProgram(self.cursesScreen)
 
   def addClickInfo(self, timeStamp, screenText, bState):
+    caller = inspect.stack()[1]
+    callerText = u"\n  %s:%s:%s(): " % (
+        os.path.split(caller[1])[1], caller[2], caller[3])
     def createEvent(display, cmdIndex):
       row, col = self.findText(screenText)
+      if row < 0:
+        output = u"%s at index %d, did not find %r" % (callerText, cmdIndex,
+            screenText)
+        if self.cursesScreen.movie:
+          print(output)
+        else:
+          self.fail(output)
       # Note that the mouse info is x,y (col, row).
       info = (timeStamp, col, row, 0, bState)
       curses.addMouseEvent(info)

@@ -188,7 +188,7 @@ class FakeDisplay:
       col = u"".join(line).find(screenText)
       if col != -1:
         return row, col
-    print(u"did not find", screenText)
+    print(u"Error: Did not find", screenText)
     self.show()
     return -1, -1
 
