@@ -189,6 +189,8 @@ class CiProgram:
               keySequence = keySequence[:-(len(paste_end))]
               #print 'keySequence', keySequence
               eventInfo = ''.join([chr(i) for i in keySequence])
+              if sys.version_info[0] == 2:
+                eventInfo = eventInfo.decode(u"utf-8")
             else:
               ch = tuple(keySequence)
             if not ch:

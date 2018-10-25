@@ -1415,7 +1415,7 @@ class Actions(app.mutator.Mutator):
     if curses.ascii.isprint(ch):
       self.insert(unichr(ch))
     elif ch is app.curses_util.BRACKETED_PASTE:
-      self.editPasteData(meta.decode(u'utf-8'))
+      self.editPasteData(meta)
     elif ch is app.curses_util.UNICODE_INPUT:
       self.insert(meta)
 
@@ -1444,7 +1444,7 @@ class Actions(app.mutator.Mutator):
       else:
         self.insert(unichr(ch))
     elif ch is app.curses_util.BRACKETED_PASTE:
-      self.editPasteData(meta.decode('utf-8'))
+      self.editPasteData(meta)
     elif ch is app.curses_util.UNICODE_INPUT:
       self.insert(meta)
 
