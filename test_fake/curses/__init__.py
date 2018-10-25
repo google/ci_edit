@@ -13,5 +13,5 @@
 # limitations under the License.
 
 
-from curses import *
+from .curses import *
 #__all__ = ["ascii"]
