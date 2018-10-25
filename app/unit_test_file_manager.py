@@ -28,13 +28,6 @@ import app.fake_curses_testing
 class FileManagerTestCases(app.fake_curses_testing.FakeCursesTestCase):
   def setUp(self):
     self.longMessage = True
-    if True:
-      # The buffer manager will retain the test file in RAM. Reset it.
-      try:
-        del sys.modules['app.buffer_manager']
-        import app.buffer_manager
-      except KeyError:
-        pass
     app.fake_curses_testing.FakeCursesTestCase.setUp(self)
 
   def test_save_as(self):

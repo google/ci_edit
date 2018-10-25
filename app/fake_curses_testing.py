@@ -22,12 +22,14 @@ import curses
 import inspect
 import os
 import sys
+import tempfile
 import unittest
 
 import third_party.pyperclip as clipboard
 
 import app.ci_program
 from app.curses_util import *
+import app.prefs
 
 
 def debug_print_stack(*args):
@@ -42,6 +44,22 @@ def debug_print_stack(*args):
 
 class FakeCursesTestCase(unittest.TestCase):
   def setUp(self):
+    if True:
+      # The buffer manager will retain the test file in RAM. Reset it.
+      try:
+        del sys.modules['app.buffer_manager']
+        import app.buffer_manager
+      except KeyError:
+        pass
+    if True:
+      # The prefs may contain old test settings in RAM. Reset it.
+      try:
+        del sys.modules['app.prefs']
+        import app.prefs
+        app.prefs.prefsDirectory = tempfile.mkdtemp()
+        #print(u"\nPrefs from this test are at:\n", app.prefs.prefsDirectory)
+      except KeyError:
+        pass
     self.cursesScreen = curses.StandardScreen()
     self.prg = app.ci_program.CiProgram(self.cursesScreen)
 
