@@ -31,6 +31,7 @@ import curses
 import locale
 import io
 import os
+import struct
 import sys
 import time
 import traceback
@@ -187,10 +188,8 @@ class CiProgram:
                 if n != curses.ERR:
                   keySequence.append(n)
               keySequence = keySequence[:-(len(paste_end))]
-              #print 'keySequence', keySequence
-              eventInfo = ''.join([chr(i) for i in keySequence])
-              if sys.version_info[0] == 2:
-                eventInfo = eventInfo.decode(u"utf-8")
+              eventInfo = struct.pack('B' * len(keySequence),
+                  *keySequence).decode(u"utf-8")
             else:
               ch = tuple(keySequence)
             if not ch:
