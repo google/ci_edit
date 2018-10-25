@@ -39,10 +39,14 @@ class PredictionWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
         self.displayCheck(0, 0, [" ci               "]),
         self.displayCheck(2, 2, ["v Type|Name "]),
         self.displayCheck(3, 0, ["    open <new file> "]),
-        self.addClickInfo(0, "[x]open", curses.BUTTON1_PRESSED),
+        self.addClickInfo(1000, "[x]open", curses.BUTTON1_PRESSED),
         curses.KEY_MOUSE,
         self.displayCheckNot(3, 0, ["    open <new file> "]),
         self.displayCheck(2, 2, ["v Type|Name "]),
+        self.addClickInfo(2000, "[ ]open", curses.BUTTON1_PRESSED),
+        curses.KEY_MOUSE,
+        # TODO(dschuyler): Look into why this fails:
+        #self.displayCheck(3, 0, ["    open <new file> "]),
         CTRL_Q])
 
   def test_save_as_to_quit(self):
