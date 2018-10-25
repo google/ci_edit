@@ -29,6 +29,7 @@ import app.log
 import app.regex
 
 importStartTime = time.time()
+prefsDirectory = "~/.ci_edit/prefs/"
 prefs = app.default_prefs.prefs
 
 def joinReList(reList):
@@ -42,7 +43,7 @@ def loadPrefs(fileName, category):
   prefs.setdefault(category, {})
   # Check the user home directory for preferences.
   prefsPath = os.path.expanduser(os.path.expandvars(
-      "~/.ci_edit/prefs/%s.json" % (fileName,)))
+      os.path.join(prefsDirectory, "%s.json" % (fileName,))))
   if os.path.isfile(prefsPath) and os.access(prefsPath, os.R_OK):
     with open(prefsPath, 'r') as f:
       try:
@@ -62,17 +63,13 @@ color256 = app.default_prefs.color256
 prefs['color'] = color256
 
 colorSchemeName = prefs['editor']['colorScheme']
-if colorSchemeName == 'custom':
-  # Check the user home directory for a color scheme preference. If found load
-  # it to replace the default color scheme.
-  prefs['color'].update(loadPrefs('color_scheme', 'color'))
 
 color = prefs['color']
-editor = loadPrefs('editor', 'editor')
+editor = prefs['editor']
 devTest = prefs['devTest']
 palette = prefs['palette']
 startup = {}
-status = loadPrefs('status', 'status')
+status = prefs[u"status"]
 
 
 grammars = {}
@@ -163,6 +160,18 @@ if 0:
     app.log.info('  ', k, ':', v)
 
 def init():
+  global editor
+  editor = loadPrefs('editor', 'editor')
+  global status
+  status = loadPrefs('status', 'status')
+
+  global colorSchemeName
+  colorSchemeName = prefs['editor']['colorScheme']
+  if colorSchemeName == 'custom':
+    # Check the user home directory for a color scheme preference. If found load
+    # it to replace the default color scheme.
+    prefs['color'].update(loadPrefs('color_scheme', 'color'))
+
   defaultColor = prefs['color']['default']
   defaultKeywordsColor = prefs['color']['keyword']
   defaultSpecialsColor = prefs['color']['special']
@@ -192,7 +201,7 @@ def save(category, label, value):
   prefs.setdefault(category, {})
   prefs[category][label] = value
   prefsPath = os.path.expanduser(os.path.expandvars(
-      "~/.ci_edit/prefs/%s.json" % (category,)))
+      os.path.join(prefsDirectory, "%s.json" % (category,))))
   with open(prefsPath, 'w') as f:
     try:
       f.write(json.dumps(prefs[category]))
