@@ -196,7 +196,7 @@ class CiProgram:
               # really the start of a sequence and is instead a stand-alone
               # Escape. Just forward the esc.
               ch = curses.ascii.ESC
-          elif 160 <= ch < 257:
+          elif type(ch) is int and 160 <= ch < 257:
             # Start of utf-8 character.
             u = None
             if (ch & 0xe0) == 0xc0:

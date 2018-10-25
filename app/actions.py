@@ -1421,7 +1421,7 @@ class Actions(app.mutator.Mutator):
 
   def insertPrintableWithPairing(self, ch, meta):
     #app.log.info(ch, meta)
-    if curses.ascii.isprint(ch):
+    if type(ch) is int and curses.ascii.isprint(ch):
       if app.prefs.editor['autoInsertClosingCharacter']:
         pairs = {
           ord(u"'"): u"'",
