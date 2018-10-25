@@ -37,6 +37,11 @@ from . import ascii
 from .constants import *
 
 
+def isStringType(value):
+  if sys.version_info[0] == 2:
+    return type(value) in types.StringTypes
+  return type(value) is str
+
 # Avoiding importing app.curses_util.
 # Tuple events are preceded by an escape (27).
 BRACKETED_PASTE_BEGIN = (91, 50, 48, 48, 126)  # i.e. "[200~"
@@ -72,14 +77,14 @@ class FakeInput:
             if self.isVerbose:
               print(repr(cmd), repr(result), u"waitingForRefresh")
             return result
-        elif type(cmd) in (types.StringType, unicode) and len(cmd) == 1:
+        elif isStringType(cmd) and len(cmd) == 1:
           if (not self.inBracketedPaste) and cmd != ascii.ESC:
             self.waitingForRefresh = True
           if self.isVerbose:
             print(repr(cmd), ord(cmd))
           return ord(cmd)
-        elif (type(cmd) == types.TupleType and len(cmd) > 1 and
-            type(cmd[0]) == types.IntType):
+        elif (type(cmd) is tuple and len(cmd) > 1 and
+            type(cmd[0]) is int):
           if cmd == BRACKETED_PASTE_BEGIN:
             self.inBracketedPaste = True
           if self.isVerbose and self.tupleIndex == 0:
