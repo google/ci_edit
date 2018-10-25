@@ -29,7 +29,10 @@ def joinReWordList(reList):
 kNonMatchingRegex = r'^\b$'
 kReNonMatching = re.compile(kNonMatchingRegex)
 
-kReBrackets = re.compile('[[\]{}()]')
+# Beware, to include a ] in a set, it should be the first character in the set.
+# So, the first ] does not close the set and the second [ does not open a set.
+# The set of characters is ]{}()[.
+kReBrackets = re.compile('[]{}()[]')
 
 kReComments = re.compile('(?:#|//).*$|/\*.*?\*/|<!--.*?-->')
 
