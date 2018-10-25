@@ -39,6 +39,7 @@ import app.unit_test_bookmarks
 import app.unit_test_brace_matching
 import app.unit_test_file_manager
 import app.unit_test_find_window
+import app.unit_test_intention
 import app.unit_test_parser
 import app.unit_test_performance
 import app.unit_test_prediction_window
@@ -46,18 +47,20 @@ import app.unit_test_prefs
 import app.unit_test_regex
 import app.unit_test_selectable
 import app.unit_test_text_buffer
+import app.unit_test_ui
 import unittest
 
 
 # Add new test cases here.
 tests = {
-  'application': app.unit_test_application.IntentionTestCases,
+  'application': app.unit_test_application.ApplicationTestCases,
   'automatic_column_adjustment':
       app.unit_test_automatic_column_adjustment.AutomaticColumnAdjustmentCases,
   'bookmarks': app.unit_test_bookmarks.BookmarkTestCases,
   'brace_matching': app.unit_test_brace_matching.BraceMatchingTestCases,
   'file_manager': app.unit_test_file_manager.FileManagerTestCases,
   'find': app.unit_test_find_window.FindWindowTestCases,
+  'intention': app.unit_test_intention.IntentionTestCases,
   'parser': app.unit_test_parser.ParserTestCases,
   'performance': app.unit_test_performance.PerformanceTestCases,
   'prediction': app.unit_test_prediction_window.PredictionWindowTestCases,
@@ -67,6 +70,7 @@ tests = {
   'text_buffer_mouse': app.unit_test_text_buffer.MouseTestCases,
   'text_buffer_indent': app.unit_test_text_buffer.TextIndent,
   'text_buffer_insert': app.unit_test_text_buffer.TextInsert,
+  'ui': app.unit_test_ui.UiBasicsTestCases,
 }
 
 

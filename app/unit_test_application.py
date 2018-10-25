@@ -31,7 +31,7 @@ import app.prefs
 kTestFile = u'#application_test_file_with_unlikely_file_name~'
 
 
-class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
+class ApplicationTestCases(app.fake_curses_testing.FakeCursesTestCase):
   def setUp(self):
     self.longMessage = True
     if os.path.isfile(kTestFile):
@@ -39,90 +39,7 @@ class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
     self.assertFalse(os.path.isfile(kTestFile))
     app.fake_curses_testing.FakeCursesTestCase.setUp(self)
 
-  def test_open_and_quit(self):
-    self.runWithTestFile(kTestFile, [CTRL_Q])
-
-  def test_new_file_quit(self):
-    self.runWithTestFile(kTestFile, [
-        self.displayCheck(2, 7, ["        "]), CTRL_Q])
-
-  def test_logo(self):
-    self.runWithTestFile(kTestFile, [
-        self.displayCheck(0, 0, [" ci "]),
-        self.displayCheckStyle(0, 0, 1, len(" ci "), app.prefs.color['logo']),
-        CTRL_Q])
-
-  def test_whole_screen(self):
-    #self.setMovieMode(True)
-    self.runWithTestFile(kTestFile, [
-        self.displayCheck(0, 0, [
-            u" ci     .                               ",
-            u"                                        ",
-            u"     1                                  ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"New buffer         |    1, 1 |   0%,  0%",
-            u"                                        ",
-            ]), CTRL_Q])
-
-  def test_resize_screen(self):
-    self.runWithTestFile(kTestFile, [
-        self.displayCheck(0, 0, [
-            u" ci     .                               ",
-            u"                                        ",
-            u"     1                                  ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"New buffer         |    1, 1 |   0%,  0%",
-            u"                                        ",
-            ]),
-        self.resizeScreen(10, 36),
-        self.displayCheck(0, 0, [
-            u" ci     .                           ",
-            u"                                    ",
-            u"     1                              ",
-            u"                                    ",
-            u"                                    ",
-            u"                                    ",
-            u"                                    ",
-            u"                                    ",
-            u"                    1, 1 |   0%,  0%",
-            u"                                    ",
-            ]),
-            CTRL_Q])
-
-  def test_prediction(self):
-    #self.setMovieMode(True)
-    self.runWithTestFile(kTestFile, [
-        self.displayCheck(-1, 0, [u"      "]),
-        #CTRL_P, self.displayCheck(-1, 0, ["p: "]), CTRL_J,
-        self.displayCheck(-1, 0, [u"      "]),
-        #CTRL_P, self.displayCheck(-1, 0, ["p: "]), CTRL_J,
-        CTRL_Q])
-
-  def test_text_contents(self):
-    self.runWithTestFile(kTestFile, [
-        self.displayCheck(2, 7, [u"        "]), u't', u'e', u'x', u't',
-        self.displayCheck(2, 7, [u"text "]),  CTRL_Q, u'n'])
-
-  if 1:
-   def test_bracketed_paste(self):
+  def test_bracketed_paste(self):
     self.runWithTestFile(kTestFile, [
         self.displayCheck(2, 7, [u"      "]),
         curses.ascii.ESC, app.curses_util.BRACKETED_PASTE_BEGIN,
@@ -240,6 +157,7 @@ class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
         CTRL_Q, u'n']);
 
   def test_select_line(self):
+    #self.setMovieMode(True)
     self.runWithTestFile(kTestFile, [
         self.displayCheck(0, 0, [
             u" ci     .                               ",
@@ -276,89 +194,3 @@ class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
         curses.KEY_MOUSE,
         CTRL_L,
         CTRL_Q, u'n']);
-
-  def test_session(self):
-    self.runWithTestFile(kTestFile, [
-        self.displayCheck(0, 0, [
-            u" ci     .                               ",
-            u"                                        ",
-            u"     1                                  ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"New buffer         |    1, 1 |   0%,  0%",
-            u"                                        "]),
-        u'H', u'e', u'l', u'l', u'o',
-        self.displayCheck(0, 0, [
-            u" ci     *                               ",
-            u"                                        ",
-            u"     1 Hello                            ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"                        1, 6 |   0%,100%",
-            u"                                        "]),
-        CTRL_Z,
-        self.displayCheck(0, 0, [
-            u" ci     .                               ",
-            u"                                        ",
-            u"     1                                  ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"                                        ",
-            u"                        1, 1 |   0%,  0%",
-            u"                                        "]),
-        CTRL_Q])
-
-  def test_quit_cancel(self):
-    #self.setMovieMode(True)
-    self.runWithFakeInputs([
-        self.displayCheck(0, 0, [
-            u" ci     .                               ",]),
-        u'x',
-        CTRL_Q,
-        u'c',
-        self.writeText(u' after cancel'),
-        self.displayCheck(2, 7, [
-            u"x after cancel ",]),
-        CTRL_Q,
-        u'n'
-        ])
-
-  def test_quit_save_as(self):
-    #self.setMovieMode(True)
-    self.assertFalse(os.path.isfile(kTestFile))
-    self.runWithFakeInputs([
-        self.displayCheck(0, 0, [
-            u" ci     .                               ",]),
-        u'x',
-        CTRL_Q,
-        u'y',
-        self.writeText(kTestFile),
-        CTRL_J,
-        CTRL_Q,
-        ])
-    self.assertTrue(os.path.isfile(kTestFile))
-    os.unlink(kTestFile)
-    self.assertFalse(os.path.isfile(kTestFile))
