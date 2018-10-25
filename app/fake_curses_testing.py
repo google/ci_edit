@@ -30,6 +30,16 @@ import app.ci_program
 from app.curses_util import *
 
 
+def debug_print_stack(*args):
+  stack = inspect.stack()[1:]
+  stack.reverse()
+  lines = []
+  for i,frame in enumerate(stack):
+    lines.append(u"stack %2d %14s %4s %s" % (i, os.path.split(frame[1])[1],
+        frame[2], frame[3]))
+  print(u"\n".join(lines))
+
+
 class FakeCursesTestCase(unittest.TestCase):
   def setUp(self):
     self.cursesScreen = curses.StandardScreen()
