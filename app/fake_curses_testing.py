@@ -17,6 +17,11 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+try:
+  unicode('')
+except:
+  unicode = str
+  unichr = chr
 
 import curses
 import inspect
@@ -267,6 +272,6 @@ class FakeCursesTestCase(unittest.TestCase):
 
   def tearDown(self):
     # Disable mouse tracking in xterm.
-    sys.stdout.write(b'\033[?1002l\n')
+    sys.stdout.write(u"\033[?1002l\n")
     # Disable Bracketed Paste Mode.
-    sys.stdout.write(b'\033[?2004l\n')
+    sys.stdout.write(u"\033[?2004l\n")
