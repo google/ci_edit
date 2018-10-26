@@ -177,6 +177,10 @@ class FakeCursesTestCase(unittest.TestCase):
       return None
     return cursorChecker
 
+  def pathToSample(self, relPath):
+    path = os.path.dirname(os.path.dirname(__file__))
+    return os.path.join(path, u"sample", relPath)
+
   def resizeScreen(self, rows, cols):
     assert type(rows) is int
     assert type(cols) is int
