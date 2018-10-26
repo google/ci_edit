@@ -866,23 +866,25 @@ class Actions(app.mutator.Mutator):
     else:
       try:
         inputFile = io.open(self.fullPath)
-        data = inputFile.read()
-        # Hacky detection of binary files.
-        unicode(data).decode(u'utf-8')
+        data = unicode(inputFile.read())
+        if hasattr(data, 'decode'):
+          # Hacky detection of binary files.
+          data.decode(u'utf-8')
         self.fileEncoding = inputFile.encoding
         self.setMessage(u'Opened existing file')
         self.isBinary = False
-      except Exception:
+      except Exception as e:
+        #app.log.info(unicode(e))
         try:
           inputFile = io.open(self.fullPath, 'rb')
           if 1:
             binary_data = inputFile.read()
-            long_hex = binascii.hexlify(binary_data)
+            long_hex = binascii.hexlify(binary_data).decode('utf-8')
             hex_list = []
             i = 0
             width = 32
             while i < len(long_hex):
-              hex_list.append(long_hex[i:i + width] + '\n')
+              hex_list.append(long_hex[i:i + width] + u'\n')
               i += width
             data = u''.join(hex_list)
           else:
