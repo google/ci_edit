@@ -17,6 +17,11 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+try:
+  unicode('')
+except:
+  unicode = str
+  unichr = chr
 
 import os
 import re
@@ -186,7 +191,8 @@ class InteractivePrompt(app.controller.Controller):
     file, ext = os.path.splitext(self.view.host.textBuffer.fullPath)
     app.log.info(file, ext)
     lines = self.view.host.textBuffer.doDataToLines(
-        formatter.get(ext, noOp)(self.view.host.textBuffer.doLinesToData(lines)))
+        formatter.get(ext, noOp)(self.view.host.textBuffer.doLinesToData(
+            lines)))
     return lines, u'Changed %d lines'%(len(lines),)
 
   def makeCommand(self, cmdLine, view):
@@ -198,7 +204,7 @@ class InteractivePrompt(app.controller.Controller):
 
   def execute(self):
     try:
-      cmdLine = ''
+      cmdLine = u''
       try: cmdLine = self.textBuffer.lines[0]
       except: pass
       if not len(cmdLine):
@@ -214,7 +220,7 @@ class InteractivePrompt(app.controller.Controller):
         tb.editPasteLines(tuple(output))
         tb.setMessage(message)
       else:
-        cmd = re.split('\\W', cmdLine)[0]
+        cmd = re.split(u'\\W', cmdLine)[0]
         filter = self.filters.get(cmd)
         if filter:
           if not len(lines):
@@ -223,7 +229,7 @@ class InteractivePrompt(app.controller.Controller):
             lines, message = filter(cmdLine, lines)
             tb.setMessage(message)
             if not len(lines):
-              lines.append('')
+              lines.append(u'')
             tb.editPasteLines(tuple(lines))
         else:
           command = self.commands.get(cmd, self.unknownCommand)
@@ -239,7 +245,7 @@ class InteractivePrompt(app.controller.Controller):
       process = subprocess.Popen(commands,
           stdin=subprocess.PIPE, stdout=subprocess.PIPE,
           stderr=subprocess.STDOUT, shell=True);
-      return process.communicate(input)[0], ''
+      return process.communicate(input)[0], u''
     except Exception as e:
       return u'', u'Error running shell command\n' + e
 
@@ -252,7 +258,7 @@ class InteractivePrompt(app.controller.Controller):
           stdin=subprocess.PIPE, stdout=subprocess.PIPE,
           stderr=subprocess.STDOUT);
       if len(chain) == 1:
-        return process.communicate(input)[0], ''
+        return process.communicate(input)[0], u''
       else:
         chain.reverse()
         prior = process
@@ -262,7 +268,7 @@ class InteractivePrompt(app.controller.Controller):
               stdin=subprocess.PIPE, stdout=prior.stdin,
               stderr=subprocess.STDOUT);
         prior.communicate(input)
-        return process.communicate()[0], ''
+        return process.communicate()[0], u''
     except Exception as e:
       return u'', u'Error running shell command\n' + e
 
@@ -300,7 +306,8 @@ class InteractivePrompt(app.controller.Controller):
       return lines, u'''Separator punctuation missing, there should be''' \
           u''' three '%s'.''' % (separator,)
     data = self.view.host.textBuffer.doLinesToData(lines)
-    output = self.view.host.textBuffer.findReplaceText(find, replace, flags, data)
+    output = self.view.host.textBuffer.findReplaceText(find, replace, flags,
+        data)
     lines = self.view.host.textBuffer.doDataToLines(output)
     return lines, u'Changed %d lines'%(len(lines),)
 
