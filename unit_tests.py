@@ -39,6 +39,7 @@ import app.unit_test_bookmarks
 import app.unit_test_brace_matching
 import app.unit_test_file_manager
 import app.unit_test_find_window
+import app.unit_test_execute_prompt
 import app.unit_test_intention
 import app.unit_test_parser
 import app.unit_test_performance
@@ -60,6 +61,7 @@ tests = {
   'brace_matching': app.unit_test_brace_matching.BraceMatchingTestCases,
   'file_manager': app.unit_test_file_manager.FileManagerTestCases,
   'find': app.unit_test_find_window.FindWindowTestCases,
+  'execute': app.unit_test_execute_prompt.ExecutePromptTestCases,
   'intention': app.unit_test_intention.IntentionTestCases,
   'parser': app.unit_test_parser.ParserTestCases,
   'performance': app.unit_test_performance.PerformanceTestCases,
