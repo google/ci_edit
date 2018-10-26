@@ -15,6 +15,11 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+try:
+  unicode('')
+except:
+  unicode = str
+  unichr = chr
 
 import curses
 
@@ -118,4 +123,4 @@ class DebugUndoWindow(app.window.ActiveWindow):
     for i in range(textBuffer.redoIndex, textBuffer.redoIndex + split - 1):
       text = (i < len(textBuffer.redoChain) and
           textBuffer.redoChain[i] or '')
-      self.writeLine(text, redoColorC)
+      self.writeLine(unicode(text), redoColorC)
