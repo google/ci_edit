@@ -86,4 +86,4 @@ class BraceMatchingTestCases(app.fake_curses_testing.FakeCursesTestCase):
           checkStyle(2, 8, 1, 4, defaultColor),
           checkStyle(2, 12, 1, 1, matchingBracketColor),
           CTRL_A,
-        CTRL_Q, b'n'])
+        CTRL_Q, u'n'])
