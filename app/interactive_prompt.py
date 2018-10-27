@@ -213,10 +213,13 @@ class InteractivePrompt(app.controller.Controller):
       tb = self.view.host.textBuffer
       lines = list(tb.getSelectedText())
       if cmdLine[0] in self.subExecute:
-        data = self.view.host.textBuffer.doLinesToData(lines)
+        data = self.view.host.textBuffer.doLinesToData(lines).encode('utf-8')
         output, message = self.subExecute.get(cmdLine[0])(
             cmdLine[1:], data)
-        output = tb.doDataToLines(output)
+        if app.config.strict_debug:
+          assert type(output) is bytes
+          assert type(message) is unicode
+        output = tb.doDataToLines(output.decode('utf-8'))
         tb.editPasteLines(tuple(output))
         tb.setMessage(message)
       else:
@@ -241,6 +244,13 @@ class InteractivePrompt(app.controller.Controller):
     self.changeToHostWindow()
 
   def shellExecute(self, commands, input):
+    """
+    input is in bytes (not unicode).
+    return tuple: output as bytes (not unicode), message as unicode.
+    """
+    if app.config.strict_debug:
+      assert type(commands) is unicode, type(input)
+      assert type(input) is bytes, type(input)
     try:
       process = subprocess.Popen(commands,
           stdin=subprocess.PIPE, stdout=subprocess.PIPE,
@@ -250,10 +260,15 @@ class InteractivePrompt(app.controller.Controller):
       return u'', u'Error running shell command\n' + e
 
   def pipeExecute(self, commands, input):
+    """
+    input is in bytes (not unicode).
+    return tuple: output as bytes (not unicode), message as unicode.
+    """
+    if app.config.strict_debug:
+      assert type(commands) is unicode, type(input)
+      assert type(input) is bytes, type(input)
     chain = kRePipeChain.findall(commands)
-    app.log.info(u'chain', chain)
     try:
-      app.log.info(kReArgChain.findall(chain[-1]))
       process = subprocess.Popen(kReArgChain.findall(chain[-1]),
           stdin=subprocess.PIPE, stdout=subprocess.PIPE,
           stderr=subprocess.STDOUT);
@@ -263,14 +278,14 @@ class InteractivePrompt(app.controller.Controller):
         chain.reverse()
         prior = process
         for i in chain[1:]:
-          app.log.info(kReArgChain.findall(i))
           prior = subprocess.Popen(kReArgChain.findall(i),
               stdin=subprocess.PIPE, stdout=prior.stdin,
               stderr=subprocess.STDOUT);
         prior.communicate(input)
         return process.communicate()[0], u''
     except Exception as e:
-      return u'', u'Error running shell command\n' + e
+      app.log.exception(e)
+      return b'', u'Error running shell command\n' + unicode(e)
 
   def info(self):
     app.log.info(u'InteractivePrompt command set')

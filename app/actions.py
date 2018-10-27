@@ -830,6 +830,8 @@ class Actions(app.mutator.Mutator):
     return hex_list
 
   def doDataToLines(self, data):
+    if app.config.strict_debug:
+      assert type(data) is unicode
     # Performance: in a 1000 line test it appears fastest to do some simple
     # .replace() calls to minimize the number of calls to parse().
     data = data.replace(u'\r\n', u'\n')
