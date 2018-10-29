@@ -49,6 +49,7 @@ import app.unit_test_regex
 import app.unit_test_selectable
 import app.unit_test_text_buffer
 import app.unit_test_ui
+import app.unit_test_undo_redo
 import unittest
 
 
@@ -73,6 +74,7 @@ tests = {
   'text_buffer_indent': app.unit_test_text_buffer.TextIndent,
   'text_buffer_insert': app.unit_test_text_buffer.TextInsert,
   'ui': app.unit_test_ui.UiBasicsTestCases,
+  'undo': app.unit_test_undo_redo.UndoRedoTestCases,
 }
 
 
