@@ -17,7 +17,7 @@ from __future__ import division
 from __future__ import print_function
 try:
   unicode('')
-except:
+except NameError:
   unicode = str
   unichr = chr
 
@@ -25,7 +25,7 @@ import cProfile
 import pstats
 try:
   import cPickle as pickle
-except:
+except ImportError:
   import pickle
 import curses
 import locale
@@ -457,12 +457,14 @@ class CiProgram:
     def getDocumentSelection(self):
       """This is primarily for testing."""
       tb = self.programWindow.inputWindow.textBuffer
-      return (tb.penRow, tb.penCol, tb.markerRow, tb.markerCol, tb.selectionMode)
+      return (tb.penRow, tb.penCol, tb.markerRow, tb.markerCol,
+          tb.selectionMode)
 
     def getSelection(self):
       """This is primarily for testing."""
       tb = self.programWindow.focusedWindow.textBuffer
-      return (tb.penRow, tb.penCol, tb.markerRow, tb.markerCol, tb.selectionMode)
+      return (tb.penRow, tb.penCol, tb.markerRow, tb.markerCol,
+          tb.selectionMode)
 
     def topWindow(self):
       top = self

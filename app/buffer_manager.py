@@ -16,12 +16,11 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-
-# For Python 2to3 support.
 try:
-  type(u"") is unicode
-except:
-  unicode = str
+  unicode('')
+except NameError:
+  unicode = str # redefined-builtin
+  unichr = chr
 
 import io
 import os

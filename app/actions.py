@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# For Python 2to3 support.
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -957,8 +958,6 @@ class Actions(app.mutator.Mutator):
     # Need to initialize goalCol since we set the cursor position directly
     # instead of performing a chain of redoes (which sets goalCol).
     self.goalCol = self.penCol
-    app.log.info(u'\n\n\n    setting scrollRow', self.fileHistory.get(u'scroll'),
-        self.fullPath, u'\n\n\n\n')
     # Do not restore the scroll position here because the view may not be set.
     # the scroll position is handled in the InputWindow.setTextBuffer.
     # self.view.scrollRow, self.view.scrollCol =  self.fileHistory.setdefault(

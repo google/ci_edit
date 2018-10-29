@@ -17,13 +17,14 @@
   cursor position after reloading a file; or a recent file list.
 """
 
+# For Python 2to3 support.
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
 try:
   import cPickle as pickle
-except:
+except ModuleNotFoundError:
   import pickle
 import hashlib
 import os

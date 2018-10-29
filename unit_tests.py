@@ -54,7 +54,7 @@ import unittest
 
 
 # Add new test cases here.
-tests = {
+TESTS = {
   'application': app.unit_test_application.ApplicationTestCases,
   'automatic_column_adjustment':
       app.unit_test_automatic_column_adjustment.AutomaticColumnAdjustmentCases,
@@ -93,13 +93,13 @@ def usage():
   print('  --log     Print output from app.log.* calls')
   print('  <name>    Run the named set of tests (only)')
   print('The <name> argument is any of:')
-  testNames = tests.keys()
+  testNames = TESTS.keys()
   testNames.sort()
   for i in testNames:
     print(' ', i)
 
 def parseArgList(argList):
-  testList = tests.values()
+  testList = TESTS.values()
   try:
     argList.remove('--help')
     usage()
@@ -113,10 +113,10 @@ def parseArgList(argList):
   except ValueError:
     pass
   if len(argList) > 1:
-    if argList[1] not in tests:
+    if argList[1] not in TESTS:
       usage()
       sys.exit(-1)
-    testList = [tests[argList[1]]]
+    testList = [TESTS[argList[1]]]
   if useAppLog:
     app.log.wrapper(lambda: runTests(testList, True))
   else:

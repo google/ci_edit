@@ -14,6 +14,7 @@
 
 """Key bindings for the emacs-like editor."""
 
+# For Python 2to3 support.
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
