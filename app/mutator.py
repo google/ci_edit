@@ -393,8 +393,8 @@ class Mutator(app.selectable.Selectable):
     self.markerRow -= change[1][2]
     self.markerCol -= change[1][3]
     self.selectionMode -= change[1][4]
-    assert self.penRow >= 0
-    assert self.penCol >= 0
+    assert self.penRow >= 0, self.penRow
+    assert self.penCol >= 0, self.penCol
 
   def undo(self):
     """Undo a set of redo nodes."""

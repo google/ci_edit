@@ -315,7 +315,7 @@ class InteractiveGoto(EditText):
     self.changeToInputWindow()
 
   def gotoHalfway(self):
-    self.cursorMoveTo(len(self.document.textBuffer.lines)/2+1, 0)
+    self.cursorMoveTo(len(self.document.textBuffer.lines) // 2 + 1, 0)
     self.changeToInputWindow()
 
   def gotoTop(self):
