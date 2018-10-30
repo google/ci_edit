@@ -1,0 +1,43 @@
+
+Common keyboard shortcuts:
+
+  Text commands (such as cut and paste)
+  operate on the text where the cursor is
+  located text rather than the main window.
+
+  ctrl+a       Select all
+  ctrl+c       Copy
+  ctrl+l       Select current line (subsequent select next line)
+  ctrl+q       Quit (exit editor)
+  crtl+w       Close buffer
+  ctrl+s       Save file
+  ctrl+v       Paste
+  ctrl+x       Cut
+  ctrl+y       Redo
+  ctrl+z       Undo
+  esc          Return to the main window
+
+
+Within the main text window:
+
+  ctrl+f       Find
+  ctrl+g       Go to line
+  ctrl+r       Reverse find
+
+
+Within Find:
+
+  return       Return to main window
+  esc          Return to main window
+  ctrl+f       Find next
+  ctrl+g       Find next
+  ctrl+r       Reverse find
+
+
+Within Goto:
+
+  return       Go to the line, column specified
+  esc          Return to main window
+  t            Jump to top of buffer
+  h            Jump to halfway point of buffer
+  b            Jump to bottom of buffer

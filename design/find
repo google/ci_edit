@@ -1,0 +1,144 @@
+
+Note: these are outline notes I used to work through design issues. They
+probably don't make a lot of sense to another reader at the moment. My
+apologies.
+
+# Find UI
+
+## What features should a find / replace tool have
+
+find (xor i.e. a radio button or dropdown selection)
+- all
+- next
+- prior
+
+replace (xor)
+-  all
+-  current
+-  next
+-  prior
+
+regex (boolean)
+match case (exact)
+smart cap replacement (boolean, smart means that lower case says lower case; upper case stays upper case)
+span lines (boolean. aka wrap)
+whole words (boolean, aka by word)
+within (as in, find within this context)
+-  anything (same as selecting all options?)
+-  comments (a grammar?)
+-  code (a grammar?)
+-  licenses (a grammar?)
+-  selection
+-  quoted (strings) though maybe this is a grammar
+-  a particular grammar (like py, js, cpp)
+
+files
+-  recursive (boolean)
+-  where (multi-selection i.e. checkboxes)
+    - current file
+    - open files
+    - current directory (or include '.')
+    - path
+        - include (list of strings)
+        - exclude (list of strings)
+
+Maybe (not sure on these)
+-  mark lines with matches (boolean)
+-  querySelect style
+-  find misspelled word
+-  error (i.e. go to the next compile error or similar)
+-  external call/script
+-  highlight all matches (boolean)
+
+## Might be a silly idea, but what about a set notation so say where and how to search
+
+Something that would describe what to search (e.g. search in comments or don't search in comments).
+
+ within: code || comments || content || markup || quoted /* && marked && selection */
+ within: -code +comments -content &marked +markup &quoted =selection
+
+
+## Here is a draft of a multi-line find UI
+
+```
+   find: dog
+replace: cat
+options: -exact +highlight +regex +smart -words +wrap
+ within: +code +comments +content +markup +quotes
+that is: -marked -selected -changed
+  paths: +example.txt
+exit^w  forward^f  reverse^r  replace^s  all^e  mark^m
+```
+
+
+or
+
+
+
+```
+   find: dog
+         +regex -words -matchCase +multiLine #  +marked
+replace: cat
+         case(simple smart upper +lower) # +mark
+ within: +code +comments +content +markup +quotes +license
+         ~selected +changed #  !marked
+  paths: +example.txt
+<exit>  <reverse>  <forward>  <replace>  <all>  #  mark^m
+```
+
+
+
+
+
+```
+   find: dog
+replace: cat
+         [*]regex, [ ]words, [ ]matchCase, [ ]multiLine
+         within: ( )code, ( )comments, ( )markup, ( )quotes, ( )license, ( )any;
+         selected: ( )yes, ( )no, (*)any;
+         changed: ( )yes, ( )no, (*)any;
+         paths: +example.txt
+         changeCase: (*)none, ( )smart, ( )upper, ( )lower;
+<exit>  <reverse>  <forward>  <replace>  <all>  #  mark^m
+```
+
+
+
+
+
+
+```
+   find: dog
+replace: cat
+         [*]regex [ ]words [ ]matchCase [ ]multiLine
+         within: ( )code ( )comments ( )markup ( )quotes ( )license (*)any
+         selected: ( )yes ( )no (*)any
+         changed: ( )yes ( )no (*)any
+         paths: +example.txt
+         changeCase: (*)none ( )smart ( )upper ( )lower
+<exit>  <reverse>  <forward>  <replace>  <all>  #  mark^m
+```
+
+
+
+
+
+
+
+```
+   find: dog
+replace: cat
+         [*]regex [ ]words [ ]matchCase [ ]multiLine
+         changeCase: {none}
+         within: {any}
+         selected: {any}
+         changed: {any}
+  paths: +example.txt
+<exit>  <reverse>  <forward>  <replace>  <all>  #  mark^m
+```
+
+
+
+## There are some options that I'd like to operate on the main document
+undo/redo/save/quit if these actions are done in the find UI, they should affect the current file.
+
