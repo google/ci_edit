@@ -111,6 +111,7 @@ class CiProgram:
   def commandLoop(self):
     # Cache the thread setting.
     useBgThread = app.prefs.editor['useBgThread']
+    cmdCount = 0
     # Track the time needed to handle commands and render the UI.
     # (A performance measurement).
     self.mainLoopTime = 0
@@ -140,7 +141,7 @@ class CiProgram:
           drawList, cursor, cmdCount = frame
           self.refresh(drawList, cursor, cmdCount)
       elif 1:
-        drawList, cursor, cmdCount = app.render.frame.grabFrame()
+        drawList, cursor  = app.render.frame.grabFrame()
         self.refresh(drawList, cursor, cmdCount)
       else:
         profile = cProfile.Profile()
@@ -247,7 +248,9 @@ class CiProgram:
           self.bg.put((self.programWindow, cmdList))
         else:
           self.programWindow.executeCommandList(cmdList)
+          self.programWindow.shortTimeSlice()
           self.programWindow.render()
+          cmdCount += len(cmdList)
 
   def startup(self):
     """A second init-like function. Called after command line arguments are
