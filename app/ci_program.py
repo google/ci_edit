@@ -68,13 +68,13 @@ class CiProgram:
     curses.mousemask(-1)
     curses.mouseinterval(0)
     # Enable mouse tracking in xterm.
-    sys.stdout.write('\033[?1002;h\n')
-    #sys.stdout.write('\033[?1005;h\n')
+    sys.stdout.write('\033[?1002;h')
+    #sys.stdout.write('\033[?1005;h')
     curses.meta(1)
     # Access ^c before shell does.
     curses.raw()
     # Enable Bracketed Paste Mode.
-    sys.stdout.write('\033[?2004;h\n')
+    sys.stdout.write('\033[?2004;h')
     try:
       curses.start_color()
       app.log.startup('aaaaaaaaaa', curses.has_colors())
@@ -499,7 +499,7 @@ def run_ci():
     app.log.flush()
     app.log.writeToFile('~/.ci_edit/recentLog')
     # Disable Bracketed Paste Mode.
-    sys.stdout.write('\033[?2004l\n')
+    sys.stdout.write('\033[?2004l')
   global userConsoleMessage
   if userConsoleMessage:
     fullPath = os.path.expanduser(os.path.expandvars(

@@ -276,6 +276,6 @@ class FakeCursesTestCase(unittest.TestCase):
 
   def tearDown(self):
     # Disable mouse tracking in xterm.
-    sys.stdout.write(u"\033[?1002l\n")
+    sys.stdout.write(u"\033[?1002l")
     # Disable Bracketed Paste Mode.
-    sys.stdout.write(u"\033[?2004l\n")
+    sys.stdout.write(u"\033[?2004l")
