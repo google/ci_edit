@@ -82,24 +82,26 @@ def runTests(tests, stopOnFailure=False):
   """Run through the list of tests."""
   for test in tests:
     suite = unittest.TestLoader().loadTestsFromTestCase(test)
-    result = unittest.TextTestRunner(verbosity = 2).run(suite)
+    result = unittest.TextTestRunner(verbosity=2).run(suite)
     if stopOnFailure and (result.failures or result.errors):
       return -1
   return 0
 
 def usage():
   print('Help:')
-  print('./unit_tests.py [--log] [<name>]\n')
+  print('./unit_tests.py [--log] [[no] <name>]\n')
+  print('  --help    This help')
   print('  --log     Print output from app.log.* calls')
+  print('  no        Run all tests except named tests')
   print('  <name>    Run the named set of tests (only)')
   print('The <name> argument is any of:')
-  testNames = TESTS.keys()
+  testNames = list(TESTS.keys())
   testNames.sort()
   for i in testNames:
     print(' ', i)
 
 def parseArgList(argList):
-  testList = TESTS.values()
+  testList = list(TESTS.values())
   try:
     argList.remove('--help')
     usage()
@@ -113,10 +115,16 @@ def parseArgList(argList):
   except ValueError:
     pass
   if len(argList) > 1:
-    if argList[1] not in TESTS:
+    if not (argList[1] == u"no" or argList[1] in TESTS):
       usage()
       sys.exit(-1)
-    testList = [TESTS[argList[1]]]
+    if argList[1] == u"no":
+      for i in argList[2:]:
+        del testList[testList.index(TESTS[i])]
+    else:
+      testList = []
+      for i in argList[1:]:
+        testList.append(TESTS[i])
   if useAppLog:
     app.log.wrapper(lambda: runTests(testList, True))
   else:
