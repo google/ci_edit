@@ -84,7 +84,7 @@ def runTests(tests, stopOnFailure=False):
     suite = unittest.TestLoader().loadTestsFromTestCase(test)
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     if stopOnFailure and (result.failures or result.errors):
-      return -1
+      return 1
   return 0
 
 def usage():
@@ -128,7 +128,7 @@ def parseArgList(argList):
   if useAppLog:
     app.log.wrapper(lambda: runTests(testList, True))
   else:
-    runTests(testList, True)
+    sys.exit(runTests(testList, True))
 
 if __name__ == '__main__':
   parseArgList(sys.argv)
