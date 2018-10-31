@@ -25,6 +25,7 @@ except ImportError:
 import signal
 import sys
 import threading
+import time
 import traceback
 
 import app.profile
@@ -45,9 +46,13 @@ class BackgroundThread(threading.Thread):
     return self.fromBackground.get()
 
   def hasMessage(self):
+    # This thread yield (time.sleep(0)) dramatically improves Python3
+    # performance. Without this line empty() will be called far too often.
+    time.sleep(0)
     return not self.fromBackground.empty()
 
   def hasUserEvent(self):
+    time.sleep(0)  # See note in hasMessage().
     return not self.toBackground.empty()
 
   def put(self, data):
@@ -75,6 +80,7 @@ def background(inputQueue, outputQueue):
         outputQueue.put(app.render.frame.grabFrame() + (cmdCount,))
         os.kill(pid, signalNumber)
         #app.profile.endPythonProfile(profile)
+        time.sleep(0)  # See note in hasMessage().
         if not inputQueue.empty():
           continue
       except queue.Empty:
