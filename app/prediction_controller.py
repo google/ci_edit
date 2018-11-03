@@ -12,6 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+try:
+  unicode('')
+except:
+  unicode = str
+  unichr = chr
+
 import os
 import re
 import time
@@ -35,7 +44,7 @@ class PredictionListController(app.controller.Controller):
 
   def buildFileList(self, currentFile):
     if app.config.strict_debug:
-      assert type(currentFile) is str
+      assert type(currentFile) is unicode, repr(currentFile)
 
     added = set()
     items = self.items = []
@@ -47,7 +56,8 @@ class PredictionListController(app.controller.Controller):
           items.append((i, i.fullPath, dirty, 'open'))
           added.add(i.fullPath)
         else:
-          items.append((i, '<new file> %s'%(i.lines[0][:20]), dirty, 'open'))
+          items.append((i, '<new file> %s'%(i.parser.rowText(0)[:20]), dirty,
+              'open'))
     if 1:
       # Add recent files.
       for recentFile in app.history.getRecentFiles():
@@ -219,7 +229,7 @@ class PredictionInputController(app.controller.Controller):
     predictionList = self.getNamedWindow('predictionList')
     if predictionList.textBuffer.penRow == 0:
       predictionList.textBuffer.cursorMoveTo(
-          len(predictionList.textBuffer.lines), 0)
+          predictionList.textBuffer.parser.rowCount(), 0)
     else:
       predictionList.textBuffer.cursorUp()
 

@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import os
 import re
 
@@ -45,7 +49,7 @@ class Mutator(app.selectable.Selectable):
     self.findRe = None
     self.findBackRe = None
     self.fileExtension = None
-    self.fullPath = ''
+    self.fullPath = u''
     self.fileStat = None
     self.goalCol = 0
     self.isReadOnly = False
@@ -303,7 +307,7 @@ class Mutator(app.selectable.Selectable):
       self.lines.insert(self.penRow + 1, line[self.penCol:])
       self.lines[self.penRow] = line[:self.penCol]
       for i in range(max(change[1] - 1, 0)):
-        self.lines.insert(self.penRow + 1, unicode(""))
+        self.lines.insert(self.penRow + 1, u"")
       if self.upperChangedRow > self.penRow:
         self.upperChangedRow = self.penRow
       self.__redoMove(change[2])
@@ -389,8 +393,8 @@ class Mutator(app.selectable.Selectable):
     self.markerRow -= change[1][2]
     self.markerCol -= change[1][3]
     self.selectionMode -= change[1][4]
-    assert self.penRow >= 0
-    assert self.penCol >= 0
+    assert self.penRow >= 0, self.penRow
+    assert self.penCol >= 0, self.penCol
 
   def undo(self):
     """Undo a set of redo nodes."""

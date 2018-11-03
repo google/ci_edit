@@ -12,14 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+try:
+  unicode('')
+except NameError:
+  unicode = str
+  unichr = chr
+
 import cProfile
 import pstats
-import cPickle as pickle
+try:
+  import cPickle as pickle
+except ImportError:
+  import pickle
 import curses
 import locale
 import io
 import os
-import StringIO
+import struct
 import sys
 import time
 import traceback
@@ -40,7 +52,7 @@ def userMessage(*args):
   if not userConsoleMessage:
     userConsoleMessage = ''
   args = [str(i) for i in args]
-  userConsoleMessage += unicode(' '.join(args) + '\n')
+  userConsoleMessage += u' '.join(args) + u'\n'
 
 
 class CiProgram:
@@ -56,15 +68,24 @@ class CiProgram:
     curses.mousemask(-1)
     curses.mouseinterval(0)
     # Enable mouse tracking in xterm.
-    sys.stdout.write('\033[?1002;h\n')
-    #sys.stdout.write('\033[?1005;h\n')
+    sys.stdout.write('\033[?1002;h')
+    #sys.stdout.write('\033[?1005;h')
     curses.meta(1)
     # Access ^c before shell does.
     curses.raw()
     # Enable Bracketed Paste Mode.
-    sys.stdout.write('\033[?2004;h\n')
-    #curses.start_color()
-    curses.use_default_colors()
+    sys.stdout.write('\033[?2004;h')
+    try:
+      curses.start_color()
+      app.log.startup('aaaaaaaaaa', curses.has_colors())
+      if not curses.has_colors():
+        userMessage("This terminal does not support color.")
+        self.quitNow()
+      else:
+        curses.use_default_colors()
+    except curses.error as e:
+      app.log.error(e)
+    app.log.startup(u"curses.COLORS", curses.COLORS)
     if 0:
       assert(curses.COLORS == 256)
       assert(curses.can_change_color() == 1)
@@ -90,6 +111,7 @@ class CiProgram:
   def commandLoop(self):
     # Cache the thread setting.
     useBgThread = app.prefs.editor['useBgThread']
+    cmdCount = 0
     # Track the time needed to handle commands and render the UI.
     # (A performance measurement).
     self.mainLoopTime = 0
@@ -114,18 +136,19 @@ class CiProgram:
           if frame[0] == 'exception':
             for line in frame[1]:
               userMessage(line[:-1])
-            self.exiting = True
+            self.quitNow()
             return
-          self.refresh(frame[0], frame[1])
+          drawList, cursor, cmdCount = frame
+          self.refresh(drawList, cursor, cmdCount)
       elif 1:
-        frame = app.render.frame.grabFrame()
-        self.refresh(frame[0], frame[1])
+        drawList, cursor  = app.render.frame.grabFrame()
+        self.refresh(drawList, cursor, cmdCount)
       else:
         profile = cProfile.Profile()
         profile.enable()
-        self.refresh(frame[0], frame[1])
+        self.refresh(drawList, cursor, cmdCount)
         profile.disable()
-        output = StringIO.StringIO()
+        output = io.StringIO.StringIO()
         stats = pstats.Stats(profile, stream=output).sort_stats('cumulative')
         stats.print_stats()
         app.log.info(output.getvalue())
@@ -141,6 +164,7 @@ class CiProgram:
           if self.exiting:
             return
           ch = cursesWindow.getch()
+          # assert type(ch) is int, type(ch)
           if ch == curses.ascii.ESC:
             # Some keys are sent from the terminal as a sequence of bytes
             # beginning with an Escape character. To help reason about these
@@ -165,8 +189,8 @@ class CiProgram:
                 if n != curses.ERR:
                   keySequence.append(n)
               keySequence = keySequence[:-(len(paste_end))]
-              #print 'keySequence', keySequence
-              eventInfo = ''.join([chr(i) for i in keySequence])
+              eventInfo = struct.pack('B' * len(keySequence),
+                  *keySequence).decode(u"utf-8")
             else:
               ch = tuple(keySequence)
             if not ch:
@@ -174,7 +198,7 @@ class CiProgram:
               # really the start of a sequence and is instead a stand-alone
               # Escape. Just forward the esc.
               ch = curses.ascii.ESC
-          elif 160 <= ch < 257:
+          elif type(ch) is int and 160 <= ch < 257:
             # Start of utf-8 character.
             u = None
             if (ch & 0xe0) == 0xc0:
@@ -203,10 +227,11 @@ class CiProgram:
               if frame[0] == 'exception':
                 for line in frame[1]:
                   userMessage(line[:-1])
-                self.exiting = True
+                self.quitNow()
                 return
             if frame is not None:
-              self.refresh(frame[0], frame[1])
+              drawList, cursor, cmdCount = frame
+              self.refresh(drawList, cursor, cmdCount)
           elif ch != curses.ERR:
             self.ch = ch
             if ch == curses.KEY_MOUSE:
@@ -223,7 +248,9 @@ class CiProgram:
           self.bg.put((self.programWindow, cmdList))
         else:
           self.programWindow.executeCommandList(cmdList)
+          self.programWindow.shortTimeSlice()
           self.programWindow.render()
+          cmdCount += len(cmdList)
 
   def startup(self):
     """A second init-like function. Called after command line arguments are
@@ -318,10 +345,10 @@ class CiProgram:
     app.log.info()
     self.exiting = True
 
-  def refresh(self, drawList, cursor):
+  def refresh(self, drawList, cursor, cmdCount):
     """Paint the drawList to the screen in the main thread."""
-    # Ask curses to hold the back buffer until curses refresh().
     cursesWindow = app.window.mainCursesWindow
+    # Ask curses to hold the back buffer until curses refresh().
     cursesWindow.noutrefresh()
     curses.curs_set(0)  # Hide cursor.
     for i in drawList:
@@ -340,6 +367,11 @@ class CiProgram:
         cursesWindow.leaveok(1)  # Don't update cursor position.
       except:
         pass
+    # This is a workaround to allow background processing (and parser screen
+    # redraw) to interact well with the test harness. The intent is to tell the
+    # test that the screen includes all commands executed up to N.
+    if hasattr(cursesWindow, 'test_rendered_command_count'):
+      cursesWindow.test_rendered_command_count(cmdCount)
 
   def makeHomeDirs(self, homePath):
     try:
@@ -369,7 +401,7 @@ class CiProgram:
       profile.enable()
       self.commandLoop()
       profile.disable()
-      output = StringIO.StringIO()
+      output = io.StringIO.StringIO()
       stats = pstats.Stats(profile, stream=output).sort_stats('cumulative')
       stats.print_stats()
       app.log.info(output.getvalue())
@@ -389,17 +421,27 @@ class CiProgram:
     def twoTries(primary, fallback):
       try:
         applyPalette(primary)
+        app.log.startup(u"Primary color scheme applied")
       except:
         try:
           applyPalette(fallback)
+          app.log.startup(u"Fallback color scheme applied")
         except:
-          pass
+          app.log.startup(u"No color scheme applied")
     app.color.colors = app.prefs.startup['numColors']
-    if app.prefs.startup['numColors'] == 8:
+    if app.prefs.startup['numColors'] == 0:
+      app.log.startup('using no colors')
+    elif app.prefs.startup['numColors'] == 8:
       app.prefs.prefs['color'] = app.prefs.color = app.prefs.color8
+      app.log.startup('using 8 colors')
       twoTries(app.prefs.editor['palette8'], 'default8')
+    elif app.prefs.startup['numColors'] == 16:
+      app.prefs.prefs['color'] = app.prefs.color = app.prefs.color16
+      app.log.startup('using 16 colors')
+      twoTries(app.prefs.editor['palette16'], 'default16')
     elif app.prefs.startup['numColors'] == 256:
       app.prefs.prefs['color'] = app.prefs.color = app.prefs.color256
+      app.log.startup('using 256 colors')
       twoTries(app.prefs.editor['palette'], 'default')
     else:
       raise Exception('unknown palette color count ' +
@@ -415,10 +457,17 @@ class CiProgram:
       recurse(self.zOrder, '  ')
       app.log.info('top window', self.topWindow())
 
+    def getDocumentSelection(self):
+      """This is primarily for testing."""
+      tb = self.programWindow.inputWindow.textBuffer
+      return (tb.penRow, tb.penCol, tb.markerRow, tb.markerCol,
+          tb.selectionMode)
+
     def getSelection(self):
       """This is primarily for testing."""
       tb = self.programWindow.focusedWindow.textBuffer
-      return (tb.penRow, tb.penCol, tb.markerRow, tb.markerCol, tb.selectionMode)
+      return (tb.penRow, tb.penCol, tb.markerRow, tb.markerCol,
+          tb.selectionMode)
 
     def topWindow(self):
       top = self
@@ -450,7 +499,7 @@ def run_ci():
     app.log.flush()
     app.log.writeToFile('~/.ci_edit/recentLog')
     # Disable Bracketed Paste Mode.
-    sys.stdout.write('\033[?2004l\n')
+    sys.stdout.write('\033[?2004l')
   global userConsoleMessage
   if userConsoleMessage:
     fullPath = os.path.expanduser(os.path.expandvars(

@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import curses
 import re
 import sys
@@ -34,12 +38,6 @@ class TextBuffer(app.actions.Actions):
     self.highlightRe = None
     self.highlightCursorLine = False
     self.highlightTrailingWhitespace = True
-    self.fileHistory = {}
-    self.fileEncoding = None
-    self.lastChecksum = None
-    self.lastFileSize = 0
-    self.bookmarks = []
-    self.nextBookmarkColorPos = 0
 
   def checkScrollToCursor(self, window):
     """Move the selected view rectangle so that the cursor is visible."""
@@ -103,16 +101,18 @@ class TextBuffer(app.actions.Actions):
             colorDelta)
     else:
       # Draw debug checker board.
-      splitRow = rows / 2
+      splitRow = rows // 2
       splitCol = 17
       self.drawTextArea(window, 0, 0, splitRow, splitCol, 0)
-      self.drawTextArea(window, 0, splitCol, splitRow, cols-splitCol, colorDelta)
-      self.drawTextArea(window, splitRow, 0, rows - splitRow, splitCol, colorDelta)
+      self.drawTextArea(window, 0, splitCol, splitRow, cols-splitCol,
+          colorDelta)
+      self.drawTextArea(window, splitRow, 0, rows - splitRow, splitCol,
+          colorDelta)
       self.drawTextArea(window, splitRow, splitCol, rows - splitRow,
           cols-splitCol, 0)
     # Blank screen past the end of the buffer.
     color = app.color.get('outside_document')
-    endOfText = min(max(len(self.lines) - self.view.scrollRow, 0), rows)
+    endOfText = min(max(self.parser.rowCount() - self.view.scrollRow, 0), rows)
     for i in range(endOfText, rows):
       window.addStr(i, 0, ' ' * cols, color)
 
@@ -126,7 +126,7 @@ class TextBuffer(app.actions.Actions):
     spellChecking = app.prefs.editor.get('spellChecking', True)
     if self.parser:
       # Highlight grammar.
-      rowLimit = min(max(len(self.lines) - startRow, 0), rows)
+      rowLimit = min(max(self.parser.rowCount() - startRow, 0), rows)
       for i in range(rowLimit):
         k = startCol
         if k == 0:
@@ -141,24 +141,23 @@ class TextBuffer(app.actions.Actions):
           grammarIndex += 1
           if remaining == 0:
             continue
-          line = self.lines[startRow + i]
-          assert remaining >= 0, remaining
+          line = self.parser.rowText(startRow + i)
           remaining = min(len(line) - k, remaining)
           length = min(endCol - k, remaining)
-          color = app.color.get(node.grammar.get('colorIndex', defaultColor),
+          color = app.color.get(node.grammar.get(u'colorIndex', defaultColor),
               colorDelta)
           if length <= 0:
-            window.addStr(top + i, left + k - startCol, ' ' * (endCol - k),
+            window.addStr(top + i, left + k - startCol, u' ' * (endCol - k),
                 color)
             break
           window.addStr(top + i, left + k - startCol, line[k:k + length], color)
           subStart = k - preceding
           subEnd = k + remaining
           subLine = line[subStart:subEnd]
-          if spellChecking and node.grammar.get('spelling', True):
+          if spellChecking and node.grammar.get(u'spelling', True):
             # Highlight spelling errors
-            grammarName = node.grammar.get('name', 'unknown')
-            misspellingColor = app.color.get('misspelling', colorDelta)
+            grammarName = node.grammar.get(u'name', 'unknown')
+            misspellingColor = app.color.get(u'misspelling', colorDelta)
             for found in re.finditer(app.regex.kReSubwords, subLine):
               reg = found.regs[0]  # Mispelllled word
               offsetStart = subStart + reg[0]
@@ -174,44 +173,44 @@ class TextBuffer(app.actions.Actions):
           k += length
     else:
       # For testing, draw without parser.
-      rowLimit = min(max(len(self.lines) - startRow, 0), rows)
+      rowLimit = min(max(self.parser.rowCount() - startRow, 0), rows)
       for i in range(rowLimit):
-        line = self.lines[startRow + i][startCol:endCol]
+        line = self.parser.rowText(startRow + i)[startCol:endCol]
         window.addStr(top + i, left, line + ' ' * (cols - len(line)),
-            app.color.get('default', colorDelta))
+            app.color.get(u'default', colorDelta))
     self.drawOverlays(window, top, left, rows, cols, colorDelta)
     if 0: # Experiment: draw our own cursor.
       if startRow <= self.penRow < endRow and  startCol <= self.penCol < endCol:
-        window.addStr(self.penRow - startRow, self.penCol - startCol, 'X', 200)
+        window.addStr(self.penRow - startRow, self.penCol - startCol, u'X', 200)
 
   def drawOverlays(self, window, top, left, maxRow, maxCol, colorDelta):
     startRow = self.view.scrollRow + top
     endRow = self.view.scrollRow + top + maxRow
     startCol = self.view.scrollCol + left
     endCol = self.view.scrollCol + left + maxCol
-    rowLimit = min(max(len(self.lines) - startRow, 0), maxRow)
+    rowLimit = min(max(self.parser.rowCount() - startRow, 0), maxRow)
     colors = app.prefs.color
     if 1:
       # Highlight brackets.
-      color = app.color.get('bracket', colorDelta)
+      color = app.color.get(u'bracket', colorDelta)
       for i in range(rowLimit):
-        line = self.lines[startRow + i][startCol:endCol]
+        line = self.parser.rowText(startRow + i)[startCol:endCol]
         for k in re.finditer(app.regex.kReBrackets, line):
           for f in k.regs:
             window.addStr(top + i, left+f[0], line[f[0]:f[1]], color)
     if 1:
       # Match brackets.
-      if (len(self.lines) > self.penRow and
-          len(self.lines[self.penRow]) > self.penCol):
-        ch = self.lines[self.penRow][self.penCol]
+      if (self.parser.rowCount() > self.penRow and
+          len(self.parser.rowText(self.penRow)) > self.penCol):
+        ch = self.parser.rowText(self.penRow)[self.penCol]
         def searchBack(closeCh, openCh):
           count = -1
           for row in range(self.penRow, -1, -1):
-            line = self.lines[row]
+            line = self.parser.rowText(row)
             if row == self.penRow:
               line = line[:self.penCol]
             found = [i for i in
-                re.finditer("(\\" + openCh + ")|(\\" + closeCh + ")", line)]
+                re.finditer(u"(\\" + openCh + u")|(\\" + closeCh + u")", line)]
             for match in reversed(found):
               if match.group() == openCh:
                 count += 1
@@ -222,17 +221,17 @@ class TextBuffer(app.actions.Actions):
                 if not (textCol < startCol or textCol >= endCol):
                   window.addStr(top + row - startRow,
                       textCol - self.view.scrollCol, openCh,
-                      app.color.get('matching_bracket', colorDelta))
+                      app.color.get(u'matching_bracket', colorDelta))
                 return
         def searchForward(openCh, closeCh):
           count = 1
           textCol = self.penCol + 1
           for row in range(self.penRow,
-              min(len(self.lines), startRow + maxRow)):
+              min(self.parser.rowCount(), startRow + maxRow)):
             if row != self.penRow:
               textCol = 0
-            line = self.lines[row][textCol:]
-            for match in re.finditer("(\\" + openCh + ")|(\\" + closeCh + ")",
+            line = self.parser.rowText(row)[textCol:]
+            for match in re.finditer(u"(\\" + openCh + u")|(\\" + closeCh + u")",
                 line):
               if match.group() == openCh:
                 count += 1
@@ -243,15 +242,15 @@ class TextBuffer(app.actions.Actions):
                 if not (textCol < startCol or textCol >= endCol):
                   window.addStr(top + row - startRow,
                       textCol - self.view.scrollCol, closeCh,
-                      app.color.get('matching_bracket', colorDelta))
+                      app.color.get(u'matching_bracket', colorDelta))
                 return
         matcher = {
-          '(': (')', searchForward),
-          '[': (']', searchForward),
-          '{': ('}', searchForward),
-          ')': ('(', searchBack),
-          ']': ('[', searchBack),
-          '}': ('{', searchBack),
+          u'(': (u')', searchForward),
+          u'[': (u']', searchForward),
+          u'{': (u'}', searchForward),
+          u')': (u'(', searchBack),
+          u']': (u'[', searchBack),
+          u'}': (u'{', searchBack),
         }
         look = matcher.get(ch)
         if look:
@@ -259,39 +258,39 @@ class TextBuffer(app.actions.Actions):
           window.addStr(
               top + self.penRow - startRow,
               self.penCol - self.view.scrollCol,
-              self.lines[self.penRow][self.penCol],
-              app.color.get('matching_bracket', colorDelta))
+              self.parser.rowText(self.penRow)[self.penCol],
+              app.color.get(u'matching_bracket', colorDelta))
     if 1:
       # Highlight numbers.
       for i in range(rowLimit):
-        line = self.lines[startRow + i][startCol:endCol]
+        line = self.parser.rowText(startRow + i)[startCol:endCol]
         for k in re.finditer(app.regex.kReNumbers, line):
           for f in k.regs:
             window.addStr(top + i, left + f[0], line[f[0]:f[1]],
-                app.color.get('number', colorDelta))
+                app.color.get(u'number', colorDelta))
     if self.highlightCursorLine:
       # Highlight the whole line at the cursor location.
       if startRow <= self.penRow < startRow + rowLimit:
-        line = self.lines[self.penRow][startCol:endCol]
+        line = self.parser.rowText(self.penRow)[startCol:endCol]
         window.addStr(top + self.penRow - startRow, left, line,
-            app.color.get('trailing_space', colorDelta))
+            app.color.get(u'trailing_space', colorDelta))
     if self.highlightTrailingWhitespace:
       # Highlight space ending lines.
       for i in range(rowLimit):
-        line = self.lines[startRow + i]
+        line = self.parser.rowText(startRow + i)
         if startRow + i == self.penRow and self.penCol == len(line):
           continue
         line = line[startCol:]
         for k in app.regex.kReEndSpaces.finditer(line):
           for f in k.regs:
             window.addStr(top + i, left + f[0], line[f[0]:f[1]],
-                app.color.get('trailing_space', colorDelta))
+                app.color.get(u'trailing_space', colorDelta))
     if 0:
       lengthLimit = self.lineLimitIndicator
       if endCol >= lengthLimit:
         # Highlight long lines.
         for i in range(rowLimit):
-          line = self.lines[startRow + i]
+          line = self.parser.rowText(startRow + i)
           if len(line) < lengthLimit or startCol > lengthLimit:
             continue
           window.addStr(top + i, left + lengthLimit - startCol,
@@ -299,7 +298,7 @@ class TextBuffer(app.actions.Actions):
     if self.findRe is not None:
       # Highlight find.
       for i in range(rowLimit):
-        line = self.lines[startRow + i][startCol:endCol]
+        line = self.parser.rowText(startRow + i)[startCol:endCol]
         for k in self.findRe.finditer(line):
           reg = k.regs[0]
           #for ref in k.regs[1:]:
@@ -319,7 +318,7 @@ class TextBuffer(app.actions.Actions):
               lowerCol < startCol or upperCol >= endCol):
             # There is an overlap.
             for i in range(start, end + 1):
-              line = self.lines[startRow + i][selStartCol:selEndCol]
+              line = self.parser.rowText(startRow + i)[selStartCol:selEndCol]
               window.addStr(top + i, selStartCol, line, colorSelected)
         elif (self.selectionMode == app.selectable.kSelectionAll or
             self.selectionMode == app.selectable.kSelectionCharacter or
@@ -328,13 +327,13 @@ class TextBuffer(app.actions.Actions):
           if not (lowerRow < startRow or upperRow >= endRow):
             # There is an overlap.
             # Go one row past the selection or to the last line.
-            for i in range(start, min(end + 1, len(self.lines) - startRow)):
-              line = self.lines[startRow + i]
+            for i in range(start, min(end + 1, self.parser.rowCount() - startRow)):
+              line = self.parser.rowText(startRow + i)
               # TODO(dschuyler): This is essentially
               # left + (upperCol or (scrollCol + left)) - scrollCol - left
               # which seems like it could be simplified.
               paneCol = left + selStartCol - startCol
-              if len(line) == len(self.lines[startRow + i]):
+              if len(line) == len(self.parser.rowText(startRow + i)):
                 line += " "  # Maybe do: "\\n".
               if i == lowerRow - startRow and i == upperRow - startRow:
                 # Selection entirely on one line.

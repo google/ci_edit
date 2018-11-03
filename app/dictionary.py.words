@@ -23,6 +23,7 @@ ascii
 atime
 basename
 baudrate
+binascii
 btab
 builtins
 bytecode
@@ -48,9 +49,12 @@ ctrl
 ctypes
 curdir
 dataerr
+dedent
 def
 defpath
 del
+delitem
+delslice
 dev
 devnull
 difflib
@@ -113,6 +117,8 @@ getlogin
 getmaxyx
 getmouse
 getmtime
+getnev
+getpass
 getpgid
 getpgrp
 getpid
@@ -124,8 +130,10 @@ getrefcount
 getsid
 getsize
 getsizeof
+getslice
 gettrace
 getuid
+getuser
 getvalue
 getyx
 gid
@@ -134,6 +142,7 @@ goto
 hasattr
 hashlib
 hexdigest
+hexlify
 hexversion
 hglobal
 hinstance
@@ -192,6 +201,7 @@ maxint
 maxsize
 maxunicode
 memmove
+metavar
 min
 mkdir
 mkfifo
@@ -202,6 +212,7 @@ moveable
 mtime
 multiline
 mvwin
+nargs
 ndelay
 ndiff
 newwin
@@ -233,6 +244,7 @@ pid
 plen
 popen
 ppage
+prog
 prv
 ps
 pstats
@@ -245,6 +257,7 @@ rdwr
 re
 readlines
 readlink
+realpath
 regex
 regs
 relpath
@@ -268,6 +281,7 @@ setegid
 seteuid
 setgid
 setgroups
+setitem
 setlocale
 setpgid
 setpgrp
@@ -276,6 +290,7 @@ setrecursionlimit
 setregid
 setreuid
 setsid
+setslice
 settrace
 setuid
 shlock
@@ -283,6 +298,7 @@ shome
 shutil
 sigalrm
 sighup
+sigterm
 sigusr
 sigwinch
 sizeof
@@ -305,6 +321,7 @@ startswith
 statvfs
 str
 strftime
+subparsers
 symlink
 sys
 sysconf
@@ -314,6 +331,7 @@ tempfail
 tempfile
 tempnam
 termios
+textwrap
 timeit
 tiocgwinsz
 tmpfile

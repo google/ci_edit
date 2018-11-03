@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import unittest
 
 import app.log
@@ -152,6 +156,46 @@ void blah();
     self.assertEqual(self.textBuffer.markerCol, wordEnd)
     self.assertEqual(self.textBuffer.penRow, row)
     self.assertEqual(self.textBuffer.penCol, 0)
+
+
+class TextIndent(unittest.TestCase):
+  def setUp(self):
+    app.log.shouldWritePrintLog = False
+    self.textBuffer = app.text_buffer.TextBuffer()
+    self.textBuffer.setView(FakeView())
+    #self.assertEqual(self.textBuffer.scrollRow, 0)
+    #self.assertEqual(self.textBuffer.scrollCol, 0)
+
+  def tearDown(self):
+    self.textBuffer = None
+
+  def test_auto_insert_pair_disable(self):
+    class FakeParser:
+      def grammarAt(self, row, col):
+        return { 'indent': '  ' }
+    app.prefs.editor['autoInsertClosingCharacter'] = False
+    tb = self.textBuffer
+    insert = self.textBuffer.insertPrintableWithPairing
+    self.assertEqual(len(tb.lines), 1)
+    insert(ord('a'), None)
+    insert(ord(':'), None)
+    tb.carriageReturn()
+    self.assertEqual(tb.lines[0], 'a:')
+    self.assertEqual(tb.lines[1], '')
+    tb.parser = FakeParser()
+    tb.backspace()
+    tb.carriageReturn()
+    self.assertEqual(tb.lines[0], 'a:')
+    self.assertEqual(tb.lines[1], '  ')
+    insert(ord('b'), None)
+    insert(ord(':'), None)
+    tb.carriageReturn()
+    insert(ord('c'), None)
+    insert(ord(':'), None)
+    tb.carriageReturn()
+    self.assertEqual(tb.lines[0], 'a:')
+    self.assertEqual(tb.lines[1], '  b:')
+    self.assertEqual(tb.lines[2], '    c:')
 
 
 class TextInsert(unittest.TestCase):

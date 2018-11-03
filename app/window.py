@@ -12,6 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+try:
+  type(u"") is unicode
+except:
+  unicode = str
+  unichr = chr
+
 import bisect
 import os
 import sys
@@ -259,6 +268,13 @@ class ViewWindow:
     assert f
     f.showWindowHierarchy()
 
+  def doPreCommand(self):
+    pass
+
+  def longTimeSlice(self):
+    """returns whether work is finished (no need to call again)."""
+    return True
+
   def shortTimeSlice(self):
     pass
 
@@ -286,7 +302,7 @@ class ViewWindow:
     self.top += rows
     self.rows -= rows
 
-  def setParent(self, parent, layerIndex=sys.maxint):
+  def setParent(self, parent, layerIndex=sys.maxsize):
     """Setting the parent will cause the the window to refresh (i.e. if self
     was hidden with detach() it will no longer be hidden).
     """
@@ -304,10 +320,12 @@ class ViewWindow:
 
   def writeLine(self, text, color):
     """Simple line writer for static windows."""
-    text = unicode(text)[:self.cols]
-    text = text + ' ' * max(0, self.cols - len(text))
+    if app.config.strict_debug:
+      type(text) is unicode
+    text = text[:self.cols]
+    text = text + u' ' * max(0, self.cols - len(text))
     app.render.frame.addStr(self.top + self.writeLineRow, self.left,
-        text.encode('utf-8'), color)
+        text.encode(u'utf-8'), color)
     self.writeLineRow += 1
 
 
@@ -335,7 +353,6 @@ class ActiveWindow(ViewWindow):
   def setController(self, controller):
     if app.config.strict_debug:
       assert issubclass(self.__class__, Window), self
-      assert type(controller) == types.ClassType, type(controller)
     self.controller = controller(self)
 
   def unfocus(self):
@@ -398,6 +415,23 @@ class Window(ActiveWindow):
     textBuffer.setView(self)
     self.textBuffer = textBuffer
 
+  def doPreCommand(self):
+    if self.textBuffer is not None:
+      self.textBuffer.setMessage()
+
+  def longTimeSlice(self):
+    """returns whether work is finished (no need to call again)."""
+    finished = True
+    tb = self.textBuffer
+    if tb is not None and tb.parser.fullyParsedToLine < len(tb.lines):
+      tb.parseDocument()
+      # If a user event came in while parsing, the parsing will be paused (to be
+      # resumed after handling the event).
+      finished = tb.parser.fullyParsedToLine >= len(tb.lines)
+    for child in self.zOrder:
+      finished = finished and child.longTimeSlice()
+    return finished
+
   def shortTimeSlice(self):
     if self.textBuffer is not None:
       self.textBuffer.parseScreenMaybe()
@@ -430,7 +464,7 @@ class LabelWindow(ViewWindow):
     if self.rows <= 0:
       return
     line = self.label[:self.cols]
-    line = unicode("%*s") % (self.cols * self.align, line)
+    line = u"%*s" % (self.cols * self.align, line)
     self.addStr(0, 0, line, self.color)
     ViewWindow.render(self)
 
@@ -833,7 +867,6 @@ class StatusLine(ViewWindow):
       color = (tb.message[1]
           if tb.message[1] is not None
           else app.color.get('status_line'))
-      tb.setMessage()
     if 0:
       if tb.isDirty():
         statusLine += ' * '
@@ -844,10 +877,10 @@ class StatusLine(ViewWindow):
     colPercentage = 0
     lineCount = len(tb.lines)
     if lineCount:
-      rowPercentage = self.host.textBuffer.penRow * 100 / lineCount
+      rowPercentage = self.host.textBuffer.penRow * 100 // lineCount
       charCount = len(tb.lines[self.host.textBuffer.penRow])
       if self.host.textBuffer.penCol != 0:
-        colPercentage = self.host.textBuffer.penCol * 100 / charCount
+        colPercentage = self.host.textBuffer.penCol * 100 // charCount
     # Format.
     rightSide = ''
     if len(statusLine):
@@ -1470,7 +1503,7 @@ class PopupWindow(Window):
     cols = min(self.longestLineLength + 6, maxCols)
     rows = min(len(self.__message) + 4, maxRows)
     self.resizeTo(rows, cols)
-    self.moveTo(maxRows / 2 - rows / 2, maxCols / 2 - cols / 2)
+    self.moveTo(maxRows // 2 - rows // 2, maxCols // 2 - cols // 2)
     color = app.color.get('popup_window')
     for row in range(rows):
       if row == rows - 2 and self.showOptions:
@@ -1481,7 +1514,7 @@ class PopupWindow(Window):
       else:
         message = self.__message[row - 1]
       lineLength = len(message)
-      spacing1 = (cols - lineLength) / 2
+      spacing1 = (cols - lineLength) // 2
       spacing2 = cols - lineLength - spacing1
       self.addStr(row, 0, ' ' * spacing1 + message + ' ' * spacing2, color)
 

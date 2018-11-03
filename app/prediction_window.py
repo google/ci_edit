@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import app.color
 import app.config
 import app.cu_editor
@@ -52,14 +56,14 @@ class PredictionList(app.window.Window):
     label.color = color
 
   def highlightLine(self, row):
-    self.textBuffer.penRow = min(row, len(self.textBuffer.lines) - 1)
+    self.textBuffer.penRow = min(row, self.textBuffer.parser.rowCount() - 1)
     self.textBuffer.penCol = 0
     app.log.info(self.textBuffer.penRow)
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
     self.highlightLine(self.scrollRow + paneRow)
     row = self.scrollRow + paneRow
-    if row >= len(self.textBuffer.lines):
+    if row >= self.textBuffer.parser.rowCount():
       return
     self.controller.openFileOrDir(row)
 
@@ -124,6 +128,7 @@ class PredictionList(app.window.Window):
               self.statusColumn.cols, i[2]
               ) for i in items
           ]))
+    self.textBuffer.parseScreenMaybe()  # TODO(dschuyler): Add test.
     self.textBuffer.cursorMoveToBegin()
 
   def onPrefChanged(self, category, name):
@@ -159,7 +164,7 @@ class PredictionInputWindow(app.window.Window):
     self.setTextBuffer(app.text_buffer.TextBuffer())
 
   def getPath(self):
-    return self.textBuffer.lines[0]
+    return self.textBuffer.parser.rowText(0)
 
   def setPath(self, path):
     self.textBuffer.replaceLines((path,))

@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import re
 
 import app.log
@@ -45,8 +49,8 @@ kSelectionModeNames = [
 
 class BaseLineBuffer:
   def __init__(self):
-    self.lines = [unicode("")]
-    self.message = ('New buffer', None)
+    self.lines = [u""]
+    self.message = (u"New buffer", None)
 
   def isEmpty(self):
     return len(self.lines) == 1 and len(self.lines[0]) == 0

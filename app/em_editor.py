@@ -14,15 +14,20 @@
 
 """Key bindings for the emacs-like editor."""
 
+# For Python 2to3 support.
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import curses
 import curses.ascii
 import os
 import re
-import text_buffer
 
 from app.curses_util import *
 import app.controller
 import app.log
+import app.text_buffer
 
 
 def parseInt(str):
@@ -262,7 +267,7 @@ class InteractiveFind(EditText):
     searchFor = self.textBuffer.lines[0]
     try:
       self.findCmd(searchFor)
-    except re.error, e:
+    except re.error as e:
       self.error = e.message
     self.findCmd = self.document.textBuffer.find
 
@@ -311,7 +316,7 @@ class InteractiveGoto(EditText):
     self.changeToInputWindow()
 
   def gotoHalfway(self):
-    self.cursorMoveTo(len(self.document.textBuffer.lines)/2+1, 0)
+    self.cursorMoveTo(len(self.document.textBuffer.lines) // 2 + 1, 0)
     self.changeToInputWindow()
 
   def gotoTop(self):

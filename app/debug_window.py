@@ -12,6 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+try:
+  unicode('')
+except:
+  unicode = str
+  unichr = chr
+
 import curses
 
 import app.curses_util
@@ -97,21 +106,21 @@ class DebugUndoWindow(app.window.ActiveWindow):
     # Display some of the redo chain.
     redoColorA = app.color.get(100)
     self.writeLine(
-        "procTemp %d temp %r"
+        u"procTemp %d temp %r"
         %(textBuffer.processTempChange, textBuffer.tempChange,),
         redoColorA)
     self.writeLine(
-        "redoIndex %3d savedAt %3d depth %3d"
+        u"redoIndex %3d savedAt %3d depth %3d"
         %(textBuffer.redoIndex, textBuffer.savedAtRedoIndex,
           len(textBuffer.redoChain)),
         redoColorA)
     redoColorB = app.color.get(101)
     split = 8
     for i in range(textBuffer.redoIndex - split, textBuffer.redoIndex):
-      text = i >= 0 and textBuffer.redoChain[i] or ''
+      text = i >= 0 and repr(textBuffer.redoChain[i]) or u''
       self.writeLine(text, redoColorB)
     redoColorC = app.color.get(1)
     for i in range(textBuffer.redoIndex, textBuffer.redoIndex + split - 1):
       text = (i < len(textBuffer.redoChain) and
           textBuffer.redoChain[i] or '')
-      self.writeLine(text, redoColorC)
+      self.writeLine(unicode(text), redoColorC)

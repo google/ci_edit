@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import re
 
 
@@ -25,7 +29,10 @@ def joinReWordList(reList):
 kNonMatchingRegex = r'^\b$'
 kReNonMatching = re.compile(kNonMatchingRegex)
 
-kReBrackets = re.compile('[[\]{}()]')
+# Beware, to include a ] in a set, it should be the first character in the set.
+# So, the first ] does not close the set and the second [ does not open a set.
+# The set of characters is ]{}()[.
+kReBrackets = re.compile('[]{}()[]')
 
 kReComments = re.compile('(?:#|//).*$|/\*.*?\*/|<!--.*?-->')
 

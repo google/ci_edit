@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import bisect
 import glob
 import io
@@ -32,7 +36,7 @@ class OsDictionary:
       self.fileLength = self.file.seek(0, 2)  # Seek to end of file.
       self.pageSize = 1024 * 8  # Arbitrary.
       # Add one to pick up any partial page at the end.
-      self.filePages = self.fileLength / self.pageSize + 1
+      self.filePages = self.fileLength // self.pageSize + 1
     except IOError:
       self.file = None
     self.cache = {}
@@ -55,7 +59,7 @@ class OsDictionary:
           app.log.info('spelling leash', word)
           return False
         leash -= 1
-        page = low + (high - low) / 2
+        page = low + (high - low) // 2
         self.file.seek(page * self.pageSize)
         # Add 100 to catch any words that straddle a page.
         size = min(self.pageSize + 100, self.fileLength - page * self.pageSize)

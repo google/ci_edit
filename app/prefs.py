@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import curses
 import io
 import json
@@ -25,6 +29,7 @@ import app.log
 import app.regex
 
 importStartTime = time.time()
+prefsDirectory = "~/.ci_edit/prefs/"
 prefs = app.default_prefs.prefs
 
 def joinReList(reList):
@@ -38,7 +43,7 @@ def loadPrefs(fileName, category):
   prefs.setdefault(category, {})
   # Check the user home directory for preferences.
   prefsPath = os.path.expanduser(os.path.expandvars(
-      "~/.ci_edit/prefs/%s.json" % (fileName,)))
+      os.path.join(prefsDirectory, "%s.json" % (fileName,))))
   if os.path.isfile(prefsPath) and os.access(prefsPath, os.R_OK):
     with open(prefsPath, 'r') as f:
       try:
@@ -53,21 +58,18 @@ def loadPrefs(fileName, category):
   return prefs[category]
 
 color8 = app.default_prefs.color8
+color16 = app.default_prefs.color16
 color256 = app.default_prefs.color256
 prefs['color'] = color256
 
 colorSchemeName = prefs['editor']['colorScheme']
-if colorSchemeName == 'custom':
-  # Check the user home directory for a color scheme preference. If found load
-  # it to replace the default color scheme.
-  prefs['color'].update(loadPrefs('color_scheme', 'color'))
 
 color = prefs['color']
-editor = loadPrefs('editor', 'editor')
+editor = prefs['editor']
 devTest = prefs['devTest']
 palette = prefs['palette']
 startup = {}
-status = loadPrefs('status', 'status')
+status = prefs[u"status"]
 
 
 grammars = {}
@@ -129,12 +131,23 @@ for k,v in prefs['grammar'].items():
   v['matchRe'] = re.compile(joinReList(markers))
   v['markers'] = markers
   v['matchGrammars'] = matchGrammars
+  newGrammarIndexLimit = 2 + len(v.get('contains', []))
+  errorIndexLimit = newGrammarIndexLimit + len(v.get('error', []))
+  keywordIndexLimit = errorIndexLimit + len(v.get('keywords', []))
+  typeIndexLimit = keywordIndexLimit + len(v.get('types', []))
+  specialIndexLimit = typeIndexLimit + len(v.get('special', []))
+  v['indexLimits'] = (newGrammarIndexLimit, errorIndexLimit, keywordIndexLimit,
+      typeIndexLimit, specialIndexLimit)
+
 # Reset the re.cache for user regexes.
 re.purge()
 
+nameToType = {}
 extensions = {}
 fileTypes = {}
 for k,v in prefs['fileType'].items():
+  for name in v.get('name', []):
+    nameToType[name] = v.get('grammar')
   for ext in v['ext']:
     extensions[ext] = v.get('grammar')
   fileTypes[k] = v
@@ -147,6 +160,18 @@ if 0:
     app.log.info('  ', k, ':', v)
 
 def init():
+  global editor
+  editor = loadPrefs('editor', 'editor')
+  global status
+  status = loadPrefs('status', 'status')
+
+  global colorSchemeName
+  colorSchemeName = prefs['editor']['colorScheme']
+  if colorSchemeName == 'custom':
+    # Check the user home directory for a color scheme preference. If found load
+    # it to replace the default color scheme.
+    prefs['color'].update(loadPrefs('color_scheme', 'color'))
+
   defaultColor = prefs['color']['default']
   defaultKeywordsColor = prefs['color']['keyword']
   defaultSpecialsColor = prefs['color']['special']
@@ -160,8 +185,14 @@ def init():
           prefs['color'].get(k+'_special_color', defaultSpecialsColor))
   app.log.info('prefs init')
 
-def getGrammar(fileExtension):
-  fileType = extensions.get(fileExtension, 'text')
+def getGrammar(filePath):
+  if filePath is None:
+    return grammars.get('text')
+  name = os.path.split(filePath)[1]
+  fileType = nameToType.get(name)
+  if fileType is None:
+    fileExtension = os.path.splitext(name)[1]
+    fileType = extensions.get(fileExtension, 'text')
   return grammars.get(fileType)
 
 def save(category, label, value):
@@ -170,7 +201,7 @@ def save(category, label, value):
   prefs.setdefault(category, {})
   prefs[category][label] = value
   prefsPath = os.path.expanduser(os.path.expandvars(
-      "~/.ci_edit/prefs/%s.json" % (category,)))
+      os.path.join(prefsDirectory, "%s.json" % (category,))))
   with open(prefsPath, 'w') as f:
     try:
       f.write(json.dumps(prefs[category]))

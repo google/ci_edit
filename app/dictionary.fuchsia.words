@@ -1,4 +1,4 @@
-# Copyright 2017 Google Inc.
+# Copyright 2018 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,6 +12,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-from .curses import *
-#__all__ = ["ascii"]
+# This is a list of non-English words that are in the open source Fuchsia OS.
+toolchains
+sessionctl
+nowait
+netaddr
+srv
+conns
+errorf
+blobfs
+merkleroot
+pkgfs
+tuf
+zxdb
+cmx
+eintr
+fxl
+fdx
+countof
+waitfor
+binfo
+mtx
+refcount
+chdir
+idx
+ctu
+fidl
+qemu

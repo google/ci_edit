@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import os
 import sys
 import unittest
@@ -29,13 +33,6 @@ kTestFile = '#bookmarks_test_file_with_unlikely_file_name~'
 
 class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
   def setUp(self):
-    if True:
-      # The buffer manager will retain the test file in RAM. Reset it.
-      try:
-        del sys.modules['app.buffer_manager']
-        import app.buffer_manager
-      except KeyError:
-        pass
     if os.path.isfile(kTestFile):
       os.unlink(kTestFile)
     self.assertFalse(os.path.isfile(kTestFile))
@@ -149,7 +146,7 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
     checkRanges(Bookmark(5000, 5000))
     checkRanges(Bookmark(-5000, 5000))
 
-    b = Bookmark(-3.99, 3.99) # Floats get casted to int (rounds towards zero).
+    b = Bookmark(-3.99, 3.99) # Floats get cast to int (rounds towards zero).
     self.assertFalse(-4 in b)
     self.assertTrue(-3 in b)
     self.assertFalse(4 in b)
@@ -301,7 +298,7 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
           "https://pypi.python.org/pypi/mock " + startYellow + "or you can " +
           "try running " + startBlue + "pip install mock." + disableColor)
       #raise Exception(exceptionMessage)
-      print exceptionMessage
+      print(exceptionMessage)
       return
     def test_with_an_x_colored_terminal(x):
       mock.patch.dict(app.prefs.startup, {'numColors': x}, clear=True)
@@ -396,52 +393,52 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
             "                                        ",
             "New buffer         |    1, 1 |   0%,  0%",
             "                                        "]),
-        self.writeText('one'),
+        self.writeText(u'one'),
         CTRL_E, 'b', 'm', CTRL_J, CTRL_J, # Create bookmark and go to next line.
         CTRL_E, 'b', 'm', CTRL_J, # Create bookmark.
-        self.writeText('two'), CTRL_J,
-        self.writeText('three'),
+        self.writeText(u'two'), CTRL_J,
+        self.writeText(u'three'),
         CTRL_E, 'b', 'm', CTRL_J, CTRL_J, # Create bookmark and go to next line.
-        self.writeText('four'), CTRL_J,
-        self.writeText('five'), CTRL_J,
-        self.writeText('six'), CTRL_J,
-        self.writeText('seven'), CTRL_J,
-        self.writeText('eight'), CTRL_J,
+        self.writeText(u'four'), CTRL_J,
+        self.writeText(u'five'), CTRL_J,
+        self.writeText(u'six'), CTRL_J,
+        self.writeText(u'seven'), CTRL_J,
+        self.writeText(u'eight'), CTRL_J,
         CTRL_E, 'b', 'm', CTRL_J, # Create a new bookmark.
-        self.writeText('nine'), CTRL_J,
-        self.writeText('ten'), CTRL_J,
-        self.writeText('eleven'), CTRL_J,
-        self.writeText('twelve'), CTRL_J,
-        self.writeText('thirteen'), CTRL_J,
-        self.writeText('fourteen'), CTRL_J,
-        self.writeText('fifteen'), CTRL_J,
-        self.writeText('sixteen'), CTRL_J,
-        self.writeText('seventeen'), CTRL_J,
-        self.writeText('eighteen'), CTRL_J,
-        self.writeText('nineteen'), CTRL_J,
-        self.writeText('twenty'), CTRL_J,
-        self.writeText('twenty-one'), CTRL_J,
-        self.writeText('twenty-two'), CTRL_J,
-        self.writeText('twenty-three'),
+        self.writeText(u'nine'), CTRL_J,
+        self.writeText(u'ten'), CTRL_J,
+        self.writeText(u'eleven'), CTRL_J,
+        self.writeText(u'twelve'), CTRL_J,
+        self.writeText(u'thirteen'), CTRL_J,
+        self.writeText(u'fourteen'), CTRL_J,
+        self.writeText(u'fifteen'), CTRL_J,
+        self.writeText(u'sixteen'), CTRL_J,
+        self.writeText(u'seventeen'), CTRL_J,
+        self.writeText(u'eighteen'), CTRL_J,
+        self.writeText(u'nineteen'), CTRL_J,
+        self.writeText(u'twenty'), CTRL_J,
+        self.writeText(u'twenty-one'), CTRL_J,
+        self.writeText(u'twenty-two'), CTRL_J,
+        self.writeText(u'twenty-three'),
         CTRL_E, 'b', 'm', CTRL_J, # Create a new bookmark.
         # Bookmarks are at positions (1, 4), (2, 1), (3, 6) (9, 1), (23, 13).
         # Note that rows here start at 1, so 1 is the first row.
         self.displayCheck(0, 0, [
-            " ci     *                               ",
-            "                                        ",
-            "    13 thirteen                         ",
-            "    14 fourteen                         ",
-            "    15 fifteen                          ",
-            "    16 sixteen                          ",
-            "    17 seventeen                        ",
-            "    18 eighteen                         ",
-            "    19 nineteen                         ",
-            "    20 twenty                           ",
-            "    21 twenty-one                       ",
-            "    22 twenty-two                       ",
-            "    23 twenty-three                     ",
-            "Added bookmark     |   23,13 |  95%,100%",
-            "                                        "]),
+            u" ci     *                               ",
+            u"                                        ",
+            u"    13 thirteen                         ",
+            u"    14 fourteen                         ",
+            u"    15 fifteen                          ",
+            u"    16 sixteen                          ",
+            u"    17 seventeen                        ",
+            u"    18 eighteen                         ",
+            u"    19 nineteen                         ",
+            u"    20 twenty                           ",
+            u"    21 twenty-one                       ",
+            u"    22 twenty-two                       ",
+            u"    23 twenty-three                     ",
+            u"Added bookmark     |   23,13 |  95%,100%",
+            u"                                        "]),
         KEY_F2, # Jump to the first bookmark (1, 4).
         self.displayCheck(0, 0, [
             " ci     *                               ",

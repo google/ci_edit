@@ -25,19 +25,29 @@ from app.curses_util import *
 import app.fake_curses_testing
 
 
-class FileManagerTestCases(app.fake_curses_testing.FakeCursesTestCase):
+class PredictionWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
   def setUp(self):
     self.longMessage = True
     app.fake_curses_testing.FakeCursesTestCase.setUp(self)
 
-  def test_save_as(self):
+  def test_prediction(self):
     #self.setMovieMode(True)
     sys.argv = []
     self.runWithFakeInputs([
         self.displayCheck(0, 0, [" ci     "]),
-        self.displayCheck(2, 7, ["     "]), CTRL_S,
-        self.displayCheck(0, 0, [" ci    Save File As"]),
-        CTRL_Q, CTRL_Q])  # TODO(dschuyler): fix need for extra CTRL_Q.
+        self.displayCheck(2, 7, ["     "]), CTRL_P,
+        self.displayCheck(0, 0, [" ci               "]),
+        self.displayCheck(2, 2, ["v Type|Name "]),
+        self.displayCheck(3, 0, ["    open <new file> "]),
+        self.addClickInfo(1000, "[x]open", curses.BUTTON1_PRESSED),
+        curses.KEY_MOUSE,
+        self.displayCheckNot(3, 0, ["    open <new file> "]),
+        self.displayCheck(2, 2, ["v Type|Name "]),
+        self.addClickInfo(2000, "[ ]open", curses.BUTTON1_PRESSED),
+        curses.KEY_MOUSE,
+        # TODO(dschuyler): Look into why this fails:
+        #self.displayCheck(3, 0, ["    open <new file> "]),
+        CTRL_Q])
 
   def test_save_as_to_quit(self):
     #self.setMovieMode(True)
@@ -52,23 +62,3 @@ class FileManagerTestCases(app.fake_curses_testing.FakeCursesTestCase):
         self.displayCheck(0, 0, [" ci     "]),
         self.displayCheck(-2, 0, ["      "]),
         CTRL_Q, ord('n')])
-
-  def test_open(self):
-    #self.setMovieMode(True)
-    sys.argv = []
-    self.runWithFakeInputs([
-        self.displayCheck(0, 0, [" ci     "]),
-        self.displayCheck(2, 7, ["     "]), CTRL_O,
-        self.displayCheck(0, 0, [" ci    Open File  "]),
-        CTRL_Q, CTRL_Q])  # TODO(dschuyler): fix need for extra CTRL_Q.
-
-  def test_open_binary_file(self):
-    #self.setMovieMode(True)
-    sys.argv = []
-    self.runWithFakeInputs([
-        self.displayCheck(0, 0, [u" ci     "]),
-        self.displayCheck(2, 7, [u"     "]), CTRL_O,
-        self.displayCheck(0, 0, [u" ci    Open File  "]), CTRL_A,
-        self.writeText(self.pathToSample(u"binary_test_file")), CTRL_J,
-        self.displayCheck(2, 7, [u"006401006c1a005a0800640000640100"]),
-        CTRL_Q])

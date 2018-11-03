@@ -12,11 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# For Python 2to3 support.
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import os
-import Queue
+try:
+  import Queue as queue
+except ImportError:
+  import queue
 import signal
 import sys
 import threading
+import time
 import traceback
 
 import app.profile
@@ -37,9 +46,13 @@ class BackgroundThread(threading.Thread):
     return self.fromBackground.get()
 
   def hasMessage(self):
+    # This thread yield (time.sleep(0)) dramatically improves Python3
+    # performance. Without this line empty() will be called far too often.
+    time.sleep(0)
     return not self.fromBackground.empty()
 
   def hasUserEvent(self):
+    time.sleep(0)  # See note in hasMessage().
     return not self.toBackground.empty()
 
   def put(self, data):
@@ -47,6 +60,7 @@ class BackgroundThread(threading.Thread):
 
 
 def background(inputQueue, outputQueue):
+  cmdCount = 0
   block = True
   pid = os.getpid()
   signalNumber = signal.SIGUSR1
@@ -62,23 +76,20 @@ def background(inputQueue, outputQueue):
         program.shortTimeSlice()
         program.render()
         # debugging only: program.showWindowHierarchy()
-        outputQueue.put(app.render.frame.grabFrame())
+        cmdCount += len(message)
+        outputQueue.put(app.render.frame.grabFrame() + (cmdCount,))
         os.kill(pid, signalNumber)
         #app.profile.endPythonProfile(profile)
+        time.sleep(0)  # See note in hasMessage().
         if not inputQueue.empty():
           continue
-      except Queue.Empty:
+      except queue.Empty:
         pass
-      #continue
-      tb = program.focusedWindow.textBuffer
-      block = len(tb.parser.rows) >= len(tb.lines)
-      if not block:
-        program.focusedWindow.textBuffer.parseDocument()
-        block = len(tb.parser.rows) >= len(tb.lines)
-        if block:
-          program.render()
-          outputQueue.put(app.render.frame.grabFrame())
-          os.kill(pid, signalNumber)
+      block = program.longTimeSlice()
+      if block:
+        program.render()
+        outputQueue.put(app.render.frame.grabFrame() + (cmdCount,))
+        os.kill(pid, signalNumber)
     except Exception as e:
       app.log.exception(e)
       app.log.error('bg thread exception', e)
@@ -94,8 +105,8 @@ def background(inputQueue, outputQueue):
 
 def startupBackground():
   global bg
-  toBackground = Queue.Queue()
-  fromBackground = Queue.Queue()
+  toBackground = queue.Queue()
+  fromBackground = queue.Queue()
   bg = BackgroundThread(
       target=background, args=(toBackground, fromBackground))
   bg.setName('ci_edit_bg')

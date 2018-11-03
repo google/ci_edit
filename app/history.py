@@ -16,7 +16,16 @@
   Track user history to provide features such as resuming editing at the same
   cursor position after reloading a file; or a recent file list.
 """
-import cPickle as pickle
+
+# For Python 2to3 support.
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
+try:
+  import cPickle as pickle
+except ModuleNotFoundError:
+  import pickle
 import hashlib
 import os
 import time
@@ -42,7 +51,10 @@ def loadUserHistory(historyPath=pathToHistory):
   pathToHistory = historyPath
   if os.path.isfile(historyPath):
     with open(historyPath, 'rb') as file:
-      userHistory = pickle.load(file)
+      try:
+        userHistory = pickle.load(file)
+      except ValueError as e:
+        app.log.info(unicode(e))
 
 def saveUserHistory(fileInfo, fileHistory, historyPath=pathToHistory):
   """

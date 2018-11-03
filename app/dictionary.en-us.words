@@ -15,6 +15,7 @@
 # This word list is a fallback for times when an OS dictionary is not available.
 # It's not a full list of English words (not by a long way).
 # Additional abbreviations, acronyms, and names are in dictionary.en-misc.words.
+stomped
 a
 aah
 aardvark
@@ -147,6 +148,7 @@ accounted
 accounting
 accounts
 accreditation
+accrete
 accrue
 accrued
 accruing
@@ -598,6 +600,7 @@ ambiguities
 ambiguity
 ambiguous
 ambit
+ambition
 ambitious
 ambler
 ambrosia
@@ -618,6 +621,7 @@ among
 amortize
 amortized
 amount
+amounting
 amounts
 amp
 ampersand
@@ -903,6 +907,7 @@ arithmetician
 arity
 ark
 arm
+armadillo
 armed
 arms
 army
@@ -999,6 +1004,7 @@ assets
 assign
 assignable
 assigned
+assignee
 assigner
 assigning
 assignment
@@ -1092,6 +1098,7 @@ attenuated
 attenuation
 attest
 attestation
+attestations
 attic
 attitude
 attn
@@ -1728,6 +1735,7 @@ blouse
 blow
 blowing
 blown
+blows
 blowup
 blue
 blueberries
@@ -2451,6 +2459,7 @@ centralize
 centralized
 centralizes
 centralizing
+centric
 cents
 century
 cert
@@ -3312,6 +3321,7 @@ conflicting
 conflicts
 conform
 conformance
+conformant
 conformer
 conforming
 conforms
@@ -5729,6 +5739,7 @@ eon
 ephemeral
 ephemerally
 epic
+epilog
 epilogue
 epiphany
 episode
@@ -6709,6 +6720,7 @@ format
 formation
 formats
 formatted
+formatters
 formatting
 formed
 former
@@ -8140,6 +8152,7 @@ implementations
 implemented
 implementer
 implementing
+implementor
 implementors
 implements
 implicated
@@ -8456,6 +8469,7 @@ initialization
 initialize
 initialized
 initializer
+initializers
 initializes
 initializing
 initially
@@ -8578,6 +8592,7 @@ instantiate
 instantiated
 instantiates
 instantiating
+instantiation
 instantiations
 instantly
 instants
@@ -8727,6 +8742,10 @@ interned
 internet
 interns
 internship
+interoperability
+interoperate
+interoperated
+interoperation
 interplay
 interpolate
 interpolated
@@ -10270,6 +10289,7 @@ mick
 micro
 microchip
 microcomputer
+microcontroller
 microcosm
 microelectronic
 microelectronics
@@ -10670,6 +10690,7 @@ multilayer
 multilayered
 multilingual
 multimedia
+multipart
 multiple
 multiples
 multiplex
@@ -11364,6 +11385,7 @@ optimum
 opting
 option
 optional
+optionality
 optionally
 options
 opts
@@ -11866,6 +11888,7 @@ pause
 paused
 pauses
 pausing
+paver
 pavilion
 paw
 pawn
@@ -12477,6 +12500,7 @@ posteriors
 posterity
 posters
 postfix
+postfixed
 posting
 postings
 postlude
@@ -12532,6 +12556,7 @@ pre
 preamble
 preambles
 prearranged
+prebuilt
 precarious
 precaution
 precautions
@@ -12589,6 +12614,7 @@ preemptive
 preemptively
 preexisting
 pref
+prefabricated
 preface
 prefecture
 prefer
@@ -14037,6 +14063,7 @@ replication
 replicator
 replied
 replies
+replugging
 reply
 replying
 repopulate
@@ -16092,6 +16119,7 @@ stashing
 stat
 state
 stated
+stateful
 stateless
 statement
 statements
@@ -17446,6 +17474,7 @@ tranquility
 trans
 transact
 transaction
+transactional
 transactions
 transatlantic
 transceiver
@@ -17903,6 +17932,7 @@ underlying
 undermentioned
 undermine
 underneath
+underperformed
 underrate
 underscore
 underscored
