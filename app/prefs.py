@@ -84,7 +84,7 @@ for k,v in prefs['grammar'].items():
     # keywords re.
     v['keywordsRe'] = re.compile(
         joinReWordList(v.get('keywords', []) + v.get('types', [])))
-    v['errorsRe'] = re.compile(joinReList(v.get('error', [])))
+    v['errorsRe'] = re.compile(joinReList(v.get('errors', [])))
     v['specialsRe'] = re.compile(joinReList(v.get('special', [])))
   # contains and end re.
   matchGrammars = []
@@ -116,7 +116,7 @@ for k,v in prefs['grammar'].items():
     markers.append(g['begin'])
     matchGrammars.append(g)
   # Index [2+len(contains)..]
-  markers += v.get('error', [])
+  markers += v.get('errors', [])
   # Index [2+len(contains)+len(error)..]
   for keyword in v.get('keywords', []):
     markers.append(r'\b' + keyword + r'\b')
@@ -132,7 +132,7 @@ for k,v in prefs['grammar'].items():
   v['markers'] = markers
   v['matchGrammars'] = matchGrammars
   newGrammarIndexLimit = 2 + len(v.get('contains', []))
-  errorIndexLimit = newGrammarIndexLimit + len(v.get('error', []))
+  errorIndexLimit = newGrammarIndexLimit + len(v.get('errors', []))
   keywordIndexLimit = errorIndexLimit + len(v.get('keywords', []))
   typeIndexLimit = keywordIndexLimit + len(v.get('types', []))
   specialIndexLimit = typeIndexLimit + len(v.get('special', []))
