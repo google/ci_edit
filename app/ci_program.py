@@ -77,7 +77,6 @@ class CiProgram:
     sys.stdout.write('\033[?2004;h')
     try:
       curses.start_color()
-      app.log.startup('aaaaaaaaaa', curses.has_colors())
       if not curses.has_colors():
         userMessage("This terminal does not support color.")
         self.quitNow()
@@ -273,6 +272,8 @@ class CiProgram:
     takeAll = False  # Take all args as file paths.
     timeStartup = False
     numColors = min(curses.COLORS, 256)
+    if os.getenv(u"CI_EDIT_SINGLE_THREAD"):
+      app.prefs.editor['useBgThread'] = False
     for i in sys.argv[1:]:
       if not takeAll and i[:1] == '+':
         openToLine = int(i[1:])
