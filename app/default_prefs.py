@@ -364,7 +364,7 @@ prefs = {
       'grammar': 'py',
     },
     'rust': {
-      'ext': ['.rust'],
+      'ext': ['.rs'],
       'grammar': 'rust',
     },
     'text': {
@@ -798,7 +798,7 @@ prefs = {
       'single_line': True,
     },
     'rust': {
-      'indent': '  ',
+      'indent': '    ',
       'keywords': [
         'abstract', 'alignof', 'as', 'become', 'box', 'break', 'const',
         'continue', 'crate', 'do', 'else', 'enum', 'extern', 'false', 'final',
