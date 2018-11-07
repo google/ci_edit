@@ -24,7 +24,7 @@ from __future__ import print_function
 
 try:
   import cPickle as pickle
-except ModuleNotFoundError:
+except ImportError:
   import pickle
 import hashlib
 import os
