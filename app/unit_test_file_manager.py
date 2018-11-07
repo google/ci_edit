@@ -1,4 +1,4 @@
-# -*- coding: latin-1 -*-
+# -*- coding: utf-8 -*-
 
 # Copyright 2018 Google Inc.
 #
@@ -71,4 +71,15 @@ class FileManagerTestCases(app.fake_curses_testing.FakeCursesTestCase):
         self.displayCheck(0, 0, [u" ci    Open File  "]), CTRL_A,
         self.writeText(self.pathToSample(u"binary_test_file")), CTRL_J,
         self.displayCheck(2, 7, [u"006401006c1a005a0800640000640100"]),
+        CTRL_Q])
+
+  def test_open_valid_unicode_file(self):
+    #self.setMovieMode(True)
+    sys.argv = []
+    self.runWithFakeInputs([
+        self.displayCheck(0, 0, [u" ci     "]),
+        self.displayCheck(2, 7, [u"     "]), CTRL_O,
+        self.displayCheck(0, 0, [u" ci    Open File  "]), CTRL_A,
+        self.writeText(self.pathToSample(u"valid_unicode")), CTRL_J,
+        self.displayCheck(4, 7, [u"Здравствуйте"]),
         CTRL_Q])
