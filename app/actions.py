@@ -870,9 +870,6 @@ class Actions(app.mutator.Mutator):
       try:
         inputFile = io.open(self.fullPath)
         data = unicode(inputFile.read())
-        if hasattr(data, 'decode'):
-          # Hacky detection of binary files.
-          data.decode(u'utf-8')
         self.fileEncoding = inputFile.encoding
         self.setMessage(u'Opened existing file')
         self.isBinary = False
