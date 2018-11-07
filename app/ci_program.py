@@ -75,6 +75,9 @@ class CiProgram:
     curses.raw()
     # Enable Bracketed Paste Mode.
     sys.stdout.write('\033[?2004;h')
+    # Push the escape codes out to the terminal. (Whether this is needed seems
+    # to vary by platform).
+    sys.stdout.flush()
     try:
       curses.start_color()
       if not curses.has_colors():
@@ -501,6 +504,7 @@ def run_ci():
     app.log.writeToFile('~/.ci_edit/recentLog')
     # Disable Bracketed Paste Mode.
     sys.stdout.write('\033[?2004l')
+    sys.stdout.flush()
   global userConsoleMessage
   if userConsoleMessage:
     fullPath = os.path.expanduser(os.path.expandvars(
@@ -508,6 +512,7 @@ def run_ci():
     with io.open(fullPath, 'w+') as f:
       f.write(userConsoleMessage)
     sys.stdout.write(userConsoleMessage + '\n')
+    sys.stdout.flush()
 
 if __name__ == '__main__':
   run_ci()
