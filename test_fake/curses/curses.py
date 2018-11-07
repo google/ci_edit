@@ -23,6 +23,11 @@ library."""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+try:
+  unicode('')
+except NameError:
+  unicode = str
+  unichr = chr
 
 
 import inspect
@@ -158,6 +163,11 @@ class FakeDisplay:
     return None
 
   def checkText(self, row, col, lines, verbose=3):
+    assert type(row) is int
+    assert type(col) is int
+    assert type(lines) is list
+    assert type(lines[0]) is unicode
+    assert type(verbose) is int
     for i in range(len(lines)):
       line = lines[i]
       for k in range(len(line)):
@@ -177,7 +187,7 @@ class FakeDisplay:
             actualLine = u"".join(self.displayText[row + i])
             result += u"\n  actual:   |%s|" % actualLine
           if verbose >= 2:
-            expectedText = "".join(line)
+            expectedText = u"".join(line)
             expectedLine = (actualLine[:col] + expectedText +
                 actualLine[col + len(expectedText):])
             result += u"\n  expected: %s|%s|" % (u" " * col,

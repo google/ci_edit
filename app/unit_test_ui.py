@@ -49,7 +49,7 @@ class UiBasicsTestCases(app.fake_curses_testing.FakeCursesTestCase):
   def test_logo(self):
     self.runWithTestFile(kTestFile, [
         #self.assertEqual(256, app.prefs.startup['numColors']),
-        self.displayCheck(0, 0, [" ci "]),
+        self.displayCheck(0, 0, [u" ci "]),
         self.displayCheckStyle(0, 0, 1, len(" ci "), app.prefs.color['logo']),
         CTRL_Q])
 

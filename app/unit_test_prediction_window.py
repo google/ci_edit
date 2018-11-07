@@ -34,16 +34,16 @@ class PredictionWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
     #self.setMovieMode(True)
     sys.argv = []
     self.runWithFakeInputs([
-        self.displayCheck(0, 0, [" ci     "]),
-        self.displayCheck(2, 7, ["     "]), CTRL_P,
-        self.displayCheck(0, 0, [" ci               "]),
-        self.displayCheck(2, 2, ["v Type|Name "]),
-        self.displayCheck(3, 0, ["    open <new file> "]),
-        self.addClickInfo(1000, "[x]open", curses.BUTTON1_PRESSED),
+        self.displayCheck(0, 0, [u" ci     "]),
+        self.displayCheck(2, 7, [u"     "]), CTRL_P,
+        self.displayCheck(0, 0, [u" ci               "]),
+        self.displayCheck(2, 2, [u"v Type|Name "]),
+        self.displayCheck(3, 0, [u"    open <new file> "]),
+        self.addClickInfo(1000, u"[x]open", curses.BUTTON1_PRESSED),
         curses.KEY_MOUSE,
-        self.displayCheckNot(3, 0, ["    open <new file> "]),
-        self.displayCheck(2, 2, ["v Type|Name "]),
-        self.addClickInfo(2000, "[ ]open", curses.BUTTON1_PRESSED),
+        self.displayCheckNot(3, 0, [u"    open <new file> "]),
+        self.displayCheck(2, 2, [u"v Type|Name "]),
+        self.addClickInfo(2000, u"[ ]open", curses.BUTTON1_PRESSED),
         curses.KEY_MOUSE,
         # TODO(dschuyler): Look into why this fails:
         #self.displayCheck(3, 0, ["    open <new file> "]),
@@ -53,12 +53,12 @@ class PredictionWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
     #self.setMovieMode(True)
     sys.argv = []
     self.runWithFakeInputs([
-        self.displayCheck(0, 0, [" ci     "]),
-        self.displayCheck(2, 7, ["     "]), ord('a'),
-        self.displayCheck(2, 7, ["a    "]),
+        self.displayCheck(0, 0, [u" ci     "]),
+        self.displayCheck(2, 7, [u"     "]), ord('a'),
+        self.displayCheck(2, 7, [u"a    "]),
         CTRL_S,
-        self.displayCheck(0, 0, [" ci    Save File As"]),
+        self.displayCheck(0, 0, [u" ci    Save File As"]),
         CTRL_Q,
-        self.displayCheck(0, 0, [" ci     "]),
-        self.displayCheck(-2, 0, ["      "]),
+        self.displayCheck(0, 0, [u" ci     "]),
+        self.displayCheck(-2, 0, [u"      "]),
         CTRL_Q, ord('n')])

@@ -51,7 +51,7 @@ class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
   def test_new_file_quit(self):
     self.runWithTestFile(kTestFile, [
-        self.displayCheck(2, 7, ["        "]), CTRL_Q])
+        self.displayCheck(2, 7, [u"        "]), CTRL_Q])
 
   def test_quit_cancel(self):
     #self.setMovieMode(True)

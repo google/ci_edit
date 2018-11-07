@@ -110,6 +110,8 @@ class FakeCursesTestCase(unittest.TestCase):
 
   def displayCheck(self, *args):
     assert type(args[0]) is int
+    assert type(args[1]) is int
+    assert type(args[2]) is list
     caller = inspect.stack()[1]
     callerText = u"\n  %s:%s:%s(): " % (
         os.path.split(caller[1])[1], caller[2], caller[3])
