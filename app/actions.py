@@ -779,6 +779,8 @@ class Actions(app.mutator.Mutator):
 
   def editPaste(self):
     data = app.clipboard.paste()
+    if hasattr(data, 'decode'):
+      data = data.decode('utf-8')
     if data is not None:
       self.editPasteData(data)
     else:
