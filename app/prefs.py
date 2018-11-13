@@ -125,6 +125,8 @@ for k,v in prefs['grammar'].items():
     markers.append(r'\b' + types + r'\b')
   # Index [2+len(contains)+len(error)+len(keywords)+len(types)..]
   markers += v.get('special', [])
+  # Index [-2]
+  markers.append(r'\u3000-\uffff')
   # Index [-1]
   markers.append(r'\n')
   #app.log.startup('markers', v['name'], markers)

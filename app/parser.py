@@ -39,29 +39,31 @@ class ParserNode:
   """A parser node represents a span of grammar. i.e. from this point to that
       point is HTML. Another parser node would represent the next segment, of
       grammar (maybe JavaScript, CSS, comment, or quoted string for example."""
-  def __init__(self, grammar, begin, prior):
+  def __init__(self, grammar, begin, prior, width):
     self.grammar = grammar
     self.begin = begin  # Offset from start of file.
     self.prior = prior  # Index of prior grammar (like a stack of grammars).
+    self.width = width  # Visible width on screen (double wide chars, and tabs).
 
   def debugLog(self, out, indent, data):
-    out('%sParserNode %26s prior %4s %4d %s' % (indent,
+    out('%sParserNode %26s prior %4s %4d %4d %s' % (indent,
         self.grammar.get('name', 'None'),
-        self.prior, self.begin, repr(data[self.begin:self.begin + 15])[1:-1]))
+        self.prior, self.begin, self.width,
+        repr(data[self.begin:self.begin + 15])[1:-1]))
 
 
 class Parser:
   """A parser generates a set of grammar segments (ParserNode objects)."""
   def __init__(self):
     self.data = ""
-    self.emptyNode = ParserNode({}, None, None)
+    self.emptyNode = ParserNode({}, None, None, 0)
     self.endNode = ({}, sys.maxsize, sys.maxsize)
     self.fullyParsedToLine = -1
     # A row on screen will consist of one or more ParserNodes. When a ParserNode
     # is returned from the parser it will be an instance of ParserNode, but
     # internally tuples are used in place of ParserNodes. This makes for some
     # ugly code, but the performance difference (~5%) is worth it.
-    self.parserNodes = [({}, 0, None)]
+    self.parserNodes = [({}, 0, None, 0)]
     # Each entry in |self.rows| is an index into the |self.parserNodes| array to
     # the parerNode that begins that row.
     self.rows = [0]  # Row parserNodes index.
@@ -144,7 +146,7 @@ class Parser:
     if self.fullyParsedToLine < beginRow:
       beginRow = self.fullyParsedToLine
 
-    self.emptyNode = ParserNode(grammar, None, None)
+    self.emptyNode = ParserNode(grammar, None, None, 0)
     self.data = data
     self.endRow = endRow
     if beginRow > 0: # and len(self.rows):
@@ -153,7 +155,7 @@ class Parser:
         self.rows = self.rows[:beginRow]
     else:
       # First time parse. Do a fast parse of the whole file.
-      self.parserNodes = [(grammar, 0, None)]
+      self.parserNodes = [(grammar, 0, None, 0)]
       self.rows = [0]
     if self.endRow > len(self.rows):
       self.__buildGrammarList()
@@ -173,7 +175,7 @@ class Parser:
         break
       index += 1
       self.rows.append(len(self.parserNodes))
-      self.parserNodes.append((grammar, index, None))
+      self.parserNodes.append((grammar, index, None, 1))
 
   def rowCount(self):
     return len(self.rows)
@@ -232,14 +234,25 @@ class Parser:
       if index == len(foundGroups) - 1:
         # Found new line.
         child = (self.parserNodes[-1][kGrammar], cursor + reg[1],
-            self.parserNodes[-1][kPrior])
+            self.parserNodes[-1][kPrior], reg[1] - reg[0])
         cursor = child[kBegin]
         self.rows.append(len(self.parserNodes))
+      elif index == len(foundGroups) - 2:
+        # Found double wide character.
+        self.parserNodes.append((app.prefs.grammars['text'], cursor + reg[0],
+            len(self.parserNodes) - 1, (reg[1] - reg[0]) * 2))
+        # Resume the current grammar.
+        child = (self.parserNodes[self.parserNodes[-1][kPrior]][kGrammar],
+            cursor + reg[1],
+            self.parserNodes[self.parserNodes[-1][kPrior]][kPrior],
+            reg[1] - reg[0])
+        cursor += reg[1]
       elif index == 1:
         # Found end of current grammar section (an 'end').
         child = (self.parserNodes[self.parserNodes[-1][kPrior]][kGrammar],
             cursor + reg[1],
-            self.parserNodes[self.parserNodes[-1][kPrior]][kPrior])
+            self.parserNodes[self.parserNodes[-1][kPrior]][kPrior],
+            reg[1] - reg[0])
         cursor = child[kBegin]
         if subdata[reg[1] - 1] == '\n':
           # This 'end' ends with a new line.
@@ -262,43 +275,48 @@ class Parser:
             markers = priorGrammar['markers']
             markers[1] = priorGrammar['end'].replace(r'\0', re.escape(hereKey))
             priorGrammar['matchRe'] = re.compile(app.prefs.joinReList(markers))
-          child = (priorGrammar, cursor + reg[0], len(self.parserNodes) - 1)
+          child = (priorGrammar, cursor + reg[0], len(self.parserNodes) - 1,
+              reg[1] - reg[0])
           cursor += reg[1]
         elif index < errorIndexLimit:
           # A special doesn't change the nodeIndex.
           self.parserNodes.append((app.prefs.grammars['error'], cursor + reg[0],
-              len(self.parserNodes) - 1))
+              len(self.parserNodes) - 1, reg[1] - reg[0]))
           # Resume the current grammar.
           child = (self.parserNodes[self.parserNodes[-1][kPrior]][kGrammar],
               cursor + reg[1],
-              self.parserNodes[self.parserNodes[-1][kPrior]][kPrior])
+              self.parserNodes[self.parserNodes[-1][kPrior]][kPrior],
+              reg[1] - reg[0])
           cursor += reg[1]
         elif index < keywordIndexLimit:
           # A keyword doesn't change the nodeIndex.
           self.parserNodes.append((app.prefs.grammars['keyword'],
-              cursor + reg[0], len(self.parserNodes) - 1))
+              cursor + reg[0], len(self.parserNodes) - 1, reg[1] - reg[0]))
           # Resume the current grammar.
           child = (self.parserNodes[self.parserNodes[-1][kPrior]][kGrammar],
               cursor + reg[1],
-              self.parserNodes[self.parserNodes[-1][kPrior]][kPrior])
+              self.parserNodes[self.parserNodes[-1][kPrior]][kPrior],
+              reg[1] - reg[0])
           cursor += reg[1]
         elif index < typeIndexLimit:
           # A type doesn't change the nodeIndex.
           self.parserNodes.append((app.prefs.grammars['type'], cursor + reg[0],
-              len(self.parserNodes) - 1))
+              len(self.parserNodes) - 1, reg[1] - reg[0]))
           # Resume the current grammar.
           child = (self.parserNodes[self.parserNodes[-1][kPrior]][kGrammar],
               cursor + reg[1],
-              self.parserNodes[self.parserNodes[-1][kPrior]][kPrior])
+              self.parserNodes[self.parserNodes[-1][kPrior]][kPrior],
+              reg[1] - reg[0])
           cursor += reg[1]
         elif index < specialIndexLimit:
           # A special doesn't change the nodeIndex.
           self.parserNodes.append((app.prefs.grammars['special'],
-              cursor + reg[0], len(self.parserNodes) - 1))
+              cursor + reg[0], len(self.parserNodes) - 1, reg[1] - reg[0]))
           # Resume the current grammar.
           child = (self.parserNodes[self.parserNodes[-1][kPrior]][kGrammar],
               cursor + reg[1],
-              self.parserNodes[self.parserNodes[-1][kPrior]][kPrior])
+              self.parserNodes[self.parserNodes[-1][kPrior]][kPrior],
+              reg[1] - reg[0])
           cursor += reg[1]
         else:
           app.log.error('invalid grammar index')
