@@ -37,6 +37,7 @@ import app.unit_test_application
 import app.unit_test_automatic_column_adjustment
 import app.unit_test_bookmarks
 import app.unit_test_brace_matching
+import app.unit_test_curses_util
 import app.unit_test_file_manager
 import app.unit_test_find_window
 import app.unit_test_execute_prompt
@@ -60,6 +61,7 @@ TESTS = {
       app.unit_test_automatic_column_adjustment.AutomaticColumnAdjustmentCases,
   'bookmarks': app.unit_test_bookmarks.BookmarkTestCases,
   'brace_matching': app.unit_test_brace_matching.BraceMatchingTestCases,
+  'curses_util': app.unit_test_curses_util.CursesUtilTestCases,
   'file_manager': app.unit_test_file_manager.FileManagerTestCases,
   'find': app.unit_test_find_window.FindWindowTestCases,
   'execute': app.unit_test_execute_prompt.ExecutePromptTestCases,

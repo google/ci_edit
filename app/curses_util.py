@@ -25,6 +25,8 @@ import struct
 import sys
 import termios
 
+import app.config
+
 
 # Strings are found using the cursesKeyName() function.
 # Constants are found using the curses.getch() function.
@@ -206,6 +208,58 @@ def cursesKeyName(keyCode):
   except:
     pass
   return None
+
+def columnToIndex(offset, string):
+  """If the visual cursor is on |offset|, which index of the string is the
+  cursor on?"""
+  if app.config.strict_debug:
+    assert type(offset), int
+    assert type(string), unicode
+  indexLimit = len(string) - 1
+  index = 0
+  for i in string:
+    if ord(i) > 0x3000:
+      offset -= 2
+    else:
+      offset -= 1
+    if offset < 0 or index >= indexLimit:
+      break
+    index += 1
+  return index
+
+def fitToRenderedWidth(width, string):
+  """With |width| character cells available, how much of |string| can I render?
+  """
+  if app.config.strict_debug:
+    assert type(width), int
+    assert type(string), unicode
+  indexLimit = len(string)
+  index = 0
+  for i in string:
+    if ord(i) > 0x3000:
+      width -= 2
+    else:
+      width -= 1
+    if width < 0 or index >= indexLimit:
+      break
+    index += 1
+  return index
+
+def renderedWidth(string):
+  """When rendering |string| how many character cells will be used? For ASCII
+  characters this will equal len(string). For many Chinese characters and
+  emoji the value will be greater than len(string), since many of them use two
+  cells.
+  """
+  if app.config.strict_debug:
+    assert type(string), unicode
+  width = 0
+  for i in string:
+    if ord(i) > 0x3000:
+      width += 2
+    else:
+      width += 1
+  return width
 
 # This is built-in in Python 3.
 # In Python 2 it's done by hand.
