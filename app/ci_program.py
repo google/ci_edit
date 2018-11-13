@@ -89,9 +89,9 @@ class CiProgram:
       app.log.error(e)
     app.log.startup(u"curses.COLORS", curses.COLORS)
     if 0:
-      assert(curses.COLORS == 256)
-      assert(curses.can_change_color() == 1)
-      assert(curses.has_colors() == 1)
+      assert curses.COLORS == 256
+      assert curses.can_change_color() == 1
+      assert curses.has_colors() == 1
       app.log.detail("color_content:")
       for i in range(0, curses.COLORS):
         app.log.detail("color", i, ": ", curses.color_content(i))

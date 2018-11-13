@@ -979,7 +979,7 @@ class InputWindow(Window):
   """This is the main content window. Often the largest pane displayed."""
   def __init__(self, host):
     if app.config.strict_debug:
-      assert(host)
+      assert host
     Window.__init__(self, host)
     self.host = host
     self.showFooter = True
@@ -1320,7 +1320,7 @@ class OptionsToggle(OptionsTrinaryStateWindow):
 class RowWindow(ViewWindow):
   def __init__(self, host, separator):
     if app.config.strict_debug:
-      assert(host)
+      assert host
     ViewWindow.__init__(self, host)
     self.color = app.color.get('keyword')
     self.separator = separator
@@ -1349,7 +1349,7 @@ class OptionsRow(ViewWindow):
 
   def __init__(self, host):
     if app.config.strict_debug:
-      assert(host)
+      assert host
     ViewWindow.__init__(self, host)
     self.host = host
     self.color = app.color.get('top_info')
@@ -1483,7 +1483,7 @@ class OptionsRow(ViewWindow):
 class PopupWindow(Window):
   def __init__(self, host):
     if app.config.strict_debug:
-      assert(host)
+      assert host
     Window.__init__(self, host)
     self.host = host
     self.controller = app.cu_editor.PopupController(self)

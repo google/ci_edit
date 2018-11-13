@@ -62,7 +62,6 @@ void blah();
     self.textBuffer.mouseClick(3, 9, False, False, False)
     self.assertEqual(self.textBuffer.penRow, 3)
     self.assertEqual(self.textBuffer.penCol, 9)
-    #assert(self.textBuffer.markerRow == 3)
 
     self.textBuffer.mouseClick(3, 8, True, False, False)
     self.assertEqual(self.textBuffer.markerRow, 3)

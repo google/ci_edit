@@ -28,7 +28,7 @@ import app.window
 class PathRow(app.window.ViewWindow):
   def __init__(self, host):
     if app.config.strict_debug:
-      assert(host)
+      assert host
     app.window.ViewWindow.__init__(self, host)
     self.host = host
     self.path = ''
