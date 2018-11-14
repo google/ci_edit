@@ -134,7 +134,7 @@ class BufferManager:
     # descriptors.
     stdinFd = sys.stdin.fileno()
     newFd = os.dup(stdinFd)
-    newStdin = open(u"/dev/tty")
+    newStdin = io.open(u"/dev/tty")
     os.dup2(newStdin.fileno(), stdinFd)
     # Create a text buffer to read from alternate stream.
     textBuffer = self.newTextBuffer()

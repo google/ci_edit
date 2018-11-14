@@ -196,7 +196,7 @@ def wrapper(function, shouldWrite=True):
 
 def writeToFile(path):
   fullPath = os.path.expanduser(os.path.expandvars(path))
-  with io.open(fullPath, 'w+') as out:
+  with io.open(fullPath, 'w+', encoding=u'UTF-8') as out:
     out.write(u"\n".join(fullLog)+u"\n")
 
 def flush():

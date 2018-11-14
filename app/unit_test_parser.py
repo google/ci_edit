@@ -63,7 +63,7 @@ parser.parse(data, grammar, 0, sys.maxint)''',
       profile = cProfile.Profile()
       parser = app.parser.Parser()
       path = 'app/actions.py'
-      data = open(path).read()
+      data = io.open(path).read()
       grammar = app.prefs.getGrammar(path)
 
       profile.enable()

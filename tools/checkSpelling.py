@@ -14,15 +14,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import io
 import os
 import sys
+import re
+import sys
+from fnmatch import fnmatch
+
 ciEditDir = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(ciEditDir)
 import app.regex
 import app.spelling
-import re
-import sys
-from fnmatch import fnmatch
 
 print "checking spelling"
 
@@ -42,7 +44,7 @@ allUnrecognizedWords = set()
 def handleFile(fileName):
   global allUnrecognizedWords
   #print fileName,
-  with open(fileName, "r+b") as f:
+  with io.open(fileName, "r") as f:
     data = f.read()
     if not data: return set()
 

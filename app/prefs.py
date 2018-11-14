@@ -45,7 +45,7 @@ def loadPrefs(fileName, category):
   prefsPath = os.path.expanduser(os.path.expandvars(
       os.path.join(prefsDirectory, "%s.json" % (fileName,))))
   if os.path.isfile(prefsPath) and os.access(prefsPath, os.R_OK):
-    with open(prefsPath, 'r') as f:
+    with io.open(prefsPath, 'r') as f:
       try:
         additionalPrefs = json.loads(f.read())
         app.log.startup(additionalPrefs)
@@ -204,7 +204,7 @@ def save(category, label, value):
   prefs[category][label] = value
   prefsPath = os.path.expanduser(os.path.expandvars(
       os.path.join(prefsDirectory, "%s.json" % (category,))))
-  with open(prefsPath, 'w') as f:
+  with io.open(prefsPath, 'w', encoding=u"utf-8") as f:
     try:
       f.write(json.dumps(prefs[category]))
     except Exception as e:

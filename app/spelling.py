@@ -97,7 +97,7 @@ def loadWords(dirPath):
   for path in glob.iglob(dirPath+'*.words'):
     if os.path.isfile(path):
       grammarName = path[len(dirPath):-len('.words')]
-      with open(path, 'r') as f:
+      with io.open(path, 'r') as f:
         lines = f.readlines()
         index = 0
         while not len(lines[index]) or lines[index][0] == '#':
