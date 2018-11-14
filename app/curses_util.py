@@ -28,6 +28,8 @@ import termios
 import app.config
 
 
+MIN_DOUBLE_WIDE_CHARACTER = u"\u3000"
+
 # Strings are found using the cursesKeyName() function.
 # Constants are found using the curses.getch() function.
 
@@ -218,7 +220,7 @@ def columnToIndex(offset, string):
   indexLimit = len(string) - 1
   index = 0
   for i in string:
-    if ord(i) > 0x3000:
+    if i > MIN_DOUBLE_WIDE_CHARACTER:
       offset -= 2
     else:
       offset -= 1
@@ -236,7 +238,7 @@ def fitToRenderedWidth(width, string):
   indexLimit = len(string)
   index = 0
   for i in string:
-    if ord(i) > 0x3000:
+    if i > MIN_DOUBLE_WIDE_CHARACTER:
       width -= 2
     else:
       width -= 1
@@ -244,6 +246,30 @@ def fitToRenderedWidth(width, string):
       break
     index += 1
   return index
+
+def renderedSubStr(string, beginCol, endCol):
+  if app.config.strict_debug:
+    assert type(string), unicode
+    assert type(begin), int
+    assert type(end), int
+  column = 0
+  beginIndex = sys.maxint
+  endIndex = sys.maxint
+  i = 0
+  limit = len(string)
+  while i < limit:
+    if beginCol <= column:
+      beginIndex = i
+      break
+    column += 2 if string[i] >= MIN_DOUBLE_WIDE_CHARACTER else 1
+    i += 1
+  while i < limit:
+    if endCol < column:
+      endIndex = i
+      break
+    column += 2 if string[i] >= MIN_DOUBLE_WIDE_CHARACTER else 1
+    i += 1
+  return string[beginIndex:endIndex]
 
 def renderedWidth(string):
   """When rendering |string| how many character cells will be used? For ASCII
@@ -255,7 +281,7 @@ def renderedWidth(string):
     assert type(string), unicode
   width = 0
   for i in string:
-    if ord(i) > 0x3000:
+    if i > MIN_DOUBLE_WIDE_CHARACTER:
       width += 2
     else:
       width += 1
