@@ -21,6 +21,7 @@ import re
 import sys
 
 import app.actions
+import app.curses_util
 import app.regex
 import app.color
 import app.log
@@ -142,7 +143,7 @@ class TextBuffer(app.actions.Actions):
           if remaining == 0:
             continue
           line = self.parser.rowText(startRow + i)
-          remaining = min(len(line) - k, remaining)
+          remaining = min(app.curses_util.renderedWidth(line) - k, remaining)
           length = min(endCol - k, remaining)
           color = app.color.get(node.grammar.get(u'colorIndex', defaultColor),
               colorDelta)
@@ -150,7 +151,8 @@ class TextBuffer(app.actions.Actions):
             window.addStr(top + i, left + k - startCol, u' ' * (endCol - k),
                 color)
             break
-          window.addStr(top + i, left + k - startCol, line[k:k + length], color)
+          window.addStr(top + i, left + k - startCol,
+              app.curses_util.renderedSubStr(line, k, k + length), color)
           subStart = k - preceding
           subEnd = k + remaining
           subLine = line[subStart:subEnd]

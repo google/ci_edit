@@ -26,7 +26,8 @@ import app.fake_curses_testing
 kTestFile = u'#automatic_column_adjustment_test_file_with_unlikely_file_name~'
 
 
-class AutomaticColumnAdjustmentCases(app.fake_curses_testing.FakeCursesTestCase):
+class AutomaticColumnAdjustmentCases(
+    app.fake_curses_testing.FakeCursesTestCase):
   def setUp(self):
     if os.path.isfile(kTestFile):
       os.unlink(kTestFile)
@@ -162,7 +163,8 @@ class AutomaticColumnAdjustmentCases(app.fake_curses_testing.FakeCursesTestCase)
             u"                                        "]),
          # Make line 3 fit on screen. This includes making room for the cursor.
         KEY_DOWN, KEY_BACKSPACE1, KEY_BACKSPACE1, KEY_BACKSPACE1,
-        KEY_UP, KEY_DOWN, # Since line 3 now fits on screen, this should set scrollCol to 0.
+        KEY_UP,
+        KEY_DOWN, # Since line 3 now fits on screen, this should set scrollCol to 0.
         self.displayCheck(0, 0, [
             u" ci     *                               ",
             u"                                        ",

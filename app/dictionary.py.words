@@ -197,7 +197,6 @@ lstrip
 makedev
 makedirs
 max
-maxint
 maxsize
 maxunicode
 memmove

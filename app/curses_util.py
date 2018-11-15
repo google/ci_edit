@@ -248,24 +248,62 @@ def fitToRenderedWidth(width, string):
   return index
 
 def renderedSubStr(string, beginCol, endCol):
+  """
+  Get a slice (similar to `string[beginCol:endCol]`) based on the rendered
+  width of the string. If columns beginCol or endCol land in the middle of a
+  double-wide character, a space is used to pad the result.
+
+  Negative columns are not supported. (Just haven't implemented it).
+
+  Args:
+    string: The string to slice.
+    beginCol: The first column of text (inclusive).
+    endCol: The last column of text (exclusive).
+
+  Returns:
+    unicode string
+  """
   if app.config.strict_debug:
     assert type(string), unicode
-    assert type(begin), int
-    assert type(end), int
+    assert type(beginCol), int
+    assert type(endCol), int
   column = 0
-  beginIndex = sys.maxint
-  endIndex = sys.maxint
+  beginIndex = sys.maxsize
+  endIndex = sys.maxsize
   i = 0
   limit = len(string)
-  while i < limit:
+  while i <= limit:
     if beginCol <= column:
-      beginIndex = i
+      if beginCol == column:
+        # An exact (aligned) trimming (not splitting a double-wide character).
+        beginIndex = i
+      else:
+        # Splitting a double-wide character. Prepend a space and adjust.
+        string = u" " + string[i:]
+        beginIndex = 0
+        # Trim these to account for what was trimmed.
+        endCol -= column
+        limit -= i
+        # Add one to each of these for the space.
+        endCol += 1
+        limit += 1
+        column = 1
+        i = 1
       break
     column += 2 if string[i] >= MIN_DOUBLE_WIDE_CHARACTER else 1
     i += 1
-  while i < limit:
-    if endCol < column:
-      endIndex = i
+  while True:
+    if endCol <= column:
+      if endCol == column:
+        # An exact (aligned) trimming (not splitting a double-wide character).
+        endIndex = i
+      else:
+        # Splitting a double-wide character. Prepend a space and adjust.
+        string = string[:i - 1] + u" "
+        endIndex = len(string)
+      break
+    if i >= limit:
+      endIndex = limit
       break
     column += 2 if string[i] >= MIN_DOUBLE_WIDE_CHARACTER else 1
     i += 1

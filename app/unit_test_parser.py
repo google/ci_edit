@@ -54,7 +54,7 @@ void blah();
     def test_parse_performance(self):
       a = timeit(
           '''parser = app.parser.Parser()
-parser.parse(data, grammar, 0, sys.maxint)''',
+parser.parse(data, grammar, 0, sys.maxsize)''',
           setup=performance1,
           number=10)
 
@@ -67,7 +67,7 @@ parser.parse(data, grammar, 0, sys.maxint)''',
       grammar = app.prefs.getGrammar(path)
 
       profile.enable()
-      parser.parse(data, grammar, 0, sys.maxint)
+      parser.parse(data, grammar, 0, sys.maxsize)
       profile.disable()
 
       output = io.StringIO.StringIO()
