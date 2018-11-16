@@ -14,3 +14,6 @@
 
 # This is a list of non-English words that are in Rust libraries (crates).
 println
+rfind
+ncurses
+peekable

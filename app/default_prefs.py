@@ -810,8 +810,13 @@ prefs = {
       ],
       'special': [
         #r'(?<!\w)__.*?__(?!\w)',
+        "<\s*'", "&\s*'",
+      ],
+      'types': [
+        'i8', 'i16', 'i32', 'i64', 'u8', 'u16', 'u32', 'u64',
       ],
       'contains': [
+        'cpp_block_comment', 'cpp_line_comment', 'c_string1', 'c_string2',
       ],
     },
     'special': {
