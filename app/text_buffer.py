@@ -129,6 +129,7 @@ class TextBuffer(app.actions.Actions):
       # Highlight grammar.
       rowLimit = min(max(self.parser.rowCount() - startRow, 0), rows)
       for i in range(rowLimit):
+        line = self.parser.rowText(startRow + i)
         k = startCol
         if k == 0:
           # When rendering from column 0 the grammar index is always zero.
@@ -142,7 +143,6 @@ class TextBuffer(app.actions.Actions):
           grammarIndex += 1
           if remaining == 0:
             continue
-          line = self.parser.rowText(startRow + i)
           remaining = min(app.curses_util.renderedWidth(line) - k, remaining)
           length = min(endCol - k, remaining)
           color = app.color.get(node.grammar.get(u'colorIndex', defaultColor),
