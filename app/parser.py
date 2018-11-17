@@ -188,6 +188,9 @@ class Parser:
       index += 1
       self.rows.append(len(self.parserNodes))
       self.parserNodes.append((grammar, index, None, visual))
+    if self.parserNodes[-1][kBegin] != sys.maxsize:
+      # End node, points just past the end of the document.
+      self.parserNodes.append((grammar, sys.maxsize, None, visual))
 
   def rowCount(self):
     return len(self.rows)
@@ -201,6 +204,22 @@ class Parser:
     else:
       end = sys.maxsize
     return self.data[begin:end]
+
+  def rowTextAndWidth(self, row):
+    begin = self.parserNodes[self.rows[row]][kBegin]
+    visual = self.parserNodes[self.rows[row]][kVisual]
+    if row + 1 < len(self.rows):
+      end = self.parserNodes[self.rows[row + 1]][kBegin]
+      visualEnd = self.parserNodes[self.rows[row + 1]][kVisual]
+      if len(self.data) and self.data[end - 1] == '\n':
+        end -= 1
+        visualEnd -= 1
+    else:
+      # There is a sentinel node at the end that records the end of document.
+      lastNode = self.parserNodes[-1]
+      end = lastNode[kBegin]
+      visualEnd = lastNode[kVisual]
+    return self.data[begin:end], visualEnd - visual
 
   def __buildGrammarList(self):
     # An arbitrary limit to avoid run-away looping.
