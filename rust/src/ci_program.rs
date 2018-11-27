@@ -12,9 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::io::Write;
+
 extern crate ncurses;
 
 const KEY_CTRL_Q: i32 = 17;
+
+pub fn enable_bracketed_paste() {
+    // Enable Bracketed Paste Mode.
+    let stdout = std::io::stdout();
+    let mut stdout_handle = stdout.lock();
+    stdout_handle.write(b"\033[?2004;h").expect(
+        "enable_bracketed_paste failed");
+    // Push the escape codes out to the terminal. (Whether this is needed seems
+    // to vary by platform).
+    stdout_handle.flush().expect("enable_bracketed_paste flush failed");
+}
 
 pub fn run() {
     // Maybe set to "en_US.UTF-8"?
@@ -24,7 +37,9 @@ pub fn run() {
     ncurses::raw();
     ncurses::mousemask(ncurses::ALL_MOUSE_EVENTS as ncurses::mmask_t, None);
     ncurses::keypad(ncurses::stdscr(), true);
+    ncurses::meta(ncurses::stdscr(), true);
     ncurses::noecho();
+    enable_bracketed_paste();
 
     ncurses::clear();
     ncurses::mv(0, 0);
