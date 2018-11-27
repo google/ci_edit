@@ -12,8 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-mod ci_program;
+extern crate ncurses;
 
-fn main() {
-    ci_program::run();
+pub fn run() {
+    ncurses::initscr();
+    ncurses::keypad(ncurses::stdscr(), true);
+    ncurses::noecho();
+
+    ncurses::clear();
+    ncurses::mv(0, 0);
+    ncurses::printw("This is a work in progress\n");
+    ncurses::printw("Press q to exit.");
+    while ncurses::getch() != 'q' as i32 {
+    }
+    ncurses::endwin();
 }
