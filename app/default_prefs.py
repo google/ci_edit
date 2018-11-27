@@ -365,7 +365,7 @@ prefs = {
     },
     'rust': {
       'ext': ['.rs'],
-      'grammar': 'rust',
+      'grammar': 'rs',
     },
     'text': {
       'ext': ['.txt', ''],
@@ -404,6 +404,7 @@ prefs = {
       'end': r'<--',
       'spelling': False,
     },
+    # Bash shell.
     'bash': {
       'indent': '  ',
       'keywords': [
@@ -419,6 +420,7 @@ prefs = {
       'spelling': False,
       'type': 'binary',
     },
+    # C language.
     'c': {
       'indent': '  ',
       'keywords': __c_keywords,
@@ -426,6 +428,7 @@ prefs = {
       'contains': ['cpp_block_comment', 'cpp_line_comment', 'c_preprocessor',
         'c_string1', 'c_string2'],
     },
+    # C++ language.
     'cpp': {
       'indent': '  ',
       'keywords': __c_keywords + [
@@ -513,6 +516,7 @@ prefs = {
       'special': __special_string_escapes + [r'\\"'],
       'single_line': True,
     },
+    # Cascading Style Sheet.
     'css': {
       'begin': '<style',
       'end': '</style>',
@@ -560,6 +564,7 @@ prefs = {
       ],
       'contains': ['cpp_block_comment',],
     },
+    # Dart language.
     'dart': {
       'indent': '  ',
       'keywords': [
@@ -598,6 +603,7 @@ prefs = {
       'indent': '  ',
       'spelling': False,
     },
+    # Go Language.
     'golang': {
       'indent': '  ',
       'keywords': [
@@ -663,6 +669,7 @@ prefs = {
       'contains': ['c_string1', 'c_string2', 'cpp_block_comment',
           'cpp_line_comment'],
     },
+    # JavaScript language.
     'js': {
       'begin': '<script',
       'end': '</script>',
@@ -693,6 +700,7 @@ prefs = {
       'indent': '  ',
       'spelling': False,
     },
+    # Markdown language.
     'md': {
       'indent': '  ',
       'keywords': [],
@@ -711,6 +719,7 @@ prefs = {
     'none': {
       'spelling': False,
     },
+    # Python language.
     'py': {
       'indent': '  ',
       'keywords': __common_keywords + [
@@ -797,7 +806,8 @@ prefs = {
       'special': __special_string_escapes + [r"\\/"],
       'single_line': True,
     },
-    'rust': {
+    # Rust language.
+    'rs': {
       'indent': '    ',
       'keywords': [
         'abstract', 'alignof', 'as', 'become', 'box', 'break', 'const',
