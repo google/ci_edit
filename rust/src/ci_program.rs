@@ -14,16 +14,28 @@
 
 extern crate ncurses;
 
+const KEY_CTRL_Q: i32 = 17;
+
 pub fn run() {
+    // Maybe set to "en_US.UTF-8"?
+    ncurses::setlocale(ncurses::LcCategory::all, "");
+
     ncurses::initscr();
+    ncurses::raw();
+    ncurses::mousemask(ncurses::ALL_MOUSE_EVENTS as ncurses::mmask_t, None);
     ncurses::keypad(ncurses::stdscr(), true);
     ncurses::noecho();
 
     ncurses::clear();
     ncurses::mv(0, 0);
     ncurses::printw("This is a work in progress\n");
-    ncurses::printw("Press q to exit.");
-    while ncurses::getch() != 'q' as i32 {
+    ncurses::printw("Press ctrl+q to exit.\n");
+    loop {
+        let c = ncurses::getch();
+        if c == KEY_CTRL_Q {
+            break;
+        }
+        ncurses::printw(&format!("pressed {}\n", c));
     }
     ncurses::endwin();
 }
