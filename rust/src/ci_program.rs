@@ -18,15 +18,15 @@ extern crate ncurses;
 
 const KEY_CTRL_Q: i32 = 17;
 
-pub fn enable_bracketed_paste() {
+pub fn enable_bracketed_paste() -> std::io::Result<()> {
     // Enable Bracketed Paste Mode.
     let stdout = std::io::stdout();
     let mut stdout_handle = stdout.lock();
-    stdout_handle.write(b"\033[?2004;h").expect(
-        "enable_bracketed_paste failed");
+    stdout_handle.write(b"\033[?2004;h")?;
     // Push the escape codes out to the terminal. (Whether this is needed seems
     // to vary by platform).
-    stdout_handle.flush().expect("enable_bracketed_paste flush failed");
+    stdout_handle.flush()?;
+    return Ok(());
 }
 
 pub fn run() {
@@ -39,7 +39,7 @@ pub fn run() {
     ncurses::keypad(ncurses::stdscr(), true);
     ncurses::meta(ncurses::stdscr(), true);
     ncurses::noecho();
-    enable_bracketed_paste();
+    enable_bracketed_paste().expect("enable_bracketed_paste failed");
 
     ncurses::clear();
     ncurses::mv(0, 0);
