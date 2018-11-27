@@ -37,7 +37,7 @@ kReBrackets = re.compile(kBracketsRegex)
 
 kReComments = re.compile('(?:#|//).*$|/\*.*?\*/|<!--.*?-->')
 
-kEndSpacesRegex = ur'\s+$'
+kEndSpacesRegex = r'\s+$'
 kReEndSpaces = re.compile(kEndSpacesRegex)
 
 kReStrings = re.compile(
@@ -58,11 +58,11 @@ kReWordBoundary = re.compile('(?:\w+)|(?:\W+)')
 kNumbersRegex = (
     # Don't include the [-+]? at the start of a number because it mismatches
     # an equation like 0x33-0x44.
-    ur'(?:'
-    ur'0[xX][A-Fa-f0-9]+'
-    ur'|\d+(?:(?:[uUlL][lL]?[lL]?)|\.?(?:\d+)?(?:e[-+]\d+)?[fFdD]?)?'
-    ur'|\.\d+[fFdD]?'
-    ur')'
+    r'(?:'
+    r'0[xX][A-Fa-f0-9]+'
+    r'|\d+(?:(?:[uUlL][lL]?[lL]?)|\.?(?:\d+)?(?:e[-+]\d+)?[fFdD]?)?'
+    r'|\.\d+[fFdD]?'
+    r')'
     #r'0[xX][^A-Fa-f0-9]+(?:[uUlL][lL]?[lL]?)?(?!\w)',
     #r'[-+]?[0-9]*\.[0-9]+(?:[eE][+-][0-9]+)?[fF]?(?!\w)',
     #r'[-+]?[0-9]+(?:\.[0-9]*(?:[eE][+-][0-9]+)?)?[fF]?(?!\w)',

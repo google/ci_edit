@@ -247,6 +247,52 @@ def fitToRenderedWidth(width, string):
     index += 1
   return index
 
+def renderedFindIter(string, beginCol, endCol, charGroups, numbers, eolSpaces):
+  """
+  Get a slice (similar to `string[beginCol:endCol]`) based on the rendered
+  width of the string.
+
+  Note: charGroups cannot (currently) contain double width characters.
+
+  Returns:
+    tuple of (subStr, column, index, id)
+  """
+  if app.config.strict_debug:
+    assert type(string), unicode
+    assert type(beginCol), int
+    assert type(endCol), int
+  column = 0
+  index = 0
+  limit = len(string)
+  while index < limit:
+    c = string[index]
+    width = 2 if c > MIN_DOUBLE_WIDE_CHARACTER else 1
+    if column >= endCol:
+      break
+    if column >= beginCol:
+      if numbers and c in '0123456789':
+        sre = app.regex.kReNumbers.match(string[index:])
+        begin = index
+        length = sre.regs[0][1]
+        index += length
+        width += length
+        yield string[begin:index], column, length, len(charGroups)
+      else:
+        for id, group in enumerate(charGroups):
+          if c in group:
+            begin = index
+            while index < limit and string[index] in group:
+              index += 1
+              width += 1
+            yield string[begin:index], column, index - begin, id
+    column += width
+    index += 1
+  if eolSpaces and limit and string[-1] == ' ':
+    index = limit - 1
+    while index and string[index - 1] == ' ':
+      index -= 1
+    yield string[index:], index, index, len(charGroups) + 1
+
 def renderedSubStr(string, beginCol, endCol):
   """
   Get a slice (similar to `string[beginCol:endCol]`) based on the rendered

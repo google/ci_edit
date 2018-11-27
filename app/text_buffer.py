@@ -194,12 +194,20 @@ class TextBuffer(app.actions.Actions):
     colors = app.prefs.color
     if 1:
       # Highlight brackets.
-      color = app.color.get(u'bracket', colorDelta)
+      # Highlight numbers.
+      # Highlight space ending lines.
+      colors = (
+          app.color.get(u'bracket', colorDelta),
+          app.color.get(u'number', colorDelta),
+          app.color.get(u'trailing_space', colorDelta))
       for i in range(rowLimit):
-        line = self.parser.rowText(startRow + i)[startCol:endCol]
-        for k in re.finditer(app.regex.kReBrackets, line):
-          for f in k.regs:
-            window.addStr(top + i, left+f[0], line[f[0]:f[1]], color)
+        line = self.parser.rowText(startRow + i)
+        highlightTrailingWhitespace = (self.highlightTrailingWhitespace and
+            not (startRow + i == self.penRow and self.penCol == len(line)))
+        for s, column, index, id in app.curses_util.renderedFindIter(
+            line, startCol, endCol, ('[]{}()',), True,
+            highlightTrailingWhitespace):
+          window.addStr(top + i, column - left, s, colors[id])
     if 1:
       # Match brackets.
       if (self.parser.rowCount() > self.penRow and
@@ -262,41 +270,12 @@ class TextBuffer(app.actions.Actions):
               self.penCol - self.view.scrollCol,
               self.parser.rowText(self.penRow)[self.penCol],
               app.color.get(u'matching_bracket', colorDelta))
-    if 1:
-      # Highlight numbers.
-      for i in range(rowLimit):
-        line = self.parser.rowText(startRow + i)[startCol:endCol]
-        for k in re.finditer(app.regex.kReNumbers, line):
-          for f in k.regs:
-            window.addStr(top + i, left + f[0], line[f[0]:f[1]],
-                app.color.get(u'number', colorDelta))
     if self.highlightCursorLine:
       # Highlight the whole line at the cursor location.
       if startRow <= self.penRow < startRow + rowLimit:
         line = self.parser.rowText(self.penRow)[startCol:endCol]
         window.addStr(top + self.penRow - startRow, left, line,
             app.color.get(u'trailing_space', colorDelta))
-    if self.highlightTrailingWhitespace:
-      # Highlight space ending lines.
-      for i in range(rowLimit):
-        line = self.parser.rowText(startRow + i)
-        if startRow + i == self.penRow and self.penCol == len(line):
-          continue
-        line = line[startCol:]
-        for k in app.regex.kReEndSpaces.finditer(line):
-          for f in k.regs:
-            window.addStr(top + i, left + f[0], line[f[0]:f[1]],
-                app.color.get(u'trailing_space', colorDelta))
-    if 0:
-      lengthLimit = self.lineLimitIndicator
-      if endCol >= lengthLimit:
-        # Highlight long lines.
-        for i in range(rowLimit):
-          line = self.parser.rowText(startRow + i)
-          if len(line) < lengthLimit or startCol > lengthLimit:
-            continue
-          window.addStr(top + i, left + lengthLimit - startCol,
-              line[lengthLimit:endCol], app.color.get(96, colorDelta))
     if self.findRe is not None:
       # Highlight find.
       for i in range(rowLimit):
@@ -329,7 +308,8 @@ class TextBuffer(app.actions.Actions):
           if not (lowerRow < startRow or upperRow >= endRow):
             # There is an overlap.
             # Go one row past the selection or to the last line.
-            for i in range(start, min(end + 1, self.parser.rowCount() - startRow)):
+            for i in range(start, min(end + 1,
+                self.parser.rowCount() - startRow)):
               line = self.parser.rowText(startRow + i)
               # TODO(dschuyler): This is essentially
               # left + (upperCol or (scrollCol + left)) - scrollCol - left
