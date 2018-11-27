@@ -13,7 +13,18 @@
 # limitations under the License.
 
 # This is a list of non-English words that are in Rust libraries (crates).
-println
-rfind
+endwin
+getch
+initscr
+lc
+mmask
+mousemask
+mv
 ncurses
+noecho
 peekable
+println
+printw
+rfind
+setlocale
+stdscr

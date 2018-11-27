@@ -324,6 +324,7 @@ subparsers
 symlink
 sys
 sysconf
+tarfile
 tcgetpgrp
 tcsetpgrp
 tempfail
