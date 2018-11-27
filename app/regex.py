@@ -32,11 +32,13 @@ kReNonMatching = re.compile(kNonMatchingRegex)
 # Beware, to include a ] in a set, it should be the first character in the set.
 # So, the first ] does not close the set and the second [ does not open a set.
 # The set of characters is ]{}()[.
-kReBrackets = re.compile('[]{}()[]')
+kBracketsRegex = u'[]{}()[]'
+kReBrackets = re.compile(kBracketsRegex)
 
 kReComments = re.compile('(?:#|//).*$|/\*.*?\*/|<!--.*?-->')
 
-kReEndSpaces = re.compile(r'\s+$')
+kEndSpacesRegex = ur'\s+$'
+kReEndSpaces = re.compile(kEndSpacesRegex)
 
 kReStrings = re.compile(
     r"(\"\"\".*?(?<!\\)\"\"\")|('''.*?(?<!\\)''')|(\".*?(?<!\\)\")|('.*?(?<!\\)')")
@@ -53,20 +55,20 @@ kReSubwordBoundaryRvr = re.compile(
 
 kReWordBoundary = re.compile('(?:\w+)|(?:\W+)')
 
-__commonNumbersRegex = (
+kNumbersRegex = (
     # Don't include the [-+]? at the start of a number because it mismatches
     # an equation like 0x33-0x44.
-    r'(?:'
-    r'0[xX][A-Fa-f0-9]+'
-    r'|\d+(?:(?:[uUlL][lL]?[lL]?)|\.?(?:\d+)?(?:e[-+]\d+)?[fFdD]?)?'
-    r'|\.\d+[fFdD]?'
-    r')'
+    ur'(?:'
+    ur'0[xX][A-Fa-f0-9]+'
+    ur'|\d+(?:(?:[uUlL][lL]?[lL]?)|\.?(?:\d+)?(?:e[-+]\d+)?[fFdD]?)?'
+    ur'|\.\d+[fFdD]?'
+    ur')'
     #r'0[xX][^A-Fa-f0-9]+(?:[uUlL][lL]?[lL]?)?(?!\w)',
     #r'[-+]?[0-9]*\.[0-9]+(?:[eE][+-][0-9]+)?[fF]?(?!\w)',
     #r'[-+]?[0-9]+(?:\.[0-9]*(?:[eE][+-][0-9]+)?)?[fF]?(?!\w)',
     #r'[-+]?[0-9]+(?:[uUlL][lL]?[lL]?)?(?!\w)',
     )
-kReNumbers = re.compile(__commonNumbersRegex)
+kReNumbers = re.compile(kNumbersRegex)
 
 # Trivia: all English contractions except 'sup, 'tis and 'twas will
 # match this regex (with re.I):  [adegIlnotuwy]'[acdmlsrtv]
