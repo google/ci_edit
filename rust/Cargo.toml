@@ -4,3 +4,4 @@ version = "0.1.0"
 authors = ["Dave Schuyler <dschuyler@chromium.org>"]
 
 [dependencies]
+ncurses = "5.97.0"
