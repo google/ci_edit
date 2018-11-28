@@ -207,7 +207,7 @@ class TextBuffer(app.actions.Actions):
         for s, column, index, id in app.curses_util.renderedFindIter(
             line, startCol, endCol, ('[]{}()',), True,
             highlightTrailingWhitespace):
-          window.addStr(top + i, column - left, s, colors[id])
+          window.addStr(top + i, column - self.view.scrollCol, s, colors[id])
     if 1:
       # Match brackets.
       if (self.parser.rowCount() > self.penRow and
