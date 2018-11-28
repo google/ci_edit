@@ -38,6 +38,7 @@ class ProgramWindow(app.window.ActiveWindow):
   over to the |program|."""
   def __init__(self, program):
     app.window.ActiveWindow.__init__(self, None)
+    self.clicks = 0
     self.modalUi = None
     self.program = program
     self.priorClick = 0

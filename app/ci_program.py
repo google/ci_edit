@@ -60,7 +60,6 @@ class CiProgram:
   the main loop. The CiProgram is intended as a singleton.
   The program interacts with a single top-level ProgramWindow."""
   def __init__(self, cursesScreen):
-    self.clicks = 0
     self.debugMouseEvent = (0, 0, 0, 0, 0)
     self.exiting = False
     self.cursesScreen = cursesScreen
