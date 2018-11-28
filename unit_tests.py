@@ -33,6 +33,7 @@ if not os.getenv('CI_EDIT_USE_REAL_CURSES'):
 import app.config
 app.config.strict_debug = True
 
+import app.unit_test_actions
 import app.unit_test_application
 import app.unit_test_automatic_column_adjustment
 import app.unit_test_bookmarks
@@ -56,6 +57,10 @@ import unittest
 
 # Add new test cases here.
 TESTS = {
+  'actions_mouse': app.unit_test_actions.MouseTestCases,
+  'actions_text_indent': app.unit_test_actions.TextIndentTestCases,
+  'actions_text_insert': app.unit_test_actions.TextInsertTestCases,
+
   'application': app.unit_test_application.ApplicationTestCases,
   'automatic_column_adjustment':
       app.unit_test_automatic_column_adjustment.AutomaticColumnAdjustmentCases,
@@ -72,9 +77,7 @@ TESTS = {
   'prefs': app.unit_test_prefs.PrefsTestCases,
   'regex': app.unit_test_regex.RegexTestCases,
   'selectable': app.unit_test_selectable.SelectableTestCases,
-  'text_buffer_mouse': app.unit_test_text_buffer.MouseTestCases,
-  'text_buffer_indent': app.unit_test_text_buffer.TextIndent,
-  'text_buffer_insert': app.unit_test_text_buffer.TextInsert,
+  'draw': app.unit_test_text_buffer.DrawTestCases,
   'ui': app.unit_test_ui.UiBasicsTestCases,
   'undo': app.unit_test_undo_redo.UndoRedoTestCases,
 }
