@@ -13,6 +13,11 @@
 # limitations under the License.
 
 # This is a list of non-English words that are in Rust libraries (crates).
+mevent
+bstate
+leaveok
+scrollok
+getmouse
 endwin
 getch
 initscr
