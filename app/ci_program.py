@@ -107,7 +107,6 @@ class CiProgram:
       cursesWindow.timeout(10)
       cursesWindow.keypad(1)
       app.window.mainCursesWindow = cursesWindow
-    self.zOrder = []
 
   def commandLoop(self):
     # Cache the thread setting.
@@ -451,15 +450,6 @@ class CiProgram:
                       repr(app.prefs.startup['numColors']))
 
   if 1:  # For unit tests/debugging.
-    def debugWindowOrder(self):
-      app.log.info('debugWindowOrder')
-      def recurse(list, indent):
-        for i in list:
-          app.log.info(indent, i)
-          recurse(i.zOrder, indent + '  ')
-      recurse(self.zOrder, '  ')
-      app.log.info('top window', self.topWindow())
-
     def getDocumentSelection(self):
       """This is primarily for testing."""
       tb = self.programWindow.inputWindow.textBuffer
@@ -471,12 +461,6 @@ class CiProgram:
       tb = self.programWindow.focusedWindow.textBuffer
       return (tb.penRow, tb.penCol, tb.markerRow, tb.markerCol,
           tb.selectionMode)
-
-    def topWindow(self):
-      top = self
-      while len(top.zOrder):
-        top = top.zOrder[-1]
-      return top
 
 def wrapped_ci(cursesScreen):
   try:
