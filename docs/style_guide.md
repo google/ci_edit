@@ -11,4 +11,6 @@ $ yapf -i --style google ci.py
 
 ## Rust Style Guide
 
-TBD
+Use rustfmt, e.g.
+
+$ cargo fmt

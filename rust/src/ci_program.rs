@@ -29,7 +29,11 @@ impl CiProgram {
     pub fn new() -> CiProgram {
         CiProgram {
             debug_mouse_event: ncurses::ll::MEVENT {
-                id: 0, x: 0, y: 0, z: 0, bstate: 0,
+                id: 0,
+                x: 0,
+                y: 0,
+                z: 0,
+                bstate: 0,
             },
             exiting: false,
             curses_screen: ncurses::initscr(),
@@ -67,7 +71,7 @@ pub fn run() {
     ncurses::start_color();
     ncurses::timeout(10);
     let curses_window = ci_program.curses_screen;
-    ncurses::leaveok(curses_window, true);  // Don't update cursor position.
+    ncurses::leaveok(curses_window, true); // Don't update cursor position.
     ncurses::scrollok(curses_window, true);
     ncurses::keypad(curses_window, true);
     //app.window.mainCursesWindow = curses_window
@@ -84,8 +88,7 @@ pub fn run() {
         }
         if c == 409 {
             let _err = ncurses::getmouse(&mut ci_program.debug_mouse_event);
-            ncurses::printw(&format!("mouse {:?}\n",
-                ci_program.debug_mouse_event));
+            ncurses::printw(&format!("mouse {:?}\n", ci_program.debug_mouse_event));
         }
         if c >= 0 {
             ncurses::printw(&format!("pressed {}\n", ci_program.ch));
