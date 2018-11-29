@@ -88,7 +88,10 @@ pub fn run() {
         }
         if c == 409 {
             let _err = ncurses::getmouse(&mut ci_program.debug_mouse_event);
-            ncurses::printw(&format!("mouse {:?}\n", ci_program.debug_mouse_event));
+            ncurses::printw(&format!(
+                "mouse {:?}\n",
+                ci_program.debug_mouse_event
+            ));
         }
         if c >= 0 {
             ncurses::printw(&format!("pressed {}\n", ci_program.ch));
