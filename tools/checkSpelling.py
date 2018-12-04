@@ -76,8 +76,7 @@ def walkTree(root):
 if os.path.isfile(root):
   print(handleFile(root))
 elif os.path.isdir(root):
-  words = list(walkTree(root))
-  words.sort()
+  words = sorted(walkTree(root))
   for i in words:
     print(i)
 else:
