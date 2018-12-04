@@ -18,8 +18,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 try:
-  unicode('')
-except:
+  unicode
+except NameError:
   unicode = str
   unichr = chr
 
@@ -323,5 +323,3 @@ class ToggleController(app.controller.Controller):
     prefs = app.prefs
     prefs.save(category, name, not prefs.prefs[category][name])
     self.view.onPrefChanged(category, name)
-
-

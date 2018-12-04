@@ -33,6 +33,11 @@ import time
 import app.log
 import app.prefs
 
+try:
+  unicode
+except NameError:
+  unicode = str
+
 userHistory = {}
 pathToHistory = app.prefs.prefs['userData'].get('historyPath')
 
@@ -193,4 +198,3 @@ def clearUserHistory():
     app.log.info("user history cleared")
   except Exception as e:
     app.log.error('clearUserHistory exception', e)
-
