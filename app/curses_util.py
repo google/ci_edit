@@ -27,6 +27,10 @@ import termios
 
 import app.config
 
+try:
+  unicode
+except NameError:
+  unicode = str
 
 MIN_DOUBLE_WIDE_CHARACTER = u"\u3000"
 
@@ -215,8 +219,8 @@ def columnToIndex(offset, string):
   """If the visual cursor is on |offset|, which index of the string is the
   cursor on?"""
   if app.config.strict_debug:
-    assert type(offset), int
-    assert type(string), unicode
+    assert isinstance(offset, int)
+    assert isinstance(string, unicode)
   indexLimit = len(string) - 1
   index = 0
   for i in string:
@@ -233,8 +237,8 @@ def fitToRenderedWidth(width, string):
   """With |width| character cells available, how much of |string| can I render?
   """
   if app.config.strict_debug:
-    assert type(width), int
-    assert type(string), unicode
+    assert isinstance(width, int)
+    assert isinstance(string, unicode)
   indexLimit = len(string)
   index = 0
   for i in string:
@@ -258,9 +262,9 @@ def renderedFindIter(string, beginCol, endCol, charGroups, numbers, eolSpaces):
     tuple of (subStr, column, index, id)
   """
   if app.config.strict_debug:
-    assert type(string), unicode
-    assert type(beginCol), int
-    assert type(endCol), int
+    assert isinstance(string, unicode)
+    assert isinstance(beginCol, int)
+    assert isinstance(endCol, int)
   column = 0
   index = 0
   limit = len(string)
@@ -310,9 +314,9 @@ def renderedSubStr(string, beginCol, endCol):
     unicode string
   """
   if app.config.strict_debug:
-    assert type(string), unicode
-    assert type(beginCol), int
-    assert type(endCol), int
+    assert isinstance(string, unicode)
+    assert isinstance(beginCol, int)
+    assert isinstance(endCol, int)
   column = 0
   beginIndex = sys.maxsize
   endIndex = sys.maxsize
@@ -362,7 +366,7 @@ def renderedWidth(string):
   cells.
   """
   if app.config.strict_debug:
-    assert type(string), unicode
+    assert isinstance(string, unicode)
   width = 0
   for i in string:
     if i > MIN_DOUBLE_WIDE_CHARACTER:
