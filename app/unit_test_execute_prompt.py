@@ -26,29 +26,32 @@ import app.fake_curses_testing
 
 
 class ExecutePromptTestCases(app.fake_curses_testing.FakeCursesTestCase):
-  def setUp(self):
-    self.longMessage = True
-    app.fake_curses_testing.FakeCursesTestCase.setUp(self)
 
-  def test_execute(self):
-    #self.setMovieMode(True)
-    self.runWithFakeInputs([
-        self.displayCheck(-1, 0, [u"      "]),
-        CTRL_E, self.displayCheck(-1, 0, [u"e: "]), CTRL_J,
-        self.displayCheck(-1, 0, [u"      "]),
-        CTRL_E, self.displayCheck(-1, 0, [u"e: "]), CTRL_J,
-        CTRL_Q])
+    def setUp(self):
+        self.longMessage = True
+        app.fake_curses_testing.FakeCursesTestCase.setUp(self)
 
-  def test_pipe_sort(self):
-    #self.setMovieMode(True)
-    self.runWithFakeInputs([
-        self.writeText(u"carrot\nbanana\nbanana\napple\n"),
-        self.displayCheck(2, 7, [u"carrot  ", u"banana  ", u"banana  ",
-            u"apple  ", u"           "]),
-        CTRL_A,
-        CTRL_E, self.writeText(u'|sort'),
-        self.displayCheck(-1, 0, [u"e: |sort  "]),
-        CTRL_J,
-        self.displayCheck(2, 7, [u"apple  ", u"banana  ", u"banana  ",
-            u"carrot  ", u"           "]),
-        CTRL_Q, u"n"])
+    def test_execute(self):
+        #self.setMovieMode(True)
+        self.runWithFakeInputs([
+            self.displayCheck(-1, 0, [u"      "]), CTRL_E,
+            self.displayCheck(-1, 0, [u"e: "]), CTRL_J,
+            self.displayCheck(-1, 0, [u"      "]), CTRL_E,
+            self.displayCheck(-1, 0, [u"e: "]), CTRL_J, CTRL_Q
+        ])
+
+    def test_pipe_sort(self):
+        #self.setMovieMode(True)
+        self.runWithFakeInputs([
+            self.writeText(u"carrot\nbanana\nbanana\napple\n"),
+            self.displayCheck(2, 7, [
+                u"carrot  ", u"banana  ", u"banana  ", u"apple  ",
+                u"           "
+            ]), CTRL_A, CTRL_E,
+            self.writeText(u'|sort'),
+            self.displayCheck(-1, 0, [u"e: |sort  "]), CTRL_J,
+            self.displayCheck(2, 7, [
+                u"apple  ", u"banana  ", u"banana  ", u"carrot  ",
+                u"           "
+            ]), CTRL_Q, u"n"
+        ])

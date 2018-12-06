@@ -26,7 +26,6 @@ import unittest
 import app.parser
 import app.prefs
 
-
 performance1 = '''
 import app.parser
 path = 'app/actions.py'
@@ -34,47 +33,51 @@ data = open(path).read()
 grammar = self.prefs.getGrammar(path)
 '''
 
+
 class ParserTestCases(unittest.TestCase):
-  def setUp(self):
-    self.parser = app.parser.Parser()
 
-  def tearDown(self):
-    self.parser = None
+    def setUp(self):
+        self.parser = app.parser.Parser()
 
-  def test_parse(self):
-    test = """/* first comment */
+    def tearDown(self):
+        self.parser = None
+
+    def test_parse(self):
+        test = """/* first comment */
 two
 // second comment
 #include "test.h"
 void blah();
 """
-    self.prefs = app.prefs.Prefs()
-    self.parser.parse(None, self.prefs, test, self.prefs.grammars['cpp'], 0,
-        99999)
-    #self.assertEqual(selectable.selection(), (0, 0, 0, 0))
+        self.prefs = app.prefs.Prefs()
+        self.parser.parse(None, self.prefs, test, self.prefs.grammars['cpp'], 0,
+                          99999)
+        #self.assertEqual(selectable.selection(), (0, 0, 0, 0))
 
-  if 0:
-    def test_parse_performance(self):
-      a = timeit(
-          '''parser = app.parser.Parser()
+    if 0:
+
+        def test_parse_performance(self):
+            a = timeit(
+                '''parser = app.parser.Parser()
 parser.parse(data, grammar, 0, sys.maxsize)''',
-          setup=performance1,
-          number=10)
+                setup=performance1,
+                number=10)
 
-  if 0:
-    def test_profile_parse(self):
-      profile = cProfile.Profile()
-      parser = app.parser.Parser()
-      path = 'app/actions.py'
-      data = io.open(path).read()
-      grammar = self.prefs.getGrammar(path)
+    if 0:
 
-      profile.enable()
-      parser.parse(data, grammar, 0, sys.maxsize)
-      profile.disable()
+        def test_profile_parse(self):
+            profile = cProfile.Profile()
+            parser = app.parser.Parser()
+            path = 'app/actions.py'
+            data = io.open(path).read()
+            grammar = self.prefs.getGrammar(path)
 
-      output = io.StringIO.StringIO()
-      stats = pstats.Stats(profile, stream=output).sort_stats('cumulative')
-      stats.print_stats()
-      print(output.getvalue())
+            profile.enable()
+            parser.parse(data, grammar, 0, sys.maxsize)
+            profile.disable()
 
+            output = io.StringIO.StringIO()
+            stats = pstats.Stats(
+                profile, stream=output).sort_stats('cumulative')
+            stats.print_stats()
+            print(output.getvalue())

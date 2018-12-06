@@ -20,10 +20,11 @@ import re
 
 
 def joinReList(reList):
-  return r"("+r")|(".join(reList)+r")"
+    return r"(" + r")|(".join(reList) + r")"
+
 
 def joinReWordList(reList):
-  return r"(\b"+r"\b)|(\b".join(reList)+r"\b)"
+    return r"(\b" + r"\b)|(\b".join(reList) + r"\b)"
 
 
 kNonMatchingRegex = r'^\b$'
@@ -41,7 +42,8 @@ kEndSpacesRegex = r'\s+$'
 kReEndSpaces = re.compile(kEndSpacesRegex)
 
 kReStrings = re.compile(
-    r"(\"\"\".*?(?<!\\)\"\"\")|('''.*?(?<!\\)''')|(\".*?(?<!\\)\")|('.*?(?<!\\)')")
+    r"(\"\"\".*?(?<!\\)\"\"\")|('''.*?(?<!\\)''')|(\".*?(?<!\\)\")|('.*?(?<!\\)')"
+)
 
 # The first group is a hack to allow upper case pluralized, e.g. URLs.
 kReSubwords = re.compile(
@@ -67,7 +69,7 @@ kNumbersRegex = (
     #r'[-+]?[0-9]*\.[0-9]+(?:[eE][+-][0-9]+)?[fF]?(?!\w)',
     #r'[-+]?[0-9]+(?:\.[0-9]*(?:[eE][+-][0-9]+)?)?[fF]?(?!\w)',
     #r'[-+]?[0-9]+(?:[uUlL][lL]?[lL]?)?(?!\w)',
-    )
+)
 kReNumbers = re.compile(kNumbersRegex)
 
 # Trivia: all English contractions except 'sup, 'tis and 'twas will

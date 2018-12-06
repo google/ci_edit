@@ -20,25 +20,26 @@ import third_party.pyperclip as clipboard
 
 
 class Clipboard():
-  def __init__(self):
-    self._clipList = []
 
-  def copy(self, text):
-    """Add text onto clipList. Empty |text| is not stored."""
-    if text and len(text):
-      self._clipList.append(text)
-      if clipboard.copy:
-        clipboard.copy(text)
+    def __init__(self):
+        self._clipList = []
 
-  def paste(self, clipIndex=None):
-    """Fetch top of clipList; or clip at index |clipIndex|. The |clipIndex| will
+    def copy(self, text):
+        """Add text onto clipList. Empty |text| is not stored."""
+        if text and len(text):
+            self._clipList.append(text)
+            if clipboard.copy:
+                clipboard.copy(text)
+
+    def paste(self, clipIndex=None):
+        """Fetch top of clipList; or clip at index |clipIndex|. The |clipIndex| will
     wrap around if it's larger than the clipList length."""
-    if clipIndex is None:
-      osClip = clipboard.paste and clipboard.paste()
-      if osClip:
-        return osClip
-      # Get the top of the clipList instead.
-      clipIndex = -1
-    if len(self._clipList):
-      return self._clipList[clipIndex % len(self._clipList)]
-    return None
+        if clipIndex is None:
+            osClip = clipboard.paste and clipboard.paste()
+            if osClip:
+                return osClip
+            # Get the top of the clipList instead.
+            clipIndex = -1
+        if len(self._clipList):
+            return self._clipList[clipIndex % len(self._clipList)]
+        return None

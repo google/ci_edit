@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """
   Track user history to provide features such as resuming editing at the same
   cursor position after reloading a file; or a recent file list.
@@ -23,17 +22,18 @@ from __future__ import division
 from __future__ import print_function
 
 try:
-  import cPickle as pickle
+    import cPickle as pickle
 except ImportError:
-  import pickle
+    import pickle
 import hashlib
 import os
 import time
 
 import app.log
 
+
 def calculateChecksum(filePath, data=None):
-  """
+    """
   Calculates the hash value of the specified file.
   The second argument can be passed in if a file's data has
   already been read so that you do not have to read the file again.
@@ -46,20 +46,21 @@ def calculateChecksum(filePath, data=None):
   Returns:
     The hash value of the file's data.
   """
-  app.log.info("Calculate checksum of the current file")
-  hasher = hashlib.sha512()
-  try:
-    if data:
-      hasher.update(data)
-    else:
-      with open(filePath, 'rb') as file:
-        hasher.update(file.read())
-    return hasher.hexdigest()
-  except:
-    return None
+    app.log.info("Calculate checksum of the current file")
+    hasher = hashlib.sha512()
+    try:
+        if data:
+            hasher.update(data)
+        else:
+            with open(filePath, 'rb') as file:
+                hasher.update(file.read())
+        return hasher.hexdigest()
+    except:
+        return None
+
 
 def calculateFileSize(filePath):
-  """
+    """
   Calculates the size of the specified value.
 
   Args:
@@ -68,13 +69,14 @@ def calculateFileSize(filePath):
   Returns:
     The size of the file in bytes.
   """
-  try:
-    return os.stat(filePath).st_size
-  except:
-    return 0
+    try:
+        return os.stat(filePath).st_size
+    except:
+        return 0
+
 
 def getFileInfo(filePath, data=None):
-  """
+    """
   Returns the hash value and size of the specified file.
   The second argument can be passed in if a file's data has
   already been read so that you do not have to read the file again.
@@ -87,32 +89,33 @@ def getFileInfo(filePath, data=None):
   Returns:
     A tuple containing the checksum and size of the file.
   """
-  checksum = calculateChecksum(filePath, data)
-  fileSize = calculateFileSize(filePath)
-  return (checksum, fileSize)
+    checksum = calculateChecksum(filePath, data)
+    fileSize = calculateFileSize(filePath)
+    return (checksum, fileSize)
 
 
 class History():
-  def __init__(self, pathToHistory):
-    self.userHistory = {}
-    self.pathToHistory = pathToHistory
 
-  def loadUserHistory(self):
-    """
+    def __init__(self, pathToHistory):
+        self.userHistory = {}
+        self.pathToHistory = pathToHistory
+
+    def loadUserHistory(self):
+        """
     Retrieves the user's complete edit history for all files.
 
     Returns:
       None.
     """
-    if os.path.isfile(self.pathToHistory):
-      with open(self.pathToHistory, 'rb') as file:
-        try:
-          userHistory = pickle.load(file)
-        except ValueError as e:
-          app.log.info(unicode(e))
+        if os.path.isfile(self.pathToHistory):
+            with open(self.pathToHistory, 'rb') as file:
+                try:
+                    userHistory = pickle.load(file)
+                except ValueError as e:
+                    app.log.info(unicode(e))
 
-  def saveUserHistory(self, fileInfo, fileHistory):
-    """
+    def saveUserHistory(self, fileInfo, fileHistory):
+        """
     Saves the user's file history by writing to a pickle file.
 
     Args:
@@ -122,20 +125,20 @@ class History():
     Returns:
       None.
     """
-    filePath, lastChecksum, lastFileSize = fileInfo
-    try:
-      if self.pathToHistory is not None:
-        self.userHistory.pop((lastChecksum, lastFileSize), None)
-        newChecksum, newFileSize = getFileInfo(filePath)
-        self.userHistory[(newChecksum, newFileSize)] = fileHistory
-        with open(self.pathToHistory, 'wb') as file:
-          pickle.dump(self.userHistory, file)
-        app.log.info('wrote pickle')
-    except Exception as e:
-      app.log.exception(e)
+        filePath, lastChecksum, lastFileSize = fileInfo
+        try:
+            if self.pathToHistory is not None:
+                self.userHistory.pop((lastChecksum, lastFileSize), None)
+                newChecksum, newFileSize = getFileInfo(filePath)
+                self.userHistory[(newChecksum, newFileSize)] = fileHistory
+                with open(self.pathToHistory, 'wb') as file:
+                    pickle.dump(self.userHistory, file)
+                app.log.info('wrote pickle')
+        except Exception as e:
+            app.log.exception(e)
 
-  def getFileHistory(self, filePath, data=None):
-    """
+    def getFileHistory(self, filePath, data=None):
+        """
     Takes in an file path and an optimal data
     argument and checks for the current file's history.
     It stores the current time in the file history and
@@ -151,25 +154,25 @@ class History():
     Returns:
       The file history (dict) of the desired file if it exists.
     """
-    checksum, fileSize = getFileInfo(filePath, data)
-    fileHistory = self.userHistory.get((checksum, fileSize), {})
-    fileHistory['adate'] = time.time()
-    return fileHistory
+        checksum, fileSize = getFileInfo(filePath, data)
+        fileHistory = self.userHistory.get((checksum, fileSize), {})
+        fileHistory['adate'] = time.time()
+        return fileHistory
 
-  def getRecentFiles(self):
-    """
+    def getRecentFiles(self):
+        """
     Returns:
       A list of file paths to recently accessed files.
     """
-    files = []
-    for entry in self.userHistory.values():
-      path = entry.get('path')
-      if path is not None:
-        files.append(path)
-    return files
+        files = []
+        for entry in self.userHistory.values():
+            path = entry.get('path')
+            if path is not None:
+                files.append(path)
+        return files
 
-  def clearUserHistory(self):
-    """
+    def clearUserHistory(self):
+        """
     Clears user history for all files.
 
     Args:
@@ -178,10 +181,9 @@ class History():
     Returns:
       None.
     """
-    self.userHistory = {}
-    try:
-      os.remove(self.pathToHistory)
-      app.log.info("user history cleared")
-    except Exception as e:
-      app.log.error('clearUserHistory exception', e)
-
+        self.userHistory = {}
+        try:
+            os.remove(self.pathToHistory)
+            app.log.info("user history cleared")
+        except Exception as e:
+            app.log.error('clearUserHistory exception', e)
