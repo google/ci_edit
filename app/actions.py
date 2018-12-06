@@ -46,10 +46,10 @@ import app.selectable
 class Actions(app.mutator.Mutator):
   """This base class to TextBuffer handles the text manipulation (without
   handling the drawing/rendering of the text)."""
-  def __init__(self, program, prefs):
+  def __init__(self, program):
     app.mutator.Mutator.__init__(self)
     self.program = program
-    self.prefs = prefs
+    self.prefs = self.program.prefs
     self.view = None
     self.bookmarks = []
     self.nextBookmarkColorPos = 0

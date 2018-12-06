@@ -31,8 +31,8 @@ import app.spelling
 
 class TextBuffer(app.actions.Actions):
   """The TextBuffer adds the drawing/rendering to the BackingTextBuffer."""
-  def __init__(self, program, prefs):
-    app.actions.Actions.__init__(self, program, prefs)
+  def __init__(self, program):
+    app.actions.Actions.__init__(self, program)
     self.lineLimitIndicator = 0
     self.highlightRe = None
     self.highlightCursorLine = False

@@ -480,8 +480,7 @@ class LabeledLine(Window):
       assert issubclass(parent.__class__, ViewWindow), parent
     Window.__init__(self, parent)
     self.host = parent
-    tb = app.text_buffer.TextBuffer(self.programWindow().program,
-        self.programWindow().program.prefs)
+    tb = app.text_buffer.TextBuffer(self.programWindow().program)
     tb.rootGrammar = self.programWindow().program.prefs.grammars['none']
     self.setTextBuffer(tb)
     self.label = label
@@ -1252,8 +1251,7 @@ class OptionsTrinaryStateWindow(Window):
     Window.__init__(self, parent)
     # TODO(dschuyler): Creating a text buffer is rather heavy for a toggle
     # control. This should get some optimization.
-    self.setTextBuffer(app.text_buffer.TextBuffer(self.programWindow().program,
-        self.programWindow().program.prefs))
+    self.setTextBuffer(app.text_buffer.TextBuffer(self.programWindow().program))
     self.setController(app.cu_editor.ToggleController)
     self.setParent(parent)
     self.name = label
@@ -1499,8 +1497,7 @@ class PopupWindow(Window):
     Window.__init__(self, host)
     self.host = host
     self.controller = app.cu_editor.PopupController(self)
-    self.setTextBuffer(app.text_buffer.TextBuffer(self.programWindow().program,
-        self.programWindow().program.prefs))
+    self.setTextBuffer(app.text_buffer.TextBuffer(self.programWindow().program))
     self.longestLineLength = 0
     self.__message = []
     self.showOptions = True
@@ -1569,8 +1566,7 @@ class PaletteWindow(Window):
     self.resizeTo(16, 16 * 5)
     self.moveTo(8, 8)
     self.controller = app.cu_editor.PaletteDialogController(self)
-    self.setTextBuffer(app.text_buffer.TextBuffer(self.programWindow().program,
-        self.programWindow().program.prefs))
+    self.setTextBuffer(app.text_buffer.TextBuffer(self.programWindow().program))
 
   def render(self):
     width = 16

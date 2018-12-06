@@ -42,7 +42,7 @@ class MouseTestCases(unittest.TestCase):
   def setUp(self):
     app.log.shouldWritePrintLog = False
     self.prg = app.ci_program.CiProgram()
-    self.textBuffer = app.text_buffer.TextBuffer(self.prg, self.prg.prefs)
+    self.textBuffer = app.text_buffer.TextBuffer(self.prg)
     self.textBuffer.setView(FakeView())
     test = """/* first comment */
 two
@@ -162,7 +162,7 @@ class TextIndentTestCases(unittest.TestCase):
   def setUp(self):
     app.log.shouldWritePrintLog = False
     self.prg = app.ci_program.CiProgram()
-    self.textBuffer = app.text_buffer.TextBuffer(self.prg, self.prg.prefs)
+    self.textBuffer = app.text_buffer.TextBuffer(self.prg)
     self.textBuffer.setView(FakeView())
     #self.assertEqual(self.textBuffer.scrollRow, 0)
     #self.assertEqual(self.textBuffer.scrollCol, 0)
@@ -203,7 +203,7 @@ class TextInsertTestCases(unittest.TestCase):
   def setUp(self):
     app.log.shouldWritePrintLog = False
     self.prg = app.ci_program.CiProgram()
-    self.textBuffer = app.text_buffer.TextBuffer(self.prg, self.prg.prefs)
+    self.textBuffer = app.text_buffer.TextBuffer(self.prg)
     self.textBuffer.setView(FakeView())
     #self.assertEqual(self.textBuffer.scrollRow, 0)
     #self.assertEqual(self.textBuffer.scrollCol, 0)

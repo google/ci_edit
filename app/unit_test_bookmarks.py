@@ -38,7 +38,7 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
     self.assertFalse(os.path.isfile(kTestFile))
     self.fakeHost = app.window.ViewWindow(None)
     self.prg = app.ci_program.CiProgram()
-    self.textBuffer = app.text_buffer.TextBuffer(self.prg, self.prg.prefs)
+    self.textBuffer = app.text_buffer.TextBuffer(self.prg)
     self.textBuffer.lines = 50
     self.lineNumbers = app.window.LineNumbers(self.fakeHost)
     self.lineNumbers.rows = 30
