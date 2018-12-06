@@ -26,7 +26,6 @@ import app.regex
 import app.log
 import app.parser
 import app.selectable
-import app.spelling
 
 
 class TextBuffer(app.actions.Actions):
@@ -126,6 +125,7 @@ class TextBuffer(app.actions.Actions):
     defaultColor = appPrefs.color['default']
     spellChecking = appPrefs.editor.get('spellChecking', True)
     colorPrefs = self.view.programWindow().program.color
+    spelling = self.program.dictionary
     if self.parser:
       # Highlight grammar.
       rowLimit = min(max(self.parser.rowCount() - startRow, 0), rows)
@@ -167,7 +167,7 @@ class TextBuffer(app.actions.Actions):
               offsetEnd = subStart + reg[1]
               if startCol < offsetEnd and offsetStart < endCol:
                 word = line[offsetStart:offsetEnd]
-                if not app.spelling.isCorrect(word, grammarName):
+                if not spelling.isCorrect(word, grammarName):
                   if startCol > offsetStart:
                     offsetStart += startCol - offsetStart
                   wordFragment = line[offsetStart:min(endCol, offsetEnd)]

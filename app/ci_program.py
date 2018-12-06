@@ -45,6 +45,7 @@ import app.history
 import app.log
 import app.prefs
 import app.program_window
+import app.spelling
 import app.window
 
 
@@ -64,6 +65,7 @@ class CiProgram:
   def __init__(self):
     self.prefs = app.prefs.Prefs()
     self.color = app.color.Colors(self.prefs.color)
+    self.dictionary = app.spelling.Dictionary()
     self.history = app.history.History(self.prefs.userData.get('historyPath'))
     self.bufferManager = app.buffer_manager.BufferManager(self, self.prefs)
     self.cursesScreen = None
