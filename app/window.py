@@ -886,7 +886,7 @@ class StatusLine(ViewWindow):
     if lineCount:
       rowPercentage = self.host.textBuffer.penRow * 100 // lineCount
       charCount = len(tb.lines[self.host.textBuffer.penRow])
-      if self.host.textBuffer.penCol != 0:
+      if charCount and self.host.textBuffer.penCol != 0:
         colPercentage = self.host.textBuffer.penCol * 100 // charCount
     # Format.
     rightSide = ''

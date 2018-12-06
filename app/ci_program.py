@@ -316,7 +316,7 @@ class CiProgram:
           userMessage(app.help.docs['key bindings'])
           self.quitNow()
         elif i == '--clearHistory':
-          app.history.clearUserHistory()
+          app.history.clearUserHistory(self.prefs.userData.get('historyPath'))
           self.quitNow()
         elif i == '--eightColors':
           numColors = 8
@@ -397,7 +397,7 @@ class CiProgram:
     self.setUpPalette()
     homePath = self.prefs.userData.get('homePath')
     self.makeHomeDirs(homePath)
-    app.history.loadUserHistory()
+    app.history.loadUserHistory(self.prefs.userData.get('historyPath'))
     app.curses_util.hackCursesFixes()
     if self.prefs.editor['useBgThread']:
       self.bg = app.background.startupBackground()

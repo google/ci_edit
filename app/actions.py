@@ -1127,7 +1127,8 @@ class Actions(app.mutator.Mutator):
           self.fileHistory[u'savedAtRedoIndexCompound'] = self.savedAtRedoIndex
           self.fileHistory[u'tempChange'] = self.tempChange
         app.history.saveUserHistory((self.fullPath, self.lastChecksum,
-            self.lastFileSize), self.fileHistory)
+            self.lastFileSize), self.fileHistory,
+            self.prefs.userData.get('historyPath'))
         # Store the file's new info
         self.lastChecksum, self.lastFileSize = app.history.getFileInfo(
             self.fullPath)

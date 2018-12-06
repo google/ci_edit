@@ -59,15 +59,16 @@ class DirectoryListController(app.controller.Controller):
       self.view.textBuffer.findRe = re.compile('()^' + re.escape(fileName))
     else:
       self.view.textBuffer.findRe = None
+    appPrefs = self.view.programWindow().program.prefs
     dirPath = dirPath or '.'
     if os.path.isdir(dirPath):
-      showDotFiles = app.prefs.editor[u'filesShowDotFiles']
-      showSizes = app.prefs.editor[u'filesShowSizes']
-      showModified = app.prefs.editor[u'filesShowModifiedDates']
+      showDotFiles = appPrefs.editor[u'filesShowDotFiles']
+      showSizes = appPrefs.editor[u'filesShowSizes']
+      showModified = appPrefs.editor[u'filesShowModifiedDates']
 
-      sortByName = app.prefs.editor[u'filesSortAscendingByName']
-      sortBySize = app.prefs.editor[u'filesSortAscendingBySize']
-      sortByModifiedDate = app.prefs.editor[u'filesSortAscendingByModifiedDate']
+      sortByName = appPrefs.editor[u'filesSortAscendingByName']
+      sortBySize = appPrefs.editor[u'filesSortAscendingBySize']
+      sortByModifiedDate = appPrefs.editor[u'filesSortAscendingByModifiedDate']
 
       lines = []
       try:

@@ -31,18 +31,16 @@ import os
 import time
 
 import app.log
-import app.prefs
 
 userHistory = {}
-pathToHistory = app.prefs.prefs['userData'].get('historyPath')
+pathToHistory = None
 
-def loadUserHistory(historyPath=pathToHistory):
+def loadUserHistory(historyPath):
   """
   Retrieves the user's complete edit history for all files.
 
   Args:
-    historyPath (str): Defaults to pathToHistory.
-      The path to the user's saved history.
+    historyPath (str): The path to the user's saved history.
 
   Returns:
     None.
@@ -56,15 +54,14 @@ def loadUserHistory(historyPath=pathToHistory):
       except ValueError as e:
         app.log.info(unicode(e))
 
-def saveUserHistory(fileInfo, fileHistory, historyPath=pathToHistory):
+def saveUserHistory(fileInfo, fileHistory, historyPath):
   """
   Saves the user's file history by writing to a pickle file.
 
   Args:
     fileInfo (tuple): Contains (filePath, lastChecksum, lastFileSize).
     fileHistory (dict): The history of the file that the user wants to save.
-    historyPath (str): Defaults to pathToHistory.
-      The path to the user's saved history.
+    historyPath (str): The path to the user's saved history.
 
   Returns:
     None.
@@ -176,7 +173,7 @@ def calculateFileSize(filePath):
   except:
     return 0
 
-def clearUserHistory():
+def clearUserHistory(pathToHistory):
   """
   Clears user history for all files.
 
@@ -186,7 +183,7 @@ def clearUserHistory():
   Returns:
     None.
   """
-  global userHistory, pathToHistory
+  global userHistory
   userHistory = {}
   try:
     os.remove(pathToHistory)
