@@ -29,8 +29,8 @@ import app.window
 
 
 class DebugWindow(app.window.ActiveWindow):
-  def __init__(self, host):
-    app.window.ActiveWindow.__init__(self, host)
+  def __init__(self, program, host):
+    app.window.ActiveWindow.__init__(self, program, host)
 
   def debugDraw(self, program, win):
     """Draw real-time debug information to the screen."""
@@ -94,8 +94,8 @@ class DebugWindow(app.window.ActiveWindow):
 
 
 class DebugUndoWindow(app.window.ActiveWindow):
-  def __init__(self, host):
-    app.window.ActiveWindow.__init__(self, host)
+  def __init__(self, program, host):
+    app.window.ActiveWindow.__init__(self, program, host)
 
   def debugUndoDraw(self, win):
     """Draw real-time debug information to the screen."""

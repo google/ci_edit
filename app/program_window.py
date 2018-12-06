@@ -36,7 +36,9 @@ class ProgramWindow(app.window.ActiveWindow):
   parent is None). Calls that propagate up the window tree stop here or jump
   over to the |program|."""
   def __init__(self, program):
-    app.window.ActiveWindow.__init__(self, None)
+    if app.config.strict_debug:
+      assert issubclass(program.__class__, app.ci_program.CiProgram), self
+    app.window.ActiveWindow.__init__(self, program, None)
     self.clicks = 0
     self.modalUi = None
     self.program = program
@@ -46,20 +48,21 @@ class ProgramWindow(app.window.ActiveWindow):
     self.savedMouseX = -1
     self.savedMouseY = -1
     self.showLogWindow = self.program.prefs.startup['showLogWindow']
-    self.debugWindow = app.debug_window.DebugWindow(self)
-    self.debugUndoWindow = app.debug_window.DebugUndoWindow(self)
-    self.logWindow = app.window.LogWindow(self)
-    self.popupWindow = app.window.PopupWindow(self)
-    self.paletteWindow = app.window.PaletteWindow(self)
+    self.debugWindow = app.debug_window.DebugWindow(self.program, self)
+    self.debugUndoWindow = app.debug_window.DebugUndoWindow(self.program, self)
+    self.logWindow = app.window.LogWindow(self.program, self)
+    self.popupWindow = app.window.PopupWindow(self.program, self)
+    self.paletteWindow = app.window.PaletteWindow(self.program, self)
     # The input window is the main document window.
-    self.inputWindow = app.window.InputWindow(self)
+    self.inputWindow = app.window.InputWindow(self.program, self)
     self.inputWindow.parent = self
     # Set up file manager.
-    self.fileManagerWindow = app.file_manager_window.FileManagerWindow(self,
+    self.fileManagerWindow = app.file_manager_window.FileManagerWindow(self.program,
+        self,
         self.inputWindow)
     self.fileManagerWindow.parent = self
     # Set up prediction.
-    self.predictionWindow = app.prediction_window.PredictionWindow(self)
+    self.predictionWindow = app.prediction_window.PredictionWindow(self.program, self)
     self.predictionWindow.parent = self
     # Put the input window in front on startup.
     self.inputWindow.reattach()

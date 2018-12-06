@@ -270,6 +270,8 @@ class CiProgram:
   def startup(self):
     """A second init-like function. Called after command line arguments are
     parsed."""
+    if app.config.strict_debug:
+      assert issubclass(self.__class__, app.ci_program.CiProgram), self
     self.programWindow = app.program_window.ProgramWindow(self)
     top, left = app.window.mainCursesWindow.getyx()
     rows, cols = app.window.mainCursesWindow.getmaxyx()

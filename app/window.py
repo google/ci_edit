@@ -45,7 +45,7 @@ class ViewWindow:
   See class ActiveWindow for a window that can get focus.
   See class Window for a window that can get focus and have a TextBuffer.
   """
-  def __init__(self, parent):
+  def __init__(self, program, parent):
     """
     Args:
       parent is responsible for the order in which this window is updated,
@@ -53,8 +53,10 @@ class ViewWindow:
     """
     if app.config.strict_debug:
       assert issubclass(self.__class__, ViewWindow), self
+      assert issubclass(program.__class__, app.ci_program.CiProgram), self
       if parent is not None:
         assert issubclass(parent.__class__, ViewWindow), parent
+    self.program = program
     self.parent = parent
     self.isFocusable = False
     self.top = 0
@@ -332,12 +334,13 @@ class ViewWindow:
 
 class ActiveWindow(ViewWindow):
   """An ActiveWindow may have focus and a controller."""
-  def __init__(self, parent):
+  def __init__(self, program, parent):
     if app.config.strict_debug:
       assert issubclass(self.__class__, ActiveWindow), self
+      assert issubclass(program.__class__, app.ci_program.CiProgram), repr(program)
       if parent is not None:
         assert issubclass(parent.__class__, ViewWindow), parent
-    ViewWindow.__init__(self, parent)
+    ViewWindow.__init__(self, program, parent)
     self.controller = None
     self.hasFocus = False
     self.isFocusable = True
@@ -364,11 +367,12 @@ class ActiveWindow(ViewWindow):
 class Window(ActiveWindow):
   """A Window holds a TextBuffer and a controller that operates on the
   TextBuffer."""
-  def __init__(self, parent):
+  def __init__(self, program, parent):
     if app.config.strict_debug:
       assert issubclass(self.__class__, Window), self
+      assert issubclass(program.__class__, app.ci_program.CiProgram), self
       assert issubclass(parent.__class__, ViewWindow), parent
-    ActiveWindow.__init__(self, parent)
+    ActiveWindow.__init__(self, program, parent)
     self.hasCaptiveCursor = self.programWindow().program.prefs.editor[
       'captiveCursor']
     self.textBuffer = None
@@ -441,13 +445,14 @@ class Window(ActiveWindow):
 
 class LabelWindow(ViewWindow):
   """A text label. The label is inert, it will pass events to its parent."""
-  def __init__(self, parent, label, preferredWidth=None, align='left'):
+  def __init__(self, program, parent, label, preferredWidth=None, align='left'):
     if app.config.strict_debug:
+      assert issubclass(program.__class__, app.ci_program.CiProgram), self
       assert issubclass(parent.__class__, ViewWindow), parent
       assert type(label) == str
       assert preferredWidth is None or type(preferredWidth) == int
       assert type(align) == str
-    ViewWindow.__init__(self, parent)
+    ViewWindow.__init__(self, program, parent)
     self.label = label
     self.preferredWidth = preferredWidth
     self.align = -1 if align == 'left' else 1
@@ -474,17 +479,18 @@ class LabelWindow(ViewWindow):
 class LabeledLine(Window):
   """A single line with a label. This is akin to a line prompt or gui modal
       dialog. It's used for things like 'find' and 'goto line'."""
-  def __init__(self, parent, label):
+  def __init__(self, program, parent, label):
     if app.config.strict_debug:
       assert issubclass(self.__class__, LabeledLine), self
+      assert issubclass(program.__class__, app.ci_program.CiProgram), self
       assert issubclass(parent.__class__, ViewWindow), parent
-    Window.__init__(self, parent)
+    Window.__init__(self, program, parent)
     self.host = parent
     tb = app.text_buffer.TextBuffer(self.programWindow().program)
     tb.rootGrammar = self.programWindow().program.prefs.grammars['none']
     self.setTextBuffer(tb)
     self.label = label
-    self.leftColumn = ViewWindow(self)
+    self.leftColumn = ViewWindow(self.program, self)
     # TODO(dschuyler) Add self.rightColumn.
 
   def focus(self):
@@ -518,11 +524,11 @@ class LabeledLine(Window):
 class Menu(ViewWindow):
   """Work in progress on a context menu.
   """
-  def __init__(self, host):
+  def __init__(self, program, host):
     if app.config.strict_debug:
       assert issubclass(self.__class__, Menu), self
       assert issubclass(host.__class__, ActiveWindow), parent
-    ViewWindow.__init__(self, host)
+    ViewWindow.__init__(self, program, host)
     self.host = host
     self.label = ''
     self.lines = []
@@ -557,8 +563,8 @@ class Menu(ViewWindow):
 
 
 class LineNumbers(ViewWindow):
-  def __init__(self, host):
-    ViewWindow.__init__(self, host)
+  def __init__(self, program, host):
+    ViewWindow.__init__(self, program, host)
     self.host = host
 
   def drawLineNumbers(self):
@@ -677,8 +683,8 @@ class LineNumbers(ViewWindow):
 
 
 class LogWindow(ViewWindow):
-  def __init__(self, parent):
-    ViewWindow.__init__(self, parent)
+  def __init__(self, program, parent):
+    ViewWindow.__init__(self, program, parent)
     self.lines = app.log.getLines()
     self.renderCounter = 0
 
@@ -698,48 +704,48 @@ class LogWindow(ViewWindow):
 
 
 class InteractiveFind(Window):
-  def __init__(self, host):
-    Window.__init__(self, host)
+  def __init__(self, program, host):
+    Window.__init__(self, program, host)
     self.host = host
     self.expanded = False
     self.setController(app.cu_editor.InteractiveFind)
     indent = '  '
 
-    self.findLine = LabeledLine(self, 'Find: ')
+    self.findLine = LabeledLine(self.program, self, 'Find: ')
     self.findLine.setController(app.cu_editor.InteractiveFindInput)
     self.findLine.setParent(self)
 
-    self.replaceLine = LabeledLine(self, 'Replace: ')
+    self.replaceLine = LabeledLine(self.program, self, 'Replace: ')
     self.replaceLine.setController(app.cu_editor.InteractiveReplaceInput)
     self.replaceLine.setParent(self)
 
-    self.matchOptionsRow = RowWindow(self, 2)
+    self.matchOptionsRow = RowWindow(self.program, self, 2)
     self.matchOptionsRow.setParent(self)
 
     # If findUseRegex is false, re.escape the search.
-    toggle = OptionsToggle(self.matchOptionsRow, 'regex', 'editor',
+    toggle = OptionsToggle(self.program, self.matchOptionsRow, 'regex', 'editor',
         'findUseRegex')
     # If findWholeWord, wrap with \b.
-    toggle = OptionsToggle(self.matchOptionsRow, 'wholeWord', 'editor',
+    toggle = OptionsToggle(self.program, self.matchOptionsRow, 'wholeWord', 'editor',
         'findWholeWord')
     # If findIgnoreCase, pass ignore case flag to regex.
-    toggle = OptionsToggle(self.matchOptionsRow, 'ignoreCase', 'editor',
+    toggle = OptionsToggle(self.program, self.matchOptionsRow, 'ignoreCase', 'editor',
         'findIgnoreCase')
     if 0:
       # Use locale.
-      toggle = OptionsToggle(self.matchOptionsRow, 'locale', 'editor',
+      toggle = OptionsToggle(self.program, self.matchOptionsRow, 'locale', 'editor',
           'findLocale')
       # Span lines.
-      toggle = OptionsToggle(self.matchOptionsRow, 'multiline', 'editor',
+      toggle = OptionsToggle(self.program, self.matchOptionsRow, 'multiline', 'editor',
           'findMultiline')
       # Dot matches anything (even \n).
-      toggle = OptionsToggle(self.matchOptionsRow, 'dotAll', 'editor',
+      toggle = OptionsToggle(self.program, self.matchOptionsRow, 'dotAll', 'editor',
           'findDotAll')
       # Unicode match.
-      toggle = OptionsToggle(self.matchOptionsRow, 'unicode', 'editor',
+      toggle = OptionsToggle(self.program, self.matchOptionsRow, 'unicode', 'editor',
           'findUnicode')
       # Replace uppercase with upper and lowercase with lower.
-      toggle = OptionsToggle(self.matchOptionsRow, 'smartCaps', 'editor',
+      toggle = OptionsToggle(self.program, self.matchOptionsRow, 'smartCaps', 'editor',
           'findReplaceSmartCaps')
 
     if 0:
@@ -831,8 +837,8 @@ class InteractiveFind(Window):
 
 class MessageLine(ViewWindow):
   """The message line appears at the bottom of the screen."""
-  def __init__(self, host):
-    ViewWindow.__init__(self, host)
+  def __init__(self, program, host):
+    ViewWindow.__init__(self, program, host)
     self.host = host
     self.message = None
     self.renderedMessage = None
@@ -850,8 +856,8 @@ class MessageLine(ViewWindow):
 class StatusLine(ViewWindow):
   """The status line appears at the bottom of the screen. It shows the current
   line and column the cursor is on."""
-  def __init__(self, host):
-    ViewWindow.__init__(self, host)
+  def __init__(self, program, host):
+    ViewWindow.__init__(self, program, host)
     self.host = host
 
   def render(self):
@@ -905,8 +911,8 @@ class StatusLine(ViewWindow):
 
 
 class TopInfo(ViewWindow):
-  def __init__(self, host):
-    ViewWindow.__init__(self, host)
+  def __init__(self, program, host):
+    ViewWindow.__init__(self, program, host)
     self.host = host
     self.borrowedRows = 0
     self.lines = []
@@ -984,10 +990,10 @@ class TopInfo(ViewWindow):
 
 class InputWindow(Window):
   """This is the main content window. Often the largest pane displayed."""
-  def __init__(self, host):
+  def __init__(self, program, host):
     if app.config.strict_debug:
       assert host
-    Window.__init__(self, host)
+    Window.__init__(self, program, host)
     self.host = host
     self.showFooter = True
     self.savedScrollPositions = {}
@@ -1006,63 +1012,63 @@ class InputWindow(Window):
     # What does the user appear to want: edit, quit, or something else?
     self.userIntent = 'edit'
     if 1:
-      self.confirmClose = LabeledLine(self,
+      self.confirmClose = LabeledLine(self.program, self,
           "Save changes? (yes, no, or cancel): ")
       self.confirmClose.setController(app.cu_editor.ConfirmClose)
     if 1:
-      self.confirmOverwrite = LabeledLine(self,
+      self.confirmOverwrite = LabeledLine(self.program, self,
           "Overwrite exiting file? (yes or no): ")
       self.confirmOverwrite.setController(app.cu_editor.ConfirmOverwrite)
-    self.contextMenu = Menu(self)
+    self.contextMenu = Menu(self.program, self)
     if 1:  # wip on multi-line interactive find.
-      self.interactiveFind = InteractiveFind(self)
+      self.interactiveFind = InteractiveFind(self.program, self)
       self.interactiveFind.setParent(self, 0)
     else:
-      self.interactiveFind = LabeledLine(self, 'find: ')
+      self.interactiveFind = LabeledLine(self.program, self, 'find: ')
       self.interactiveFind.setController(app.cu_editor.InteractiveFind)
     if 1:
-      self.interactiveGoto = LabeledLine(self, 'goto: ')
+      self.interactiveGoto = LabeledLine(self.program, self, 'goto: ')
       self.interactiveGoto.setController(app.cu_editor.InteractiveGoto)
     if 1:
-      self.interactivePrediction = LabeledLine(self, 'p: ')
+      self.interactivePrediction = LabeledLine(self.program, self, 'p: ')
       self.interactivePrediction.setController(
           app.cu_editor.InteractivePrediction)
     if 1:
-      self.interactivePrompt = LabeledLine(self, "e: ")
+      self.interactivePrompt = LabeledLine(self.program, self, "e: ")
       self.interactivePrompt.setController(app.cu_editor.InteractivePrompt)
     if 1:
-      self.interactiveQuit = LabeledLine(self,
+      self.interactiveQuit = LabeledLine(self.program, self,
           "Save changes? (yes, no, or cancel): ")
       self.interactiveQuit.setController(app.cu_editor.InteractiveQuit)
     if 1:
-      self.topInfo = TopInfo(self)
+      self.topInfo = TopInfo(self.program, self)
       self.topInfo.setParent(self, 0)
       if not self.showTopInfo:
         self.topInfo.detach()
     if 1:
-      self.statusLine = StatusLine(self)
+      self.statusLine = StatusLine(self.program, self)
       self.statusLine.setParent(self, 0)
       if not self.showFooter:
         self.statusLine.detach()
     if 1:
-      self.lineNumberColumn = LineNumbers(self)
+      self.lineNumberColumn = LineNumbers(self.program, self)
       self.lineNumberColumn.setParent(self, 0)
       if not self.showLineNumbers:
         self.lineNumberColumn.detach()
     if 1:
-      self.logoCorner = ViewWindow(self)
+      self.logoCorner = ViewWindow(self.program, self)
       self.logoCorner.name = 'Logo'
       self.logoCorner.setParent(self, 0)
     if 1:
-      self.rightColumn = ViewWindow(self)
+      self.rightColumn = ViewWindow(self.program, self)
       self.rightColumn.name = 'Right'
       self.rightColumn.setParent(self, 0)
       if not self.showRightColumn:
         self.rightColumn.detach()
     if 1:
-      self.popupWindow = PopupWindow(self)
+      self.popupWindow = PopupWindow(self.program, self)
     if self.showMessageLine:
-      self.messageLine = MessageLine(self)
+      self.messageLine = MessageLine(self.program, self)
       self.messageLine.setParent(self, 0)
     self.showTips = self.programWindow().program.prefs.status.get('showTips')
     self.statusLineCount = 8 if self.showTips else 1
@@ -1223,10 +1229,10 @@ class InputWindow(Window):
 
 class OptionsSelectionWindow(ViewWindow):
   """Mutex window."""
-  def __init__(self, parent):
+  def __init__(self, program, parent):
     if app.config.strict_debug:
       assert parent is not None
-    ViewWindow.__init__(self, parent)
+    ViewWindow.__init__(self, program, parent)
     self.color = self.programWindow().program.color.get('top_info')
 
   def reshape(self, top, left, rows, cols):
@@ -1245,10 +1251,10 @@ class OptionsSelectionWindow(ViewWindow):
 
 
 class OptionsTrinaryStateWindow(Window):
-  def __init__(self, parent, label, prefCategory, prefName):
+  def __init__(self, program, parent, label, prefCategory, prefName):
     if app.config.strict_debug:
       assert type(label) == str
-    Window.__init__(self, parent)
+    Window.__init__(self, program, parent)
     # TODO(dschuyler): Creating a text buffer is rather heavy for a toggle
     # control. This should get some optimization.
     self.setTextBuffer(app.text_buffer.TextBuffer(self.programWindow().program))
@@ -1307,12 +1313,12 @@ class OptionsTrinaryStateWindow(Window):
 
 
 class OptionsToggle(OptionsTrinaryStateWindow):
-  def __init__(self, parent, label, prefCategory, prefName, width=None):
+  def __init__(self, program, parent, label, prefCategory, prefName, width=None):
     if app.config.strict_debug:
       assert type(label) == str
       assert type(prefCategory) == str
       assert type(prefName) == str
-    OptionsTrinaryStateWindow.__init__(self, parent, label, prefCategory,
+    OptionsTrinaryStateWindow.__init__(self, program, parent, label, prefCategory,
         prefName)
     if 0:
       toggleOn = '[x]' + name
@@ -1328,10 +1334,10 @@ class OptionsToggle(OptionsTrinaryStateWindow):
 
 
 class RowWindow(ViewWindow):
-  def __init__(self, host, separator):
+  def __init__(self, program, host, separator):
     if app.config.strict_debug:
       assert host
-    ViewWindow.__init__(self, host)
+    ViewWindow.__init__(self, program, host)
     self.color = self.programWindow().program.color.get('keyword')
     self.separator = separator
 
@@ -1357,10 +1363,10 @@ class OptionsRow(ViewWindow):
       self.width = width if width is not None else len(name)
       self.sep = sep
 
-  def __init__(self, host):
+  def __init__(self, program, host):
     if app.config.strict_debug:
       assert host
-    ViewWindow.__init__(self, host)
+    ViewWindow.__init__(self, program, host)
     self.host = host
     self.color = self.programWindow().program.color.get('top_info')
     self.controlList = []
@@ -1491,10 +1497,10 @@ class OptionsRow(ViewWindow):
 
 
 class PopupWindow(Window):
-  def __init__(self, host):
+  def __init__(self, program, host):
     if app.config.strict_debug:
       assert host
-    Window.__init__(self, host)
+    Window.__init__(self, program, host)
     self.host = host
     self.controller = app.cu_editor.PopupController(self)
     self.setTextBuffer(app.text_buffer.TextBuffer(self.programWindow().program))
@@ -1560,8 +1566,8 @@ class PopupWindow(Window):
 
 class PaletteWindow(Window):
   """A window with example foreground and background text colors."""
-  def __init__(self, prg):
-    Window.__init__(self, prg)
+  def __init__(self, prg, host):
+    Window.__init__(self, prg, host)
     self.prg = prg
     self.resizeTo(16, 16 * 5)
     self.moveTo(8, 8)
@@ -1587,12 +1593,13 @@ class PaletteWindow(Window):
 
 
 class SortableHeaderWindow(OptionsTrinaryStateWindow):
-  def __init__(self, parent, label, prefCategory, prefName, width=None):
+  def __init__(self, program, parent, label, prefCategory, prefName, width=None):
     if app.config.strict_debug:
+      assert issubclass(program.__class__, app.ci_program.CiProgram), program
       assert type(label) == str
       assert type(prefCategory) == str
       assert type(prefName) == str
-    OptionsTrinaryStateWindow.__init__(self, parent, label, prefCategory,
+    OptionsTrinaryStateWindow.__init__(self, program, parent, label, prefCategory,
         prefName)
     self.color = self.programWindow().program.color.get('top_info')
     def draw(label, decoration, width):

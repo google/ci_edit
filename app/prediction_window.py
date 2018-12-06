@@ -25,32 +25,32 @@ import app.window
 
 class PredictionList(app.window.Window):
   """This <tbd>."""
-  def __init__(self, host):
+  def __init__(self, program, host):
     if app.config.strict_debug:
       assert host
       assert self is not host
-    app.window.Window.__init__(self, host)
+    app.window.Window.__init__(self, program, host)
     self.host = host
     self.isFocusable = False
     self.controller = app.cu_editor.PredictionList(self)
     self.setTextBuffer(app.text_buffer.TextBuffer(self.programWindow().program))
     # Set up table headers.
     color = host.programWindow().program.color.get('top_info')
-    self.optionsRow = app.window.OptionsSelectionWindow(self)
+    self.optionsRow = app.window.OptionsSelectionWindow(self.program, self)
     self.optionsRow.setParent(self)
-    self.typeColumn = app.window.SortableHeaderWindow(self.optionsRow, 'Type',
+    self.typeColumn = app.window.SortableHeaderWindow(self.program, self.optionsRow, 'Type',
         'editor', 'predictionSortAscendingByType', 8)
-    label = app.window.LabelWindow(self.optionsRow, '|')
+    label = app.window.LabelWindow(self.program, self.optionsRow, '|')
     label.setParent(self.optionsRow)
     label.color = color
-    self.nameColumn = app.window.SortableHeaderWindow(self.optionsRow, 'Name',
+    self.nameColumn = app.window.SortableHeaderWindow(self.program, self.optionsRow, 'Name',
         'editor', 'predictionSortAscendingByName', -61)
-    label = app.window.LabelWindow(self.optionsRow, '|')
+    label = app.window.LabelWindow(self.program, self.optionsRow, '|')
     label.setParent(self.optionsRow)
     label.color = color
-    self.statusColumn = app.window.SortableHeaderWindow(self.optionsRow,
+    self.statusColumn = app.window.SortableHeaderWindow(self.program, self.optionsRow,
         'Status ', 'editor', 'predictionSortAscendingByStatus', -7)
-    label = app.window.LabelWindow(self.optionsRow, '|')
+    label = app.window.LabelWindow(self.program, self.optionsRow, '|')
     label.setParent(self.optionsRow)
     label.color = color
 
@@ -154,11 +154,11 @@ class PredictionList(app.window.Window):
 
 
 class PredictionInputWindow(app.window.Window):
-  def __init__(self, host):
+  def __init__(self, program, host):
     if app.config.strict_debug:
       assert host
       assert issubclass(host.__class__, app.window.ActiveWindow), host
-    app.window.Window.__init__(self, host)
+    app.window.Window.__init__(self, program, host)
     self.host = host
     self.controller = app.cu_editor.PredictionInputController(self)
     self.setTextBuffer(app.text_buffer.TextBuffer(self.programWindow().program))
@@ -177,42 +177,42 @@ class PredictionInputWindow(app.window.Window):
 
 
 class PredictionWindow(app.window.Window):
-  def __init__(self, host):
-    app.window.Window.__init__(self, host)
+  def __init__(self, program, host):
+    app.window.Window.__init__(self, program, host)
 
     self.showTips = False
     self.controller = app.cu_editor.PredictionController(self)
     self.setTextBuffer(app.text_buffer.TextBuffer(self.programWindow().program))
 
-    self.titleRow = app.window.OptionsRow(self)
+    self.titleRow = app.window.OptionsRow(self.program, self)
     self.titleRow.addLabel(' ci   ')
     self.titleRow.setParent(self)
 
-    self.predictionInputWindow = PredictionInputWindow(self)
+    self.predictionInputWindow = PredictionInputWindow(self.program, self)
     self.predictionInputWindow.setParent(self)
 
-    self.predictionList = PredictionList(self)
+    self.predictionList = PredictionList(self.program, self)
     self.predictionList.setParent(self)
 
     if 1:
-      self.optionsRow = app.window.RowWindow(self, 2)
+      self.optionsRow = app.window.RowWindow(self.program, self, 2)
       self.optionsRow.setParent(self)
       colorPrefs = host.programWindow().program.color
       self.optionsRow.color = colorPrefs.get('top_info')
-      label = app.window.LabelWindow(self.optionsRow, 'Show:')
+      label = app.window.LabelWindow(self.program, self.optionsRow, 'Show:')
       label.color = colorPrefs.get('top_info')
       label.setParent(self.optionsRow)
-      toggle = app.window.OptionsToggle(self.optionsRow, 'open', 'editor',
+      toggle = app.window.OptionsToggle(self.program, self.optionsRow, 'open', 'editor',
           'predictionShowOpenFiles')
       toggle.color = colorPrefs.get('top_info')
-      toggle = app.window.OptionsToggle(self.optionsRow, 'alternates', 'editor',
+      toggle = app.window.OptionsToggle(self.program, self.optionsRow, 'alternates', 'editor',
           'predictionShowAlternateFiles')
       toggle.color = colorPrefs.get('top_info')
-      toggle = app.window.OptionsToggle(self.optionsRow, 'recent', 'editor',
+      toggle = app.window.OptionsToggle(self.program, self.optionsRow, 'recent', 'editor',
           'predictionShowRecentFiles')
       toggle.color = colorPrefs.get('top_info')
 
-    self.messageLine = app.window.LabelWindow(self, "")
+    self.messageLine = app.window.LabelWindow(self.program, self, "")
     self.messageLine.setParent(self)
 
   def bringChildToFront(self, child):
