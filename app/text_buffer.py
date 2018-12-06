@@ -23,7 +23,6 @@ import sys
 import app.actions
 import app.curses_util
 import app.regex
-import app.color
 import app.log
 import app.parser
 import app.prefs
@@ -76,11 +75,12 @@ class TextBuffer(app.actions.Actions):
     if self.view.hasCaptiveCursor:
       self.checkScrollToCursor(window)
     rows, cols = window.rows, window.cols
+    colorPrefs = self.view.programWindow().program.color
     colorDelta = 32 * 4
     #colorDelta = 4
     if 0:
       for i in range(rows):
-        window.addStr(i, 0, '?' * cols, app.color.get(120))
+        window.addStr(i, 0, '?' * cols, colorPrefs.get(120))
     if 0:
       # Draw window with no concern for sub-rectangles.
       self.drawTextArea(window, 0, 0, rows, cols, 0)
@@ -112,7 +112,7 @@ class TextBuffer(app.actions.Actions):
       self.drawTextArea(window, splitRow, splitCol, rows - splitRow,
           cols-splitCol, 0)
     # Blank screen past the end of the buffer.
-    color = app.color.get('outside_document')
+    color = colorPrefs.get('outside_document')
     endOfText = min(max(self.parser.rowCount() - self.view.scrollRow, 0), rows)
     for i in range(endOfText, rows):
       window.addStr(i, 0, ' ' * cols, color)
@@ -125,6 +125,7 @@ class TextBuffer(app.actions.Actions):
     colors = app.prefs.color
     defaultColor = app.prefs.prefs['color']['default']
     spellChecking = app.prefs.editor.get('spellChecking', True)
+    colorPrefs = self.view.programWindow().program.color
     if self.parser:
       # Highlight grammar.
       rowLimit = min(max(self.parser.rowCount() - startRow, 0), rows)
@@ -145,7 +146,7 @@ class TextBuffer(app.actions.Actions):
             continue
           remaining = min(renderedWidth - k, remaining)
           length = min(endCol - k, remaining)
-          color = app.color.get(node.grammar.get(u'colorIndex', defaultColor),
+          color = colorPrefs.get(node.grammar.get(u'colorIndex', defaultColor),
               colorDelta)
           if length <= 0:
             window.addStr(top + i, left + k - startCol, u' ' * (endCol - k),
@@ -159,7 +160,7 @@ class TextBuffer(app.actions.Actions):
           if spellChecking and node.grammar.get(u'spelling', True):
             # Highlight spelling errors
             grammarName = node.grammar.get(u'name', 'unknown')
-            misspellingColor = app.color.get(u'misspelling', colorDelta)
+            misspellingColor = colorPrefs.get(u'misspelling', colorDelta)
             for found in re.finditer(app.regex.kReSubwords, subLine):
               reg = found.regs[0]  # Mispelllled word
               offsetStart = subStart + reg[0]
@@ -179,7 +180,7 @@ class TextBuffer(app.actions.Actions):
       for i in range(rowLimit):
         line = self.parser.rowText(startRow + i)[startCol:endCol]
         window.addStr(top + i, left, line + ' ' * (cols - len(line)),
-            app.color.get(u'default', colorDelta))
+            colorPrefs.get(u'default', colorDelta))
     self.drawOverlays(window, top, left, rows, cols, colorDelta)
     if 0: # Experiment: draw our own cursor.
       if startRow <= self.penRow < endRow and  startCol <= self.penCol < endCol:
@@ -191,15 +192,15 @@ class TextBuffer(app.actions.Actions):
     startCol = self.view.scrollCol + left
     endCol = self.view.scrollCol + left + maxCol
     rowLimit = min(max(self.parser.rowCount() - startRow, 0), maxRow)
-    colors = app.prefs.color
+    colorPrefs = self.view.programWindow().program.color
     if 1:
       # Highlight brackets.
       # Highlight numbers.
       # Highlight space ending lines.
       colors = (
-          app.color.get(u'bracket', colorDelta),
-          app.color.get(u'number', colorDelta),
-          app.color.get(u'trailing_space', colorDelta))
+          colorPrefs.get(u'bracket', colorDelta),
+          colorPrefs.get(u'number', colorDelta),
+          colorPrefs.get(u'trailing_space', colorDelta))
       for i in range(rowLimit):
         line = self.parser.rowText(startRow + i)
         highlightTrailingWhitespace = (self.highlightTrailingWhitespace and
@@ -231,7 +232,7 @@ class TextBuffer(app.actions.Actions):
                 if not (textCol < startCol or textCol >= endCol):
                   window.addStr(top + row - startRow,
                       textCol - self.view.scrollCol, openCh,
-                      app.color.get(u'matching_bracket', colorDelta))
+                      colorPrefs.get(u'matching_bracket', colorDelta))
                 return
         def searchForward(openCh, closeCh):
           count = 1
@@ -252,7 +253,7 @@ class TextBuffer(app.actions.Actions):
                 if not (textCol < startCol or textCol >= endCol):
                   window.addStr(top + row - startRow,
                       textCol - self.view.scrollCol, closeCh,
-                      app.color.get(u'matching_bracket', colorDelta))
+                      colorPrefs.get(u'matching_bracket', colorDelta))
                 return
         matcher = {
           u'(': (u')', searchForward),
@@ -269,13 +270,13 @@ class TextBuffer(app.actions.Actions):
               top + self.penRow - startRow,
               self.penCol - self.view.scrollCol,
               self.parser.rowText(self.penRow)[self.penCol],
-              app.color.get(u'matching_bracket', colorDelta))
+              colorPrefs.get(u'matching_bracket', colorDelta))
     if self.highlightCursorLine:
       # Highlight the whole line at the cursor location.
       if startRow <= self.penRow < startRow + rowLimit:
         line = self.parser.rowText(self.penRow)[startCol:endCol]
         window.addStr(top + self.penRow - startRow, left, line,
-            app.color.get(u'trailing_space', colorDelta))
+            colorPrefs.get(u'trailing_space', colorDelta))
     if self.findRe is not None:
       # Highlight find.
       for i in range(rowLimit):
@@ -284,10 +285,10 @@ class TextBuffer(app.actions.Actions):
           reg = k.regs[0]
           #for ref in k.regs[1:]:
           window.addStr(top + i, left + reg[0], line[reg[0]:reg[1]],
-              app.color.get('found_find', colorDelta))
+              colorPrefs.get('found_find', colorDelta))
     if rowLimit and self.selectionMode != app.selectable.kSelectionNone:
       # Highlight selected text.
-      colorSelected = app.color.get('selected')
+      colorSelected = colorPrefs.get('selected')
       upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
       if 1:
         selStartCol = max(upperCol, startCol)

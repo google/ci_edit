@@ -220,7 +220,6 @@ class FakeCursesTestCase(unittest.TestCase):
 
   def runWithFakeInputs(self, fakeInputs):
     assert hasattr(fakeInputs, "__getitem__") or hasattr(fakeInputs, "__iter__")
-    app.color.reset(),
     self.cursesScreen.setFakeInputs(fakeInputs + [self.notReached,])
     self.assertTrue(self.prg)
     self.assertFalse(self.prg.exiting)

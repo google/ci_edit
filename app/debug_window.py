@@ -41,7 +41,7 @@ class DebugWindow(app.window.ActiveWindow):
     intent = "noIntent"
     try: intent = win.userIntent
     except: pass
-    color = app.color.get('debug_window')
+    color = program.color.get('debug_window')
     self.writeLine(
         "   cRow %3d    cCol %2d goalCol %2d  %s"
         %(win.textBuffer.penRow, win.textBuffer.penCol, win.textBuffer.goalCol,
@@ -104,7 +104,8 @@ class DebugUndoWindow(app.window.ActiveWindow):
     maxRow, maxCol = win.rows, win.cols
     self.writeLineRow = 0
     # Display some of the redo chain.
-    redoColorA = app.color.get(100)
+    colorPrefs = win.programWindow().program.color
+    redoColorA = colorPrefs.get(100)
     self.writeLine(
         u"procTemp %d temp %r"
         %(textBuffer.processTempChange, textBuffer.tempChange,),
@@ -114,12 +115,12 @@ class DebugUndoWindow(app.window.ActiveWindow):
         %(textBuffer.redoIndex, textBuffer.savedAtRedoIndex,
           len(textBuffer.redoChain)),
         redoColorA)
-    redoColorB = app.color.get(101)
+    redoColorB = colorPrefs.get(101)
     split = 8
     for i in range(textBuffer.redoIndex - split, textBuffer.redoIndex):
       text = i >= 0 and repr(textBuffer.redoChain[i]) or u''
       self.writeLine(text, redoColorB)
-    redoColorC = app.color.get(1)
+    redoColorC = colorPrefs.get(1)
     for i in range(textBuffer.redoIndex, textBuffer.redoIndex + split - 1):
       text = (i < len(textBuffer.redoChain) and
           textBuffer.redoChain[i] or '')

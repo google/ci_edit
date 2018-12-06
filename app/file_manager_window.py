@@ -16,7 +16,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import app.color
 import app.config
 import app.cu_editor
 import app.log
@@ -47,7 +46,7 @@ class PathRow(app.window.ViewWindow):
   def render(self):
     app.log.debug()
     offset = 0
-    color = app.color.get('message_line')
+    color = self.programWindow().program.color.get('message_line')
     #self.addStr(0, 0, self.path, color)
     self.writeLineRow = 0
     self.writeLine(self.path, color)
@@ -66,7 +65,7 @@ class DirectoryList(app.window.Window):
     self.controller = app.cu_editor.DirectoryList(self)
     self.setTextBuffer(app.text_buffer.TextBuffer())
     # Set up table headers.
-    color = app.color.get('top_info')
+    color = self.programWindow().program.color.get('top_info')
     self.optionsRow = app.window.OptionsSelectionWindow(self)
     self.optionsRow.setParent(self)
     app.window.SortableHeaderWindow(self.optionsRow, 'Name', 'editor',
@@ -193,19 +192,20 @@ class FileManagerWindow(app.window.Window):
     if 1:
       self.optionsRow = app.window.RowWindow(self, 2)
       self.optionsRow.setParent(self)
-      self.optionsRow.color = app.color.get('top_info')
+      colorPrefs = self.programWindow().program.color
+      self.optionsRow.color = colorPrefs.get('top_info')
       label = app.window.LabelWindow(self.optionsRow, 'Show:')
-      label.color = app.color.get('top_info')
+      label.color = colorPrefs.get('top_info')
       label.setParent(self.optionsRow)
       toggle = app.window.OptionsToggle(self.optionsRow, 'dotFiles', 'editor',
           'filesShowDotFiles')
-      toggle.color = app.color.get('top_info')
+      toggle.color = colorPrefs.get('top_info')
       toggle = app.window.OptionsToggle(self.optionsRow, 'sizes', 'editor',
           'filesShowSizes')
-      toggle.color = app.color.get('top_info')
+      toggle.color = colorPrefs.get('top_info')
       toggle = app.window.OptionsToggle(self.optionsRow, 'modified', 'editor',
           'filesShowModifiedDates')
-      toggle.color = app.color.get('top_info')
+      toggle.color = colorPrefs.get('top_info')
 
     self.messageLine = app.window.LabelWindow(self, "")
     self.messageLine.setParent(self)

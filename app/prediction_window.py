@@ -16,7 +16,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import app.color
 import app.config
 import app.cu_editor
 import app.log
@@ -36,7 +35,7 @@ class PredictionList(app.window.Window):
     self.controller = app.cu_editor.PredictionList(self)
     self.setTextBuffer(app.text_buffer.TextBuffer())
     # Set up table headers.
-    color = app.color.get('top_info')
+    color = host.programWindow().program.color.get('top_info')
     self.optionsRow = app.window.OptionsSelectionWindow(self)
     self.optionsRow.setParent(self)
     self.typeColumn = app.window.SortableHeaderWindow(self.optionsRow, 'Type',
@@ -197,19 +196,20 @@ class PredictionWindow(app.window.Window):
     if 1:
       self.optionsRow = app.window.RowWindow(self, 2)
       self.optionsRow.setParent(self)
-      self.optionsRow.color = app.color.get('top_info')
+      colorPrefs = host.programWindow().program.color
+      self.optionsRow.color = colorPrefs.get('top_info')
       label = app.window.LabelWindow(self.optionsRow, 'Show:')
-      label.color = app.color.get('top_info')
+      label.color = colorPrefs.get('top_info')
       label.setParent(self.optionsRow)
       toggle = app.window.OptionsToggle(self.optionsRow, 'open', 'editor',
           'predictionShowOpenFiles')
-      toggle.color = app.color.get('top_info')
+      toggle.color = colorPrefs.get('top_info')
       toggle = app.window.OptionsToggle(self.optionsRow, 'alternates', 'editor',
           'predictionShowAlternateFiles')
-      toggle.color = app.color.get('top_info')
+      toggle.color = colorPrefs.get('top_info')
       toggle = app.window.OptionsToggle(self.optionsRow, 'recent', 'editor',
           'predictionShowRecentFiles')
-      toggle.color = app.color.get('top_info')
+      toggle.color = colorPrefs.get('top_info')
 
     self.messageLine = app.window.LabelWindow(self, "")
     self.messageLine.setParent(self)

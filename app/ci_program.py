@@ -38,6 +38,7 @@ import traceback
 
 import app.background
 import app.buffer_manager
+import app.color
 import app.curses_util
 import app.help
 import app.history
@@ -391,6 +392,7 @@ class CiProgram:
 
   def run(self):
     self.prefs = app.prefs
+    self.color = app.color.Colors(self.prefs.color)
     self.bufferManager = app.buffer_manager.BufferManager()
     self.parseArgs()
     self.setUpPalette()
@@ -433,7 +435,7 @@ class CiProgram:
           app.log.startup(u"Fallback color scheme applied")
         except:
           app.log.startup(u"No color scheme applied")
-    app.color.colors = self.prefs.startup['numColors']
+    self.color.colors = self.prefs.startup['numColors']
     if self.prefs.startup['numColors'] == 0:
       app.log.startup('using no colors')
     elif self.prefs.startup['numColors'] == 8:

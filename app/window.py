@@ -27,7 +27,6 @@ import sys
 import types
 import curses
 
-import app.color
 import app.config
 import app.controller
 import app.cu_editor
@@ -452,7 +451,7 @@ class LabelWindow(ViewWindow):
     self.label = label
     self.preferredWidth = preferredWidth
     self.align = -1 if align == 'left' else 1
-    self.color = app.color.get('keyword')
+    self.color = self.programWindow().program.color.get('keyword')
 
   def preferredSize(self, rowLimit, colLimit):
     if app.config.strict_debug:
@@ -501,7 +500,8 @@ class LabeledLine(Window):
     #app.log.info('LabeledLine', self.label, self.rows, self.cols)
     if self.rows <= 0:
       return
-    self.leftColumn.addStr(0, 0, self.label, app.color.get('keyword'))
+    self.leftColumn.addStr(0, 0, self.label,
+        self.programWindow().program.color.get('keyword'))
     Window.render(self)
 
   def reshape(self, top, left, rows, cols):
@@ -549,7 +549,7 @@ class Menu(ViewWindow):
     self.reshape(left, top, len(self.lines), longest + 2)
 
   def render(self):
-    color = app.color.get('context_menu')
+    color = self.programWindow().program.color.get('context_menu')
     self.writeLineRow = 0
     for i in self.lines[:self.rows]:
       self.writeLine(" "+i, color);
@@ -568,8 +568,9 @@ class LineNumbers(ViewWindow):
     visibleBookmarks = self.getVisibleBookmarks(self.host.scrollRow,
                                                 self.host.scrollRow + limit)
     currentBookmarkIndex = 0
+    colorPrefs = self.programWindow().program.color
     for i in range(limit):
-      color = app.color.get('line_number')
+      color = colorPrefs.get('line_number')
       currentRow = self.host.scrollRow + i
       if currentBookmarkIndex < len(visibleBookmarks):
         currentBookmark = visibleBookmarks[currentBookmarkIndex]
@@ -579,7 +580,7 @@ class LineNumbers(ViewWindow):
       if currentBookmark:
         if (currentRow >= currentBookmark.begin and
             currentRow <= currentBookmark.end):
-          color = app.color.get(currentBookmark.data.get('colorIndex'))
+          color = colorPrefs.get(currentBookmark.data.get('colorIndex'))
           if self.host.textBuffer.penRow == currentRow:
             cursorBookmarkColorIndex = currentBookmark.data.get('colorIndex')
         if currentRow + 1 > currentBookmark.end:
@@ -587,12 +588,12 @@ class LineNumbers(ViewWindow):
       self.addStr(i, 0, ' %5d ' % (currentRow + 1), color)
     # Draw indicators for text off of the left edge.
     if self.host.scrollCol > 0:
-      color = app.color.get('line_overflow')
+      color = colorPrefs.get('line_overflow')
       for i in range(limit):
         if len(self.host.textBuffer.lines[self.host.scrollRow + i]) > 0:
           self.addStr(i, 6, ' ', color)
     # Draw blank line number rows past the end of the document.
-    color = app.color.get('outside_document')
+    color = colorPrefs.get('outside_document')
     for i in range(limit, self.rows):
       self.addStr(i, 0, '       ', color)
     # Highlight the line numbers for the current cursor line.
@@ -600,11 +601,11 @@ class LineNumbers(ViewWindow):
     if 0 <= cursorAt < limit:
       if cursorBookmarkColorIndex:
         if self.programWindow().program.prefs.startup['numColors'] == 8:
-          color = app.color.get(cursorBookmarkColorIndex)
+          color = colorPrefs.get(cursorBookmarkColorIndex)
         else:
-          color = app.color.get(cursorBookmarkColorIndex % 32 + 128)
+          color = colorPrefs.get(cursorBookmarkColorIndex % 32 + 128)
       else:
-        color = app.color.get('line_number_current')
+        color = colorPrefs.get('line_number_current')
       self.addStr(cursorAt, 1, '%5d' % (self.host.textBuffer.penRow + 1), color)
 
   def getVisibleBookmarks(self, beginRow, endRow):
@@ -685,8 +686,9 @@ class LogWindow(ViewWindow):
     self.renderCounter += 1
     app.log.meta(" " * 10, self.renderCounter, "- screen refresh -")
     self.writeLineRow = 0
-    colorA = app.color.get('default')
-    colorB = app.color.get('highlight')
+    colorPrefs = self.programWindow().program.color
+    colorA = colorPrefs.get('default')
+    colorB = colorPrefs.get('highlight')
     for i in self.lines[-self.rows:]:
       color = colorA
       if len(i) and i[-1] == '-':
@@ -779,7 +781,7 @@ class InteractiveFind(Window):
     Such as a radio group.
     """
     optionsRow = OptionsRow(self)
-    optionsRow.color = app.color.get('keyword')
+    optionsRow.color = self.programWindow().program.color.get('keyword')
     optionsRow.addLabel(label)
     optionsDict = {}
     optionsRow.beginGroup()
@@ -836,12 +838,13 @@ class MessageLine(ViewWindow):
     self.renderedMessage = None
 
   def render(self):
+    colorPrefs = self.programWindow().program.color
     if self.message:
       if self.message != self.renderedMessage:
         self.writeLineRow = 0
-        self.writeLine(self.message, app.color.get('message_line'))
+        self.writeLine(self.message, colorPrefs.get('message_line'))
     else:
-      self.blank(app.color.get('message_line'))
+      self.blank(colorPrefs.get('message_line'))
 
 
 class StatusLine(ViewWindow):
@@ -853,7 +856,8 @@ class StatusLine(ViewWindow):
 
   def render(self):
     tb = self.host.textBuffer
-    color = app.color.get('status_line')
+    colorPrefs = self.programWindow().program.color
+    color = colorPrefs.get('status_line')
     if self.host.showTips:
       tipRows = app.help.docs['tips']
       if len(tipRows) + 1 < self.rows:
@@ -869,7 +873,7 @@ class StatusLine(ViewWindow):
       statusLine = tb.message[0]
       color = (tb.message[1]
           if tb.message[1] is not None
-          else app.color.get('status_line'))
+          else colorPrefs.get('status_line'))
     if 0:
       if tb.isDirty():
         statusLine += ' * '
@@ -966,7 +970,7 @@ class TopInfo(ViewWindow):
     """Render the context information at the top of the window."""
     lines = self.lines[-self.mode:]
     lines.reverse()
-    color = app.color.get('top_info')
+    color = self.programWindow().program.color.get('top_info')
     for i,line in enumerate(lines):
       self.addStr(i, 0, (line + ' ' * (self.cols - len(line)))[:self.cols],
           color)
@@ -1124,7 +1128,7 @@ class InputWindow(Window):
     logo = self.logoCorner
     if logo.rows <= 0 or logo.cols <= 0:
       return
-    color = app.color.get('logo')
+    color = self.programWindow().program.color.get('logo')
     for i in range(logo.rows):
       logo.addStr(i, 0, ' ' * logo.cols, color)
     logo.addStr(0, 1, 'ci'[:self.cols], color)
@@ -1135,13 +1139,14 @@ class InputWindow(Window):
     window."""
     maxRow, maxCol = self.rows, self.cols
     limit = min(maxRow, len(self.textBuffer.lines) - self.scrollRow)
+    colorPrefs = self.programWindow().program.color
     for i in range(limit):
-      color = app.color.get('right_column')
+      color = colorPrefs.get('right_column')
       if len(self.textBuffer.lines[
           i + self.scrollRow]) - self.scrollCol > maxCol:
-        color = app.color.get('line_overflow')
+        color = colorPrefs.get('line_overflow')
       self.rightColumn.addStr(i, 0, ' ', color)
-    color = app.color.get('outside_document')
+    color = colorPrefs.get('outside_document')
     for i in range(limit, maxRow):
       self.rightColumn.addStr(i, 0, ' ', color)
 
@@ -1222,7 +1227,7 @@ class OptionsSelectionWindow(ViewWindow):
     if app.config.strict_debug:
       assert parent is not None
     ViewWindow.__init__(self, parent)
-    self.color = app.color.get('top_info')
+    self.color = self.programWindow().program.color.get('top_info')
 
   def reshape(self, top, left, rows, cols):
     ViewWindow.reshape(self, top, left, rows, cols)
@@ -1252,8 +1257,9 @@ class OptionsTrinaryStateWindow(Window):
     self.name = label
     self.prefCategory = prefCategory
     self.prefName = prefName
-    self.color = app.color.get('keyword')
-    self.focusColor = app.color.get('selected')
+    colorPrefs = self.programWindow().program.color
+    self.color = colorPrefs.get('keyword')
+    self.focusColor = colorPrefs.get('selected')
 
   def focus(self):
     Window.focus(self)
@@ -1326,7 +1332,7 @@ class RowWindow(ViewWindow):
     if app.config.strict_debug:
       assert host
     ViewWindow.__init__(self, host)
-    self.color = app.color.get('keyword')
+    self.color = self.programWindow().program.color.get('keyword')
     self.separator = separator
 
   def preferredSize(self, rowLimit, colLimit):
@@ -1356,7 +1362,7 @@ class OptionsRow(ViewWindow):
       assert host
     ViewWindow.__init__(self, host)
     self.host = host
-    self.color = app.color.get('top_info')
+    self.color = self.programWindow().program.color.get('top_info')
     self.controlList = []
     self.group = None
 
@@ -1508,7 +1514,7 @@ class PopupWindow(Window):
     rows = min(len(self.__message) + 4, maxRows)
     self.resizeTo(rows, cols)
     self.moveTo(maxRows // 2 - rows // 2, maxCols // 2 - cols // 2)
-    color = app.color.get('popup_window')
+    color = self.programWindow().program.color.get('popup_window')
     for row in range(rows):
       if row == rows - 2 and self.showOptions:
         message = '/'.join(self.options)
@@ -1565,10 +1571,11 @@ class PaletteWindow(Window):
   def render(self):
     width = 16
     rows = 16
+    colorPrefs = self.programWindow().program.color
     for i in range(width):
       for k in range(rows):
         self.addStr(k, i * 5, ' %3d ' % (i + k * width,),
-            app.color.get(i + k * width))
+            colorPrefs.get(i + k * width))
 
   def setTextBuffer(self, textBuffer):
     Window.setTextBuffer(self, textBuffer)
@@ -1587,7 +1594,7 @@ class SortableHeaderWindow(OptionsTrinaryStateWindow):
       assert type(prefName) == str
     OptionsTrinaryStateWindow.__init__(self, parent, label, prefCategory,
         prefName)
-    self.color = app.color.get('top_info')
+    self.color = self.programWindow().program.color.get('top_info')
     def draw(label, decoration, width):
       if width < 0:
         x = '%s %s' % (label, decoration)
