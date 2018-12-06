@@ -26,10 +26,8 @@ except:
 import os
 import re
 
-import app.buffer_manager
 import app.config
 import app.controller
-#import app.window
 import app.text_buffer
 
 
@@ -97,7 +95,8 @@ class InteractivePrediction(app.controller.Controller):
     if app.config.strict_debug:
       assert type(currentFile) is str
     self.items = []
-    for i in app.buffer_manager.buffers.buffers:
+    bufferManager = self.view.programWindow().program.bufferManager
+    for i in bufferManager.buffers:
       dirty = '*' if i.isDirty() else '.'
       if i.fullPath:
         self.items.append((i, i.fullPath, dirty))
@@ -133,7 +132,7 @@ class InteractivePrediction(app.controller.Controller):
           app.log.info()
           self.items.append((None, chromiumPath, '='))
     # Suggest item.
-    return (len(app.buffer_manager.buffers.buffers) - 2) % len(self.items)
+    return (len(bufferManager.buffers) - 2) % len(self.items)
 
   def onChange(self):
     clip = []
@@ -159,13 +158,14 @@ class InteractivePrediction(app.controller.Controller):
     app.controller.Controller.unfocus(self)
     if self.items is None:
       return
+    bufferManager = self.view.programWindow().program.bufferManager
     textBuffer, fullPath = self.items[self.index][:2]
     if textBuffer is not None:
       self.view.host.setTextBuffer(
-          app.buffer_manager.buffers.getValidTextBuffer(textBuffer))
+          bufferManager.getValidTextBuffer(textBuffer))
     else:
       expandedPath = os.path.abspath(os.path.expanduser(fullPath))
-      textBuffer = app.buffer_manager.buffers.loadTextBuffer(expandedPath)
+      textBuffer = bufferManager.loadTextBuffer(expandedPath)
       self.view.host.setTextBuffer(textBuffer)
     self.items = None
 

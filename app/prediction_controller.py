@@ -27,7 +27,6 @@ import time
 
 from app.curses_util import *
 import app.buffer_file
-import app.buffer_manager
 import app.controller
 
 
@@ -50,7 +49,8 @@ class PredictionListController(app.controller.Controller):
     items = self.items = []
     if 1:
       # Add open buffers.
-      for i in app.buffer_manager.buffers.buffers:
+      bufferManager = self.view.programWindow().program.bufferManager
+      for i in bufferManager.buffers:
         dirty = '*' if i.isDirty() else '.'
         if i.fullPath:
           items.append((i, i.fullPath, dirty, 'open'))
@@ -134,14 +134,15 @@ class PredictionListController(app.controller.Controller):
       assert type(row) is int
     if self.items is None or len(self.items) == 0:
       return
+    bufferManager = self.view.programWindow().program.bufferManager
     textBuffer, fullPath = self.items[row][:2]
     self.items = None
     self.shownList = None
     if textBuffer is not None:
-      textBuffer = app.buffer_manager.buffers.getValidTextBuffer(textBuffer)
+      textBuffer = bufferManager.getValidTextBuffer(textBuffer)
     else:
       expandedPath = os.path.abspath(os.path.expanduser(fullPath))
-      textBuffer = app.buffer_manager.buffers.loadTextBuffer(expandedPath)
+      textBuffer = bufferManager.loadTextBuffer(expandedPath)
     inputWindow = self.currentInputWindow()
     inputWindow.setTextBuffer(textBuffer)
     self.changeTo(inputWindow)

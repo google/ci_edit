@@ -102,7 +102,8 @@ class Controller:
     view.changeFocusTo(view);
 
   def createNewTextBuffer(self):
-    self.view.setTextBuffer(app.buffer_manager.buffers.newTextBuffer())
+    bufferManager = self.view.programWindow().program.bufferManager
+    self.view.setTextBuffer(bufferManager.newTextBuffer())
 
   def doCommand(self, ch, meta):
     # Check the commandSet for the input with both its string and integer
@@ -149,21 +150,20 @@ class Controller:
 
   def __closeHostFile(self, host):
     """Close the current file and switch to another or create an empty file."""
-    app.buffer_manager.buffers.closeTextBuffer(host.textBuffer)
+    bufferManager = host.programWindow().program.bufferManager
+    bufferManager.closeTextBuffer(host.textBuffer)
     host.userIntent = 'edit'
-    tb = app.buffer_manager.buffers.getUnsavedBuffer()
+    tb = bufferManager.getUnsavedBuffer()
     if not tb:
-      tb = app.buffer_manager.buffers.nextBuffer()
+      tb = bufferManager.nextBuffer()
       if not tb:
-        tb = app.buffer_manager.buffers.newTextBuffer()
+        tb = bufferManager.newTextBuffer()
     host.setTextBuffer(tb)
 
   def closeFile(self):
     app.log.info()
     host = self.getNamedWindow('inputWindow')
     self.__closeHostFile(host)
-    #app.buffer_manager.buffers.closeTextBuffer(self.view.host.textBuffer)
-    #self.view.host.setTextBuffer(app.buffer_manager.buffers.newTextBuffer())
     self.confirmationPromptFinish()
 
   def closeOrConfirmClose(self):
@@ -194,12 +194,13 @@ class Controller:
     if tb.isDirty():
       self.view.changeFocusTo(self.view.interactiveQuit)
       return
-    tb = app.buffer_manager.buffers.getUnsavedBuffer()
+    bufferManager = self.view.programWindow().program.bufferManager
+    tb = bufferManager.getUnsavedBuffer()
     if tb:
       self.view.setTextBuffer(tb)
       self.view.changeFocusTo(self.view.interactiveQuit)
       return
-    app.buffer_manager.buffers.debugLog()
+    bufferManager.debugLog()
     self.view.quitNow()
 
   def initiateSave(self):
@@ -265,12 +266,13 @@ class Controller:
     if tb.isDirty():
       self.changeToConfirmQuit()
       return
-    tb = app.buffer_manager.buffers.getUnsavedBuffer()
+    bufferManager = self.view.programWindow().program.bufferManager
+    tb = bufferManager.getUnsavedBuffer()
     if tb:
       host.setTextBuffer(tb)
       self.changeToConfirmQuit()
       return
-    app.buffer_manager.buffers.debugLog()
+    bufferManager.debugLog()
     host.quitNow()
 
   def saveOrChangeToSaveAs(self):

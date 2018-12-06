@@ -34,13 +34,6 @@ kTestFile = u'#application_test_file_with_unlikely_file_name~'
 class UiBasicsTestCases(app.fake_curses_testing.FakeCursesTestCase):
   def setUp(self):
     self.longMessage = True
-    if True:
-      # The buffer manager will retain the test file in RAM. Reset it.
-      try:
-        del sys.modules['app.buffer_manager']
-        import app.buffer_manager
-      except KeyError:
-        pass
     if os.path.isfile(kTestFile):
       os.unlink(kTestFile)
     self.assertFalse(os.path.isfile(kTestFile))

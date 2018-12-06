@@ -211,7 +211,8 @@ class InteractiveOpener(EditText):
         if i.startswith(fileName):
           lines.append(i)
       if len(lines) == 1 and os.path.isfile(os.path.join(dirPath, fileName)):
-        self.view.host.setTextBuffer(app.buffer_manager.buffers.loadTextBuffer(
+        self.view.host.setTextBuffer(
+            self.view.programWindow().program.bufferManager.loadTextBuffer(
             os.path.join(dirPath, fileName), self.view.host))
       else:
         self.view.host.textBuffer.lines = [

@@ -152,6 +152,3 @@ class BufferManager:
 
   def fileClose(self, path):
     pass
-
-
-buffers = BufferManager()

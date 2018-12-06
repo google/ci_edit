@@ -26,7 +26,6 @@ import app.debug_window
 import app.file_manager_window
 import app.log
 import app.prediction_window
-import app.prefs
 import app.window
 
 
@@ -46,7 +45,7 @@ class ProgramWindow(app.window.ActiveWindow):
     self.savedMouseWindow = None
     self.savedMouseX = -1
     self.savedMouseY = -1
-    self.showLogWindow = app.prefs.startup['showLogWindow']
+    self.showLogWindow = self.program.prefs.startup['showLogWindow']
     self.debugWindow = app.debug_window.DebugWindow(self)
     self.debugUndoWindow = app.debug_window.DebugUndoWindow(self)
     self.logWindow = app.window.LogWindow(self)

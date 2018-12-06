@@ -27,7 +27,6 @@ import time
 
 from app.curses_util import *
 import app.buffer_file
-import app.buffer_manager
 import app.controller
 
 
@@ -199,7 +198,7 @@ class FilePathInputController(app.controller.Controller):
         clip = [path + u":", u'Error opening file.']
         return
     self.view.textBuffer.replaceLines((u'',))
-    textBuffer = app.buffer_manager.buffers.loadTextBuffer(path)
+    textBuffer = self.view.programWindow().program.bufferManager.loadTextBuffer(path)
     #assert textBuffer.parser
     inputWindow = self.currentInputWindow()
     inputWindow.setTextBuffer(textBuffer)

@@ -27,7 +27,6 @@ import sys
 import types
 import curses
 
-import app.buffer_manager
 import app.color
 import app.config
 import app.controller
@@ -239,11 +238,14 @@ class ViewWindow:
   def priorFocusableWindow(self, start):
     return self.nextFocusableWindow(start, True)
 
-  def quitNow(self):
+  def programWindow(self):
     programWindow = self
     while programWindow.parent is not None:
       programWindow = programWindow.parent
-    programWindow.quitNow()
+    return programWindow
+
+  def quitNow(self):
+    self.programWindow().quitNow()
 
   def render(self):
     """Redraw window."""
@@ -368,7 +370,8 @@ class Window(ActiveWindow):
       assert issubclass(self.__class__, Window), self
       assert issubclass(parent.__class__, ViewWindow), parent
     ActiveWindow.__init__(self, parent)
-    self.hasCaptiveCursor = app.prefs.editor['captiveCursor']
+    self.hasCaptiveCursor = self.programWindow().program.prefs.editor[
+      'captiveCursor']
     self.textBuffer = None
 
   def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
@@ -479,7 +482,7 @@ class LabeledLine(Window):
     Window.__init__(self, parent)
     self.host = parent
     tb = app.text_buffer.TextBuffer()
-    tb.rootGrammar = app.prefs.grammars['none']
+    tb.rootGrammar = self.programWindow().program.prefs.grammars['none']
     self.setTextBuffer(tb)
     self.label = label
     self.leftColumn = ViewWindow(self)
@@ -596,7 +599,7 @@ class LineNumbers(ViewWindow):
     cursorAt = self.host.textBuffer.penRow - self.host.scrollRow
     if 0 <= cursorAt < limit:
       if cursorBookmarkColorIndex:
-        if app.prefs.startup['numColors'] == 8:
+        if self.programWindow().program.prefs.startup['numColors'] == 8:
           color = app.color.get(cursorBookmarkColorIndex)
         else:
           color = app.color.get(cursorBookmarkColorIndex % 32 + 128)
@@ -885,7 +888,7 @@ class StatusLine(ViewWindow):
     rightSide = ''
     if len(statusLine):
       rightSide += ' |'
-    if app.prefs.startup.get('showLogWindow'):
+    if self.programWindow().program.prefs.startup.get('showLogWindow'):
       rightSide += ' %s | %s |' % (tb.cursorGrammarName(),
           tb.selectionModeName())
     rightSide += ' %4d,%2d | %3d%%,%3d%%' % (
@@ -984,12 +987,12 @@ class InputWindow(Window):
     self.host = host
     self.showFooter = True
     self.savedScrollPositions = {}
-    self.showLineNumbers = app.prefs.editor.get(
+    self.showLineNumbers = self.programWindow().program.prefs.editor.get(
         'showLineNumbers', True)
     self.showMessageLine = True
     self.showRightColumn = True
     self.showTopInfo = True
-    self.statusLineCount = 0 if app.prefs.status.get('seenTips') else 8
+    self.statusLineCount = 0 if self.programWindow().program.prefs.status.get('seenTips') else 8
 
     self.topRows = 2  # Number of lines in default TopInfo status.
     self.controller = app.controller.MainController(self)
@@ -1057,7 +1060,7 @@ class InputWindow(Window):
     if self.showMessageLine:
       self.messageLine = MessageLine(self)
       self.messageLine.setParent(self, 0)
-    self.showTips = app.prefs.status.get('showTips')
+    self.showTips = self.programWindow().program.prefs.status.get('showTips')
     self.statusLineCount = 8 if self.showTips else 1
 
   if 0:
@@ -1172,8 +1175,8 @@ class InputWindow(Window):
       self.savedScrollPositions[self.textBuffer.fullPath] = (
           self.scrollRow, self.scrollCol)
     #self.normalize()
-    textBuffer.lineLimitIndicator = app.prefs.editor['lineLimitIndicator']
-    textBuffer.debugRedo = app.prefs.startup.get('debugRedo')
+    textBuffer.lineLimitIndicator = self.programWindow().program.prefs.editor['lineLimitIndicator']
+    textBuffer.debugRedo = self.programWindow().program.prefs.startup.get('debugRedo')
     Window.setTextBuffer(self, textBuffer)
     self.controller.setTextBuffer(textBuffer)
     savedScroll = self.savedScrollPositions.get(self.textBuffer.fullPath)
@@ -1187,15 +1190,16 @@ class InputWindow(Window):
         self.textBuffer.scrollToOptimalScrollPosition()
 
   def startup(self):
-    for f in app.prefs.startup.get('cliFiles', []):
-      app.buffer_manager.buffers.loadTextBuffer(f['path'])
-    if app.prefs.startup.get('readStdin'):
-      app.buffer_manager.buffers.readStdin()
-    tb = app.buffer_manager.buffers.topBuffer()
+    bufferManager = self.programWindow().program.bufferManager
+    for f in self.programWindow().program.prefs.startup.get('cliFiles', []):
+      bufferManager.loadTextBuffer(f['path'])
+    if self.programWindow().program.prefs.startup.get('readStdin'):
+      bufferManager.readStdin()
+    tb = bufferManager.topBuffer()
     if not tb:
-      tb = app.buffer_manager.buffers.newTextBuffer()
+      tb = bufferManager.newTextBuffer()
     self.setTextBuffer(tb)
-    openToLine = app.prefs.startup.get('openToLine')
+    openToLine = self.programWindow().program.prefs.startup.get('openToLine')
     if openToLine is not None:
       self.textBuffer.selectText(openToLine - 1, 0, 0,
           app.selectable.kSelectionNone)
@@ -1204,7 +1208,7 @@ class InputWindow(Window):
     self.showTips = not self.showTips
     self.statusLineCount = 8 if self.showTips else 1
     self.layout()
-    app.prefs.save('status', 'showTips', self.showTips)
+    self.programWindow().program.prefs.save('status', 'showTips', self.showTips)
 
   def unfocus(self):
     if self.showMessageLine:
@@ -1277,7 +1281,7 @@ class OptionsTrinaryStateWindow(Window):
     self.updateLabel()
 
   def updateLabel(self):
-    pref = app.prefs.prefs[self.prefCategory][self.prefName]
+    pref = self.programWindow().program.prefs.prefs[self.prefCategory][self.prefName]
     if pref is None:
       label = self.toggleUndefined
     else:

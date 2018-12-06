@@ -37,6 +37,7 @@ import time
 import traceback
 
 import app.background
+import app.buffer_manager
 import app.curses_util
 import app.help
 import app.history
@@ -110,14 +111,14 @@ class CiProgram:
 
   def commandLoop(self):
     # Cache the thread setting.
-    useBgThread = app.prefs.editor['useBgThread']
+    useBgThread = self.prefs.editor['useBgThread']
     cmdCount = 0
     # Track the time needed to handle commands and render the UI.
     # (A performance measurement).
     self.mainLoopTime = 0
     self.mainLoopTimePeak = 0
     cursesWindow = app.window.mainCursesWindow
-    if app.prefs.startup['timeStartup']:
+    if self.prefs.startup['timeStartup']:
       # When running a timing of the application startup, push a CTRL_Q onto the
       # curses event messages to simulate a full startup with a GUI render.
       curses.ungetch(17)
@@ -274,7 +275,7 @@ class CiProgram:
     timeStartup = False
     numColors = min(curses.COLORS, 256)
     if os.getenv(u"CI_EDIT_SINGLE_THREAD"):
-      app.prefs.editor['useBgThread'] = False
+      self.prefs.editor['useBgThread'] = False
     for i in sys.argv[1:]:
       if not takeAll and i[:1] == '+':
         openToLine = int(i[1:])
@@ -298,7 +299,7 @@ class CiProgram:
         elif i == '--parser':
           app.log.channelEnable('parser', True)
         elif i == '--singleThread':
-          app.prefs.editor['useBgThread'] = False
+          self.prefs.editor['useBgThread'] = False
         elif i == '--startup':
           app.log.channelEnable('startup', True)
         elif i == '--timeStartup':
@@ -328,8 +329,8 @@ class CiProgram:
         readStdin = True
       else:
         cliFiles.append({'path': unicode(i)})
-    app.prefs.init()
-    app.prefs.startup = {
+    self.prefs.init()
+    self.prefs.startup = {
       'debugRedo': debugRedo,
       'showLogWindow': showLogWindow,
       'cliFiles': cliFiles,
@@ -389,16 +390,18 @@ class CiProgram:
       app.log.exception(e)
 
   def run(self):
+    self.prefs = app.prefs
+    self.bufferManager = app.buffer_manager.BufferManager()
     self.parseArgs()
     self.setUpPalette()
-    homePath = app.prefs.prefs['userData'].get('homePath')
+    homePath = self.prefs.prefs['userData'].get('homePath')
     self.makeHomeDirs(homePath)
     app.history.loadUserHistory()
     app.curses_util.hackCursesFixes()
-    if app.prefs.editor['useBgThread']:
+    if self.prefs.editor['useBgThread']:
       self.bg = app.background.startupBackground()
     self.startup()
-    if app.prefs.startup.get('profile'):
+    if self.prefs.startup.get('profile'):
       profile = cProfile.Profile()
       profile.enable()
       self.commandLoop()
@@ -409,16 +412,16 @@ class CiProgram:
       app.log.info(output.getvalue())
     else:
       self.commandLoop()
-    if app.prefs.editor['useBgThread']:
+    if self.prefs.editor['useBgThread']:
       self.bg.put((self.programWindow, 'quit'))
       self.bg.join()
 
   def setUpPalette(self):
     def applyPalette(name):
-      palette = app.prefs.palette[name]
+      palette = self.prefs.palette[name]
       foreground = palette['foregroundIndexes']
       background = palette['backgroundIndexes']
-      for i in range(1, app.prefs.startup['numColors']):
+      for i in range(1, self.prefs.startup['numColors']):
         curses.init_pair(i, foreground[i], background[i])
     def twoTries(primary, fallback):
       try:
@@ -430,24 +433,24 @@ class CiProgram:
           app.log.startup(u"Fallback color scheme applied")
         except:
           app.log.startup(u"No color scheme applied")
-    app.color.colors = app.prefs.startup['numColors']
-    if app.prefs.startup['numColors'] == 0:
+    app.color.colors = self.prefs.startup['numColors']
+    if self.prefs.startup['numColors'] == 0:
       app.log.startup('using no colors')
-    elif app.prefs.startup['numColors'] == 8:
-      app.prefs.prefs['color'] = app.prefs.color = app.prefs.color8
+    elif self.prefs.startup['numColors'] == 8:
+      self.prefs.prefs['color'] = self.prefs.color = self.prefs.color8
       app.log.startup('using 8 colors')
-      twoTries(app.prefs.editor['palette8'], 'default8')
-    elif app.prefs.startup['numColors'] == 16:
-      app.prefs.prefs['color'] = app.prefs.color = app.prefs.color16
+      twoTries(self.prefs.editor['palette8'], 'default8')
+    elif self.prefs.startup['numColors'] == 16:
+      self.prefs.prefs['color'] = self.prefs.color = self.prefs.color16
       app.log.startup('using 16 colors')
-      twoTries(app.prefs.editor['palette16'], 'default16')
-    elif app.prefs.startup['numColors'] == 256:
-      app.prefs.prefs['color'] = app.prefs.color = app.prefs.color256
+      twoTries(self.prefs.editor['palette16'], 'default16')
+    elif self.prefs.startup['numColors'] == 256:
+      self.prefs.prefs['color'] = self.prefs.color = self.prefs.color256
       app.log.startup('using 256 colors')
-      twoTries(app.prefs.editor['palette'], 'default')
+      twoTries(self.prefs.editor['palette'], 'default')
     else:
       raise Exception('unknown palette color count ' +
-                      repr(app.prefs.startup['numColors']))
+                      repr(self.prefs.startup['numColors']))
 
   if 1:  # For unit tests/debugging.
     def getDocumentSelection(self):
