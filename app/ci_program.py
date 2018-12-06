@@ -46,6 +46,7 @@ import app.history
 import app.log
 import app.prefs
 import app.program_window
+import app.render
 import app.spelling
 import app.window
 
@@ -68,6 +69,7 @@ class CiProgram:
     self.color = app.color.Colors(self.prefs.color)
     self.dictionary = app.spelling.Dictionary()
     self.clipboard = app.clipboard.Clipboard()
+    self.frame = app.render.Frame()
     self.history = app.history.History(self.prefs.userData.get('historyPath'))
     self.bufferManager = app.buffer_manager.BufferManager(self, self.prefs)
     self.cursesScreen = None
@@ -156,7 +158,7 @@ class CiProgram:
           drawList, cursor, cmdCount = frame
           self.refresh(drawList, cursor, cmdCount)
       elif 1:
-        drawList, cursor  = app.render.frame.grabFrame()
+        drawList, cursor  = self.frame.grabFrame()
         self.refresh(drawList, cursor, cmdCount)
       else:
         profile = cProfile.Profile()

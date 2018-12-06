@@ -340,11 +340,11 @@ class ProgramWindow(app.window.ActiveWindow):
     penRow = window.textBuffer.penRow
     penCol = window.textBuffer.penCol
     if (penRow >= window.scrollRow and penRow < window.scrollRow + window.rows):
-      app.render.frame.setCursor((
+      self.program.frame.setCursor((
           window.top + penRow - window.scrollRow,
           window.left + penCol - window.scrollCol))
     else:
-      app.render.frame.setCursor(None)
+      self.program.frame.setCursor(None)
 
   def reshape(self, top, left, rows, cols):
     app.window.ActiveWindow.reshape(self, top, left, rows, cols)

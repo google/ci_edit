@@ -32,5 +32,3 @@ class Frame:
     self.drawList = []
     self.cursor = None
     return r
-
-frame = Frame()
