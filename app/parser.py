@@ -25,7 +25,6 @@ import traceback
 
 import third_party.pyperclip as clipboard
 
-import app.background
 import app.log
 import app.selectable
 
@@ -130,7 +129,7 @@ class Parser:
     node = self.parserNodes[rowIndex + index]
     return ParserNode(*node), offset - node[kVisual], remaining
 
-  def parse(self, appPrefs, data, grammar, beginRow, endRow):
+  def parse(self, bgThread, appPrefs, data, grammar, beginRow, endRow):
     """
       Args:
         data (string): The file contents. The document.
@@ -161,7 +160,7 @@ class Parser:
       self.parserNodes = [(grammar, 0, None, 0)]
       self.rows = [0]
     if self.endRow > len(self.rows):
-      self.__buildGrammarList(appPrefs)
+      self.__buildGrammarList(bgThread, appPrefs)
     self.fullyParsedToLine = len(self.rows)
     self.__fastLineParse(grammar)
     #startTime = time.time()
@@ -220,7 +219,7 @@ class Parser:
       visualEnd = lastNode[kVisual]
     return self.data[begin:end], visualEnd - visual
 
-  def __buildGrammarList(self, appPrefs):
+  def __buildGrammarList(self, bgThread, appPrefs):
     # An arbitrary limit to avoid run-away looping.
     leash = 50000
     topNode = self.parserNodes[-1]
@@ -240,7 +239,7 @@ class Parser:
         #app.log.error('grammar likely caught in a loop')
         break
       leash -= 1
-      if app.background.bg and app.background.bg.hasUserEvent():
+      if bgThread and bgThread.hasUserEvent():
         break
       subdata = self.data[cursor:]
       found = self.parserNodes[-1][kGrammar].get('matchRe').search(subdata)

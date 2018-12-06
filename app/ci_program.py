@@ -70,6 +70,7 @@ class CiProgram:
     self.debugMouseEvent = (0, 0, 0, 0, 0)
     self.exiting = False
     self.ch = 0
+    self.bg = None
 
 
   def setUpCurses(self, cursesScreen):

@@ -32,10 +32,6 @@ import app.profile
 import app.render
 
 
-# The instance of the background thread.
-bg = None
-
-
 class BackgroundThread(threading.Thread):
   def __init__(self, *args, **keywords):
     threading.Thread.__init__(self, *args, **keywords)
@@ -104,7 +100,6 @@ def background(inputQueue, outputQueue):
           return
 
 def startupBackground():
-  global bg
   toBackground = queue.Queue()
   fromBackground = queue.Queue()
   bg = BackgroundThread(

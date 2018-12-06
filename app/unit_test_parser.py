@@ -49,7 +49,7 @@ two
 void blah();
 """
     self.prefs = app.prefs.Prefs()
-    self.parser.parse(self.prefs, test, self.prefs.grammars['cpp'], 0,
+    self.parser.parse(None, self.prefs, test, self.prefs.grammars['cpp'], 0,
         99999)
     #self.assertEqual(selectable.selection(), (0, 0, 0, 0))
 

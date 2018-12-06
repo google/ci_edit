@@ -1618,7 +1618,8 @@ class Actions(app.mutator.Mutator):
   def doParse(self, begin, end):
     start = time.time()
     self.linesToData()
-    self.parser.parse(self.program.prefs, self.data, self.rootGrammar, begin, end)
+    self.parser.parse(self.program.bg, self.program.prefs, self.data,
+        self.rootGrammar, begin, end)
     self.debugUpperChangedRow = self.upperChangedRow
     self.upperChangedRow = self.parser.fullyParsedToLine
     self.parserTime = time.time() - start
