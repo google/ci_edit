@@ -34,7 +34,6 @@ import time
 import traceback
 
 import app.bookmark
-import app.clipboard
 import app.config
 import app.history
 import app.log
@@ -767,7 +766,7 @@ class Actions(app.mutator.Mutator):
     text = self.getSelectedText()
     if len(text):
       data = self.doLinesToData(text)
-      app.clipboard.copy(data)
+      self.program.clipboard.copy(data)
       if len(text) == 1:
         self.setMessage(u'copied %d characters' % len(text[0]))
       else:
@@ -778,7 +777,7 @@ class Actions(app.mutator.Mutator):
     self.performDelete()
 
   def editPaste(self):
-    data = app.clipboard.paste()
+    data = self.program.clipboard.paste()
     if hasattr(data, 'decode'):
       data = data.decode('utf-8')
     if data is not None:

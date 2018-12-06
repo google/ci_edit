@@ -38,6 +38,7 @@ import traceback
 
 import app.background
 import app.buffer_manager
+import app.clipboard
 import app.color
 import app.curses_util
 import app.help
@@ -66,6 +67,7 @@ class CiProgram:
     self.prefs = app.prefs.Prefs()
     self.color = app.color.Colors(self.prefs.color)
     self.dictionary = app.spelling.Dictionary()
+    self.clipboard = app.clipboard.Clipboard()
     self.history = app.history.History(self.prefs.userData.get('historyPath'))
     self.bufferManager = app.buffer_manager.BufferManager(self, self.prefs)
     self.cursesScreen = None
