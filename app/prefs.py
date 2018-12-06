@@ -27,8 +27,6 @@ import app.default_prefs
 import app.log
 import app.regex
 
-prefsDirectory = "~/.ci_edit/prefs/"
-
 def joinReList(reList):
   return r"("+r")|(".join(reList)+r")"
 
@@ -38,6 +36,7 @@ def joinReWordList(reList):
 
 class Prefs():
   def __init__(self):
+    self.prefsDirectory = "~/.ci_edit/prefs/"
     prefs = app.default_prefs.prefs
     self.color8 = app.default_prefs.color8
     self.color16 = app.default_prefs.color16
@@ -56,7 +55,7 @@ class Prefs():
   def loadPrefs(self, fileName, category):
     # Check the user home directory for preferences.
     prefsPath = os.path.expanduser(os.path.expandvars(
-        os.path.join(prefsDirectory, "%s.json" % (fileName,))))
+        os.path.join(self.prefsDirectory, "%s.json" % (fileName,))))
     if os.path.isfile(prefsPath) and os.access(prefsPath, os.R_OK):
       with io.open(prefsPath, 'r') as f:
         try:
@@ -115,7 +114,7 @@ class Prefs():
     prefCategory = self.category(category)
     prefCategory[label] = value
     prefsPath = os.path.expanduser(os.path.expandvars(
-        os.path.join(prefsDirectory, "%s.json" % (category,))))
+        os.path.join(self.prefsDirectory, "%s.json" % (category,))))
     with io.open(prefsPath, 'w', encoding=u"utf-8") as f:
       try:
         f.write(json.dumps(prefs[category]))
