@@ -28,7 +28,6 @@ import third_party.pyperclip as clipboard
 import app.background
 import app.log
 import app.selectable
-import app.prefs
 
 
 kGrammar = 0
@@ -131,7 +130,7 @@ class Parser:
     node = self.parserNodes[rowIndex + index]
     return ParserNode(*node), offset - node[kVisual], remaining
 
-  def parse(self, data, grammar, beginRow, endRow):
+  def parse(self, appPrefs, data, grammar, beginRow, endRow):
     """
       Args:
         data (string): The file contents. The document.
@@ -162,7 +161,7 @@ class Parser:
       self.parserNodes = [(grammar, 0, None, 0)]
       self.rows = [0]
     if self.endRow > len(self.rows):
-      self.__buildGrammarList()
+      self.__buildGrammarList(appPrefs)
     self.fullyParsedToLine = len(self.rows)
     self.__fastLineParse(grammar)
     #startTime = time.time()
@@ -221,7 +220,7 @@ class Parser:
       visualEnd = lastNode[kVisual]
     return self.data[begin:end], visualEnd - visual
 
-  def __buildGrammarList(self):
+  def __buildGrammarList(self, appPrefs):
     # An arbitrary limit to avoid run-away looping.
     leash = 50000
     topNode = self.parserNodes[-1]
@@ -271,7 +270,7 @@ class Parser:
         self.rows.append(len(self.parserNodes))
       elif index == len(foundGroups) - 2:
         # Found double wide character.
-        self.parserNodes.append((app.prefs.grammars['text'], cursor + reg[0],
+        self.parserNodes.append((appPrefs.grammars['text'], cursor + reg[0],
             len(self.parserNodes) - 1, visual + reg[0]))
         # Resume the current grammar.
         child = (self.parserNodes[self.parserNodes[-1][kPrior]][kGrammar],
@@ -308,14 +307,14 @@ class Parser:
                 priorGrammar['end_key'], subdata[reg[1]:]).groups()[0]
             markers = priorGrammar['markers']
             markers[1] = priorGrammar['end'].replace(r'\0', re.escape(hereKey))
-            priorGrammar['matchRe'] = re.compile(app.prefs.joinReList(markers))
+            priorGrammar['matchRe'] = re.compile(appPrefs.joinReList(markers))
           child = (priorGrammar, cursor + reg[0], len(self.parserNodes) - 1,
               visual + reg[0])
           cursor += reg[1]
           visual += reg[1]
         elif index < errorIndexLimit:
           # A special doesn't change the nodeIndex.
-          self.parserNodes.append((app.prefs.grammars['error'], cursor + reg[0],
+          self.parserNodes.append((appPrefs.grammars['error'], cursor + reg[0],
               len(self.parserNodes) - 1, visual + reg[0]))
           # Resume the current grammar.
           child = (self.parserNodes[self.parserNodes[-1][kPrior]][kGrammar],
@@ -326,7 +325,7 @@ class Parser:
           visual += reg[1]
         elif index < keywordIndexLimit:
           # A keyword doesn't change the nodeIndex.
-          self.parserNodes.append((app.prefs.grammars['keyword'],
+          self.parserNodes.append((appPrefs.grammars['keyword'],
               cursor + reg[0], len(self.parserNodes) - 1, visual + reg[0]))
           # Resume the current grammar.
           child = (self.parserNodes[self.parserNodes[-1][kPrior]][kGrammar],
@@ -337,7 +336,7 @@ class Parser:
           visual += reg[1]
         elif index < typeIndexLimit:
           # A type doesn't change the nodeIndex.
-          self.parserNodes.append((app.prefs.grammars['type'], cursor + reg[0],
+          self.parserNodes.append((appPrefs.grammars['type'], cursor + reg[0],
               len(self.parserNodes) - 1, visual + reg[0]))
           # Resume the current grammar.
           child = (self.parserNodes[self.parserNodes[-1][kPrior]][kGrammar],
@@ -348,7 +347,7 @@ class Parser:
           visual += reg[1]
         elif index < specialIndexLimit:
           # A special doesn't change the nodeIndex.
-          self.parserNodes.append((app.prefs.grammars['special'],
+          self.parserNodes.append((appPrefs.grammars['special'],
               cursor + reg[0], len(self.parserNodes) - 1, visual + reg[0]))
           # Resume the current grammar.
           child = (self.parserNodes[self.parserNodes[-1][kPrior]][kGrammar],

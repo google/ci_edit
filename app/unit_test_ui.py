@@ -25,7 +25,6 @@ import sys
 from app.curses_util import *
 import app.ci_program
 import app.fake_curses_testing
-import app.prefs
 
 
 kTestFile = u'#application_test_file_with_unlikely_file_name~'
@@ -41,9 +40,10 @@ class UiBasicsTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
   def test_logo(self):
     self.runWithTestFile(kTestFile, [
-        #self.assertEqual(256, app.prefs.startup['numColors']),
+        #self.assertEqual(256, self.prg.prefs.startup['numColors']),
         self.displayCheck(0, 0, [u" ci "]),
-        self.displayCheckStyle(0, 0, 1, len(" ci "), app.prefs.color['logo']),
+        self.displayCheckStyle(0, 0, 1, len(" ci "),
+            self.prg.prefs.color['logo']),
         CTRL_Q])
 
   def test_whole_screen(self):

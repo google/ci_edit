@@ -63,7 +63,8 @@ class DirectoryList(app.window.Window):
     self.isFocusable = False
     self.inputWindow = inputWindow
     self.controller = app.cu_editor.DirectoryList(self)
-    self.setTextBuffer(app.text_buffer.TextBuffer())
+    self.setTextBuffer(app.text_buffer.TextBuffer(
+        self.programWindow().program.prefs))
     # Set up table headers.
     color = self.programWindow().program.color.get('top_info')
     self.optionsRow = app.window.OptionsSelectionWindow(self)
@@ -140,7 +141,8 @@ class PathWindow(app.window.Window):
     app.window.Window.__init__(self, host)
     self.host = host
     self.controller = app.cu_editor.FilePathInput(self)
-    self.setTextBuffer(app.text_buffer.TextBuffer())
+    self.setTextBuffer(app.text_buffer.TextBuffer(
+        self.programWindow().program.prefs))
 
   def getPath(self):
     return self.textBuffer.lines[0]
@@ -175,7 +177,8 @@ class FileManagerWindow(app.window.Window):
     self.mode = 'open'
     self.showTips = False
     self.controller = app.cu_editor.FileOpener(self)
-    self.setTextBuffer(app.text_buffer.TextBuffer())
+    self.setTextBuffer(app.text_buffer.TextBuffer(
+        self.programWindow().program.prefs))
 
     self.titleRow = app.window.OptionsRow(self)
     self.titleRow.addLabel(' ci   ')

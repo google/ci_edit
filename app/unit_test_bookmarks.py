@@ -37,7 +37,7 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
       os.unlink(kTestFile)
     self.assertFalse(os.path.isfile(kTestFile))
     self.fakeHost = app.window.ViewWindow(None)
-    self.textBuffer = app.text_buffer.TextBuffer()
+    self.textBuffer = app.text_buffer.TextBuffer(app.prefs.Prefs())
     self.textBuffer.lines = 50
     self.lineNumbers = app.window.LineNumbers(self.fakeHost)
     self.lineNumbers.rows = 30
@@ -301,7 +301,7 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
       print(exceptionMessage)
       return
     def test_with_an_x_colored_terminal(x):
-      mock.patch.dict(app.prefs.startup, {'numColors': x}, clear=True)
+      mock.patch.dict(self.prg.prefs.startup, {'numColors': x}, clear=True)
       colors = set()
       expectedNumberOfColors = 5
       for _ in range(expectedNumberOfColors):

@@ -62,6 +62,7 @@ class CiProgram:
   the main loop. The CiProgram is intended as a singleton.
   The program interacts with a single top-level ProgramWindow."""
   def __init__(self, cursesScreen):
+    self.prefs = app.prefs.Prefs()
     self.debugMouseEvent = (0, 0, 0, 0, 0)
     self.exiting = False
     self.cursesScreen = cursesScreen
@@ -330,7 +331,6 @@ class CiProgram:
         readStdin = True
       else:
         cliFiles.append({'path': unicode(i)})
-    self.prefs.init()
     self.prefs.startup = {
       'debugRedo': debugRedo,
       'showLogWindow': showLogWindow,
@@ -391,12 +391,11 @@ class CiProgram:
       app.log.exception(e)
 
   def run(self):
-    self.prefs = app.prefs
     self.color = app.color.Colors(self.prefs.color)
-    self.bufferManager = app.buffer_manager.BufferManager()
+    self.bufferManager = app.buffer_manager.BufferManager(self.prefs)
     self.parseArgs()
     self.setUpPalette()
-    homePath = self.prefs.prefs['userData'].get('homePath')
+    homePath = self.prefs.userData.get('homePath')
     self.makeHomeDirs(homePath)
     app.history.loadUserHistory()
     app.curses_util.hackCursesFixes()
@@ -439,15 +438,15 @@ class CiProgram:
     if self.prefs.startup['numColors'] == 0:
       app.log.startup('using no colors')
     elif self.prefs.startup['numColors'] == 8:
-      self.prefs.prefs['color'] = self.prefs.color = self.prefs.color8
+      self.prefs.color = self.prefs.color8
       app.log.startup('using 8 colors')
       twoTries(self.prefs.editor['palette8'], 'default8')
     elif self.prefs.startup['numColors'] == 16:
-      self.prefs.prefs['color'] = self.prefs.color = self.prefs.color16
+      self.prefs.color = self.prefs.color16
       app.log.startup('using 16 colors')
       twoTries(self.prefs.editor['palette16'], 'default16')
     elif self.prefs.startup['numColors'] == 256:
-      self.prefs.prefs['color'] = self.prefs.color = self.prefs.color256
+      self.prefs.color = self.prefs.color256
       app.log.startup('using 256 colors')
       twoTries(self.prefs.editor['palette'], 'default')
     else:

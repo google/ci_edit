@@ -187,29 +187,49 @@ def init():
           prefs['color'].get(k+'_special_color', defaultSpecialsColor))
   app.log.info('prefs init')
 
-def getGrammar(filePath):
-  if filePath is None:
-    return grammars.get('text')
-  name = os.path.split(filePath)[1]
-  fileType = nameToType.get(name)
-  if fileType is None:
-    fileExtension = os.path.splitext(name)[1]
-    fileType = extensions.get(fileExtension, 'text')
-  return grammars.get(fileType)
+class Prefs():
+  def __init__(self):
+    self.color = color
+    self.editor = prefs['editor']
+    self.devTest = prefs['devTest']
+    self.palette = prefs['palette']
+    self.startup = startup
+    self.status = prefs[u"status"]
+    self.userData = prefs[u"userData"]
+    self.grammars = grammars
+    self.color8 = app.default_prefs.color8
+    self.color16 = app.default_prefs.color16
+    self.color256 = app.default_prefs.color256
+    init()
 
-def save(category, label, value):
-  app.log.info(category, label, value)
-  global prefs
-  prefs.setdefault(category, {})
-  prefs[category][label] = value
-  prefsPath = os.path.expanduser(os.path.expandvars(
-      os.path.join(prefsDirectory, "%s.json" % (category,))))
-  with io.open(prefsPath, 'w', encoding=u"utf-8") as f:
-    try:
-      f.write(json.dumps(prefs[category]))
-    except Exception as e:
-      app.log.error('error writing prefs')
-      app.log.exception(e)
+  def category(self, name):
+    return {
+      'editor': self.editor
+    }[name]
+
+  def getGrammar(self, filePath):
+    if filePath is None:
+      return grammars.get('text')
+    name = os.path.split(filePath)[1]
+    fileType = nameToType.get(name)
+    if fileType is None:
+      fileExtension = os.path.splitext(name)[1]
+      fileType = extensions.get(fileExtension, 'text')
+    return grammars.get(fileType)
+
+  def save(self, category, label, value):
+    app.log.info(category, label, value)
+    global prefs
+    prefs.setdefault(category, {})
+    prefs[category][label] = value
+    prefsPath = os.path.expanduser(os.path.expandvars(
+        os.path.join(prefsDirectory, "%s.json" % (category,))))
+    with io.open(prefsPath, 'w', encoding=u"utf-8") as f:
+      try:
+        f.write(json.dumps(prefs[category]))
+      except Exception as e:
+        app.log.error('error writing prefs')
+        app.log.exception(e)
 
 app.log.startup('prefs.py import time', time.time() - importStartTime)
 

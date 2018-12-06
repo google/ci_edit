@@ -39,8 +39,9 @@ class DrawTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
   def test_draw_long_line(self):
     #self.setMovieMode(True)
-    lineLimitIndicator = app.prefs.editor['lineLimitIndicator']
-    app.prefs.editor['lineLimitIndicator'] = 10
+    lineLimitIndicator = self.prg.prefs.editor[
+      'lineLimitIndicator']
+    self.prg.prefs.editor['lineLimitIndicator'] = 10
     self.runWithFakeInputs([
         self.displayCheck(2, 7, [u"      "]),
         self.writeText(u"A line with numbers 1234567890"),
@@ -52,4 +53,4 @@ class DrawTestCases(app.fake_curses_testing.FakeCursesTestCase):
         self.writeText(u"\n"),
         self.displayCheck(2, 7, [u"A line with numbers 1234567890."]),
         CTRL_Q, u"n"])
-    app.prefs.editor['lineLimitIndicator'] = lineLimitIndicator
+    self.prg.prefs.editor['lineLimitIndicator'] = lineLimitIndicator

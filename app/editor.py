@@ -86,7 +86,8 @@ class InteractivePrediction(app.controller.Controller):
     self.view.host.setTextBuffer(text_buffer.TextBuffer())
     self.commandDefault = self.view.textBuffer.insertPrintable
     self.view.host.textBuffer.lineLimitIndicator = 0
-    self.view.host.textBuffer.rootGrammar = app.prefs.getGrammar('_pre')
+    self.view.host.textBuffer.rootGrammar = \
+        self.view.programWindow().program.prefs.getGrammar('_pre')
 
   def info(self):
     app.log.info('InteractivePrediction command set')
@@ -313,15 +314,15 @@ class ToggleController(app.controller.Controller):
   def clearValue(self):
     category = self.view.prefCategory
     name = self.view.prefName
-    prefs = app.prefs
+    prefs = self.view.programWindow().program.prefs
     prefs.save(category, name, None)
     self.view.onPrefChanged(category, name)
 
   def toggleValue(self):
     category = self.view.prefCategory
     name = self.view.prefName
-    prefs = app.prefs
-    prefs.save(category, name, not prefs.prefs[category][name])
+    prefs = self.view.programWindow().program.prefs
+    prefs.save(category, name, not prefs.category(category)[name])
     self.view.onPrefChanged(category, name)
 
 

@@ -40,15 +40,15 @@ import app.history
 import app.log
 import app.mutator
 import app.parser
-import app.prefs
 import app.selectable
 
 
 class Actions(app.mutator.Mutator):
   """This base class to TextBuffer handles the text manipulation (without
   handling the drawing/rendering of the text)."""
-  def __init__(self):
+  def __init__(self, prefs):
     app.mutator.Mutator.__init__(self)
+    self.prefs = prefs
     self.view = None
     self.bookmarks = []
     self.nextBookmarkColorPos = 0
@@ -57,7 +57,7 @@ class Actions(app.mutator.Mutator):
     self.isBinary = False
     self.lastChecksum = None
     self.lastFileSize = 0
-    self.rootGrammar = app.prefs.getGrammar(None)
+    self.rootGrammar = self.prefs.getGrammar(None)
     self.debugUpperChangedRow = -1
     self.parser = app.parser.Parser()
     self.fileFilter(u'')
@@ -116,7 +116,7 @@ class Actions(app.mutator.Mutator):
     Returns:
       A color (int) for a new bookmark.
     """
-    if app.prefs.startup[u'numColors'] == 8:
+    if self.prefs.startup[u'numColors'] == 8:
       goodColorIndices = [1, 2, 3, 4, 5]
     else:
       goodColorIndices = [97, 98, 113, 117, 127]
@@ -275,7 +275,7 @@ class Actions(app.mutator.Mutator):
     grammarIndent = grammar.get(u'indent')
     if grammarIndent:
       line = self.lines[self.penRow - 1]
-      #commonIndent = len(app.prefs.editor['indentation'])
+      #commonIndent = len(self.prefs.editor['indentation'])
       nonSpace = 0
       while nonSpace < len(line) and line[nonSpace].isspace():
         nonSpace += 1
@@ -839,7 +839,7 @@ class Actions(app.mutator.Mutator):
     # .replace() calls to minimize the number of calls to parse().
     data = data.replace(u'\r\n', u'\n')
     data = data.replace(u'\r', u'\n')
-    tabSize = app.prefs.editor.get(u"tabSize", 8)
+    tabSize = self.prefs.editor.get(u"tabSize", 8)
     data = data.expandtabs(tabSize)
     def parse(sre):
       return u"\x01%02x" % ord(sre.groups()[0])
@@ -926,7 +926,7 @@ class Actions(app.mutator.Mutator):
     if self.fileExtension != extension:
       self.fileExtension = extension
       self.upperChangedRow = 0
-    self.rootGrammar = app.prefs.getGrammar(self.fullPath)
+    self.rootGrammar = self.prefs.getGrammar(self.fullPath)
     self.parseGrammars()
     self.dataToLines()
 
@@ -965,7 +965,7 @@ class Actions(app.mutator.Mutator):
         app.selectable.kSelectionNone))
     self.markerRow, self.markerCol = self.fileHistory.setdefault(u'marker',
         (0, 0))
-    if app.prefs.editor[u'saveUndo']:
+    if self.prefs.editor[u'saveUndo']:
       self.redoChain = self.fileHistory.setdefault(u'redoChainCompound', [])
       self.savedAtRedoIndex = self.fileHistory.setdefault(
           u'savedAtRedoIndexCompound', 0)
@@ -1027,7 +1027,7 @@ class Actions(app.mutator.Mutator):
     height = bottom - top + 1
     extraRows = maxRows - height
     if extraRows > 0:
-      optimalRowRatio = app.prefs.editor[u'optimalCursorRow']
+      optimalRowRatio = self.prefs.editor[u'optimalCursorRow']
       scrollRow = max(0, min(len(self.lines) - 1,
         top - int(optimalRowRatio * (maxRows - 1))))
     else:
@@ -1041,7 +1041,7 @@ class Actions(app.mutator.Mutator):
       if right < maxCols:
         scrollCol = 0
       else:
-        optimalColRatio = app.prefs.editor[u'optimalCursorCol']
+        optimalColRatio = self.prefs.editor[u'optimalCursorCol']
         scrollCol = max(0, min(right,
           left - int(optimalColRatio * (maxCols - 1))))
     else:
@@ -1088,7 +1088,7 @@ class Actions(app.mutator.Mutator):
     self.isReadOnly = not os.access(self.fullPath, os.W_OK)
     try:
       try:
-        if app.prefs.editor[u'onSaveStripTrailingSpaces']:
+        if self.prefs.editor[u'onSaveStripTrailingSpaces']:
           self.stripTrailingWhiteSpace()
           self.compoundChangePush()
         # Save user data that applies to read-only files into history.
@@ -1122,7 +1122,7 @@ class Actions(app.mutator.Mutator):
         outputFile.close()
         # Save user data that applies to writable files.
         self.savedAtRedoIndex = self.redoIndex
-        if app.prefs.editor[u'saveUndo']:
+        if self.prefs.editor[u'saveUndo']:
           self.fileHistory[u'redoChainCompound'] = self.redoChain
           self.fileHistory[u'savedAtRedoIndexCompound'] = self.savedAtRedoIndex
           self.fileHistory[u'tempChange'] = self.tempChange
@@ -1137,8 +1137,7 @@ class Actions(app.mutator.Mutator):
         self.isReadOnly = False
         self.setMessage(u'File saved')
       except Exception as e:
-        color = self.view.programWindow().program.color.get(
-            u'status_line_error')
+        color = self.prefs.color.get(u'status_line_error')
         if self.isReadOnly:
           self.setMessage(u"Permission error. Try modifying in sudo mode.",
                           color=color)
@@ -1174,7 +1173,7 @@ class Actions(app.mutator.Mutator):
       self.findRe = None
       self.doSelectionMode(app.selectable.kSelectionNone)
       return
-    editorPrefs = app.prefs.editor
+    editorPrefs = self.prefs.editor
     flags = 0
     flags |= (editorPrefs.get(u'findIgnoreCase') and re.IGNORECASE or 0)
     flags |= (editorPrefs.get(u'findMultiLine') and re.MULTILINE or 0)
@@ -1199,7 +1198,7 @@ class Actions(app.mutator.Mutator):
       assert type(replaceWith) is unicode
     if not self.findRe:
       return
-    if app.prefs.editor.get(u'findUseRegex'):
+    if self.prefs.editor.get(u'findUseRegex'):
       toReplace = "\n".join(self.getSelectedText())
       try:
         toReplace = self.findRe.sub(replaceWith, toReplace)
@@ -1375,7 +1374,7 @@ class Actions(app.mutator.Mutator):
     self.find(searchFor, -1)
 
   def indent(self):
-    indentation = app.prefs.editor[u'indentation']
+    indentation = self.prefs.editor[u'indentation']
     indentationLength = len(indentation)
     if self.selectionMode == app.selectable.kSelectionNone:
       self.verticalInsert(self.penRow, self.penRow, self.penCol, indentation)
@@ -1392,7 +1391,7 @@ class Actions(app.mutator.Mutator):
     col = 0
     row = min(self.markerRow, self.penRow)
     endRow = max(self.markerRow, self.penRow)
-    indentation = app.prefs.editor[u'indentation']
+    indentation = self.prefs.editor[u'indentation']
     self.verticalInsert(row, endRow, col, indentation)
 
   def verticalDelete(self, row, endRow, col, text):
@@ -1425,7 +1424,7 @@ class Actions(app.mutator.Mutator):
   def insertPrintableWithPairing(self, ch, meta):
     #app.log.info(ch, meta)
     if type(ch) is int and curses.ascii.isprint(ch):
-      if app.prefs.editor['autoInsertClosingCharacter']:
+      if self.prefs.editor['autoInsertClosingCharacter']:
         pairs = {
           ord(u"'"): u"'",
           ord(u'"'): u'"',
@@ -1557,7 +1556,7 @@ class Actions(app.mutator.Mutator):
   def mouseWheelDown(self, shift, ctrl, alt):
     if not shift:
       self.selectionNone()
-    if app.prefs.editor[u'naturalScrollDirection']:
+    if self.prefs.editor[u'naturalScrollDirection']:
       self.scrollUp()
     else:
       self.scrollDown()
@@ -1579,7 +1578,7 @@ class Actions(app.mutator.Mutator):
   def mouseWheelUp(self, shift, ctrl, alt):
     if not shift:
       self.selectionNone()
-    if app.prefs.editor[u'naturalScrollDirection']:
+    if self.prefs.editor[u'naturalScrollDirection']:
       self.scrollDown()
     else:
       self.scrollUp()
@@ -1618,7 +1617,7 @@ class Actions(app.mutator.Mutator):
   def doParse(self, begin, end):
     start = time.time()
     self.linesToData()
-    self.parser.parse(self.data, self.rootGrammar, begin, end)
+    self.parser.parse(self.prefs, self.data, self.rootGrammar, begin, end)
     self.debugUpperChangedRow = self.upperChangedRow
     self.upperChangedRow = self.parser.fullyParsedToLine
     self.parserTime = time.time() - start
@@ -1743,7 +1742,7 @@ class Actions(app.mutator.Mutator):
     if self.selectionMode != app.selectable.kSelectionNone:
       self.unindentLines()
     else:
-      indentation = app.prefs.editor[u'indentation']
+      indentation = self.prefs.editor[u'indentation']
       indentationLength = len(indentation)
       line = self.lines[self.penRow]
       start = self.penCol - indentationLength
@@ -1751,7 +1750,7 @@ class Actions(app.mutator.Mutator):
         self.verticalDelete(self.penRow, self.penRow, start, indentation)
 
   def unindentLines(self):
-    indentation = app.prefs.editor[u'indentation']
+    indentation = self.prefs.editor[u'indentation']
     indentationLength = len(indentation)
     row = min(self.markerRow, self.penRow)
     endRow = max(self.markerRow, self.penRow)

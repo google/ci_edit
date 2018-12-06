@@ -20,7 +20,6 @@ from timeit import timeit
 import unittest
 
 import app.parser
-import app.prefs
 
 
 class PerformanceTestCases(unittest.TestCase):

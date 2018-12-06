@@ -25,15 +25,14 @@ import app.curses_util
 import app.regex
 import app.log
 import app.parser
-import app.prefs
 import app.selectable
 import app.spelling
 
 
 class TextBuffer(app.actions.Actions):
   """The TextBuffer adds the drawing/rendering to the BackingTextBuffer."""
-  def __init__(self):
-    app.actions.Actions.__init__(self)
+  def __init__(self, prefs):
+    app.actions.Actions.__init__(self, prefs)
     self.lineLimitIndicator = 0
     self.highlightRe = None
     self.highlightCursorLine = False
@@ -68,7 +67,7 @@ class TextBuffer(app.actions.Actions):
   def draw(self, window):
     if self.view.rows <= 0 or self.view.cols <= 0:
       return
-    if not app.prefs.editor['useBgThread']:
+    if not self.view.programWindow().program.prefs.editor['useBgThread']:
       if self.shouldReparse:
         self.parseGrammars()
         self.shouldReparse = False
@@ -122,9 +121,10 @@ class TextBuffer(app.actions.Actions):
     endRow = startRow + rows
     startCol = self.view.scrollCol + left
     endCol = startCol + cols
-    colors = app.prefs.color
-    defaultColor = app.prefs.prefs['color']['default']
-    spellChecking = app.prefs.editor.get('spellChecking', True)
+    appPrefs = self.view.programWindow().program.prefs
+    colors = appPrefs.color
+    defaultColor = appPrefs.color['default']
+    spellChecking = appPrefs.editor.get('spellChecking', True)
     colorPrefs = self.view.programWindow().program.color
     if self.parser:
       # Highlight grammar.

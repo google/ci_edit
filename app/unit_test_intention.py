@@ -25,7 +25,6 @@ import sys
 from app.curses_util import *
 import app.ci_program
 import app.fake_curses_testing
-import app.prefs
 
 
 kTestFile = u'#application_test_file_with_unlikely_file_name~'

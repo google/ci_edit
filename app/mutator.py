@@ -22,7 +22,6 @@ import re
 import app.buffer_file
 import app.log
 import app.parser
-import app.prefs
 import app.selectable
 
 

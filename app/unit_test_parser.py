@@ -26,11 +26,12 @@ import unittest
 import app.parser
 import app.prefs
 
+
 performance1 = '''
 import app.parser
 path = 'app/actions.py'
 data = open(path).read()
-grammar = app.prefs.getGrammar(path)
+grammar = self.prefs.getGrammar(path)
 '''
 
 class ParserTestCases(unittest.TestCase):
@@ -47,7 +48,9 @@ two
 #include "test.h"
 void blah();
 """
-    self.parser.parse(test, app.prefs.grammars['cpp'], 0, 99999)
+    self.prefs = app.prefs.Prefs()
+    self.parser.parse(self.prefs, test, self.prefs.grammars['cpp'], 0,
+        99999)
     #self.assertEqual(selectable.selection(), (0, 0, 0, 0))
 
   if 0:
@@ -64,7 +67,7 @@ parser.parse(data, grammar, 0, sys.maxsize)''',
       parser = app.parser.Parser()
       path = 'app/actions.py'
       data = io.open(path).read()
-      grammar = app.prefs.getGrammar(path)
+      grammar = self.prefs.getGrammar(path)
 
       profile.enable()
       parser.parse(data, grammar, 0, sys.maxsize)

@@ -33,7 +33,8 @@ class PredictionList(app.window.Window):
     self.host = host
     self.isFocusable = False
     self.controller = app.cu_editor.PredictionList(self)
-    self.setTextBuffer(app.text_buffer.TextBuffer())
+    self.setTextBuffer(app.text_buffer.TextBuffer(
+        self.programWindow().program.prefs))
     # Set up table headers.
     color = host.programWindow().program.color.get('top_info')
     self.optionsRow = app.window.OptionsSelectionWindow(self)
@@ -88,9 +89,10 @@ class PredictionList(app.window.Window):
   def update(self, items):
     # Filter the list. (The filter function is not used so as to edit the list
     # in place).
-    showOpen = app.prefs.editor['predictionShowOpenFiles']
-    showAlternate = app.prefs.editor['predictionShowAlternateFiles']
-    showRecent = app.prefs.editor['predictionShowRecentFiles']
+    appPrefs = self.programWindow().program.prefs
+    showOpen = appPrefs.editor['predictionShowOpenFiles']
+    showAlternate = appPrefs.editor['predictionShowAlternateFiles']
+    showRecent = appPrefs.editor['predictionShowRecentFiles']
     if not (showOpen and showAlternate and showRecent):
       i = 0
       while i < len(items):
@@ -103,9 +105,9 @@ class PredictionList(app.window.Window):
         else:
           i += 1
     # Sort the list
-    sortByType = app.prefs.editor['predictionSortAscendingByType']
-    sortByName = app.prefs.editor['predictionSortAscendingByName']
-    sortByStatus = app.prefs.editor['predictionSortAscendingByStatus']
+    sortByType = appPrefs.editor['predictionSortAscendingByType']
+    sortByName = appPrefs.editor['predictionSortAscendingByName']
+    sortByStatus = appPrefs.editor['predictionSortAscendingByStatus']
     if sortByType is not None:
       items.sort(reverse=not sortByType, key=lambda x: x[3])
     elif sortByStatus is not None:
@@ -160,7 +162,8 @@ class PredictionInputWindow(app.window.Window):
     app.window.Window.__init__(self, host)
     self.host = host
     self.controller = app.cu_editor.PredictionInputController(self)
-    self.setTextBuffer(app.text_buffer.TextBuffer())
+    self.setTextBuffer(app.text_buffer.TextBuffer(
+        self.programWindow().program.prefs))
 
   def getPath(self):
     return self.textBuffer.parser.rowText(0)
@@ -181,7 +184,8 @@ class PredictionWindow(app.window.Window):
 
     self.showTips = False
     self.controller = app.cu_editor.PredictionController(self)
-    self.setTextBuffer(app.text_buffer.TextBuffer())
+    self.setTextBuffer(app.text_buffer.TextBuffer(
+        self.programWindow().program.prefs))
 
     self.titleRow = app.window.OptionsRow(self)
     self.titleRow.addLabel(' ci   ')
