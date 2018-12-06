@@ -34,9 +34,10 @@ import app.text_buffer
 
 class BufferManager:
   """Manage a set of text buffers. Some text buffers may be hidden."""
-  def __init__(self, prefs):
+  def __init__(self, program, prefs):
     if app.config.strict_debug:
       assert issubclass(self.__class__, BufferManager), self
+    self.program = program
     self.prefs = prefs
     # Using a dictionary lookup for buffers accelerates finding buffers by key
     # (the file path), but that's not the common use. Maintaining an ordered
@@ -58,7 +59,7 @@ class BufferManager:
     return None
 
   def newTextBuffer(self):
-    textBuffer = app.text_buffer.TextBuffer(self.prefs)
+    textBuffer = app.text_buffer.TextBuffer(self.program, self.prefs)
     textBuffer.lines = [u""]
     textBuffer.savedAtRedoIndex = 0
     self.buffers.append(textBuffer)
@@ -88,7 +89,7 @@ class BufferManager:
       del self.buffers[self.buffers.index(textBuffer)]
       self.buffers.append(textBuffer)
       return textBuffer
-    textBuffer = app.text_buffer.TextBuffer(self.prefs)
+    textBuffer = app.text_buffer.TextBuffer(self.program, self.prefs)
     self.buffers.append(textBuffer)
     return textBuffer
 
@@ -112,7 +113,7 @@ class BufferManager:
         return
       if not os.path.isfile(fullPath):
         app.log.info(u'creating a new file at\n ', fullPath)
-      textBuffer = app.text_buffer.TextBuffer(self.prefs)
+      textBuffer = app.text_buffer.TextBuffer(self.program, self.prefs)
       textBuffer.setFilePath(fullPath)
       textBuffer.fileLoad()
       self.buffers.append(textBuffer)

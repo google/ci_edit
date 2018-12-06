@@ -46,8 +46,9 @@ import app.selectable
 class Actions(app.mutator.Mutator):
   """This base class to TextBuffer handles the text manipulation (without
   handling the drawing/rendering of the text)."""
-  def __init__(self, prefs):
+  def __init__(self, program, prefs):
     app.mutator.Mutator.__init__(self)
+    self.program = program
     self.prefs = prefs
     self.view = None
     self.bookmarks = []
@@ -950,7 +951,8 @@ class Actions(app.mutator.Mutator):
       None.
     """
     # Restore the file history.
-    self.fileHistory = app.history.getFileHistory(self.fullPath, self.data)
+    self.fileHistory = self.program.history.getFileHistory(self.fullPath,
+        self.data)
 
     # Restore all positions and values of variables.
     self.penRow, self.penCol = self.fileHistory.setdefault(u'pen', (0, 0))
@@ -1126,9 +1128,8 @@ class Actions(app.mutator.Mutator):
           self.fileHistory[u'redoChainCompound'] = self.redoChain
           self.fileHistory[u'savedAtRedoIndexCompound'] = self.savedAtRedoIndex
           self.fileHistory[u'tempChange'] = self.tempChange
-        app.history.saveUserHistory((self.fullPath, self.lastChecksum,
-            self.lastFileSize), self.fileHistory,
-            self.prefs.userData.get('historyPath'))
+        self.program.history.saveUserHistory((self.fullPath, self.lastChecksum,
+            self.lastFileSize), self.fileHistory)
         # Store the file's new info
         self.lastChecksum, self.lastFileSize = app.history.getFileInfo(
             self.fullPath)

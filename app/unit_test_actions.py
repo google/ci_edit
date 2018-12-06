@@ -41,8 +41,8 @@ class FakeView:
 class MouseTestCases(unittest.TestCase):
   def setUp(self):
     app.log.shouldWritePrintLog = False
-    self.prefs = app.prefs.Prefs()
-    self.textBuffer = app.text_buffer.TextBuffer(self.prefs)
+    self.prg = app.ci_program.CiProgram()
+    self.textBuffer = app.text_buffer.TextBuffer(self.prg, self.prg.prefs)
     self.textBuffer.setView(FakeView())
     test = """/* first comment */
 two
@@ -161,8 +161,8 @@ void blah();
 class TextIndentTestCases(unittest.TestCase):
   def setUp(self):
     app.log.shouldWritePrintLog = False
-    self.prefs = app.prefs.Prefs()
-    self.textBuffer = app.text_buffer.TextBuffer(self.prefs)
+    self.prg = app.ci_program.CiProgram()
+    self.textBuffer = app.text_buffer.TextBuffer(self.prg, self.prg.prefs)
     self.textBuffer.setView(FakeView())
     #self.assertEqual(self.textBuffer.scrollRow, 0)
     #self.assertEqual(self.textBuffer.scrollCol, 0)
@@ -174,7 +174,7 @@ class TextIndentTestCases(unittest.TestCase):
     class FakeParser:
       def grammarAt(self, row, col):
         return { 'indent': '  ' }
-    self.prefs.editor['autoInsertClosingCharacter'] = False
+    self.prg.prefs.editor['autoInsertClosingCharacter'] = False
     tb = self.textBuffer
     insert = self.textBuffer.insertPrintableWithPairing
     self.assertEqual(len(tb.lines), 1)
@@ -202,8 +202,8 @@ class TextIndentTestCases(unittest.TestCase):
 class TextInsertTestCases(unittest.TestCase):
   def setUp(self):
     app.log.shouldWritePrintLog = False
-    self.prefs = app.prefs.Prefs()
-    self.textBuffer = app.text_buffer.TextBuffer(self.prefs)
+    self.prg = app.ci_program.CiProgram()
+    self.textBuffer = app.text_buffer.TextBuffer(self.prg, self.prg.prefs)
     self.textBuffer.setView(FakeView())
     #self.assertEqual(self.textBuffer.scrollRow, 0)
     #self.assertEqual(self.textBuffer.scrollCol, 0)
@@ -212,8 +212,8 @@ class TextInsertTestCases(unittest.TestCase):
     self.textBuffer = None
 
   def test_auto_insert_pair_disable(self):
+    self.prg.prefs.editor['autoInsertClosingCharacter'] = False
     tb = self.textBuffer
-    tb.prefs.editor['autoInsertClosingCharacter'] = False
     insert = self.textBuffer.insertPrintableWithPairing
     self.assertEqual(len(tb.lines), 1)
     insert(ord('o'), None)
@@ -236,8 +236,8 @@ class TextInsertTestCases(unittest.TestCase):
     self.assertEqual(tb.lines[0], '(o')
 
   def test_auto_insert_pair_enable(self):
+    self.prg.prefs.editor['autoInsertClosingCharacter'] = True
     tb = self.textBuffer
-    tb.prefs.editor['autoInsertClosingCharacter'] = True
     insert = self.textBuffer.insertPrintableWithPairing
     self.assertEqual(len(tb.lines), 1)
     insert(ord('o'), None)

@@ -61,12 +61,19 @@ class CiProgram:
   """This is the main editor program. It holds top level information and runs
   the main loop. The CiProgram is intended as a singleton.
   The program interacts with a single top-level ProgramWindow."""
-  def __init__(self, cursesScreen):
+  def __init__(self):
     self.prefs = app.prefs.Prefs()
+    self.color = app.color.Colors(self.prefs.color)
+    self.history = app.history.History(self.prefs.userData.get('historyPath'))
+    self.bufferManager = app.buffer_manager.BufferManager(self, self.prefs)
+    self.cursesScreen = None
     self.debugMouseEvent = (0, 0, 0, 0, 0)
     self.exiting = False
-    self.cursesScreen = cursesScreen
     self.ch = 0
+
+
+  def setUpCurses(self, cursesScreen):
+    self.cursesScreen = cursesScreen
     curses.mousemask(-1)
     curses.mouseinterval(0)
     # Enable mouse tracking in xterm.
@@ -316,7 +323,7 @@ class CiProgram:
           userMessage(app.help.docs['key bindings'])
           self.quitNow()
         elif i == '--clearHistory':
-          app.history.clearUserHistory(self.prefs.userData.get('historyPath'))
+          self.history.clearUserHistory()
           self.quitNow()
         elif i == '--eightColors':
           numColors = 8
@@ -391,13 +398,11 @@ class CiProgram:
       app.log.exception(e)
 
   def run(self):
-    self.color = app.color.Colors(self.prefs.color)
-    self.bufferManager = app.buffer_manager.BufferManager(self.prefs)
     self.parseArgs()
     self.setUpPalette()
     homePath = self.prefs.userData.get('homePath')
     self.makeHomeDirs(homePath)
-    app.history.loadUserHistory(self.prefs.userData.get('historyPath'))
+    self.history.loadUserHistory()
     app.curses_util.hackCursesFixes()
     if self.prefs.editor['useBgThread']:
       self.bg = app.background.startupBackground()
@@ -468,7 +473,8 @@ class CiProgram:
 
 def wrapped_ci(cursesScreen):
   try:
-    prg = CiProgram(cursesScreen)
+    prg = CiProgram()
+    prg.setUpCurses(cursesScreen)
     prg.run()
   except Exception:
     userMessage('---------------------------------------')

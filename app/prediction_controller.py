@@ -60,7 +60,7 @@ class PredictionListController(app.controller.Controller):
               'open'))
     if 1:
       # Add recent files.
-      for recentFile in app.history.getRecentFiles():
+      for recentFile in self.view.programWindow().program.history.getRecentFiles():
         if recentFile not in added:
           items.append((None, recentFile, '=', 'recent'))
           added.add(recentFile)

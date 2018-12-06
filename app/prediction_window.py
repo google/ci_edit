@@ -33,7 +33,7 @@ class PredictionList(app.window.Window):
     self.host = host
     self.isFocusable = False
     self.controller = app.cu_editor.PredictionList(self)
-    self.setTextBuffer(app.text_buffer.TextBuffer(
+    self.setTextBuffer(app.text_buffer.TextBuffer(self.programWindow().program,
         self.programWindow().program.prefs))
     # Set up table headers.
     color = host.programWindow().program.color.get('top_info')
@@ -162,7 +162,7 @@ class PredictionInputWindow(app.window.Window):
     app.window.Window.__init__(self, host)
     self.host = host
     self.controller = app.cu_editor.PredictionInputController(self)
-    self.setTextBuffer(app.text_buffer.TextBuffer(
+    self.setTextBuffer(app.text_buffer.TextBuffer(self.programWindow().program,
         self.programWindow().program.prefs))
 
   def getPath(self):
@@ -184,7 +184,7 @@ class PredictionWindow(app.window.Window):
 
     self.showTips = False
     self.controller = app.cu_editor.PredictionController(self)
-    self.setTextBuffer(app.text_buffer.TextBuffer(
+    self.setTextBuffer(app.text_buffer.TextBuffer(self.programWindow().program,
         self.programWindow().program.prefs))
 
     self.titleRow = app.window.OptionsRow(self)

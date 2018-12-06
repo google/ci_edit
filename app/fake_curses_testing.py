@@ -49,7 +49,8 @@ def debug_print_stack(*args):
 class FakeCursesTestCase(unittest.TestCase):
   def setUp(self):
     self.cursesScreen = curses.StandardScreen()
-    self.prg = app.ci_program.CiProgram(self.cursesScreen)
+    self.prg = app.ci_program.CiProgram()
+    self.prg.setUpCurses(self.cursesScreen)
 
   def addClickInfo(self, timeStamp, screenText, bState):
     caller = inspect.stack()[1]
