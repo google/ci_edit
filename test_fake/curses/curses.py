@@ -52,6 +52,12 @@ BRACKETED_PASTE_END = (91, 50, 48, 49, 126)  # i.e. "[201~"
 BRACKETED_PASTE = ("terminal_paste",)  # Pseudo event type.
 
 
+class error(BaseException):
+
+    def __init__(self):
+        BaseException.__init__(self)
+
+
 class FakeInput:
 
     def __init__(self, display):
@@ -284,8 +290,8 @@ class FakeCursesWindow:
             if len(text) > 1:
                 self.cursorCol = len(text[-1])
             return (1, 1)
-        except:
-            sys.exit(1)
+        except Exception as e:
+            raise error()
 
     def getch(self):
         testLog(3)
@@ -391,10 +397,6 @@ def color_pair(*args):
 
 
 def curs_set(*args):
-    testLog(1, *args)
-
-
-def error(*args):
     testLog(1, *args)
 
 

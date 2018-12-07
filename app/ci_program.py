@@ -63,8 +63,8 @@ def userMessage(*args):
 
 class CiProgram:
     """This is the main editor program. It holds top level information and runs
-  the main loop. The CiProgram is intended as a singleton.
-  The program interacts with a single top-level ProgramWindow."""
+    the main loop. The CiProgram is intended as a singleton.
+    The program interacts with a single top-level ProgramWindow."""
 
     def __init__(self):
         self.prefs = app.prefs.Prefs()
@@ -93,8 +93,8 @@ class CiProgram:
         curses.raw()
         # Enable Bracketed Paste Mode.
         sys.stdout.write('\033[?2004;h')
-        # Push the escape codes out to the terminal. (Whether this is needed seems
-        # to vary by platform).
+        # Push the escape codes out to the terminal. (Whether this is needed
+        # seems to vary by platform).
         sys.stdout.flush()
         try:
             curses.start_color()
@@ -137,8 +137,9 @@ class CiProgram:
         self.mainLoopTimePeak = 0
         cursesWindow = app.window.mainCursesWindow
         if self.prefs.startup['timeStartup']:
-            # When running a timing of the application startup, push a CTRL_Q onto the
-            # curses event messages to simulate a full startup with a GUI render.
+            # When running a timing of the application startup, push a CTRL_Q
+            # onto the curses event messages to simulate a full startup with a
+            # GUI render.
             curses.ungetch(17)
         start = time.time()
         # The first render, to get something on the screen.
@@ -179,17 +180,18 @@ class CiProgram:
             # (A performance optimization).
             cmdList = []
             while not len(cmdList):
-                for i in range(5):
+                for _ in range(5):
                     eventInfo = None
                     if self.exiting:
                         return
                     ch = cursesWindow.getch()
                     # assert type(ch) is int, type(ch)
                     if ch == curses.ascii.ESC:
-                        # Some keys are sent from the terminal as a sequence of bytes
-                        # beginning with an Escape character. To help reason about these
-                        # events (and apply event handler callback functions) the sequence
-                        # is converted into tuple.
+                        # Some keys are sent from the terminal as a sequence of
+                        # bytes beginning with an Escape character. To help
+                        # reason about these events (and apply event handler
+                        # callback functions) the sequence is converted into
+                        # tuple.
                         keySequence = []
                         n = cursesWindow.getch()
                         while n != curses.ERR:
@@ -216,9 +218,10 @@ class CiProgram:
                         else:
                             ch = tuple(keySequence)
                         if not ch:
-                            # The sequence was empty, so it looks like this Escape wasn't
-                            # really the start of a sequence and is instead a stand-alone
-                            # Escape. Just forward the esc.
+                            # The sequence was empty, so it looks like this
+                            # Escape wasn't really the start of a sequence and
+                            # is instead a stand-alone Escape. Just forward the
+                            # esc.
                             ch = curses.ascii.ESC
                     elif type(ch) is int and 160 <= ch < 257:
                         # Start of utf-8 character.
@@ -258,10 +261,11 @@ class CiProgram:
                     elif ch != curses.ERR:
                         self.ch = ch
                         if ch == curses.KEY_MOUSE:
-                            # On Ubuntu, Gnome terminal, curses.getmouse() may only be called
-                            # once for each KEY_MOUSE. Subsequent calls will throw an
-                            # exception. So getmouse is (only) called here and other parts of
-                            # the code use the eventInfo list instead of calling getmouse.
+                            # On Ubuntu, Gnome terminal, curses.getmouse() may
+                            # only be called once for each KEY_MOUSE. Subsequent
+                            # calls will throw an exception. So getmouse is
+                            # (only) called here and other parts of the code use
+                            # the eventInfo list instead of calling getmouse.
                             self.debugMouseEvent = curses.getmouse()
                             eventInfo = (self.debugMouseEvent, time.time())
                         cmdList.append((ch, eventInfo))
@@ -367,7 +371,7 @@ class CiProgram:
 
     def quitNow(self):
         """Set the intent to exit the program. The actual exit will occur a bit
-    later."""
+        later."""
         app.log.info()
         self.exiting = True
 
@@ -380,7 +384,7 @@ class CiProgram:
         for i in drawList:
             try:
                 cursesWindow.addstr(*i)
-            except:
+            except curses.error:
                 #app.log.error('failed to draw', repr(i))
                 pass
         if cursor is not None:
@@ -391,11 +395,11 @@ class CiProgram:
                 # Calling refresh will draw the cursor.
                 cursesWindow.refresh()
                 cursesWindow.leaveok(1)  # Don't update cursor position.
-            except:
+            except curses.error:
                 pass
         # This is a workaround to allow background processing (and parser screen
-        # redraw) to interact well with the test harness. The intent is to tell the
-        # test that the screen includes all commands executed up to N.
+        # redraw) to interact well with the test harness. The intent is to tell
+        # the test that the screen includes all commands executed up to N.
         if hasattr(cursesWindow, 'test_rendered_command_count'):
             cursesWindow.test_rendered_command_count(cmdCount)
 
@@ -451,11 +455,11 @@ class CiProgram:
             try:
                 applyPalette(primary)
                 app.log.startup(u"Primary color scheme applied")
-            except:
+            except curses.error:
                 try:
                     applyPalette(fallback)
                     app.log.startup(u"Fallback color scheme applied")
-                except:
+                except curses.error:
                     app.log.startup(u"No color scheme applied")
 
         self.color.colors = self.prefs.startup['numColors']

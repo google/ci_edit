@@ -41,9 +41,9 @@ class BufferManager:
             assert issubclass(self.__class__, BufferManager), self
         self.program = program
         self.prefs = prefs
-        # Using a dictionary lookup for buffers accelerates finding buffers by key
-        # (the file path), but that's not the common use. Maintaining an ordered
-        # list turns out to be more valuable.
+        # Using a dictionary lookup for buffers accelerates finding buffers by
+        # key (the file path), but that's not the common use. Maintaining an
+        # ordered list turns out to be more valuable.
         self.buffers = []
 
     def closeTextBuffer(self, textBuffer):
@@ -85,8 +85,8 @@ class BufferManager:
 
     def getValidTextBuffer(self, textBuffer):
         """If |textBuffer| is a managed buffer return it, otherwise create a new
-    buffer. Primarily used to determine if a held reference to a textBuffer is
-    still valid."""
+        buffer. Primarily used to determine if a held reference to a textBuffer
+        is still valid."""
         if textBuffer in self.buffers:
             del self.buffers[self.buffers.index(textBuffer)]
             self.buffers.append(textBuffer)
@@ -134,8 +134,8 @@ class BufferManager:
     def readStdin(self):
         app.log.info(u'reading from stdin')
         # Create a new input stream for the file data.
-        # Fd is short for file descriptor. os.dup and os.dup2 will duplicate file
-        # descriptors.
+        # Fd is short for file descriptor. os.dup and os.dup2 will duplicate
+        # file descriptors.
         stdinFd = sys.stdin.fileno()
         newFd = os.dup(stdinFd)
         newStdin = io.open(u"/dev/tty")
