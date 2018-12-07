@@ -39,17 +39,19 @@ mainCursesWindow = None
 
 
 class ViewWindow:
-    """A view window is a base window that does not get focus or have TextBuffer.
-  See class ActiveWindow for a window that can get focus.
-  See class Window for a window that can get focus and have a TextBuffer.
-  """
+    """A view window is a base window that does not get focus or have
+    TextBuffer.
+
+    See class ActiveWindow for a window that can get focus. See class Window for
+    a window that can get focus and have a TextBuffer.
+    """
 
     def __init__(self, program, parent):
         """
-    Args:
-      parent is responsible for the order in which this window is updated,
-      relative to its siblings.
-    """
+        Args:
+          parent is responsible for the order in which this window is updated,
+          relative to its siblings.
+        """
         if app.config.strict_debug:
             assert issubclass(self.__class__, ViewWindow), self
             assert issubclass(program.__class__, app.ci_program.CiProgram), self
@@ -68,9 +70,10 @@ class ViewWindow:
         self.zOrder = []
 
     def addStr(self, row, col, text, colorPair):
-        """Overwrite text at row, column with text. The caller is responsible for
-    avoiding overdraw.
-    """
+        """Overwrite text at row, column with text.
+
+        The caller is responsible for avoiding overdraw.
+        """
         if app.config.strict_debug:
             app.log.check_le(row, self.rows)
             app.log.check_le(col, self.cols)
@@ -124,8 +127,8 @@ class ViewWindow:
         pass
 
     def detach(self):
-        """Hide the window by removing self from parents' children, but keep same
-    parent to be reattached later."""
+        """Hide the window by removing self from parents' children, but keep
+        same parent to be reattached later."""
         try:
             self.parent.zOrder.remove(self)
         except ValueError:
@@ -224,10 +227,11 @@ class ViewWindow:
 
     def paint(self, row, col, count, colorPair):
         """Paint text a row, column with colorPair.
-      fyi, I thought this may be faster than using addStr to paint over the text
-      with a different colorPair. It looks like there isn't a significant
-      performance difference between chgat and addstr.
-    """
+
+        fyi, I thought this may be faster than using addStr to paint over the
+        text with a different colorPair. It looks like there isn't a significant
+        performance difference between chgat and addstr.
+        """
         mainCursesWindow.chgat(self.top + row, self.left + col, count,
                                colorPair)
 
@@ -309,8 +313,7 @@ class ViewWindow:
 
     def setParent(self, parent, layerIndex=sys.maxsize):
         """Setting the parent will cause the the window to refresh (i.e. if self
-    was hidden with detach() it will no longer be hidden).
-    """
+        was hidden with detach() it will no longer be hidden)."""
         if app.config.strict_debug:
             assert issubclass(self.__class__, ViewWindow), self
             assert issubclass(parent.__class__, ViewWindow), parent
@@ -351,10 +354,10 @@ class ActiveWindow(ViewWindow):
 
     def focus(self):
         """
-    Note: to focus a view it must have a controller. Focusing a view without a
-        controller would make the program appear to freeze since nothing would
-        be responding to user input.
-    """
+        Note: to focus a view it must have a controller. Focusing a view without
+            a controller would make the program appear to freeze since nothing
+            would be responding to user input.
+        """
         self.hasFocus = True
         self.controller.focus()
 
@@ -370,7 +373,7 @@ class ActiveWindow(ViewWindow):
 
 class Window(ActiveWindow):
     """A Window holds a TextBuffer and a controller that operates on the
-  TextBuffer."""
+    TextBuffer."""
 
     def __init__(self, program, parent):
         if app.config.strict_debug:
@@ -436,8 +439,8 @@ class Window(ActiveWindow):
         tb = self.textBuffer
         if tb is not None and tb.parser.fullyParsedToLine < len(tb.lines):
             tb.parseDocument()
-            # If a user event came in while parsing, the parsing will be paused (to be
-            # resumed after handling the event).
+            # If a user event came in while parsing, the parsing will be paused
+            # (to be resumed after handling the event).
             finished = tb.parser.fullyParsedToLine >= len(tb.lines)
         for child in self.zOrder:
             finished = finished and child.longTimeSlice()
@@ -449,7 +452,10 @@ class Window(ActiveWindow):
 
 
 class LabelWindow(ViewWindow):
-    """A text label. The label is inert, it will pass events to its parent."""
+    """A text label.
+
+    The label is inert, it will pass events to its parent.
+    """
 
     def __init__(self,
                  program,
@@ -488,8 +494,11 @@ class LabelWindow(ViewWindow):
 
 
 class LabeledLine(Window):
-    """A single line with a label. This is akin to a line prompt or gui modal
-      dialog. It's used for things like 'find' and 'goto line'."""
+    """A single line with a label.
+
+    This is akin to a line prompt or gui modal dialog. It's used for things like
+    'find' and 'goto line'.
+    """
 
     def __init__(self, program, parent, label):
         if app.config.strict_debug:
@@ -535,8 +544,7 @@ class LabeledLine(Window):
 
 
 class Menu(ViewWindow):
-    """Work in progress on a context menu.
-  """
+    """Work in progress on a context menu."""
 
     def __init__(self, program, host):
         if app.config.strict_debug:
@@ -807,9 +815,7 @@ class InteractiveFind(Window):
         self.parent.layout()
 
     def addSelectOptionsRow(self, label, optionsList):
-        """
-    Such as a radio group.
-    """
+        """Such as a radio group."""
         optionsRow = OptionsRow(self)
         optionsRow.color = self.programWindow().program.color.get('keyword')
         optionsRow.addLabel(label)
@@ -879,8 +885,10 @@ class MessageLine(ViewWindow):
 
 
 class StatusLine(ViewWindow):
-    """The status line appears at the bottom of the screen. It shows the current
-  line and column the cursor is on."""
+    """The status line appears at the bottom of the screen.
+
+    It shows the current line and column the cursor is on.
+    """
 
     def __init__(self, program, host):
         ViewWindow.__init__(self, program, host)
@@ -1014,7 +1022,10 @@ class TopInfo(ViewWindow):
 
 
 class InputWindow(Window):
-    """This is the main content window. Often the largest pane displayed."""
+    """This is the main content window.
+
+    Often the largest pane displayed.
+    """
 
     def __init__(self, program, host):
         if app.config.strict_debug:
@@ -1105,9 +1116,7 @@ class InputWindow(Window):
     if 0:
 
         def splitWindow(self):
-            """
-      Experimental.
-      """
+            """Experimental."""
             app.log.info()
             other = InputWindow(self.prg)
             other.setTextBuffer(self.textBuffer)
@@ -1171,7 +1180,7 @@ class InputWindow(Window):
 
     def drawRightEdge(self):
         """Draw makers to indicate text extending past the right edge of the
-    window."""
+        window."""
         maxRow, maxCol = self.rows, self.cols
         limit = min(maxRow, len(self.textBuffer.lines) - self.scrollRow)
         colorPrefs = self.programWindow().program.color
@@ -1567,14 +1576,13 @@ class PopupWindow(Window):
         self.longestLineLength = 0
         self.__message = []
         self.showOptions = True
-        # This will be displayed and should contain the keys that respond to user
-        # input. This should be updated if you change the controller's command set.
+        # This will be displayed and should contain the keys that respond to
+        # user input. This should be updated if you change the controller's
+        # command set.
         self.options = []
 
     def render(self):
-        """
-    Display a box of text in the center of the window.
-    """
+        """Display a box of text in the center of the window."""
         maxRows, maxCols = self.host.rows, self.host.cols
         cols = min(self.longestLineLength + 6, maxCols)
         rows = min(len(self.__message) + 4, maxRows)
@@ -1596,24 +1604,25 @@ class PopupWindow(Window):
                         color)
 
     def setMessage(self, message):
+        """Sets the Popup window's message to the given message.
+
+        message (str): A string that you want to display.
+
+        Returns:
+          None.
         """
-    Sets the Popup window's message to the given message.
-    message (str): A string that you want to display.
-    Returns:
-      None.
-    """
         self.__message = message.split("\n")
         self.longestLineLength = max([len(line) for line in self.__message])
 
     def setOptionsToDisplay(self, options):
         """
-    This function is used to change the options that are displayed in the
-    popup window. They will be separated by a '/' character when displayed.
+        This function is used to change the options that are displayed in the
+        popup window. They will be separated by a '/' character when displayed.
 
-    Args:
-      options (list): A list of possible keys which the user can press and
-                      should be responded to by the controller.
-    """
+        Args:
+          options (list): A list of possible keys which the user can press and
+                          should be responded to by the controller.
+        """
         self.options = options
 
     def setTextBuffer(self, textBuffer):
