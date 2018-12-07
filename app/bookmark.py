@@ -19,22 +19,22 @@ from __future__ import print_function
 
 class Bookmark(object):
     """
-  This bookmark object is used as a marker for different places in a
-  text document. Note that because text buffer lines index at 0, all
-  references to rows also assume that 0 is the first line.
-  """
-
-    def __init__(self, beginRow, endRow, data={}):
-        """
-    Creates a bookmark located at the specified rows. This will automatically
-    cast the passed in rows into integers.
-    Args:
-      beginRow (int-like): The line that the bookmark starts on (inclusive).
-      endRow (int-like): The line that the bookmark ends on (inclusive).
-      data (other): This is used to store any information that you would like to
-                    to associate with this bookmark. It is an empty dictionary
-                    by default.
+    This bookmark object is used as a marker for different places in a
+    text document. Note that because text buffer lines index at 0, all
+    references to rows also assume that 0 is the first line.
     """
+
+    def __init__(self, beginRow, endRow, data):
+        """
+        Creates a bookmark located at the specified rows. This will
+        automatically cast the passed in rows into integers.
+        Args:
+          beginRow (int-like): The line that the bookmark starts on (inclusive).
+          endRow (int-like): The line that the bookmark ends on (inclusive).
+          data (other): This is used to store any information that you would
+                        like to to associate with this bookmark. It is an empty
+                        dictionary by default.
+        """
         self.__begin = int(beginRow)
         self.__end = int(endRow)
         self.data = data
@@ -107,8 +107,9 @@ class Bookmark(object):
         return self.range >= other.range
 
     def __hash__(self):
-        # NOTE: Any two bookmarks with the same range WILL have the same hash value.
-        # self.range can also change, so be careful when using this in a hash table.
+        # NOTE: Any two bookmarks with the same range WILL have the same hash
+        # value. self.range can also change, so be careful when using this in a
+        # hash table.
         return hash(self.range)
 
     def __repr__(self):

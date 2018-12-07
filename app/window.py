@@ -16,8 +16,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 try:
-    type(u"") is unicode
-except:
+    unicode('')
+except NameError:
     unicode = str
     unichr = chr
 
@@ -655,7 +655,7 @@ class LineNumbers(ViewWindow):
         bookmarkList = self.host.textBuffer.bookmarks
         beginIndex = endIndex = 0
         if len(bookmarkList):
-            needle = app.bookmark.Bookmark(beginRow, beginRow)
+            needle = app.bookmark.Bookmark(beginRow, beginRow, {})
             beginIndex = bisect.bisect_left(bookmarkList, needle)
             if beginIndex > 0 and bookmarkList[beginIndex - 1].end >= beginRow:
                 beginIndex -= 1

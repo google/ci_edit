@@ -52,8 +52,8 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
         app.fake_curses_testing.FakeCursesTestCase.tearDown(self)
 
     def test_bookmark_comparisons(self):
-        b1 = Bookmark(1, 5)
-        b2 = Bookmark(1, 3)
+        b1 = Bookmark(1, 5, {})
+        b2 = Bookmark(1, 3, {})
         self.assertTrue(b1 > b2)
         self.assertTrue(b1 >= b2)
         self.assertFalse(b1 < b2)
@@ -66,8 +66,8 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
         self.assertFalse(b1 == b2)
         self.assertFalse(hash(b1) == hash(b2))
 
-        b1 = Bookmark(2, 5)
-        # b2 = Bookmark(1, 3)
+        b1 = Bookmark(2, 5, {})
+        # b2 = Bookmark(1, 3, {})
         self.assertTrue(b1 > b2)
         self.assertTrue(b1 >= b2)
         self.assertFalse(b1 < b2)
@@ -80,8 +80,8 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
         self.assertFalse(b1 == b2)
         self.assertFalse(hash(b1) == hash(b2))
 
-        # b1 = Bookmark(2, 5)
-        b2 = Bookmark(1, 10)
+        # b1 = Bookmark(2, 5, {})
+        b2 = Bookmark(1, 10, {})
         self.assertTrue(b1 > b2)
         self.assertTrue(b1 >= b2)
         self.assertFalse(b1 < b2)
@@ -94,8 +94,8 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
         self.assertFalse(b1 == b2)
         self.assertFalse(hash(b1) == hash(b2))
 
-        b1 = Bookmark(1, 10)
-        # b2 = Bookmark(1, 10)
+        b1 = Bookmark(1, 10, {})
+        # b2 = Bookmark(1, 10, {})
         self.assertFalse(b1 > b2)
         self.assertTrue(b1 >= b2)
         self.assertFalse(b1 < b2)
@@ -108,8 +108,8 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
         self.assertTrue(b1 == b2)
         self.assertTrue(hash(b1) == hash(b2))
 
-        # b1 - Bookmark(1, 10)
-        b2 = Bookmark(-10, 10)
+        # b1 - Bookmark(1, 10, {})
+        b2 = Bookmark(-10, 10, {})
         self.assertTrue(b1 > b2)
         self.assertTrue(b1 >= b2)
         self.assertFalse(b1 < b2)
@@ -126,10 +126,11 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
         def checkRanges(bookmark):
             """
-      Checks that every integer between the bookmark's interval is 'in'
-      the bookmark. It also checks if the two integers outside of the bookmark's
-      range on both sides of its interval are NOT 'in' the bookmark.
-      """
+            Checks that every integer between the bookmark's interval is 'in'
+            the bookmark. It also checks if the two integers outside of the
+            bookmark's range on both sides of its interval are NOT 'in' the
+            bookmark.
+            """
             begin = bookmark.begin
             end = bookmark.end
             for i in range(begin, end + 1):
@@ -139,100 +140,100 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
             self.assertFalse(end + 1 in bookmark)
             self.assertFalse(end + 2 in bookmark)
 
-        checkRanges(Bookmark(1, 5))
-        checkRanges(Bookmark(-3, 3))
-        checkRanges(Bookmark(-5000, -4990))
+        checkRanges(Bookmark(1, 5, {}))
+        checkRanges(Bookmark(-3, 3, {}))
+        checkRanges(Bookmark(-5000, -4990, {}))
 
         # Check intervals of length 0.
-        checkRanges(Bookmark(0, 0))
-        checkRanges(Bookmark(5000, 5000))
-        checkRanges(Bookmark(-5000, 5000))
+        checkRanges(Bookmark(0, 0, {}))
+        checkRanges(Bookmark(5000, 5000, {}))
+        checkRanges(Bookmark(-5000, 5000, {}))
 
-        b = Bookmark(-3.99,
-                     3.99)  # Floats get cast to int (rounds towards zero).
+        b = Bookmark(-3.99, 3.99,
+                     {})  # Floats get cast to int (rounds towards zero).
         self.assertFalse(-4 in b)
         self.assertTrue(-3 in b)
         self.assertFalse(4 in b)
         self.assertTrue(3 in b)
 
     def test_bookmark_overlap(self):
-        b1 = Bookmark(1, 5)
-        b2 = Bookmark(1, 5)
+        b1 = Bookmark(1, 5, {})
+        b2 = Bookmark(1, 5, {})
         self.assertTrue(b1.overlaps(b2))
         self.assertTrue(b2.overlaps(b1))
 
-        b1 = Bookmark(2, 5)
-        b2 = Bookmark(1, 5)
+        b1 = Bookmark(2, 5, {})
+        b2 = Bookmark(1, 5, {})
         self.assertTrue(b1.overlaps(b2))
         self.assertTrue(b2.overlaps(b1))
 
-        b1 = Bookmark(1, 3)
-        b2 = Bookmark(1, 5)
+        b1 = Bookmark(1, 3, {})
+        b2 = Bookmark(1, 5, {})
         self.assertTrue(b1.overlaps(b2))
         self.assertTrue(b2.overlaps(b1))
 
-        b1 = Bookmark(3, 4)
-        b2 = Bookmark(1, 5)
+        b1 = Bookmark(3, 4, {})
+        b2 = Bookmark(1, 5, {})
         self.assertTrue(b1.overlaps(b2))
         self.assertTrue(b2.overlaps(b1))
 
-        b1 = Bookmark(3, 10)
-        b2 = Bookmark(1, 5)
+        b1 = Bookmark(3, 10, {})
+        b2 = Bookmark(1, 5, {})
         self.assertTrue(b1.overlaps(b2))
         self.assertTrue(b2.overlaps(b1))
 
-        b1 = Bookmark(5, 10)
-        b2 = Bookmark(1, 5)
+        b1 = Bookmark(5, 10, {})
+        b2 = Bookmark(1, 5, {})
         self.assertTrue(b1.overlaps(b2))
         self.assertTrue(b2.overlaps(b1))
 
-        b1 = Bookmark(-5, 0)
-        b2 = Bookmark(-5, 5)
+        b1 = Bookmark(-5, 0, {})
+        b2 = Bookmark(-5, 5, {})
         self.assertTrue(b1.overlaps(b2))
         self.assertTrue(b2.overlaps(b1))
 
-        b1 = Bookmark(0, 0)
-        b2 = Bookmark(0, 0)
+        b1 = Bookmark(0, 0, {})
+        b2 = Bookmark(0, 0, {})
         self.assertTrue(b1.overlaps(b2))
         self.assertTrue(b2.overlaps(b1))
 
-        b1 = Bookmark(0, 0)
-        b2 = Bookmark(-5, 99)
+        b1 = Bookmark(0, 0, {})
+        b2 = Bookmark(-5, 99, {})
         self.assertTrue(b1.overlaps(b2))
         self.assertTrue(b2.overlaps(b1))
 
-        b1 = Bookmark(0, 0)
-        b2 = Bookmark(-5, -1)
+        b1 = Bookmark(0, 0, {})
+        b2 = Bookmark(-5, -1, {})
         self.assertFalse(b1.overlaps(b2))
         self.assertFalse(b2.overlaps(b1))
 
-        b1 = Bookmark(5, 5)
-        b2 = Bookmark(6, 9)
+        b1 = Bookmark(5, 5, {})
+        b2 = Bookmark(6, 9, {})
         self.assertFalse(b1.overlaps(b2))
         self.assertFalse(b2.overlaps(b1))
 
-        b1 = Bookmark(3, 5)
-        b2 = Bookmark(5, 8)
+        b1 = Bookmark(3, 5, {})
+        b2 = Bookmark(5, 8, {})
         self.assertTrue(b1.overlaps(b2))
         self.assertTrue(b2.overlaps(b1))
 
-        b1 = Bookmark(-3.999, 3.999)  # Rounds to range (-3, 3).
-        b2 = Bookmark(-5, -4)
+        b1 = Bookmark(-3.999, 3.999, {})  # Rounds to range (-3, 3).
+        b2 = Bookmark(-5, -4, {})
         self.assertFalse(b1.overlaps(b2))
         self.assertFalse(b2.overlaps(b1))
 
-        b1 = Bookmark(-3.001, 3.001)  # Rounds to range (-3, 3).
-        b2 = Bookmark(3.99, 9.0)  # Rounds to range (3, 9).
+        b1 = Bookmark(-3.001, 3.001, {})  # Rounds to range (-3, 3).
+        b2 = Bookmark(3.99, 9.0, {})  # Rounds to range (3, 9).
         self.assertTrue(b1.overlaps(b2))
         self.assertTrue(b2.overlaps(b1))
 
     def test_bookmark_properties(self):
-        b = Bookmark(3, 5)
+        b = Bookmark(3, 5, {})
         self.assertTrue(b.begin == 3)
         self.assertTrue(b.end == 5)
         self.assertTrue(b.range == (3, 5))
 
-        b = Bookmark(-5.99, 5.99)  # Test constructor
+        b = Bookmark(-5.99, 5.99, {})  # Test constructor
         self.assertTrue(b.begin == -5)
         self.assertTrue(b.end == 5)
         self.assertTrue(b.range == (-5, 5))
@@ -297,10 +298,9 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
             exceptionMessage = (
                 startYellow + "This test could " +
                 "not execute because the 'mock' module could not be found. If "
-                +
-                "you would like to run this test, please install the mock module "
-                + "for python 2.7. You can visit their website at " + startBlue
-                + "https://pypi.python.org/pypi/mock " + startYellow +
+                + "you would like to run this test, please install the mock " +
+                "module for python 2.7. You can visit their website at " +
+                startBlue + "https://pypi.python.org/pypi/mock " + startYellow +
                 "or you can " + "try running " + startBlue + "pip install mock."
                 + disableColor)
             #raise Exception(exceptionMessage)
@@ -333,29 +333,34 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
     def test_get_visible_bookmarks(self):
         # Set up the fake objects to test the LineNumbers methods.
         self.textBuffer.bookmarks = [
-            Bookmark(0, 0),
-            Bookmark(10, 10),
-            Bookmark(20, 20),
-            Bookmark(30, 30),
-            Bookmark(40, 40)
+            Bookmark(0, 0, {}),
+            Bookmark(10, 10, {}),
+            Bookmark(20, 20, {}),
+            Bookmark(30, 30, {}),
+            Bookmark(40, 40, {})
         ]
         visibleBookmarks = self.lineNumbers.getVisibleBookmarks(
             self.fakeHost.scrollRow,
             self.fakeHost.scrollRow + self.lineNumbers.rows)
-        expectedBookmarks = {Bookmark(0, 0), Bookmark(10, 10), Bookmark(20, 20)}
+        expectedBookmarks = {
+            Bookmark(0, 0, {}),
+            Bookmark(10, 10, {}),
+            Bookmark(20, 20, {})
+        }
 
         # Check that visibleBookmarks contains all the correct bookmarks
         self.assertEqual(set(visibleBookmarks), expectedBookmarks)
-        # Check that the number of bookmarks is the same, as set removes duplicates.
+        # Check that the number of bookmarks is the same, as set removes
+        # duplicates.
         self.assertEqual(len(visibleBookmarks), len(expectedBookmarks))
 
         self.fakeHost.scrollRow = 20
         visibleBookmarks = self.lineNumbers.getVisibleBookmarks(
             self.fakeHost.scrollRow, 20 + self.lineNumbers.rows)
         expectedBookmarks = {
-            Bookmark(20, 20),
-            Bookmark(30, 30),
-            Bookmark(40, 40)
+            Bookmark(20, 20, {}),
+            Bookmark(30, 30, {}),
+            Bookmark(40, 40, {})
         }
         self.assertEqual(set(visibleBookmarks), expectedBookmarks)
         self.assertEqual(len(visibleBookmarks), len(expectedBookmarks))
@@ -364,7 +369,7 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
         visibleBookmarks = self.lineNumbers.getVisibleBookmarks(
             self.fakeHost.scrollRow,
             self.fakeHost.scrollRow + self.lineNumbers.rows)
-        expectedBookmarks = {Bookmark(30, 30), Bookmark(40, 40)}
+        expectedBookmarks = {Bookmark(30, 30, {}), Bookmark(40, 40, {})}
         self.assertEqual(set(visibleBookmarks), expectedBookmarks)
         self.assertEqual(len(visibleBookmarks), len(expectedBookmarks))
 
@@ -373,7 +378,7 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
         visibleBookmarks = self.lineNumbers.getVisibleBookmarks(
             self.fakeHost.scrollRow,
             self.fakeHost.scrollRow + self.lineNumbers.rows)
-        expectedBookmarks = {Bookmark(30, 30)}
+        expectedBookmarks = {Bookmark(30, 30, {})}
         self.assertEqual(set(visibleBookmarks), expectedBookmarks)
         self.assertEqual(len(visibleBookmarks), len(expectedBookmarks))
 
@@ -386,16 +391,16 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
         self.fakeHost.scrollRow = 10
         self.textBuffer.bookmarks = [
-            Bookmark(0, 10),
-            Bookmark(11, 29),
-            Bookmark(30, 45),
-            Bookmark(46, 49)
+            Bookmark(0, 10, {}),
+            Bookmark(11, 29, {}),
+            Bookmark(30, 45, {}),
+            Bookmark(46, 49, {})
         ]
         self.lineNumbers.rows = 15
         visibleBookmarks = self.lineNumbers.getVisibleBookmarks(
             self.fakeHost.scrollRow,
             self.fakeHost.scrollRow + self.lineNumbers.rows)
-        expectedBookmarks = {Bookmark(0, 10), Bookmark(11, 29)}
+        expectedBookmarks = {Bookmark(0, 10, {}), Bookmark(11, 29, {})}
         self.assertEqual(set(visibleBookmarks), expectedBookmarks)
         self.assertEqual(len(visibleBookmarks), len(expectedBookmarks))
 
@@ -486,7 +491,8 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
                 'b',
                 'm',
                 CTRL_J,  # Create a new bookmark.
-                # Bookmarks are at positions (1, 4), (2, 1), (3, 6) (9, 1), (23, 13).
+                # Bookmarks are at positions (1, 4), (2, 1), (3, 6) (9, 1),
+                # (23, 13).
                 # Note that rows here start at 1, so 1 is the first row.
                 self.displayCheck(0, 0, [
                     u" ci     *                               ",
@@ -524,8 +530,8 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
                     u"                                        "
                 ]),
                 KEY_F2,  # Jump to the second bookmark (2, 1).
-                # The display doesn't move because the bookmark is already in the
-                # optimal position.
+                # The display doesn't move because the bookmark is already in
+                # the optimal position.
                 self.displayCheck(0, 0, [
                     u" ci     *                               ",
                     u"                                        ",
@@ -676,8 +682,8 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
                     u"                                        "
                 ]),
                 KEY_SHIFT_F2,  # Go back to the first bookmark (1, 4).
-                # The display doesn't move because the bookmark is already in the
-                # optimal position.
+                # The display doesn't move because the bookmark is already in
+                # the optimal position.
                 self.displayCheck(0, 0, [
                     u" ci     *                               ",
                     u"                                        ",

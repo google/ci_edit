@@ -18,7 +18,7 @@ from __future__ import division
 from __future__ import print_function
 try:
     unicode('')
-except:
+except NameError:
     unicode = str
     unichr = chr
 

@@ -18,7 +18,7 @@ from __future__ import division
 from __future__ import print_function
 try:
     unicode('')
-except:
+except NameError:
     unicode = str
     unichr = chr
 
@@ -51,6 +51,7 @@ class Actions(app.mutator.Mutator):
         self.program = program
         self.view = None
         self.bookmarks = []
+        self.fileExtension = None
         self.nextBookmarkColorPos = 0
         self.fileEncoding = None
         self.fileHistory = {}
@@ -190,7 +191,7 @@ class Actions(app.mutator.Mutator):
             self.setMessage(u"No bookmarks to jump to")
             return
         _, _, lowerRow, _ = self.startAndEnd()
-        needle = app.bookmark.Bookmark(lowerRow + 1, lowerRow + 1)
+        needle = app.bookmark.Bookmark(lowerRow + 1, lowerRow + 1, {})
         index = bisect.bisect_left(self.bookmarks, needle)
         self.bookmarkGoto(self.bookmarks[index % len(self.bookmarks)])
 
@@ -207,7 +208,7 @@ class Actions(app.mutator.Mutator):
             self.setMessage(u"No bookmarks to jump to")
             return
         upperRow, _, _, _ = self.startAndEnd()
-        needle = app.bookmark.Bookmark(upperRow, upperRow)
+        needle = app.bookmark.Bookmark(upperRow, upperRow, {})
         index = bisect.bisect_left(self.bookmarks, needle)
         self.bookmarkGoto(self.bookmarks[index - 1])
 
@@ -222,7 +223,7 @@ class Actions(app.mutator.Mutator):
         """
         upperRow, _, lowerRow, _ = self.startAndEnd()
         rangeList = self.bookmarks
-        needle = app.bookmark.Bookmark(upperRow, lowerRow)
+        needle = app.bookmark.Bookmark(upperRow, lowerRow, {})
         # Find the left-hand index.
         begin = bisect.bisect_left(rangeList, needle)
         if begin and needle.begin <= rangeList[begin - 1].end:
@@ -1076,7 +1077,7 @@ class Actions(app.mutator.Mutator):
         if self.isBinary:
             self.data = self.doLinesToData(self.lines)
             # TODO(dschuyler): convert binary data.
-            pass  #self.data = self.doLinesToBinaryData(self.lines)
+            #self.data = self.doLinesToBinaryData(self.lines)
         else:
             self.data = self.doLinesToData(self.lines)
 
@@ -1268,9 +1269,9 @@ class Actions(app.mutator.Mutator):
         data = self.findReplaceText(find, replace, flags, self.data)
         self.applyDocumentUpdate(data)
 
-    def findReplaceText(self, find, replace, flags, input):
+    def findReplaceText(self, find, replace, flags, text):
         flags = self.findReplaceFlags(flags)
-        return re.sub(find, replace, input, flags=flags)
+        return re.sub(find, replace, text, flags=flags)
 
     def applyDocumentUpdate(self, data):
         diff = difflib.ndiff(self.lines, self.doDataToLines(data))
@@ -1765,6 +1766,7 @@ class Actions(app.mutator.Mutator):
         row = min(self.markerRow, self.penRow)
         endRow = max(self.markerRow, self.penRow)
         begin = 0
+        i = -1
         for i, line in enumerate(self.lines[row:endRow + 1]):
             if (len(line) < indentationLength or
                     line[:indentationLength] != indentation):
