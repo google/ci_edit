@@ -62,13 +62,14 @@ class Parser:
         self.emptyNode = ParserNode({}, None, None, 0)
         self.endNode = ({}, sys.maxsize, sys.maxsize, sys.maxsize)
         self.fullyParsedToLine = -1
-        # A row on screen will consist of one or more ParserNodes. When a ParserNode
-        # is returned from the parser it will be an instance of ParserNode, but
-        # internally tuples are used in place of ParserNodes. This makes for some
-        # ugly code, but the performance difference (~5%) is worth it.
+        # A row on screen will consist of one or more ParserNodes. When a
+        # ParserNode is returned from the parser it will be an instance of
+        # ParserNode, but internally tuples are used in place of ParserNodes.
+        # This makes for some ugly code, but the performance difference (~5%) is
+        # worth it.
         self.parserNodes = [({}, 0, None, 0)]
-        # Each entry in |self.rows| is an index into the |self.parserNodes| array to
-        # the parerNode that begins that row.
+        # Each entry in |self.rows| is an index into the |self.parserNodes|
+        # array to the parerNode that begins that row.
         self.rows = [0]  # Row parserNodes index.
         app.log.parser('__init__')
 
@@ -79,8 +80,8 @@ class Parser:
     """
         if row + 1 >= len(
                 self.rows):  # or self.rows[row + 1] > len(self.parserNodes):
-            # This file is too large. There's other ways to handle this, but for now
-            # let's leave the tail un-highlighted.
+            # This file is too large. There's other ways to handle this, but for
+            # now let's leave the tail un-highlighted.
             return 0
         gl = self.parserNodes[self.rows[row]:self.rows[row + 1]] + [
             self.endNode
@@ -99,24 +100,22 @@ class Parser:
                 return index
 
     def grammarAt(self, row, col):
+        """Get the grammar at row, col.
+        It's more efficient to use grammarIndexFromRowCol() and grammarAtIndex()
+        individually if grammars are requested contiguously. This function is
+        just for one-off needs.
         """
-    Get the grammar at row, col.
-    It's more efficient to use grammarIndexFromRowCol() and grammarAtIndex()
-    individually if grammars are requested contiguously. This function is just
-    for one-off needs.
-    """
         grammarIndex = self.grammarIndexFromRowCol(row, col)
         node, _, _ = self.grammarAtIndex(row, col, grammarIndex)
         return node.grammar
 
     def grammarAtIndex(self, row, col, index):
-        """
-    Call grammarIndexFromRowCol() to get the index parameter.
+        """Call grammarIndexFromRowCol() to get the index parameter.
 
-    Returns:
-        (node, preceding, remaining). |proceeding| and |remaining| are relative
-        to the |col| parameter.
-    """
+        Returns:
+            (node, preceding, remaining). |proceeding| and |remaining| are
+            relative to the |col| parameter.
+        """
         finalResult = (self.emptyNode, col, sys.maxsize)
         if row >= len(self.rows):
             return finalResult
@@ -135,18 +134,18 @@ class Parser:
 
     def parse(self, bgThread, appPrefs, data, grammar, beginRow, endRow):
         """
-      Args:
-        data (string): The file contents. The document.
-        grammar (object): The initial grammar (often determined by the file
-            extension). If |beginRow| is not zero then grammar is ignored.
-        beginRow (int): is the first row (which is line number - 1) in data that
-            is has changed since the previous parse of this data. Pass zero to
-            parse the entire document. If beginRow >= len(data) then no parse
-            is done.
-        endRow (int): The last row to parse. This stops the parser from going
-            over the entire file if, for example, only 100 rows out of a million
-            rows are needed (which can save a lot of cpu time).
-    """
+        Args:
+          data (string): The file contents. The document.
+          grammar (object): The initial grammar (often determined by the file
+              extension). If |beginRow| is not zero then grammar is ignored.
+          beginRow (int): is the first row (which is line number - 1) in data
+              that is has changed since the previous parse of this data. Pass
+              zero to parse the entire document. If beginRow >= len(data) then
+              no parse is done.
+          endRow (int): The last row to parse. This stops the parser from going
+              over the entire file if, for example, only 100 rows out of a
+              million rows are needed (which can save a lot of cpu time).
+        """
         app.log.parser('grammar', grammar['name'])
         # Trim partially parsed data.
         if self.fullyParsedToLine < beginRow:
@@ -217,7 +216,8 @@ class Parser:
                 end -= 1
                 visualEnd -= 1
         else:
-            # There is a sentinel node at the end that records the end of document.
+            # There is a sentinel node at the end that records the end of
+            # document.
             lastNode = self.parserNodes[-1]
             end = lastNode[kBegin]
             visualEnd = lastNode[kVisual]
@@ -229,7 +229,8 @@ class Parser:
         topNode = self.parserNodes[-1]
         cursor = topNode[kBegin]
         visual = topNode[kVisual]
-        # If we are at the start of a grammar, skip the 'begin' part of the grammar.
+        # If we are at the start of a grammar, skip the 'begin' part of the
+        # grammar.
         if (len(self.parserNodes) == 1 or
                 topNode[kGrammar] is not self.parserNodes[-2][kGrammar]):
             beginRegex = topNode[kGrammar].get('begin')
@@ -250,8 +251,8 @@ class Parser:
                 subdata)
             if not found:
                 #app.log.info('parser exit, match not found')
-                # todo(dschuyler): mark parent grammars as unterminated (if they expect
-                # be terminated). e.g. unmatched string quote or xml tag.
+                # todo(dschuyler): mark parent grammars as unterminated (if they
+                # expect be terminated). e.g. unmatched string quote or xml tag.
                 break
             index = -1
             foundGroups = found.groups()

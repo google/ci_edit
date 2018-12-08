@@ -106,7 +106,7 @@ class InteractivePrediction(app.controller.Controller):
                 self.items.append(
                     (i, '<new file> %s' % (i.parser.rowText(0)[:20]), dirty))
         dirPath, fileName = os.path.split(currentFile)
-        file, ext = os.path.splitext(fileName)
+        fileName, ext = os.path.splitext(fileName)
         # TODO(dschuyler): rework this ignore list.
         ignoreExt = set((
             '.pyc',
@@ -125,7 +125,7 @@ class InteractivePrediction(app.controller.Controller):
         contents.sort()
         for i in contents:
             f, e = os.path.splitext(i)
-            if file == f and ext != e and e not in ignoreExt:
+            if fileName == f and ext != e and e not in ignoreExt:
                 self.items.append((None, os.path.join(dirPath, i), '='))
         if 1:
             app.log.info()
