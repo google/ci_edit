@@ -103,7 +103,7 @@ class Controller:
         view.changeFocusTo(view)
 
     def createNewTextBuffer(self):
-        bufferManager = self.view.programWindow().program.bufferManager
+        bufferManager = self.view.program.bufferManager
         self.view.setTextBuffer(bufferManager.newTextBuffer())
 
     def doCommand(self, ch, meta):
@@ -152,7 +152,7 @@ class Controller:
     def __closeHostFile(self, host):
         """Close the current file and switch to another or create an empty
         file."""
-        bufferManager = host.programWindow().program.bufferManager
+        bufferManager = host.program.bufferManager
         bufferManager.closeTextBuffer(host.textBuffer)
         host.userIntent = 'edit'
         tb = bufferManager.getUnsavedBuffer()
@@ -196,7 +196,7 @@ class Controller:
         if tb.isDirty():
             self.view.changeFocusTo(self.view.interactiveQuit)
             return
-        bufferManager = self.view.programWindow().program.bufferManager
+        bufferManager = self.view.program.bufferManager
         tb = bufferManager.getUnsavedBuffer()
         if tb:
             self.view.setTextBuffer(tb)
@@ -271,7 +271,7 @@ class Controller:
         if tb.isDirty():
             self.changeToConfirmQuit()
             return
-        bufferManager = self.view.programWindow().program.bufferManager
+        bufferManager = self.view.program.bufferManager
         tb = bufferManager.getUnsavedBuffer()
         if tb:
             host.setTextBuffer(tb)

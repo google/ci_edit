@@ -69,14 +69,14 @@ class TextBuffer(app.actions.Actions):
     def draw(self, window):
         if self.view.rows <= 0 or self.view.cols <= 0:
             return
-        if not self.view.programWindow().program.prefs.editor['useBgThread']:
+        if not self.view.program.prefs.editor['useBgThread']:
             if self.shouldReparse:
                 self.parseGrammars()
                 self.shouldReparse = False
         if self.view.hasCaptiveCursor:
             self.checkScrollToCursor(window)
         rows, cols = window.rows, window.cols
-        colorPrefs = self.view.programWindow().program.color
+        colorPrefs = self.view.program.color
         colorDelta = 32 * 4
         #colorDelta = 4
         if 0:
@@ -124,11 +124,11 @@ class TextBuffer(app.actions.Actions):
         endRow = startRow + rows
         startCol = self.view.scrollCol + left
         endCol = startCol + cols
-        appPrefs = self.view.programWindow().program.prefs
+        appPrefs = self.view.program.prefs
         colors = appPrefs.color
         defaultColor = appPrefs.color['default']
         spellChecking = appPrefs.editor.get('spellChecking', True)
-        colorPrefs = self.view.programWindow().program.color
+        colorPrefs = self.view.program.color
         spelling = self.program.dictionary
         if self.parser:
             # Highlight grammar.
@@ -137,7 +137,8 @@ class TextBuffer(app.actions.Actions):
                 line, renderedWidth = self.parser.rowTextAndWidth(startRow + i)
                 k = startCol
                 if k == 0:
-                    # When rendering from column 0 the grammar index is always zero.
+                    # When rendering from column 0 the grammar index is always
+                    # zero.
                     grammarIndex = 0
                 else:
                     # When starting mid-line, find starting grammar index.
@@ -195,7 +196,8 @@ class TextBuffer(app.actions.Actions):
                               colorPrefs.get(u'default', colorDelta))
         self.drawOverlays(window, top, left, rows, cols, colorDelta)
         if 0:  # Experiment: draw our own cursor.
-            if startRow <= self.penRow < endRow and startCol <= self.penCol < endCol:
+            if (startRow <= self.penRow < endRow and
+                    startCol <= self.penCol < endCol):
                 window.addStr(self.penRow - startRow, self.penCol - startCol,
                               u'X', 200)
 
@@ -205,7 +207,7 @@ class TextBuffer(app.actions.Actions):
         startCol = self.view.scrollCol + left
         endCol = self.view.scrollCol + left + maxCol
         rowLimit = min(max(self.parser.rowCount() - startRow, 0), maxRow)
-        colorPrefs = self.view.programWindow().program.color
+        colorPrefs = self.view.program.color
         if 1:
             # Highlight brackets.
             # Highlight numbers.
@@ -219,7 +221,7 @@ class TextBuffer(app.actions.Actions):
                     self.highlightTrailingWhitespace and
                     not (startRow + i == self.penRow and
                          self.penCol == len(line)))
-                for s, column, index, id in app.curses_util.renderedFindIter(
+                for s, column, _, id in app.curses_util.renderedFindIter(
                         line, startCol, endCol, ('[]{}()',), True,
                         highlightTrailingWhitespace):
                     window.addStr(top + i, column - self.view.scrollCol, s,
@@ -346,13 +348,15 @@ class TextBuffer(app.actions.Actions):
                                     self.parser.rowCount() - startRow)):
                             line = self.parser.rowText(startRow + i)
                             # TODO(dschuyler): This is essentially
-                            # left + (upperCol or (scrollCol + left)) - scrollCol - left
+                            # left + (upperCol or (scrollCol + left)) -
+                            #    scrollCol - left
                             # which seems like it could be simplified.
                             paneCol = left + selStartCol - startCol
                             if len(line) == len(
                                     self.parser.rowText(startRow + i)):
                                 line += " "  # Maybe do: "\\n".
-                            if i == lowerRow - startRow and i == upperRow - startRow:
+                            if (i == lowerRow - startRow and
+                                    i == upperRow - startRow):
                                 # Selection entirely on one line.
                                 window.addStr(top + i, paneCol,
                                               line[selStartCol:selEndCol],

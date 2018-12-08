@@ -34,10 +34,9 @@ class PredictionList(app.window.Window):
         self.host = host
         self.isFocusable = False
         self.controller = app.cu_editor.PredictionList(self)
-        self.setTextBuffer(
-            app.text_buffer.TextBuffer(self.programWindow().program))
+        self.setTextBuffer(app.text_buffer.TextBuffer(self.program))
         # Set up table headers.
-        color = host.programWindow().program.color.get('top_info')
+        color = host.program.color.get('top_info')
         self.optionsRow = app.window.OptionsSelectionWindow(self.program, self)
         self.optionsRow.setParent(self)
         self.typeColumn = app.window.SortableHeaderWindow(
@@ -93,7 +92,7 @@ class PredictionList(app.window.Window):
     def update(self, items):
         # Filter the list. (The filter function is not used so as to edit the
         # list in place).
-        appPrefs = self.programWindow().program.prefs
+        appPrefs = self.program.prefs
         showOpen = appPrefs.editor['predictionShowOpenFiles']
         showAlternate = appPrefs.editor['predictionShowAlternateFiles']
         showRecent = appPrefs.editor['predictionShowRecentFiles']
@@ -168,8 +167,7 @@ class PredictionInputWindow(app.window.Window):
         app.window.Window.__init__(self, program, host)
         self.host = host
         self.controller = app.cu_editor.PredictionInputController(self)
-        self.setTextBuffer(
-            app.text_buffer.TextBuffer(self.programWindow().program))
+        self.setTextBuffer(app.text_buffer.TextBuffer(self.program))
 
     def getPath(self):
         return self.textBuffer.parser.rowText(0)
@@ -191,8 +189,7 @@ class PredictionWindow(app.window.Window):
 
         self.showTips = False
         self.controller = app.cu_editor.PredictionController(self)
-        self.setTextBuffer(
-            app.text_buffer.TextBuffer(self.programWindow().program))
+        self.setTextBuffer(app.text_buffer.TextBuffer(self.program))
 
         self.titleRow = app.window.OptionsRow(self.program, self)
         self.titleRow.addLabel(' ci   ')
@@ -207,7 +204,7 @@ class PredictionWindow(app.window.Window):
         if 1:
             self.optionsRow = app.window.RowWindow(self.program, self, 2)
             self.optionsRow.setParent(self)
-            colorPrefs = host.programWindow().program.color
+            colorPrefs = host.program.color
             self.optionsRow.color = colorPrefs.get('top_info')
             label = app.window.LabelWindow(self.program, self.optionsRow,
                                            'Show:')

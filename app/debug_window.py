@@ -98,7 +98,7 @@ class DebugUndoWindow(app.window.ActiveWindow):
         maxRow, maxCol = win.rows, win.cols
         self.writeLineRow = 0
         # Display some of the redo chain.
-        colorPrefs = win.programWindow().program.color
+        colorPrefs = win.program.color
         redoColorA = colorPrefs.get(100)
         self.writeLine(
             u"procTemp %d temp %r" % (

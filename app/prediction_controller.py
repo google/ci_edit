@@ -50,7 +50,7 @@ class PredictionListController(app.controller.Controller):
         items = self.items = []
         if 1:
             # Add open buffers.
-            bufferManager = self.view.programWindow().program.bufferManager
+            bufferManager = self.view.program.bufferManager
             for i in bufferManager.buffers:
                 dirty = '*' if i.isDirty() else '.'
                 if i.fullPath:
@@ -62,8 +62,7 @@ class PredictionListController(app.controller.Controller):
                          'open'))
         if 1:
             # Add recent files.
-            for recentFile in self.view.programWindow(
-            ).program.history.getRecentFiles():
+            for recentFile in self.view.program.history.getRecentFiles():
                 if recentFile not in added:
                     items.append((None, recentFile, '=', 'recent'))
                     added.add(recentFile)
@@ -140,7 +139,7 @@ class PredictionListController(app.controller.Controller):
             assert type(row) is int
         if self.items is None or len(self.items) == 0:
             return
-        bufferManager = self.view.programWindow().program.bufferManager
+        bufferManager = self.view.program.bufferManager
         textBuffer, fullPath = self.items[row][:2]
         self.items = None
         self.shownList = None

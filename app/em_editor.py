@@ -217,11 +217,9 @@ class InteractiveOpener(EditText):
                     lines.append(i)
             if len(lines) == 1 and os.path.isfile(
                     os.path.join(dirPath, fileName)):
-                self.view.host.setTextBuffer(self.view.programWindow().program.
-                                             bufferManager.loadTextBuffer(
-                                                 os.path.join(
-                                                     dirPath, fileName),
-                                                 self.view.host))
+                self.view.host.setTextBuffer(
+                    self.view.program.bufferManager.loadTextBuffer(
+                        os.path.join(dirPath, fileName), self.view.host))
             else:
                 self.view.host.textBuffer.lines = [
                     os.path.abspath(os.path.expanduser(dirPath)) + ":"

@@ -88,7 +88,7 @@ class InteractivePrediction(app.controller.Controller):
         self.commandDefault = self.view.textBuffer.insertPrintable
         self.view.host.textBuffer.lineLimitIndicator = 0
         self.view.host.textBuffer.rootGrammar = \
-            self.view.programWindow().program.prefs.getGrammar('_pre')
+            self.view.program.prefs.getGrammar('_pre')
 
     def info(self):
         app.log.info('InteractivePrediction command set')
@@ -97,7 +97,7 @@ class InteractivePrediction(app.controller.Controller):
         if app.config.strict_debug:
             assert type(currentFile) is str
         self.items = []
-        bufferManager = self.view.programWindow().program.bufferManager
+        bufferManager = self.view.program.bufferManager
         for i in bufferManager.buffers:
             dirty = '*' if i.isDirty() else '.'
             if i.fullPath:
@@ -170,7 +170,7 @@ class InteractivePrediction(app.controller.Controller):
         app.controller.Controller.unfocus(self)
         if self.items is None:
             return
-        bufferManager = self.view.programWindow().program.bufferManager
+        bufferManager = self.view.program.bufferManager
         textBuffer, fullPath = self.items[self.index][:2]
         if textBuffer is not None:
             self.view.host.setTextBuffer(
@@ -331,13 +331,13 @@ class ToggleController(app.controller.Controller):
     def clearValue(self):
         category = self.view.prefCategory
         name = self.view.prefName
-        prefs = self.view.programWindow().program.prefs
+        prefs = self.view.program.prefs
         prefs.save(category, name, None)
         self.view.onPrefChanged(category, name)
 
     def toggleValue(self):
         category = self.view.prefCategory
         name = self.view.prefName
-        prefs = self.view.programWindow().program.prefs
+        prefs = self.view.program.prefs
         prefs.save(category, name, not prefs.category(category)[name])
         self.view.onPrefChanged(category, name)

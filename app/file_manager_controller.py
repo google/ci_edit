@@ -62,7 +62,7 @@ class DirectoryListController(app.controller.Controller):
                                                      re.escape(fileName))
         else:
             self.view.textBuffer.findRe = None
-        appPrefs = self.view.programWindow().program.prefs
+        appPrefs = self.view.program.prefs
         dirPath = dirPath or '.'
         if os.path.isdir(dirPath):
             showDotFiles = appPrefs.editor[u'filesShowDotFiles']
@@ -209,8 +209,7 @@ class FilePathInputController(app.controller.Controller):
                 clip = [path + u":", u'Error opening file.']
                 return
         self.view.textBuffer.replaceLines((u'',))
-        textBuffer = self.view.programWindow(
-        ).program.bufferManager.loadTextBuffer(path)
+        textBuffer = self.view.program.bufferManager.loadTextBuffer(path)
         #assert textBuffer.parser
         inputWindow = self.currentInputWindow()
         inputWindow.setTextBuffer(textBuffer)

@@ -47,7 +47,7 @@ class PathRow(app.window.ViewWindow):
     def render(self):
         app.log.debug()
         offset = 0
-        color = self.programWindow().program.color.get('message_line')
+        color = self.program.color.get('message_line')
         #self.addStr(0, 0, self.path, color)
         self.writeLineRow = 0
         self.writeLine(self.path, color)
@@ -65,10 +65,9 @@ class DirectoryList(app.window.Window):
         self.isFocusable = False
         self.inputWindow = inputWindow
         self.controller = app.cu_editor.DirectoryList(self)
-        self.setTextBuffer(
-            app.text_buffer.TextBuffer(self.programWindow().program))
+        self.setTextBuffer(app.text_buffer.TextBuffer(self.program))
         # Set up table headers.
-        color = self.programWindow().program.color.get('top_info')
+        color = self.program.color.get('top_info')
         self.optionsRow = app.window.OptionsSelectionWindow(self.program, self)
         self.optionsRow.setParent(self)
         app.window.SortableHeaderWindow(self.program, self.optionsRow, 'Name',
@@ -147,8 +146,7 @@ class PathWindow(app.window.Window):
         app.window.Window.__init__(self, program, host)
         self.host = host
         self.controller = app.cu_editor.FilePathInput(self)
-        self.setTextBuffer(
-            app.text_buffer.TextBuffer(self.programWindow().program))
+        self.setTextBuffer(app.text_buffer.TextBuffer(self.program))
 
     def getPath(self):
         return self.textBuffer.lines[0]
@@ -184,8 +182,7 @@ class FileManagerWindow(app.window.Window):
         self.mode = 'open'
         self.showTips = False
         self.controller = app.cu_editor.FileOpener(self)
-        self.setTextBuffer(
-            app.text_buffer.TextBuffer(self.programWindow().program))
+        self.setTextBuffer(app.text_buffer.TextBuffer(self.program))
 
         self.titleRow = app.window.OptionsRow(self.program, self)
         self.titleRow.addLabel(' ci   ')
@@ -202,7 +199,7 @@ class FileManagerWindow(app.window.Window):
         if 1:
             self.optionsRow = app.window.RowWindow(self.program, self, 2)
             self.optionsRow.setParent(self)
-            colorPrefs = self.programWindow().program.color
+            colorPrefs = self.program.color
             self.optionsRow.color = colorPrefs.get('top_info')
             label = app.window.LabelWindow(self.program, self.optionsRow,
                                            'Show:')
