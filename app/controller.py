@@ -29,7 +29,7 @@ import app.log
 
 class Controller:
     """A Controller is a keyboard mapping from keyboard/mouse events to editor
-  commands."""
+    commands."""
 
     def __init__(self, view, name):
         if app.config.strict_debug:
@@ -150,7 +150,8 @@ class Controller:
         self.view.changeFocusTo(window)
 
     def __closeHostFile(self, host):
-        """Close the current file and switch to another or create an empty file."""
+        """Close the current file and switch to another or create an empty
+        file."""
         bufferManager = host.programWindow().program.bufferManager
         bufferManager.closeTextBuffer(host.textBuffer)
         host.userIntent = 'edit'
@@ -217,7 +218,9 @@ class Controller:
         self.changeToSaveAs()
 
     def overwriteHostFile(self):
-        """Close the current file and switch to another or create an empty file."""
+        """Close the current file and switch to another or create an empty
+        file.
+        """
         host = self.getNamedWindow('inputWindow')
         host.textBuffer.fileWrite()
         if host.userIntent == 'quit':
@@ -250,7 +253,8 @@ class Controller:
         tb.fileWrite()
         # TODO(dschuyler): Is there a deeper issue here that necessitates saving
         # the message? Does this only need to wrap the changeToHostWindow()?
-        saveMessage = tb.message  # Store the save message so it is not overwritten.
+        # Store the save message so it is not overwritten.
+        saveMessage = tb.message
         if host.userIntent == 'quit':
             self.quitOrSwitchToConfirmQuit()
             return
@@ -312,8 +316,8 @@ class Controller:
 
 class MainController:
     """The different keyboard mappings are different controllers. This class
-  manages a collection of keyboard mappings and allows the user to switch
-  between them."""
+    manages a collection of keyboard mappings and allows the user to switch
+    between them."""
 
     def __init__(self, view):
         if app.config.strict_debug:

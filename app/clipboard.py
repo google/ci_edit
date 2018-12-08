@@ -32,8 +32,8 @@ class Clipboard():
                 clipboard.copy(text)
 
     def paste(self, clipIndex=None):
-        """Fetch top of clipList; or clip at index |clipIndex|. The |clipIndex| will
-    wrap around if it's larger than the clipList length."""
+        """Fetch top of clipList; or clip at index |clipIndex|. The |clipIndex|
+        will wrap around if it's larger than the clipList length."""
         if clipIndex is None:
             osClip = clipboard.paste and clipboard.paste()
             if osClip:

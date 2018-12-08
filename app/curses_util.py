@@ -227,7 +227,7 @@ def cursesKeyName(keyCode):
 
 def columnToIndex(offset, string):
     """If the visual cursor is on |offset|, which index of the string is the
-  cursor on?"""
+    cursor on?"""
     if app.config.strict_debug:
         assert type(offset), int
         assert type(string), unicode
@@ -245,8 +245,9 @@ def columnToIndex(offset, string):
 
 
 def fitToRenderedWidth(width, string):
-    """With |width| character cells available, how much of |string| can I render?
-  """
+    """With |width| character cells available, how much of |string| can I
+    render?
+    """
     if app.config.strict_debug:
         assert type(width), int
         assert type(string), unicode
@@ -264,15 +265,14 @@ def fitToRenderedWidth(width, string):
 
 
 def renderedFindIter(string, beginCol, endCol, charGroups, numbers, eolSpaces):
+    """Get a slice (similar to `string[beginCol:endCol]`) based on the rendered
+    width of the string.
+
+    Note: charGroups cannot (currently) contain double width characters.
+
+    Returns:
+      tuple of (subStr, column, index, id)
     """
-  Get a slice (similar to `string[beginCol:endCol]`) based on the rendered
-  width of the string.
-
-  Note: charGroups cannot (currently) contain double width characters.
-
-  Returns:
-    tuple of (subStr, column, index, id)
-  """
     if app.config.strict_debug:
         assert type(string), unicode
         assert type(beginCol), int
@@ -312,20 +312,20 @@ def renderedFindIter(string, beginCol, endCol, charGroups, numbers, eolSpaces):
 
 def renderedSubStr(string, beginCol, endCol):
     """
-  Get a slice (similar to `string[beginCol:endCol]`) based on the rendered
-  width of the string. If columns beginCol or endCol land in the middle of a
-  double-wide character, a space is used to pad the result.
+    Get a slice (similar to `string[beginCol:endCol]`) based on the rendered
+    width of the string. If columns beginCol or endCol land in the middle of a
+    double-wide character, a space is used to pad the result.
 
-  Negative columns are not supported. (Just haven't implemented it).
+    Negative columns are not supported. (Just haven't implemented it).
 
-  Args:
-    string: The string to slice.
-    beginCol: The first column of text (inclusive).
-    endCol: The last column of text (exclusive).
+    Args:
+      string: The string to slice.
+      beginCol: The first column of text (inclusive).
+      endCol: The last column of text (exclusive).
 
-  Returns:
-    unicode string
-  """
+    Returns:
+      unicode string
+    """
     if app.config.strict_debug:
         assert type(string), unicode
         assert type(beginCol), int
@@ -338,7 +338,8 @@ def renderedSubStr(string, beginCol, endCol):
     while i <= limit:
         if beginCol <= column:
             if beginCol == column:
-                # An exact (aligned) trimming (not splitting a double-wide character).
+                # An exact (aligned) trimming (not splitting a double-wide
+                # character).
                 beginIndex = i
             else:
                 # Splitting a double-wide character. Prepend a space and adjust.
@@ -358,7 +359,8 @@ def renderedSubStr(string, beginCol, endCol):
     while True:
         if endCol <= column:
             if endCol == column:
-                # An exact (aligned) trimming (not splitting a double-wide character).
+                # An exact (aligned) trimming (not splitting a double-wide
+                # character).
                 endIndex = i
             else:
                 # Splitting a double-wide character. Prepend a space and adjust.
@@ -375,10 +377,10 @@ def renderedSubStr(string, beginCol, endCol):
 
 def renderedWidth(string):
     """When rendering |string| how many character cells will be used? For ASCII
-  characters this will equal len(string). For many Chinese characters and
-  emoji the value will be greater than len(string), since many of them use two
-  cells.
-  """
+    characters this will equal len(string). For many Chinese characters and
+    emoji the value will be greater than len(string), since many of them use two
+    cells.
+    """
     if app.config.strict_debug:
         assert type(string), unicode
     width = 0
