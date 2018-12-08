@@ -91,8 +91,8 @@ class PredictionList(app.window.Window):
         self.textBuffer.mouseWheelUp(shift, ctrl, alt)
 
     def update(self, items):
-        # Filter the list. (The filter function is not used so as to edit the list
-        # in place).
+        # Filter the list. (The filter function is not used so as to edit the
+        # list in place).
         appPrefs = self.programWindow().program.prefs
         showOpen = appPrefs.editor['predictionShowOpenFiles']
         showAlternate = appPrefs.editor['predictionShowAlternateFiles']

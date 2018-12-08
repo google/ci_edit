@@ -31,10 +31,10 @@ import app.window
 
 class ProgramWindow(app.window.ActiveWindow):
     """The outermost window. This window doesn't draw content itself. It is
-  primarily a container the child windows that make up the UI. The program
-  window is expected to be a singleton. The program window has no parent (the
-  parent is None). Calls that propagate up the window tree stop here or jump
-  over to the |program|."""
+    primarily a container the child windows that make up the UI. The program
+    window is expected to be a singleton. The program window has no parent (the
+    parent is None). Calls that propagate up the window tree stop here or jump
+    over to the |program|."""
 
     def __init__(self, program):
         if app.config.strict_debug:
@@ -71,7 +71,8 @@ class ProgramWindow(app.window.ActiveWindow):
 
     def changeFocusTo(self, changeTo):
         self.focusedWindow.controller.onChange()
-        # Unfocus all the windows from the prior focused window to the common root.
+        # Unfocus all the windows from the prior focused window to the common
+        # root.
         commonRoot = self.findCommonRoot(self.focusedWindow, changeTo)
         current = self.focusedWindow
         while current != commonRoot:
@@ -98,8 +99,8 @@ class ProgramWindow(app.window.ActiveWindow):
 
     def findCommonRoot(self, first, second):
         """Find the Window that is the parent of both |first| and |second|. If
-    |first| is a (grand*)parent of |second|, return |first| (or vice versa).
-    """
+        |first| is a (grand*)parent of |second|, return |first| (or vice versa).
+        """
         # assert self.focusedWindow is not changeTo
         if first is second:
             return first
@@ -114,9 +115,9 @@ class ProgramWindow(app.window.ActiveWindow):
             if secondPath[-1] == first:
                 return first
         # assert firstPath[-1] is secondPath[-1]
-        # Assumptions: The first unequal match will never be found at [-1]. A match
-        # will always be found before exhausting the lists. It doesn't matter which
-        # list is longer.
+        # Assumptions: The first unequal match will never be found at [-1]. A
+        # match will always be found before exhausting the lists. It doesn't
+        # matter which list is longer.
         for i in range(len(firstPath)):
             if firstPath[-(i + 1)] is not secondPath[-(i + 1)]:
                 root = firstPath[-i]
@@ -173,8 +174,8 @@ class ProgramWindow(app.window.ActiveWindow):
 
     def handleMouse(self, info):
         """Mouse handling is a special case. The getch() curses function will
-    signal the existence of a mouse event, but the event must be fetched and
-    parsed separately."""
+        signal the existence of a mouse event, but the event must be fetched and
+        parsed separately."""
         (_, mouseCol, mouseRow, _, bState) = info[0]
         app.log.mouse()
         eventTime = info[1]
@@ -211,9 +212,9 @@ class ProgramWindow(app.window.ActiveWindow):
                 #else:
                 #  signal.setitimer(signal.ITIMER_REAL, rapidClickTimeout)
             else:
-                # Some terminals (linux?) send BUTTON1_RELEASED after moving the mouse.
-                # Specifically if the terminal doesn't use button 4 for mouse movement.
-                # Mouse drag or mouse wheel movement done.
+                # Some terminals (linux?) send BUTTON1_RELEASED after moving the
+                # mouse. Specifically if the terminal doesn't use button 4 for
+                # mouse movement. Mouse drag or mouse wheel movement done.
                 pass
         elif bState & curses.BUTTON1_PRESSED:
             self.savedMouseButton1Down = True
@@ -245,7 +246,8 @@ class ProgramWindow(app.window.ActiveWindow):
             # Notes from testing:
             # Mac seems to send BUTTON4_PRESSED during mouse move; followed by
             #   BUTTON4_RELEASED.
-            # Linux seems to send REPORT_MOUSE_POSITION during mouse move; followed by
+            # Linux seems to send REPORT_MOUSE_POSITION during mouse move;
+            # followed by
             #   BUTTON1_RELEASED.
             if self.savedMouseX == mouseCol and self.savedMouseY == mouseRow:
                 if bState & curses.REPORT_MOUSE_POSITION:
@@ -319,8 +321,8 @@ class ProgramWindow(app.window.ActiveWindow):
                                     rows - eachRows * (count - 1), inputWidth)
 
     def nextFocusableWindow(self, start, reverse=False):
-        # Keep the tab focus in the child branch. (The child view will call this,
-        # tell the child there is nothing to tab to up here).
+        # Keep the tab focus in the child branch. (The child view will call
+        # this, tell the child there is nothing to tab to up here).
         return None
 
     def normalize(self):

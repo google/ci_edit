@@ -25,14 +25,13 @@ import os
 import re
 import time
 
-from app.curses_util import *
 import app.buffer_file
 import app.controller
 
 
 class PredictionListController(app.controller.Controller):
     """Gather and prepare file directory information.
-  """
+    """
 
     def __init__(self, view):
         assert self is not view
@@ -71,17 +70,10 @@ class PredictionListController(app.controller.Controller):
         if 1:
             # Add alternate files.
             dirPath, fileName = os.path.split(currentFile)
-            file, ext = os.path.splitext(fileName)
+            fileName, ext = os.path.splitext(fileName)
             # TODO(dschuyler): rework this ignore list.
-            ignoreExt = set((
-                '.pyc',
-                '.pyo',
-                '.o',
-                '.obj',
-                '.tgz',
-                '.zip',
-                '.tar',
-            ))
+            ignoreExt = set(('.pyc', '.pyo', '.o', '.obj', '.tgz', '.zip',
+                             '.tar'))
             try:
                 contents = os.listdir(
                     os.path.expandvars(os.path.expanduser(dirPath)) or '.')
@@ -90,7 +82,7 @@ class PredictionListController(app.controller.Controller):
             contents.sort()
             for i in contents:
                 f, e = os.path.splitext(i)
-                if file == f and ext != e and e not in ignoreExt:
+                if fileName == f and ext != e and e not in ignoreExt:
                     fullPath = os.path.join(dirPath, i)
                     if fullPath not in added:
                         items.append((None, fullPath, '=', 'alt'))
@@ -168,10 +160,10 @@ class PredictionListController(app.controller.Controller):
         self.shownList = None
         self.onChange()
 
-    def setFilter(self, filter):
+    def setFilter(self, listFilter):
         if app.config.strict_debug:
-            assert type(filter) is str
-        self.filter = filter
+            assert type(listFilter) is str
+        self.filter = listFilter
         self.shownList = None  # Cause a refresh.
 
     def unfocus(self):

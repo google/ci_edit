@@ -79,8 +79,8 @@ class Prefs():
 
         self.colorSchemeName = self.editor['colorScheme']
         if self.colorSchemeName == 'custom':
-            # Check the user home directory for a color scheme preference. If found
-            # load it to replace the default color scheme.
+            # Check the user home directory for a color scheme preference. If
+            # found load it to replace the default color scheme.
             self.color = self.loadPrefs('color_scheme', self.color)
 
         defaultColor = self.color['default']
