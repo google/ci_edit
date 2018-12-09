@@ -161,8 +161,8 @@ class InteractivePrompt(app.controller.Controller):
         def noOp(data):
             return data
 
-        file, ext = os.path.splitext(self.view.host.textBuffer.fullPath)
-        app.log.info(file, ext)
+        fileName, ext = os.path.splitext(self.view.host.textBuffer.fullPath)
+        app.log.info(fileName, ext)
         lines = self.view.host.textBuffer.doDataToLines(
             formatter.get(ext,
                           noOp)(self.view.host.textBuffer.doLinesToData(lines)))
@@ -197,13 +197,13 @@ class InteractivePrompt(app.controller.Controller):
                 tb.setMessage(message)
             else:
                 cmd = re.split(u'\\W', cmdLine)[0]
-                filter = self.filters.get(cmd)
-                if filter:
+                dataFilter = self.filters.get(cmd)
+                if dataFilter:
                     if not len(lines):
                         tb.setMessage(
                             u'The %s filter needs a selection.' % (cmd,))
                     else:
-                        lines, message = filter(cmdLine, lines)
+                        lines, message = dataFilter(cmdLine, lines)
                         tb.setMessage(message)
                         if not len(lines):
                             lines.append(u'')
@@ -217,14 +217,14 @@ class InteractivePrompt(app.controller.Controller):
             tb.setMessage(u'Execution threw an error.')
         self.changeToHostWindow()
 
-    def shellExecute(self, commands, input):
+    def shellExecute(self, commands, cmdInput):
         """
-    input is in bytes (not unicode).
-    return tuple: output as bytes (not unicode), message as unicode.
-    """
+        cmdInput is in bytes (not unicode).
+        return tuple: output as bytes (not unicode), message as unicode.
+        """
         if app.config.strict_debug:
-            assert type(commands) is unicode, type(input)
-            assert type(input) is bytes, type(input)
+            assert type(commands) is unicode, type(commands)
+            assert type(cmdInput) is bytes, type(cmdInput)
         try:
             process = subprocess.Popen(
                 commands,
@@ -232,18 +232,18 @@ class InteractivePrompt(app.controller.Controller):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 shell=True)
-            return process.communicate(input)[0], u''
+            return process.communicate(cmdInput)[0], u''
         except Exception as e:
             return u'', u'Error running shell command\n' + e
 
-    def pipeExecute(self, commands, input):
+    def pipeExecute(self, commands, cmdInput):
         """
-    input is in bytes (not unicode).
-    return tuple: output as bytes (not unicode), message as unicode.
-    """
+        cmdInput is in bytes (not unicode).
+        return tuple: output as bytes (not unicode), message as unicode.
+        """
         if app.config.strict_debug:
-            assert type(commands) is unicode, type(input)
-            assert type(input) is bytes, type(input)
+            assert type(commands) is unicode, type(commands)
+            assert type(cmdInput) is bytes, type(cmdInput)
         chain = kRePipeChain.findall(commands)
         try:
             process = subprocess.Popen(
@@ -252,7 +252,7 @@ class InteractivePrompt(app.controller.Controller):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT)
             if len(chain) == 1:
-                return process.communicate(input)[0], u''
+                return process.communicate(cmdInput)[0], u''
             else:
                 chain.reverse()
                 prior = process
@@ -262,7 +262,7 @@ class InteractivePrompt(app.controller.Controller):
                         stdin=subprocess.PIPE,
                         stdout=prior.stdin,
                         stderr=subprocess.STDOUT)
-                prior.communicate(input)
+                prior.communicate(cmdInput)
                 return process.communicate()[0], u''
         except Exception as e:
             app.log.exception(e)
@@ -287,20 +287,20 @@ class InteractivePrompt(app.controller.Controller):
 
     def substituteText(self, cmdLine, lines):
         if len(cmdLine) < 2:
-            return (lines, u'''tip: %s/foo/bar/ to replace 'foo' with 'bar'.''' % (
-                cmdLine,))
+            return (lines, u'''tip: %s/foo/bar/ to replace 'foo' with 'bar'.'''
+                    % (cmdLine,))
         if not lines:
             return lines, u'No text was selected.'
         sre = re.match('\w+(\W)', cmdLine)
         if not sre:
             return (lines, u'''Separator punctuation missing, example:'''
-                u''' %s/foo/bar/''' % (cmdLine,))
+                    u''' %s/foo/bar/''' % (cmdLine,))
         separator = sre.groups()[0]
         try:
             _, find, replace, flags = cmdLine.split(separator, 3)
-        except:
+        except ValueError:
             return (lines, u'''Separator punctuation missing, there should be'''
-                u''' three '%s'.''' % (separator,))
+                    u''' three '%s'.''' % (separator,))
         data = self.view.host.textBuffer.doLinesToData(lines)
         output = self.view.host.textBuffer.findReplaceText(
             find, replace, flags, data)
