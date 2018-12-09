@@ -261,7 +261,8 @@ class ProgramWindow(app.window.ActiveWindow):
                                           bState & curses.BUTTON_CTRL,
                                           bState & curses.BUTTON_ALT)
             else:
-                if self.savedMouseWindow and self.savedMouseWindow is not window:
+                if (self.savedMouseWindow and
+                        self.savedMouseWindow is not window):
                     mouseRow += window.top - self.savedMouseWindow.top
                     mouseCol += window.left - self.savedMouseWindow.left
                     window = self.savedMouseWindow

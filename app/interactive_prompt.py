@@ -177,14 +177,11 @@ class InteractivePrompt(app.controller.Controller):
 
     def execute(self):
         try:
-            cmdLine = u''
-            try:
-                cmdLine = self.textBuffer.lines[0]
-            except:
-                pass
-            if not len(cmdLine):
+            inputLines = self.textBuffer.lines
+            if not len(inputLines) or not len(inputLines[0]):
                 self.changeToHostWindow()
                 return
+            cmdLine = inputLines[0]
             tb = self.view.host.textBuffer
             lines = list(tb.getSelectedText())
             if cmdLine[0] in self.subExecute:
@@ -290,20 +287,20 @@ class InteractivePrompt(app.controller.Controller):
 
     def substituteText(self, cmdLine, lines):
         if len(cmdLine) < 2:
-            return lines, u'''tip: %s/foo/bar/ to replace 'foo' with 'bar'.''' % (
-                cmdLine,)
+            return (lines, u'''tip: %s/foo/bar/ to replace 'foo' with 'bar'.''' % (
+                cmdLine,))
         if not lines:
             return lines, u'No text was selected.'
         sre = re.match('\w+(\W)', cmdLine)
         if not sre:
-            return lines, u'''Separator punctuation missing, example:''' \
-                u''' %s/foo/bar/''' % (cmdLine,)
+            return (lines, u'''Separator punctuation missing, example:'''
+                u''' %s/foo/bar/''' % (cmdLine,))
         separator = sre.groups()[0]
         try:
             _, find, replace, flags = cmdLine.split(separator, 3)
         except:
-            return lines, u'''Separator punctuation missing, there should be''' \
-                u''' three '%s'.''' % (separator,)
+            return (lines, u'''Separator punctuation missing, there should be'''
+                u''' three '%s'.''' % (separator,))
         data = self.view.host.textBuffer.doLinesToData(lines)
         output = self.view.host.textBuffer.findReplaceText(
             find, replace, flags, data)

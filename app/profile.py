@@ -39,14 +39,14 @@ def lowest(key, value):
         profiles[key] = value
 
 
-def highestDelta(key, start):
-    delta = time.time() - start
+def highestDelta(key, startTime):
+    delta = time.time() - startTime
     if delta > profiles.get(key):
         profiles[key] = delta
 
 
-def runningDelta(key, start):
-    delta = time.time() - start
+def runningDelta(key, startTime):
+    delta = time.time() - startTime
     bleed = 0.501
     profiles[key] = delta * bleed + profiles.get(key, delta) * (1 - bleed)
 
