@@ -33,7 +33,9 @@ import unittest
 import third_party.pyperclip as clipboard
 
 import app.ci_program
-from app.curses_util import *
+import app.curses_util
+
+#from app.curses_util import *
 
 
 def debug_print_stack(*args):
@@ -184,9 +186,6 @@ class FakeCursesTestCase(unittest.TestCase):
     def resizeScreen(self, rows, cols):
         assert type(rows) is int
         assert type(cols) is int
-        caller = inspect.stack()[1]
-        callerText = u"in %s:%s:%s(): " % (os.path.split(caller[1])[1],
-                                           caller[2], caller[3])
 
         def setScreenSize(display, cmdIndex):
             self.cursesScreen.fakeDisplay.setScreenSize(rows, cols)
@@ -201,7 +200,7 @@ class FakeCursesTestCase(unittest.TestCase):
                                            caller[2], caller[3])
 
         def copyToClipboard(display, cmdIndex):
-            self.assertTrue(clipboard.copy)  # Check that copy exists.
+            self.assertTrue(clipboard.copy, callerText)
             clipboard.copy(text)
             return None
 
@@ -218,15 +217,15 @@ class FakeCursesTestCase(unittest.TestCase):
                                            caller[2], caller[3])
 
         def copyToClipboard(display, cmdIndex):
-            self.assertTrue(clipboard.copy)  # Check that copy exists.
+            self.assertTrue(clipboard.copy, callerText)
             clipboard.copy(text)
-            return CTRL_V
+            return app.curses_util.CTRL_V
 
         return copyToClipboard
 
-    def notReached(display):
+    def notReached(self, display):
         """Calling this will fail the test. It's expected that the code will not
-    reach this function."""
+        reach this function."""
         self.fail('Called notReached!')
 
     def runWithFakeInputs(self, fakeInputs):
@@ -243,8 +242,8 @@ class FakeCursesTestCase(unittest.TestCase):
             message = app.ci_program.userConsoleMessage
             app.ci_program.userConsoleMessage = None
             self.fail(message)
-        # Check that the application is closed down (don't leave it running across
-        # tests).
+        # Check that the application is closed down (don't leave it running
+        # across tests).
         self.assertTrue(self.prg.exiting)
         self.assertEqual(self.cursesScreen.fakeInput.inputsIndex,
                          len(fakeInputs) - 1)

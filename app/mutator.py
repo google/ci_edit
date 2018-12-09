@@ -41,8 +41,8 @@ class Mutator(app.selectable.Selectable):
     def __init__(self):
         app.selectable.Selectable.__init__(self)
         self.__compoundChange = []
-        # |oldRedoIndex| is used to store the redo index before an action occurs,
-        # so we know where to insert the compound change.
+        # |oldRedoIndex| is used to store the redo index before an action
+        # occurs, so we know where to insert the compound change.
         self.oldRedoIndex = 0
         self.debugRedo = False
         self.findRe = None
@@ -133,7 +133,8 @@ class Mutator(app.selectable.Selectable):
         return self.penGrammar.grammar.get('name', 'unknown')
 
     def isDirty(self):
-        """Whether the buffer contains non-trivial changes since the last save."""
+        """Whether the buffer contains non-trivial changes since the last save.
+        """
         clean = self.savedAtRedoIndex >= 0 and (
             self.savedAtRedoIndex == self.redoIndex or
             (self.redoIndex + 1 == self.savedAtRedoIndex and
@@ -336,7 +337,8 @@ class Mutator(app.selectable.Selectable):
     """
         if self.debugRedo:
             app.log.info('redoAddChange', change)
-        # Handle new trivial actions, which are defined as standalone cursor moves.
+        # Handle new trivial actions, which are defined as standalone cursor
+        # moves.
         if change[0] == 'm' and not self.__compoundChange:
             if self.tempChange:
                 # Combine new change with the existing tempChange.
@@ -359,7 +361,8 @@ class Mutator(app.selectable.Selectable):
                 self.savedAtRedoIndex = -1
             self.redoChain = self.redoChain[:self.redoIndex]
             if self.tempChange:
-                # If previous action was a cursor move, we can merge it with tempChange.
+                # If previous action was a cursor move, we can merge it with
+                # tempChange.
                 if (len(self.redoChain) and self.redoChain[-1][0][0] == 'm' and
                         len(self.redoChain[-1]) == 1):
                     combinedChange = ('m',

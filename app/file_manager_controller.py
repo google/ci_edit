@@ -25,7 +25,6 @@ import os
 import re
 import time
 
-from app.curses_util import *
 import app.buffer_file
 import app.controller
 
@@ -49,14 +48,14 @@ class DirectoryListController(app.controller.Controller):
         app.log.info(u'DirectoryListController command set')
 
     def onChange(self):
-        input = self.view.parent.getPath()
-        if self.shownDirectory == input:
+        pathInput = self.view.parent.getPath()
+        if self.shownDirectory == pathInput:
             return
-        self.shownDirectory = input
-        fullPath = app.buffer_file.fullPath(input)
+        self.shownDirectory = pathInput
+        fullPath = app.buffer_file.fullPath(pathInput)
         dirPath = fullPath
         fileName = ''
-        if len(input) > 0 and input[-1] != os.sep:
+        if len(pathInput) > 0 and pathInput[-1] != os.sep:
             dirPath, fileName = os.path.split(fullPath)
             self.view.textBuffer.findRe = re.compile('()^' +
                                                      re.escape(fileName))
@@ -151,8 +150,8 @@ class DirectoryListController(app.controller.Controller):
         self.shownDirectory = None
         self.onChange()
 
-    def setFilter(self, filter):
-        self.filter = filter
+    def setFilter(self, listFilter):
+        self.filter = listFilter
         self.shownDirectory = None  # Cause a refresh.
 
 
@@ -206,7 +205,6 @@ class FilePathInputController(app.controller.Controller):
         path = self.textBuffer.lines[0]
         if not os.access(path, os.R_OK):
             if os.path.isfile(path):
-                clip = [path + u":", u'Error opening file.']
                 return
         self.view.textBuffer.replaceLines((u'',))
         textBuffer = self.view.program.bufferManager.loadTextBuffer(path)

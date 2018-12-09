@@ -34,7 +34,6 @@ class PathRow(app.window.ViewWindow):
         self.path = ''
 
     def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
-        row = self.scrollRow + paneRow
         col = self.scrollCol + paneCol
         line = self.path
         col = self.scrollCol + paneCol
@@ -45,10 +44,7 @@ class PathRow(app.window.ViewWindow):
         self.path = line[:col + slash + 1]
 
     def render(self):
-        app.log.debug()
-        offset = 0
         color = self.program.color.get('message_line')
-        #self.addStr(0, 0, self.path, color)
         self.writeLineRow = 0
         self.writeLine(self.path, color)
 
@@ -152,7 +148,6 @@ class PathWindow(app.window.Window):
         return self.textBuffer.lines[0]
 
     def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
-        row = self.scrollRow + paneRow
         col = self.scrollCol + paneCol
         line = self.textBuffer.lines[0]
         col = self.scrollCol + paneCol
