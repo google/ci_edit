@@ -95,13 +95,13 @@ class FindWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
             self.writeText(u'x\\1\\1'),
             self.displayCheck(-2, 0, [u"Replace: x\\1\\1  "]),
             CTRL_G,
-            # The replacement will have failed (there is no \1 group). The display
-            # should not have changed.
+            # The replacement will have failed (there is no \1 group). The
+            # display should not have changed.
             self.displayCheck(2, 7, [u"aDog aDog  "]),
             # Since the replacement has an error, the selection should not move.
             #self.selectionDocumentCheck(0, 0, 0, 1, 3),
-            # Doing a find doesn't involve the error in the replacement string, so
-            # the selection should move.
+            # Doing a find doesn't involve the error in the replacement string,
+            # so the selection should move.
             #CTRL_F, self.selectionDocumentCheck(0, 5, 0, 6, 3),
             CTRL_Q,
             u"n"
@@ -147,7 +147,8 @@ class FindWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
             self.displayCheck(2, 7,
                               [u"a ", u"b ", u"a ", u"b ", u"a!a ", u"b "]),
             # TODO(dschuyler): CTRL_R,
-            # TODO(dschuyler): self.displayCheck(2, 7, [u"a ", u"b ", u"a!a ", u"b ", u"a!a ", u"b "]),
+            # TODO(dschuyler): self.displayCheck(2, 7, [u"a ", u"b ", u"a!a ",
+            # u"b ", u"a!a ", u"b "]),
 
             # Quit without saving.
             CTRL_Q,
@@ -181,7 +182,8 @@ class FindWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
             self.displayCheckStyle(-2, 0, 1, 10,
                                    self.prg.prefs.color['status_line']),
 
-            # Regression test one for https://github.com/google/ci_edit/issues/170.
+            # Regression test one for
+            # https://github.com/google/ci_edit/issues/170.
             CTRL_F,
             self.displayCheck(-3, 0, [u"Find: ", u"Replace: ", u"["]),
             CTRL_I,
@@ -193,7 +195,8 @@ class FindWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
             self.displayCheckStyle(-2, 0, 1, 10,
                                    self.prg.prefs.color['status_line']),
 
-            # Regression test two for https://github.com/google/ci_edit/issues/170.
+            # Regression test two for
+            # https://github.com/google/ci_edit/issues/170.
             CTRL_F,
             self.displayCheck(-3, 0, [u"Find: ", u"Replace: ", u"["]),
             self.addMouseInfo(0, 2, 10, curses.BUTTON1_PRESSED),
@@ -213,9 +216,11 @@ class FindWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
             #self.displayCheck(-1, 0, [u"Find:         "]),
             self.writeText(u'focused'),
             CTRL_I,
-            #self.displayCheck(-3, 0, [u"Find: focused", "Replace:          ", u"["]),
+            #self.displayCheck(
+            #    -3, 0, [u"Find: focused", "Replace:          ", u"["]),
             self.writeText(u'  focused'),
-            #self.displayCheck(-3, 0, [u"Find: focused", "Replace:   focused", u"["]),
+            #self.displayCheck(
+            #    -3, 0, [u"Find: focused", "Replace:   focused", u"["]),
             CTRL_G,
             # Regression, replace causes 'Windo' to show as a misspelling.
             self.displayCheckStyle(2, 17, 1, 10, self.prg.prefs.color[u'text']),

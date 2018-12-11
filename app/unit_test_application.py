@@ -126,8 +126,8 @@ class ApplicationTestCases(app.fake_curses_testing.FakeCursesTestCase):
                 KEY_SHIFT_UP,
                 self.cursorCheck(2, 11),
                 self.selectionCheck(0, 4, 2, 6, 3),
-                # Regression test: shift down past the end of the document should select
-                # to end of document (i.e. end of line).
+                # Regression test: shift down past the end of the document
+                # should select to end of document (i.e. end of line).
                 KEY_SHIFT_UP,
                 self.cursorCheck(2, 7),
                 self.selectionCheck(0, 0, 2, 6, 3),
@@ -168,8 +168,8 @@ class ApplicationTestCases(app.fake_curses_testing.FakeCursesTestCase):
                 KEY_SHIFT_DOWN,
                 self.cursorCheck(4, 7),
                 self.selectionCheck(2, 0, 0, 0, 3),
-                # Regression test: shift down past the end of the document should select
-                # to end of document (i.e. end of line).
+                # Regression test: shift down past the end of the document
+                # should select to end of document (i.e. end of line).
                 KEY_SHIFT_DOWN,
                 self.cursorCheck(4, 13),
                 self.selectionCheck(2, 6, 0, 0, 3),

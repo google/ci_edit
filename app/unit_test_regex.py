@@ -32,8 +32,8 @@ class RegexTestCases(unittest.TestCase):
 
     def test_common_numbers(self):
 
-        def testNumber(str, reg):
-            sre = app.regex.kReNumbers.search(str)
+        def testNumber(strInput, reg):
+            sre = app.regex.kReNumbers.search(strInput)
             if sre is None:
                 self.assertEqual(sre, reg)
                 return
