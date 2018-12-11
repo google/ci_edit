@@ -42,7 +42,8 @@ kEndSpacesRegex = r'\s+$'
 kReEndSpaces = re.compile(kEndSpacesRegex)
 
 kReStrings = re.compile(
-    r"(\"\"\".*?(?<!\\)\"\"\")|('''.*?(?<!\\)''')|(\".*?(?<!\\)\")|('.*?(?<!\\)')"
+    r"(\"\"\".*?(?<!\\)\"\"\")|('''.*?(?<!\\)''')|(\".*?(?<!\\)\")"
+    r"|('.*?(?<!\\)')"
 )
 
 # The first group is a hack to allow upper case pluralized, e.g. URLs.

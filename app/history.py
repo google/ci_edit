@@ -34,26 +34,26 @@ import app.log
 
 def calculateChecksum(filePath, data=None):
     """
-  Calculates the hash value of the specified file.
-  The second argument can be passed in if a file's data has
-  already been read so that you do not have to read the file again.
+    Calculates the hash value of the specified file.
+    The second argument can be passed in if a file's data has
+    already been read so that you do not have to read the file again.
 
-  Args:
-    filePath (str): The absolute path to the file.
-    data (str): Defaults to None. This is the data
-      returned by calling read() on a file object.
+    Args:
+      filePath (str): The absolute path to the file.
+      data (str): Defaults to None. This is the data
+        returned by calling read() on a file object.
 
-  Returns:
-    The hash value of the file's data.
-  """
+    Returns:
+      The hash value of the file's data.
+    """
     app.log.info("Calculate checksum of the current file")
     hasher = hashlib.sha512()
     try:
         if data:
             hasher.update(data)
         else:
-            with open(filePath, 'rb') as file:
-                hasher.update(file.read())
+            with open(filePath, 'rb') as dataFile:
+                hasher.update(dataFile.read())
         return hasher.hexdigest()
     except:
         return None
@@ -61,34 +61,34 @@ def calculateChecksum(filePath, data=None):
 
 def calculateFileSize(filePath):
     """
-  Calculates the size of the specified value.
+    Calculates the size of the specified value.
 
-  Args:
-    filePath (str): The absolute path to the file.
+    Args:
+      filePath (str): The absolute path to the file.
 
-  Returns:
-    The size of the file in bytes.
-  """
+    Returns:
+      The size of the file in bytes.
+    """
     try:
         return os.stat(filePath).st_size
-    except:
+    except OSError:
         return 0
 
 
 def getFileInfo(filePath, data=None):
     """
-  Returns the hash value and size of the specified file.
-  The second argument can be passed in if a file's data has
-  already been read so that you do not have to read the file again.
+    Returns the hash value and size of the specified file.
+    The second argument can be passed in if a file's data has
+    already been read so that you do not have to read the file again.
 
-  Args:
-    filePath (str): The absolute path to the file.
-    data (str): Defaults to None. This is the data
-      returned by calling read() on a file object.
+    Args:
+      filePath (str): The absolute path to the file.
+      data (str): Defaults to None. This is the data
+        returned by calling read() on a file object.
 
-  Returns:
-    A tuple containing the checksum and size of the file.
-  """
+    Returns:
+      A tuple containing the checksum and size of the file.
+    """
     checksum = calculateChecksum(filePath, data)
     fileSize = calculateFileSize(filePath)
     return (checksum, fileSize)
@@ -102,58 +102,59 @@ class History():
 
     def loadUserHistory(self):
         """
-    Retrieves the user's complete edit history for all files.
+        Retrieves the user's complete edit history for all files.
 
-    Returns:
-      None.
-    """
+        Returns:
+          None.
+        """
         if os.path.isfile(self.pathToHistory):
-            with open(self.pathToHistory, 'rb') as file:
+            with open(self.pathToHistory, 'rb') as historyFile:
                 try:
-                    userHistory = pickle.load(file)
+                    self.userHistory = pickle.load(historyFile)
                 except ValueError as e:
                     app.log.info(unicode(e))
 
     def saveUserHistory(self, fileInfo, fileHistory):
         """
-    Saves the user's file history by writing to a pickle file.
+        Saves the user's file history by writing to a pickle file.
 
-    Args:
-      fileInfo (tuple): Contains (filePath, lastChecksum, lastFileSize).
-      fileHistory (dict): The history of the file that the user wants to save.
+        Args:
+          fileInfo (tuple): Contains (filePath, lastChecksum, lastFileSize).
+          fileHistory (dict): The history of the file that the user wants to
+                              save.
 
-    Returns:
-      None.
-    """
+        Returns:
+          None.
+        """
         filePath, lastChecksum, lastFileSize = fileInfo
         try:
             if self.pathToHistory is not None:
                 self.userHistory.pop((lastChecksum, lastFileSize), None)
                 newChecksum, newFileSize = getFileInfo(filePath)
                 self.userHistory[(newChecksum, newFileSize)] = fileHistory
-                with open(self.pathToHistory, 'wb') as file:
-                    pickle.dump(self.userHistory, file)
+                with open(self.pathToHistory, 'wb') as historyFile:
+                    pickle.dump(self.userHistory, historyFile)
                 app.log.info('wrote pickle')
         except Exception as e:
             app.log.exception(e)
 
     def getFileHistory(self, filePath, data=None):
         """
-    Takes in an file path and an optimal data
-    argument and checks for the current file's history.
-    It stores the current time in the file history and
-    returns the file history. The second argument can be
-    passed in if a file's data has already been read
-    so that you do not have to read the file again.
+        Takes in an file path and an optimal data
+        argument and checks for the current file's history.
+        It stores the current time in the file history and
+        returns the file history. The second argument can be
+        passed in if a file's data has already been read
+        so that you do not have to read the file again.
 
-    Args:
-      filePath (str): The absolute path to the file.
-      data (str): Defaults to None. This is the data
-        returned by calling read() on a file object.
+        Args:
+          filePath (str): The absolute path to the file.
+          data (str): Defaults to None. This is the data
+            returned by calling read() on a file object.
 
-    Returns:
-      The file history (dict) of the desired file if it exists.
-    """
+        Returns:
+          The file history (dict) of the desired file if it exists.
+        """
         checksum, fileSize = getFileInfo(filePath, data)
         fileHistory = self.userHistory.get((checksum, fileSize), {})
         fileHistory['adate'] = time.time()
@@ -161,9 +162,9 @@ class History():
 
     def getRecentFiles(self):
         """
-    Returns:
-      A list of file paths to recently accessed files.
-    """
+        Returns:
+          A list of file paths to recently accessed files.
+        """
         files = []
         for entry in self.userHistory.values():
             path = entry.get('path')
@@ -173,14 +174,14 @@ class History():
 
     def clearUserHistory(self):
         """
-    Clears user history for all files.
+        Clears user history for all files.
 
-    Args:
-      None.
+        Args:
+          None.
 
-    Returns:
-      None.
-    """
+        Returns:
+          None.
+        """
         self.userHistory = {}
         try:
             os.remove(self.pathToHistory)

@@ -131,63 +131,67 @@ class PerformanceTestCases(unittest.TestCase):
             self.assertLess(a, b * 24)
 
     def test_split_insert(self):
-        return  # Remove to enable test (disabled due to running time).
-        # This tests a performance assumption. If this test fails, the program
-        # should still work fine, but it may not run as fast as it could by
-        # using different assumptions.
-        #
-        # With frequent splitting the performance reverses.
-        for lineCount in (100, 1000, 5000):
-            half = lineCount // 2
-            a = timeit(
-                r'''data2 = data1.split('\n'); \
-              data2[%s] = data2[%s][:50] + "x" + data2[%s][50:]; \
-              ''' % (half, half, half),
-                setup=r'''data1 = ("a" * 100 + '\n') * %s''' % (lineCount,),
-                number=10000)
-            b = timeit(
-                'data1 = data1[:%s] + "x" + data1[%s:]' % (half, half),
-                setup=r'''data1 = ("a" * 100 + '\n') * %s''' % (lineCount,),
-                number=10000)
-            print("\n%9s: %s %s" % (lineCount, a, b))
-            self.assertGreater(a, b)
+        # Disabled due to running time.
+        if 0:
+            # This tests a performance assumption. If this test fails, the
+            # program should still work fine, but it may not run as fast as it
+            # could by using different assumptions.
+            #
+            # With frequent splitting the performance reverses.
+            for lineCount in (100, 1000, 5000):
+                half = lineCount // 2
+                a = timeit(
+                    r'''data2 = data1.split('\n'); \
+                data2[%s] = data2[%s][:50] + "x" + data2[%s][50:]; \
+                ''' % (half, half, half),
+                    setup=r'''data1 = ("a" * 100 + '\n') * %s''' % (lineCount,),
+                    number=10000)
+                b = timeit(
+                    'data1 = data1[:%s] + "x" + data1[%s:]' % (half, half),
+                    setup=r'''data1 = ("a" * 100 + '\n') * %s''' % (lineCount,),
+                    number=10000)
+                print("\n%9s: %s %s" % (lineCount, a, b))
+                self.assertGreater(a, b)
 
     def test_split_insert_balance(self):
-        return  # Remove to enable test (disabled due to running time).
-        # This tests a performance assumption. If this test fails, the program
-        # should still work fine, but it may not run as fast as it could by
-        # using different assumptions.
-        #
-        # With 5 inserts between splits, the performance is nearly the same.
-        for lineCount in (100, 1000, 5000):
-            half = lineCount // 2
-            a = timeit(
-                r'''data2 = data1.split('\n');''' +
-                (r'''data2[%s] = data2[%s][:50] + "x" + data2[%s][50:]; \
-              ''' % (half, half, half)) * 5,
-                setup=r'''data1 = ("a" * 100 + '\n') * %s''' % (lineCount,),
-                number=10000)
-            b = timeit(
-                ('data1 = data1[:%s] + "x" + data1[%s:]; ' % (half, half)) * 5,
-                setup=r'''data1 = ("a" * 100 + '\n') * %s''' % (lineCount,),
-                number=10000)
-            print("\n%9s: %s %s" % (lineCount, a, b))
+        # Disabled due to running time.
+        if 0:
+            # This tests a performance assumption. If this test fails, the
+            # program should still work fine, but it may not run as fast as it
+            # could by using different assumptions.
+            #
+            # With 5 inserts between splits, the performance is nearly the same.
+            for lineCount in (100, 1000, 5000):
+                half = lineCount // 2
+                a = timeit(
+                    r'''data2 = data1.split('\n');''' +
+                    (r'''data2[%s] = data2[%s][:50] + "x" + data2[%s][50:]; \
+                ''' % (half, half, half)) * 5,
+                    setup=r'''data1 = ("a" * 100 + '\n') * %s''' % (lineCount,),
+                    number=10000)
+                b = timeit(
+                    ('data1 = data1[:%s] + "x" + data1[%s:]; ' % (half, half)) *
+                    5,
+                    setup=r'''data1 = ("a" * 100 + '\n') * %s''' % (lineCount,),
+                    number=10000)
+                print("\n%9s: %s %s" % (lineCount, a, b))
 
     def test_instance_vs_tuple(self):
-        return  # Remove to enable test (disabled due to running time).
-        # This tests a performance assumption. If this test fails, the program
-        # should still work fine, but it may not run as fast as it could by
-        # using different assumptions.
-        for lineCount in (100, 1000, 5000):
-            a = timeit(
-                r'''
+        # Disabled due to running time.
+        if 0:
+            # This tests a performance assumption. If this test fails, the
+            # program should still work fine, but it may not run as fast as it
+            # could by using different assumptions.
+            for lineCount in (100, 1000, 5000):
+                a = timeit(
+                    r'''
 a = Node()
 a.foo = 5
 a.bar = 'hi'
 a.blah = 7
 foo.append(a)
 ''',
-                setup=r'''
+                    setup=r'''
 foo = []
 class Node:
   def __init__(self):
@@ -195,14 +199,14 @@ class Node:
     self.bar = None
     self.blah = None
 ''',
-                number=10000)
-            b = timeit(
-                r'''
+                    number=10000)
+                b = timeit(
+                    r'''
 a = (5, 'hi', 7)
 foo.append(a)
 ''',
-                setup=r'''
+                    setup=r'''
 foo = []
 ''',
-                number=10000)
-            print("\n%9s: %s %s" % (lineCount, a, b))
+                    number=10000)
+                print("\n%9s: %s %s" % (lineCount, a, b))

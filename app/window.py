@@ -744,31 +744,30 @@ class InteractiveFind(Window):
         self.matchOptionsRow.setParent(self)
 
         # If findUseRegex is false, re.escape the search.
-        toggle = OptionsToggle(self.program, self.matchOptionsRow, 'regex',
-                               'editor', 'findUseRegex')
+        OptionsToggle(self.program, self.matchOptionsRow, 'regex', 'editor',
+                      'findUseRegex')
         # If findWholeWord, wrap with \b.
-        toggle = OptionsToggle(self.program, self.matchOptionsRow, 'wholeWord',
-                               'editor', 'findWholeWord')
+        OptionsToggle(self.program, self.matchOptionsRow, 'wholeWord', 'editor',
+                      'findWholeWord')
         # If findIgnoreCase, pass ignore case flag to regex.
-        toggle = OptionsToggle(self.program, self.matchOptionsRow, 'ignoreCase',
-                               'editor', 'findIgnoreCase')
+        OptionsToggle(self.program, self.matchOptionsRow, 'ignoreCase',
+                      'editor', 'findIgnoreCase')
         if 0:
             # Use locale.
-            toggle = OptionsToggle(self.program, self.matchOptionsRow, 'locale',
-                                   'editor', 'findLocale')
+            OptionsToggle(self.program, self.matchOptionsRow, 'locale',
+                          'editor', 'findLocale')
             # Span lines.
-            toggle = OptionsToggle(self.program, self.matchOptionsRow,
-                                   'multiline', 'editor', 'findMultiline')
+            OptionsToggle(self.program, self.matchOptionsRow, 'multiline',
+                          'editor', 'findMultiline')
             # Dot matches anything (even \n).
-            toggle = OptionsToggle(self.program, self.matchOptionsRow, 'dotAll',
-                                   'editor', 'findDotAll')
+            OptionsToggle(self.program, self.matchOptionsRow, 'dotAll',
+                          'editor', 'findDotAll')
             # Unicode match.
-            toggle = OptionsToggle(self.program, self.matchOptionsRow,
-                                   'unicode', 'editor', 'findUnicode')
+            OptionsToggle(self.program, self.matchOptionsRow, 'unicode',
+                          'editor', 'findUnicode')
             # Replace uppercase with upper and lowercase with lower.
-            toggle = OptionsToggle(self.program, self.matchOptionsRow,
-                                   'smartCaps', 'editor',
-                                   'findReplaceSmartCaps')
+            OptionsToggle(self.program, self.matchOptionsRow, 'smartCaps',
+                          'editor', 'findReplaceSmartCaps')
 
         if 0:
             self.scopeOptions, self.scopeRow = self.addSelectOptionsRow(
@@ -795,7 +794,7 @@ class InteractiveFind(Window):
             (self.searchChangedOption,
              self.searchChangedRow) = self.addSelectOptionsRow(
                  indent + 'changed   ', ['any', 'yes', 'no'])
-            self.pathsLine = LabeledLine(self, 'Paths: ')
+            self.pathsLine = LabeledLine(self.program, self, 'Paths: ')
             self.pathsLine.setController(app.cu_editor.InteractiveFindInput)
             self.pathsLine.setParent(self)
 
@@ -812,7 +811,7 @@ class InteractiveFind(Window):
 
     def addSelectOptionsRow(self, label, optionsList):
         """Such as a radio group."""
-        optionsRow = OptionsRow(self)
+        optionsRow = OptionsRow(self.program, self)
         optionsRow.color = self.program.color.get('keyword')
         optionsRow.addLabel(label)
         optionsDict = {}
@@ -1113,7 +1112,7 @@ class InputWindow(Window):
         def splitWindow(self):
             """Experimental."""
             app.log.info()
-            other = InputWindow(self.prg)
+            other = InputWindow(self.prg, self)
             other.setTextBuffer(self.textBuffer)
             app.log.info()
             self.prg.zOrder.append(other)
@@ -1402,8 +1401,8 @@ class OptionsRow(ViewWindow):
 
     class ControlElement:
 
-        def __init__(self, type, name, reference, width=None, sep=" "):
-            self.type = type
+        def __init__(self, elementType, name, reference, width=None, sep=" "):
+            self.type = elementType
             self.name = name
             self.reference = reference
             self.width = width if width is not None else len(name)
@@ -1469,7 +1468,6 @@ class OptionsRow(ViewWindow):
         def draw(control):
             return toggleOn if control['dict'][control['name']] else toggleOff
 
-        group = []
         width = max(width, min(len(toggleOn), len(toggleOff)))
         self.addElement(draw, 'selection', name, reference, width, sep,
                         len('(*)'))
@@ -1502,7 +1500,7 @@ class OptionsRow(ViewWindow):
         pass
 
     def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
-        row = self.scrollRow + paneRow
+        #row = self.scrollRow + paneRow
         col = self.scrollCol + paneCol
         offset = 0
         for index, control in enumerate(self.controlList):

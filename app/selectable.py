@@ -55,7 +55,7 @@ class BaseLineBuffer:
     def isEmpty(self):
         return len(self.lines) == 1 and len(self.lines[0]) == 0
 
-    def setMessage(self, *args, **dict):
+    def setMessage(self, *args, **kwargs):
         if not len(args):
             self.message = None
             #app.log.caller()
@@ -68,7 +68,7 @@ class BaseLineBuffer:
             prior = str(i)
             msg += prior
         #app.log.caller("\n", msg)
-        self.message = (repr(msg)[1:-1], dict.get('color'))
+        self.message = (repr(msg)[1:-1], kwargs.get('color'))
 
 
 class Selectable(BaseLineBuffer):
@@ -181,8 +181,8 @@ class Selectable(BaseLineBuffer):
             app.log.info('selection mode not recognized', selectionMode)
 
     def __extendWords(self, upperRow, upperCol, lowerRow, lowerCol):
-        """Extends and existing selection to the nearest word boundaries. The pen
-        and marker will be extended away from each other. The extension may
+        """Extends and existing selection to the nearest word boundaries. The
+        pen and marker will be extended away from each other. The extension may
         occur in one, both, or neither direction."""
         line = self.lines[upperRow]
         for segment in re.finditer(app.regex.kReWordBoundary, line):
@@ -198,7 +198,7 @@ class Selectable(BaseLineBuffer):
 
     def extendSelection(self):
         """Get a tuple of:
-    (penRow, penCol, markerRow, markerCol, selectionMode)"""
+        (penRow, penCol, markerRow, markerCol, selectionMode)"""
         if self.selectionMode == kSelectionNone:
             return (0, 0, -self.markerRow, -self.markerCol, 0)
         elif self.selectionMode == kSelectionAll:
@@ -224,7 +224,7 @@ class Selectable(BaseLineBuffer):
 
     def startAndEnd(self):
         """Get the marker and pen pair as the earlier of the two then the later
-    of the two. The result accounts for the current selection mode."""
+        of the two. The result accounts for the current selection mode."""
         upperRow = 0
         upperCol = 0
         lowerRow = 0

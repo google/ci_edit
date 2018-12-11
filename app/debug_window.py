@@ -36,8 +36,6 @@ class DebugWindow(app.window.ActiveWindow):
     def debugDraw(self, program, win):
         """Draw real-time debug information to the screen."""
         textBuffer = win.textBuffer
-        y, x = win.top, win.left
-        maxRow, maxCol = win.rows, win.cols
         self.writeLineRow = 0
         intent = "noIntent"
         try:
@@ -61,6 +59,8 @@ class DebugWindow(app.window.ActiveWindow):
             "scrlRow %3d scrlCol %2d lines %3d" % (win.scrollRow, win.scrollCol,
                                                    len(textBuffer.lines)),
             color)
+        y, x = win.top, win.left
+        maxRow, maxCol = win.rows, win.cols
         self.writeLine(
             "y %2d x %2d maxRow %d maxCol %d baud %d color %d" %
             (y, x, maxRow, maxCol, curses.baudrate(),

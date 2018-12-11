@@ -125,7 +125,6 @@ class TextBuffer(app.actions.Actions):
         startCol = self.view.scrollCol + left
         endCol = startCol + cols
         appPrefs = self.view.program.prefs
-        colors = appPrefs.color
         defaultColor = appPrefs.color['default']
         spellChecking = appPrefs.editor.get('spellChecking', True)
         colorPrefs = self.view.program.color
@@ -221,11 +220,11 @@ class TextBuffer(app.actions.Actions):
                     self.highlightTrailingWhitespace and
                     not (startRow + i == self.penRow and
                          self.penCol == len(line)))
-                for s, column, _, id in app.curses_util.renderedFindIter(
+                for s, column, _, index in app.curses_util.renderedFindIter(
                         line, startCol, endCol, ('[]{}()',), True,
                         highlightTrailingWhitespace):
                     window.addStr(top + i, column - self.view.scrollCol, s,
-                                  colors[id])
+                                  colors[index])
         if 1:
             # Match brackets.
             if (self.parser.rowCount() > self.penRow and

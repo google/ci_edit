@@ -524,7 +524,6 @@ def run_ci():
         # Disable Bracketed Paste Mode.
         sys.stdout.write('\033[?2004l')
         sys.stdout.flush()
-    global userConsoleMessage
     if userConsoleMessage:
         fullPath = os.path.expanduser(
             os.path.expandvars('~/.ci_edit/userConsoleMessage'))

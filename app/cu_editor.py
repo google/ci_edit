@@ -189,8 +189,8 @@ class InteractiveFindInput(app.editor.InteractiveFindInput):
                 'Press ctrl+g to find again; ctrl+r find prior.')
         else:
             self.view.parent.parent.textBuffer.setMessage(
-                'Press tab for more options; ctrl+g to find next; ctrl+r find prior.'
-            )
+                'Press tab for more options; ctrl+g to find next;'
+                ' ctrl+r find prior.')
 
     def setTextBuffer(self, textBuffer):
         app.editor.InteractiveFindInput.setTextBuffer(self, textBuffer)

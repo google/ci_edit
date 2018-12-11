@@ -123,9 +123,9 @@ class Dictionary:
                     index = 0
                     while not len(lines[index]) or lines[index][0] == '#':
                         index += 1
-                    # TODO(dschuyler): Word contractions are hacked by storing the
-                    # components of the contraction. So didn, doesn, and isn are considered
-                    # 'words'.
+                    # TODO(dschuyler): Word contractions are hacked by storing
+                    # the components of the contraction. So didn, doesn, and isn
+                    # are considered 'words'.
                     self.grammarWords[grammarName] = set([
                         p for l in lines for w in l.split()
                         for p in w.split("'")
@@ -153,8 +153,8 @@ class Dictionary:
                 # All upper case.
                 return True
         if 0:
-            # TODO(dschuyler): This is an experiment. Considering a py specific word
-            # list instead.
+            # TODO(dschuyler): This is an experiment. Considering a py specific
+            # word list instead.
             if grammarName == 'py':
                 # Handle run together (undelineated) words.
                 if len(re.sub('[a-z]+', '', word)) == 0:

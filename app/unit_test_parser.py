@@ -56,15 +56,6 @@ void blah();
 
     if 0:
 
-        def test_parse_performance(self):
-            a = timeit(
-                '''parser = app.parser.Parser()
-parser.parse(data, grammar, 0, sys.maxsize)''',
-                setup=performance1,
-                number=10)
-
-    if 0:
-
         def test_profile_parse(self):
             profile = cProfile.Profile()
             parser = app.parser.Parser()

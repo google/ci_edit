@@ -141,7 +141,6 @@ class Controller:
 
     def focus(self):
         app.log.info('base controller focus()')
-        pass
 
     def confirmationPromptFinish(self, *args):
         window = self.getNamedWindow('inputWindow')
@@ -351,21 +350,21 @@ class MainController:
 
     def nextController(self):
         app.log.info('nextController')
-        return
-        if self.controller is self.controllers['cuaPlus']:
-            app.log.info('MainController.nextController cua')
-            self.controller = self.controllers['cua']
-        elif self.controller is self.controllers['cua']:
-            app.log.info('MainController.nextController emacs')
-            self.controller = self.controllers['emacs']
-        elif self.controller is self.controllers['emacs']:
-            app.log.info('MainController.nextController vi')
-            self.controller = self.controllers['vi']
-        else:
-            app.log.info('MainController.nextController cua')
-            self.controller = self.controllers['cua']
-        self.controller.setTextBuffer(self.textBuffer)
-        self.focus()
+        if 0:
+            if self.controller is self.controllers['cuaPlus']:
+                app.log.info('MainController.nextController cua')
+                self.controller = self.controllers['cua']
+            elif self.controller is self.controllers['cua']:
+                app.log.info('MainController.nextController emacs')
+                self.controller = self.controllers['emacs']
+            elif self.controller is self.controllers['emacs']:
+                app.log.info('MainController.nextController vi')
+                self.controller = self.controllers['vi']
+            else:
+                app.log.info('MainController.nextController cua')
+                self.controller = self.controllers['cua']
+            self.controller.setTextBuffer(self.textBuffer)
+            self.focus()
 
     def setTextBuffer(self, textBuffer):
         app.log.info('MainController.setTextBuffer', self.controller)
