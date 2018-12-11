@@ -31,7 +31,7 @@ class PathRow(app.window.ViewWindow):
             assert host
         app.window.ViewWindow.__init__(self, program, host)
         self.host = host
-        self.path = ''
+        self.path = u''
 
     def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
         col = self.scrollCol + paneCol
@@ -40,11 +40,11 @@ class PathRow(app.window.ViewWindow):
         self.host.controller.shownDirectory = None
         if col >= len(line):
             return
-        slash = line[col:].find('/')
+        slash = line[col:].find(u'/')
         self.path = line[:col + slash + 1]
 
     def render(self):
-        color = self.program.color.get('message_line')
+        color = self.program.color.get(u'message_line')
         self.writeLineRow = 0
         self.writeLine(self.path, color)
 
@@ -63,31 +63,31 @@ class DirectoryList(app.window.Window):
         self.controller = app.cu_editor.DirectoryList(self)
         self.setTextBuffer(app.text_buffer.TextBuffer(self.program))
         # Set up table headers.
-        color = self.program.color.get('top_info')
+        color = self.program.color.get(u'top_info')
         self.optionsRow = app.window.OptionsSelectionWindow(self.program, self)
         self.optionsRow.setParent(self)
-        app.window.SortableHeaderWindow(self.program, self.optionsRow, 'Name',
-                                        'editor', 'filesSortAscendingByName',
+        app.window.SortableHeaderWindow(self.program, self.optionsRow, u'Name',
+                                        u'editor', u'filesSortAscendingByName',
                                         -41)
-        label = app.window.LabelWindow(self.program, self.optionsRow, '|')
+        label = app.window.LabelWindow(self.program, self.optionsRow, u'|')
         label.setParent(self.optionsRow)
         label.color = color
-        app.window.SortableHeaderWindow(self.program, self.optionsRow, 'Size ',
-                                        'editor', 'filesSortAscendingBySize',
+        app.window.SortableHeaderWindow(self.program, self.optionsRow, u'Size ',
+                                        u'editor', u'filesSortAscendingBySize',
                                         16)
-        label = app.window.LabelWindow(self.program, self.optionsRow, '|')
+        label = app.window.LabelWindow(self.program, self.optionsRow, u'|')
         label.setParent(self.optionsRow)
         label.color = color
         app.window.SortableHeaderWindow(self.program, self.optionsRow,
-                                        'Modified ', 'editor',
-                                        'filesSortAscendingByModifiedDate', 25)
-        label = app.window.LabelWindow(self.program, self.optionsRow, '|')
+                                        u'Modified ', u'editor',
+                                        u'filesSortAscendingByModifiedDate', 25)
+        label = app.window.LabelWindow(self.program, self.optionsRow, u'|')
         label.setParent(self.optionsRow)
         label.color = color
 
     def reshape(self, top, left, rows, cols):
         """Change self and sub-windows to fit within the given rectangle."""
-        app.log.detail('reshape', top, left, rows, cols)
+        app.log.detail(u'reshape', top, left, rows, cols)
         self.optionsRow.reshape(top, left, 1, cols)
         top += 1
         rows -= 1
@@ -154,7 +154,7 @@ class PathWindow(app.window.Window):
         self.parent.directoryList.controller.shownDirectory = None
         if col >= len(line):
             return
-        slash = line[col:].find('/')
+        slash = line[col:].find(u'/')
         self.setPath(line[:col + slash + 1])
 
     def setPath(self, path):
@@ -174,15 +174,15 @@ class FileManagerWindow(app.window.Window):
         self.inputWindow = inputWindow
         self.inputWindow.fileManagerWindow = self
 
-        self.mode = 'open'
+        self.mode = u'open'
         self.showTips = False
         self.controller = app.cu_editor.FileOpener(self)
         self.setTextBuffer(app.text_buffer.TextBuffer(self.program))
 
         self.titleRow = app.window.OptionsRow(self.program, self)
-        self.titleRow.addLabel(' ci   ')
-        self.modeTitle = self.titleRow.addLabel('x')
-        self.setMode('open')
+        self.titleRow.addLabel(u' ci   ')
+        self.modeTitle = self.titleRow.addLabel(u'x')
+        self.setMode(u'open')
         self.titleRow.setParent(self)
 
         self.pathWindow = PathWindow(self.program, self)
@@ -195,25 +195,25 @@ class FileManagerWindow(app.window.Window):
             self.optionsRow = app.window.RowWindow(self.program, self, 2)
             self.optionsRow.setParent(self)
             colorPrefs = self.program.color
-            self.optionsRow.color = colorPrefs.get('top_info')
+            self.optionsRow.color = colorPrefs.get(u'top_info')
             label = app.window.LabelWindow(self.program, self.optionsRow,
-                                           'Show:')
-            label.color = colorPrefs.get('top_info')
+                                           u'Show:')
+            label.color = colorPrefs.get(u'top_info')
             label.setParent(self.optionsRow)
             toggle = app.window.OptionsToggle(self.program, self.optionsRow,
-                                              'dotFiles', 'editor',
-                                              'filesShowDotFiles')
-            toggle.color = colorPrefs.get('top_info')
+                                              u'dotFiles', u'editor',
+                                              u'filesShowDotFiles')
+            toggle.color = colorPrefs.get(u'top_info')
             toggle = app.window.OptionsToggle(self.program, self.optionsRow,
-                                              'sizes', 'editor',
-                                              'filesShowSizes')
-            toggle.color = colorPrefs.get('top_info')
+                                              u'sizes', u'editor',
+                                              u'filesShowSizes')
+            toggle.color = colorPrefs.get(u'top_info')
             toggle = app.window.OptionsToggle(self.program, self.optionsRow,
-                                              'modified', 'editor',
-                                              'filesShowModifiedDates')
-            toggle.color = colorPrefs.get('top_info')
+                                              u'modified', u'editor',
+                                              u'filesShowModifiedDates')
+            toggle.color = colorPrefs.get(u'top_info')
 
-        self.messageLine = app.window.LabelWindow(self.program, self, "")
+        self.messageLine = app.window.LabelWindow(self.program, self, u"")
         self.messageLine.setParent(self)
 
     def bringChildToFront(self, child):
@@ -235,7 +235,7 @@ class FileManagerWindow(app.window.Window):
 
     def reshape(self, top, left, rows, cols):
         """Change self and sub-windows to fit within the given rectangle."""
-        app.log.detail('reshape', top, left, rows, cols)
+        app.log.detail(u'reshape', top, left, rows, cols)
         app.window.Window.reshape(self, top, left, rows, cols)
         self.titleRow.reshape(top, left, 1, cols)
         top += 1
@@ -252,11 +252,11 @@ class FileManagerWindow(app.window.Window):
     def setMode(self, mode):
         self.mode = mode
         modeTitles = {
-            'open': 'Open File',
-            'saveAs': 'Save File As',
-            'selectDir': 'Select a Directory',
+            u'open': u'Open File',
+            u'saveAs': u'Save File As',
+            u'selectDir': u'Select a Directory',
         }
-        self.modeTitle['name'] = modeTitles[mode]
+        self.modeTitle[u'name'] = modeTitles[mode]
 
     def setPath(self, path):
         self.pathWindow.setPath(path)

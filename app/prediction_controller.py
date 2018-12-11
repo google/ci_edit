@@ -154,14 +154,14 @@ class PredictionListController(app.controller.Controller):
 
     def optionChanged(self, name, value):
         if app.config.strict_debug:
-            assert type(name) is str
-            assert type(value) is str
+            assert type(name) is unicode
+            assert type(value) is unicode
         self.shownList = None
         self.onChange()
 
     def setFilter(self, listFilter):
         if app.config.strict_debug:
-            assert type(listFilter) is str
+            assert type(listFilter) is unicode
         self.filter = listFilter
         self.shownList = None  # Cause a refresh.
 
@@ -215,8 +215,8 @@ class PredictionInputController(app.controller.Controller):
 
     def optionChanged(self, name, value):
         if app.config.strict_debug:
-            assert type(name) is str
-            assert type(value) is str
+            assert type(name) is unicode
+            assert type(value) is unicode
         self.getNamedWindow('predictionList').controller.shownList = None
 
     def passEventToPredictionList(self):
