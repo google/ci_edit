@@ -35,16 +35,15 @@ startTime = time.time()
 
 
 def getLines():
-    global screenLog
     return screenLog
 
 
-def parseLines(frame, channel, *args):
+def parseLines(frame, logChannel, *args):
     if not len(args):
         args = [u""]
     msg = str(args[0])
     if 1:
-        msg = u"%s %s %s %s: %s" % (channel, os.path.split(frame[1])[1],
+        msg = u"%s %s %s %s: %s" % (logChannel, os.path.split(frame[1])[1],
                                     frame[2], frame[3], msg)
     prior = msg
     for i in args[1:]:
@@ -55,31 +54,32 @@ def parseLines(frame, channel, *args):
     return msg.split("\n")
 
 
-def channelEnable(channel, isEnabled):
-    global enabledChannels, fullLog, shouldWritePrintLog
+def channelEnable(logChannel, isEnabled):
+    global fullLog, shouldWritePrintLog
     fullLog += [
-        u"%10s %10s: %s %r" % (u'logging', u'channelEnable', channel, isEnabled)
+        u"%10s %10s: %s %r" % (u'logging', u'channelEnable', logChannel,
+                               isEnabled)
     ]
     if isEnabled:
-        enabledChannels[channel] = isEnabled
+        enabledChannels[logChannel] = isEnabled
         shouldWritePrintLog = True
     else:
         enabledChannels.pop(channel, None)
 
 
-def channel(channel, *args):
-    global enabledChannels, fullLog, screenLog
-    if channel in enabledChannels:
-        lines = parseLines(inspect.stack()[2], channel, *args)
+def channel(logChannel, *args):
+    global fullLog, screenLog
+    if logChannel in enabledChannels:
+        lines = parseLines(inspect.stack()[2], logChannel, *args)
         screenLog += lines
         fullLog += lines
 
 
 def caller(*args):
     global fullLog, screenLog
-    caller = inspect.stack()[2]
-    msg = (u"%s %s %s" %
-           (os.path.split(caller[1])[1], caller[2], caller[3]),) + args
+    priorCaller = inspect.stack()[2]
+    msg = (u"%s %s %s" % (os.path.split(priorCaller[1])[1], priorCaller[2],
+                          priorCaller[3]),) + args
     lines = parseLines(inspect.stack()[1], u"caller", *msg)
     screenLog += lines
     fullLog += lines
@@ -126,9 +126,9 @@ def check_lt(a, b):
 
 def stack(*args):
     global fullLog, screenLog
-    stack = inspect.stack()[1:]
-    stack.reverse()
-    for i, frame in enumerate(stack):
+    callStack = inspect.stack()[1:]
+    callStack.reverse()
+    for i, frame in enumerate(callStack):
         line = [
             u"stack %2d %14s %4s %s" % (i, os.path.split(frame[1])[1], frame[2],
                                         frame[3])
@@ -176,7 +176,7 @@ def quick(*args):
 
 
 def debug(*args):
-    global enabledChannels, fullLog, screenLog
+    global fullLog, screenLog
     if u'debug' in enabledChannels:
         lines = parseLines(inspect.stack()[1], u'debug_@@@', *args)
         screenLog += lines
@@ -184,7 +184,7 @@ def debug(*args):
 
 
 def detail(*args):
-    global enabledChannels, fullLog
+    global fullLog
     if u'detail' in enabledChannels:
         lines = parseLines(inspect.stack()[1], u'detail', *args)
         fullLog += lines
@@ -226,6 +226,5 @@ def writeToFile(path):
 
 
 def flush():
-    global fullLog
     if shouldWritePrintLog:
         sys.stdout.write(u"\n".join(fullLog) + u"\n")

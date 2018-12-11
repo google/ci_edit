@@ -38,10 +38,8 @@ class DebugWindow(app.window.ActiveWindow):
         textBuffer = win.textBuffer
         self.writeLineRow = 0
         intent = "noIntent"
-        try:
+        if hasattr(win, "userIntent"):
             intent = win.userIntent
-        except:
-            pass
         color = program.color.get('debug_window')
         self.writeLine(
             "   cRow %3d    cCol %2d goalCol %2d  %s" %
@@ -94,8 +92,6 @@ class DebugUndoWindow(app.window.ActiveWindow):
     def debugUndoDraw(self, win):
         """Draw real-time debug information to the screen."""
         textBuffer = win.textBuffer
-        y, x = win.top, win.left
-        maxRow, maxCol = win.rows, win.cols
         self.writeLineRow = 0
         # Display some of the redo chain.
         colorPrefs = win.program.color

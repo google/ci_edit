@@ -36,7 +36,7 @@ import traceback
 import types
 
 from . import ascii
-from .constants import *
+from . import constants
 
 
 def isStringType(value):
@@ -107,7 +107,7 @@ class FakeInput:
                             self.waitingForRefresh = True
                         if self.isVerbose:
                             print(cmd, type(cmd))
-                        return ERR
+                        return constants.ERR
                     self.inputsIndex -= 1
                     if self.isVerbose:
                         print(cmd, type(cmd))
@@ -118,7 +118,7 @@ class FakeInput:
                     if self.isVerbose:
                         print(cmd, type(cmd))
                     return cmd
-        return ERR
+        return constants.ERR
 
 
 def testLog(log_level, *msg):
@@ -166,8 +166,9 @@ class FakeDisplay:
                 d = self.displayStyle[row + i][col + k]
                 if d != colorPair:
                     self.show()
-                    return u"\n  row %s, col %s color/style mismatch '%d' != '%d'" % (
-                        row + i, col + k, d, colorPair)
+                    return (
+                        u"\n  row %s, col %s color/style mismatch '%d' != '%d'"
+                        % (row + i, col + k, d, colorPair))
         return None
 
     def checkText(self, row, col, lines, verbose=3):
@@ -183,8 +184,8 @@ class FakeDisplay:
                     return u"\n  Row %d is outside of the %d row display" % (
                         row + i, self.rows)
                 if col + k >= self.cols:
-                    return u"\n  Column %d is outside of the %d column display" % (
-                        col + k, self.cols)
+                    return (u"\n  Column %d is outside of the %d column display"
+                            % (col + k, self.cols))
                 d = self.displayText[row + i][col + k]
                 c = line[k]
                 if d != c:
@@ -196,8 +197,6 @@ class FakeDisplay:
                         result += u"\n  actual:   |%s|" % actualLine
                     if verbose >= 2:
                         expectedText = u"".join(line)
-                        expectedLine = (actualLine[:col] + expectedText +
-                                        actualLine[col + len(expectedText):])
                         result += u"\n  expected: %s|%s|" % (u" " * col,
                                                              expectedText)
                     if verbose >= 3:
@@ -243,10 +242,10 @@ class FakeDisplay:
 
     def reset(self):
         self.displayStyle = [
-            [-1 for k in range(self.cols)] for i in range(self.rows)
+            [-1 for _ in range(self.cols)] for _ in range(self.rows)
         ]
         self.displayText = [
-            [u"x" for k in range(self.cols)] for i in range(self.rows)
+            [u"x" for _ in range(self.cols)] for _ in range(self.rows)
         ]
 
 
@@ -275,7 +274,6 @@ class FakeCursesWindow:
         self.cursorCol = 0
 
     def addstr(self, *args):
-        global fakeDisplay
         try:
             testLog(3, *args)
             cursorRow = args[0]
@@ -290,18 +288,17 @@ class FakeCursesWindow:
             if len(text) > 1:
                 self.cursorCol = len(text[-1])
             return (1, 1)
-        except Exception as e:
+        except Exception:
             raise error()
 
     def getch(self):
         testLog(3)
         if 1:
-            global getchCallback
             if getchCallback:
                 val = getchCallback()
                 return val
         val = fakeInput.next()
-        if self.movie and val != ERR:
+        if self.movie and val != constants.ERR:
             if val == 409:
                 print(u"val", val, u"mouse_info", mouseEvents[-1])
             else:
@@ -406,7 +403,7 @@ def errorpass(*args):
 
 def getch(*args):
     testLog(1, *args)
-    return ERR
+    return constants.ERR
 
 
 def addMouseEvent(mouseEvent):

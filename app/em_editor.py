@@ -287,11 +287,6 @@ class InteractiveFind(EditText):
     def unfocus(self):
         app.log.info('unfocus Find')
         #self.hide()
-        return
-        self.document.resizeBy(self.height, 0)
-        #self.view.host.resizeBy(-self.height, 0)
-        #self.view.host.moveBy(self.height, 0)
-        self.document.statusLine.bringToFront()
 
 
 class InteractiveGoto(EditText):
@@ -343,10 +338,7 @@ class InteractiveGoto(EditText):
 
     def onChange(self):
         gotoLine = 0
-        try:
-            line = self.textBuffer.lines[0]
-        except:
-            pass
+        line = self.textBuffer.parser.rowText(0)
         gotoLine, gotoCol = (line.split(',') + ['0', '0'])[:2]
         self.cursorMoveTo(parseInt(gotoLine), parseInt(gotoCol))
 
@@ -465,8 +457,8 @@ class CiEdit(app.controller.Controller):
 
 
 class EmacsEdit(app.controller.Controller):
-    """Emacs is a common Unix based text editor. This keyboard mapping is similar
-  to basic Emacs commands."""
+    """Emacs is a common Unix based text editor. This keyboard mapping is
+    similar to basic Emacs commands."""
 
     def __init__(self, view):
         app.controller.Controller.__init__(self, view, 'EditText')

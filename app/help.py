@@ -122,7 +122,8 @@ Within the Goto line prompt:
         """see help.md file.""",
         "",
         #"""What do you think of the help text above?""",
-        #"""Please add feedback to https://github.com/google/ci_edit/issues/107""",
+        #"""Please add feedback"""
+        #""" to https://github.com/google/ci_edit/issues/107""",
     ],
 
     'version': \
