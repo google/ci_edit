@@ -75,9 +75,9 @@ class Parser:
 
     def grammarIndexFromRowCol(self, row, col):
         """
-    Returns:
-        index. |index| may then be passed to grammarAtIndex().
-    """
+        Returns:
+            index. |index| may then be passed to grammarAtIndex().
+        """
         if row + 1 >= len(
                 self.rows):  # or self.rows[row + 1] > len(self.parserNodes):
             # This file is too large. There's other ways to handle this, but for

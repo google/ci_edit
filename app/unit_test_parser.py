@@ -57,12 +57,51 @@ void blah();
     def test_parse_cpp_literal(self):
         test = """/* first comment */
 char stuff = R"mine(two
-// second comment)mine";
+// not a comment)mine";
 void blah();
 """
         self.prefs = app.prefs.Prefs()
         self.parser.parse(None, self.prefs, test, self.prefs.grammars['cpp'], 0,
                           99999)
+        self.assertEqual(self.parser.rowText(0), "/* first comment */")
+        self.assertEqual(self.parser.rowText(1), """char stuff = R"mine(two""")
+        self.assertEqual(
+            self.parser.grammarAt(0, 0),
+            self.prefs.grammars['cpp_block_comment'])
+        self.assertEqual(
+            self.parser.grammarAt(1, 8), self.prefs.grammars['cpp'])
+        self.assertEqual(
+            self.parser.grammarAt(1, 18),
+            self.prefs.grammars['cpp_string_literal'])
+        self.assertEqual(
+            self.parser.grammarAt(3, 7), self.prefs.grammars['cpp'])
+
+    def test_parse_rs_raw_string(self):
+        test = """// one
+let stuff = r###"two
+not an "## end
+ignored " quote"###;
+fn main { }
+// two
+"""
+        self.prefs = app.prefs.Prefs()
+        self.parser.parse(None, self.prefs, test, self.prefs.grammars['rs'], 0,
+                          99999)
+        self.assertEqual(self.parser.rowText(0), "// one")
+        self.assertEqual(self.parser.rowText(1), """let stuff = r###"two""")
+        self.assertEqual(
+            self.parser.grammarAt(0, 0),
+            self.prefs.grammars['cpp_line_comment'])
+        self.assertEqual(self.parser.grammarAt(1, 8), self.prefs.grammars['rs'])
+        self.assertEqual(
+            self.parser.grammarAt(1, 18), self.prefs.grammars['rs_raw_string'])
+        self.assertEqual(
+            self.parser.grammarAt(2, 12), self.prefs.grammars['rs_raw_string'])
+        self.assertEqual(
+            self.parser.grammarAt(3, 15), self.prefs.grammars['rs_raw_string'])
+        self.assertEqual(
+            self.parser.grammarAt(3, 12), self.prefs.grammars['rs_raw_string'])
+        self.assertEqual(self.parser.grammarAt(4, 7), self.prefs.grammars['rs'])
 
     if 0:
 

@@ -104,6 +104,7 @@ color8 = {
     'quoted_string2': 2,
     'regex_string': 2,
     'right_column': 6,
+    'rs_raw_string': 3,
     'selected': 5,
     'special': 1,
     'status_line': 7,
@@ -172,6 +173,7 @@ color16 = {
     'quoted_string2': stringColor16Index,
     'regex_string': stringColor16Index,
     'right_column': outsideOfBufferColor16Index,
+    'rs_raw_string': stringColor16Index,
     'selected': selectedColor16Index,
     'special': specialsColor16Index,
     'status_line': borderColor16Index,
@@ -238,6 +240,7 @@ color256 = {
     'quoted_string2': stringColorIndex,
     'regex_string': stringColorIndex,
     'right_column': outsideOfBufferColorIndex,
+    'rs_raw_string': stringColorIndex,
     'selected': selectedColor,
     'special': specialsColorIndex,
     'status_line': 168,
@@ -940,7 +943,16 @@ prefs = {
                 'cpp_line_comment',
                 'c_string1',
                 'c_string2',
+                'rs_raw_string',
             ],
+        },
+        'rs_raw_string': {
+            'begin': r'r',
+            # TODO(dschuyler): backslash and whitespace are invalid in the
+            # |end_key|.
+            'end_key': r'''([#]*)"''',
+            'end': r'"\0',
+            'single_line': False,
         },
         'special': {
             'indent': '  ',
