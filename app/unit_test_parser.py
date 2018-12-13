@@ -54,6 +54,16 @@ void blah();
                           99999)
         #self.assertEqual(selectable.selection(), (0, 0, 0, 0))
 
+    def test_parse_cpp_literal(self):
+        test = """/* first comment */
+char stuff = R"mine(two
+// second comment)mine";
+void blah();
+"""
+        self.prefs = app.prefs.Prefs()
+        self.parser.parse(None, self.prefs, test, self.prefs.grammars['cpp'], 0,
+                          99999)
+
     if 0:
 
         def test_profile_parse(self):

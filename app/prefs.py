@@ -28,14 +28,6 @@ import app.log
 import app.regex
 
 
-def joinReList(reList):
-    return r"(" + r")|(".join(reList) + r")"
-
-
-def joinReWordList(reList):
-    return r"(\b" + r"\b)|(\b".join(reList) + r"\b)"
-
-
 class Prefs():
 
     def __init__(self):
@@ -139,9 +131,9 @@ class Prefs():
             if 0:
                 # keywords re.
                 v['keywordsRe'] = re.compile(
-                    joinReWordList(v.get('keywords', []) + v.get('types', [])))
-                v['errorsRe'] = re.compile(joinReList(v.get('errors', [])))
-                v['specialsRe'] = re.compile(joinReList(v.get('special', [])))
+                    app.regex.joinReWordList(v.get('keywords', []) + v.get('types', [])))
+                v['errorsRe'] = re.compile(app.regex.joinReList(v.get('errors', [])))
+                v['specialsRe'] = re.compile(app.regex.joinReList(v.get('special', [])))
             # contains and end re.
             matchGrammars = []
             markers = []
@@ -187,7 +179,7 @@ class Prefs():
             # Index [-1]
             markers.append(r'\n')
             #app.log.startup('markers', v['name'], markers)
-            v['matchRe'] = re.compile(joinReList(markers))
+            v['matchRe'] = re.compile(app.regex.joinReList(markers))
             v['markers'] = markers
             v['matchGrammars'] = matchGrammars
             newGrammarIndexLimit = 2 + len(v.get('contains', []))

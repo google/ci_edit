@@ -318,7 +318,7 @@ class Parser:
                         markers[1] = priorGrammar['end'].replace(
                             r'\0', re.escape(hereKey))
                         priorGrammar['matchRe'] = re.compile(
-                            appPrefs.joinReList(markers))
+                            app.regex.joinReList(markers))
                     child = (priorGrammar, cursor + reg[0],
                              len(self.parserNodes) - 1, visual + reg[0])
                     cursor += reg[1]
