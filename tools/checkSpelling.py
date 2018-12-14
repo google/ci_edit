@@ -14,9 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import print_function
+
 import io
 import os
-import sys
 import re
 import sys
 from fnmatch import fnmatch
@@ -26,7 +27,7 @@ sys.path.append(ciEditDir)
 import app.regex
 import app.spelling
 
-print "checking spelling"
+print("checking spelling")
 
 doValues = False
 root = (len(sys.argv) > 1 and sys.argv[1]) or "."
@@ -43,23 +44,10 @@ allUnrecognizedWords = set()
 
 def handleFile(fileName):
     global allUnrecognizedWords
-    #print fileName,
+    # print(fileName, end="")
     with io.open(fileName, "r") as f:
         data = f.read()
         if not data: return set()
-
-        unrecognizedWords = set()
-        for found in re.finditer(app.regex.kReSubwords, data):
-            reg = found.regs[0]
-            word = data[reg[0]:reg[1]]
-            if not app.spelling.isCorrect(word, 'py'):
-                unrecognizedWords.add(word.lower())
-
-        if unrecognizedWords:
-            print 'found', fileName
-            print unrecognizedWords
-            print
-        return unrecognizedWords
 
 
 def walkTree(root):
@@ -72,17 +60,20 @@ def walkTree(root):
                 continue
             unrecognizedWords.update(
                 handleFile(os.path.join(dirPath, fileName)))
+    if unrecognizedWords:
+        print('found', fileName)
+        print(unrecognizedWords)
+        print()
     return unrecognizedWords
 
 
 if os.path.isfile(root):
-    print handleFile(root)
+    print(handleFile(root))
 elif os.path.isdir(root):
-    words = list(walkTree(root))
-    words.sort()
+    words = sorted(walkTree(root))
     for i in words:
-        print i
+        print(i)
 else:
-    print "root is not a file or directory"
+    print("root is not a file or directory")
 
-print "end"
+print("end")
