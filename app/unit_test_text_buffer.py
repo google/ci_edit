@@ -23,33 +23,39 @@ import app.fake_curses_testing
 
 
 class DrawTestCases(app.fake_curses_testing.FakeCursesTestCase):
-  def setUp(self):
-    app.fake_curses_testing.FakeCursesTestCase.setUp(self)
 
-  def test_draw_nothing(self):
-    self.runWithFakeInputs([
-        self.displayCheck(2, 7, [u"      "]), self.writeText(u"tex"),
-        self.displayCheck(2, 7, [u"tex "]), KEY_BACKSPACE1, u"t",
-        self.displayCheck(2, 7, [u"tet "]), CTRL_Q, u"n"])
+    def setUp(self):
+        app.fake_curses_testing.FakeCursesTestCase.setUp(self)
 
-  def test_draw_text(self):
-    self.runWithFakeInputs([
-        self.displayCheck(2, 7, [u"      "]), self.writeText(u"text"),
-        self.displayCheck(2, 7, [u"text "]), CTRL_Q, u"n"])
+    def test_draw_nothing(self):
+        self.runWithFakeInputs([
+            self.displayCheck(2, 7, [u"      "]),
+            self.writeText(u"tex"),
+            self.displayCheck(2, 7, [u"tex "]), KEY_BACKSPACE1, u"t",
+            self.displayCheck(2, 7, [u"tet "]), CTRL_Q, u"n"
+        ])
 
-  def test_draw_long_line(self):
-    #self.setMovieMode(True)
-    lineLimitIndicator = app.prefs.editor['lineLimitIndicator']
-    app.prefs.editor['lineLimitIndicator'] = 10
-    self.runWithFakeInputs([
-        self.displayCheck(2, 7, [u"      "]),
-        self.writeText(u"A line with numbers 1234567890"),
-        self.displayCheck(2, 7, [u"A line with numbers 1234567890"]),
-        self.writeText(u". Writing"),
-        self.displayCheck(2, 7, [u"ith numbers 1234567890. Writing"]),
-        self.writeText(u" some more."),
-        self.displayCheck(2, 7, [u" 1234567890. Writing some more."]),
-        self.writeText(u"\n"),
-        self.displayCheck(2, 7, [u"A line with numbers 1234567890."]),
-        CTRL_Q, u"n"])
-    app.prefs.editor['lineLimitIndicator'] = lineLimitIndicator
+    def test_draw_text(self):
+        self.runWithFakeInputs([
+            self.displayCheck(2, 7, [u"      "]),
+            self.writeText(u"text"),
+            self.displayCheck(2, 7, [u"text "]), CTRL_Q, u"n"
+        ])
+
+    def test_draw_long_line(self):
+        #self.setMovieMode(True)
+        lineLimitIndicator = self.prg.prefs.editor['lineLimitIndicator']
+        self.prg.prefs.editor['lineLimitIndicator'] = 10
+        self.runWithFakeInputs([
+            self.displayCheck(2, 7, [u"      "]),
+            self.writeText(u"A line with numbers 1234567890"),
+            self.displayCheck(2, 7, [u"A line with numbers 1234567890"]),
+            self.writeText(u". Writing"),
+            self.displayCheck(2, 7, [u"ith numbers 1234567890. Writing"]),
+            self.writeText(u" some more."),
+            self.displayCheck(2, 7, [u" 1234567890. Writing some more."]),
+            self.writeText(u"\n"),
+            self.displayCheck(2, 7, [u"A line with numbers 1234567890."]),
+            CTRL_Q, u"n"
+        ])
+        self.prg.prefs.editor['lineLimitIndicator'] = lineLimitIndicator

@@ -22,12 +22,12 @@ import app.prefs
 
 
 class PrefsTestCases(unittest.TestCase):
-  def setUp(self):
-    pass
 
-  def tearDown(self):
-    pass
+    def setUp(self):
+        pass
 
-  def test_fill_this_in(self):
-    pass
+    def tearDown(self):
+        pass
 
+    def test_fill_this_in(self):
+        pass
