@@ -25,138 +25,144 @@ import re
 import app.log
 
 
-grammarWords = {}
-
-
 class OsDictionary:
-  def __init__(self):
-    path = '/usr/share/dict/words'
-    try:
-      self.file = io.open(path, 'r')
-      self.fileLength = self.file.seek(0, 2)  # Seek to end of file.
-      self.pageSize = 1024 * 8  # Arbitrary.
-      # Add one to pick up any partial page at the end.
-      self.filePages = self.fileLength // self.pageSize + 1
-    except IOError:
-      self.file = None
-    self.cache = {}
-    self.knownOffsets = []
 
-  def check(self, word):
-    if self.file is None:
-      return False
-    word = word.lower()
-    r = self.cache.get(word)
-    if r is not None:
-      return r
-    high = self.filePages
-    low = 0
-    leash = 20  # Way more than should be necessary.
-    try:
-      while True:
-        if not leash:
-          # There's likely a bug in this function if we hit this.
-          app.log.info('spelling leash', word)
-          return False
-        leash -= 1
-        page = low + (high - low) // 2
-        self.file.seek(page * self.pageSize)
-        # Add 100 to catch any words that straddle a page.
-        size = min(self.pageSize + 100, self.fileLength - page * self.pageSize)
-        if not size:
-          self.cache[word] = False
-          return False
-        chunk = self.file.read(size)
-        chunk = chunk[chunk.find('\n'):chunk.rfind('\n')]
-        if not chunk:
-          self.cache[word] = False
-          return False
-        words = chunk.split()
-        if word < words[0].lower():
-          high = page
-          continue
-        if word > words[-1].lower():
-          low = page
-          continue
-        lowerWords = [i.lower() for i in words]
-        index = bisect.bisect_left(lowerWords, word)
-        if lowerWords[index] == word:
-          self.cache[word] = True
-          return True
-        self.cache[word] = False
-        return False
-    except IOError:
-      return False
+    def __init__(self):
+        path = '/usr/share/dict/words'
+        try:
+            self.file = io.open(path, 'r')
+            self.fileLength = self.file.seek(0, 2)  # Seek to end of file.
+            self.pageSize = 1024 * 8  # Arbitrary.
+            # Add one to pick up any partial page at the end.
+            self.filePages = self.fileLength // self.pageSize + 1
+        except IOError:
+            self.file = None
+        self.cache = {}
+        self.knownOffsets = []
 
-osDictionary = OsDictionary()
-
-
-def loadWords(dirPath):
-  global grammarWords
-  dirPath = os.path.join(dirPath, 'dictionary.')
-  for path in glob.iglob(dirPath+'*.words'):
-    if os.path.isfile(path):
-      grammarName = path[len(dirPath):-len('.words')]
-      with io.open(path, 'r') as f:
-        lines = f.readlines()
-        index = 0
-        while not len(lines[index]) or lines[index][0] == '#':
-          index += 1
-        # TODO(dschuyler): Word contractions are hacked by storing the
-        # components of the contraction. So didn, doesn, and isn are considered
-        # 'words'.
-        grammarWords[grammarName] = set([
-            p for l in lines for w in l.split() for p in w.split("'")])
-loadWords(os.path.dirname(__file__))
-loadWords(os.path.expanduser("~/.ci_edit/dictionaries"))
-
-words = grammarWords.get('en-us', set())
-words.update(grammarWords.get('en-abbreviations', set()))
-words.update(grammarWords.get('en-misc', set()))
-words.update(grammarWords.get('acronyms', set()))
-words.update(grammarWords.get('chromium', set()))
-words.update(grammarWords.get('name', set()))
-words.update(grammarWords.get('coding', set()))
-words.update(grammarWords.get('contractions', set()))
-words.update(grammarWords.get('user', set()))
-# TODO(dschuyler): provide a UI to enable selected dictionaries.
-words.update(grammarWords.get('cpp', set()))
-words.update(grammarWords.get('en-gb', set()))
-words.update(grammarWords.get('html', set()))
-words.update(grammarWords.get('css', set()))
+    def check(self, word):
+        if self.file is None:
+            return False
+        word = word.lower()
+        r = self.cache.get(word)
+        if r is not None:
+            return r
+        high = self.filePages
+        low = 0
+        leash = 20  # Way more than should be necessary.
+        try:
+            while True:
+                if not leash:
+                    # There's likely a bug in this function if we hit this.
+                    app.log.info('spelling leash', word)
+                    return False
+                leash -= 1
+                page = low + (high - low) // 2
+                self.file.seek(page * self.pageSize)
+                # Add 100 to catch any words that straddle a page.
+                size = min(self.pageSize + 100,
+                           self.fileLength - page * self.pageSize)
+                if not size:
+                    self.cache[word] = False
+                    return False
+                chunk = self.file.read(size)
+                chunk = chunk[chunk.find('\n'):chunk.rfind('\n')]
+                if not chunk:
+                    self.cache[word] = False
+                    return False
+                words = chunk.split()
+                if word < words[0].lower():
+                    high = page
+                    continue
+                if word > words[-1].lower():
+                    low = page
+                    continue
+                lowerWords = [i.lower() for i in words]
+                index = bisect.bisect_left(lowerWords, word)
+                if lowerWords[index] == word:
+                    self.cache[word] = True
+                    return True
+                self.cache[word] = False
+                return False
+        except IOError:
+            return False
 
 
-def isCorrect(word, grammarName):
-  if len(word) <= 1:
-    return True
-  lowerWord = word.lower()
-  if word in words or lowerWord in words:
-    return True
-  if lowerWord in grammarWords.get(grammarName, set()):
-    return True
-  if lowerWord.startswith('sub') and lowerWord[3:] in words:
-    return True
-  if lowerWord.startswith('un') and lowerWord[2:] in words:
-    return True
-  if 1:
-    if len(word) == 2 and word[1] == 's' and word[0].isupper():
-      # Upper case, with an 's' for plurality (e.g. PDFs).
-      return True
-  if 0:
-    if len(re.sub('[A-Z]', '', word)) == 0:
-      # All upper case.
-      return True
-  if 0:
-    # TODO(dschuyler): This is an experiment. Considering a py specific word
-    # list instead.
-    if grammarName == 'py':
-      # Handle run together (undelineated) words.
-      if len(re.sub('[a-z]+', '', word)) == 0:
-        for i in range(len(word), 0, -1):
-          if word[:i] in words and word[i:] in words:
+class Dictionary:
+
+    def __init__(self):
+        self.osDictionary = OsDictionary()
+
+        self.grammarWords = {}
+        self.loadWords(os.path.dirname(__file__))
+        self.loadWords(os.path.expanduser("~/.ci_edit/dictionaries"))
+
+        words = self.grammarWords.get('en-us', set())
+        words.update(self.grammarWords.get('en-abbreviations', set()))
+        words.update(self.grammarWords.get('en-misc', set()))
+        words.update(self.grammarWords.get('acronyms', set()))
+        words.update(self.grammarWords.get('chromium', set()))
+        words.update(self.grammarWords.get('name', set()))
+        words.update(self.grammarWords.get('coding', set()))
+        words.update(self.grammarWords.get('contractions', set()))
+        words.update(self.grammarWords.get('user', set()))
+        # TODO(dschuyler): provide a UI to enable selected dictionaries.
+        words.update(self.grammarWords.get('cpp', set()))
+        words.update(self.grammarWords.get('en-gb', set()))
+        words.update(self.grammarWords.get('html', set()))
+        words.update(self.grammarWords.get('css', set()))
+        self.words = words
+
+    def loadWords(self, dirPath):
+        dirPath = os.path.join(dirPath, 'dictionary.')
+        for path in glob.iglob(dirPath + '*.words'):
+            if os.path.isfile(path):
+                grammarName = path[len(dirPath):-len('.words')]
+                with io.open(path, 'r') as f:
+                    lines = f.readlines()
+                    index = 0
+                    while not len(lines[index]) or lines[index][0] == '#':
+                        index += 1
+                    # TODO(dschuyler): Word contractions are hacked by storing
+                    # the components of the contraction. So didn, doesn, and isn
+                    # are considered 'words'.
+                    self.grammarWords[grammarName] = set([
+                        p for l in lines for w in l.split()
+                        for p in w.split("'")
+                    ])
+
+    def isCorrect(self, word, grammarName):
+        if len(word) <= 1:
             return True
-  if 1:  # Experimental.
-    # Fallback to the OS dictionary.
-    return osDictionary.check(word)
-  #app.log.info(grammarName, word)
-  return False
+        words = self.words
+        lowerWord = word.lower()
+        if word in words or lowerWord in words:
+            return True
+        if lowerWord in self.grammarWords.get(grammarName, set()):
+            return True
+        if lowerWord.startswith('sub') and lowerWord[3:] in words:
+            return True
+        if lowerWord.startswith('un') and lowerWord[2:] in words:
+            return True
+        if 1:
+            if len(word) == 2 and word[1] == 's' and word[0].isupper():
+                # Upper case, with an 's' for plurality (e.g. PDFs).
+                return True
+        if 0:
+            if len(re.sub('[A-Z]', '', word)) == 0:
+                # All upper case.
+                return True
+        if 0:
+            # TODO(dschuyler): This is an experiment. Considering a py specific
+            # word list instead.
+            if grammarName == 'py':
+                # Handle run together (undelineated) words.
+                if len(re.sub('[a-z]+', '', word)) == 0:
+                    for i in range(len(word), 0, -1):
+                        if word[:i] in words and word[i:] in words:
+                            return True
+        if 1:  # Experimental.
+            # Fallback to the OS dictionary.
+            return self.osDictionary.check(word)
+        #app.log.info(grammarName, word)
+        return False

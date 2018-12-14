@@ -30,48 +30,94 @@ performance1 = '''
 import app.parser
 path = 'app/actions.py'
 data = open(path).read()
-grammar = app.prefs.getGrammar(path)
+grammar = self.prefs.getGrammar(path)
 '''
 
+
 class ParserTestCases(unittest.TestCase):
-  def setUp(self):
-    self.parser = app.parser.Parser()
 
-  def tearDown(self):
-    self.parser = None
+    def setUp(self):
+        self.parser = app.parser.Parser()
 
-  def test_parse(self):
-    test = """/* first comment */
+    def tearDown(self):
+        self.parser = None
+
+    def test_parse(self):
+        test = """/* first comment */
 two
 // second comment
 #include "test.h"
 void blah();
 """
-    self.parser.parse(test, app.prefs.grammars['cpp'], 0, 99999)
-    #self.assertEqual(selectable.selection(), (0, 0, 0, 0))
+        self.prefs = app.prefs.Prefs()
+        self.parser.parse(None, self.prefs, test, self.prefs.grammars['cpp'], 0,
+                          99999)
+        #self.assertEqual(selectable.selection(), (0, 0, 0, 0))
 
-  if 0:
-    def test_parse_performance(self):
-      a = timeit(
-          '''parser = app.parser.Parser()
-parser.parse(data, grammar, 0, sys.maxsize)''',
-          setup=performance1,
-          number=10)
+    def test_parse_cpp_literal(self):
+        test = """/* first comment */
+char stuff = R"mine(two
+// not a comment)mine";
+void blah();
+"""
+        self.prefs = app.prefs.Prefs()
+        self.parser.parse(None, self.prefs, test, self.prefs.grammars['cpp'], 0,
+                          99999)
+        self.assertEqual(self.parser.rowText(0), "/* first comment */")
+        self.assertEqual(self.parser.rowText(1), """char stuff = R"mine(two""")
+        self.assertEqual(
+            self.parser.grammarAt(0, 0),
+            self.prefs.grammars['cpp_block_comment'])
+        self.assertEqual(
+            self.parser.grammarAt(1, 8), self.prefs.grammars['cpp'])
+        self.assertEqual(
+            self.parser.grammarAt(1, 18),
+            self.prefs.grammars['cpp_string_literal'])
+        self.assertEqual(
+            self.parser.grammarAt(3, 7), self.prefs.grammars['cpp'])
 
-  if 0:
-    def test_profile_parse(self):
-      profile = cProfile.Profile()
-      parser = app.parser.Parser()
-      path = 'app/actions.py'
-      data = io.open(path).read()
-      grammar = app.prefs.getGrammar(path)
+    def test_parse_rs_raw_string(self):
+        test = """// one
+let stuff = r###"two
+not an "## end
+ignored " quote"###;
+fn main { }
+// two
+"""
+        self.prefs = app.prefs.Prefs()
+        self.parser.parse(None, self.prefs, test, self.prefs.grammars['rs'], 0,
+                          99999)
+        self.assertEqual(self.parser.rowText(0), "// one")
+        self.assertEqual(self.parser.rowText(1), """let stuff = r###"two""")
+        self.assertEqual(
+            self.parser.grammarAt(0, 0),
+            self.prefs.grammars['cpp_line_comment'])
+        self.assertEqual(self.parser.grammarAt(1, 8), self.prefs.grammars['rs'])
+        self.assertEqual(
+            self.parser.grammarAt(1, 18), self.prefs.grammars['rs_raw_string'])
+        self.assertEqual(
+            self.parser.grammarAt(2, 12), self.prefs.grammars['rs_raw_string'])
+        self.assertEqual(
+            self.parser.grammarAt(3, 15), self.prefs.grammars['rs_raw_string'])
+        self.assertEqual(
+            self.parser.grammarAt(3, 12), self.prefs.grammars['rs_raw_string'])
+        self.assertEqual(self.parser.grammarAt(4, 7), self.prefs.grammars['rs'])
 
-      profile.enable()
-      parser.parse(data, grammar, 0, sys.maxsize)
-      profile.disable()
+    if 0:
 
-      output = io.StringIO.StringIO()
-      stats = pstats.Stats(profile, stream=output).sort_stats('cumulative')
-      stats.print_stats()
-      print(output.getvalue())
+        def test_profile_parse(self):
+            profile = cProfile.Profile()
+            parser = app.parser.Parser()
+            path = 'app/actions.py'
+            data = io.open(path).read()
+            grammar = self.prefs.getGrammar(path)
 
+            profile.enable()
+            parser.parse(data, grammar, 0, sys.maxsize)
+            profile.disable()
+
+            output = io.StringIO.StringIO()
+            stats = pstats.Stats(
+                profile, stream=output).sort_stats('cumulative')
+            stats.print_stats()
+            print(output.getvalue())

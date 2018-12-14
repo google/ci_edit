@@ -15,5 +15,5 @@
 mod ci_program;
 
 fn main() {
-    ci_program::run();
+    ci_program::run_ci();
 }

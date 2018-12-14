@@ -16,12 +16,9 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-
 # These constants have specific values.
 COLORS = 256
 ERR = 0  # ERR is normally -1, but bg signal doesn't work in unit test.
-
-
 
 # These constants have arbitrary values.
 KEY_ALT_A = 0  # todo
@@ -95,7 +92,6 @@ KEY_SRIGHT = 67  # todo
 KEY_UP = 68  # todo
 KEY_SEND = 69  # todo
 KEY_SHOME = 70  # todo
-
 
 A_BOLD = 1000
 A_REVERSE = 1001

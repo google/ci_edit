@@ -20,32 +20,40 @@ import time
 
 profiles = {}
 
+
 def start():
-  return time.time()
+    return time.time()
+
 
 def current(key, value):
-  profiles[key] = value
+    profiles[key] = value
+
 
 def highest(key, value):
-  if value > profiles.get(key):
-    profiles[key] = value
+    if value > profiles.get(key):
+        profiles[key] = value
+
 
 def lowest(key, value):
-  if value < profiles.get(key, value):
-    profiles[key] = value
+    if value < profiles.get(key, value):
+        profiles[key] = value
 
-def highestDelta(key, start):
-  delta = time.time() - start
-  if delta > profiles.get(key):
-    profiles[key] = delta
 
-def runningDelta(key, start):
-  delta = time.time() - start
-  bleed = 0.501
-  profiles[key] = delta*bleed+profiles.get(key, delta)*(1-bleed)
+def highestDelta(key, startTime):
+    delta = time.time() - startTime
+    if delta > profiles.get(key):
+        profiles[key] = delta
+
+
+def runningDelta(key, startTime):
+    delta = time.time() - startTime
+    bleed = 0.501
+    profiles[key] = delta * bleed + profiles.get(key, delta) * (1 - bleed)
+
 
 def results():
-  return "one\ntwo\nthree"
+    return "one\ntwo\nthree"
+
 
 #----------------------------
 # TODO(dschuyler): consider moving this python profile code out of this file.
@@ -54,17 +62,16 @@ import cProfile
 import pstats
 import io
 
+
 def beginPythonProfile():
-  profile = cProfile.Profile()
-  profile.enable()
-  return profile
+    profile = cProfile.Profile()
+    profile.enable()
+    return profile
+
 
 def endPythonProfile(profile):
-  profile.disable()
-  output = io.StringIO.StringIO()
-  stats = pstats.Stats(profile, stream=output).sort_stats('cumulative')
-  stats.print_stats()
-  app.log.info(output.getvalue())
-
-
-
+    profile.disable()
+    output = io.StringIO.StringIO()
+    stats = pstats.Stats(profile, stream=output).sort_stats('cumulative')
+    stats.print_stats()
+    app.log.info(output.getvalue())

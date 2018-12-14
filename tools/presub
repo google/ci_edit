@@ -1,0 +1,21 @@
+#!/bin/bash
+
+process() {
+    echo "Processing $1"
+    yapf -i --style google "$1"
+    #docformatter -i --wrap-summaries 80 --wrap-descriptions 80 "$1"
+    pylint -d unused-argument -d attribute-defined-outside-init \
+-d undefined-variable -d wildcard-import -d redefined-builtin "$1"
+}
+
+if [ "$1" != "" ]; then
+  fileList=$*
+else
+  fileList=`git diff master --name-only`
+fi
+
+for i in $fileList; do
+  if [ "${i: -3}" == ".py" ]; then
+    process "$i"
+  fi
+done
