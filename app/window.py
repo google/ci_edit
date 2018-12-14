@@ -541,7 +541,7 @@ class Menu(ViewWindow):
     def __init__(self, program, host):
         if app.config.strict_debug:
             assert issubclass(self.__class__, Menu), self
-            assert issubclass(host.__class__, ActiveWindow), parent
+            assert issubclass(host.__class__, ActiveWindow)
         ViewWindow.__init__(self, program, host)
         self.host = host
         self.label = u''
@@ -1366,15 +1366,9 @@ class OptionsToggle(OptionsTrinaryStateWindow):
             assert type(prefName) == unicode
         OptionsTrinaryStateWindow.__init__(self, program, parent, label,
                                            prefCategory, prefName)
-        if 0:
-            toggleOn = '[x]' + name
-            toggleOff = '[ ]' + name
-        if 0:
-            toggleOn = unichr(0x2612) + ' ' + control['name']
-            toggleOff = unichr(0x2610) + ' ' + control['name']
-        if 0:
-            toggleOn = '[+' + control['name'] + ']'
-            toggleOff = '[-' + control['name'] + ']'
+        # I considered these unicode characters, but [x] looks clearer to me.
+        # toggleOn = unichr(0x2612) + ' ' + control['name']
+        # toggleOff = unichr(0x2610) + ' ' + control['name']
         OptionsTrinaryStateWindow.setUp(self, u'[x]' + label, u'[ ]' + label,
                                         u'[-]' + label, width)
 
