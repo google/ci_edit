@@ -44,7 +44,7 @@ class PredictionListController(app.controller.Controller):
 
     def buildFileList(self, currentFile):
         if app.config.strict_debug:
-            assert type(currentFile) is unicode, repr(currentFile)
+            assert isinstance(currentFile, unicode), repr(currentFile)
 
         added = set()
         items = self.items = []
@@ -136,7 +136,7 @@ class PredictionListController(app.controller.Controller):
 
     def openFileOrDir(self, row):
         if app.config.strict_debug:
-            assert type(row) is int
+            assert isinstance(row, int)
         if self.items is None or len(self.items) == 0:
             return
         bufferManager = self.view.program.bufferManager
@@ -154,14 +154,14 @@ class PredictionListController(app.controller.Controller):
 
     def optionChanged(self, name, value):
         if app.config.strict_debug:
-            assert type(name) is unicode
-            assert type(value) is unicode
+            assert isinstance(name, unicode)
+            assert isinstance(value, unicode)
         self.shownList = None
         self.onChange()
 
     def setFilter(self, listFilter):
         if app.config.strict_debug:
-            assert type(listFilter) is unicode
+            assert isinstance(listFilter, unicode)
         self.filter = listFilter
         self.shownList = None  # Cause a refresh.
 
@@ -215,8 +215,8 @@ class PredictionInputController(app.controller.Controller):
 
     def optionChanged(self, name, value):
         if app.config.strict_debug:
-            assert type(name) is unicode
-            assert type(value) is unicode
+            assert isinstance(name, unicode)
+            assert isinstance(value, unicode)
         self.getNamedWindow('predictionList').controller.shownList = None
 
     def passEventToPredictionList(self):

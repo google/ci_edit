@@ -185,7 +185,7 @@ class CiProgram:
                     if self.exiting:
                         return
                     ch = cursesWindow.getch()
-                    # assert type(ch) is int, type(ch)
+                    # assert isinstance(ch, int), type(ch)
                     if ch == curses.ascii.ESC:
                         # Some keys are sent from the terminal as a sequence of
                         # bytes beginning with an Escape character. To help

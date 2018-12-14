@@ -190,8 +190,8 @@ class InteractivePrompt(app.controller.Controller):
                 output, message = self.subExecute.get(cmdLine[0])(cmdLine[1:],
                                                                   data)
                 if app.config.strict_debug:
-                    assert type(output) is bytes
-                    assert type(message) is unicode
+                    assert isinstance(output, bytes)
+                    assert isinstance(message, unicode)
                 output = tb.doDataToLines(output.decode('utf-8'))
                 tb.editPasteLines(tuple(output))
                 tb.setMessage(message)
@@ -223,8 +223,8 @@ class InteractivePrompt(app.controller.Controller):
         return tuple: output as bytes (not unicode), message as unicode.
         """
         if app.config.strict_debug:
-            assert type(commands) is unicode, type(commands)
-            assert type(cmdInput) is bytes, type(cmdInput)
+            assert isinstance(commands, unicode), type(commands)
+            assert isinstance(cmdInput, bytes), type(cmdInput)
         try:
             process = subprocess.Popen(
                 commands,
@@ -242,8 +242,8 @@ class InteractivePrompt(app.controller.Controller):
         return tuple: output as bytes (not unicode), message as unicode.
         """
         if app.config.strict_debug:
-            assert type(commands) is unicode, type(commands)
-            assert type(cmdInput) is bytes, type(cmdInput)
+            assert isinstance(commands, unicode), type(commands)
+            assert isinstance(cmdInput, bytes), type(cmdInput)
         chain = kRePipeChain.findall(commands)
         try:
             process = subprocess.Popen(

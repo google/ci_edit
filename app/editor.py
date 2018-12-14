@@ -32,7 +32,7 @@ import app.text_buffer
 
 def parseInt(inStr):
     if app.config.strict_debug:
-        assert type(inStr) is unicode, type(inStr)
+        assert isinstance(inStr, unicode), type(inStr)
     i = 0
     k = 0
     if len(inStr) > i and inStr[i] in ('+', '-'):
@@ -72,8 +72,8 @@ class InteractivePrediction(app.controller.Controller):
 
     def cursorMoveTo(self, row, col):
         if app.config.strict_debug:
-            assert type(row) is int
-            assert type(col) is int
+            assert isinstance(row, int)
+            assert isinstance(col, int)
         textBuffer = self.view.host.textBuffer
         textBuffer.cursorMoveTo(row, col)
         textBuffer.cursorScrollToMiddle()
@@ -95,7 +95,7 @@ class InteractivePrediction(app.controller.Controller):
 
     def buildFileList(self, currentFile):
         if app.config.strict_debug:
-            assert type(currentFile) is str
+            assert isinstance(currentFile, str)
         self.items = []
         bufferManager = self.view.program.bufferManager
         for i in bufferManager.buffers:
@@ -301,8 +301,8 @@ class InteractiveGoto(app.controller.Controller):
 
     def cursorMoveTo(self, row, col):
         if app.config.strict_debug:
-            assert type(row) is int
-            assert type(col) is int
+            assert isinstance(row, int)
+            assert isinstance(col, int)
         textBuffer = self.view.host.textBuffer
         textBuffer.cursorMoveTo(row, col)
         textBuffer.cursorScrollToMiddle()

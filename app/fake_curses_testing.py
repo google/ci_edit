@@ -86,10 +86,10 @@ class FakeCursesTestCase(unittest.TestCase):
       curses.BUTTON_CTRL
       curses.BUTTON_ALT
     """
-        assert type(timeStamp) is int
-        assert type(mouseRow) is int
-        assert type(mouseCol) is int
-        assert type(bState) is int
+        assert isinstance(timeStamp, int)
+        assert isinstance(mouseRow, int)
+        assert isinstance(mouseCol, int)
+        assert isinstance(bState, int)
         # Note that the mouse info is x,y (col, row).
         info = (timeStamp, mouseCol, mouseRow, 0, bState)
 
@@ -100,9 +100,9 @@ class FakeCursesTestCase(unittest.TestCase):
         return createEvent
 
     def displayCheck(self, *args):
-        assert type(args[0]) is int
-        assert type(args[1]) is int
-        assert type(args[2]) is list
+        assert isinstance(args[0], int)
+        assert isinstance(args[1], int)
+        assert isinstance(args[2], list)
         caller = inspect.stack()[1]
         callerText = u"\n  %s:%s:%s(): " % (os.path.split(caller[1])[1],
                                             caller[2], caller[3])
@@ -123,7 +123,7 @@ class FakeCursesTestCase(unittest.TestCase):
         """
     Verify that the display does not match.
     """
-        assert type(args[0]) is int
+        assert isinstance(args[0], int)
         caller = inspect.stack()[1]
         callerText = "\n  %s:%s:%s(): " % (os.path.split(caller[1])[1],
                                            caller[2], caller[3])
@@ -163,8 +163,8 @@ class FakeCursesTestCase(unittest.TestCase):
         return self.cursesScreen.test_find_text(screenText)
 
     def cursorCheck(self, expectedRow, expectedCol):
-        assert type(expectedRow) is int
-        assert type(expectedCol) is int
+        assert isinstance(expectedRow, int)
+        assert isinstance(expectedCol, int)
         caller = inspect.stack()[1]
         callerText = u"in %s:%s:%s(): " % (os.path.split(caller[1])[1],
                                            caller[2], caller[3])
@@ -184,8 +184,8 @@ class FakeCursesTestCase(unittest.TestCase):
         return os.path.join(path, u"sample", relPath)
 
     def resizeScreen(self, rows, cols):
-        assert type(rows) is int
-        assert type(cols) is int
+        assert isinstance(rows, int)
+        assert isinstance(cols, int)
 
         def setScreenSize(display, cmdIndex):
             self.cursesScreen.fakeDisplay.setScreenSize(rows, cols)
@@ -194,7 +194,7 @@ class FakeCursesTestCase(unittest.TestCase):
         return setScreenSize
 
     def setClipboard(self, text):
-        assert type(text) is str
+        assert isinstance(text, str)
         caller = inspect.stack()[1]
         callerText = u"in %s:%s:%s(): " % (os.path.split(caller[1])[1],
                                            caller[2], caller[3])
@@ -211,7 +211,7 @@ class FakeCursesTestCase(unittest.TestCase):
         self.cursesScreen.fakeInput.isVerbose = enabled
 
     def writeText(self, text):
-        assert type(text) is unicode, type(text)
+        assert isinstance(text, unicode), type(text)
         caller = inspect.stack()[1]
         callerText = u"in %s:%s:%s(): " % (os.path.split(caller[1])[1],
                                            caller[2], caller[3])

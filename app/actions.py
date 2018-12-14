@@ -306,7 +306,7 @@ class Actions(app.mutator.Mutator):
 
     def cursorColDelta(self, toRow):
         if app.config.strict_debug:
-            assert type(toRow) is int
+            assert isinstance(toRow, int)
             assert 0 <= toRow < len(self.lines)
         lineLen = len(self.lines[toRow])
         if self.goalCol <= lineLen:
@@ -327,8 +327,8 @@ class Actions(app.mutator.Mutator):
 
     def getCursorMove(self, rowDelta, colDelta):
         if app.config.strict_debug:
-            assert type(rowDelta) is int
-            assert type(colDelta) is int
+            assert isinstance(rowDelta, int)
+            assert isinstance(colDelta, int)
         return self.getCursorMoveAndMark(rowDelta, colDelta, 0, 0, 0)
 
     def cursorMove(self, rowDelta, colDelta):
@@ -337,11 +337,11 @@ class Actions(app.mutator.Mutator):
     def getCursorMoveAndMark(self, rowDelta, colDelta, markRowDelta,
                              markColDelta, selectionModeDelta):
         if app.config.strict_debug:
-            assert type(rowDelta) is int
-            assert type(colDelta) is int
-            assert type(markRowDelta) is int
-            assert type(markColDelta) is int
-            assert type(selectionModeDelta) is int
+            assert isinstance(rowDelta, int)
+            assert isinstance(colDelta, int)
+            assert isinstance(markRowDelta, int)
+            assert isinstance(markColDelta, int)
+            assert isinstance(selectionModeDelta, int)
         if self.penCol + colDelta < 0:  # Catch cursor at beginning of line.
             colDelta = -self.penCol
         self.goalCol = self.penCol + colDelta
@@ -351,8 +351,8 @@ class Actions(app.mutator.Mutator):
     def cursorMoveAndMark(self, rowDelta, colDelta, markRowDelta, markColDelta,
                           selectionModeDelta):
         if app.config.strict_debug:
-            assert type(rowDelta) is int
-            assert type(colDelta) is int
+            assert isinstance(rowDelta, int)
+            assert isinstance(colDelta, int)
         change = self.getCursorMoveAndMark(rowDelta, colDelta, markRowDelta,
                                            markColDelta, selectionModeDelta)
         self.redoAddChange(change)
@@ -824,7 +824,7 @@ class Actions(app.mutator.Mutator):
 
     def doDataToLines(self, data):
         if app.config.strict_debug:
-            assert type(data) is unicode
+            assert isinstance(data, unicode)
         # Performance: in a 1000 line test it appears fastest to do some simple
         # .replace() calls to minimize the number of calls to parse().
         data = data.replace(u'\r\n', u'\n')
@@ -1171,8 +1171,8 @@ class Actions(app.mutator.Mutator):
     def find(self, searchFor, direction=0):
         """direction is -1 for findPrior, 0 for at pen, 1 for findNext."""
         if app.config.strict_debug:
-            assert type(searchFor) is unicode
-            assert type(direction) is int
+            assert isinstance(searchFor, unicode)
+            assert isinstance(direction, int)
         app.log.info(searchFor, direction)
         if not len(searchFor):
             self.findRe = None
@@ -1200,7 +1200,7 @@ class Actions(app.mutator.Mutator):
     def replaceFound(self, replaceWith):
         """direction is -1 for findPrior, 0 for at pen, 1 for findNext."""
         if app.config.strict_debug:
-            assert type(replaceWith) is unicode
+            assert isinstance(replaceWith, unicode)
         if not self.findRe:
             return
         if self.program.prefs.editor.get(u'findUseRegex'):

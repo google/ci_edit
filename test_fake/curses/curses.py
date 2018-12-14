@@ -172,11 +172,11 @@ class FakeDisplay:
         return None
 
     def checkText(self, row, col, lines, verbose=3):
-        assert type(row) is int
-        assert type(col) is int
-        assert type(lines) is list
-        assert type(lines[0]) is unicode
-        assert type(verbose) is int
+        assert isinstance(row, int)
+        assert isinstance(col, int)
+        assert isinstance(lines, list)
+        assert isinstance(lines[0], unicode)
+        assert isinstance(verbose, int)
         for i in range(len(lines)):
             line = lines[i]
             for k in range(len(line)):

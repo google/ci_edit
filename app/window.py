@@ -323,7 +323,7 @@ class ViewWindow:
     def writeLine(self, text, color):
         """Simple line writer for static windows."""
         if app.config.strict_debug:
-            assert type(text) is unicode
+            assert isinstance(text, unicode)
         text = text[:self.cols]
         text = text + u' ' * max(0, self.cols - len(text))
         self.program.frame.addStr(self.top + self.writeLineRow, self.left,
@@ -459,9 +459,9 @@ class LabelWindow(ViewWindow):
         if app.config.strict_debug:
             assert issubclass(program.__class__, app.ci_program.CiProgram), self
             assert issubclass(parent.__class__, ViewWindow), parent
-            assert type(label) == unicode
-            assert preferredWidth is None or type(preferredWidth) == int
-            assert type(align) == unicode
+            assert isinstance(label, unicode)
+            assert preferredWidth is None or isinstance(preferredWidth, int)
+            assert isinstance(align, unicode)
         ViewWindow.__init__(self, program, parent)
         self.label = label
         self.preferredWidth = preferredWidth
@@ -1290,9 +1290,9 @@ class OptionsTrinaryStateWindow(Window):
 
     def __init__(self, program, parent, label, prefCategory, prefName):
         if app.config.strict_debug:
-            assert type(label) == unicode
-            assert type(prefCategory) == unicode
-            assert type(prefName) == unicode
+            assert isinstance(label, unicode)
+            assert isinstance(prefCategory, unicode)
+            assert isinstance(prefName, unicode)
         Window.__init__(self, program, parent)
         # TODO(dschuyler): Creating a text buffer is rather heavy for a toggle
         # control. This should get some optimization.
@@ -1311,10 +1311,10 @@ class OptionsTrinaryStateWindow(Window):
 
     def setUp(self, toggleOn, toggleOff, toggleUndefined, width=None):
         if app.config.strict_debug:
-            assert type(toggleOn) == unicode
-            assert type(toggleOff) == unicode
-            assert type(toggleUndefined) == unicode
-            assert width is None or type(width) == int
+            assert isinstance(toggleOn, unicode)
+            assert isinstance(toggleOff, unicode)
+            assert isinstance(toggleUndefined, unicode)
+            assert width is None or isinstance(width, int)
         self.toggleOn = toggleOn
         self.toggleOff = toggleOff
         self.toggleUndefined = toggleUndefined
@@ -1361,9 +1361,9 @@ class OptionsToggle(OptionsTrinaryStateWindow):
                  prefName,
                  width=None):
         if app.config.strict_debug:
-            assert type(label) == unicode
-            assert type(prefCategory) == unicode
-            assert type(prefName) == unicode
+            assert isinstance(label, unicode)
+            assert isinstance(prefCategory, unicode)
+            assert isinstance(prefName, unicode)
         OptionsTrinaryStateWindow.__init__(self, program, parent, label,
                                            prefCategory, prefName)
         # I considered these unicode characters, but [x] looks clearer to me.
@@ -1417,12 +1417,12 @@ class OptionsRow(ViewWindow):
 
     def addElement(self, draw, kind, name, reference, width, sep, extraWidth=0):
         if app.config.strict_debug:
-            assert type(name) == unicode
-            assert type(sep) == unicode
-            assert type(width) in [type(None), int]
-            assert type(extraWidth) == int
+            assert isinstance(name, unicode)
+            assert isinstance(sep, unicode)
+            assert width is None or isinstance(width, int)
+            assert isinstance(extraWidth, int)
             if reference is not None:
-                assert type(reference) == dict
+                assert isinstance(reference, dict)
                 assert name in reference
         if self.group is not None:
             self.group.append(len(self.controlList))
@@ -1458,7 +1458,7 @@ class OptionsRow(ViewWindow):
 
     def addSelection(self, name, reference, width=None, sep=u"  "):
         if app.config.strict_debug:
-            assert type(name) == unicode
+            assert isinstance(name, unicode)
         if 1:
             toggleOn = u'(*)' + name
             toggleOff = u'( )' + name
@@ -1472,7 +1472,7 @@ class OptionsRow(ViewWindow):
 
     def removeThis_addToggle(self, name, reference, width=None, sep=u"  "):
         if app.config.strict_debug:
-            assert type(name) == unicode
+            assert isinstance(name, unicode)
         if 1:
             toggleOn = u'[x]' + name
             toggleOff = u'[ ]' + name
@@ -1661,9 +1661,9 @@ class SortableHeaderWindow(OptionsTrinaryStateWindow):
         if app.config.strict_debug:
             assert issubclass(program.__class__,
                               app.ci_program.CiProgram), program
-            assert type(label) == unicode
-            assert type(prefCategory) == unicode
-            assert type(prefName) == unicode
+            assert isinstance(label, unicode)
+            assert isinstance(prefCategory, unicode)
+            assert isinstance(prefName, unicode)
         OptionsTrinaryStateWindow.__init__(self, program, parent, label,
                                            prefCategory, prefName)
         self.color = self.program.color.get(u'top_info')

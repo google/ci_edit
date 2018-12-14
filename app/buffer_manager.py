@@ -98,7 +98,7 @@ class BufferManager:
     def loadTextBuffer(self, relPath):
         if app.config.strict_debug:
             assert issubclass(self.__class__, BufferManager), self
-            assert type(relPath) is unicode, type(relPath)
+            assert isinstance(relPath, unicode), type(relPath)
         fullPath = app.buffer_file.fullPath(relPath)
         app.log.info(fullPath)
         textBuffer = None
