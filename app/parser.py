@@ -15,6 +15,11 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+try:
+    unicode
+except NameError:
+    unicode = str
+    unichr = chr
 
 import curses.ascii
 import os
@@ -25,6 +30,7 @@ import traceback
 
 import third_party.pyperclip as clipboard
 
+import app.config
 import app.log
 import app.selectable
 
@@ -58,7 +64,7 @@ class Parser:
     """A parser generates a set of grammar segments (ParserNode objects)."""
 
     def __init__(self):
-        self.data = ""
+        self.data = u""
         self.emptyNode = ParserNode({}, None, None, 0)
         self.endNode = ({}, sys.maxsize, sys.maxsize, sys.maxsize)
         self.fullyParsedToLine = -1
@@ -197,6 +203,9 @@ class Parser:
         return len(self.rows)
 
     def rowText(self, row):
+        if app.config.strict_debug:
+            assert isinstance(row, int)
+            assert isinstance(self.data, unicode)
         begin = self.parserNodes[self.rows[row]][kBegin]
         if row + 1 < len(self.rows):
             end = self.parserNodes[self.rows[row + 1]][kBegin]

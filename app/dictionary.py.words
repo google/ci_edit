@@ -163,6 +163,7 @@ isdecimal
 isdigit
 isdir
 isfile
+isinstance
 islink
 islower
 ismount

@@ -61,7 +61,7 @@ class EditText(app.controller.Controller):
         self.document = None
 
     def setTextBuffer(self, textBuffer):
-        textBuffer.lines = [unicode("")]
+        textBuffer.lines = [u""]
         self.commandSet = {
             KEY_F1: self.info,
             CTRL_A: textBuffer.selectionAll,

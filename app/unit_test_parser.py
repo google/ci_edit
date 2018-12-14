@@ -26,7 +26,7 @@ import unittest
 import app.parser
 import app.prefs
 
-performance1 = '''
+performance1 = u'''
 import app.parser
 path = 'app/actions.py'
 data = open(path).read()
@@ -43,19 +43,19 @@ class ParserTestCases(unittest.TestCase):
         self.parser = None
 
     def test_parse(self):
-        test = """/* first comment */
+        test = u"""/* first comment */
 two
 // second comment
 #include "test.h"
 void blah();
 """
         self.prefs = app.prefs.Prefs()
-        self.parser.parse(None, self.prefs, test, self.prefs.grammars['cpp'], 0,
-                          99999)
+        self.parser.parse(None, self.prefs, test, self.prefs.grammars[u'cpp'],
+                          0, 99999)
         #self.assertEqual(selectable.selection(), (0, 0, 0, 0))
 
     def test_parse_cpp_literal(self):
-        test = """/* first comment */
+        test = u"""/* first comment */
 char stuff = R"mine(two
 // not a comment)mine";
 void blah();
@@ -63,21 +63,21 @@ void blah();
         self.prefs = app.prefs.Prefs()
         self.parser.parse(None, self.prefs, test, self.prefs.grammars['cpp'], 0,
                           99999)
-        self.assertEqual(self.parser.rowText(0), "/* first comment */")
-        self.assertEqual(self.parser.rowText(1), """char stuff = R"mine(two""")
+        self.assertEqual(self.parser.rowText(0), u"/* first comment */")
+        self.assertEqual(self.parser.rowText(1), u"""char stuff = R"mine(two""")
         self.assertEqual(
             self.parser.grammarAt(0, 0),
-            self.prefs.grammars['cpp_block_comment'])
+            self.prefs.grammars[u'cpp_block_comment'])
         self.assertEqual(
-            self.parser.grammarAt(1, 8), self.prefs.grammars['cpp'])
+            self.parser.grammarAt(1, 8), self.prefs.grammars[u'cpp'])
         self.assertEqual(
             self.parser.grammarAt(1, 18),
-            self.prefs.grammars['cpp_string_literal'])
+            self.prefs.grammars[u'cpp_string_literal'])
         self.assertEqual(
-            self.parser.grammarAt(3, 7), self.prefs.grammars['cpp'])
+            self.parser.grammarAt(3, 7), self.prefs.grammars[u'cpp'])
 
     def test_parse_rs_raw_string(self):
-        test = """// one
+        test = u"""// one
 let stuff = r###"two
 not an "## end
 ignored " quote"###;
@@ -85,30 +85,32 @@ fn main { }
 // two
 """
         self.prefs = app.prefs.Prefs()
-        self.parser.parse(None, self.prefs, test, self.prefs.grammars['rs'], 0,
+        self.parser.parse(None, self.prefs, test, self.prefs.grammars[u'rs'], 0,
                           99999)
-        self.assertEqual(self.parser.rowText(0), "// one")
-        self.assertEqual(self.parser.rowText(1), """let stuff = r###"two""")
+        self.assertEqual(self.parser.rowText(0), u"// one")
+        self.assertEqual(self.parser.rowText(1), u"""let stuff = r###"two""")
         self.assertEqual(
             self.parser.grammarAt(0, 0),
-            self.prefs.grammars['cpp_line_comment'])
-        self.assertEqual(self.parser.grammarAt(1, 8), self.prefs.grammars['rs'])
+            self.prefs.grammars[u'cpp_line_comment'])
         self.assertEqual(
-            self.parser.grammarAt(1, 18), self.prefs.grammars['rs_raw_string'])
+            self.parser.grammarAt(1, 8), self.prefs.grammars[u'rs'])
         self.assertEqual(
-            self.parser.grammarAt(2, 12), self.prefs.grammars['rs_raw_string'])
+            self.parser.grammarAt(1, 18), self.prefs.grammars[u'rs_raw_string'])
         self.assertEqual(
-            self.parser.grammarAt(3, 15), self.prefs.grammars['rs_raw_string'])
+            self.parser.grammarAt(2, 12), self.prefs.grammars[u'rs_raw_string'])
         self.assertEqual(
-            self.parser.grammarAt(3, 12), self.prefs.grammars['rs_raw_string'])
-        self.assertEqual(self.parser.grammarAt(4, 7), self.prefs.grammars['rs'])
+            self.parser.grammarAt(3, 15), self.prefs.grammars[u'rs_raw_string'])
+        self.assertEqual(
+            self.parser.grammarAt(3, 12), self.prefs.grammars[u'rs_raw_string'])
+        self.assertEqual(
+            self.parser.grammarAt(4, 7), self.prefs.grammars[u'rs'])
 
     if 0:
 
         def test_profile_parse(self):
             profile = cProfile.Profile()
             parser = app.parser.Parser()
-            path = 'app/actions.py'
+            path = u'app/actions.py'
             data = io.open(path).read()
             grammar = self.prefs.getGrammar(path)
 
@@ -118,6 +120,6 @@ fn main { }
 
             output = io.StringIO.StringIO()
             stats = pstats.Stats(
-                profile, stream=output).sort_stats('cumulative')
+                profile, stream=output).sort_stats(u'cumulative')
             stats.print_stats()
             print(output.getvalue())

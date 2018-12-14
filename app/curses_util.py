@@ -15,6 +15,11 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+try:
+    unicode
+except NameError:
+    unicode = str
+    unichr = chr
 
 import curses
 import curses.ascii
@@ -26,11 +31,6 @@ import sys
 import termios
 
 import app.config
-
-try:
-    unicode
-except NameError:
-    unicode = str
 
 MIN_DOUBLE_WIDE_CHARACTER = u"\u3000"
 

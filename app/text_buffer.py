@@ -221,7 +221,7 @@ class TextBuffer(app.actions.Actions):
                     not (startRow + i == self.penRow and
                          self.penCol == len(line)))
                 for s, column, _, index in app.curses_util.renderedFindIter(
-                        line, startCol, endCol, ('[]{}()',), True,
+                        line, startCol, endCol, (u'[]{}()',), True,
                         highlightTrailingWhitespace):
                     window.addStr(top + i, column - self.view.scrollCol, s,
                                   colors[index])
