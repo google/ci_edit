@@ -131,9 +131,12 @@ class Prefs():
             if 0:
                 # keywords re.
                 v['keywordsRe'] = re.compile(
-                    app.regex.joinReWordList(v.get('keywords', []) + v.get('types', [])))
-                v['errorsRe'] = re.compile(app.regex.joinReList(v.get('errors', [])))
-                v['specialsRe'] = re.compile(app.regex.joinReList(v.get('special', [])))
+                    app.regex.joinReWordList(
+                        v.get('keywords', []) + v.get('types', [])))
+                v['errorsRe'] = re.compile(
+                    app.regex.joinReList(v.get('errors', [])))
+                v['specialsRe'] = re.compile(
+                    app.regex.joinReList(v.get('special', [])))
             # contains and end re.
             matchGrammars = []
             markers = []

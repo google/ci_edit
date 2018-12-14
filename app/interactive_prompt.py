@@ -21,7 +21,7 @@ try:
 except NameError:
     unicode = str
     unichr = chr
- 
+
 import os
 import re
 import subprocess
