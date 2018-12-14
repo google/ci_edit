@@ -166,6 +166,7 @@ oculus
 omnibox
 opencl
 opengl
+opensource
 openssh
 packard
 pemberley
@@ -174,6 +175,7 @@ phillips
 pixelbook
 powerpoint
 profont
+qemu
 quickoffice
 rachel
 rebecca
@@ -213,9 +215,8 @@ winrt
 wong
 xcode
 xul
+yapf
 youtube
 zeus
 zlib
 zulu
-opensource
-qemu
