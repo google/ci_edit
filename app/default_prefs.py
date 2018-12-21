@@ -546,7 +546,7 @@ prefs = {
             'begin': r'R"',
             # TODO(dschuyler): backslash and whitespace are invalid in the
             # |end_key|.
-            'end_key': r'''([^(]*)\(''',
+            'end_key': r'''R"([^(]*)\(''',
             'end': r'\)\0"',
             'single_line': False,
         },
@@ -963,10 +963,10 @@ prefs = {
             'end': r'"',
         },
         'rs_raw_string': {
-            'begin': r'b?r',
+            'begin': r'b?r#*"',
             # TODO(dschuyler): backslash and whitespace are invalid in the
             # |end_key|.
-            'end_key': r'''([#]*)"''',
+            'end_key': r'''b?r(#*)"''',
             'end': r'"\0',
             'single_line': False,
         },

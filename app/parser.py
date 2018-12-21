@@ -322,7 +322,7 @@ class Parser:
                     if priorGrammar.get('end_key'):
                         # A dynamic end tag.
                         hereKey = re.search(priorGrammar['end_key'],
-                                            subdata[reg[1]:]).groups()[0]
+                                            subdata[reg[0]:]).groups()[0]
                         markers = priorGrammar['markers']
                         markers[1] = priorGrammar['end'].replace(
                             r'\0', re.escape(hereKey))
