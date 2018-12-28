@@ -13,12 +13,16 @@
 // limitations under the License.
 
 use std::io::Write;
+use std::rc::{Rc, Weak};
+use std::cell::RefCell;
+use super::buffer_manager::BufferManager;
 
 extern crate ncurses;
 
 const KEY_CTRL_Q: i32 = 17;
 
-struct CiProgram {
+pub struct CiProgram {
+    buffer_manager: BufferManager,
     debug_mouse_event: ncurses::ll::MEVENT,
     exiting: bool,
     curses_screen: ncurses::WINDOW,
@@ -27,7 +31,8 @@ struct CiProgram {
 
 impl CiProgram {
     pub fn new() -> CiProgram {
-        CiProgram {
+        let program = CiProgram {
+            buffer_manager: BufferManager::new(),
             debug_mouse_event: ncurses::ll::MEVENT {
                 id: 0,
                 x: 0,
@@ -38,7 +43,9 @@ impl CiProgram {
             exiting: false,
             curses_screen: ncurses::initscr(),
             ch: 0,
-        }
+        };
+        //*program.buffer_manager.borrow_mut().program.borrow_mut() = Rc::downgrade(&program);
+        program
     }
 
     pub fn init(&mut self) {

@@ -13,6 +13,9 @@
 // limitations under the License.
 
 mod ci_program;
+mod buffer_manager;
+mod prefs;
+mod text_buffer;
 
 fn main() {
     ci_program::run_ci();
