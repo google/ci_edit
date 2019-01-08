@@ -262,6 +262,7 @@ class Actions(app.mutator.Mutator):
             change = (u'b', line[self.penCol - 1:self.penCol])
             self.redoAddChange(change)
             self.redo()
+        self.setMessage()  # Clear selection message.
 
     def carriageReturn(self):
         self.performDelete()
@@ -303,6 +304,7 @@ class Actions(app.mutator.Mutator):
                 self.redoAddChange((u'i', indent))
                 self.redo()
         self.updateBasicScrollPosition()
+        self.setMessage()  # Clear selection message.
 
     def cursorColDelta(self, toRow):
         if app.config.strict_debug:
