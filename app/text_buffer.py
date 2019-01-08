@@ -230,10 +230,10 @@ class TextBuffer(app.actions.Actions):
             if (self.parser.rowCount() > self.penRow and
                     len(self.parser.rowText(self.penRow)) > self.penCol):
                 ch = self.parser.rowText(self.penRow)[self.penCol]
-                matchingBracketAddress = self.getMatchingBracketAddress()
-                if matchingBracketAddress is not None:
-                    matchingBracketRow = matchingBracketAddress[0]
-                    matchingBracketCol = matchingBracketAddress[1]
+                matchingBracketRowCol = self.getMatchingBracketRowCol()
+                if matchingBracketRowCol is not None:
+                    matchingBracketRow = matchingBracketRowCol[0]
+                    matchingBracketCol = matchingBracketRowCol[1]
                     window.addStr(
                         top + self.penRow - startRow,
                         self.penCol - self.view.scrollCol,

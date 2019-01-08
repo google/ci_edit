@@ -62,9 +62,9 @@ class Actions(app.mutator.Mutator):
         self.debugUpperChangedRow = -1
         self.parser = app.parser.Parser()
         self.fileFilter(u'')
-    
-    def getMatchingBracketAddress(self):
-        """Returns the address of the bracket which matches
+
+    def getMatchingBracketRowCol(self):
+        """Gives the position of the bracket which matches
         the bracket at the current position of the cursor.
 
         Args:
@@ -72,66 +72,67 @@ class Actions(app.mutator.Mutator):
 
         Returns:
           None if matching bracket isn't found.
-          Address (int row, int col) of the matching bracket otherwise.
+          Position (int row, int col) of the matching bracket otherwise.
         """
-        if (self.parser.rowCount() > self.penRow and
-                len(self.parser.rowText(self.penRow)) > self.penCol):
-            ch = self.parser.rowText(self.penRow)[self.penCol]
-            def searchForward(openCh, closeCh):
-                count = 1
-                textCol = self.penCol + 1
-                for row in range(
-                        self.penRow,
-                        self.parser.rowCount()):
-                    if row != self.penRow:
-                        textCol = 0
-                    line = self.parser.rowText(row)[textCol:]
-                    for match in re.finditer(
-                            u"(\\" + openCh + u")|(\\" + closeCh + u")",
-                            line):
-                        if match.group() == openCh:
-                            count += 1
-                        else:
-                            count -= 1
-                        if count == 0:
-                            textCol += match.start()
-                            return row, textCol
-            def searchBack(closeCh, openCh):
-                count = -1
-                for row in range(self.penRow, -1, -1):
-                    line = self.parser.rowText(row)
-                    if row == self.penRow:
-                        line = line[:self.penCol]
-                    found = [
-                        i for i in re.finditer(
-                            u"(\\" + openCh + u")|(\\" + closeCh +
-                            u")", line)
-                    ]
-                    for match in reversed(found):
-                        if match.group() == openCh:
-                            count += 1
-                        else:
-                            count -= 1
-                        if count == 0:
-                            textCol = match.start()
-                            return row, textCol
-            matcher = {
-                        u'(': (u')', searchForward),
-                        u'[': (u']', searchForward),
-                        u'{': (u'}', searchForward),
-                        u')': (u'(', searchBack),
-                        u']': (u'[', searchBack),
-                        u'}': (u'{', searchBack),
-                    }
-            look = matcher.get(ch)
-            if look:
-                return look[1](ch, look[0])
+        if (self.parser.rowCount() <= self.penRow or
+                len(self.parser.rowText(self.penRow)) <= self.penCol):
+            return None
+        ch = self.parser.rowText(self.penRow)[self.penCol]
+        def searchForward(openCh, closeCh):
+            count = 1
+            textCol = self.penCol + 1
+            for row in range(
+                    self.penRow,
+                    self.parser.rowCount()):
+                if row != self.penRow:
+                    textCol = 0
+                line = self.parser.rowText(row)[textCol:]
+                for match in re.finditer(
+                        u"(\\" + openCh + u")|(\\" + closeCh + u")",
+                        line):
+                    if match.group() == openCh:
+                        count += 1
+                    else:
+                        count -= 1
+                    if count == 0:
+                        textCol += match.start()
+                        return row, textCol
+        def searchBack(closeCh, openCh):
+            count = -1
+            for row in range(self.penRow, -1, -1):
+                line = self.parser.rowText(row)
+                if row == self.penRow:
+                    line = line[:self.penCol]
+                found = [
+                    i for i in re.finditer(
+                        u"(\\" + openCh + u")|(\\" + closeCh +
+                        u")", line)
+                ]
+                for match in reversed(found):
+                    if match.group() == openCh:
+                        count += 1
+                    else:
+                        count -= 1
+                    if count == 0:
+                        textCol = match.start()
+                        return row, textCol
+        matcher = {
+                    u'(': (u')', searchForward),
+                    u'[': (u']', searchForward),
+                    u'{': (u'}', searchForward),
+                    u')': (u'(', searchBack),
+                    u']': (u'[', searchBack),
+                    u'}': (u'{', searchBack),
+                }
+        look = matcher.get(ch)
+        if look:
+            return look[1](ch, look[0])
 
     def jumpToMatchingBracket(self):
-        matchingBracketAddress = self.getMatchingBracketAddress()
-        if matchingBracketAddress is not None:
-            self.penRow = matchingBracketAddress[0]
-            self.penCol = matchingBracketAddress[1]
+        matchingBracketRowCol = self.getMatchingBracketRowCol()
+        if matchingBracketRowCol is not None:
+            self.penRow = matchingBracketRowCol[0]
+            self.penCol = matchingBracketRowCol[1]
 
     def charAt(self, row, col):
         if row >= len(self.lines) or col >= len(self.lines[row]):
