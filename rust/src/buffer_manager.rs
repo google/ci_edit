@@ -13,15 +13,16 @@
 // limitations under the License.
 
 //use std::io::Write;
-use std::rc::{Rc, Weak};
-use std::cell::RefCell;
+//use std::rc::{Rc, Weak};
+//use std::cell::RefCell;
+use std::sync::{Arc};
 use super::prefs::Prefs;
 use super::ci_program::CiProgram;
 use super::text_buffer::TextBuffer;
 
 
 pub struct BufferManager {
-    //pub program: RefCell<Weak<CiProgram>>,
+    pub program: Option<Arc<CiProgram>>,
     buffers: Vec<TextBuffer>,
 }
 
@@ -29,7 +30,7 @@ impl BufferManager {
     //pub fn new(program: RefCell<Weak<CiProgram>>) -> BufferManager {
     pub fn new() -> BufferManager {
         BufferManager {
-            //program: RefCell::new(Weak::new()),
+            program: None,
             //prefs: prefs::Prefs::new(),
             buffers: vec![],
         }

@@ -18,7 +18,7 @@ use std::collections::HashMap;
 type PrefMap = HashMap<String, String>;
 
 pub struct Prefs {
-    prefsDirectory: String,
+    prefs_directory: String,
     color8: PrefMap,
     color16: PrefMap,
     color256: PrefMap,
@@ -35,7 +35,7 @@ pub struct Prefs {
 impl Prefs {
     pub fn new() -> Prefs {
         Prefs {
-            prefsDirectory: "~/.ci_edit/prefs/".to_string(),
+            prefs_directory: "~/.ci_edit/prefs/".to_string(),
             color8: PrefMap::new(),
             color16: PrefMap::new(),
             color256: PrefMap::new(),
