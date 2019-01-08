@@ -1,4 +1,8 @@
-python unit_tests.py $* && \
-python3 unit_tests.py $* && \
-CI_EDIT_SINGLE_THREAD="1" python unit_tests.py $* && \
-CI_EDIT_SINGLE_THREAD="1" python3 unit_tests.py $*
+#!/bin/bash
+
+unit_tests="$(dirname "$0")/../unit_tests.py"
+
+python "$unit_tests" $* && \
+python3 "$unit_tests" $* && \
+CI_EDIT_SINGLE_THREAD="1" python "$unit_tests" $* && \
+CI_EDIT_SINGLE_THREAD="1" python3 "$unit_tests" $*
