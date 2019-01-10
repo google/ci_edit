@@ -87,6 +87,9 @@ class Mutator(app.selectable.Selectable):
                     change = (change[0], self.redoChain[-1][0][1] + change[1])
                     self.redoChain[-1] = (change,)
                     handledChange = True
+                elif change[0] == 'f':
+                    # Fences have no arguments to merge.
+                    handledChange = True
                 elif change[0] == 'n':
                     newCursorChange = change[2]
                     newCarriageReturns = change[1]
@@ -243,7 +246,8 @@ class Mutator(app.selectable.Selectable):
             for change in changes:
                 self.__redoChange(change)
             # Stop redoing if we redo a non-trivial action
-            if not (changes[0][0] == 'm' and len(changes) == 1):
+            if not ((changes[0][0] == 'f' or changes[0][0] == 'm') and
+                    len(changes) == 1):
                 self.shouldReparse = True
                 break
         self.updateBasicScrollPosition()
@@ -266,6 +270,8 @@ class Mutator(app.selectable.Selectable):
             self.doDelete(*change[1])
         elif change[0] == 'ds':  # Redo delete selection.
             self.doDeleteSelection()
+        elif change[0] == 'f':  # Redo fence.
+            pass
         elif change[0] == 'i':  # Redo insert.
             line = self.lines[self.penRow]
             x = self.penCol
@@ -332,9 +338,9 @@ class Mutator(app.selectable.Selectable):
 
     def redoAddChange(self, change):
         """
-    Push a change onto the end of the redoChain. Call redo() to enact the
-    change.
-    """
+        Push a change onto the end of the redoChain. Call redo() to enact the
+        change.
+        """
         if self.debugRedo:
             app.log.info('redoAddChange', change)
         # Handle new trivial actions, which are defined as standalone cursor
@@ -410,7 +416,7 @@ class Mutator(app.selectable.Selectable):
             changes = self.redoChain[self.redoIndex]
             if self.debugRedo:
                 app.log.info('undo', self.redoIndex, repr(changes))
-            if changes[0][0] == 'm' and len(changes) == 1:
+            if ((changes[0][0] == 'f' or changes[0][0] == 'm') and len(changes) == 1):
                 # Undo if the last edit was a cursor move.
                 self.__undoChange(changes[0])
             else:
@@ -440,6 +446,8 @@ class Mutator(app.selectable.Selectable):
                                app.selectable.kSelectionCharacter)
         elif change[0] == 'ds':  # Undo delete selection.
             self.insertLines(change[1])
+        elif change[0] == 'f':  # Undo fence.
+            pass
         elif change[0] == 'i':  # Undo insert.
             line = self.lines[self.penRow]
             x = self.penCol

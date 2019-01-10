@@ -1083,10 +1083,15 @@ class Actions(app.mutator.Mutator):
         else:
             self.data = self.doLinesToData(self.lines)
 
+    def fenceRedoChain(self):
+        self.redoAddChange((u'f'))
+        self.redo()
+
     def fileWrite(self):
         # Preload the message with an error that should be overwritten.
         self.setMessage(u'Error saving file')
         self.isReadOnly = not os.access(self.fullPath, os.W_OK)
+        self.fenceRedoChain()
         try:
             try:
                 if self.program.prefs.editor[u'onSaveStripTrailingSpaces']:
