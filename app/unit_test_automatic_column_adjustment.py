@@ -39,8 +39,7 @@ class AutomaticColumnAdjustmentCases(
 
     def test_column_adjustment_on_moving_by_one_line(self):
         # self.setMovieMode(True)
-        self.runWithTestFile(
-            kTestFile,
+        self.runWithFakeInputs(
             [
                 self.displayCheck(0, 0, [
                     u" ci     .                               ",
@@ -216,8 +215,7 @@ class AutomaticColumnAdjustmentCases(
         it first arrived on that line.
         """
         # self.setMovieMode(True)
-        self.runWithTestFile(
-            kTestFile,
+        self.runWithFakeInputs(
             [
                 self.displayCheck(0, 0, [
                     u" ci     .                               ",

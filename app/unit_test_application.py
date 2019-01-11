@@ -69,7 +69,7 @@ class ApplicationTestCases(app.fake_curses_testing.FakeCursesTestCase):
     def test_cursor_moves(self):
         self.runWithTestFile(kTestFile, [
             self.displayCheck(0, 0, [
-                u" ci     .                               ",
+                u" ci    _file_with_unlikely_file_name~ . ",
                 u"                                        ",
                 u"     1                                  "
             ]),
@@ -195,7 +195,7 @@ class ApplicationTestCases(app.fake_curses_testing.FakeCursesTestCase):
     def test_ctrl_cursor_moves(self):
         self.runWithTestFile(kTestFile, [
             self.displayCheck(0, 0, [
-                u" ci     .                               ",
+                u" ci    _file_with_unlikely_file_name~ . ",
                 u"                                        ",
                 u"     1                                  "
             ]),
@@ -223,7 +223,7 @@ class ApplicationTestCases(app.fake_curses_testing.FakeCursesTestCase):
         #self.setMovieMode(True)
         self.runWithTestFile(kTestFile, [
             self.displayCheck(0, 0, [
-                u" ci     .                               ",
+                u" ci    _file_with_unlikely_file_name~ . ",
                 u"                                        ",
                 u"     1                                  "
             ]),
@@ -245,7 +245,7 @@ class ApplicationTestCases(app.fake_curses_testing.FakeCursesTestCase):
     def test_select_line_via_line_numbers(self):
         self.runWithTestFile(kTestFile, [
             self.displayCheck(0, 0, [
-                u" ci     .                               ",
+                u" ci    _file_with_unlikely_file_name~ . ",
                 u"                                        ",
                 u"     1                                  "
             ]),

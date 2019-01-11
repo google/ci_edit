@@ -78,14 +78,14 @@ class FakeCursesTestCase(unittest.TestCase):
 
     def addMouseInfo(self, timeStamp, mouseRow, mouseCol, bState):
         """
-    bState may be a logical or of:
-      curses.BUTTON1_PRESSED;
-      curses.BUTTON1_RELEASED;
-      ...
-      curses.BUTTON_SHIFT
-      curses.BUTTON_CTRL
-      curses.BUTTON_ALT
-    """
+        bState may be a logical or of:
+          curses.BUTTON1_PRESSED;
+          curses.BUTTON1_RELEASED;
+          ...
+          curses.BUTTON_SHIFT
+          curses.BUTTON_CTRL
+          curses.BUTTON_ALT
+        """
         assert isinstance(timeStamp, int)
         assert isinstance(mouseRow, int)
         assert isinstance(mouseCol, int)
@@ -121,8 +121,8 @@ class FakeCursesTestCase(unittest.TestCase):
 
     def displayCheckNot(self, *args):
         """
-    Verify that the display does not match.
-    """
+        Verify that the display does not match.
+        """
         assert isinstance(args[0], int)
         caller = inspect.stack()[1]
         callerText = "\n  %s:%s:%s(): " % (os.path.split(caller[1])[1],
@@ -159,7 +159,7 @@ class FakeCursesTestCase(unittest.TestCase):
 
     def findText(self, screenText):
         """Locate |screenText| on the display, returning row, col.
-    """
+        """
         return self.cursesScreen.test_find_text(screenText)
 
     def cursorCheck(self, expectedRow, expectedCol):
@@ -228,9 +228,10 @@ class FakeCursesTestCase(unittest.TestCase):
         reach this function."""
         self.fail('Called notReached!')
 
-    def runWithFakeInputs(self, fakeInputs):
+    def runWithFakeInputs(self, fakeInputs, argv=["no_argv"]):
         assert hasattr(fakeInputs, "__getitem__") or hasattr(
             fakeInputs, "__iter__")
+        sys.argv = argv
         self.cursesScreen.setFakeInputs(fakeInputs + [
             self.notReached,
         ])
@@ -255,9 +256,8 @@ class FakeCursesTestCase(unittest.TestCase):
             print(u'\n-------- finished', callerText)
 
     def runWithTestFile(self, kTestFile, fakeInputs):
-        sys.argv = [kTestFile]
         self.assertFalse(os.path.isfile(kTestFile))
-        self.runWithFakeInputs(fakeInputs)
+        self.runWithFakeInputs(fakeInputs, ["ci_test_program", kTestFile])
 
     def selectionDocumentCheck(self, expectedPenRow, expectedPenCol,
                                expectedMarkerRow, expectedMarkerCol,
