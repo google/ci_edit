@@ -18,12 +18,25 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import curses
 import unittest
 
 import app.curses_util
 
 
 class CursesUtilTestCases(unittest.TestCase):
+
+    def test_curses_key_name(self):
+        # These actually test the fake curses.
+        def test1():
+            curses.keyname(-3)
+        self.assertRaises(ValueError, test1)
+        def test2():
+            curses.keyname([])
+        self.assertRaises(TypeError, test2)
+        def test3():
+            curses.keyname(9**999)
+        self.assertRaises(OverflowError, test3)
 
     def test_column_to_index(self):
         self.assertEqual(0, app.curses_util.columnToIndex(0, u"test"))
@@ -130,3 +143,4 @@ class CursesUtilTestCases(unittest.TestCase):
         self.assertEqual(3, app.curses_util.renderedWidth(u"こc"))
         self.assertEqual(4, app.curses_util.renderedWidth(u"aこc"))
         self.assertEqual(7, app.curses_util.renderedWidth(u"aこbんc"))
+

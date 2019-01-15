@@ -225,7 +225,7 @@ def mouseButtonName(buttonState):
 def cursesKeyName(keyCode):
     try:
         return curses.keyname(keyCode)
-    except curses.error:
+    except Exception:
         pass
     return None
 

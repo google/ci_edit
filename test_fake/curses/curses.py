@@ -431,6 +431,11 @@ def init_pair(*args):
 
 def keyname(*args):
     testLog(1, *args)
+    # Raise expected exception types.
+    a = int(*args)  # ValueError.
+    xrange(*args)  # OverflowError.
+    if a < 0:
+        raise ValueError()
 
 
 def meta(*args):
