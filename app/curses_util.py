@@ -286,28 +286,33 @@ def renderedFindIter(string, beginCol, endCol, charGroups, numbers, eolSpaces):
     index = 0
     limit = len(string)
     while index < limit:
-        c = string[index]
-        width = 2 if c > MIN_DOUBLE_WIDE_CHARACTER else 1
         if column >= endCol:
             break
+        c = string[index]
         if column >= beginCol:
             if numbers and c in '0123456789':
                 sre = app.regex.kReNumbers.match(string[index:])
                 begin = index
-                length = sre.regs[0][1]
+                length = min(sre.regs[0][1], endCol - column)
                 index += length
-                width += length
                 yield string[begin:index], column, length, len(charGroups)
+                column += length
             else:
                 for id, group in enumerate(charGroups):
                     if c in group:
                         begin = index
                         while index < limit and string[index] in group:
                             index += 1
-                            width += 1
+                        #if
                         yield string[begin:index], column, index - begin, id
-        column += width
-        index += 1
+                        column += index - begin
+                        break
+                else:
+                    column += 2 if c > MIN_DOUBLE_WIDE_CHARACTER else 1
+                    index += 1
+        else:
+          column += 2 if c > MIN_DOUBLE_WIDE_CHARACTER else 1
+          index += 1
     if eolSpaces and limit and string[-1] == ' ':
         index = limit - 1
         while index and string[index - 1] == ' ':

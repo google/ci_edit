@@ -38,6 +38,44 @@ class CursesUtilTestCases(unittest.TestCase):
             curses.keyname(9**999)
         self.assertRaises(OverflowError, test3)
 
+    def test_renderedFindIter(self):
+        def test(line, startCol, endCol, matches):
+            matches.reverse()
+            for s, column, length, index in app.curses_util.renderedFindIter(
+                    line, startCol, endCol, (u'[]{}()',), True,
+                    True):
+                self.assertEqual(matches.pop(), (s, column, length, index))
+
+        # Float and leading zero.
+        line = u"""5.32e+30 a 000808"""
+        test(line, 0, len(line), [
+            (u'5.32e+30', 0, 8, 1),
+            (u'000808', 11, 6, 1),
+        ])
+
+        # Parenthesis and number.
+        line = u"""(23432ull a"""
+        test(line, 0, len(line), [
+          (u'(', 0, 1, 0),
+          (u'23432ull', 1, 8, 1),
+        ])
+
+        # Multiple numbers and string of brackets.
+        line = u"""23 five )}]](23432ull a"""
+        test(line, 0, len(line), [
+          (u'23', 0, 2, 1),
+          (u')}]](', 8, 5, 0),
+          (u'23432ull', 13, 8, 1),
+        ])
+
+        # Constrained columns.
+        line = u"""23 five )}]](23432ull a"""
+        test(line, 1, len(line)-4, [
+          (u'3', 1, 1, 1),
+          (u')}]](', 8, 5, 0),
+          (u'23432u', 13, 6, 1),
+        ])
+
     def test_column_to_index(self):
         self.assertEqual(0, app.curses_util.columnToIndex(0, u"test"))
         self.assertEqual(1, app.curses_util.columnToIndex(1, u"test"))
