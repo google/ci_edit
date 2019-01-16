@@ -16,6 +16,7 @@
 # libraries.
 alloca
 atexit
+atoi
 calloc
 cassert
 ceil
@@ -29,6 +30,7 @@ cstring
 demangle
 dirent
 ebadf
+eintr
 endl
 enomem
 enotdir
@@ -42,18 +44,22 @@ grpc
 ifstream
 intptr
 intrinsics
+inttypes
 iomanip
 iostream
 isatty
 istream
 istreambuf
 istringstream
+itoa
 lu
 malloc
 memcmp
 memcpy
 memset
 multimap
+nonblock
+nowait
 npos
 opendir
 ostream
@@ -63,6 +69,8 @@ rbegin
 rdbuf
 readdir
 refcounted
+ret
+setfl
 setprecision
 setw
 snprintf
@@ -78,6 +86,7 @@ strcmp
 strerror
 stricmp
 stringstream
+strlcpy
 strlen
 toupper
 typename

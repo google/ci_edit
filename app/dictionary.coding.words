@@ -68,10 +68,12 @@ baz
 bbggrr
 bgr
 bitmask
+bitwise
 blitter
 bool
 booleans
 bools
+bsp
 buf
 bugzilla
 bzip
@@ -172,6 +174,8 @@ fs
 ftp
 func
 functor
+futex
+futexes
 gaia
 ge
 getter
@@ -191,6 +195,7 @@ hpp
 htm
 https
 hxx
+ia
 idr
 ifconfig
 iff
@@ -211,6 +216,9 @@ intrinsics
 ip
 ipsum
 ipv
+irq
+irqs
+isa
 iter
 iterable
 jk
@@ -246,8 +254,10 @@ mixin
 mixins
 mmu
 mmus
+msec
 msg
 mutex
+mutexes
 na
 namespaces
 ndebug
@@ -281,6 +291,7 @@ precompilation
 precompile
 precompiled
 precompiling
+preemptible
 prefetch
 prerender
 prerendered
@@ -289,6 +300,8 @@ prg
 proc
 proto
 psec
+pthread
+pthreads
 ptr
 ptrs
 pv
@@ -309,6 +322,7 @@ recursing
 refptr
 regex
 regexes
+relayout
 remoting
 renderer
 reparented
@@ -328,6 +342,7 @@ runtime
 rv
 rvalue
 rvalues
+rx
 scp
 scrollback
 scrollbar
@@ -340,6 +355,7 @@ signin
 sigtrap
 sizeof
 skia
+smp
 solaris
 sql
 src
@@ -373,6 +389,7 @@ templatizers
 textbox
 tgz
 throbber
+tid
 tk
 tmp
 todo
@@ -381,11 +398,13 @@ tooltip
 traceback
 traversable
 tty
+tx
 txt
 typdef
 typedef
 typedefed
 typedefs
+uart
 ubuntu
 uchar
 uid
@@ -396,6 +415,7 @@ uniquify
 unobserve
 unparsable
 unserializable
+usec
 utf
 variadic
 versioning

@@ -1,4 +1,4 @@
-# -*- coding: latin-1 -*-
+# -*- coding: utf-8 -*-
 
 # Copyright 2018 Google Inc.
 #
@@ -26,49 +26,62 @@ import app.fake_curses_testing
 
 
 class FileManagerTestCases(app.fake_curses_testing.FakeCursesTestCase):
-  def setUp(self):
-    self.longMessage = True
-    app.fake_curses_testing.FakeCursesTestCase.setUp(self)
 
-  def test_save_as(self):
-    #self.setMovieMode(True)
-    sys.argv = []
-    self.runWithFakeInputs([
-        self.displayCheck(0, 0, [" ci     "]),
-        self.displayCheck(2, 7, ["     "]), CTRL_S,
-        self.displayCheck(0, 0, [" ci    Save File As"]),
-        CTRL_Q, CTRL_Q])  # TODO(dschuyler): fix need for extra CTRL_Q.
+    def setUp(self):
+        self.longMessage = True
+        app.fake_curses_testing.FakeCursesTestCase.setUp(self)
 
-  def test_save_as_to_quit(self):
-    #self.setMovieMode(True)
-    sys.argv = []
-    self.runWithFakeInputs([
-        self.displayCheck(0, 0, [" ci     "]),
-        self.displayCheck(2, 7, ["     "]), ord('a'),
-        self.displayCheck(2, 7, ["a    "]),
-        CTRL_S,
-        self.displayCheck(0, 0, [" ci    Save File As"]),
-        CTRL_Q,
-        self.displayCheck(0, 0, [" ci     "]),
-        self.displayCheck(-2, 0, ["      "]),
-        CTRL_Q, ord('n')])
+    def test_save_as(self):
+        #self.setMovieMode(True)
+        sys.argv = []
+        self.runWithFakeInputs([
+            self.displayCheck(0, 0, [u" ci     "]),
+            self.displayCheck(2, 7, [u"     "]), CTRL_S,
+            self.displayCheck(0, 0, [u" ci    Save File As"]), CTRL_Q, CTRL_Q
+        ])  # TODO(dschuyler): fix need for extra CTRL_Q.
 
-  def test_open(self):
-    #self.setMovieMode(True)
-    sys.argv = []
-    self.runWithFakeInputs([
-        self.displayCheck(0, 0, [" ci     "]),
-        self.displayCheck(2, 7, ["     "]), CTRL_O,
-        self.displayCheck(0, 0, [" ci    Open File  "]),
-        CTRL_Q, CTRL_Q])  # TODO(dschuyler): fix need for extra CTRL_Q.
+    def test_save_as_to_quit(self):
+        #self.setMovieMode(True)
+        sys.argv = []
+        self.runWithFakeInputs([
+            self.displayCheck(0, 0, [u" ci     "]),
+            self.displayCheck(2, 7, [u"     "]),
+            ord('a'),
+            self.displayCheck(2, 7, [u"a    "]), CTRL_S,
+            self.displayCheck(0, 0, [u" ci    Save File As"]), CTRL_Q,
+            self.displayCheck(0, 0, [u" ci     "]),
+            self.displayCheck(-2, 0, [u"      "]), CTRL_Q,
+            ord('n')
+        ])
 
-  def test_open_binary_file(self):
-    #self.setMovieMode(True)
-    sys.argv = []
-    self.runWithFakeInputs([
-        self.displayCheck(0, 0, [u" ci     "]),
-        self.displayCheck(2, 7, [u"     "]), CTRL_O,
-        self.displayCheck(0, 0, [u" ci    Open File  "]), CTRL_A,
-        self.writeText(self.pathToSample(u"binary_test_file")), CTRL_J,
-        self.displayCheck(2, 7, [u"006401006c1a005a0800640000640100"]),
-        CTRL_Q])
+    def test_open(self):
+        #self.setMovieMode(True)
+        sys.argv = []
+        self.runWithFakeInputs([
+            self.displayCheck(0, 0, [u" ci     "]),
+            self.displayCheck(2, 7, [u"     "]), CTRL_O,
+            self.displayCheck(0, 0, [u" ci    Open File  "]), CTRL_Q, CTRL_Q
+        ])  # TODO(dschuyler): fix need for extra CTRL_Q.
+
+    def test_open_binary_file(self):
+        #self.setMovieMode(True)
+        sys.argv = []
+        self.runWithFakeInputs([
+            self.displayCheck(0, 0, [u" ci     "]),
+            self.displayCheck(2, 7, [u"     "]), CTRL_O,
+            self.displayCheck(0, 0, [u" ci    Open File  "]), CTRL_A,
+            self.writeText(self.pathToSample(u"binary_test_file")), CTRL_J,
+            self.displayCheck(2, 7, [u"006401006c1a005a0800640000640100"]),
+            CTRL_Q
+        ])
+
+    def test_open_valid_unicode_file(self):
+        #self.setMovieMode(True)
+        sys.argv = []
+        self.runWithFakeInputs([
+            self.displayCheck(0, 0, [u" ci     "]),
+            self.displayCheck(2, 7, [u"     "]), CTRL_O,
+            self.displayCheck(0, 0, [u" ci    Open File  "]), CTRL_A,
+            self.writeText(self.pathToSample(u"valid_unicode")), CTRL_J,
+            self.displayCheck(4, 7, [u"Здравствуйте"]), CTRL_Q
+        ])

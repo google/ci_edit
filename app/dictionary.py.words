@@ -163,6 +163,7 @@ isdecimal
 isdigit
 isdir
 isfile
+isinstance
 islink
 islower
 ismount
@@ -197,7 +198,6 @@ lstrip
 makedev
 makedirs
 max
-maxint
 maxsize
 maxunicode
 memmove
@@ -325,6 +325,7 @@ subparsers
 symlink
 sys
 sysconf
+tarfile
 tcgetpgrp
 tcsetpgrp
 tempfail

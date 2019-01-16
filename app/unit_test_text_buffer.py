@@ -18,240 +18,44 @@ from __future__ import print_function
 
 import unittest
 
-import app.log
-import app.text_buffer
+from app.curses_util import *
+import app.fake_curses_testing
 
 
-class FakeCursorWindow:
-  def getmaxyx(self):
-    return (100, 100)
+class DrawTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
+    def setUp(self):
+        app.fake_curses_testing.FakeCursesTestCase.setUp(self)
 
-class FakeView:
-  def __init__(self):
-    self.cursorWindow = FakeCursorWindow()
-    self.top = 0
-    self.left = 0
-    self.rows = 10
-    self.cols = 100
-    self.scrollRow = 0
-    self.scrollCol = 0
+    def test_draw_nothing(self):
+        self.runWithFakeInputs([
+            self.displayCheck(2, 7, [u"      "]),
+            self.writeText(u"tex"),
+            self.displayCheck(2, 7, [u"tex "]), KEY_BACKSPACE1, u"t",
+            self.displayCheck(2, 7, [u"tet "]), CTRL_Q, u"n"
+        ])
 
+    def test_draw_text(self):
+        self.runWithFakeInputs([
+            self.displayCheck(2, 7, [u"      "]),
+            self.writeText(u"text"),
+            self.displayCheck(2, 7, [u"text "]), CTRL_Q, u"n"
+        ])
 
-class MouseTestCases(unittest.TestCase):
-  def setUp(self):
-    app.log.shouldWritePrintLog = False
-    self.textBuffer = app.text_buffer.TextBuffer()
-    self.textBuffer.setView(FakeView())
-    test = """/* first comment */
-two
-// second comment
-apple banana carrot
-#include "test.h"
-void blah();
-"""
-    self.textBuffer.insertLines(test.split('\n'))
-    #self.assertEqual(self.textBuffer.scrollRow, 0)
-    #self.assertEqual(self.textBuffer.scrollCol, 0)
-    self.assertEqual(self.textBuffer.lines[1], 'two')
-
-  def tearDown(self):
-    self.textBuffer = None
-
-  def test_mouse_selection(self):
-    self.textBuffer.mouseClick(3, 9, False, False, False)
-    self.assertEqual(self.textBuffer.penRow, 3)
-    self.assertEqual(self.textBuffer.penCol, 9)
-    #assert(self.textBuffer.markerRow == 3)
-
-    self.textBuffer.mouseClick(3, 8, True, False, False)
-    self.assertEqual(self.textBuffer.markerRow, 3)
-    self.assertEqual(self.textBuffer.markerCol, 9)
-    self.assertEqual(self.textBuffer.penRow, 3)
-    self.assertEqual(self.textBuffer.penCol, 8)
-
-    self.textBuffer.mouseClick(4, 8, True, False, False)
-    self.assertEqual(self.textBuffer.markerRow, 3)
-    self.assertEqual(self.textBuffer.markerCol, 9)
-    self.assertEqual(self.textBuffer.penRow, 4)
-    self.assertEqual(self.textBuffer.penCol, 8)
-
-    self.textBuffer.mouseClick(3, 8, True, False, False)
-    self.assertEqual(self.textBuffer.markerRow, 3)
-    self.assertEqual(self.textBuffer.markerCol, 9)
-    self.assertEqual(self.textBuffer.penRow, 3)
-    self.assertEqual(self.textBuffer.penCol, 8)
-
-    self.textBuffer.mouseClick(4, 8, True, False, False)
-    self.textBuffer.mouseClick(4, 9, True, False, False)
-    self.assertEqual(self.textBuffer.markerRow, 3)
-    self.assertEqual(self.textBuffer.markerCol, 9)
-    self.assertEqual(self.textBuffer.penRow, 4)
-    self.assertEqual(self.textBuffer.penCol, 9)
-
-    self.textBuffer.mouseClick(4, 10, True, False, False)
-    self.assertEqual(self.textBuffer.markerRow, 3)
-    self.assertEqual(self.textBuffer.markerCol, 9)
-    self.assertEqual(self.textBuffer.penRow, 4)
-    self.assertEqual(self.textBuffer.penCol, 10)
-
-    self.textBuffer.mouseClick(4, 11, True, False, False)
-    self.assertEqual(self.textBuffer.markerRow, 3)
-    self.assertEqual(self.textBuffer.markerCol, 9)
-    self.assertEqual(self.textBuffer.penRow, 4)
-    #self.assertEqual(self.textBuffer.penCol, 11)
-    #self.assertEqual(self.textBuffer.scrollCol, 0)
-
-  def test_mouse_word_selection(self):
-    #self.assertEqual(self.textBuffer.scrollCol, 0)
-    self.textBuffer.selectionWord()
-    #self.assertEqual(self.textBuffer.scrollCol, 0)
-    row = 3
-    col = 9
-    wordBegin = 6
-    wordEnd = 12
-    self.textBuffer.mouseClick(row, col, False, False, False)
-    self.assertEqual(self.textBuffer.penRow, row)
-    self.assertEqual(self.textBuffer.penCol, col)
-
-    self.textBuffer.mouseDoubleClick(row, col-1, False, False, False)
-    self.assertEqual(self.textBuffer.markerRow, row)
-    self.assertEqual(self.textBuffer.markerCol, wordBegin)
-    self.assertEqual(self.textBuffer.penRow, row)
-    self.assertEqual(self.textBuffer.penCol, wordEnd)
-
-    self.textBuffer.mouseMoved(row, wordBegin, False, False, False)
-    self.assertEqual(self.textBuffer.markerRow, row)
-    self.assertEqual(self.textBuffer.markerCol, wordBegin)
-    self.assertEqual(self.textBuffer.penRow, row)
-    self.assertEqual(self.textBuffer.penCol, wordEnd)
-
-    self.textBuffer.mouseMoved(row, wordBegin-1, False, False, False)
-    self.assertEqual(self.textBuffer.markerRow, row)
-    self.assertEqual(self.textBuffer.penCol, 0)
-    self.assertEqual(self.textBuffer.markerCol, wordEnd)
-    self.assertEqual(self.textBuffer.penRow, row)
-    self.assertEqual(self.textBuffer.penCol, 0)
-
-    self.textBuffer.mouseMoved(row, 1, False, False, False)
-    self.assertEqual(self.textBuffer.markerRow, row)
-    self.assertEqual(self.textBuffer.markerCol, wordEnd)
-    self.assertEqual(self.textBuffer.penRow, row)
-    self.assertEqual(self.textBuffer.penCol, 0)
-
-    self.textBuffer.mouseMoved(row+1, 0, False, False, False)
-    self.assertEqual(self.textBuffer.markerRow, row)
-    self.assertEqual(self.textBuffer.markerCol, wordBegin)
-    self.assertEqual(self.textBuffer.penRow, row+1)
-    self.assertEqual(self.textBuffer.penCol, 1)
-
-    self.textBuffer.mouseMoved(row+1, 1, False, False, False)
-    self.assertEqual(self.textBuffer.markerRow, row)
-    self.assertEqual(self.textBuffer.markerCol, wordBegin)
-    self.assertEqual(self.textBuffer.penRow, row+1)
-    self.assertEqual(self.textBuffer.penCol, 8)
-
-    self.textBuffer.mouseMoved(row, 1, False, False, False)
-    self.assertEqual(self.textBuffer.markerRow, row)
-    self.assertEqual(self.textBuffer.markerCol, wordEnd)
-    self.assertEqual(self.textBuffer.penRow, row)
-    self.assertEqual(self.textBuffer.penCol, 0)
-
-
-class TextIndent(unittest.TestCase):
-  def setUp(self):
-    app.log.shouldWritePrintLog = False
-    self.textBuffer = app.text_buffer.TextBuffer()
-    self.textBuffer.setView(FakeView())
-    #self.assertEqual(self.textBuffer.scrollRow, 0)
-    #self.assertEqual(self.textBuffer.scrollCol, 0)
-
-  def tearDown(self):
-    self.textBuffer = None
-
-  def test_auto_insert_pair_disable(self):
-    class FakeParser:
-      def grammarAt(self, row, col):
-        return { 'indent': '  ' }
-    app.prefs.editor['autoInsertClosingCharacter'] = False
-    tb = self.textBuffer
-    insert = self.textBuffer.insertPrintableWithPairing
-    self.assertEqual(len(tb.lines), 1)
-    insert(ord('a'), None)
-    insert(ord(':'), None)
-    tb.carriageReturn()
-    self.assertEqual(tb.lines[0], 'a:')
-    self.assertEqual(tb.lines[1], '')
-    tb.parser = FakeParser()
-    tb.backspace()
-    tb.carriageReturn()
-    self.assertEqual(tb.lines[0], 'a:')
-    self.assertEqual(tb.lines[1], '  ')
-    insert(ord('b'), None)
-    insert(ord(':'), None)
-    tb.carriageReturn()
-    insert(ord('c'), None)
-    insert(ord(':'), None)
-    tb.carriageReturn()
-    self.assertEqual(tb.lines[0], 'a:')
-    self.assertEqual(tb.lines[1], '  b:')
-    self.assertEqual(tb.lines[2], '    c:')
-
-
-class TextInsert(unittest.TestCase):
-  def setUp(self):
-    app.log.shouldWritePrintLog = False
-    self.textBuffer = app.text_buffer.TextBuffer()
-    self.textBuffer.setView(FakeView())
-    #self.assertEqual(self.textBuffer.scrollRow, 0)
-    #self.assertEqual(self.textBuffer.scrollCol, 0)
-
-  def tearDown(self):
-    self.textBuffer = None
-
-  def test_auto_insert_pair_disable(self):
-    app.prefs.editor['autoInsertClosingCharacter'] = False
-    tb = self.textBuffer
-    insert = self.textBuffer.insertPrintableWithPairing
-    self.assertEqual(len(tb.lines), 1)
-    insert(ord('o'), None)
-    insert(ord('('), None)
-    self.assertEqual(tb.lines[0], 'o(')
-    insert(ord('a'), None)
-    self.assertEqual(tb.lines[0], 'o(a')
-    tb.editUndo()
-    self.assertEqual(tb.lines[0], 'o(')
-    tb.editUndo()
-    self.assertEqual(tb.lines[0], 'o')
-    tb.editUndo()
-    self.assertEqual(tb.lines[0], '')
-    # Don't insert pair if the next char is not whitespace.
-    insert(ord('o'), None)
-    self.assertEqual(tb.lines[0], 'o')
-    tb.cursorLeft()
-    self.assertEqual(tb.lines[0], 'o')
-    insert(ord('('), None)
-    self.assertEqual(tb.lines[0], '(o')
-
-  def test_auto_insert_pair_enable(self):
-    app.prefs.editor['autoInsertClosingCharacter'] = True
-    tb = self.textBuffer
-    insert = self.textBuffer.insertPrintableWithPairing
-    self.assertEqual(len(tb.lines), 1)
-    insert(ord('o'), None)
-    insert(ord('('), None)
-    self.assertEqual(tb.lines[0], 'o()')
-    insert(ord('a'), None)
-    self.assertEqual(tb.lines[0], 'o(a)')
-    tb.editUndo()
-    self.assertEqual(tb.lines[0], 'o()')
-    tb.editUndo()
-    self.assertEqual(tb.lines[0], '')
-    # Don't insert pair if the next char is not whitespace.
-    insert(ord('o'), None)
-    self.assertEqual(tb.lines[0], 'o')
-    tb.cursorLeft()
-    self.assertEqual(tb.lines[0], 'o')
-    insert(ord('('), None)
-    self.assertEqual(tb.lines[0], '(o')
-
+    def test_draw_long_line(self):
+        #self.setMovieMode(True)
+        lineLimitIndicator = self.prg.prefs.editor['lineLimitIndicator']
+        self.prg.prefs.editor['lineLimitIndicator'] = 10
+        self.runWithFakeInputs([
+            self.displayCheck(2, 7, [u"      "]),
+            self.writeText(u"A line with numbers 1234567890"),
+            self.displayCheck(2, 7, [u"A line with numbers 1234567890"]),
+            self.writeText(u". Writing"),
+            self.displayCheck(2, 7, [u"ith numbers 1234567890. Writing"]),
+            self.writeText(u" some more."),
+            self.displayCheck(2, 7, [u" 1234567890. Writing some more."]),
+            self.writeText(u"\n"),
+            self.displayCheck(2, 7, [u"A line with numbers 1234567890."]),
+            CTRL_Q, u"n"
+        ])
+        self.prg.prefs.editor['lineLimitIndicator'] = lineLimitIndicator

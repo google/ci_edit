@@ -19,12 +19,10 @@ from __future__ import print_function
 import os
 import sys
 
-
-dirPath = os.path.split(os.path.abspath(os.path.dirname(
-    __file__)))[0]
+dirPath = os.path.split(os.path.abspath(os.path.dirname(__file__)))[0]
 
 docs = {
-  'command line': \
+    'command line': \
 """\
 Command line help
 %s [args] [file...]
@@ -40,7 +38,7 @@ Command line help
   --version       Print version and license information then exit.\
 """ % (sys.argv[0],),
 
-  'key bindings': \
+    'key bindings': \
 """\
 Key Bindings
 
@@ -113,20 +111,24 @@ Within the Goto line prompt:
   * Affects goto: prompt, not the document.\
 """,
 
-  'tips': [
-"""Welcome to ci_edit.""",
-"",
-"""Tips: press ctrl+q to quit, ctrl+s (aka ^s) to save, ^a select all,""",
-"""      ^z cut, ^x cut, ^c copy, ^v paste, ^f find, ^o open file, ^w close,""",
-"""      ^g goto line. ^e and ^p are need more explanation, see help.md file.""",
-"",
-#"""What do you think of the help text above?""",
-#"""Please add feedback to https://github.com/google/ci_edit/issues/107""",
-],
+    'tips': [
+        """Welcome to ci_edit.""",
+        "",
+        """Tips: press ctrl+q to quit, ctrl+s (aka ^s) to save, """
+        """^a select all,""",
+        """      ^z cut, ^x cut, ^c copy, ^v paste, ^f find, """
+        """^o open file, ^w close,""",
+        """      ^g goto line. ^e and ^p are need more explanation, """
+        """see help.md file.""",
+        "",
+        #"""What do you think of the help text above?""",
+        #"""Please add feedback"""
+        #""" to https://github.com/google/ci_edit/issues/107""",
+    ],
 
-  'version': \
+    'version': \
 """\
-  Version (build iteration): v35
+  Version (build iteration): v38
   See LICENSE for license information
   See readme.md for an introduction
   Both files may be found in "%s"
@@ -134,7 +136,7 @@ Within the Goto line prompt:
     https://github.com/google/ci_edit/issues\
 """ % (dirPath,),
 
-  'welcome': \
+    'welcome': \
 """\
 Welcome to the ci_edit text editor.\
 """,
