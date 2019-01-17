@@ -147,6 +147,7 @@ accounted
 accounting
 accounts
 accreditation
+accrete
 accrue
 accrued
 accruing
@@ -283,6 +284,7 @@ adjunct
 adjust
 adjustable
 adjusted
+adjuster
 adjusting
 adjustment
 adjustments
@@ -551,6 +553,7 @@ alphabetizes
 alphabets
 alphanumeric
 alphanumerical
+alphanumerics
 alphas
 alpine
 alps
@@ -596,6 +599,7 @@ ambiguities
 ambiguity
 ambiguous
 ambit
+ambition
 ambitious
 ambler
 ambrosia
@@ -616,6 +620,7 @@ among
 amortize
 amortized
 amount
+amounting
 amounts
 amp
 ampersand
@@ -698,6 +703,7 @@ annotating
 annotation
 annotations
 annotator
+annotators
 announce
 announced
 announcement
@@ -725,6 +731,7 @@ ans
 answer
 answerable
 answered
+answering
 answers
 ant
 ante
@@ -896,8 +903,10 @@ aristocrat
 arithmetic
 arithmetically
 arithmetician
+arity
 ark
 arm
+armadillo
 armed
 arms
 army
@@ -921,6 +930,7 @@ arrives
 arriving
 arrow
 arrowhead
+arrowing
 arrows
 arsenic
 art
@@ -993,6 +1003,7 @@ assets
 assign
 assignable
 assigned
+assignee
 assigner
 assigning
 assignment
@@ -1068,6 +1079,7 @@ attackers
 attacking
 attacks
 attain
+attained
 attaining
 attempt
 attempted
@@ -1086,6 +1098,7 @@ attenuated
 attenuation
 attest
 attestation
+attestations
 attic
 attitude
 attn
@@ -1279,6 +1292,7 @@ bacon
 bad
 bade
 badge
+badged
 badger
 badges
 badly
@@ -1721,6 +1735,7 @@ blouse
 blow
 blowing
 blown
+blows
 blowup
 blue
 blueberries
@@ -1822,6 +1837,7 @@ booty
 bop
 border
 bordered
+borderless
 borderline
 borders
 bore
@@ -2410,6 +2426,7 @@ cede
 ceder
 cedilla
 ceding
+ceiled
 ceiling
 celebrate
 celebrated
@@ -2442,6 +2459,7 @@ centralize
 centralized
 centralizes
 centralizing
+centric
 cents
 century
 cert
@@ -2608,6 +2626,7 @@ chip
 chipmunk
 chipped
 chips
+chipset
 chiropractic
 chis
 chive
@@ -3303,6 +3322,7 @@ conflicting
 conflicts
 conform
 conformance
+conformant
 conformer
 conforming
 conforms
@@ -3418,6 +3438,7 @@ constraint
 constraints
 construct
 constructed
+constructible
 constructing
 construction
 constructions
@@ -3470,6 +3491,7 @@ contexts
 contextual
 contextually
 contiguous
+contiguously
 continent
 continental
 contingent
@@ -3774,6 +3796,7 @@ crashing
 crate
 crated
 crater
+crates
 crawl
 crawler
 crawlers
@@ -3991,6 +4014,7 @@ cyan
 cyborg
 cycle
 cycled
+cycler
 cycles
 cyclic
 cyclical
@@ -4109,6 +4133,7 @@ deal
 dealer
 dealing
 dealings
+deallocated
 deals
 dealt
 dean
@@ -4812,6 +4837,7 @@ discouraged
 discourse
 discourses
 discover
+discoverability
 discoverable
 discovered
 discoverer
@@ -5590,6 +5616,8 @@ encrypts
 encumbered
 encyclopedia
 end
+endcap
+endcaps
 ended
 ending
 endings
@@ -5715,6 +5743,7 @@ eon
 ephemeral
 ephemerally
 epic
+epilog
 epilogue
 epiphany
 episode
@@ -6236,6 +6265,7 @@ fault
 faulted
 faults
 faulty
+faux
 fave
 favicon
 favicons
@@ -6694,6 +6724,7 @@ format
 formation
 formats
 formatted
+formatters
 formatting
 formed
 former
@@ -7151,6 +7182,7 @@ glued
 glues
 glut
 glyph
+glyphs
 gm
 gnarly
 gnome
@@ -7284,6 +7316,8 @@ grape
 grapefruit
 grapevine
 graph
+grapheme
+graphemes
 graphic
 graphical
 graphically
@@ -8014,6 +8048,7 @@ identities
 identity
 ideograms
 ideograph
+ideographic
 ideographs
 ideologically
 ides
@@ -8120,7 +8155,9 @@ implementation
 implementations
 implemented
 implementer
+implementers
 implementing
+implementor
 implementors
 implements
 implicated
@@ -8437,6 +8474,7 @@ initialization
 initialize
 initialized
 initializer
+initializers
 initializes
 initializing
 initially
@@ -8559,6 +8597,7 @@ instantiate
 instantiated
 instantiates
 instantiating
+instantiation
 instantiations
 instantly
 instants
@@ -8638,6 +8677,7 @@ interactivity
 interacts
 intercede
 intercedes
+intercell
 intercept
 intercepted
 intercepting
@@ -8707,6 +8747,10 @@ interned
 internet
 interns
 internship
+interoperability
+interoperate
+interoperated
+interoperation
 interplay
 interpolate
 interpolated
@@ -9574,6 +9618,7 @@ lira
 lire
 lisp
 list
+listable
 listed
 listen
 listened
@@ -10250,6 +10295,7 @@ mick
 micro
 microchip
 microcomputer
+microcontroller
 microcosm
 microelectronic
 microelectronics
@@ -10646,8 +10692,11 @@ mullion
 multi
 multicolored
 multifarious
+multilayer
+multilayered
 multilingual
 multimedia
+multipart
 multiple
 multiples
 multiplex
@@ -10963,6 +11012,7 @@ nonstandard
 nonstarter
 nonstop
 nonstructural
+nonterminal
 nontrivial
 nonzero
 noodle
@@ -11342,6 +11392,7 @@ optimum
 opting
 option
 optional
+optionality
 optionally
 options
 opts
@@ -11526,7 +11577,6 @@ overprint
 overproduce
 overridden
 override
-overriden
 overrides
 overriding
 overrode
@@ -11844,6 +11894,7 @@ pause
 paused
 pauses
 pausing
+paver
 pavilion
 paw
 pawn
@@ -11960,6 +12011,7 @@ performing
 performs
 perfume
 perhaps
+peridot
 peril
 period
 periodic
@@ -12011,6 +12063,7 @@ persona
 personal
 personalities
 personality
+personalization
 personalize
 personalized
 personalizes
@@ -12359,6 +12412,7 @@ polygon
 polygons
 polymer
 polymorphic
+polymorphically
 polynomial
 polyphony
 polypropylene
@@ -12452,6 +12506,8 @@ posterior
 posteriors
 posterity
 posters
+postfix
+postfixed
 posting
 postings
 postlude
@@ -12507,6 +12563,7 @@ pre
 preamble
 preambles
 prearranged
+prebuilt
 precarious
 precaution
 precautions
@@ -12526,6 +12583,8 @@ precision
 preclude
 precludes
 precluding
+precomputation
+precomputed
 precondition
 preconditions
 preconnection
@@ -12562,6 +12621,7 @@ preemptive
 preemptively
 preexisting
 pref
+prefabricated
 preface
 prefecture
 prefer
@@ -12693,6 +12753,7 @@ previewing
 previews
 previous
 previously
+prevision
 prey
 price
 priced
@@ -13174,6 +13235,7 @@ quick
 quicker
 quickly
 quid
+quiesce
 quiescence
 quiescent
 quiet
@@ -13641,6 +13703,7 @@ reeks
 reel
 reenrollment
 reenter
+reentrant
 reentry
 reevaluate
 reevaluation
@@ -14008,6 +14071,7 @@ replication
 replicator
 replied
 replies
+replugging
 reply
 replying
 repopulate
@@ -14028,6 +14092,9 @@ repositions
 repositories
 repository
 repost
+reposted
+reposting
+reposts
 reprehension
 represent
 representation
@@ -14562,6 +14629,7 @@ rundown
 rune
 rung
 runic
+runnable
 runner
 runners
 running
@@ -14820,6 +14888,8 @@ scream
 scree
 screen
 screened
+screenful
+screenfuls
 screenings
 screens
 screenshot
@@ -16059,6 +16129,7 @@ stashing
 stat
 state
 stated
+stateful
 stateless
 statement
 statements
@@ -16152,6 +16223,7 @@ stocks
 stole
 stolen
 stomp
+stomped
 stomping
 stone
 stop
@@ -16683,6 +16755,7 @@ syntactic
 syntactical
 syntactically
 syntax
+syntaxes
 synth
 synthesis
 synthesize
@@ -17014,6 +17087,7 @@ them
 theme
 themed
 themes
+theming
 themselves
 then
 theocracy
@@ -17130,6 +17204,7 @@ thunderstorm
 thunk
 thursday
 thus
+thusly
 thwart
 thy
 ti
@@ -17410,6 +17485,7 @@ tranquility
 trans
 transact
 transaction
+transactional
 transactions
 transatlantic
 transceiver
@@ -17867,6 +17943,7 @@ underlying
 undermentioned
 undermine
 underneath
+underperformed
 underrate
 underscore
 underscored
@@ -17901,6 +17978,7 @@ unedited
 unencumbered
 unenforceable
 unequal
+unescapable
 uneven
 unevenly
 unexceptional
@@ -18187,7 +18265,9 @@ unzipping
 unzips
 up
 upcoming
+updatable
 update
+updateable
 updated
 updater
 updates

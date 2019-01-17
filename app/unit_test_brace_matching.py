@@ -14,6 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import curses
 import sys
 
@@ -22,71 +26,97 @@ import app.fake_curses_testing
 
 
 class BraceMatchingTestCases(app.fake_curses_testing.FakeCursesTestCase):
-  def setUp(self):
-    self.longMessage = True
-    if True:
-      # The buffer manager will retain the test file in RAM. Reset it.
-      try:
-        del sys.modules['app.buffer_manager']
-        import app.buffer_manager
-      except KeyError:
-        pass
-    app.fake_curses_testing.FakeCursesTestCase.setUp(self)
 
-  def test_parenthesis(self):
-    #self.setMovieMode(True)
-    sys.argv = []
-    write = self.writeText
-    checkStyle = self.displayCheckStyle
-    bracketColor = app.prefs.color['bracket']
-    defaultColor = app.prefs.color['default']
-    matchingBracketColor = app.prefs.color['matching_bracket']
-    self.runWithFakeInputs([
-        self.displayCheck(2, 7, ["     "]),
-        # Regression test for open ([{ without closing.
-        write('('), self.displayCheck(2, 7, ["(    "]), KEY_LEFT, CTRL_A,
-        write('['), self.displayCheck(2, 7, ["[    "]), KEY_LEFT, CTRL_A,
-        write('{'), self.displayCheck(2, 7, ["{    "]), KEY_LEFT, CTRL_A,
-        # Test for closing )]} without opening.
-        write(')'), self.displayCheck(2, 7, [")    "]), KEY_LEFT, CTRL_A,
-        write(']'), self.displayCheck(2, 7, ["]    "]), KEY_LEFT, CTRL_A,
-        write('}'), self.displayCheck(2, 7, ["}    "]), KEY_LEFT, CTRL_A,
-        # Test adjacent matching.
-        write('()'), self.displayCheck(2, 7, ["()    "]),
-          checkStyle(2, 7, 1, 2, bracketColor), KEY_LEFT,
-          checkStyle(2, 7, 1, 2, matchingBracketColor), CTRL_A,
-        write('[]'), self.displayCheck(2, 7, ["[]    "]),
-          checkStyle(2, 7, 1, 2, bracketColor), KEY_LEFT,
-          checkStyle(2, 7, 1, 2, matchingBracketColor), CTRL_A,
-        write('{}'), self.displayCheck(2, 7, ["{}    "]),
-          checkStyle(2, 7, 1, 2, bracketColor), KEY_LEFT,
-          checkStyle(2, 7, 1, 2, matchingBracketColor), CTRL_A,
-        # Test same line matching.
-        write('(test)'), self.displayCheck(2, 7, ["(test)    "]),
-          checkStyle(2, 7, 1, 1, bracketColor),
-          checkStyle(2, 8, 1, 4, defaultColor),
-          checkStyle(2, 12, 1, 1, bracketColor),
-          KEY_LEFT,
-          checkStyle(2, 7, 1, 1, matchingBracketColor),
-          checkStyle(2, 8, 1, 4, defaultColor),
-          checkStyle(2, 12, 1, 1, matchingBracketColor),
-          CTRL_A,
-        write('[test]'), self.displayCheck(2, 7, ["[test]    "]),
-          checkStyle(2, 7, 1, 1, bracketColor),
-          checkStyle(2, 8, 1, 4, defaultColor),
-          checkStyle(2, 12, 1, 1, bracketColor),
-          KEY_LEFT,
-          checkStyle(2, 7, 1, 1, matchingBracketColor),
-          checkStyle(2, 8, 1, 4, defaultColor),
-          checkStyle(2, 12, 1, 1, matchingBracketColor),
-          CTRL_A,
-        write('{test}'), self.displayCheck(2, 7, ["{test}    "]),
-          checkStyle(2, 7, 1, 1, bracketColor),
-          checkStyle(2, 8, 1, 4, defaultColor),
-          checkStyle(2, 12, 1, 1, bracketColor),
-          KEY_LEFT,
-          checkStyle(2, 7, 1, 1, matchingBracketColor),
-          checkStyle(2, 8, 1, 4, defaultColor),
-          checkStyle(2, 12, 1, 1, matchingBracketColor),
-          CTRL_A,
-        CTRL_Q, 'n'])
+    def setUp(self):
+        self.longMessage = True
+        app.fake_curses_testing.FakeCursesTestCase.setUp(self)
+
+    def test_parenthesis(self):
+        #self.setMovieMode(True)
+        sys.argv = []
+        write = self.writeText
+        checkStyle = self.displayCheckStyle
+        bracketColor = self.prg.prefs.color['bracket']
+        defaultColor = self.prg.prefs.color['default']
+        matchingBracketColor = self.prg.prefs.color['matching_bracket']
+        self.runWithFakeInputs([
+            self.displayCheck(2, 7, [u"     "]),
+            # Regression test for open ([{ without closing.
+            write(u'('),
+            self.displayCheck(2, 7, [u"(    "]),
+            KEY_LEFT,
+            CTRL_A,
+            write(u'['),
+            self.displayCheck(2, 7, [u"[    "]),
+            KEY_LEFT,
+            CTRL_A,
+            write(u'{'),
+            self.displayCheck(2, 7, [u"{    "]),
+            KEY_LEFT,
+            CTRL_A,
+            # Test for closing )]} without opening.
+            write(u')'),
+            self.displayCheck(2, 7, [u")    "]),
+            KEY_LEFT,
+            CTRL_A,
+            write(u']'),
+            self.displayCheck(2, 7, [u"]    "]),
+            KEY_LEFT,
+            CTRL_A,
+            write(u'}'),
+            self.displayCheck(2, 7, [u"}    "]),
+            KEY_LEFT,
+            CTRL_A,
+            # Test adjacent matching.
+            write(u'()'),
+            self.displayCheck(2, 7, [u"()    "]),
+            checkStyle(2, 7, 1, 2, bracketColor),
+            KEY_LEFT,
+            checkStyle(2, 7, 1, 2, matchingBracketColor),
+            CTRL_A,
+            write(u'[]'),
+            self.displayCheck(2, 7, [u"[]    "]),
+            checkStyle(2, 7, 1, 2, bracketColor),
+            KEY_LEFT,
+            checkStyle(2, 7, 1, 2, matchingBracketColor),
+            CTRL_A,
+            write(u'{}'),
+            self.displayCheck(2, 7, [u"{}    "]),
+            checkStyle(2, 7, 1, 2, bracketColor),
+            KEY_LEFT,
+            checkStyle(2, 7, 1, 2, matchingBracketColor),
+            CTRL_A,
+            # Test same line matching.
+            write(u'(test)'),
+            self.displayCheck(2, 7, [u"(test)    "]),
+            checkStyle(2, 7, 1, 1, bracketColor),
+            checkStyle(2, 8, 1, 4, defaultColor),
+            checkStyle(2, 12, 1, 1, bracketColor),
+            KEY_LEFT,
+            checkStyle(2, 7, 1, 1, matchingBracketColor),
+            checkStyle(2, 8, 1, 4, defaultColor),
+            checkStyle(2, 12, 1, 1, matchingBracketColor),
+            CTRL_A,
+            write(u'[test]'),
+            self.displayCheck(2, 7, [u"[test]    "]),
+            checkStyle(2, 7, 1, 1, bracketColor),
+            checkStyle(2, 8, 1, 4, defaultColor),
+            checkStyle(2, 12, 1, 1, bracketColor),
+            KEY_LEFT,
+            checkStyle(2, 7, 1, 1, matchingBracketColor),
+            checkStyle(2, 8, 1, 4, defaultColor),
+            checkStyle(2, 12, 1, 1, matchingBracketColor),
+            CTRL_A,
+            write(u'{test}'),
+            self.displayCheck(2, 7, [u"{test}    "]),
+            checkStyle(2, 7, 1, 1, bracketColor),
+            checkStyle(2, 8, 1, 4, defaultColor),
+            checkStyle(2, 12, 1, 1, bracketColor),
+            KEY_LEFT,
+            checkStyle(2, 7, 1, 1, matchingBracketColor),
+            checkStyle(2, 8, 1, 4, defaultColor),
+            checkStyle(2, 12, 1, 1, matchingBracketColor),
+            CTRL_A,
+            CTRL_Q,
+            u'n'
+        ])

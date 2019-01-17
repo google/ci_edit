@@ -13,6 +13,8 @@
 # limitations under the License.
 
 # This is a list of non-English words that are in Python libraries.
+unhexlify
+pprint
 abspath
 addstr
 altsep
@@ -23,6 +25,7 @@ ascii
 atime
 basename
 baudrate
+binascii
 btab
 builtins
 bytecode
@@ -48,9 +51,12 @@ ctrl
 ctypes
 curdir
 dataerr
+dedent
 def
 defpath
 del
+delitem
+delslice
 dev
 devnull
 difflib
@@ -75,6 +81,7 @@ execve
 execvp
 execvpe
 exlock
+expandtabs
 expanduser
 expandvars
 extsep
@@ -112,6 +119,8 @@ getlogin
 getmaxyx
 getmouse
 getmtime
+getnev
+getpass
 getpgid
 getpgrp
 getpid
@@ -123,8 +132,10 @@ getrefcount
 getsid
 getsize
 getsizeof
+getslice
 gettrace
 getuid
+getuser
 getvalue
 getyx
 gid
@@ -133,6 +144,7 @@ goto
 hasattr
 hashlib
 hexdigest
+hexlify
 hexversion
 hglobal
 hinstance
@@ -146,15 +158,22 @@ ino
 insort
 inventwithpython
 ioerr
+isalnum
+isalpha
 isatty
+isdecimal
 isdigit
 isdir
 isfile
+isinstance
 islink
 islower
 ismount
+isnumeric
 isprint
+isspace
 issubclass
+istitle
 isupper
 iteritems
 itertools
@@ -171,6 +190,7 @@ len
 lft
 linesep
 listdir
+ljust
 localtime
 lpcstr
 lpvoid
@@ -180,10 +200,10 @@ lstrip
 makedev
 makedirs
 max
-maxint
 maxsize
 maxunicode
 memmove
+metavar
 min
 mkdir
 mkfifo
@@ -194,6 +214,7 @@ moveable
 mtime
 multiline
 mvwin
+nargs
 ndelay
 ndiff
 newwin
@@ -225,6 +246,7 @@ pid
 plen
 popen
 ppage
+prog
 prv
 ps
 pstats
@@ -237,6 +259,7 @@ rdwr
 re
 readlines
 readlink
+realpath
 regex
 regs
 relpath
@@ -260,6 +283,7 @@ setegid
 seteuid
 setgid
 setgroups
+setitem
 setlocale
 setpgid
 setpgrp
@@ -268,6 +292,7 @@ setrecursionlimit
 setregid
 setreuid
 setsid
+setslice
 settrace
 setuid
 shlock
@@ -275,6 +300,7 @@ shome
 shutil
 sigalrm
 sighup
+sigterm
 sigusr
 sigwinch
 sizeof
@@ -297,15 +323,18 @@ startswith
 statvfs
 str
 strftime
+subparsers
 symlink
 sys
 sysconf
+tarfile
 tcgetpgrp
 tcsetpgrp
 tempfail
 tempfile
 tempnam
 termios
+textwrap
 timeit
 tiocgwinsz
 tmpfile
@@ -345,3 +374,4 @@ wuntraced
 xclip
 xrange
 xsel
+zfill

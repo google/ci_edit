@@ -31,6 +31,8 @@ override a
 3.d a
 3.f a
 
+(2323ull a
+
 namespace sample {
 
 #if defined(foo) && \

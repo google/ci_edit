@@ -15,16 +15,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 
 import sys
 
-
 if __name__ == '__main__':
-  args = sys.argv
-  if '--test' in args:
-    import unit_tests
-    args.remove('--test')
-    unit_tests.parseArgList(args)
-  else:
-    import app.ci_program
-    app.ci_program.run_ci()
+    args = sys.argv
+    if '--test' in args:
+        import unit_tests
+        args.remove('--test')
+        unit_tests.parseArgList(args)
+    else:
+        import app.ci_program
+        app.ci_program.run_ci()

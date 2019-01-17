@@ -12,27 +12,38 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import re
 
 
 def joinReList(reList):
-  return r"("+r")|(".join(reList)+r")"
+    return r"(" + r")|(".join(reList) + r")"
+
 
 def joinReWordList(reList):
-  return r"(\b"+r"\b)|(\b".join(reList)+r"\b)"
+    return r"(\b" + r"\b)|(\b".join(reList) + r"\b)"
 
 
 kNonMatchingRegex = r'^\b$'
 kReNonMatching = re.compile(kNonMatchingRegex)
 
-kReBrackets = re.compile('[[\]{}()]')
+# Beware, to include a ] in a set, it should be the first character in the set.
+# So, the first ] does not close the set and the second [ does not open a set.
+# The set of characters is ]{}()[.
+kBracketsRegex = u'[]{}()[]'
+kReBrackets = re.compile(kBracketsRegex)
 
 kReComments = re.compile('(?:#|//).*$|/\*.*?\*/|<!--.*?-->')
 
-kReEndSpaces = re.compile(r'\s+$')
+kEndSpacesRegex = r'\s+$'
+kReEndSpaces = re.compile(kEndSpacesRegex)
 
 kReStrings = re.compile(
-    r"(\"\"\".*?(?<!\\)\"\"\")|('''.*?(?<!\\)''')|(\".*?(?<!\\)\")|('.*?(?<!\\)')")
+    r"(\"\"\".*?(?<!\\)\"\"\")|('''.*?(?<!\\)''')|(\".*?(?<!\\)\")"
+    r"|('.*?(?<!\\)')")
 
 # The first group is a hack to allow upper case pluralized, e.g. URLs.
 kReSubwords = re.compile(
@@ -46,7 +57,7 @@ kReSubwordBoundaryRvr = re.compile(
 
 kReWordBoundary = re.compile('(?:\w+)|(?:\W+)')
 
-__commonNumbersRegex = (
+kNumbersRegex = (
     # Don't include the [-+]? at the start of a number because it mismatches
     # an equation like 0x33-0x44.
     r'(?:'
@@ -58,8 +69,8 @@ __commonNumbersRegex = (
     #r'[-+]?[0-9]*\.[0-9]+(?:[eE][+-][0-9]+)?[fF]?(?!\w)',
     #r'[-+]?[0-9]+(?:\.[0-9]*(?:[eE][+-][0-9]+)?)?[fF]?(?!\w)',
     #r'[-+]?[0-9]+(?:[uUlL][lL]?[lL]?)?(?!\w)',
-    )
-kReNumbers = re.compile(__commonNumbersRegex)
+)
+kReNumbers = re.compile(kNumbersRegex)
 
 # Trivia: all English contractions except 'sup, 'tis and 'twas will
 # match this regex (with re.I):  [adegIlnotuwy]'[acdmlsrtv]

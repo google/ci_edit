@@ -16,6 +16,7 @@
 # Chromium (May be specific to Chromium development)
 # May of these are not real words or correct spellings.
 accname
+ais
 ansa
 ansb
 appcache
@@ -54,6 +55,8 @@ cryptohome
 cws
 darkconnect
 dcheck
+decltype
+declval
 deletability
 displaymode
 dlog
@@ -133,6 +136,7 @@ rendertext
 rlz
 rtlui
 safebrowsing
+scoper
 scrollview
 sel
 sideload
@@ -148,6 +152,8 @@ tabstrip
 tbr
 textfield
 tooltips
+triggerer
+triggerers
 tryserver
 uitest
 ukm

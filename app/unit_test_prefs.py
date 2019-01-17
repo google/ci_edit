@@ -12,18 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import unittest
 
+from app.curses_util import *
+import app.fake_curses_testing
 import app.prefs
 
 
-class PrefsTestCases(unittest.TestCase):
-  def setUp(self):
-    pass
+class PrefsTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
-  def tearDown(self):
-    pass
+    def setUp(self):
+        self.longMessage = True
+        app.fake_curses_testing.FakeCursesTestCase.setUp(self)
 
-  def test_fill_this_in(self):
-    pass
-
+    def test_default_prefs(self):
+        self.runWithFakeInputs([
+            self.prefCheck(u'editor', u'saveUndo', True),
+            CTRL_Q,
+        ])

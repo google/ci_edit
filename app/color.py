@@ -12,27 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import curses
 
-import app.prefs
 
+class Colors():
 
-colors = 256
-cache__ = {}
+    def __init__(self, colorPrefs):
+        self.__colorPrefs = colorPrefs
+        self.colors = 256
+        self.__cache = {}
 
-def reset():
-  global cache__
-  cache__ = {}
-
-def get(colorType, delta=0):
-  global cache__
-  if type(colorType) == type(0):
-    colorIndex = colorType
-  else:
-    colorIndex = app.prefs.color[colorType]
-  colorIndex = min(colors - 1, colorIndex + delta)
-  color = cache__.get(colorIndex) or curses.color_pair(colorIndex)
-  cache__[colorIndex] = color
-  if colorType in ('error', 'misspelling'):
-    color |= curses.A_BOLD | curses.A_REVERSE
-  return color
+    def get(self, colorType, delta=0):
+        if type(colorType) == type(0):
+            colorIndex = colorType
+        else:
+            colorIndex = self.__colorPrefs[colorType]
+        colorIndex = min(self.colors - 1, colorIndex + delta)
+        color = self.__cache.get(colorIndex) or curses.color_pair(colorIndex)
+        self.__cache[colorIndex] = color
+        if colorType in ('error', 'misspelling'):
+            color |= curses.A_BOLD | curses.A_REVERSE
+        return color

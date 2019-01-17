@@ -12,95 +12,103 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# For Python 2to3 support.
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import os
-import Queue
+try:
+    import Queue as queue
+except ImportError:
+    import queue
 import signal
 import sys
 import threading
+import time
 import traceback
 
 import app.profile
 import app.render
 
 
-# The instance of the background thread.
-bg = None
-
-
 class BackgroundThread(threading.Thread):
-  def __init__(self, *args, **keywords):
-    threading.Thread.__init__(self, *args, **keywords)
-    self.toBackground = None
-    self.fromBackground = None
 
-  def get(self):
-    return self.fromBackground.get()
+    def __init__(self, *args, **keywords):
+        threading.Thread.__init__(self, *args, **keywords)
+        self.toBackground = None
+        self.fromBackground = None
 
-  def hasMessage(self):
-    return not self.fromBackground.empty()
+    def get(self):
+        return self.fromBackground.get()
 
-  def hasUserEvent(self):
-    return not self.toBackground.empty()
+    def hasMessage(self):
+        # This thread yield (time.sleep(0)) dramatically improves Python3
+        # performance. Without this line empty() will be called far too often.
+        time.sleep(0)
+        return not self.fromBackground.empty()
 
-  def put(self, data):
-    self.toBackground.put(data)
+    def hasUserEvent(self):
+        time.sleep(0)  # See note in hasMessage().
+        return not self.toBackground.empty()
+
+    def put(self, data):
+        self.toBackground.put(data)
 
 
 def background(inputQueue, outputQueue):
-  block = True
-  pid = os.getpid()
-  signalNumber = signal.SIGUSR1
-  while True:
-    try:
-      try:
-        program, message = inputQueue.get(block)
-        #profile = app.profile.beginPythonProfile()
-        if message == 'quit':
-          app.log.info('bg received quit message')
-          return
-        program.executeCommandList(message)
-        program.shortTimeSlice()
-        program.render()
-        # debugging only: program.showWindowHierarchy()
-        outputQueue.put(app.render.frame.grabFrame())
-        os.kill(pid, signalNumber)
-        #app.profile.endPythonProfile(profile)
-        if not inputQueue.empty():
-          continue
-      except Queue.Empty:
-        pass
-      #continue
-      tb = program.focusedWindow.textBuffer
-      block = len(tb.parser.rows) >= len(tb.lines)
-      if not block:
-        program.focusedWindow.textBuffer.parseDocument()
-        block = len(tb.parser.rows) >= len(tb.lines)
-        if block:
-          program.render()
-          outputQueue.put(app.render.frame.grabFrame())
-          os.kill(pid, signalNumber)
-    except Exception as e:
-      app.log.exception(e)
-      app.log.error('bg thread exception', e)
-      errorType, value, tracebackInfo = sys.exc_info()
-      out = traceback.format_exception(errorType, value, tracebackInfo)
-      outputQueue.put(('exception', out))
-      os.kill(pid, signalNumber)
-      while True:
-        program, message = inputQueue.get()
-        if message == 'quit':
-          app.log.info('bg received quit message')
-          return
+    cmdCount = 0
+    block = True
+    pid = os.getpid()
+    signalNumber = signal.SIGUSR1
+    while True:
+        try:
+            try:
+                program, message = inputQueue.get(block)
+                #profile = app.profile.beginPythonProfile()
+                if message == 'quit':
+                    app.log.info('bg received quit message')
+                    return
+                program.executeCommandList(message)
+                program.shortTimeSlice()
+                program.render()
+                # debugging only: program.showWindowHierarchy()
+                cmdCount += len(message)
+                outputQueue.put(program.program.frame.grabFrame() + (cmdCount,))
+                os.kill(pid, signalNumber)
+                #app.profile.endPythonProfile(profile)
+                time.sleep(0)  # See note in hasMessage().
+                if not inputQueue.empty():
+                    continue
+            except queue.Empty:
+                pass
+            block = program.longTimeSlice()
+            if block:
+                program.render()
+                outputQueue.put(program.program.frame.grabFrame() + (cmdCount,))
+                os.kill(pid, signalNumber)
+        except Exception as e:
+            app.log.exception(e)
+            app.log.error('bg thread exception', e)
+            errorType, value, tracebackInfo = sys.exc_info()
+            out = traceback.format_exception(errorType, value, tracebackInfo)
+            outputQueue.put(('exception', out))
+            os.kill(pid, signalNumber)
+            while True:
+                program, message = inputQueue.get()
+                if message == 'quit':
+                    app.log.info('bg received quit message')
+                    return
+
 
 def startupBackground():
-  global bg
-  toBackground = Queue.Queue()
-  fromBackground = Queue.Queue()
-  bg = BackgroundThread(
-      target=background, args=(toBackground, fromBackground))
-  bg.setName('ci_edit_bg')
-  bg.setDaemon(True)
-  bg.start()
-  bg.toBackground = toBackground
-  bg.fromBackground = fromBackground
-  return bg
+    toBackground = queue.Queue()
+    fromBackground = queue.Queue()
+    bg = BackgroundThread(
+        target=background, args=(toBackground, fromBackground))
+    bg.setName('ci_edit_bg')
+    bg.setDaemon(True)
+    bg.start()
+    bg.toBackground = toBackground
+    bg.fromBackground = fromBackground
+    return bg

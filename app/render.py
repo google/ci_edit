@@ -12,21 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
+
 class Frame:
-  def __init__(self):
-    self.cursor = None
-    self.drawList = []
 
-  def addStr(self, row, col, text, style):
-    self.drawList.append((row, col, text, style))
+    def __init__(self):
+        self.cursor = None
+        self.drawList = []
 
-  def setCursor(self, cursor):
-    self.cursor = cursor
+    def addStr(self, row, col, text, style):
+        self.drawList.append((row, col, text, style))
 
-  def grabFrame(self):
-    r = self.drawList, self.cursor
-    self.drawList = []
-    self.cursor = None
-    return r
+    def setCursor(self, cursor):
+        self.cursor = cursor
 
-frame = Frame()
+    def grabFrame(self):
+        r = self.drawList, self.cursor
+        self.drawList = []
+        self.cursor = None
+        return r
