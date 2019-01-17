@@ -88,8 +88,8 @@ def mainWindowCommands(controller, textBuffer):
         textBuffer.cursorSelectBlockPageUp,
         KEY_ALT_SHIFT_PAGE_DOWN:
         textBuffer.cursorSelectBlockPageDown,
-        CTRL_B:
-        textBuffer.jumpToMatchingBracket,
+        #CTRL_B:
+        #textBuffer.jumpToMatchingBracket,
         CTRL_F:
         controller.changeToFind,
         CTRL_G:
