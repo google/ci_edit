@@ -29,9 +29,6 @@ class AutomaticColumnAdjustmentCases(
         app.fake_curses_testing.FakeCursesTestCase):
 
     def setUp(self):
-        if os.path.isfile(kTestFile):
-            os.unlink(kTestFile)
-        self.assertFalse(os.path.isfile(kTestFile))
         app.fake_curses_testing.FakeCursesTestCase.setUp(self)
 
     def tearDown(self):

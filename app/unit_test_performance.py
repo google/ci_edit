@@ -24,12 +24,6 @@ import app.parser
 
 class PerformanceTestCases(unittest.TestCase):
 
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
-
     def test_array_vs_getter(self):
         setup = '''data = ['a'] * 100\n'''
         setup += '''def get(n):\n'''

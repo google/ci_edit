@@ -33,9 +33,6 @@ class UiBasicsTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
     def setUp(self):
         self.longMessage = True
-        if os.path.isfile(kTestFile):
-            os.unlink(kTestFile)
-        self.assertFalse(os.path.isfile(kTestFile))
         app.fake_curses_testing.FakeCursesTestCase.setUp(self)
 
     def test_logo(self):
@@ -101,6 +98,7 @@ class UiBasicsTestCases(app.fake_curses_testing.FakeCursesTestCase):
             self.displayCheck(0, 0, [
                 u" ci    " + kTestFile[-30:],
             ]),
+            self.cursorCheck(2, 7),
             self.displayCheck(13, 0, [
                 u"Creating new file  ",
                 u"                   ",
@@ -109,6 +107,7 @@ class UiBasicsTestCases(app.fake_curses_testing.FakeCursesTestCase):
                 u"                   ",
                 u"                   ",
             ]), CTRL_S,
+            self.cursorCheck(2, 8),
             self.displayCheck(13, 0, [
                 u"File saved    ",
                 u"                   ",
@@ -121,11 +120,11 @@ class UiBasicsTestCases(app.fake_curses_testing.FakeCursesTestCase):
                 u" ci     . ",
             ]), CTRL_O,
             self.writeText(kTestFile), CTRL_J,
-            #self.displayCheck(0, 0, [
-            #    u" ci    " + kTestFile[-30:],
-            #    u"            ",
-            #    u"     1 te   ",
-            #]),
+            self.displayCheck(0, 0, [
+                u" ci    " + kTestFile[-30:],
+                u"            ",
+                u"     1 te   ",
+            ]),
             CTRL_Q
         ])
 

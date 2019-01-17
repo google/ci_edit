@@ -20,6 +20,10 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+try:
+    FileNotFoundError
+except NameError:
+    FileNotFoundError = OSError
 
 try:
     import cPickle as pickle
@@ -49,14 +53,17 @@ def calculateChecksum(filePath, data=None):
     app.log.info("Calculate checksum of the current file")
     hasher = hashlib.sha512()
     try:
-        if data:
-            hasher.update(data)
+        if data is not None:
+            hasher.update(data.encode(u"utf-8"))
         else:
             with open(filePath, 'rb') as dataFile:
                 hasher.update(dataFile.read())
         return hasher.hexdigest()
-    except:
-        return None
+    except FileNotFoundError as e:
+        pass
+    except Exception as e:
+        app.log.exception(e)
+    return None
 
 
 def calculateFileSize(filePath):
@@ -71,8 +78,11 @@ def calculateFileSize(filePath):
     """
     try:
         return os.stat(filePath).st_size
-    except OSError:
-        return 0
+    except FileNotFoundError:
+        pass
+    except Exception as e:
+        app.log.exception(e)
+    return 0
 
 
 def getFileInfo(filePath, data=None):

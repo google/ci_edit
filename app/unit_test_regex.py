@@ -24,12 +24,6 @@ import app.regex
 
 class RegexTestCases(unittest.TestCase):
 
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
-
     def test_common_numbers(self):
 
         def testNumber(strInput, reg):

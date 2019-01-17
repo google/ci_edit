@@ -183,6 +183,25 @@ class FakeCursesTestCase(unittest.TestCase):
         path = os.path.dirname(os.path.dirname(__file__))
         return os.path.join(path, u"sample", relPath)
 
+    def prefCheck(self, *args):
+        assert isinstance(args[0], unicode)
+        assert isinstance(args[1], unicode)
+        assert isinstance(args[2], (int, bool))
+        caller = inspect.stack()[1]
+        callerText = u"\n  %s:%s:%s(): " % (os.path.split(caller[1])[1],
+                                            caller[2], caller[3])
+
+        def prefChecker(display, cmdIndex):
+            if self.prg.prefs.category(args[0])[args[1]] != args[2]:
+                output = u"%s at index %s, expected %r, found %r" % (callerText, unicode(cmdIndex), args[2], result)
+                if self.cursesScreen.movie:
+                    print(output)
+                else:
+                    self.fail(output)
+            return None
+
+        return prefChecker
+
     def resizeScreen(self, rows, cols):
         assert isinstance(rows, int)
         assert isinstance(cols, int)
@@ -256,6 +275,8 @@ class FakeCursesTestCase(unittest.TestCase):
             print(u'\n-------- finished', callerText)
 
     def runWithTestFile(self, kTestFile, fakeInputs):
+        if os.path.isfile(kTestFile):
+            os.unlink(kTestFile)
         self.assertFalse(os.path.isfile(kTestFile))
         self.runWithFakeInputs(fakeInputs, ["ci_test_program", kTestFile])
 

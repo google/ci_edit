@@ -33,9 +33,6 @@ kTestFile = '#bookmarks_test_file_with_unlikely_file_name~'
 class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
     def setUp(self):
-        if os.path.isfile(kTestFile):
-            os.unlink(kTestFile)
-        self.assertFalse(os.path.isfile(kTestFile))
         self.prg = app.ci_program.CiProgram()
         self.fakeHost = app.window.ViewWindow(self.prg, None)
         self.textBuffer = app.text_buffer.TextBuffer(self.prg)
