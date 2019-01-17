@@ -17,6 +17,9 @@
 #include "project_file.h"
 #include <system_file.h>
 
+"hello"
+"%s and\n %-3i or\r %u with %zu float %3.12fend"
+
 // comment with \
 a line continuation.
 override a
