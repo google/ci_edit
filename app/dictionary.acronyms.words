@@ -14,12 +14,16 @@
 
 
 # Acronyms (acronyms that match trademarks are not a challenge to said marks)
+absl
 acl
 adt
 afaict
 afaik
 afk
+ai
+ansi
 ar
+ast
 atl
 awt
 bg
@@ -40,6 +44,7 @@ ci
 cisc
 cjk
 cla
+cmx
 cn
 cpu
 cpus
@@ -59,11 +64,13 @@ dns
 dq
 drm
 ebnf
+eos
 et
 eula
 eulas
 faq
 fc
+fde
 fg
 fil
 fpu
@@ -103,6 +110,7 @@ ide
 ie
 ieee
 ietf
+ifc
 iiuc
 ime
 imes
@@ -114,6 +122,7 @@ ipps
 ips
 ir
 iso
+iu
 ja
 jdk
 jit
@@ -131,6 +140,7 @@ ld
 lds
 lgtm
 lgtms
+llc
 lldb
 llvm
 lpd
@@ -161,6 +171,7 @@ nasa
 nb
 ncsa
 nfs
+nic
 nin
 nl
 nls
@@ -183,6 +194,7 @@ pb
 pbs
 pc
 pcie
+pdd
 pdf
 pdfs
 pdt
@@ -201,6 +213,7 @@ rgba
 rgbs
 risc
 rom
+rpcs
 rsa
 rtc
 rtl
@@ -210,6 +223,7 @@ sde
 sdk
 sdks
 serp
+sftp
 sgml
 sgmls
 simd
@@ -229,11 +243,13 @@ ssp
 sv
 sw
 swf
+sz
 tb
 tbd
 tc
 tcp
 te
+tftp
 tif
 tifs
 tld
@@ -258,9 +274,12 @@ usbs
 utc
 utcs
 uuid
+vk
 vm
+vma
 vmo
 vr
+vv
 wep
 wip
 www
@@ -273,6 +292,7 @@ xmm
 xssi
 xxl
 xxxl
+xzf
 yaml
 zh
 zx

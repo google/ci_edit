@@ -112,11 +112,13 @@ cwd
 cxx
 datagram
 dbus
+deallocation
 def
 del
 dep
 deps
 deque
+deserialization
 deserialized
 deserializer
 deserializing
@@ -182,6 +184,7 @@ getter
 gfx
 github
 gitignore
+glibc
 goto
 grey
 guid
@@ -219,6 +222,7 @@ ipv
 irq
 irqs
 isa
+istty
 iter
 iterable
 jk
@@ -279,6 +283,7 @@ opcodes
 openbsd
 overscroll
 patcher
+pcm
 pem
 pid
 pkgs
@@ -426,6 +431,7 @@ vpns
 vsync
 waitable
 wasm
+wav
 wb
 webkit
 websocket

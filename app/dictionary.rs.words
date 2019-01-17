@@ -13,17 +13,23 @@
 # limitations under the License.
 
 # This is a list of non-English words that are in Rust libraries (crates).
-mevent
 bstate
-leaveok
-scrollok
-getmouse
 endwin
+eprintln
+fmt
 getch
+getmouse
 initscr
+iters
+itertools
+izip
 lc
+leaveok
+mevent
 mmask
 mousemask
+multizip
+mut
 mv
 ncurses
 noecho
@@ -31,5 +37,11 @@ peekable
 println
 printw
 rfind
+rng
+rustc
+scrollok
 setlocale
 stdscr
+structopt
+vec
+writeln
