@@ -927,14 +927,14 @@ prefs = {
             'indent':
             '    ',
             'keywords': [
-                'abstract', 'alignof', 'as', 'become', 'box', 'break', 'const',
-                'continue', 'crate', 'do', 'else', 'enum', 'extern', 'false',
-                'final', 'fn', 'for', 'if', 'impl', 'in', 'let', 'loop',
-                'macro', 'match', 'mod', 'move', 'mut', 'offsetof', 'override',
-                'priv', 'pub', 'pure', 'ref', 'return', 'Self', 'self',
-                'sizeof', 'static', 'struct', 'super', 'trait', 'true', 'type',
-                'typeof', 'unsafe', 'unsized', 'use', 'virtual', 'where',
-                'while', 'yield'
+                'abstract', 'alignof', 'as', 'async', 'await', 'become', 'box',
+                'break', 'const', 'continue', 'crate', 'do', 'dyn', 'else',
+                'enum', 'extern', 'false', 'final', 'fn', 'for', 'if', 'impl',
+                'in', 'let', 'loop', 'macro', 'match', 'mod', 'move', 'mut',
+                'offsetof', 'override', 'priv', 'pub', 'pure', 'ref', 'return',
+                'Self', 'self', 'sizeof', 'static', 'struct', 'super', 'trait',
+                'true', 'type', 'typeof', 'try', 'unsafe', 'unsized', 'use',
+                'virtual', 'where', 'while', 'yield'
             ],
             'special': [
                 #r'(?<!\w)__.*?__(?!\w)',
@@ -942,8 +942,8 @@ prefs = {
                 "&\s*'",
             ],
             'types': [
-                'i8', 'i16', 'i32', 'i64', 'isize', 'u8', 'u16', 'u32', 'u64',
-                'usize', 'array', 'slice', 'tuple'
+                'bool', 'char', 'i8', 'i16', 'i32', 'i64', 'isize', 'u8', 'u16',
+                'u32', 'u64', 'usize', 'array', 'slice', 'tuple'
             ],
             'contains': [
                 'cpp_block_comment',
