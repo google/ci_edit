@@ -193,7 +193,8 @@ class FakeCursesTestCase(unittest.TestCase):
 
         def prefChecker(display, cmdIndex):
             if self.prg.prefs.category(args[0])[args[1]] != args[2]:
-                output = u"%s at index %s, expected %r, found %r" % (callerText, unicode(cmdIndex), args[2], result)
+                output = u"%s at index %s, expected %r, found %r" % (
+                    callerText, unicode(cmdIndex), args[2], result)
                 if self.cursesScreen.movie:
                     print(output)
                 else:
