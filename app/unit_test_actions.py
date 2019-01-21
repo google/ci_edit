@@ -294,3 +294,12 @@ class TextDeleteTestCases(unittest.TestCase):
         self.assertEqual(tb.message[0], u"1 characters (1 lines) selected")
         tb.carriageReturn()
         self.assertEqual(tb.message, None)
+
+    def test_message_after_text_deletion(self):
+        tb = self.textBuffer
+        self.assertEqual(tb.message[0], u"New buffer")
+        tb.insert(u"p")
+        tb.selectionAll()
+        self.assertEqual(tb.message[0], u"1 characters (1 lines) selected")
+        tb.insert("q")
+        self.assertEqual(tb.message, None)
