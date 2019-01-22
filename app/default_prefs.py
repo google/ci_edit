@@ -353,6 +353,10 @@ prefs = {
             ],
             'grammar': 'dart',
         },
+        'gn': {
+            'ext': ['.gn'],
+            'grammar': 'gn',
+        },
         'golang': {
             'ext': [
                 '.go',
@@ -676,6 +680,22 @@ prefs = {
         'error': {
             'indent': '  ',
             'spelling': False,
+        },
+        # Generate Ninja language.
+        'gn': {
+            'indent': '  ',
+            'keywords': [
+                'else', 'false', 'if', 'true'
+            ],
+            'special': [
+            ],
+            'types': [
+            ],
+            'contains': [
+                'pound_comment',
+                'c_string1',
+                'c_string2',
+            ],
         },
         # Go Language.
         'golang': {
