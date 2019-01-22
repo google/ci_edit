@@ -385,6 +385,10 @@ prefs = {
             'ext': ['.md'],
             'grammar': 'md',
         },
+        'proto': {
+            'ext': ['.proto'],
+            'grammar': 'proto',
+        },
         'python': {
             'ext': ['.py'],
             'grammar': 'py',
@@ -684,13 +688,9 @@ prefs = {
         # Generate Ninja language.
         'gn': {
             'indent': '  ',
-            'keywords': [
-                'else', 'false', 'if', 'true'
-            ],
-            'special': [
-            ],
-            'types': [
-            ],
+            'keywords': ['else', 'false', 'if', 'true'],
+            'special': [],
+            'types': [],
             'contains': [
                 'pound_comment',
                 'c_string1',
@@ -846,6 +846,29 @@ prefs = {
         },
         'none': {
             'spelling': False,
+        },
+        # Proto buffer language.
+        'proto': {
+            'indent':
+            '  ',
+            'keywords':
+            __common_keywords +
+            ['message', 'option', 'package', 'returns', 'rpc', 'syntax'],
+            'namespaces': [],
+            'special': [
+                #r'(?<!\w)__.*?__(?!\w)',
+            ],
+            'types': [
+                'bool', 'bytes', 'double', 'enum', 'float', 'int8', 'int16',
+                'int32', 'int64', 'optional', 'repeated', 'required', 'string',
+                'uint8', 'uint16', 'uint32', 'uint64'
+            ],
+            'contains': [
+                # This list is carefully ordered. Don't sort it.
+                'c_string1',
+                'c_string2',
+                'cpp_line_comment',
+            ],
         },
         # Python language.
         'py': {
