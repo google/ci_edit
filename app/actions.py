@@ -974,8 +974,7 @@ class Actions(app.mutator.Mutator):
             inputFile.close()
         self.determineFileType()
 
-    def determineFileType(self):
-        extension = os.path.splitext(self.fullPath)[1]
+    def _determineRootGrammar(self, name, extension):
         if extension == u"" and len(self.lines) > 0:
             line = self.lines[0]
             if line.startswith(u'#!'):
@@ -990,7 +989,11 @@ class Actions(app.mutator.Mutator):
         if self.fileExtension != extension:
             self.fileExtension = extension
             self.upperChangedRow = 0
-        self.rootGrammar = self.program.prefs.getGrammar(self.fullPath)
+        return self.program.prefs.getGrammar(name + extension)
+
+    def determineFileType(self):
+        self.rootGrammar = self._determineRootGrammar(
+            *os.path.splitext(self.fullPath))
         self.parseGrammars()
         self.dataToLines()
 

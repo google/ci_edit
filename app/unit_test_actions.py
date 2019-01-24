@@ -16,6 +16,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import os
 import unittest
 
 import app.log
@@ -294,3 +295,20 @@ class TextDeleteTestCases(unittest.TestCase):
         self.assertEqual(tb.message[0], u"1 characters (1 lines) selected")
         tb.carriageReturn()
         self.assertEqual(tb.message, None)
+
+
+class GrammarDeterminationTestCases(unittest.TestCase):
+
+    def setUp(self):
+        app.log.shouldWritePrintLog = False
+        self.prg = app.ci_program.CiProgram()
+        self.textBuffer = app.text_buffer.TextBuffer(self.prg)
+        self.textBuffer.setView(FakeView())
+
+    def tearDown(self):
+        self.textBuffer = None
+
+    def test_message_backspace(self):
+        tb = self.textBuffer
+        self.assertEqual(tb._determineRootGrammar(*os.path.splitext("test.cc")),
+            self.prg.prefs.grammars.get(self.prg.prefs.extensions.get('.cc')))
