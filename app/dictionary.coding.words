@@ -87,6 +87,7 @@ changelist
 changelog
 chans
 checkbox
+checkboxes
 chr
 cli
 cmake
@@ -152,6 +153,7 @@ eol
 eq
 errno
 esc
+etags
 ethernet
 eval
 exe
@@ -166,6 +168,8 @@ fi
 fifo
 filename
 filenames
+filesystem
+filesystems
 fixme
 fn
 formatter
@@ -191,6 +195,7 @@ guid
 gz
 gzip
 hardcode
+hardcoded
 hasher
 hostname
 hostnames
@@ -207,6 +212,7 @@ ij
 ijk
 ik
 img
+inet
 infographic
 ini
 init
@@ -239,6 +245,7 @@ lf
 lhs
 libc
 libs
+lifecycle
 lifo
 lk
 loc
@@ -251,6 +258,7 @@ lvalue
 lvalues
 makefile
 makefiles
+mem
 memoized
 microkernel
 minified
@@ -263,10 +271,14 @@ msg
 mutex
 mutexes
 na
+namespace
 namespaces
 ndebug
 ne
 neq
+netmask
+netmasks
+noop
 nullability
 nullable
 nulled
@@ -282,6 +294,7 @@ opcode
 opcodes
 openbsd
 overscroll
+overscrolling
 patcher
 pcm
 pem
@@ -344,6 +357,7 @@ rrggbb
 rrggbbaa
 rtti
 runtime
+runtimes
 rv
 rvalue
 rvalues
@@ -399,7 +413,10 @@ tk
 tmp
 todo
 tolltip
+toolchain
+toolchains
 tooltip
+tooltips
 traceback
 traversable
 tty
@@ -437,9 +454,12 @@ webkit
 websocket
 webview
 whitelist
+whitelists
 whitespace
+whitespaces
 wi
 wifi
+wildcard
 wildcards
 xorg
 xss

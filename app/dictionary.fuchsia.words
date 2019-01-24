@@ -15,10 +15,13 @@
 # This is a list of non-English words that are in the open source Fuchsia OS.
 abigen
 addrs
+appmgr
+arches
 aspace
 binfo
 blobfs
 bti
+cdecls
 chdir
 cmdline
 cmx
@@ -26,6 +29,7 @@ conns
 contig
 countof
 ctu
+curr
 disp
 embedders
 emebbing
@@ -39,10 +43,14 @@ fsl
 fxl
 fzl
 idx
+ints
 iommu
+ipi
+ipis
 kcounter
 koid
 koids
+libasync
 libobject
 libsyscalls
 libzircon
@@ -51,6 +59,7 @@ lkthread
 lockdep
 lowmem
 ltrace
+ltracef
 matred
 merkleroot
 mtx
@@ -63,13 +72,17 @@ pkgfs
 pmm
 pmt
 preinstall
+priv
 protoc
 pyproto
+realtime
 refcount
 sessionctl
+spinlock
 srv
 syscalls
 sysinfo
+termina
 toolchain
 toolchains
 tremplin
@@ -83,4 +96,5 @@ vmars
 vmos
 vsock
 waitfor
+wordwise
 zxdb
