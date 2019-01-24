@@ -401,6 +401,10 @@ prefs = {
             'ext': ['.txt', ''],
             'grammar': 'text',
         },
+        'words': {
+            'ext': ['.words', ''],
+            'grammar': 'words',
+        },
     },
     'grammar': {
         # A grammar is
@@ -1027,6 +1031,12 @@ prefs = {
         'type': {
             'indent': '  ',
             'spelling': False,
+        },
+        # Dictionary file for ci_edit.
+        'words': {
+            'contains': [
+                'pound_comment',
+            ],
         },
     },
     'palette': {
