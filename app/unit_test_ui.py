@@ -124,8 +124,7 @@ class UiBasicsTestCases(app.fake_curses_testing.FakeCursesTestCase):
                 u" ci    " + kTestFile[-30:],
                 u"            ",
                 u"     1 te   ",
-            ]),
-            CTRL_Q
+            ]), CTRL_Q
         ])
 
     def test_message_on_text_selection(self):

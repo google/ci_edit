@@ -416,7 +416,8 @@ class Mutator(app.selectable.Selectable):
             changes = self.redoChain[self.redoIndex]
             if self.debugRedo:
                 app.log.info('undo', self.redoIndex, repr(changes))
-            if ((changes[0][0] == 'f' or changes[0][0] == 'm') and len(changes) == 1):
+            if ((changes[0][0] == 'f' or changes[0][0] == 'm') and
+                    len(changes) == 1):
                 # Undo if the last edit was a cursor move.
                 self.__undoChange(changes[0])
             else:

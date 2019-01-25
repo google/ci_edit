@@ -78,18 +78,16 @@ class Actions(app.mutator.Mutator):
                 len(self.parser.rowText(self.penRow)) <= self.penCol):
             return None
         ch = self.parser.rowText(self.penRow)[self.penCol]
+
         def searchForward(openCh, closeCh):
             count = 1
             textCol = self.penCol + 1
-            for row in range(
-                    self.penRow,
-                    self.parser.rowCount()):
+            for row in range(self.penRow, self.parser.rowCount()):
                 if row != self.penRow:
                     textCol = 0
                 line = self.parser.rowText(row)[textCol:]
                 for match in re.finditer(
-                        u"(\\" + openCh + u")|(\\" + closeCh + u")",
-                        line):
+                        u"(\\" + openCh + u")|(\\" + closeCh + u")", line):
                     if match.group() == openCh:
                         count += 1
                     else:
@@ -97,6 +95,7 @@ class Actions(app.mutator.Mutator):
                     if count == 0:
                         textCol += match.start()
                         return row, textCol
+
         def searchBack(closeCh, openCh):
             count = -1
             for row in range(self.penRow, -1, -1):
@@ -105,8 +104,7 @@ class Actions(app.mutator.Mutator):
                     line = line[:self.penCol]
                 found = [
                     i for i in re.finditer(
-                        u"(\\" + openCh + u")|(\\" + closeCh +
-                        u")", line)
+                        u"(\\" + openCh + u")|(\\" + closeCh + u")", line)
                 ]
                 for match in reversed(found):
                     if match.group() == openCh:
@@ -116,14 +114,15 @@ class Actions(app.mutator.Mutator):
                     if count == 0:
                         textCol = match.start()
                         return row, textCol
+
         matcher = {
-                    u'(': (u')', searchForward),
-                    u'[': (u']', searchForward),
-                    u'{': (u'}', searchForward),
-                    u')': (u'(', searchBack),
-                    u']': (u'[', searchBack),
-                    u'}': (u'{', searchBack),
-                }
+            u'(': (u')', searchForward),
+            u'[': (u']', searchForward),
+            u'{': (u'}', searchForward),
+            u')': (u'(', searchBack),
+            u']': (u'[', searchBack),
+            u'}': (u'{', searchBack),
+        }
         look = matcher.get(ch)
         if look:
             return look[1](ch, look[0])
@@ -969,8 +968,7 @@ class Actions(app.mutator.Mutator):
             inputFile.close()
         self.determineFileType()
 
-    def determineFileType(self):
-        extension = os.path.splitext(self.fullPath)[1]
+    def _determineRootGrammar(self, name, extension):
         if extension == u"" and len(self.lines) > 0:
             line = self.lines[0]
             if line.startswith(u'#!'):
@@ -985,7 +983,11 @@ class Actions(app.mutator.Mutator):
         if self.fileExtension != extension:
             self.fileExtension = extension
             self.upperChangedRow = 0
-        self.rootGrammar = self.program.prefs.getGrammar(self.fullPath)
+        return self.program.prefs.getGrammar(name + extension)
+
+    def determineFileType(self):
+        self.rootGrammar = self._determineRootGrammar(
+            *os.path.splitext(self.fullPath))
         self.parseGrammars()
         self.dataToLines()
 

@@ -56,6 +56,7 @@ __special_string_escapes = [
     r'\\t',
     r'\\v',
     r'\\0[0-7]{0,3}',
+    #r'%#?-?[0-9]*\.?[0-9]*z?.',
     __chrome_extension,
     __sha_1,
 ]
@@ -352,6 +353,10 @@ prefs = {
             ],
             'grammar': 'dart',
         },
+        'gn': {
+            'ext': ['.gn'],
+            'grammar': 'gn',
+        },
         'golang': {
             'ext': [
                 '.go',
@@ -380,6 +385,10 @@ prefs = {
             'ext': ['.md'],
             'grammar': 'md',
         },
+        'proto': {
+            'ext': ['.proto'],
+            'grammar': 'proto',
+        },
         'python': {
             'ext': ['.py'],
             'grammar': 'py',
@@ -391,6 +400,10 @@ prefs = {
         'text': {
             'ext': ['.txt', ''],
             'grammar': 'text',
+        },
+        'words': {
+            'ext': ['.words', ''],
+            'grammar': 'words',
         },
     },
     'grammar': {
@@ -676,6 +689,18 @@ prefs = {
             'indent': '  ',
             'spelling': False,
         },
+        # Generate Ninja language.
+        'gn': {
+            'indent': '  ',
+            'keywords': ['else', 'false', 'if', 'true'],
+            'special': [],
+            'types': [],
+            'contains': [
+                'pound_comment',
+                'c_string1',
+                'c_string2',
+            ],
+        },
         # Go Language.
         'golang': {
             'indent':
@@ -826,6 +851,29 @@ prefs = {
         'none': {
             'spelling': False,
         },
+        # Proto buffer language.
+        'proto': {
+            'indent':
+            '  ',
+            'keywords':
+            __common_keywords +
+            ['message', 'option', 'package', 'returns', 'rpc', 'syntax'],
+            'namespaces': [],
+            'special': [
+                #r'(?<!\w)__.*?__(?!\w)',
+            ],
+            'types': [
+                'bool', 'bytes', 'double', 'enum', 'float', 'int8', 'int16',
+                'int32', 'int64', 'optional', 'repeated', 'required', 'string',
+                'uint8', 'uint16', 'uint32', 'uint64'
+            ],
+            'contains': [
+                # This list is carefully ordered. Don't sort it.
+                'c_string1',
+                'c_string2',
+                'cpp_line_comment',
+            ],
+        },
         # Python language.
         'py': {
             'indent':
@@ -926,14 +974,14 @@ prefs = {
             'indent':
             '    ',
             'keywords': [
-                'abstract', 'alignof', 'as', 'become', 'box', 'break', 'const',
-                'continue', 'crate', 'do', 'else', 'enum', 'extern', 'false',
-                'final', 'fn', 'for', 'if', 'impl', 'in', 'let', 'loop',
-                'macro', 'match', 'mod', 'move', 'mut', 'offsetof', 'override',
-                'priv', 'pub', 'pure', 'ref', 'return', 'Self', 'self',
-                'sizeof', 'static', 'struct', 'super', 'trait', 'true', 'type',
-                'typeof', 'unsafe', 'unsized', 'use', 'virtual', 'where',
-                'while', 'yield'
+                'abstract', 'alignof', 'as', 'async', 'await', 'become', 'box',
+                'break', 'const', 'continue', 'crate', 'do', 'dyn', 'else',
+                'enum', 'extern', 'false', 'final', 'fn', 'for', 'if', 'impl',
+                'in', 'let', 'loop', 'macro', 'match', 'mod', 'move', 'mut',
+                'offsetof', 'override', 'priv', 'pub', 'pure', 'ref', 'return',
+                'Self', 'self', 'sizeof', 'static', 'struct', 'super', 'trait',
+                'true', 'type', 'typeof', 'try', 'unsafe', 'unsized', 'use',
+                'virtual', 'where', 'while', 'yield'
             ],
             'special': [
                 #r'(?<!\w)__.*?__(?!\w)',
@@ -941,8 +989,8 @@ prefs = {
                 "&\s*'",
             ],
             'types': [
-                'i8', 'i16', 'i32', 'i64', 'isize', 'u8', 'u16', 'u32', 'u64',
-                'usize', 'array', 'slice', 'tuple'
+                'bool', 'char', 'i8', 'i16', 'i32', 'i64', 'isize', 'u8', 'u16',
+                'u32', 'u64', 'usize', 'array', 'slice', 'tuple'
             ],
             'contains': [
                 'cpp_block_comment',
@@ -983,6 +1031,12 @@ prefs = {
         'type': {
             'indent': '  ',
             'spelling': False,
+        },
+        # Dictionary file for ci_edit.
+        'words': {
+            'contains': [
+                'pound_comment',
+            ],
         },
     },
     'palette': {
