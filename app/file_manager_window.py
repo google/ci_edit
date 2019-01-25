@@ -134,6 +134,9 @@ class DirectoryList(app.window.Window):
 
 
 class PathWindow(app.window.Window):
+    """The path window is the editable text line where the user may freely type
+    in a path.
+    """
 
     def __init__(self, program, host):
         if app.config.strict_debug:

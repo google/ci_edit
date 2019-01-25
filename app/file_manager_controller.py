@@ -31,7 +31,7 @@ import app.controller
 
 class DirectoryListController(app.controller.Controller):
     """Gather and prepare file directory information.
-  """
+    """
 
     def __init__(self, view):
         assert self is not view
@@ -157,7 +157,7 @@ class DirectoryListController(app.controller.Controller):
 
 class FileManagerController(app.controller.Controller):
     """Create or open files.
-  """
+    """
 
     def __init__(self, view):
         app.controller.Controller.__init__(self, view, u'FileManagerController')
@@ -181,7 +181,7 @@ class FileManagerController(app.controller.Controller):
 
 class FilePathInputController(app.controller.Controller):
     """Manipulate path string.
-  """
+    """
 
     def __init__(self, view):
         app.controller.Controller.__init__(self, view,
