@@ -136,6 +136,8 @@ accompanying
 accomplish
 accomplished
 accomplishes
+accomplishment
+accomplishments
 accord
 accordance
 according
@@ -166,7 +168,12 @@ accuracy
 accurate
 accurately
 accusation
+accuse
+accused
 accuser
+accuses
+accusing
+accusingly
 ace
 aced
 aces
@@ -194,7 +201,9 @@ acme
 acne
 acoustic
 acoustics
+acquaint
 acquaintance
+acquaintances
 acquainted
 acquire
 acquired
@@ -275,6 +284,7 @@ adds
 adequate
 adequately
 adhere
+adhering
 adheres
 adj
 adjacency
@@ -300,13 +310,17 @@ administrator
 administrators
 admins
 admiral
+admiration
 admiralty
 admire
+admired
+admires
 admission
 admissions
 admit
 admits
 admitted
+admitting
 ado
 adobe
 adobes
@@ -430,6 +444,7 @@ ago
 agog
 agree
 agreeable
+agreeably
 agreed
 agreeing
 agreement
@@ -471,6 +486,7 @@ ajar
 aka
 akin
 alarm
+alarmed
 alarming
 alarms
 alas
@@ -500,6 +516,8 @@ aliased
 aliases
 aliasing
 alien
+alienate
+alienated
 align
 aligned
 aligner
@@ -619,7 +637,11 @@ amended
 amending
 amendment
 amendments
+amends
 amenities
+amiability
+amiable
+amiably
 amid
 amigo
 amigos
@@ -643,6 +665,9 @@ amplifiers
 amplify
 amplitude
 amt
+amuse
+amused
+amusement
 amusements
 amusing
 amusingly
@@ -702,6 +727,8 @@ animator
 animators
 anime
 ankh
+ankle
+ankles
 annex
 annexation
 anniversary
@@ -763,6 +790,7 @@ antis
 antivirus
 antivivisectionist
 ants
+anxious
 any
 anybody
 anyhow
@@ -809,6 +837,7 @@ appended
 appending
 appendix
 appends
+appetite
 applauding
 apple
 apples
@@ -906,6 +935,7 @@ arguments
 aria
 arid
 arise
+arisen
 arises
 arising
 aristocracy
@@ -920,6 +950,7 @@ armadillo
 armed
 arms
 army
+arose
 around
 arr
 arrange
@@ -938,6 +969,8 @@ arrive
 arrived
 arrives
 arriving
+arrogance
+arrogant
 arrow
 arrowhead
 arrowing
@@ -971,6 +1004,7 @@ ascents
 ascertain
 ascertaining
 ash
+ashamed
 ashamedly
 aside
 ask
@@ -1023,6 +1057,7 @@ assist
 assistance
 assistant
 assisted
+assisting
 assistive
 assists
 assoc
@@ -1051,6 +1086,8 @@ assuring
 asterisk
 asterisks
 asthmatic
+astonish
+astonishment
 astral
 astronaut
 astronomer
@@ -1102,7 +1139,9 @@ attendants
 attended
 attendees
 attender
+attending
 attention
+attentive
 attentiveness
 attenuate
 attenuated
@@ -1570,6 +1609,9 @@ beside
 besides
 besieged
 best
+bestow
+bestowed
+bestowing
 bestride
 bestrides
 bet
@@ -1596,6 +1638,7 @@ bible
 bibliography
 bid
 bidder
+bidding
 biddy
 bide
 bidirectional
@@ -1686,6 +1729,8 @@ blag
 blah
 blame
 blamed
+blames
+blaming
 blanched
 bland
 blank
@@ -1772,10 +1817,16 @@ blurry
 blurs
 blurt
 blush
+blushed
+blushes
+blushing
 boa
 boar
 board
 boards
+boast
+boasting
+boasts
 boat
 bob
 bobby
@@ -1853,6 +1904,7 @@ booty
 bop
 border
 bordered
+bordering
 borderless
 borderline
 borders
@@ -1902,9 +1954,11 @@ bourgeois
 bout
 boutique
 bow
+bowed
 bower
 bowl
 bowler
+bows
 box
 boxcar
 boxed
@@ -1913,6 +1967,8 @@ boxes
 boxing
 boy
 boyfriend
+boyfriends
+boys
 bozo
 bpm
 bps
@@ -1956,6 +2012,7 @@ breakaway
 breakdown
 breaker
 breakers
+breakfast
 breaking
 breakout
 breakpoints
@@ -1967,12 +2024,15 @@ breathing
 breathtaking
 bred
 breed
+breeding
 breve
 brevet
 brevets
 brevity
 brew
 brick
+bride
+bridegroom
 brides
 bridge
 bridged
@@ -2115,6 +2175,7 @@ bureaus
 burger
 burglar
 buried
+buries
 burl
 burly
 burn
@@ -2127,6 +2188,7 @@ burr
 burst
 bursts
 bury
+burying
 bus
 busby
 buses
@@ -6752,6 +6814,7 @@ formerly
 forming
 forms
 formula
+formulae
 formulaic
 formulas
 formulate
@@ -7990,6 +8053,7 @@ humbly
 humid
 humidity
 humongous
+humor
 humorous
 hump
 hundred
@@ -16785,6 +16849,7 @@ syndicated
 syndrome
 synonym
 synonymous
+synonymously
 synonyms
 synopses
 synopsis
