@@ -332,7 +332,6 @@ class Actions(app.mutator.Mutator):
             change = (u'b', line[self.penCol - 1:self.penCol])
             self.redoAddChange(change)
             self.redo()
-        self.setMessage()  # Clear selection message.
 
     def carriageReturn(self):
         self.performDelete()
@@ -374,7 +373,6 @@ class Actions(app.mutator.Mutator):
                 self.redoAddChange((u'i', indent))
                 self.redo()
         self.updateBasicScrollPosition()
-        self.setMessage()  # Clear selection message.
 
     def cursorColDelta(self, toRow):
         if app.config.strict_debug:
@@ -429,10 +427,6 @@ class Actions(app.mutator.Mutator):
                                            markColDelta, selectionModeDelta)
         self.redoAddChange(change)
         self.redo()
-        if self.selectionMode != app.selectable.kSelectionNone:
-            charCount, lineCount = self.countSelected()
-            self.setMessage(
-                u'%d characters (%d lines) selected' % (charCount, lineCount))
 
     def cursorMoveScroll(self, rowDelta, colDelta, scrollRowDelta,
                          scrollColDelta):

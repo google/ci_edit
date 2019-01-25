@@ -127,6 +127,33 @@ class UiBasicsTestCases(app.fake_curses_testing.FakeCursesTestCase):
             ]), CTRL_Q
         ])
 
+    def test_message_on_text_selection(self):
+        self.runWithTestFile(kTestFile, [
+            self.cursorCheck(2, 7),
+            u'H', u'e', u'l', u'l', u'o',
+            self.displayCheck(2, 0, [
+                u"     1 Hello                            "
+            ]), self.cursorCheck(2, 12), CTRL_A,
+            self.selectionDocumentCheck(0, 5, 0, 0, 1),
+            self.displayCheck(13, 0, [
+                u"5 characters (1 lines) selected"
+            ]), u'a', u'b', self.cursorCheck(2, 9),
+            self.displayCheck(2, 0, [
+                u"     1 ab                               "
+            ]), self.displayCheck(13, 0, [
+                u"                        1, 3 |   0%,100%"
+            ]), KEY_SHIFT_LEFT,
+            self.selectionDocumentCheck(0, 1, 0, 2, 3),
+            self.displayCheck(13, 0, [
+                u"1 characters (1 lines) selected"
+            ]), u'c', self.cursorCheck(2, 9),
+            self.displayCheck(2, 0, [
+                u"     1 ac                               "
+            ]), self.displayCheck(13, 0, [
+                u"                        1, 3 |   0%,100%"
+            ]), CTRL_Q, u'n'
+        ])
+
     def test_session(self):
         self.runWithTestFile(kTestFile, [
             self.displayCheck(0, 0, [
