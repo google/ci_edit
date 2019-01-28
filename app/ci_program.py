@@ -43,6 +43,7 @@ import app.color
 import app.curses_util
 import app.help
 import app.history
+import app.keyboard_monitor
 import app.log
 import app.prefs
 import app.program_window
@@ -425,6 +426,7 @@ class CiProgram:
         app.curses_util.hackCursesFixes()
         if self.prefs.editor['useBgThread']:
             self.bg = app.background.startupBackground()
+            self.setUpKeyboardMonitor()
         self.startup()
         if self.prefs.startup.get('profile'):
             profile = cProfile.Profile()
@@ -441,6 +443,10 @@ class CiProgram:
         if self.prefs.editor['useBgThread']:
             self.bg.put((self.programWindow, 'quit'))
             self.bg.join()
+
+    def setUpKeyboardMonitor(self):
+        self.keyboard_monitor = app.keyboard_monitor.KeyboardMonitor()
+        self.keyboard_monitor.start()
 
     def setUpPalette(self):
 
