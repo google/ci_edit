@@ -77,6 +77,7 @@ CTRL_BACKSLASH = b'^\\'  # 0x1c
 CTRL_CLOSE_BRACKET = b'^]'  # 0x1d
 CTRL_CARROT = b'^^'  # 0x1e
 CTRL_UNDERBAR = b'^_'  # 0x1f
+CTRL_BACKSPACE = b'^BACKSPACE'
 
 KEY_ALT_A = 165
 KEY_ALT_B = 171

@@ -1,0 +1,3 @@
+text buffer threading:
+Need to create a text_buffer method that turns off threads (or set some active flag to false that the threads reference to skip all logic)
+This method should create a temporary save before turning off threads

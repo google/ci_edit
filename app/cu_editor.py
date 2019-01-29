@@ -45,6 +45,7 @@ def initCommandSet(controller, textBuffer):
         KEY_BACKSPACE1: textBuffer.backspace,
         KEY_BACKSPACE2: textBuffer.backspace,
         KEY_BACKSPACE3: textBuffer.backspace,
+        CTRL_BACKSPACE: textBuffer.ctrlBackspace,
         KEY_DELETE: textBuffer.delete,
         KEY_HOME: textBuffer.cursorStartOfLine,
         KEY_END: textBuffer.cursorEndOfLine,

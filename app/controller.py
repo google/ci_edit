@@ -19,6 +19,7 @@ from __future__ import print_function
 
 import curses
 import curses.ascii
+from pynput import keyboard
 
 import app.config
 import app.curses_util
@@ -110,8 +111,15 @@ class Controller:
         # Check the commandSet for the input with both its string and integer
         # representation.
         self.savedCh = ch
-        cmd = (self.commandSet.get(ch) or
-               self.commandSet.get(app.curses_util.cursesKeyName(ch)))
+
+        # Check if any modifier + key combinations need to be handled specially.
+        program = self.view.getProgram()
+        keys_pressed = program.keyboard_monitor.getKeysPressed()
+        if keyboard.Key.ctrl in keys_pressed and keyboard.Key.backspace in keys_pressed:
+            cmd = self.commandSet.get(app.curses_util.CTRL_BACKSPACE)
+        else:
+            cmd = (self.commandSet.get(ch) or
+                   self.commandSet.get(app.curses_util.cursesKeyName(ch)))
         if cmd:
             cmd()
         else:

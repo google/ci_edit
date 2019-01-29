@@ -445,8 +445,12 @@ class CiProgram:
             self.bg.join()
 
     def setUpKeyboardMonitor(self):
-        self.keyboard_monitor = app.keyboard_monitor.KeyboardMonitor()
-        self.keyboard_monitor.start()
+        try:
+            self.keyboard_monitor = app.keyboard_monitor.KeyboardMonitor()
+            self.keyboard_monitor.start()
+        except:
+            # In case of a crash, do nothing.
+            pass
 
     def setUpPalette(self):
 

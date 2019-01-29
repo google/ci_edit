@@ -333,6 +333,10 @@ class Actions(app.mutator.Mutator):
             self.redoAddChange(change)
             self.redo()
 
+    def ctrlBackspace(self):
+        self.cursorSelectWordLeft()
+        self.backspace()
+
     def carriageReturn(self):
         self.performDelete()
         grammar = self.parser.grammarAt(self.penRow, self.penCol)
