@@ -260,7 +260,7 @@ class Mutator(app.selectable.Selectable):
             self.lines[self.penRow] = line[:x] + line[x + len(change[1]):]
             if self.upperChangedRow > self.penRow:
                 self.upperChangedRow = self.penRow
-        elif change[0] == 'bw': # Redo backspace word.
+        elif change[0] == 'bw':  # Redo backspace word.
             line = self.lines[self.penRow]
             self.penCol -= len(change[1])
             x = self.penCol
