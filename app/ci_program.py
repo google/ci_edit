@@ -81,6 +81,7 @@ class CiProgram:
         self.exiting = False
         self.ch = 0
         self.bg = None
+        self.keyboard_monitor = None
 
     def setUpCurses(self, cursesScreen):
         self.cursesScreen = cursesScreen

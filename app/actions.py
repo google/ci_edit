@@ -333,9 +333,19 @@ class Actions(app.mutator.Mutator):
             self.redoAddChange(change)
             self.redo()
 
-    def ctrlBackspace(self):
-        self.cursorSelectWordLeft()
-        self.backspace()
+    def backspaceWord(self):
+        if self.selectionMode != app.selectable.kSelectionNone:
+            self.performDelete()
+        elif self.penCol == 0:
+            if self.penRow > 0:
+                self.cursorLeft()
+                self.joinLines()
+        else:
+            line = self.lines[self.penRow]
+            colDelta = self.getCursorMoveLeftTo(app.regex.kReWordBoundary)[1][1]
+            change = (u'bw', line[self.penCol + colDelta:self.penCol])
+            self.redoAddChange(change)
+            self.redo()
 
     def carriageReturn(self):
         self.performDelete()
@@ -538,7 +548,7 @@ class Actions(app.mutator.Mutator):
         self.selectionNone()
         self.doCursorMoveRightTo(app.regex.kReWordBoundary)
 
-    def doCursorMoveLeftTo(self, boundary):
+    def getCursorMoveLeftTo(self, boundary):
         if self.penCol > 0:
             line = self.lines[self.penRow]
             pos = self.penCol
@@ -546,9 +556,14 @@ class Actions(app.mutator.Mutator):
                 if segment.start() < pos <= segment.end():
                     pos = segment.start()
                     break
-            self.cursorMove(0, pos - self.penCol)
+            return self.getCursorMove(0, pos - self.penCol)
         elif self.penRow > 0:
-            self.cursorMove(-1, len(self.lines[self.penRow - 1]))
+            return self.getCursorMove(-1, len(self.lines[self.penRow - 1]))
+
+    def doCursorMoveLeftTo(self, boundary):
+        change = self.getCursorMoveLeftTo(boundary)
+        self.redoAddChange(change)
+        self.redo()
 
     def doCursorMoveRightTo(self, boundary):
         if not self.lines:
@@ -1098,11 +1113,10 @@ class Actions(app.mutator.Mutator):
         extraRows = maxRows - height
         if extraRows > 0:
             optimalRowRatio = self.program.prefs.editor[u'optimalCursorRow']
-            scrollRow = max(
-                0,
-                min(
-                    len(self.lines) - 1,
-                    top - int(optimalRowRatio * (maxRows - 1))))
+            scrollRow = max(0,
+                            min(
+                                len(self.lines) - 1,
+                                top - int(optimalRowRatio * (maxRows - 1))))
         else:
             scrollRow = top
         # Column.
@@ -1115,8 +1129,9 @@ class Actions(app.mutator.Mutator):
                 scrollCol = 0
             else:
                 optimalColRatio = self.program.prefs.editor[u'optimalCursorCol']
-                scrollCol = max(
-                    0, min(right, left - int(optimalColRatio * (maxCols - 1))))
+                scrollCol = max(0,
+                                min(right, left - int(optimalColRatio *
+                                                      (maxCols - 1))))
         else:
             scrollCol = left
         self.view.scrollRow = scrollRow
@@ -1339,8 +1354,8 @@ class Actions(app.mutator.Mutator):
         separator = cmd[0]
         splitCmd = cmd.split(separator, 3)
         if len(splitCmd) < 4:
-            self.setMessage(u'An exchange needs three ' + separator +
-                            u' separators')
+            self.setMessage(
+                u'An exchange needs three ' + separator + u' separators')
             return
         _, find, replace, flags = splitCmd
         self.linesToData()

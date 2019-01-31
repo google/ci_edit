@@ -260,6 +260,13 @@ class Mutator(app.selectable.Selectable):
             self.lines[self.penRow] = line[:x] + line[x + len(change[1]):]
             if self.upperChangedRow > self.penRow:
                 self.upperChangedRow = self.penRow
+        elif change[0] == 'bw': # Redo backspace word.
+            line = self.lines[self.penRow]
+            self.penCol -= len(change[1])
+            x = self.penCol
+            self.lines[self.penRow] = line[:x] + line[x + len(change[1]):]
+            if self.upperChangedRow > self.penRow:
+                self.upperChangedRow = self.penRow
         elif change[0] == 'd':  # Redo delete character.
             line = self.lines[self.penRow]
             x = self.penCol
@@ -430,6 +437,13 @@ class Mutator(app.selectable.Selectable):
 
     def __undoChange(self, change):
         if change[0] == 'b':
+            line = self.lines[self.penRow]
+            x = self.penCol
+            self.lines[self.penRow] = line[:x] + change[1] + line[x:]
+            self.penCol += len(change[1])
+            if self.upperChangedRow > self.penRow:
+                self.upperChangedRow = self.penRow
+        elif change[0] == 'bw':
             line = self.lines[self.penRow]
             x = self.penCol
             self.lines[self.penRow] = line[:x] + change[1] + line[x:]
