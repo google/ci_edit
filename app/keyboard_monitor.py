@@ -12,8 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+try:
+    from pynput import keyboard
+except Exception as e:
+    pass
+
 import app.log
-from pynput import keyboard
 
 
 class KeyboardMonitor:
@@ -26,8 +30,12 @@ class KeyboardMonitor:
   """
 
     def __init__(self):
-        self.listener = keyboard.Listener(
-            on_press=self.__onPress, on_release=self.__onRelease)
+        try:
+            self.listener = keyboard.Listener(
+                on_press=self.__onPress, on_release=self.__onRelease)
+        except NameError as e:
+            app.log.error("keyboard monitor creation error", e)
+            self.listener = None
         self.keys_pressed = set()
         self.keys_to_check = {keyboard.Key.ctrl, keyboard.Key.backspace}
 
@@ -42,10 +50,12 @@ class KeyboardMonitor:
             app.log.info(key, "has been released from KeyboardMonitor.")
 
     def start(self):
-        self.listener.start()
+        if self.listener:
+            self.listener.start()
 
     def stop(self):
-        self.listener.stop()
+        if self.listener:
+            self.listener.stop()
 
     def getKeysPressed(self):
         return self.keys_pressed
