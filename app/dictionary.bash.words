@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# This is a list of non-English words that are in Bash/shell scripts.
 autoconf
 awk
+cd
 chmod
 chown
 cp
@@ -24,6 +26,7 @@ mkdir
 rf
 rm
 rmdir
+rsync
 sbin
 sed
 symlink

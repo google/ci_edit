@@ -13,6 +13,8 @@
 # limitations under the License.
 
 # This is a list of non-English words that are in Python libraries.
+unhexlify
+pprint
 abspath
 addstr
 altsep
@@ -23,6 +25,7 @@ ascii
 atime
 basename
 baudrate
+binascii
 btab
 builtins
 bytecode
@@ -48,6 +51,7 @@ ctrl
 ctypes
 curdir
 dataerr
+dedent
 def
 defpath
 del
@@ -115,6 +119,8 @@ getlogin
 getmaxyx
 getmouse
 getmtime
+getnev
+getpass
 getpgid
 getpgrp
 getpid
@@ -129,6 +135,7 @@ getsizeof
 getslice
 gettrace
 getuid
+getuser
 getvalue
 getyx
 gid
@@ -137,6 +144,7 @@ goto
 hasattr
 hashlib
 hexdigest
+hexlify
 hexversion
 hglobal
 hinstance
@@ -157,6 +165,7 @@ isdecimal
 isdigit
 isdir
 isfile
+isinstance
 islink
 islower
 ismount
@@ -191,10 +200,10 @@ lstrip
 makedev
 makedirs
 max
-maxint
 maxsize
 maxunicode
 memmove
+metavar
 min
 mkdir
 mkfifo
@@ -205,6 +214,7 @@ moveable
 mtime
 multiline
 mvwin
+nargs
 ndelay
 ndiff
 newwin
@@ -236,6 +246,7 @@ pid
 plen
 popen
 ppage
+prog
 prv
 ps
 pstats
@@ -248,6 +259,7 @@ rdwr
 re
 readlines
 readlink
+realpath
 regex
 regs
 relpath
@@ -288,6 +300,7 @@ shome
 shutil
 sigalrm
 sighup
+sigterm
 sigusr
 sigwinch
 sizeof
@@ -310,15 +323,18 @@ startswith
 statvfs
 str
 strftime
+subparsers
 symlink
 sys
 sysconf
+tarfile
 tcgetpgrp
 tcsetpgrp
 tempfail
 tempfile
 tempnam
 termios
+textwrap
 timeit
 tiocgwinsz
 tmpfile

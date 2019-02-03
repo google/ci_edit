@@ -1,0 +1,100 @@
+# Copyright 2018 Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# This is a list of non-English words that are in the open source Fuchsia OS.
+abigen
+addrs
+appmgr
+arches
+aspace
+binfo
+blobfs
+bti
+cdecls
+chdir
+cmdline
+cmx
+conns
+contig
+countof
+ctu
+curr
+disp
+embedders
+emebbing
+errorf
+eventpair
+excp
+fbl
+fidl
+fidlc
+fsl
+fxl
+fzl
+idx
+ints
+iommu
+ipi
+ipis
+kcounter
+koid
+koids
+libasync
+libobject
+libsyscalls
+libzircon
+lifecycle
+lkthread
+lockdep
+lowmem
+ltrace
+ltracef
+matred
+merkleroot
+mtx
+nanosleep
+netaddr
+netmask
+paddr
+physmap
+pkgfs
+pmm
+pmt
+preinstall
+priv
+protoc
+pyproto
+realtime
+refcount
+sessionctl
+spinlock
+srv
+syscalls
+sysinfo
+termina
+toolchain
+toolchains
+tremplin
+tuf
+txid
+userboot
+userspace
+vdso
+vmar
+vmars
+vmos
+vsock
+waitfor
+wordwise
+zxdb

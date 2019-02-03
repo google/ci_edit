@@ -26,41 +26,42 @@ import app.fake_curses_testing
 
 
 class PredictionWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
-  def setUp(self):
-    self.longMessage = True
-    if True:
-      # The buffer manager will retain the test file in RAM. Reset it.
-      try:
-        del sys.modules['app.buffer_manager']
-        import app.buffer_manager
-      except KeyError:
-        pass
-    app.fake_curses_testing.FakeCursesTestCase.setUp(self)
 
-  def test_prediction(self):
-    #self.setMovieMode(True)
-    sys.argv = []
-    self.runWithFakeInputs([
-        self.displayCheck(0, 0, [" ci     "]),
-        self.displayCheck(2, 7, ["     "]), CTRL_P,
-        self.displayCheck(0, 0, [" ci               "]),
-        self.displayCheck(2, 2, ["v Type|Name "]),
-        self.displayCheck(3, 0, ["    open <new file> "]),
-        self.addClickInfo(0, "[x]open", curses.BUTTON1_PRESSED),
-        curses.KEY_MOUSE,
-        self.displayCheckNot(3, 0, ["    open <new file> "]),
-        CTRL_Q])
+    def setUp(self):
+        self.longMessage = True
+        app.fake_curses_testing.FakeCursesTestCase.setUp(self)
 
-  def test_save_as_to_quit(self):
-    #self.setMovieMode(True)
-    sys.argv = []
-    self.runWithFakeInputs([
-        self.displayCheck(0, 0, [" ci     "]),
-        self.displayCheck(2, 7, ["     "]), ord('a'),
-        self.displayCheck(2, 7, ["a    "]),
-        CTRL_S,
-        self.displayCheck(0, 0, [" ci    Save File As"]),
-        CTRL_Q,
-        self.displayCheck(0, 0, [" ci     "]),
-        self.displayCheck(-2, 0, ["      "]),
-        CTRL_Q, ord('n')])
+    def test_prediction(self):
+        #self.setMovieMode(True)
+        sys.argv = []
+        self.runWithFakeInputs([
+            self.displayCheck(0, 0, [u" ci     "]),
+            self.displayCheck(2, 7, [u"     "]),
+            CTRL_P,
+            self.displayCheck(0, 0, [u" ci               "]),
+            self.displayCheck(2, 2, [u"v Type|Name "]),
+            self.displayCheck(3, 0, [u"    open <new file> "]),
+            self.addClickInfo(1000, u"[x]open", curses.BUTTON1_PRESSED),
+            curses.KEY_MOUSE,
+            self.displayCheckNot(3, 0, [u"    open <new file> "]),
+            self.displayCheck(2, 2, [u"v Type|Name "]),
+            self.addClickInfo(2000, u"[ ]open", curses.BUTTON1_PRESSED),
+            curses.KEY_MOUSE,
+            # TODO(dschuyler): Look into why this fails:
+            #self.displayCheck(3, 0, ["    open <new file> "]),
+            CTRL_Q
+        ])
+
+    def test_save_as_to_quit(self):
+        #self.setMovieMode(True)
+        sys.argv = []
+        self.runWithFakeInputs([
+            self.displayCheck(0, 0, [u" ci     "]),
+            self.displayCheck(2, 7, [u"     "]),
+            ord('a'),
+            self.displayCheck(2, 7, [u"a    "]), CTRL_S,
+            self.displayCheck(0, 0, [u" ci    Save File As"]), CTRL_Q,
+            self.displayCheck(0, 0, [u" ci     "]),
+            self.displayCheck(-2, 0, [u"      "]), CTRL_Q,
+            ord('n')
+        ])

@@ -17,6 +17,9 @@
 #include "project_file.h"
 #include <system_file.h>
 
+"hello"
+"%s and\n %-3i or\r %u with %zu float %3.12fend"
+
 // comment with \
 a line continuation.
 override a
@@ -30,6 +33,8 @@ override a
 .3f a
 3.d a
 3.f a
+
+(2323ull a
 
 namespace sample {
 

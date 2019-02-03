@@ -32,6 +32,22 @@ This version of ci_edit still doesn't have all the intended features, but it's
 a start. It's has the necessary features of a basic text editor and a few fancy
 extras. Those fancy extras stay out of your way until you want them.
 
+## How to stay in touch
+
+To get news about new features, please join
+- [ci_edit-announce](https://groups.google.com/forum/#!forum/ci_edit-announce)
+
+If you have a question (i.e. "how do I..."), please post it here
+- [ci_edit-users](https://groups.google.com/forum/#!forum/ci_edit-users)
+
+Have you found a case where ci_edit misbehaves, please let us know by describing
+what happened here
+- [Report bug in ci_edit](https://github.com/google/ci_edit/issues/new)
+
+For those interested in contributing new features or steering the future
+direction of ci_edit, join us on
+- [ci_edit-dev](https://groups.google.com/forum/#!forum/ci_edit-dev)
+
 
 ### Installation (Linux / Mac OS)
 
@@ -133,6 +149,8 @@ more users are happy users for a longer time.
   - Sort selected lines
   - regex text substitution, such as s/dogs/cats/ replaces the text "dogs" with
     the text "cats".
+- saved undo/redo
+  - Open a file and undo prior edits of that document
 
 ## Future features (the to do list)
 
@@ -149,8 +167,6 @@ more users are happy users for a longer time.
   - Monitor a file and continuously read in the new lines
 - jump to opposing brace
   - Move the cursor from here to there.
-- saved undo/redo
-  - Open a file and undo prior edits of that document
 - a lot more...
   - There are so many dreams for the future.
 

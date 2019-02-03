@@ -12,9 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 ESC = 27
 BS = 2
 DEL = 3
 
+
 def isprint(*args):
-  return 31 < args[0] <= 127
+    return 31 < args[0] <= 127

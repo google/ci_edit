@@ -12,6 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-from curses import *
-#__all__ = ["ascii"]
+from .constants import *
+from .curses import *
+#__all__ = ["ascii", "contants", "curses"]

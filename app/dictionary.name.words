@@ -13,8 +13,9 @@
 # limitations under the License.
 
 
-# Names (names that match trademarks are not a challenge to said marks)
+# Names (names that match trademarks are not a challenge to said marks).
 abdul
+abseil
 acer
 ada
 ajax
@@ -25,17 +26,21 @@ almeida
 america
 apache
 arial
+atlassian
 austen
 australian
 bart
+bazel
 bezier
 bingley
 bluetooth
 bob
 boolean
+boringssl
 boulanger
 bourgh
 british
+broadcom
 california
 capitan
 carl
@@ -53,6 +58,7 @@ chromecast
 ci
 connor
 consolas
+cray
 cygwin
 dan
 darcy
@@ -75,6 +81,7 @@ facebook
 firefox
 fitts
 flashplayer
+flynn
 forster
 frank
 franklin
@@ -83,6 +90,7 @@ fx
 gavin
 gerrit
 gmail
+golang
 google
 grande
 graphviz
@@ -108,6 +116,7 @@ jason
 jayson
 jesus
 jim
+jira
 jiri
 joe
 jsbin
@@ -122,6 +131,7 @@ kevin
 laguna
 latin
 lei
+linenoise
 linux
 lisa
 lizzy
@@ -141,6 +151,7 @@ mathew
 matt
 maxwell
 mendel
+merkle
 meryton
 mexico
 michael
@@ -151,6 +162,7 @@ mongolian
 monospace
 mozart
 mozilla
+neko
 netherfield
 norwegian
 nvidia
@@ -158,16 +170,21 @@ oculus
 omnibox
 opencl
 opengl
+opensource
 openssh
+openssl
 packard
 pemberley
+perl
 philip
 phillips
 pixelbook
 powerpoint
 profont
+qemu
 quickoffice
 rachel
+readline
 rebecca
 redirector
 richard
@@ -189,13 +206,16 @@ tom
 tommy
 touchpad
 tracy
+travis
 unicode
 unix
 venti
 verdana
 verisign
 verizon
+vulkan
 wagner
+wayland
 webgl
 westerham
 wickham
@@ -204,6 +224,7 @@ winrt
 wong
 xcode
 xul
+yapf
 youtube
 zeus
 zlib
