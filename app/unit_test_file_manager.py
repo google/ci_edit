@@ -54,6 +54,19 @@ class FileManagerTestCases(app.fake_curses_testing.FakeCursesTestCase):
             ord('n')
         ])
 
+    def test_dir_list(self):
+        #self.setMovieMode(True)
+        sys.argv = []
+        self.runWithFakeInputs([
+            self.displayCheck(0, 0, [u" ci     "]),
+            self.displayCheck(2, 7, [u"     "]), CTRL_O,
+            self.displayCheck(0, 0, [u" ci    Open File  "]), CTRL_A,
+            self.writeText(self.pathToSample(u"")),
+            self.displayCheck(3, 0, [u"./     ", u"../     "]),
+            self.displayCheck(5, 0, [u"._ A name with cr\\r/"]),
+            CTRL_Q, CTRL_Q
+        ])
+
     def test_open(self):
         #self.setMovieMode(True)
         sys.argv = []

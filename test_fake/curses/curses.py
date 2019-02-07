@@ -280,11 +280,15 @@ class FakeCursesWindow:
             cursorCol = args[1]
             text = args[2].decode("utf-8")
             color = args[3]
-            for i in range(len(text)):
-                fakeDisplay.displayText[cursorRow][cursorCol + i] = text[i]
-                fakeDisplay.displayStyle[cursorRow][cursorCol + i] = color
-            self.cursorRow = cursorRow + len(text)
-            self.cursorCol = cursorCol + len(text[-1])
+            for i in text:
+                if i == '\r':
+                    cursorCol = 0
+                    continue
+                fakeDisplay.displayText[cursorRow][cursorCol] = i
+                fakeDisplay.displayStyle[cursorRow][cursorCol] = color
+                cursorCol += 1
+            self.cursorRow = cursorRow
+            self.cursorCol = cursorCol
             if len(text) > 1:
                 self.cursorCol = len(text[-1])
             return (1, 1)

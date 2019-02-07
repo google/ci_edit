@@ -31,6 +31,7 @@ import app.config
 import app.controller
 import app.cu_editor
 import app.em_editor
+import app.string
 import app.text_buffer
 import app.vi_editor
 
@@ -982,7 +983,7 @@ class TopInfo(ViewWindow):
                             indent = z
                             lines.append(line)
                     lineCursor -= 1
-        pathLine = self.host.textBuffer.fullPath
+        pathLine = app.string.pathEncode(self.host.textBuffer.fullPath)
         if 1:
             if tb.isReadOnly:
                 pathLine += u' [RO]'
@@ -1215,6 +1216,8 @@ class InputWindow(Window):
         self.layout()
 
     def setTextBuffer(self, textBuffer):
+        if app.config.strict_debug:
+            assert issubclass(textBuffer.__class__, app.text_buffer.TextBuffer)
         app.log.info('setTextBuffer')
         if self.textBuffer is not None:
             self.savedScrollPositions[self.textBuffer.fullPath] = (
