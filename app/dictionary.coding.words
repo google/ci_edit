@@ -299,6 +299,7 @@ patcher
 pcm
 pem
 pid
+pipelining
 pkgs
 png
 popups
@@ -328,6 +329,7 @@ px
 py
 pyc
 pyo
+qux
 rar
 rastered
 rastering
