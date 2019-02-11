@@ -1113,10 +1113,11 @@ class Actions(app.mutator.Mutator):
         extraRows = maxRows - height
         if extraRows > 0:
             optimalRowRatio = self.program.prefs.editor[u'optimalCursorRow']
-            scrollRow = max(0,
-                            min(
-                                len(self.lines) - 1,
-                                top - int(optimalRowRatio * (maxRows - 1))))
+            scrollRow = max(
+                0,
+                min(
+                    len(self.lines) - 1,
+                    top - int(optimalRowRatio * (maxRows - 1))))
         else:
             scrollRow = top
         # Column.
@@ -1129,9 +1130,8 @@ class Actions(app.mutator.Mutator):
                 scrollCol = 0
             else:
                 optimalColRatio = self.program.prefs.editor[u'optimalCursorCol']
-                scrollCol = max(0,
-                                min(right, left - int(optimalColRatio *
-                                                      (maxCols - 1))))
+                scrollCol = max(
+                    0, min(right, left - int(optimalColRatio * (maxCols - 1))))
         else:
             scrollCol = left
         self.view.scrollRow = scrollRow
@@ -1354,8 +1354,8 @@ class Actions(app.mutator.Mutator):
         separator = cmd[0]
         splitCmd = cmd.split(separator, 3)
         if len(splitCmd) < 4:
-            self.setMessage(
-                u'An exchange needs three ' + separator + u' separators')
+            self.setMessage(u'An exchange needs three ' + separator +
+                            u' separators')
             return
         _, find, replace, flags = splitCmd
         self.linesToData()

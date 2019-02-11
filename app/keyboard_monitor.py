@@ -22,12 +22,12 @@ import app.log
 
 class KeyboardMonitor:
     """
-  This class is used to listen to the user's inputs in order to detect any
-  modifier keys being used. Due to limitations of this library, errors may occur
-  when running over ssh, since an X server is required. This will also not be
-  able to detect most keys on macOS unless run as root. See more details at
-  https://pynput.readthedocs.io/en/latest/limitations.html.
-  """
+    This class is used to listen to the user's inputs in order to detect any
+    modifier keys being used. Due to limitations of this library, errors may occur
+    when running over ssh, since an X server is required. This will also not be
+    able to detect most keys on macOS unless run as root. See more details at
+    https://pynput.readthedocs.io/en/latest/limitations.html.
+    """
 
     def __init__(self):
         try:
