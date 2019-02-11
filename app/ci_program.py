@@ -450,7 +450,7 @@ class CiProgram:
             self.keyboard_monitor = app.keyboard_monitor.KeyboardMonitor()
             self.keyboard_monitor.start()
         except:
-            # In case of a crash, do nothing.
+            # In case of an exception, do nothing.
             pass
 
     def setUpPalette(self):
