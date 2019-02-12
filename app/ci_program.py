@@ -67,6 +67,7 @@ class CiProgram:
     The program interacts with a single top-level ProgramWindow."""
 
     def __init__(self):
+        app.log.startup(u"Python version ", sys.version)
         self.prefs = app.prefs.Prefs()
         self.color = app.color.Colors(self.prefs.color)
         self.dictionary = app.spelling.Dictionary()

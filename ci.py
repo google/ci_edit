@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/env python3
 # TODO(dschuyler): !/usr/bin/python -O
 
 # Copyright 2016 Google Inc.
