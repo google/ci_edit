@@ -119,6 +119,29 @@ class FakeCursesTestCase(unittest.TestCase):
 
         return displayChecker
 
+    def displayFindCheck(self, *args):
+        assert len(args) == 2
+        assert isinstance(args[0], unicode)
+        assert isinstance(args[1], unicode)
+        caller = inspect.stack()[1]
+        callerText = u"\n  %s:%s:%s(): " % (os.path.split(caller[1])[1],
+                                            caller[2], caller[3])
+
+        def displayFindChecker(display, cmdIndex):
+            find_string, check_string = args
+            row, col = display.findText(find_string)
+            result = display.checkText(row, col + len(find_string),
+                                       [check_string])
+            if result is not None:
+                output = callerText + u' at index ' + str(cmdIndex) + result
+                if self.cursesScreen.movie:
+                    print(output)
+                else:
+                    self.fail(output)
+            return None
+
+        return displayFindChecker
+
     def displayCheckNot(self, *args):
         """
         Verify that the display does not match.
@@ -248,9 +271,11 @@ class FakeCursesTestCase(unittest.TestCase):
         reach this function."""
         self.fail('Called notReached!')
 
-    def runWithFakeInputs(self, fakeInputs, argv=["no_argv"]):
+    def runWithFakeInputs(self, fakeInputs, argv=None):
         assert hasattr(fakeInputs, "__getitem__") or hasattr(
             fakeInputs, "__iter__")
+        if argv is None:
+            argv = ["no_argv"]
         sys.argv = argv
         self.cursesScreen.setFakeInputs(fakeInputs + [
             self.notReached,

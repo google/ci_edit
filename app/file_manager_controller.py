@@ -131,6 +131,8 @@ class DirectoryListController(app.controller.Controller):
         self.filter = None
 
     def openFileOrDir(self, row):
+        if app.config.strict_debug:
+            assert isinstance(row, int)
         pathController = self.view.parent.pathWindow.controller
         path = pathController.decodedPath()
         if row == 0:  # Clicked on "./".
@@ -288,8 +290,8 @@ class FilePathInputController(app.controller.Controller):
 
     def tabCompleteExtend(self):
         """Extend the selection to match characters in common."""
-        expandedPath = os.path.expandvars(
-            os.path.expanduser(self.textBuffer.lines[0]))
+        decodedPath = self.decodedPath()
+        expandedPath = os.path.expandvars(os.path.expanduser(decodedPath))
         dirPath, fileName = os.path.split(expandedPath)
         expandedDir = dirPath or u'.'
         matches = []
@@ -303,7 +305,7 @@ class FilePathInputController(app.controller.Controller):
             self.onChange()
             return
         if len(matches) == 1:
-            self.textBuffer.insert(matches[0][len(fileName):])
+            self.setEncodedPath(decodedPath + matches[0][len(fileName):])
             self.maybeSlash(os.path.join(expandedDir, matches[0]))
             self.onChange()
             return
@@ -323,9 +325,9 @@ class FilePathInputController(app.controller.Controller):
             return prefixLen
 
         prefixLen = findCommonPrefixLength(len(fileName))
-        self.textBuffer.insert(matches[0][len(fileName):prefixLen])
+        self.setEncodedPath(decodedPath + matches[0][len(fileName):prefixLen])
         if expandedPath == os.path.expandvars(
-                os.path.expanduser(self.textBuffer.lines[0])):
+                os.path.expanduser(self.decodedPath())):
             # No further expansion found.
             self.getNamedWindow(u'directoryList').controller.setFilter(fileName)
         self.onChange()

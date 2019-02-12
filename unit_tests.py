@@ -53,6 +53,7 @@ import app.unit_test_prediction_window
 import app.unit_test_prefs
 import app.unit_test_regex
 import app.unit_test_selectable
+import app.unit_test_string
 import app.unit_test_text_buffer
 import app.unit_test_ui
 import app.unit_test_undo_redo
@@ -100,6 +101,8 @@ TESTS = {
     app.unit_test_regex.RegexTestCases,
     'selectable':
     app.unit_test_selectable.SelectableTestCases,
+    'string':
+    app.unit_test_string.StringTestCases,
     'draw':
     app.unit_test_text_buffer.DrawTestCases,
     'ui':

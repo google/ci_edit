@@ -205,6 +205,7 @@ class FakeDisplay:
         return None
 
     def findText(self, screenText):
+        assert isinstance(screenText, unicode)
         for row in range(len(self.displayText)):
             line = self.displayText[row]
             col = u"".join(line).find(screenText)
@@ -233,6 +234,8 @@ class FakeDisplay:
         self.reset()
 
     def show(self):
+        assert self.displayStyle[0][0] != -1, \
+            u"Error: showing display before drawing to it."
         print(u'   %*s   %s' % (-self.cols, u'display', u'style'))
         print(u'  +' + u'-' * self.cols + u'+ +' + u'-' * self.cols + u'+')
         for i, (line, styles) in enumerate(
