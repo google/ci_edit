@@ -19,10 +19,6 @@ from __future__ import print_function
 
 import curses
 import curses.ascii
-try:
-    from pynput import keyboard
-except Exception as e:
-    pass
 
 import app.config
 import app.curses_util
@@ -118,12 +114,6 @@ class Controller:
         cmd = (self.commandSet.get(ch) or
                self.commandSet.get(app.curses_util.cursesKeyName(ch)))
 
-        # Check if any modifier + key combinations need to be handled specially.
-        program = self.view.getProgram()
-        if program.keyboard_monitor and program.keyboard_monitor.listener:
-            keys_pressed = program.keyboard_monitor.getKeysPressed()
-            if keyboard.Key.ctrl in keys_pressed and keyboard.Key.backspace in keys_pressed:
-                cmd = self.commandSet.get(app.curses_util.CTRL_BACKSPACE)
         if cmd:
             cmd()
         else:
