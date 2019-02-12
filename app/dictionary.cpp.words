@@ -20,6 +20,7 @@ atoi
 calloc
 cassert
 ceil
+cerr
 cin
 cmath
 countof

@@ -259,6 +259,7 @@ lvalues
 makefile
 makefiles
 mem
+memoize
 memoized
 microkernel
 minified
@@ -342,6 +343,7 @@ recursing
 refptr
 regex
 regexes
+regs
 relayout
 remoting
 renderer
@@ -433,6 +435,7 @@ ubuntu
 uchar
 uid
 uintptr
+ulong
 undef
 uniquifier
 uniquify
