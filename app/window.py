@@ -331,6 +331,9 @@ class ViewWindow:
                                   text.encode(u'utf-8'), color)
         self.writeLineRow += 1
 
+    def getProgram(self):
+        return self.program
+
 
 class ActiveWindow(ViewWindow):
     """An ActiveWindow may have focus and a controller."""

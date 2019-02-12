@@ -110,8 +110,10 @@ class Controller:
         # Check the commandSet for the input with both its string and integer
         # representation.
         self.savedCh = ch
+
         cmd = (self.commandSet.get(ch) or
                self.commandSet.get(app.curses_util.cursesKeyName(ch)))
+
         if cmd:
             cmd()
         else:
