@@ -70,7 +70,7 @@ class CiProgram:
         app.log.startup(u"Python version ", sys.version)
         self.prefs = app.prefs.Prefs()
         self.color = app.color.Colors(self.prefs.color)
-        self.dictionary = app.spelling.Dictionary()
+        self.dictionary = app.spelling.Dictionary(self.prefs.dictionaries)
         self.clipboard = app.clipboard.Clipboard()
         self.frame = app.render.Frame()
         self.history = app.history.History(

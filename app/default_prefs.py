@@ -269,6 +269,23 @@ assert color16.keys() == color256.keys()
 prefs = {
     'color': {},
     'devTest': {},
+    # TODO(dschuyler): provide a UI to enable selected dictionaries.
+    u"dictionaries": [
+        'acronyms',
+        'chromium',
+        'coding',
+        'contractions',
+        'cpp',
+        'css',
+        'en-abbreviations',
+        'en-gb',
+        'en-misc',
+        'en-us',
+        'fuchsia',
+        'html',
+        'name',
+        'user',
+    ],
     'editor': {
         'autoInsertClosingCharacter': False,
         'captiveCursor': False,

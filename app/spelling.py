@@ -90,27 +90,16 @@ class OsDictionary:
 
 class Dictionary:
 
-    def __init__(self):
+    def __init__(self, dictionaryList):
         self.osDictionary = OsDictionary()
 
         self.grammarWords = {}
         self.loadWords(os.path.dirname(__file__))
         self.loadWords(os.path.expanduser("~/.ci_edit/dictionaries"))
 
-        words = self.grammarWords.get('en-us', set())
-        words.update(self.grammarWords.get('en-abbreviations', set()))
-        words.update(self.grammarWords.get('en-misc', set()))
-        words.update(self.grammarWords.get('acronyms', set()))
-        words.update(self.grammarWords.get('chromium', set()))
-        words.update(self.grammarWords.get('name', set()))
-        words.update(self.grammarWords.get('coding', set()))
-        words.update(self.grammarWords.get('contractions', set()))
-        words.update(self.grammarWords.get('user', set()))
-        # TODO(dschuyler): provide a UI to enable selected dictionaries.
-        words.update(self.grammarWords.get('cpp', set()))
-        words.update(self.grammarWords.get('en-gb', set()))
-        words.update(self.grammarWords.get('html', set()))
-        words.update(self.grammarWords.get('css', set()))
+        words = set()
+        for i in dictionaryList:
+            words.update(self.grammarWords.get(i, set()))
         self.words = words
 
     def loadWords(self, dirPath):

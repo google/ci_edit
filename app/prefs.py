@@ -37,6 +37,7 @@ class Prefs():
         self.color16 = app.default_prefs.color16
         self.color256 = app.default_prefs.color256
         self.color = self.color256
+        self.dictionaries = prefs.get('dictionaries', [])
         self.editor = prefs.get('editor', {})
         self.devTest = prefs.get('devTest', {})
         self.palette = prefs.get('palette', {})
