@@ -116,6 +116,7 @@ more users are happy users for a longer time.
 - written in Python
   - No Python experience is required. Being written in Python means that many
     users will be able to review the code.
+  - Python 3.7+ and Python 2.7+ are supported.
 - selection modes
   - select by line, word, character, select all, or rectangle (block) selection
 - brace matching
