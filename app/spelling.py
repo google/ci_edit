@@ -90,8 +90,9 @@ class OsDictionary:
 
 class Dictionary:
 
-    def __init__(self, dictionaryList):
+    def __init__(self, dictionaryList, pathPrefs):
         self.osDictionary = OsDictionary()
+        self.pathPrefs = pathPrefs
 
         self.grammarWords = {}
         self.loadWords(os.path.dirname(__file__))
@@ -100,7 +101,16 @@ class Dictionary:
         words = set()
         for i in dictionaryList:
             words.update(self.grammarWords.get(i, set()))
-        self.words = words
+        self.baseWords = words
+        self.pathWords = set()
+
+    def setUpWordsForPath(self, path):
+        self.pathWords = set()
+        app.log.info(repr(self.pathPrefs))
+        for k,v in self.pathPrefs.items():
+            if k in path:
+                for i in v:
+                    self.pathWords.update(self.grammarWords.get(i, set()))
 
     def loadWords(self, dirPath):
         dirPath = os.path.join(dirPath, 'dictionary.')
@@ -123,7 +133,7 @@ class Dictionary:
     def isCorrect(self, word, grammarName):
         if len(word) <= 1:
             return True
-        words = self.words
+        words = self.baseWords
         lowerWord = word.lower()
         if word in words or lowerWord in words:
             return True
@@ -132,6 +142,8 @@ class Dictionary:
         if lowerWord.startswith('sub') and lowerWord[3:] in words:
             return True
         if lowerWord.startswith('un') and lowerWord[2:] in words:
+            return True
+        if lowerWord in self.pathWords:
             return True
         if 1:
             if len(word) == 2 and word[1] == 's' and word[0].isupper():

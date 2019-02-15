@@ -270,22 +270,29 @@ prefs = {
     'color': {},
     'devTest': {},
     # TODO(dschuyler): provide a UI to enable selected dictionaries.
-    u"dictionaries": [
-        'acronyms',
-        'chromium',
-        'coding',
-        'contractions',
-        'cpp',
-        'css',
-        'en-abbreviations',
-        'en-gb',
-        'en-misc',
-        'en-us',
-        'fuchsia',
-        'html',
-        'name',
-        'user',
-    ],
+    u"dictionaries": {
+        # The base dictionaries are loaded at startup. They are active for all
+        # documents.
+        "base": [
+            'acronyms',
+            'coding',
+            'contractions',
+            'cpp',
+            'css',
+            'en-abbreviations',
+            'en-gb',
+            'en-misc',
+            'en-us',
+            'html',
+            'name',
+        ],
+        # If the expanded path to the current document contains |key| the list
+        # of dictionaries are applied.
+        "path_match": {
+            u"/chromium/": [u"chromium"],
+            u"/fuchsia/": [u"fuchsia"],
+        },
+    },
     'editor': {
         'autoInsertClosingCharacter': False,
         'captiveCursor': False,

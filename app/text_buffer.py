@@ -129,6 +129,7 @@ class TextBuffer(app.actions.Actions):
         spellChecking = appPrefs.editor.get('spellChecking', True)
         colorPrefs = self.view.program.color
         spelling = self.program.dictionary
+        spelling.setUpWordsForPath(self.fullPath)
         if self.parser:
             # Highlight grammar.
             rowLimit = min(max(self.parser.rowCount() - startRow, 0), rows)
