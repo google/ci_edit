@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 # Copyright 2017 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,26 +32,6 @@ class ApplicationTestCases(app.fake_curses_testing.FakeCursesTestCase):
     def setUp(self):
         self.longMessage = True
         app.fake_curses_testing.FakeCursesTestCase.setUp(self)
-
-    def test_bracketed_paste(self):
-        self.runWithTestFile(
-            kTestFile,
-            [
-                self.displayCheck(2, 7, [u"      "]),
-                curses.ascii.ESC,
-                app.curses_util.BRACKETED_PASTE_BEGIN,
-                u't',
-                u'e',
-                225,
-                186,
-                191,  # Send an "" in utf-8.
-                u't',
-                curses.ascii.ESC,
-                app.curses_util.BRACKETED_PASTE_END,
-                self.displayCheck(2, 7, [u'te\u1ebft ']),
-                CTRL_Q,
-                u'n'
-            ])
 
     def test_backspace(self):
         self.runWithTestFile(kTestFile, [

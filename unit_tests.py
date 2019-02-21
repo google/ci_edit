@@ -42,6 +42,7 @@ import app.unit_test_application
 import app.unit_test_automatic_column_adjustment
 import app.unit_test_bookmarks
 import app.unit_test_brace_matching
+import app.unit_test_copy_paste
 import app.unit_test_curses_util
 import app.unit_test_file_manager
 import app.unit_test_find_window
@@ -79,6 +80,8 @@ TESTS = {
     app.unit_test_bookmarks.BookmarkTestCases,
     'brace_matching':
     app.unit_test_brace_matching.BraceMatchingTestCases,
+    'copy_paste':
+    app.unit_test_copy_paste.CopyPasteTestCases,
     'curses_util':
     app.unit_test_curses_util.CursesUtilTestCases,
     'file_manager':

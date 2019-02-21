@@ -261,8 +261,13 @@ class FakeCursesTestCase(unittest.TestCase):
 
         def copyToClipboard(display, cmdIndex):
             self.assertTrue(clipboard.copy, callerText)
-            clipboard.copy(text)
-            return app.curses_util.CTRL_V
+            while True:
+                # Python 2.7 will sometimes fail this copy call. Keep trying.
+                try:
+                    clipboard.copy(text)
+                    return app.curses_util.CTRL_V
+                except OSError:
+                  pass
 
         return copyToClipboard
 
