@@ -50,6 +50,7 @@ import app.unit_test_execute_prompt
 import app.unit_test_file_manager
 import app.unit_test_find_window
 import app.unit_test_intention
+import app.unit_test_misspellings
 import app.unit_test_parser
 import app.unit_test_performance
 import app.unit_test_prediction_window
@@ -93,6 +94,8 @@ TESTS = {
     app.unit_test_execute_prompt.ExecutePromptTestCases,
     'intention':
     app.unit_test_intention.IntentionTestCases,
+    'misspellings':
+    app.unit_test_misspellings.MisspellingsTestCases,
     'parser':
     app.unit_test_parser.ParserTestCases,
     'performance':
