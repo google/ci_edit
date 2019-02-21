@@ -33,6 +33,8 @@ if not os.getenv('CI_EDIT_USE_REAL_CURSES'):
     }
     app.log.shouldWritePrintLog = True
 
+import unittest
+
 # Set up strict_debug before loading other app.* modules.
 import app.config
 app.config.strict_debug = True
@@ -44,9 +46,9 @@ import app.unit_test_bookmarks
 import app.unit_test_brace_matching
 import app.unit_test_copy_paste
 import app.unit_test_curses_util
+import app.unit_test_execute_prompt
 import app.unit_test_file_manager
 import app.unit_test_find_window
-import app.unit_test_execute_prompt
 import app.unit_test_intention
 import app.unit_test_parser
 import app.unit_test_performance
@@ -58,7 +60,6 @@ import app.unit_test_string
 import app.unit_test_text_buffer
 import app.unit_test_ui
 import app.unit_test_undo_redo
-import unittest
 
 # Add new test cases here.
 TESTS = {

@@ -208,7 +208,7 @@ class ApplicationTestCases(app.fake_curses_testing.FakeCursesTestCase):
             self.selectionCheck(2, 6, 0, 0, 0), CTRL_L,
             self.selectionCheck(2, 6, 2, 0, 4),
             self.displayCheckStyle(0, 0, 1, len(u" ci "),
-                                   self.prg.prefs.color[u'logo']), KEY_UP,
+                                   self.prg.color.get(u'logo', 0)), KEY_UP,
             self.selectionCheck(1, 5, 2, 6, 0), CTRL_L,
             self.selectionCheck(2, 0, 1, 0, 4), CTRL_L,
             self.selectionCheck(2, 6, 1, 0, 4),

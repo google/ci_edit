@@ -36,9 +36,9 @@ class BraceMatchingTestCases(app.fake_curses_testing.FakeCursesTestCase):
         sys.argv = []
         write = self.writeText
         checkStyle = self.displayCheckStyle
-        bracketColor = self.prg.prefs.color['bracket']
-        defaultColor = self.prg.prefs.color['default']
-        matchingBracketColor = self.prg.prefs.color['matching_bracket']
+        bracketColor = self.prg.color.get(u'bracket', 0)
+        defaultColor = self.prg.color.get(u'default', 0)
+        matchingBracketColor = self.prg.color.get(u'matching_bracket', 0)
         self.runWithFakeInputs([
             self.displayCheck(2, 7, [u"     "]),
             # Regression test for open ([{ without closing.

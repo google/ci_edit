@@ -38,6 +38,9 @@ import types
 from . import ascii
 from . import constants
 
+DEBUG_COLOR_PAIR_BASE = 256
+DEBUG_COLOR_PAIR_MASK = (DEBUG_COLOR_PAIR_BASE * 2) - 1
+
 
 def isStringType(value):
     if sys.version_info[0] == 2:
@@ -157,10 +160,9 @@ class FakeDisplay:
         self.displayText = None
         self.reset()
 
-    def checkStyle(self, row, col, height, width, color):
-        colorPair = self.colors.get(color)
-        if colorPair is None:
-            return u"\n  color %s is not ready" % (color,)
+    def checkStyle(self, row, col, height, width, colorPair):
+        #assert (colorPair & DEBUG_COLOR_PAIR_MASK) in self.colors.values()
+        assert colorPair >= DEBUG_COLOR_PAIR_BASE
         for i in range(height):
             for k in range(width):
                 d = self.displayStyle[row + i][col + k]
@@ -204,6 +206,21 @@ class FakeDisplay:
                     return result
         return None
 
+    def draw(self, cursorRow, cursorCol, text, colorPair):
+        #assert (colorPair & DEBUG_COLOR_PAIR_MASK) in self.colors.values()
+        assert colorPair >= DEBUG_COLOR_PAIR_BASE
+        for i in text:
+            if i == '\r':
+                cursorCol = 0
+                continue
+            try:
+                self.displayText[cursorRow][cursorCol] = i
+                self.displayStyle[cursorRow][cursorCol] = colorPair
+            except IndexError:
+                raise error()
+            cursorCol += 1
+        return cursorRow, cursorCol
+
     def findText(self, screenText):
         assert isinstance(screenText, unicode)
         for row in range(len(self.displayText)):
@@ -216,12 +233,17 @@ class FakeDisplay:
         return -1, -1
 
     def getColorPair(self, colorIndex):
-        return self.colors.setdefault(colorIndex, 91 + len(self.colors))
+        assert colorIndex < DEBUG_COLOR_PAIR_BASE
+        colorPair = self.colors.setdefault(
+            colorIndex, DEBUG_COLOR_PAIR_BASE + len(self.colors))
+        return colorPair
 
     def getStyle(self):
         return [
-            u"".join([unichr(c)
-                      for c in self.displayStyle[i]])
+            u"".join([
+                unichr((c & DEBUG_COLOR_PAIR_MASK) - DEBUG_COLOR_PAIR_BASE + 91)
+                for c in self.displayStyle[i]
+            ])
             for i in range(self.rows)
         ]
 
@@ -277,26 +299,13 @@ class FakeCursesWindow:
         self.cursorCol = 0
 
     def addstr(self, *args):
-        try:
-            testLog(3, *args)
-            cursorRow = args[0]
-            cursorCol = args[1]
-            text = args[2].decode("utf-8")
-            color = args[3]
-            for i in text:
-                if i == '\r':
-                    cursorCol = 0
-                    continue
-                fakeDisplay.displayText[cursorRow][cursorCol] = i
-                fakeDisplay.displayStyle[cursorRow][cursorCol] = color
-                cursorCol += 1
-            self.cursorRow = cursorRow
-            self.cursorCol = cursorCol
-            if len(text) > 1:
-                self.cursorCol = len(text[-1])
-            return (1, 1)
-        except Exception:
-            raise error()
+        testLog(3, *args)
+        cursorRow = args[0]
+        cursorCol = args[1]
+        text = args[2].decode("utf-8")
+        color = args[3]
+        self.cursorRow, self.cursorCol = fakeDisplay.draw(
+            cursorRow, cursorCol, text, color)
 
     def getch(self):
         testLog(3)
