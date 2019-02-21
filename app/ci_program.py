@@ -296,12 +296,13 @@ class CiProgram:
 
     def parseArgs(self):
         """Interpret the command line arguments."""
+        app.log.startup('isatty', sys.stdin.isatty())
         debugRedo = False
         showLogWindow = False
         cliFiles = []
         openToLine = None
         profile = False
-        readStdin = False
+        readStdin = not sys.stdin.isatty()
         takeAll = False  # Take all args as file paths.
         timeStartup = False
         numColors = min(curses.COLORS, 256)
