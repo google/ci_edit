@@ -32,6 +32,7 @@ contig
 countof
 ctu
 curr
+dcheck
 disp
 dl
 dso
@@ -82,6 +83,7 @@ pmt
 preinstall
 priv
 protoc
+protos
 pyproto
 realtime
 refcount

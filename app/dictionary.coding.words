@@ -92,6 +92,7 @@ chr
 cli
 cmake
 cmd
+cmp
 cntl
 codebase
 codec
@@ -221,6 +222,7 @@ inlined
 inlines
 inlining
 intl
+intr
 intrinsics
 ip
 ipsum
@@ -241,6 +243,7 @@ keyframes
 lambdas
 le
 len
+lexing
 lf
 lhs
 libc
@@ -272,6 +275,7 @@ msg
 mutex
 mutexes
 na
+nak
 namespace
 namespaces
 ndebug
@@ -416,6 +420,7 @@ tid
 tk
 tmp
 todo
+tok
 tolltip
 toolchain
 toolchains
@@ -437,6 +442,8 @@ uid
 uintptr
 ulong
 undef
+underrun
+underruns
 uniquifier
 uniquify
 unobserve
@@ -445,6 +452,7 @@ unserializable
 usec
 utf
 variadic
+vdso
 versioning
 vimrc
 vkey
