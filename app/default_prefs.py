@@ -285,6 +285,7 @@ prefs = {
             'en-us',
             'html',
             'name',
+            'user',
         ],
         # If the expanded path to the current document contains |key| the list
         # of dictionaries are applied.
