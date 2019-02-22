@@ -19,5 +19,11 @@ from __future__ import print_function
 import os
 
 
-def fullPath(path):
+def expandFullPath(path):
+    if path.startswith(u"//"):
+        cwd = os.getcwd()
+        # TODO(dschuyler): make this not a hack (make it configurable).
+        index = cwd.find(u"/fuchsia")
+        if index >= 0:
+            path = cwd[:index + 8] + path[1:]
     return os.path.abspath(os.path.expanduser(os.path.expandvars(path)))

@@ -37,6 +37,7 @@ import time
 import traceback
 
 import app.background
+import app.buffer_file
 import app.buffer_manager
 import app.clipboard
 import app.color
@@ -529,8 +530,8 @@ def run_ci():
         sys.stdout.write('\033[?2004l')
         sys.stdout.flush()
     if userConsoleMessage:
-        fullPath = os.path.expanduser(
-            os.path.expandvars('~/.ci_edit/userConsoleMessage'))
+        fullPath = app.buffer_file.expandFullPath(
+            '~/.ci_edit/userConsoleMessage')
         with io.open(fullPath, 'w+') as f:
             f.write(userConsoleMessage)
         sys.stdout.write(userConsoleMessage + '\n')

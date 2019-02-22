@@ -99,7 +99,7 @@ class BufferManager:
         if app.config.strict_debug:
             assert issubclass(self.__class__, BufferManager), self
             assert isinstance(relPath, unicode), type(relPath)
-        fullPath = app.buffer_file.fullPath(relPath)
+        fullPath = app.buffer_file.expandFullPath(relPath)
         app.log.info(fullPath)
         textBuffer = None
         for i, tb in enumerate(self.buffers):

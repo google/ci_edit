@@ -169,7 +169,7 @@ class Mutator(app.selectable.Selectable):
                 s1.st_mtime == s2.st_mtime and s1.st_ctime == s2.st_ctime)
 
     def setFilePath(self, path):
-        self.fullPath = app.buffer_file.fullPath(path)
+        self.fullPath = app.buffer_file.expandFullPath(path)
 
     def __doMoveLines(self, begin, end, to):
         lines = self.lines[begin:end]

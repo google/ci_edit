@@ -23,6 +23,8 @@ import sys
 import time
 import traceback
 
+import app.buffer_file
+
 screenLog = [u"--- screen log ---"]
 fullLog = [u"--- begin log ---"]
 enabledChannels = {
@@ -220,7 +222,7 @@ def wrapper(function, shouldWrite=True):
 
 
 def writeToFile(path):
-    fullPath = os.path.expanduser(os.path.expandvars(path))
+    fullPath = app.buffer_file.expandFullPath(path)
     with io.open(fullPath, 'w+', encoding=u'UTF-8') as out:
         out.write(u"\n".join(fullLog) + u"\n")
 

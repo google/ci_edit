@@ -55,7 +55,7 @@ class DirectoryListController(app.controller.Controller):
         if self.shownDirectory == pathInput:
             return
         self.shownDirectory = pathInput
-        fullPath = app.buffer_file.fullPath(pathInput)
+        fullPath = app.buffer_file.expandFullPath(pathInput)
         dirPath = fullPath
         fileName = ''
         if len(pathInput) > 0 and pathInput[-1] != os.sep:
