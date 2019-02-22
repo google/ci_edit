@@ -207,6 +207,7 @@ hxx
 ia
 idr
 ifconfig
+ifdef
 iff
 ifndef
 ij

@@ -78,6 +78,8 @@ color8 = {
     'default': 0,
     'doc_block_comment': 3,
     'error': 7,
+    'file_path_bracketed': 3,
+    'file_path_quoted': 3,
     'found_find': 1,
     'highlight': 3,
     'html_block_comment': 2,
@@ -125,6 +127,7 @@ commentColor16Index = 2
 defaultColor16Index = 1
 foundColor16Index = 3
 keywordsColor16Index = 2
+pathColor16Index = 6
 selectedColor16Index = 4  # Active find is a selection.
 specialsColor16Index = 5
 stringColor16Index = 6
@@ -149,6 +152,8 @@ color16 = {
     'default': defaultColor16Index,
     'doc_block_comment': commentColor16Index,
     'error': 9,
+    'file_path_bracketed': pathColor16Index,
+    'file_path_quoted': pathColor16Index,
     'found_find': foundColor16Index,
     'highlight': 15,
     'html_block_comment': commentColor16Index,
@@ -196,6 +201,7 @@ commentColorIndex = 2
 defaultColorIndex = 18
 foundColorIndex = 32
 keywordsColorIndex = 21
+pathColorIndex = 30
 selectedColor = 64  # Active find is a selection.
 specialsColorIndex = 20
 stringColorIndex = 5
@@ -218,6 +224,8 @@ color256 = {
     'default': defaultColorIndex,
     'doc_block_comment': commentColorIndex,
     'error': 9,
+    'file_path_bracketed': pathColorIndex,
+    'file_path_quoted': pathColorIndex,
     'found_find': foundColorIndex,
     'highlight': 96,
     'html_block_comment': commentColorIndex,
@@ -549,20 +557,20 @@ prefs = {
             r'(?<!\\)\n',
             'indent':
             '  ',
-            'special': [
-                r'^\s*#\s*?define\b',
-                r'^\s*#\s*?defined\b',
-                r'^\s*#\s*?elif\b',
-                r'^\s*#\s*?else\b',
-                r'^\s*#\s*?endif\b',
-                r'^\s*#\s*?if\b',
-                r'^\s*#\s*ifdef\b',
-                r'^\s*#\s*?elif\b',
-                r'^\s*#\s*?ifndef\b',
-                r'^\s*#\s*?include\b',
-                r'^\s*#\s*?undef\b',
+            'disabled_special': [
+                r'\bdefine\b',
+                r'\bdefined\b',
+                r'\belif\b',
+                r'\belif\b',
+                r'\belse\b',
+                r'\bendif\b',
+                r'\bif\b',
+                r'\bifdef\b',
+                r'\bifndef\b',
+                r'\binclude\b',
+                r'\bundef\b',
             ],
-            #'contains': ['file_path_quoted', 'file_path_bracketed'],
+            'contains': ['file_path_quoted', 'file_path_bracketed'],
         },
         'c_raw_string1': {
             'begin': "[uU]?[rR]'",
@@ -602,6 +610,18 @@ prefs = {
             'escaped': r'\\"',
             'indent': '  ',
             'special': __special_string_escapes + [r'\\"'],
+            'single_line': True,
+        },
+        'file_path_bracketed': {
+            # Paths in includes don't allow escapes.
+            'begin': '<',
+            'end': r'>',
+            'single_line': True,
+        },
+        'file_path_quoted': {
+            # Paths in includes don't allow escapes.
+            'begin': '"',
+            'end': r'"',
             'single_line': True,
         },
         # Cascading Style Sheet.
