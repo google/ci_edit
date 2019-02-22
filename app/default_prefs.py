@@ -303,10 +303,14 @@ prefs = {
         },
     },
     'editor': {
+        # E.g. When key '(' is pressed, '()' is typed.
         'autoInsertClosingCharacter': False,
+        # Scroll the window to keep the cursor on screen.
         'captiveCursor': False,
         'colorScheme': 'default',
+        # Show hidden files in file list.
         'filesShowDotFiles': True,
+        # Show the size on disk for files in the file list.
         'filesShowSizes': True,
         'filesShowModifiedDates': True,
         'filesSortAscendingByName': True,
@@ -320,13 +324,17 @@ prefs = {
         'findUseRegex': True,
         'findVerbose': False,
         'findWholeWord': False,
+        # An example indentation. If the grammar has its own indent that can
+        # override this value.
         'indentation': '  ',
         'lineLimitIndicator': 80,
+        # When the mouse wheel is moved, which way should the window scroll.
         'naturalScrollDirection': True,
         'onSaveStripTrailingSpaces': True,
-        'optimalCursorCol': 0.98,  # Ratio of columns: 0 left, 1.0 right.
-        'optimalCursorRow':
-        0.28,  # Ratio of rows: 0 top, 0.5 middle, 1.0 bottom.
+        # Ratio of columns: 0 left, 1.0 right.
+        'optimalCursorCol': 0.98,
+        # Ratio of rows: 0 top, 0.5 middle, 1.0 bottom.
+        'optimalCursorRow': 0.28,
         'palette': 'default',
         'palette8': 'default8',
         'palette16': 'default16',
@@ -341,7 +349,10 @@ prefs = {
         'showLineNumbers': True,
         'showStatusLine': True,
         'showTopInfo': True,
+        # When expanding tabs to spaces, how many spaces to use. This is not
+        # used for indentation, see 'indentation' or grammar 'indent'.
         'tabSize': 8,
+        # Use a background thread to process changes and parse grammars.
         'useBgThread': True,
     },
     'fileType': {
