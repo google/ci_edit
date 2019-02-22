@@ -429,6 +429,7 @@ tooltip
 tooltips
 traceback
 traversable
+trie
 tty
 tx
 txt
