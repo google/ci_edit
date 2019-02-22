@@ -922,7 +922,7 @@ prefs = {
         # Python language.
         'py': {
             'indent':
-            '  ',
+            '    ',
             'keywords':
             __common_keywords + [
                 'and', 'as', 'assert', 'class', 'def', 'del', 'dict', 'elif',

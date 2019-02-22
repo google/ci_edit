@@ -1474,7 +1474,9 @@ class Actions(app.mutator.Mutator):
         self.find(searchFor, -1)
 
     def indent(self):
-        indentation = self.program.prefs.editor[u'indentation']
+        grammar = self.parser.grammarAt(self.penRow, self.penCol)
+        indentation = (grammar.get(u'indent') or
+                       self.program.prefs.editor[u'indentation'])
         indentationLength = len(indentation)
         if self.selectionMode == app.selectable.kSelectionNone:
             self.verticalInsert(self.penRow, self.penRow, self.penCol,
