@@ -18,6 +18,41 @@ from __future__ import print_function
 
 import os
 
+import app.config
+
+
+def guess(cliFiles, openToLine):
+    """Guess whether unrecognized file paths refer to another file.
+
+    Passing non-None in openToLine disables guessing. Otherwise the code will
+    try to convert an unrecognized path to an exiting file.
+    E.g.
+    In `git diff` an 'a/' or 'b/' may be prepended to the path. Or in a compiler
+    error ':<line number>' may be appended. If the file doesn't exist as-is, try
+    removing those decorations, and if that exists use that path instead.
+    """
+    if app.config.strict_debug:
+        assert isinstance(cliFiles, list)
+        assert openToLine is None or isinstance(openToLine, int)
+    if openToLine is not None:
+        return cliFiles, openToLine
+    out = []
+    for file in cliFiles:
+        path = file['path']
+        if os.path.isfile(path):
+            out.append({'path': path})
+            continue
+        if len(path) > 2 and path[1] == '/':
+            if os.path.isfile(path[2:]):
+                out.append({'path': path[2:]})
+                continue
+        index = path.rfind(':')
+        if index != -1 and os.path.isfile(path[:index]):
+            out.append({'path': path[:index]})
+            openToLine = int(path[index + 1:])
+            continue
+        out.append({'path': path})
+    return out, openToLine
 
 def expandFullPath(path):
     if path.startswith(u"//"):

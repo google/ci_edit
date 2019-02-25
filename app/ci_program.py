@@ -362,6 +362,7 @@ class CiProgram:
                 readStdin = True
             else:
                 cliFiles.append({'path': unicode(i)})
+        cliFiles, openToLine = app.buffer_file.guess(cliFiles, openToLine)
         self.prefs.startup = {
             'debugRedo': debugRedo,
             'showLogWindow': showLogWindow,
