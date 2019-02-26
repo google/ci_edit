@@ -90,19 +90,47 @@ more users are happy users for a longer time.
 
 # Features of ci_edit
 
+## Stand out features
+- nested grammars
+  - A source file being edited may start in one grammar such as HTML and
+    contain nested JavaScript or CSS. ci_edit will highlight each grammar for
+    each separate language.
+- terminal mouse support and GUI shortcuts by default (enabled out-of-the-box).
+- open the file you meant
+  - If a given path doesn't exist, ci_edit will try to estimate "what you
+    meant". This allows for opening a file path by copy/pasting output from
+    other tools without needing to touch up the path.
+    - This is disabled by passing a line number parameter, such as +1 (which
+      opens the file to the first line).
+  - A path such as `a/foo/bar.cc` can open `foo/bar.cc`.
+    - Why: `git diff` may add `a/` or `b/` prefixes to files in diff output.
+  - A path such as `foo/bar.cc:421` can open `foo/bar.cc` to line number 421
+    - Why: some compiler or log output us a <file>:<line number> notation to
+      refer to specific lines.
+
+## Uncommon features
+Some other editors provide these features, but not all of them.
+- file path tab-completion
+  - i.e. when opening files
+- written in Python
+  - No Python experience is required. Being written in Python means that many
+    users will be able to review the code.
+  - Python 3.7+ and Python 2.7+ are supported.
+- saved undo/redo
+  - Open a file and undo prior edits of that document
 - runs on nCurses
   - This means that it can use used in the terminal window just like vim,
     emacs, and pine.
-- cut/copy/paste
-  - Using common GUI editor keyboard short-cuts: `ctrl+x`, `ctrl+c`, and `ctrl+v`!
 - sensible save and quit
   - Using GUI editor keyboard short-cuts: `ctrl+s` and `ctrl+q` respectively.
+
+## Common features
+We should expect these features from a text editor.
+- cut/copy/paste
+  - Using common GUI editor keyboard short-cuts: `ctrl+x`, `ctrl+c`, and
+    `ctrl+v`!
 - syntax highlighting
   - keywords an such are displayed in different colors.
-- nested grammars
-  - A source file being edited may start in one grammar such as HTML and
-    contain nested JavaScript. ci_edit will highlight each grammar for each
-    separate language.
 - find within text
   - Regular expression search forward and backward.
 - line numbers
@@ -111,12 +139,6 @@ more users are happy users for a longer time.
   - Jump to a line number or the top, bottom, or middle of the document
 - unlimited undo/redo
   - Or at least within the limits of disk space to page to
-- file path tab-completion
-  - i.e. when opening files
-- written in Python
-  - No Python experience is required. Being written in Python means that many
-    users will be able to review the code.
-  - Python 3.7+ and Python 2.7+ are supported.
 - selection modes
   - select by line, word, character, select all, or rectangle (block) selection
 - brace matching
@@ -150,8 +172,6 @@ more users are happy users for a longer time.
   - Sort selected lines
   - regex text substitution, such as s/dogs/cats/ replaces the text "dogs" with
     the text "cats".
-- saved undo/redo
-  - Open a file and undo prior edits of that document
 
 ## Future features (the to do list)
 
