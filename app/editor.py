@@ -214,7 +214,7 @@ class InteractiveFind(app.controller.Controller):
         try:
             self.findCmd(searchFor)
         except re.error as e:
-            self.error = e.message
+            self.error = u"invalid regex"
         self.findCmd = self.view.host.textBuffer.find
 
     def replaceAndNext(self):
