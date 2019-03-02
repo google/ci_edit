@@ -362,7 +362,14 @@ class CiProgram:
                 readStdin = True
             else:
                 cliFiles.append({'path': unicode(i)})
-        cliFiles, openToLine = app.buffer_file.guess(cliFiles, openToLine)
+        # If there's no line specified, try to reinterpret the paths.
+        if openToLine is None:
+            decodedPaths = []
+            for file in cliFiles:
+                path, openToLine, openToColumn = app.buffer_file.pathLineColumn(
+                    file[u"path"], self.prefs.editor[u"baseDirEnv"])
+                decodedPaths.append({'path': path})
+            cliFiles = decodedPaths
         self.prefs.startup = {
             'debugRedo': debugRedo,
             'showLogWindow': showLogWindow,

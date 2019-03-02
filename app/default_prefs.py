@@ -305,6 +305,9 @@ prefs = {
     'editor': {
         # E.g. When key '(' is pressed, '()' is typed.
         'autoInsertClosingCharacter': False,
+        # When opening a path that starts with '//', the value is used to
+        # replace the first slash in a double slash prefix.
+        'baseDirEnv': u"/",  # u"${FUCHSIA_DIR}",
         # Scroll the window to keep the cursor on screen.
         'captiveCursor': False,
         'colorScheme': 'default',

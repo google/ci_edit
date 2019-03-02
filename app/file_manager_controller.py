@@ -55,7 +55,10 @@ class DirectoryListController(app.controller.Controller):
         if self.shownDirectory == pathInput:
             return
         self.shownDirectory = pathInput
-        fullPath = app.buffer_file.expandFullPath(pathInput)
+        appPrefs = self.view.program.prefs
+        fullPath, openToLine, openToColumn = app.buffer_file.pathLineColumn(
+            pathInput, appPrefs.editor[u"baseDirEnv"])
+        fullPath = app.buffer_file.expandFullPath(fullPath)
         dirPath = fullPath
         fileName = ''
         if len(pathInput) > 0 and pathInput[-1] != os.sep:
@@ -64,7 +67,6 @@ class DirectoryListController(app.controller.Controller):
                                                      re.escape(fileName))
         else:
             self.view.textBuffer.findRe = None
-        appPrefs = self.view.program.prefs
         dirPath = dirPath or '.'
         if os.path.isdir(dirPath):
             showDotFiles = appPrefs.editor[u'filesShowDotFiles']
@@ -210,7 +212,9 @@ class FilePathInputController(app.controller.Controller):
             directoryList.controller.openFileOrDir(row)
 
     def doCreateOrOpen(self):
-        path = self.decodedPath()
+        appPrefs = self.view.program.prefs
+        path, openToLine, openToColumn = app.buffer_file.pathLineColumn(
+            self.decodedPath(), appPrefs.editor[u"baseDirEnv"])
         if len(path) == 0:
             app.log.info('path is empty')
             return
@@ -219,9 +223,14 @@ class FilePathInputController(app.controller.Controller):
                 return
         self.setEncodedPath(u"")
         textBuffer = self.view.program.bufferManager.loadTextBuffer(path)
+        if openToLine is not None:
+            textBuffer.penRow = openToLine - 1 if openToLine > 0 else 0
+        if openToColumn is not None:
+            textBuffer.penCol = openToColumn - 1 if openToColumn > 0 else 0
         #assert textBuffer.parser
         inputWindow = self.currentInputWindow()
         inputWindow.setTextBuffer(textBuffer)
+        textBuffer.scrollToOptimalScrollPosition()
         self.changeTo(inputWindow)
 
     def doSaveAs(self):

@@ -15,50 +15,69 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+try:
+    unicode
+except NameError:
+    unicode = str
+    unichr = chr
 
 import os
 
 import app.config
 
 
-def guess(cliFiles, openToLine):
-    """Guess whether unrecognized file paths refer to another file.
+def pathLineColumn(path, projectDir):
+    """Guess whether unrecognized file path refers to another file or has line
+    and column information.
 
-    Passing non-None in openToLine disables guessing. Otherwise the code will
-    try to convert an unrecognized path to an exiting file.
+    Try to convert an unrecognized path to an exiting file.
     E.g.
     In `git diff` an 'a/' or 'b/' may be prepended to the path. Or in a compiler
     error ':<line number>' may be appended. If the file doesn't exist as-is, try
     removing those decorations, and if that exists use that path instead.
+
+    Returns: (fullPath, openToLine)
     """
     if app.config.strict_debug:
-        assert isinstance(cliFiles, list)
-        assert openToLine is None or isinstance(openToLine, int)
-    if openToLine is not None:
-        return cliFiles, openToLine
-    out = []
-    for file in cliFiles:
-        path = file['path']
-        if os.path.isfile(path):
-            out.append({'path': path})
-            continue
-        if len(path) > 2 and path[1] == '/':
+        assert isinstance(path, unicode)
+        assert projectDir is None or isinstance(projectDir, unicode)
+    app.log.debug(u"path", path)
+    openToLine = None
+    openToColumn = None
+    if os.path.isfile(path):  # or os.path.isdir(os.path.dirname(path)):
+        return path, openToLine, openToColumn
+    pieces = path.split(u":")
+    app.log.debug(u"pieces\n", pieces)
+    if len(pieces) == 4 and pieces[-1] == u"":
+        try:
+            openToLine = int(pieces[1])
+            openToColumn = int(pieces[2])
+            path = pieces[0]
+        except ValueError:
+            pass
+    elif pieces[-1] != u"":
+        if len(pieces) == 2:
+            try:
+                openToLine = int(pieces[1])
+                path = pieces[0]
+            except ValueError:
+                pass
+        elif len(pieces) == 3:
+            try:
+                openToLine = int(pieces[1])
+                openToColumn = int(pieces[2])
+                path = pieces[0]
+            except ValueError:
+                pass
+    if len(path) > 2:  #  and not os.path.isdir(path[:2]):
+        if projectDir is not None and path.startswith(u"//"):
+            path = projectDir + path[1:]
+        elif path[1] == u"/":
             if os.path.isfile(path[2:]):
-                out.append({'path': path[2:]})
-                continue
-        index = path.rfind(':')
-        if index != -1 and os.path.isfile(path[:index]):
-            out.append({'path': path[:index]})
-            openToLine = int(path[index + 1:])
-            continue
-        out.append({'path': path})
-    return out, openToLine
+                path = path[2:]
+    app.log.debug(u"return\n", path, openToLine, openToColumn)
+    return path, openToLine, openToColumn
+
 
 def expandFullPath(path):
-    if path.startswith(u"//"):
-        cwd = os.getcwd()
-        # TODO(dschuyler): make this not a hack (make it configurable).
-        index = cwd.find(u"/fuchsia")
-        if index >= 0:
-            path = cwd[:index + 8] + path[1:]
     return os.path.abspath(os.path.expanduser(os.path.expandvars(path)))
