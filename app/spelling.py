@@ -106,7 +106,7 @@ class Dictionary:
 
     def setUpWordsForPath(self, path):
         self.pathWords = set()
-        app.log.info(repr(self.pathPrefs))
+        # app.log.info(repr(self.pathPrefs))
         for k,v in self.pathPrefs.items():
             if k in path:
                 for i in v:

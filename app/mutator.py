@@ -72,7 +72,7 @@ class Mutator(app.selectable.Selectable):
         self.shouldReparse = False
 
     def compoundChangePush(self):
-        app.log.info('compoundChangePush')
+        # app.log.info('compoundChangePush')
         if self.__compoundChange:
             self.redoIndex = self.oldRedoIndex
             self.redoChain = self.redoChain[:self.redoIndex]

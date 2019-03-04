@@ -27,6 +27,7 @@ import time
 
 import app.buffer_file
 import app.controller
+import app.string
 
 
 class PredictionListController(app.controller.Controller):
@@ -42,7 +43,7 @@ class PredictionListController(app.controller.Controller):
         self.items = None
         self.shownList = None
 
-    def buildFileList(self, currentFile):
+    def _buildFileList(self, currentFile):
         if app.config.strict_debug:
             assert isinstance(currentFile, unicode), repr(currentFile)
 
@@ -111,6 +112,7 @@ class PredictionListController(app.controller.Controller):
                     i += 1
 
     def focus(self):
+        #app.log.info('PredictionListController')
         self.onChange()
         app.controller.Controller.focus(self)
 
@@ -118,13 +120,13 @@ class PredictionListController(app.controller.Controller):
         app.log.info('PredictionListController command set')
 
     def onChange(self):
-        self.filter = self.view.parent.getPath()
+        self.filter = self.view.parent.predictionInputWindow.controller.decodedPath()
         if self.shownList == self.filter:
             return
         self.shownList = self.filter
 
         inputWindow = self.currentInputWindow()
-        self.buildFileList(inputWindow.textBuffer.fullPath)
+        self._buildFileList(inputWindow.textBuffer.fullPath)
         if self.items is not None:
             self.view.update(self.items)
         self.filter = None
@@ -172,7 +174,7 @@ class PredictionListController(app.controller.Controller):
 
 class PredictionController(app.controller.Controller):
     """Create or open files.
-  """
+    """
 
     def __init__(self, view):
         app.controller.Controller.__init__(self, view, 'PredictionController')
@@ -184,6 +186,7 @@ class PredictionController(app.controller.Controller):
         app.log.info('PredictionController command set')
 
     def onChange(self):
+        #app.log.info('PredictionController')
         self.view.predictionList.controller.onChange()
         app.controller.Controller.onChange(self)
 
@@ -196,13 +199,27 @@ class PredictionController(app.controller.Controller):
 
 class PredictionInputController(app.controller.Controller):
     """Manipulate query string.
-  """
+    """
 
     def __init__(self, view):
         app.controller.Controller.__init__(self, view,
                                            'PredictionInputController')
 
+    def decodedPath(self):
+        if app.config.strict_debug:
+            assert self.view.textBuffer is self.textBuffer
+        return app.string.pathDecode(self.textBuffer.lines[0])
+
+    def setEncodedPath(self, path):
+        if app.config.strict_debug:
+            assert isinstance(path, unicode)
+            assert self.view.textBuffer is self.textBuffer
+        return self.textBuffer.replaceLines((app.string.pathEncode(path),))
+
     def focus(self):
+        #app.log.info('PredictionInputController')
+        self.setEncodedPath(u"")
+        #self.getNamedWindow('predictionList').controller.setFilter(u"py")
         self.getNamedWindow('predictionList').focus()
         app.controller.Controller.focus(self)
 
@@ -210,6 +227,7 @@ class PredictionInputController(app.controller.Controller):
         app.log.info('PredictionInputController command set')
 
     def onChange(self):
+        #app.log.info('PredictionInputController', self.view.parent.getPath())
         self.getNamedWindow('predictionList').controller.onChange()
         app.controller.Controller.onChange(self)
 
@@ -224,12 +242,12 @@ class PredictionInputController(app.controller.Controller):
             self.savedCh, None)
 
     def openAlternateFile(self):
-        app.log.info()
+        app.log.info('PredictionInputController')
         predictionList = self.getNamedWindow('predictionList')
         predictionList.controller.openAltFile()
 
     def performPrimaryAction(self):
-        app.log.info()
+        app.log.info('PredictionInputController')
         predictionList = self.getNamedWindow('predictionList')
         row = predictionList.textBuffer.penRow
         predictionList.controller.openFileOrDir(row)
