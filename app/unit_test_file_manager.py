@@ -54,6 +54,30 @@ class FileManagerTestCases(app.fake_curses_testing.FakeCursesTestCase):
             ord('n')
         ])
 
+    def test_dir_and_path_with_cr(self):
+        #self.setMovieMode(True)
+        sys.argv = []
+        self.runWithFakeInputs([
+            self.displayCheck(0, 0, [u" ci     "]),
+            self.displayCheck(2, 7, [u"     "]), CTRL_O,
+            self.displayCheck(0, 0, [u" ci    Open File  "]), CTRL_A,
+            self.writeText(self.pathToSample(u"")),
+            self.displayCheck(3, 0, [u"./     ", u"../     "]),
+            self.displayCheck(5, 0, [u"._ A name with cr\\r/"]),
+            self.addMouseInfo(0, 5, 0,
+                              curses.BUTTON1_PRESSED), curses.KEY_MOUSE,
+            self.displayCheck(5, 0, [u"example"]),
+            self.displayFindCheck(u"/._ A name with ",
+                                  u"cr\\r/"), KEY_ESCAPE, curses.ERR,
+            self.displayCheck(0, 0, [u" ci     "]),
+            self.displayCheck(2, 7, [u"     "]), CTRL_O,
+            self.displayCheck(0, 0, [u" ci    Open File  "]), CTRL_A,
+            self.writeText(self.pathToSample(u"._ A name")), CTRL_I,
+            self.displayCheck(5, 0, [u"example"]),
+            self.displayFindCheck(u"/._ A name with ", u"cr\\r/"), CTRL_Q,
+            CTRL_Q
+        ])
+
     def test_open(self):
         #self.setMovieMode(True)
         sys.argv = []
@@ -84,4 +108,24 @@ class FileManagerTestCases(app.fake_curses_testing.FakeCursesTestCase):
             self.displayCheck(0, 0, [u" ci    Open File  "]), CTRL_A,
             self.writeText(self.pathToSample(u"valid_unicode")), CTRL_J,
             self.displayCheck(4, 7, [u"Здравствуйте"]), CTRL_Q
+        ])
+
+    def test_empty_path_input(self):
+        """Avoid crash when pressing return when the path input is empty."""
+        #self.setMovieMode(True)
+        sys.argv = []
+        self.runWithFakeInputs([
+            self.displayCheck(0, 0, [u" ci     "]),
+            self.displayCheck(2, 7, [u"     "]),
+            CTRL_O,
+            self.displayCheck(0, 0, [u" ci    Open File  "]),
+            CTRL_A,
+            KEY_BACKSPACE1,
+            self.displayCheck(2, 7, [u"     "]),
+            CTRL_J,
+            self.displayCheck(0, 0, [u" ci    Open File  "]),
+            KEY_ESCAPE,
+            curses.ERR,
+            self.displayCheck(0, 0, [u" ci     "]),
+            CTRL_Q,
         ])

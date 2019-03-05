@@ -160,7 +160,7 @@ class FindWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
             # Check initial state.
             self.displayCheck(-1, 0, [u"      "]),
             self.displayCheckStyle(-2, 0, 1, 10,
-                                   self.prg.prefs.color['status_line']),
+                                   self.prg.color.get(u'status_line', 0)),
 
             # Basic open and close.
             CTRL_F,
@@ -169,7 +169,7 @@ class FindWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
             curses.ERR,
             self.displayCheck(-3, 0, [u"   ", u"   ", u"   "]),
             self.displayCheckStyle(-2, 0, 1, 10,
-                                   self.prg.prefs.color['status_line']),
+                                   self.prg.color.get(u'status_line', 0)),
 
             # Open, expand, and close.
             CTRL_F,
@@ -180,7 +180,7 @@ class FindWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
             curses.ERR,
             self.displayCheck(-3, 0, [u"   ", u"   ", u"   "]),
             self.displayCheckStyle(-2, 0, 1, 10,
-                                   self.prg.prefs.color['status_line']),
+                                   self.prg.color.get(u'status_line', 0)),
 
             # Regression test one for
             # https://github.com/google/ci_edit/issues/170.
@@ -193,7 +193,7 @@ class FindWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
             curses.ERR,
             self.displayCheck(-3, 0, [u"   ", u"   ", u"   "]),
             self.displayCheckStyle(-2, 0, 1, 10,
-                                   self.prg.prefs.color['status_line']),
+                                   self.prg.color.get(u'status_line', 0)),
 
             # Regression test two for
             # https://github.com/google/ci_edit/issues/170.
@@ -203,14 +203,15 @@ class FindWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
             curses.KEY_MOUSE,
             #self.displayCheck(-3, 0, ["   ", "   ", "   "]),
             self.displayCheckStyle(-2, 0, 1, 10,
-                                   self.prg.prefs.color[u'status_line']),
+                                   self.prg.color.get(u'status_line', 0)),
             CTRL_Q
         ])
 
     def test_replace_style_parse(self):
         self.runWithFakeInputs([
             #self.displayCheck(2, 7, [u"      "]),
-            #self.displayCheckStyle(2, 7, 1, 10, self.prg.prefs.color[u'text']),
+            #self.displayCheckStyle(2, 7, 1, 10,
+            #    self.prg.color.get(u'text', 0)),
             self.writeText(u'focusedWindow\n'),
             CTRL_F,
             #self.displayCheck(-1, 0, [u"Find:         "]),
@@ -223,7 +224,8 @@ class FindWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
             #    -3, 0, [u"Find: focused", "Replace:   focused", u"["]),
             CTRL_G,
             # Regression, replace causes 'Windo' to show as a misspelling.
-            self.displayCheckStyle(2, 17, 1, 10, self.prg.prefs.color[u'text']),
+            self.displayCheckStyle(2, 17, 1, 10, self.prg.color.get(u'text',
+                                                                    0)),
             CTRL_Q,
             ord('n')
         ])

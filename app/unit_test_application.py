@@ -1,5 +1,3 @@
-# -*- coding: latin-1 -*-
-
 # Copyright 2017 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,26 +32,6 @@ class ApplicationTestCases(app.fake_curses_testing.FakeCursesTestCase):
     def setUp(self):
         self.longMessage = True
         app.fake_curses_testing.FakeCursesTestCase.setUp(self)
-
-    def test_bracketed_paste(self):
-        self.runWithTestFile(
-            kTestFile,
-            [
-                self.displayCheck(2, 7, [u"      "]),
-                curses.ascii.ESC,
-                app.curses_util.BRACKETED_PASTE_BEGIN,
-                u't',
-                u'e',
-                225,
-                186,
-                191,  # Send an "" in utf-8.
-                u't',
-                curses.ascii.ESC,
-                app.curses_util.BRACKETED_PASTE_END,
-                self.displayCheck(2, 7, [u'te\u1ebft ']),
-                CTRL_Q,
-                u'n'
-            ])
 
     def test_backspace(self):
         self.runWithTestFile(kTestFile, [
@@ -230,7 +208,7 @@ class ApplicationTestCases(app.fake_curses_testing.FakeCursesTestCase):
             self.selectionCheck(2, 6, 0, 0, 0), CTRL_L,
             self.selectionCheck(2, 6, 2, 0, 4),
             self.displayCheckStyle(0, 0, 1, len(u" ci "),
-                                   self.prg.prefs.color[u'logo']), KEY_UP,
+                                   self.prg.color.get(u'logo', 0)), KEY_UP,
             self.selectionCheck(1, 5, 2, 6, 0), CTRL_L,
             self.selectionCheck(2, 0, 1, 0, 4), CTRL_L,
             self.selectionCheck(2, 6, 1, 0, 4),

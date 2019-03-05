@@ -18,7 +18,14 @@
 #include <system_file.h>
 
 "hello"
+#ifdef SOME_FLAG
 "%s and\n %-3i or\r %u with %zu float %3.12fend"
+#else
+#endif
+
+#if 0
+#elif 5
+#endif
 
 // comment with \
 a line continuation.

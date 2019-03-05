@@ -26,15 +26,18 @@ import re
 import time
 
 import app.buffer_file
+import app.config
 import app.controller
+import app.string
 
 
 class DirectoryListController(app.controller.Controller):
     """Gather and prepare file directory information.
-  """
+    """
 
     def __init__(self, view):
-        assert self is not view
+        if app.config.strict_debug:
+            assert self is not view
         app.controller.Controller.__init__(self, view,
                                            u'DirectoryListController')
         self.filter = None
@@ -48,11 +51,14 @@ class DirectoryListController(app.controller.Controller):
         app.log.info(u'DirectoryListController command set')
 
     def onChange(self):
-        pathInput = self.view.parent.getPath()
+        pathInput = self.view.parent.pathWindow.controller.decodedPath()
         if self.shownDirectory == pathInput:
             return
         self.shownDirectory = pathInput
-        fullPath = app.buffer_file.fullPath(pathInput)
+        appPrefs = self.view.program.prefs
+        fullPath, openToLine, openToColumn = app.buffer_file.pathLineColumn(
+            pathInput, appPrefs.editor[u"baseDirEnv"])
+        fullPath = app.buffer_file.expandFullPath(fullPath)
         dirPath = fullPath
         fileName = ''
         if len(pathInput) > 0 and pathInput[-1] != os.sep:
@@ -61,7 +67,6 @@ class DirectoryListController(app.controller.Controller):
                                                      re.escape(fileName))
         else:
             self.view.textBuffer.findRe = None
-        appPrefs = self.view.program.prefs
         dirPath = dirPath or '.'
         if os.path.isdir(dirPath):
             showDotFiles = appPrefs.editor[u'filesShowDotFiles']
@@ -76,23 +81,25 @@ class DirectoryListController(app.controller.Controller):
             lines = []
             try:
                 fileLines = []
-                contents = os.listdir(dirPath)
-                for i in contents:
-                    if not showDotFiles and i[0] == u'.':
+                dirContents = os.listdir(dirPath)
+                for dirItem in dirContents:
+                    if not showDotFiles and dirItem[0] == u'.':
                         continue
-                    if self.filter is not None and not i.startswith(
+                    if self.filter is not None and not dirItem.startswith(
                             self.filter):
                         continue
-                    fullPath = os.path.join(dirPath, i)
+                    fullPath = os.path.join(dirPath, dirItem)
                     if os.path.isdir(fullPath):
-                        i += os.path.sep
+                        dirItem += os.path.sep
                     iSize = None
                     iModified = 0
                     if showSizes and os.path.isfile(fullPath):
                         iSize = os.path.getsize(fullPath)
                     if showModified:
                         iModified = os.path.getmtime(fullPath)
-                    fileLines.append([i, iSize, iModified])
+                    # Handle \r and similar characters in file paths.
+                    encodedPath = app.string.pathEncode(dirItem)
+                    fileLines.append([encodedPath, iSize, iModified, dirItem])
                 if sortBySize is not None:
                     # Sort by size.
                     fileLines.sort(reverse=not sortBySize, key=lambda x: x[1])
@@ -110,7 +117,7 @@ class DirectoryListController(app.controller.Controller):
                      time.strftime(u'%c', time.localtime(i[2]))
                      if i[2] else u'') for i in fileLines
                 ]
-                self.view.contents = [i[0] for i in fileLines]
+                self.view.contents = [i[3] for i in fileLines]
             except OSError as e:
                 lines = [u'Error opening directory.']
                 lines.append(unicode(e))
@@ -126,7 +133,10 @@ class DirectoryListController(app.controller.Controller):
         self.filter = None
 
     def openFileOrDir(self, row):
-        path = self.view.host.getPath()
+        if app.config.strict_debug:
+            assert isinstance(row, int)
+        pathController = self.view.parent.pathWindow.controller
+        path = pathController.decodedPath()
         if row == 0:  # Clicked on "./".
             # Clear the shown directory to trigger a refresh.
             self.shownDirectory = None
@@ -137,13 +147,13 @@ class DirectoryListController(app.controller.Controller):
             path = os.path.dirname(path)
             if len(path) > len(os.path.sep):
                 path += os.path.sep
-            self.view.host.setPath(path)
+            pathController.setEncodedPath(path)
             return
         # If there is a partially typed name in the line, clear it.
         if path[-1:] != os.path.sep:
             path = os.path.dirname(path) + os.path.sep
-        self.view.host.setPath(path + self.view.contents[row - 2])
-        if not os.path.isdir(self.view.host.getPath()):
+        pathController.setEncodedPath(path + self.view.contents[row - 2])
+        if not os.path.isdir(pathController.decodedPath()):
             self.view.host.controller.performPrimaryAction()
 
     def optionChanged(self, name, value):
@@ -157,7 +167,7 @@ class DirectoryListController(app.controller.Controller):
 
 class FileManagerController(app.controller.Controller):
     """Create or open files.
-  """
+    """
 
     def __init__(self, view):
         app.controller.Controller.__init__(self, view, u'FileManagerController')
@@ -181,7 +191,7 @@ class FileManagerController(app.controller.Controller):
 
 class FilePathInputController(app.controller.Controller):
     """Manipulate path string.
-  """
+    """
 
     def __init__(self, view):
         app.controller.Controller.__init__(self, view,
@@ -196,25 +206,35 @@ class FilePathInputController(app.controller.Controller):
         directoryList = self.getNamedWindow(u'directoryList')
         row = directoryList.textBuffer.penRow
         if row == 0:
-            if not os.path.isdir(self.view.getPath()):
+            if not os.path.isdir(self.decodedPath()):
                 self.primaryActions[self.view.parent.mode]()
         else:
             directoryList.controller.openFileOrDir(row)
 
     def doCreateOrOpen(self):
-        path = self.textBuffer.lines[0]
+        appPrefs = self.view.program.prefs
+        path, openToLine, openToColumn = app.buffer_file.pathLineColumn(
+            self.decodedPath(), appPrefs.editor[u"baseDirEnv"])
+        if len(path) == 0:
+            app.log.info('path is empty')
+            return
         if not os.access(path, os.R_OK):
             if os.path.isfile(path):
                 return
-        self.view.textBuffer.replaceLines((u'',))
+        self.setEncodedPath(u"")
         textBuffer = self.view.program.bufferManager.loadTextBuffer(path)
+        if openToLine is not None:
+            textBuffer.penRow = openToLine - 1 if openToLine > 0 else 0
+        if openToColumn is not None:
+            textBuffer.penCol = openToColumn - 1 if openToColumn > 0 else 0
         #assert textBuffer.parser
         inputWindow = self.currentInputWindow()
         inputWindow.setTextBuffer(textBuffer)
+        textBuffer.scrollToOptimalScrollPosition()
         self.changeTo(inputWindow)
 
     def doSaveAs(self):
-        path = self.textBuffer.lines[0]
+        path = self.decodedPath()
         inputWindow = self.currentInputWindow()
         tb = inputWindow.textBuffer
         tb.setFilePath(path)
@@ -226,11 +246,11 @@ class FilePathInputController(app.controller.Controller):
             self.view.changeFocusTo(inputWindow.confirmOverwrite)
             return
         tb.fileWrite()
-        self.view.textBuffer.replaceLines((u'',))
+        self.setEncodedPath(u"")
 
     def doSelectDir(self):
         # TODO(dschuyler): not yet implemented.
-        self.view.textBuffer.replaceLines((u'',))
+        self.setEncodedPath(u"")
         self.changeToInputWindow()
 
     def focus(self):
@@ -242,9 +262,20 @@ class FilePathInputController(app.controller.Controller):
                 path = os.path.dirname(inputWindow.textBuffer.fullPath)
             if len(path) != 0:
                 path += os.path.sep
-            self.view.textBuffer.replaceLines((path,))
+            self.setEncodedPath(unicode(path))
         self.getNamedWindow(u'directoryList').focus()
         app.controller.Controller.focus(self)
+
+    def decodedPath(self):
+        if app.config.strict_debug:
+            assert self.view.textBuffer is self.textBuffer
+        return app.string.pathDecode(self.textBuffer.lines[0])
+
+    def setEncodedPath(self, path):
+        if app.config.strict_debug:
+            assert isinstance(path, unicode)
+            assert self.view.textBuffer is self.textBuffer
+        return self.textBuffer.replaceLines((app.string.pathEncode(path),))
 
     def info(self):
         app.log.info(u'FilePathInputController command set')
@@ -268,8 +299,8 @@ class FilePathInputController(app.controller.Controller):
 
     def tabCompleteExtend(self):
         """Extend the selection to match characters in common."""
-        expandedPath = os.path.expandvars(
-            os.path.expanduser(self.textBuffer.lines[0]))
+        decodedPath = self.decodedPath()
+        expandedPath = os.path.expandvars(os.path.expanduser(decodedPath))
         dirPath, fileName = os.path.split(expandedPath)
         expandedDir = dirPath or u'.'
         matches = []
@@ -283,7 +314,7 @@ class FilePathInputController(app.controller.Controller):
             self.onChange()
             return
         if len(matches) == 1:
-            self.textBuffer.insert(matches[0][len(fileName):])
+            self.setEncodedPath(decodedPath + matches[0][len(fileName):])
             self.maybeSlash(os.path.join(expandedDir, matches[0]))
             self.onChange()
             return
@@ -303,9 +334,9 @@ class FilePathInputController(app.controller.Controller):
             return prefixLen
 
         prefixLen = findCommonPrefixLength(len(fileName))
-        self.textBuffer.insert(matches[0][len(fileName):prefixLen])
+        self.setEncodedPath(decodedPath + matches[0][len(fileName):prefixLen])
         if expandedPath == os.path.expandvars(
-                os.path.expanduser(self.textBuffer.lines[0])):
+                os.path.expanduser(self.decodedPath())):
             # No further expansion found.
             self.getNamedWindow(u'directoryList').controller.setFilter(fileName)
         self.onChange()

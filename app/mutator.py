@@ -72,7 +72,7 @@ class Mutator(app.selectable.Selectable):
         self.shouldReparse = False
 
     def compoundChangePush(self):
-        app.log.info('compoundChangePush')
+        # app.log.info('compoundChangePush')
         if self.__compoundChange:
             self.redoIndex = self.oldRedoIndex
             self.redoChain = self.redoChain[:self.redoIndex]
@@ -169,7 +169,7 @@ class Mutator(app.selectable.Selectable):
                 s1.st_mtime == s2.st_mtime and s1.st_ctime == s2.st_ctime)
 
     def setFilePath(self, path):
-        self.fullPath = app.buffer_file.fullPath(path)
+        self.fullPath = app.buffer_file.expandFullPath(path)
 
     def __doMoveLines(self, begin, end, to):
         lines = self.lines[begin:end]
@@ -254,6 +254,13 @@ class Mutator(app.selectable.Selectable):
 
     def __redoChange(self, change):
         if change[0] == 'b':  # Redo backspace.
+            line = self.lines[self.penRow]
+            self.penCol -= len(change[1])
+            x = self.penCol
+            self.lines[self.penRow] = line[:x] + line[x + len(change[1]):]
+            if self.upperChangedRow > self.penRow:
+                self.upperChangedRow = self.penRow
+        elif change[0] == 'bw':  # Redo backspace word.
             line = self.lines[self.penRow]
             self.penCol -= len(change[1])
             x = self.penCol
@@ -430,6 +437,13 @@ class Mutator(app.selectable.Selectable):
 
     def __undoChange(self, change):
         if change[0] == 'b':
+            line = self.lines[self.penRow]
+            x = self.penCol
+            self.lines[self.penRow] = line[:x] + change[1] + line[x:]
+            self.penCol += len(change[1])
+            if self.upperChangedRow > self.penRow:
+                self.upperChangedRow = self.penRow
+        elif change[0] == 'bw':
             line = self.lines[self.penRow]
             x = self.penCol
             self.lines[self.penRow] = line[:x] + change[1] + line[x:]

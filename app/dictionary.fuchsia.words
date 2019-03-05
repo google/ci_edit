@@ -20,9 +20,11 @@ arches
 aspace
 binfo
 blobfs
+breakpoint
 bti
 cdecls
 chdir
+classname
 cmdline
 cmx
 conns
@@ -30,7 +32,10 @@ contig
 countof
 ctu
 curr
+dcheck
 disp
+dl
+dso
 embedders
 emebbing
 errorf
@@ -48,6 +53,7 @@ iommu
 ipi
 ipis
 kcounter
+kmem
 koid
 koids
 libasync
@@ -62,10 +68,13 @@ ltrace
 ltracef
 matred
 merkleroot
+minidump
 mtx
+nanos
 nanosleep
 netaddr
 netmask
+overnet
 paddr
 physmap
 pkgfs
@@ -74,6 +83,7 @@ pmt
 preinstall
 priv
 protoc
+protos
 pyproto
 realtime
 refcount
@@ -90,11 +100,13 @@ tuf
 txid
 userboot
 userspace
+vaddr
 vdso
 vmar
 vmars
 vmos
 vsock
 waitfor
+wlan
 wordwise
 zxdb

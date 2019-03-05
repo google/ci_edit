@@ -13,10 +13,6 @@
 # limitations under the License.
 
 # Abbreviations
-tv
-yaml
-vm
-fs
 apr
 aug
 bidi
@@ -30,6 +26,7 @@ dev
 expr
 feb
 fri
+fs
 idl
 ipc
 isp
@@ -53,5 +50,8 @@ st
 thu
 tos
 tue
+tv
 ux
 ver
+vm
+yaml

@@ -13,8 +13,6 @@
 # limitations under the License.
 
 # This is a list of non-English words that are in Python libraries.
-unhexlify
-pprint
 abspath
 addstr
 altsep
@@ -246,6 +244,7 @@ pid
 plen
 popen
 ppage
+pprint
 prog
 prv
 ps
@@ -346,6 +345,7 @@ uid
 umask
 uname
 ungetch
+unhexlify
 unichr
 unicodetext
 unittest

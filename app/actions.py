@@ -333,6 +333,20 @@ class Actions(app.mutator.Mutator):
             self.redoAddChange(change)
             self.redo()
 
+    def backspaceWord(self):
+        if self.selectionMode != app.selectable.kSelectionNone:
+            self.performDelete()
+        elif self.penCol == 0:
+            if self.penRow > 0:
+                self.cursorLeft()
+                self.joinLines()
+        else:
+            line = self.lines[self.penRow]
+            colDelta = self.getCursorMoveLeftTo(app.regex.kReWordBoundary)[1][1]
+            change = (u'bw', line[self.penCol + colDelta:self.penCol])
+            self.redoAddChange(change)
+            self.redo()
+
     def carriageReturn(self):
         self.performDelete()
         grammar = self.parser.grammarAt(self.penRow, self.penCol)
@@ -534,7 +548,7 @@ class Actions(app.mutator.Mutator):
         self.selectionNone()
         self.doCursorMoveRightTo(app.regex.kReWordBoundary)
 
-    def doCursorMoveLeftTo(self, boundary):
+    def getCursorMoveLeftTo(self, boundary):
         if self.penCol > 0:
             line = self.lines[self.penRow]
             pos = self.penCol
@@ -542,9 +556,14 @@ class Actions(app.mutator.Mutator):
                 if segment.start() < pos <= segment.end():
                     pos = segment.start()
                     break
-            self.cursorMove(0, pos - self.penCol)
+            return self.getCursorMove(0, pos - self.penCol)
         elif self.penRow > 0:
-            self.cursorMove(-1, len(self.lines[self.penRow - 1]))
+            return self.getCursorMove(-1, len(self.lines[self.penRow - 1]))
+
+    def doCursorMoveLeftTo(self, boundary):
+        change = self.getCursorMoveLeftTo(boundary)
+        self.redoAddChange(change)
+        self.redo()
 
     def doCursorMoveRightTo(self, boundary):
         if not self.lines:
@@ -1455,7 +1474,9 @@ class Actions(app.mutator.Mutator):
         self.find(searchFor, -1)
 
     def indent(self):
-        indentation = self.program.prefs.editor[u'indentation']
+        grammar = self.parser.grammarAt(self.penRow, self.penCol)
+        indentation = (grammar.get(u'indent') or
+                       self.program.prefs.editor[u'indentation'])
         indentationLength = len(indentation)
         if self.selectionMode == app.selectable.kSelectionNone:
             self.verticalInsert(self.penRow, self.penRow, self.penCol,

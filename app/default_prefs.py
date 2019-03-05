@@ -78,6 +78,8 @@ color8 = {
     'default': 0,
     'doc_block_comment': 3,
     'error': 7,
+    'file_path_bracketed': 3,
+    'file_path_quoted': 3,
     'found_find': 1,
     'highlight': 3,
     'html_block_comment': 2,
@@ -125,6 +127,7 @@ commentColor16Index = 2
 defaultColor16Index = 1
 foundColor16Index = 3
 keywordsColor16Index = 2
+pathColor16Index = 6
 selectedColor16Index = 4  # Active find is a selection.
 specialsColor16Index = 5
 stringColor16Index = 6
@@ -149,6 +152,8 @@ color16 = {
     'default': defaultColor16Index,
     'doc_block_comment': commentColor16Index,
     'error': 9,
+    'file_path_bracketed': pathColor16Index,
+    'file_path_quoted': pathColor16Index,
     'found_find': foundColor16Index,
     'highlight': 15,
     'html_block_comment': commentColor16Index,
@@ -196,6 +201,7 @@ commentColorIndex = 2
 defaultColorIndex = 18
 foundColorIndex = 32
 keywordsColorIndex = 21
+pathColorIndex = 30
 selectedColor = 64  # Active find is a selection.
 specialsColorIndex = 20
 stringColorIndex = 5
@@ -218,6 +224,8 @@ color256 = {
     'default': defaultColorIndex,
     'doc_block_comment': commentColorIndex,
     'error': 9,
+    'file_path_bracketed': pathColorIndex,
+    'file_path_quoted': pathColorIndex,
     'found_find': foundColorIndex,
     'highlight': 96,
     'html_block_comment': commentColorIndex,
@@ -269,11 +277,43 @@ assert color16.keys() == color256.keys()
 prefs = {
     'color': {},
     'devTest': {},
+    # TODO(dschuyler): provide a UI to enable selected dictionaries.
+    u"dictionaries": {
+        # The base dictionaries are loaded at startup. They are active for all
+        # documents.
+        "base": [
+            'acronyms',
+            'coding',
+            'contractions',
+            'cpp',
+            'css',
+            'en-abbreviations',
+            'en-gb',
+            'en-misc',
+            'en-us',
+            'html',
+            'name',
+            'user',
+        ],
+        # If the expanded path to the current document contains |key| the list
+        # of dictionaries are applied.
+        "path_match": {
+            u"/chromium/": [u"chromium"],
+            u"/fuchsia/": [u"fuchsia"],
+        },
+    },
     'editor': {
+        # E.g. When key '(' is pressed, '()' is typed.
         'autoInsertClosingCharacter': False,
+        # When opening a path that starts with '//', the value is used to
+        # replace the first slash in a double slash prefix.
+        'baseDirEnv': u"/",  # u"${FUCHSIA_DIR}",
+        # Scroll the window to keep the cursor on screen.
         'captiveCursor': False,
         'colorScheme': 'default',
+        # Show hidden files in file list.
         'filesShowDotFiles': True,
+        # Show the size on disk for files in the file list.
         'filesShowSizes': True,
         'filesShowModifiedDates': True,
         'filesSortAscendingByName': True,
@@ -287,13 +327,17 @@ prefs = {
         'findUseRegex': True,
         'findVerbose': False,
         'findWholeWord': False,
+        # An example indentation. If the grammar has its own indent that can
+        # override this value.
         'indentation': '  ',
         'lineLimitIndicator': 80,
+        # When the mouse wheel is moved, which way should the window scroll.
         'naturalScrollDirection': True,
         'onSaveStripTrailingSpaces': True,
-        'optimalCursorCol': 0.98,  # Ratio of columns: 0 left, 1.0 right.
-        'optimalCursorRow':
-        0.28,  # Ratio of rows: 0 top, 0.5 middle, 1.0 bottom.
+        # Ratio of columns: 0 left, 1.0 right.
+        'optimalCursorCol': 0.98,
+        # Ratio of rows: 0 top, 0.5 middle, 1.0 bottom.
+        'optimalCursorRow': 0.28,
         'palette': 'default',
         'palette8': 'default8',
         'palette16': 'default16',
@@ -308,7 +352,10 @@ prefs = {
         'showLineNumbers': True,
         'showStatusLine': True,
         'showTopInfo': True,
+        # When expanding tabs to spaces, how many spaces to use. This is not
+        # used for indentation, see 'indentation' or grammar 'indent'.
         'tabSize': 8,
+        # Use a background thread to process changes and parse grammars.
         'useBgThread': True,
     },
     'fileType': {
@@ -524,20 +571,20 @@ prefs = {
             r'(?<!\\)\n',
             'indent':
             '  ',
-            'special': [
-                r'^\s*#\s*?define\b',
-                r'^\s*#\s*?defined\b',
-                r'^\s*#\s*?elif\b',
-                r'^\s*#\s*?else\b',
-                r'^\s*#\s*?endif\b',
-                r'^\s*#\s*?if\b',
-                r'^\s*#\s*ifdef\b',
-                r'^\s*#\s*?elif\b',
-                r'^\s*#\s*?ifndef\b',
-                r'^\s*#\s*?include\b',
-                r'^\s*#\s*?undef\b',
+            'disabled_special': [
+                r'\bdefine\b',
+                r'\bdefined\b',
+                r'\belif\b',
+                r'\belif\b',
+                r'\belse\b',
+                r'\bendif\b',
+                r'\bif\b',
+                r'\bifdef\b',
+                r'\bifndef\b',
+                r'\binclude\b',
+                r'\bundef\b',
             ],
-            #'contains': ['file_path_quoted', 'file_path_bracketed'],
+            'contains': ['file_path_quoted', 'file_path_bracketed'],
         },
         'c_raw_string1': {
             'begin': "[uU]?[rR]'",
@@ -577,6 +624,18 @@ prefs = {
             'escaped': r'\\"',
             'indent': '  ',
             'special': __special_string_escapes + [r'\\"'],
+            'single_line': True,
+        },
+        'file_path_bracketed': {
+            # Paths in includes don't allow escapes.
+            'begin': '<',
+            'end': r'>',
+            'single_line': True,
+        },
+        'file_path_quoted': {
+            # Paths in includes don't allow escapes.
+            'begin': '"',
+            'end': r'"',
             'single_line': True,
         },
         # Cascading Style Sheet.
@@ -877,7 +936,7 @@ prefs = {
         # Python language.
         'py': {
             'indent':
-            '  ',
+            '    ',
             'keywords':
             __common_keywords + [
                 'and', 'as', 'assert', 'class', 'def', 'del', 'dict', 'elif',

@@ -19,6 +19,7 @@ from __future__ import print_function
 import app.config
 import app.cu_editor
 import app.log
+import app.string
 import app.text_buffer
 import app.window
 
@@ -134,6 +135,9 @@ class DirectoryList(app.window.Window):
 
 
 class PathWindow(app.window.Window):
+    """The path window is the editable text line where the user may freely type
+    in a path.
+    """
 
     def __init__(self, program, host):
         if app.config.strict_debug:
@@ -144,21 +148,15 @@ class PathWindow(app.window.Window):
         self.controller = app.cu_editor.FilePathInput(self)
         self.setTextBuffer(app.text_buffer.TextBuffer(self.program))
 
-    def getPath(self):
-        return self.textBuffer.lines[0]
-
     def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
         col = self.scrollCol + paneCol
-        line = self.textBuffer.lines[0]
+        line = self.controller.decodedPath()
         col = self.scrollCol + paneCol
         self.parent.directoryList.controller.shownDirectory = None
         if col >= len(line):
             return
         slash = line[col:].find(u'/')
-        self.setPath(line[:col + slash + 1])
-
-    def setPath(self, path):
-        self.textBuffer.replaceLines((path,))
+        self.controller.setEncodedPath(line[:col + slash + 1])
 
     def setTextBuffer(self, textBuffer):
         textBuffer.lineLimitIndicator = 0
@@ -226,9 +224,6 @@ class FileManagerWindow(app.window.Window):
         self.controller.focus()
         self.changeFocusTo(self.pathWindow)
 
-    def getPath(self):
-        return self.pathWindow.getPath()
-
     def onPrefChanged(self, category, name):
         self.directoryList.controller.optionChanged(category, name)
         app.window.Window.onPrefChanged(self.program, self, category, name)
@@ -257,9 +252,6 @@ class FileManagerWindow(app.window.Window):
             u'selectDir': u'Select a Directory',
         }
         self.modeTitle[u'name'] = modeTitles[mode]
-
-    def setPath(self, path):
-        self.pathWindow.setPath(path)
 
     def unfocus(self):
         app.window.Window.unfocus(self)

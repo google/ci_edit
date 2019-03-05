@@ -1,7 +1,4 @@
-#!/usr/bin/env python3
-# TODO(dschuyler): !/usr/bin/python -O
-
-# Copyright 2016 Google Inc.
+# Copyright 2019 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,14 +16,24 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import sys
+import curses
+import unittest
 
-if __name__ == '__main__':
-    args = sys.argv
-    if '--test' in args:
-        import unit_tests
-        args.remove('--test')
-        unit_tests.parseArgList(args)
-    else:
-        import app.ci_program
-        app.ci_program.run_ci()
+import app.string
+
+
+class StringTestCases(unittest.TestCase):
+
+    def test_path_encode(self):
+        tests = [
+            (u"abcd", u"abcd"),
+            (u"\rabcd", u"\\rabcd"),
+            (u"ab\rcd", u"ab\\rcd"),
+            (u"abcd\r", u"abcd\\r"),
+            (u"\aab\tcd\r", u"\\aab\\tcd\\r"),
+            (u"abcd\\", u"abcd\\\\"),
+            (u"\\", u"\\\\"),
+        ]
+        for test in tests:
+            self.assertEqual(app.string.pathEncode(test[0]), test[1])
+            self.assertEqual(app.string.pathDecode(test[1]), test[0])

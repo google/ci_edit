@@ -37,6 +37,7 @@ import time
 import traceback
 
 import app.background
+import app.buffer_file
 import app.buffer_manager
 import app.clipboard
 import app.color
@@ -67,9 +68,12 @@ class CiProgram:
     The program interacts with a single top-level ProgramWindow."""
 
     def __init__(self):
+        app.log.startup(u"Python version ", sys.version)
         self.prefs = app.prefs.Prefs()
         self.color = app.color.Colors(self.prefs.color)
-        self.dictionary = app.spelling.Dictionary()
+        self.dictionary = app.spelling.Dictionary(
+            self.prefs.dictionaries[u"base"],
+            self.prefs.dictionaries[u"path_match"])
         self.clipboard = app.clipboard.Clipboard()
         self.frame = app.render.Frame()
         self.history = app.history.History(
@@ -293,12 +297,13 @@ class CiProgram:
 
     def parseArgs(self):
         """Interpret the command line arguments."""
+        app.log.startup('isatty', sys.stdin.isatty())
         debugRedo = False
         showLogWindow = False
         cliFiles = []
         openToLine = None
         profile = False
-        readStdin = False
+        readStdin = not sys.stdin.isatty()
         takeAll = False  # Take all args as file paths.
         timeStartup = False
         numColors = min(curses.COLORS, 256)
@@ -357,6 +362,14 @@ class CiProgram:
                 readStdin = True
             else:
                 cliFiles.append({'path': unicode(i)})
+        # If there's no line specified, try to reinterpret the paths.
+        if openToLine is None:
+            decodedPaths = []
+            for file in cliFiles:
+                path, openToLine, openToColumn = app.buffer_file.pathLineColumn(
+                    file[u"path"], self.prefs.editor[u"baseDirEnv"])
+                decodedPaths.append({'path': path})
+            cliFiles = decodedPaths
         self.prefs.startup = {
             'debugRedo': debugRedo,
             'showLogWindow': showLogWindow,
@@ -525,8 +538,8 @@ def run_ci():
         sys.stdout.write('\033[?2004l')
         sys.stdout.flush()
     if userConsoleMessage:
-        fullPath = os.path.expanduser(
-            os.path.expandvars('~/.ci_edit/userConsoleMessage'))
+        fullPath = app.buffer_file.expandFullPath(
+            '~/.ci_edit/userConsoleMessage')
         with io.open(fullPath, 'w+') as f:
             f.write(userConsoleMessage)
         sys.stdout.write(userConsoleMessage + '\n')

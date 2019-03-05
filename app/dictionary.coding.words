@@ -92,6 +92,7 @@ chr
 cli
 cmake
 cmd
+cmp
 cntl
 codebase
 codec
@@ -206,6 +207,7 @@ hxx
 ia
 idr
 ifconfig
+ifdef
 iff
 ifndef
 ij
@@ -221,6 +223,7 @@ inlined
 inlines
 inlining
 intl
+intr
 intrinsics
 ip
 ipsum
@@ -241,6 +244,7 @@ keyframes
 lambdas
 le
 len
+lexing
 lf
 lhs
 libc
@@ -259,6 +263,7 @@ lvalues
 makefile
 makefiles
 mem
+memoize
 memoized
 microkernel
 minified
@@ -271,6 +276,7 @@ msg
 mutex
 mutexes
 na
+nak
 namespace
 namespaces
 ndebug
@@ -299,6 +305,7 @@ patcher
 pcm
 pem
 pid
+pipelining
 pkgs
 png
 popups
@@ -328,6 +335,7 @@ px
 py
 pyc
 pyo
+qux
 rar
 rastered
 rastering
@@ -340,6 +348,7 @@ recursing
 refptr
 regex
 regexes
+regs
 relayout
 remoting
 renderer
@@ -412,6 +421,7 @@ tid
 tk
 tmp
 todo
+tok
 tolltip
 toolchain
 toolchains
@@ -419,6 +429,7 @@ tooltip
 tooltips
 traceback
 traversable
+trie
 tty
 tx
 txt
@@ -431,7 +442,10 @@ ubuntu
 uchar
 uid
 uintptr
+ulong
 undef
+underrun
+underruns
 uniquifier
 uniquify
 unobserve
@@ -440,6 +454,7 @@ unserializable
 usec
 utf
 variadic
+vdso
 versioning
 vimrc
 vkey

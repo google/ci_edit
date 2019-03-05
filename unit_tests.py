@@ -33,6 +33,8 @@ if not os.getenv('CI_EDIT_USE_REAL_CURSES'):
     }
     app.log.shouldWritePrintLog = True
 
+import unittest
+
 # Set up strict_debug before loading other app.* modules.
 import app.config
 app.config.strict_debug = True
@@ -42,21 +44,23 @@ import app.unit_test_application
 import app.unit_test_automatic_column_adjustment
 import app.unit_test_bookmarks
 import app.unit_test_brace_matching
+import app.unit_test_copy_paste
 import app.unit_test_curses_util
+import app.unit_test_execute_prompt
 import app.unit_test_file_manager
 import app.unit_test_find_window
-import app.unit_test_execute_prompt
 import app.unit_test_intention
+import app.unit_test_misspellings
 import app.unit_test_parser
 import app.unit_test_performance
 import app.unit_test_prediction_window
 import app.unit_test_prefs
 import app.unit_test_regex
 import app.unit_test_selectable
+import app.unit_test_string
 import app.unit_test_text_buffer
 import app.unit_test_ui
 import app.unit_test_undo_redo
-import unittest
 
 # Add new test cases here.
 TESTS = {
@@ -78,6 +82,8 @@ TESTS = {
     app.unit_test_bookmarks.BookmarkTestCases,
     'brace_matching':
     app.unit_test_brace_matching.BraceMatchingTestCases,
+    'copy_paste':
+    app.unit_test_copy_paste.CopyPasteTestCases,
     'curses_util':
     app.unit_test_curses_util.CursesUtilTestCases,
     'file_manager':
@@ -88,6 +94,8 @@ TESTS = {
     app.unit_test_execute_prompt.ExecutePromptTestCases,
     'intention':
     app.unit_test_intention.IntentionTestCases,
+    'misspellings':
+    app.unit_test_misspellings.MisspellingsTestCases,
     'parser':
     app.unit_test_parser.ParserTestCases,
     'performance':
@@ -100,6 +108,8 @@ TESTS = {
     app.unit_test_regex.RegexTestCases,
     'selectable':
     app.unit_test_selectable.SelectableTestCases,
+    'string':
+    app.unit_test_string.StringTestCases,
     'draw':
     app.unit_test_text_buffer.DrawTestCases,
     'ui':
