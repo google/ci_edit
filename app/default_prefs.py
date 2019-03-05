@@ -492,10 +492,15 @@ prefs = {
             'indent':
             '  ',
             'keywords': [
-                'basename', 'break', 'case', 'chmod', 'continue', 'cp',
-                'dirname', 'do', 'done', 'echo', 'else', 'exit', 'fi', 'find',
-                'if', 'for', 'ln', 'mkdir', 'read', 'return', 'rm', 'sleep',
-                'switch', 'then', 'while'
+                'break', 'case', 'continue', 'do', 'done', 'echo', 'else',
+                'esac', 'exit', 'fi', 'if', 'for', 'return', 'switch', 'then',
+                'while'
+            ],
+            # Not really types.
+            'types': [
+                'ag', 'basename', 'chmod', 'cp', 'dircolors', 'dirname', 'find',
+                'ixoff', 'ixon', 'lesspipe', 'ln', 'mkdir', 'read', 'rm',
+                'rmdir', 'rxvt', 'sed', 'sleep', 'ssh', 'tput', 'wc'
             ],
             'contains': ['c_string1', 'c_string2', 'pound_comment'],
         },
@@ -520,19 +525,31 @@ prefs = {
         'cpp': {
             'indent':
             '  ',
-            'keywords':
-            __c_keywords + [
-                'auto', 'catch', 'class', 'constexpr', 'delete', 'explicit',
-                'false', 'mutable', 'namespace', 'new', 'nullptr', 'override',
-                'private', 'protected', 'public', 'template', 'this', 'throw',
-                'true', 'typename'
+            'keywords': [
+                'alignas', 'alignof', 'and', 'and_eq', 'asm', 'audit', 'auto',
+                'axiom', 'bitand', 'bitor', 'break', 'case', 'catch', 'class',
+                'compl', 'concept', 'const', 'const_cast', 'consteval',
+                'constexpr', 'continue', 'decltype', 'default', 'delete', 'do',
+                'dynamic_cast', 'else', 'enum', 'explicit', 'export', 'extern',
+                'false', 'final', 'for', 'friend', 'goto', 'if', 'inline',
+                'mutable', 'namespace', 'new', 'noexcept', 'not', 'not_eq',
+                'nullptr', 'operator', 'or', 'or_eq', 'override', 'private',
+                'protected', 'public', 'register', 'reinterpret_cast', 'return',
+                'sizeof', 'static', 'static_assert', 'static_cast', 'struct',
+                'switch', 'template', 'this', 'thread_local', 'throw', 'true',
+                'typedef'
+                'typename', 'virtual', 'volatile', 'while', 'xor', 'xor_eq'
             ],
             'namespaces': [
                 '::',
                 'std::',
             ],
             'types':
-            __c_primitive_types,
+            __c_primitive_types + [
+                'char8_t',
+                'char16_t',
+                'char32_t',
+            ],
             'contains': [
                 'cpp_block_comment', 'cpp_line_comment', 'c_preprocessor',
                 'cpp_string_literal', 'c_string1', 'c_string2'
@@ -582,6 +599,7 @@ prefs = {
                 r'\bifdef\b',
                 r'\bifndef\b',
                 r'\binclude\b',
+                r'\bpragma\b',
                 r'\bundef\b',
             ],
             'contains': ['file_path_quoted', 'file_path_bracketed'],
