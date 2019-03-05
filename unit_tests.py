@@ -60,6 +60,8 @@ import unittest
 
 # Add new test cases here.
 TESTS = {
+    'actions_grammar':
+    app.unit_test_actions.GrammarDeterminationTestCases,
     'actions_mouse':
     app.unit_test_actions.MouseTestCases,
     'actions_text_delete':

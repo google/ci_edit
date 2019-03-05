@@ -311,8 +311,8 @@ def renderedFindIter(string, beginCol, endCol, charGroups, numbers, eolSpaces):
                     column += 2 if c > MIN_DOUBLE_WIDE_CHARACTER else 1
                     index += 1
         else:
-          column += 2 if c > MIN_DOUBLE_WIDE_CHARACTER else 1
-          index += 1
+            column += 2 if c > MIN_DOUBLE_WIDE_CHARACTER else 1
+            index += 1
     if eolSpaces and limit and string[-1] == ' ':
         index = limit - 1
         while index and string[index - 1] == ' ':

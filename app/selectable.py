@@ -89,6 +89,17 @@ class Selectable(BaseLineBuffer):
             chars += len(line)
         return chars, len(lines)
 
+    def changeSelectionMode(self, newSelectionMode):
+        if newSelectionMode == self.selectionMode:
+            return
+        self.selectionMode = newSelectionMode
+        if newSelectionMode == kSelectionNone:
+            self.setMessage()
+        else:
+            charCount, lineCount = self.countSelected()
+            self.setMessage(
+                u'%d characters (%d lines) selected' % (charCount, lineCount))
+
     def selection(self):
         return (self.penRow, self.penCol, self.markerRow, self.markerCol)
 

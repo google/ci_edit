@@ -15,6 +15,7 @@
 
 # Names (names that match trademarks are not a challenge to said marks).
 abdul
+abseil
 acer
 ada
 ajax
@@ -29,6 +30,7 @@ atlassian
 austen
 australian
 bart
+bazel
 bezier
 bingley
 bluetooth
@@ -56,6 +58,7 @@ chromecast
 ci
 connor
 consolas
+cray
 cygwin
 dan
 darcy
@@ -128,6 +131,7 @@ kevin
 laguna
 latin
 lei
+linenoise
 linux
 lisa
 lizzy
@@ -168,8 +172,10 @@ opencl
 opengl
 opensource
 openssh
+openssl
 packard
 pemberley
+perl
 philip
 phillips
 pixelbook
@@ -178,6 +184,7 @@ profont
 qemu
 quickoffice
 rachel
+readline
 rebecca
 redirector
 richard
@@ -199,6 +206,7 @@ tom
 tommy
 touchpad
 tracy
+travis
 unicode
 unix
 venti
@@ -207,6 +215,7 @@ verisign
 verizon
 vulkan
 wagner
+wayland
 webgl
 westerham
 wickham

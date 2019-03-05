@@ -33,9 +33,6 @@ class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
     def setUp(self):
         self.longMessage = True
-        if os.path.isfile(kTestFile):
-            os.unlink(kTestFile)
-        self.assertFalse(os.path.isfile(kTestFile))
         app.fake_curses_testing.FakeCursesTestCase.setUp(self)
 
     def test_open_and_quit(self):

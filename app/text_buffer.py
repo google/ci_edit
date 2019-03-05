@@ -230,76 +230,27 @@ class TextBuffer(app.actions.Actions):
             if (self.parser.rowCount() > self.penRow and
                     len(self.parser.rowText(self.penRow)) > self.penCol):
                 ch = self.parser.rowText(self.penRow)[self.penCol]
-
-                def searchBack(closeCh, openCh):
-                    count = -1
-                    for row in range(self.penRow, -1, -1):
-                        line = self.parser.rowText(row)
-                        if row == self.penRow:
-                            line = line[:self.penCol]
-                        found = [
-                            i for i in re.finditer(
-                                u"(\\" + openCh + u")|(\\" + closeCh +
-                                u")", line)
-                        ]
-                        for match in reversed(found):
-                            if match.group() == openCh:
-                                count += 1
-                            else:
-                                count -= 1
-                            if count == 0:
-                                textCol = match.start()
-                                if not (textCol < startCol or
-                                        textCol >= endCol):
-                                    window.addStr(
-                                        top + row - startRow,
-                                        textCol - self.view.scrollCol, openCh,
-                                        colorPrefs.get(u'matching_bracket',
-                                                       colorDelta))
-                                return
-
-                def searchForward(openCh, closeCh):
-                    count = 1
-                    textCol = self.penCol + 1
-                    for row in range(
-                            self.penRow,
-                            min(self.parser.rowCount(), startRow + maxRow)):
-                        if row != self.penRow:
-                            textCol = 0
-                        line = self.parser.rowText(row)[textCol:]
-                        for match in re.finditer(
-                                u"(\\" + openCh + u")|(\\" + closeCh + u")",
-                                line):
-                            if match.group() == openCh:
-                                count += 1
-                            else:
-                                count -= 1
-                            if count == 0:
-                                textCol += match.start()
-                                if not (textCol < startCol or
-                                        textCol >= endCol):
-                                    window.addStr(
-                                        top + row - startRow,
-                                        textCol - self.view.scrollCol, closeCh,
-                                        colorPrefs.get(u'matching_bracket',
-                                                       colorDelta))
-                                return
-
-                matcher = {
-                    u'(': (u')', searchForward),
-                    u'[': (u']', searchForward),
-                    u'{': (u'}', searchForward),
-                    u')': (u'(', searchBack),
-                    u']': (u'[', searchBack),
-                    u'}': (u'{', searchBack),
-                }
-                look = matcher.get(ch)
-                if look:
-                    look[1](ch, look[0])
+                matchingBracketRowCol = self.getMatchingBracketRowCol()
+                if matchingBracketRowCol is not None:
+                    matchingBracketRow = matchingBracketRowCol[0]
+                    matchingBracketCol = matchingBracketRowCol[1]
                     window.addStr(
                         top + self.penRow - startRow,
                         self.penCol - self.view.scrollCol,
                         self.parser.rowText(self.penRow)[self.penCol],
+                        colorPrefs.get(u'matching_bracket', colorDelta))
+                    characterFinder = {
+                        u'(': u')',
+                        u'[': u']',
+                        u'{': u'}',
+                        u')': u'(',
+                        u']': u'[',
+                        u'}': u'{',
+                    }
+                    oppCharacter = characterFinder[ch]
+                    window.addStr(
+                        top + matchingBracketRow - startRow,
+                        matchingBracketCol - self.view.scrollCol, oppCharacter,
                         colorPrefs.get(u'matching_bracket', colorDelta))
         if self.highlightCursorLine:
             # Highlight the whole line at the cursor location.

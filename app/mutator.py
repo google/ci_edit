@@ -223,7 +223,7 @@ class Mutator(app.selectable.Selectable):
         self.penCol += change[1][1]
         self.markerRow += change[1][2]
         self.markerCol += change[1][3]
-        self.selectionMode += change[1][4]
+        self.changeSelectionMode(self.selectionMode + change[1][4])
 
     def redo(self):
         """Replay the next action on the redoChain."""
@@ -400,7 +400,7 @@ class Mutator(app.selectable.Selectable):
         self.penCol -= change[1][1]
         self.markerRow -= change[1][2]
         self.markerCol -= change[1][3]
-        self.selectionMode -= change[1][4]
+        self.changeSelectionMode(self.selectionMode - change[1][4])
         assert self.penRow >= 0, self.penRow
         assert self.penCol >= 0, self.penCol
 
@@ -416,7 +416,8 @@ class Mutator(app.selectable.Selectable):
             changes = self.redoChain[self.redoIndex]
             if self.debugRedo:
                 app.log.info('undo', self.redoIndex, repr(changes))
-            if ((changes[0][0] == 'f' or changes[0][0] == 'm') and len(changes) == 1):
+            if ((changes[0][0] == 'f' or changes[0][0] == 'm') and
+                    len(changes) == 1):
                 # Undo if the last edit was a cursor move.
                 self.__undoChange(changes[0])
             else:

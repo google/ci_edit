@@ -33,9 +33,6 @@ class UiBasicsTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
     def setUp(self):
         self.longMessage = True
-        if os.path.isfile(kTestFile):
-            os.unlink(kTestFile)
-        self.assertFalse(os.path.isfile(kTestFile))
         app.fake_curses_testing.FakeCursesTestCase.setUp(self)
 
     def test_logo(self):
@@ -101,6 +98,7 @@ class UiBasicsTestCases(app.fake_curses_testing.FakeCursesTestCase):
             self.displayCheck(0, 0, [
                 u" ci    " + kTestFile[-30:],
             ]),
+            self.cursorCheck(2, 7),
             self.displayCheck(13, 0, [
                 u"Creating new file  ",
                 u"                   ",
@@ -109,6 +107,7 @@ class UiBasicsTestCases(app.fake_curses_testing.FakeCursesTestCase):
                 u"                   ",
                 u"                   ",
             ]), CTRL_S,
+            self.cursorCheck(2, 8),
             self.displayCheck(13, 0, [
                 u"File saved    ",
                 u"                   ",
@@ -121,12 +120,38 @@ class UiBasicsTestCases(app.fake_curses_testing.FakeCursesTestCase):
                 u" ci     . ",
             ]), CTRL_O,
             self.writeText(kTestFile), CTRL_J,
-            #self.displayCheck(0, 0, [
-            #    u" ci    " + kTestFile[-30:],
-            #    u"            ",
-            #    u"     1 te   ",
-            #]),
-            CTRL_Q
+            self.displayCheck(0, 0, [
+                u" ci    " + kTestFile[-30:],
+                u"            ",
+                u"     1 te   ",
+            ]), CTRL_Q
+        ])
+
+    def test_message_on_text_selection(self):
+        self.runWithTestFile(kTestFile, [
+            self.cursorCheck(2, 7),
+            u'H', u'e', u'l', u'l', u'o',
+            self.displayCheck(2, 0, [
+                u"     1 Hello                            "
+            ]), self.cursorCheck(2, 12), CTRL_A,
+            self.selectionDocumentCheck(0, 5, 0, 0, 1),
+            self.displayCheck(13, 0, [
+                u"5 characters (1 lines) selected"
+            ]), u'a', u'b', self.cursorCheck(2, 9),
+            self.displayCheck(2, 0, [
+                u"     1 ab                               "
+            ]), self.displayCheck(13, 0, [
+                u"                        1, 3 |   0%,100%"
+            ]), KEY_SHIFT_LEFT,
+            self.selectionDocumentCheck(0, 1, 0, 2, 3),
+            self.displayCheck(13, 0, [
+                u"1 characters (1 lines) selected"
+            ]), u'c', self.cursorCheck(2, 9),
+            self.displayCheck(2, 0, [
+                u"     1 ac                               "
+            ]), self.displayCheck(13, 0, [
+                u"                        1, 3 |   0%,100%"
+            ]), CTRL_Q, u'n'
         ])
 
     def test_session(self):
