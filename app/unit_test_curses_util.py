@@ -171,6 +171,7 @@ class CursesUtilTestCases(unittest.TestCase):
         self.assertEqual(u"", app.curses_util.renderedSubStr(u"こんにちは", 0, 0))
 
         # Test past the length of the string.
+        self.assertEqual(u"", app.curses_util.renderedSubStr(u"", 1, 1))
         self.assertEqual(u"test", app.curses_util.renderedSubStr(u"test", 0, 8))
 
     def test_rendered_width(self):
