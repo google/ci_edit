@@ -624,15 +624,15 @@ prefs = {
             "escaped": r"\\'",
             "indent": "  ",
             "single_line": True,
-            "special": __special_string_escapes + [r"\\\\"],
+            "special": __special_string_escapes + [r"\\'"],
         },
         "c_raw_string2": {
             "begin": "[uU]?[rR]\"",
             "end": "\"",
-            "escaped": "\\\"",
+            "escaped": "\\\\\"",
             "indent": "  ",
             "single_line": True,
-            "special": __special_string_escapes + [r"\\\\"],
+            "special": __special_string_escapes + ["\\\\\""],
         },
         "cpp_string_literal": {
             "begin": "R\"",
@@ -645,7 +645,7 @@ prefs = {
         "c_string1": {
             "begin": "'(?!'')",
             "end": "'",
-            "escaped": "\\'",
+            "escaped": r"\\'",
             "indent": "  ",
             "special": __special_string_escapes + [r"\\'"],
             "single_line": True,
@@ -653,9 +653,9 @@ prefs = {
         "c_string2": {
             "begin": "\"(?!\"\")",
             "end": "\"",
-            "escaped": "\\\"",
+            "escaped": "\\\\\"",
             "indent": "  ",
-            "special": __special_string_escapes + ["\\\""],
+            "special": __special_string_escapes + ["\\\\\""],
             "single_line": True,
         },
         "file_path_bracketed": {
@@ -684,9 +684,9 @@ prefs = {
         },
         "css_block": {
             "begin":
-            "\\{",
+            r"\\{",
             "end":
-            "\\}",
+            r"\\}",
             "indent":
             "  ",
             "keywords": [
@@ -857,7 +857,7 @@ prefs = {
             ],
             "end": ">",
             "special": [
-                "\\w+",
+                r"\\w+",
             ],
         },
         "html_element_attribute": {
@@ -865,7 +865,7 @@ prefs = {
             "end": "\"",
         },
         "html_element_end": {
-            "begin": "</\\w+",
+            "begin": r"</\\w+",
             "end": ">",
         },
         "java": {
@@ -1017,30 +1017,30 @@ prefs = {
         "py_raw_string1": {
             "begin": "[uU]?[rR]'''",
             "end": "'''",
-            "escaped": "\\'",
+            "escaped": r"\\'",
             "indent": "  ",
-            #"special": [r"\""?"?$"],
+            #"special": ["\"\"?\"?$"],
         },
         "py_raw_string2": {
             "begin": "[uU]?[rR]\"\"\"",
             "end": "\"\"\"",
-            "escaped": "\\\"",
+            "escaped": "\\\\\"",
             "indent": "  ",
-            #"special": ["\\\""],
+            #"special": ["\\\\\""],
         },
         "py_string1": {
             "begin": "[uU]?'''",
             "end": "'''",
-            "escaped": "\\'",
+            "escaped": r"\\'",
             #"indent": "  ",
             "special": __special_string_escapes + [r"\\'"],
         },
         "py_string2": {
             "begin": "[uU]?\"\"\"",
             "end": "\"\"\"",
-            "escaped": "\\\"",
+            "escaped": "\\\\\"",
             #"indent": "  ",
-            "special": __special_string_escapes + [r"\\\""],
+            "special": __special_string_escapes + ["\\\\\""],
         },
         "quoted_string1": {
             # This is not a programming string, there are no escape chars.
@@ -1055,9 +1055,9 @@ prefs = {
         "regex_string": {
             "begin": r"(?<=[\n=:;([{,])(?:\s*)/(?![/*])",
             "end": "/",
-            "escaped": "\\.",
+            "escaped": r"\\.",
             "indent": "  ",
-            "special": __special_string_escapes + ["\\/"],
+            "special": __special_string_escapes + [r"\\/"],
             "single_line": True,
         },
         # Rust language.
