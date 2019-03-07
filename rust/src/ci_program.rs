@@ -15,48 +15,72 @@
 use std::io::Write;
 //use std::rc::{Rc, Weak};
 //use std::cell::RefCell;
-use std::sync::{Arc, Mutex};
-use std::sync::atomic::{AtomicBool, Ordering};
 use super::buffer_manager::BufferManager;
+use super::color::Colors;
+use super::prefs::Prefs;
+use std::cmp::min;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{Arc, Mutex, RwLock};
 
-extern crate ncurses;
+extern crate ncurses; // https://crates.io/crates/ncurses
 
 const KEY_CTRL_Q: i32 = 17;
 
+// Helper function to initialize an MEVENT. (Is there a better approach?)
+pub fn newMevent() -> ncurses::ll::MEVENT {
+    ncurses::ll::MEVENT {
+        id: 0,
+        x: 0,
+        y: 0,
+        z: 0,
+        bstate: 0,
+    }
+}
+
+// A few helpful pieces of data to display in the debug window.
+pub struct DebugInfo {
+    mouse_event: ncurses::ll::MEVENT,
+    pub ch: i32,
+}
+
+impl DebugInfo {
+    pub fn new() -> DebugInfo {
+        DebugInfo {
+            mouse_event: newMevent(),
+            ch: 0,
+        }
+    }
+}
+
+// This is the overall program singleton that holds the other important
+// singletons such as the buffer_manager, preferences, and UI display.
 pub struct CiProgram {
     buffer_manager: Mutex<BufferManager>,
-    debug_mouse_event: Mutex<ncurses::ll::MEVENT>,
+    color: RwLock<Colors>,
+    prefs: RwLock<Prefs>,
     exiting: AtomicBool,
     curses_screen: ncurses::WINDOW,
-    ch: i32,
+    pub debug_info: Mutex<DebugInfo>,
 }
 
 impl CiProgram {
     pub fn new() -> Arc<CiProgram> {
+        let prefs = Prefs::new();
         let program = Arc::new(CiProgram {
             buffer_manager: Mutex::new(BufferManager::new()),
-            debug_mouse_event: Mutex::new(ncurses::ll::MEVENT {
-                id: 0,
-                x: 0,
-                y: 0,
-                z: 0,
-                bstate: 0,
-            }),
+            color: RwLock::new(Colors::new(prefs.color256.clone())),
+            prefs: RwLock::new(prefs),
+            debug_info: Mutex::new(DebugInfo::new()),
             exiting: AtomicBool::new(false),
             curses_screen: ncurses::initscr(),
-            ch: 0,
         });
-        //*program.buffer_manager.borrow_mut().program.borrow_mut() = Rc::downgrade(&program);
-        let mut guard = program.buffer_manager.lock().unwrap();
-        guard.program = Some(program.clone());
-        program.clone()
+        program
     }
 
     pub fn init(&self) {
         // Maybe set to "en_US.UTF-8"?
         ncurses::setlocale(ncurses::LcCategory::all, "");
 
-        //let mut ci_program = CiProgram::new();
         ncurses::raw();
         ncurses::mousemask(ncurses::ALL_MOUSE_EVENTS as ncurses::mmask_t, None);
         ncurses::keypad(ncurses::stdscr(), true);
@@ -77,29 +101,54 @@ impl CiProgram {
         ncurses::mv(0, 0);
         ncurses::printw("This is a work in progress\n");
         ncurses::printw("Press ctrl+q to exit.\n");
+        let mut mouse_event = newMevent();
         while self.exiting.load(Ordering::SeqCst) == false {
             let c = ncurses::getch();
-            //self.ch = c;
+            if c == 409 {
+                let _err = ncurses::getmouse(&mut mouse_event);
+            }
+            {
+                let mut info = self.debug_info.lock().unwrap();
+                info.ch = c;
+                info.mouse_event = mouse_event;
+            }
             if c == KEY_CTRL_Q {
                 self.quit_now();
             }
-            if c == 409 {
-                /*
-                let _err = ncurses::getmouse(&mut self.debug_mouse_event.lock().unwrap());
-                ncurses::printw(&format!(
-                    "mouse {:?}\n",
-                    self.debug_mouse_event
-                ));
-                */
-            }
             if c >= 0 {
-                ncurses::printw(&format!("pressed {}\n", self.ch));
+                // This grabs the mutex separately because this code will be in
+                // a separate thread later (and I'm getting the hang of rust
+                // mutex).
+                let info = self.debug_info.lock().unwrap();
+                ncurses::printw(&format!("pressed {}\n", info.ch));
+                if c == 409 {
+                    ncurses::printw(&format!("mouse {:?}\n", info.mouse_event));
+                }
             }
         }
         ncurses::endwin();
     }
 
-    pub fn parse_args(&self) {}
+    pub fn parse_args(&self) {
+        let debugRedo = false;
+        let showLogWindow = false;
+        let cliFiles: Vec<String>;
+        //let cliFiles = vec![];
+        let openToLine: Option<i32> = None;
+        let profile = false;
+        let readStdin = false;
+        let takeAll = false; // Take all args as file paths.
+        let timeStartup = false;
+        let numColors = min(ncurses::COLORS(), 256);
+        println!("{:?}", self.prefs);
+        if std::env::var("CI_EDIT_SINGLE_THREAD").is_ok() {
+            self.prefs
+                .write()
+                .unwrap()
+                .editor
+                .insert("useBgThread".to_string(), "false".to_string());
+        }
+    }
 
     pub fn quit_now(&self) {
         self.exiting.store(true, Ordering::SeqCst);
@@ -110,31 +159,7 @@ impl CiProgram {
 
         self.parse_args();
         self.set_up_palette();
-        /*
-        homePath = app.prefs.prefs['userData'].get('homePath')
-        self.makeHomeDirs(homePath)
-        app.history.loadUserHistory()
-        app.curses_util.hackCursesFixes()
-        if app.prefs.editor['useBgThread']:
-          self.bg = app.background.startupBackground()
-        self.startup()
-        if app.prefs.startup.get('profile'):
-          profile = cProfile.Profile()
-          profile.enable()
-          self.commandLoop();
-          profile.disable()
-          output = io.StringIO.StringIO()
-          stats = pstats.Stats(profile, stream=output).sort_stats('cumulative')
-          stats.print_stats()
-          app.log.info(output.getvalue())
-        else:
-        */
         self.command_loop();
-        /*
-        if app.prefs.editor['useBgThread']:
-          self.bg.put((self.programWindow, 'quit'))
-          self.bg.join()
-        */
         ncurses::endwin();
     }
 

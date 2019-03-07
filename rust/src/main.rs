@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-mod ci_program;
 mod buffer_manager;
+mod ci_program;
+mod color;
 mod prefs;
 mod text_buffer;
 
