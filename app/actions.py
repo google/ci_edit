@@ -158,7 +158,7 @@ class Actions(app.mutator.Mutator):
                 self.redo()
             self.selectionNone()
 
-    def performDeleteRange(self, upperRow, upperCol, lowerRow, lowerCol):
+    def _performDeleteRange(self, upperRow, upperCol, lowerRow, lowerCol):
         if upperRow == self.penRow == lowerRow:
             if upperCol < self.penCol:
                 col = upperCol - self.penCol
@@ -1840,7 +1840,7 @@ class Actions(app.mutator.Mutator):
     def stripTrailingWhiteSpace(self):
         for i in range(len(self.lines)):
             for found in app.regex.kReEndSpaces.finditer(self.lines[i]):
-                self.performDeleteRange(i, found.regs[0][0], i,
+                self._performDeleteRange(i, found.regs[0][0], i,
                                         found.regs[0][1])
 
     def unindent(self):
