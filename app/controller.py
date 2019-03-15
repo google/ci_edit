@@ -23,6 +23,7 @@ import curses.ascii
 import app.config
 import app.curses_util
 import app.log
+import app.selectable
 
 #import app.window
 
@@ -348,6 +349,11 @@ class MainController:
             self.controller.commandSet = commandSet
 
     def onChange(self):
+        tb = self.view.textBuffer
+        if tb.message is None and tb.selectionMode != app.selectable.kSelectionNone:
+              charCount, lineCount = tb.countSelected()
+              tb.setMessage(
+                  u'%d characters (%d lines) selected' % (charCount, lineCount))
         self.controller.onChange()
 
     def nextController(self):

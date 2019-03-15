@@ -18,6 +18,7 @@ from __future__ import print_function
 
 import re
 
+import app.config
 import app.log
 import app.regex
 
@@ -89,17 +90,6 @@ class Selectable(BaseLineBuffer):
             chars += len(line)
         return chars, len(lines)
 
-    def changeSelectionMode(self, newSelectionMode):
-        if newSelectionMode == self.selectionMode:
-            return
-        self.selectionMode = newSelectionMode
-        if newSelectionMode == kSelectionNone:
-            self.setMessage()
-        else:
-            charCount, lineCount = self.countSelected()
-            self.setMessage(
-                u'%d characters (%d lines) selected' % (charCount, lineCount))
-
     def selection(self):
         return (self.penRow, self.penCol, self.markerRow, self.markerCol)
 
@@ -117,6 +107,15 @@ class Selectable(BaseLineBuffer):
                 lowerRow,
                 lowerCol,
                 selectionMode=kSelectionCharacter):
+        if app.config.strict_debug:
+            assert isinstance(upperRow, int)
+            assert isinstance(upperCol, int)
+            assert isinstance(lowerRow, int)
+            assert isinstance(lowerCol, int)
+            assert isinstance(selectionMode, int)
+            assert upperRow <= lowerRow
+            assert upperRow != lowerRow or upperCol <= lowerCol
+            assert kSelectionNone <= selectionMode < kSelectionModeCount
         lines = []
         if selectionMode == kSelectionBlock:
             if (lowerRow + 1 < len(self.lines)):
@@ -135,7 +134,7 @@ class Selectable(BaseLineBuffer):
                         lines.append(self.lines[i][upperCol:])
                     elif i == lowerRow:
                         lines.append(self.lines[i][:lowerCol])
-                    elif i < len(self.lines):
+                    else:
                         lines.append(self.lines[i])
         return tuple(lines)
 
@@ -144,6 +143,13 @@ class Selectable(BaseLineBuffer):
         self.doDelete(upperRow, upperCol, lowerRow, lowerCol)
 
     def doDelete(self, upperRow, upperCol, lowerRow, lowerCol):
+        if app.config.strict_debug:
+            assert isinstance(upperRow, int)
+            assert isinstance(upperCol, int)
+            assert isinstance(lowerRow, int)
+            assert isinstance(lowerCol, int)
+            assert upperRow <= lowerRow
+            assert upperRow != lowerRow or upperCol <= lowerCol
         if self.upperChangedRow > upperRow:
             self.upperChangedRow = upperRow
         if self.selectionMode == kSelectionBlock:
@@ -162,9 +168,16 @@ class Selectable(BaseLineBuffer):
                 del self.lines[upperRow + 1:lowerRow + 1]
 
     def insertLines(self, lines):
+        if app.config.strict_debug:
+            assert isinstance(lines, tuple)
         self.insertLinesAt(self.penRow, self.penCol, lines, self.selectionMode)
 
     def insertLinesAt(self, row, col, lines, selectionMode):
+        if app.config.strict_debug:
+            assert isinstance(row, int)
+            assert isinstance(col, int)
+            assert isinstance(lines, tuple)
+            assert isinstance(selectionMode, int)
         if len(lines) == 0:
             return
         lines = list(lines)

@@ -68,8 +68,6 @@ TESTS = {
     app.unit_test_actions.GrammarDeterminationTestCases,
     'actions_mouse':
     app.unit_test_actions.MouseTestCases,
-    'actions_text_delete':
-    app.unit_test_actions.TextDeleteTestCases,
     'actions_text_indent':
     app.unit_test_actions.TextIndentTestCases,
     'actions_text_insert':
