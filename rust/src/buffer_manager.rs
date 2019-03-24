@@ -12,14 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//use std::io::Write;
-//use std::rc::{Rc, Weak};
-//use std::cell::RefCell;
-use std::sync::{Arc};
-use super::prefs::Prefs;
 use super::ci_program::CiProgram;
+use super::prefs::Prefs;
 use super::text_buffer::TextBuffer;
-
+use std::sync::Arc;
 
 pub struct BufferManager {
     pub program: Option<Arc<CiProgram>>,
@@ -36,8 +32,7 @@ impl BufferManager {
         }
     }
 
-    pub fn init(&mut self) {
-    }
+    pub fn init(&mut self) {}
 
     pub fn set_up_palette(&mut self) {}
 }

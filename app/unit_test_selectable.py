@@ -163,6 +163,5 @@ class SelectableTestCases(unittest.TestCase):
         selectable.markerCol = 2
         self.assertEqual(selectable.extendSelection(), (0, 3, 0, -2, 0))
 
-
 if __name__ == '__main__':
     unittest.main()

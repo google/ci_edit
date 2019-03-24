@@ -218,12 +218,11 @@ class Mutator(app.selectable.Selectable):
                                                            change[1][0])
         assert self.penCol + change[1][1] >= 0, "%s %s" % (self.penCol,
                                                            change[1][1])
-
         self.penRow += change[1][0]
         self.penCol += change[1][1]
         self.markerRow += change[1][2]
         self.markerCol += change[1][3]
-        self.changeSelectionMode(self.selectionMode + change[1][4])
+        self.selectionMode += change[1][4]
 
     def redo(self):
         """Replay the next action on the redoChain."""
@@ -407,7 +406,7 @@ class Mutator(app.selectable.Selectable):
         self.penCol -= change[1][1]
         self.markerRow -= change[1][2]
         self.markerCol -= change[1][3]
-        self.changeSelectionMode(self.selectionMode - change[1][4])
+        self.selectionMode -= change[1][4]
         assert self.penRow >= 0, self.penRow
         assert self.penCol >= 0, self.penCol
 

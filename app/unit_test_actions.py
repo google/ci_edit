@@ -55,7 +55,7 @@ apple banana carrot
 #include "test.h"
 void blah();
 """
-        self.textBuffer.insertLines(test.split('\n'))
+        self.textBuffer.insertLines(tuple(test.split('\n')))
         #self.assertEqual(self.textBuffer.scrollRow, 0)
         #self.assertEqual(self.textBuffer.scrollCol, 0)
         self.assertEqual(self.textBuffer.lines[1], 'two')
@@ -265,45 +265,6 @@ class TextInsertTestCases(unittest.TestCase):
         self.assertEqual(tb.lines[0], 'o')
         insert(ord('('), None)
         self.assertEqual(tb.lines[0], '(o')
-
-
-class TextDeleteTestCases(unittest.TestCase):
-
-    def setUp(self):
-        app.log.shouldWritePrintLog = False
-        self.prg = app.ci_program.CiProgram()
-        self.textBuffer = app.text_buffer.TextBuffer(self.prg)
-        self.textBuffer.setView(FakeView())
-
-    def tearDown(self):
-        self.textBuffer = None
-
-    def test_message_backspace(self):
-        tb = self.textBuffer
-        self.assertEqual(tb.message[0], u"New buffer")
-        tb.insert(u"a")
-        tb.selectionAll()
-        self.assertEqual(tb.message[0], u"1 characters (1 lines) selected")
-        tb.backspace()
-        self.assertEqual(tb.message, None)
-
-    def test_message_carriage_return(self):
-        tb = self.textBuffer
-        self.assertEqual(tb.message[0], u"New buffer")
-        tb.insert(u"a")
-        tb.selectionAll()
-        self.assertEqual(tb.message[0], u"1 characters (1 lines) selected")
-        tb.carriageReturn()
-        self.assertEqual(tb.message, None)
-
-    def test_message_after_text_deletion(self):
-        tb = self.textBuffer
-        self.assertEqual(tb.message[0], u"New buffer")
-        tb.insert(u"p")
-        tb.selectionAll()
-        self.assertEqual(tb.message[0], u"1 characters (1 lines) selected")
-        tb.insert("q")
-        self.assertEqual(tb.message, None)
 
 class GrammarDeterminationTestCases(unittest.TestCase):
 

@@ -30,5 +30,7 @@ rsync
 sbin
 sed
 symlink
+ulimit
 uname
+wc
 xserver

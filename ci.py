@@ -28,5 +28,9 @@ if __name__ == '__main__':
         args.remove('--test')
         unit_tests.parseArgList(args)
     else:
+        if '--strict' in args:
+            import app.config
+            args.remove('--strict')
+            app.config.strict_debug = True
         import app.ci_program
         app.ci_program.run_ci()

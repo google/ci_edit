@@ -15,21 +15,22 @@
 //use std::io::Write;
 use std::collections::HashMap;
 
-type PrefMap = HashMap<String, String>;
+pub type PrefMap = HashMap<String, String>;
 
+#[derive(Debug)]
 pub struct Prefs {
-    prefs_directory: String,
-    color8: PrefMap,
-    color16: PrefMap,
-    color256: PrefMap,
-    color: Option<PrefMap>,
+    pub prefs_directory: String,
+    pub color8: PrefMap,
+    pub color16: PrefMap,
+    pub color256: PrefMap,
+    //pub color: Option<PrefMap>,
     //color: Option<&'a PrefMap>,
-    editor: PrefMap,
-    dev_test: PrefMap,
-    palette: PrefMap,
-    startup: PrefMap,
-    status: PrefMap,
-    user_data: PrefMap,
+    pub editor: PrefMap,
+    pub dev_test: PrefMap,
+    pub palette: PrefMap,
+    pub startup: PrefMap,
+    pub status: PrefMap,
+    pub user_data: PrefMap,
 }
 
 impl Prefs {
@@ -39,7 +40,7 @@ impl Prefs {
             color8: PrefMap::new(),
             color16: PrefMap::new(),
             color256: PrefMap::new(),
-            color: None,
+            //color: None,
             editor: PrefMap::new(),
             dev_test: PrefMap::new(),
             palette: PrefMap::new(),

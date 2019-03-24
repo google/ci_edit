@@ -346,27 +346,28 @@ def renderedSubStr(string, beginCol, endCol):
     endIndex = sys.maxsize
     i = 0
     limit = len(string)
-    while i <= limit:
-        if beginCol <= column:
-            if beginCol == column:
-                # An exact (aligned) trimming (not splitting a double-wide
-                # character).
-                beginIndex = i
-            else:
-                # Splitting a double-wide character. Prepend a space and adjust.
-                string = u" " + string[i:]
-                beginIndex = 0
-                # Trim these to account for what was trimmed.
-                endCol -= column
-                limit -= i
-                # Add one to each of these for the space.
-                endCol += 1
-                limit += 1
-                column = 1
-                i = 1
-            break
+    while column < beginCol:
+        if i >= limit:
+            # The |string| is entirely before |beginCol|.
+            return u""
         column += 2 if string[i] >= MIN_DOUBLE_WIDE_CHARACTER else 1
         i += 1
+    if beginCol == column:
+        # An exact (aligned) trimming (not splitting a double-wide
+        # character).
+        beginIndex = i
+    else:
+        # Splitting a double-wide character. Prepend a space and adjust.
+        string = u" " + string[i:]
+        beginIndex = 0
+        # Trim these to account for what was trimmed.
+        endCol -= column
+        limit -= i
+        # Add one to each of these for the space.
+        endCol += 1
+        limit += 1
+        column = 1
+        i = 1
     while True:
         if endCol <= column:
             if endCol == column:
