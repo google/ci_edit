@@ -279,6 +279,7 @@ na
 nak
 namespace
 namespaces
+ncurses
 ndebug
 ne
 neq
@@ -370,6 +371,7 @@ runtimes
 rv
 rvalue
 rvalues
+rw
 rx
 scp
 scrollback
