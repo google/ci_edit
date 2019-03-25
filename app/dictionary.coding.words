@@ -120,6 +120,9 @@ del
 dep
 deps
 deque
+dereferenced
+dereferences
+dereferencing
 deserialization
 deserialized
 deserializer
@@ -132,6 +135,7 @@ directionality
 dirname
 dirs
 divs
+dma
 dropdown
 dt
 dtor
@@ -139,7 +143,11 @@ dupped
 dword
 dx
 dy
+eax
+ebx
+ecx
 edu
+edx
 elif
 emacs
 enablement
@@ -147,6 +155,8 @@ encodings
 endian
 endianness
 endif
+enqueued
+enqueues
 enums
 env
 eof
@@ -184,6 +194,8 @@ functor
 futex
 futexes
 gaia
+gamepad
+gamepads
 ge
 getter
 gfx
@@ -273,6 +285,12 @@ mmu
 mmus
 msec
 msg
+multibyte
+multicast
+multisample
+multisampled
+multisampling
+multithread
 mutex
 mutexes
 na
@@ -428,6 +446,7 @@ toolchains
 tooltip
 tooltips
 traceback
+trackpad
 traversable
 trie
 tty
@@ -446,11 +465,13 @@ ulong
 undef
 underrun
 underruns
+unicast
 uniquifier
 uniquify
 unobserve
 unparsable
 unserializable
+upsampling
 usec
 utf
 variadic
@@ -476,6 +497,7 @@ wi
 wifi
 wildcard
 wildcards
+wireframe
 xorg
 xss
 xterm
