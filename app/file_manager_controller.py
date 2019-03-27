@@ -254,15 +254,6 @@ class FilePathInputController(app.controller.Controller):
         self.changeToInputWindow()
 
     def focus(self):
-        if self.view.textBuffer.isEmpty():
-            inputWindow = self.currentInputWindow()
-            if len(inputWindow.textBuffer.fullPath) == 0:
-                path = os.getcwd()
-            else:
-                path = os.path.dirname(inputWindow.textBuffer.fullPath)
-            if len(path) != 0:
-                path += os.path.sep
-            self.setEncodedPath(unicode(path))
         self.getNamedWindow(u'directoryList').focus()
         app.controller.Controller.focus(self)
 
