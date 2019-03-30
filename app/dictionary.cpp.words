@@ -17,6 +17,7 @@
 addrstrlen
 af
 alloca
+asprintf
 atexit
 atoi
 calloc
@@ -24,6 +25,7 @@ cassert
 ceil
 cerr
 cin
+closedir
 cmath
 countof
 cout
@@ -35,6 +37,7 @@ cstring
 demangle
 dgram
 dirent
+dprintf
 eagain
 ebadf
 eexist
@@ -51,6 +54,7 @@ ewouldblock
 extern
 fileno
 fopen
+fp
 fprintf
 freeifaddrs
 fstat
@@ -76,6 +80,7 @@ ipproto
 irgrp
 iroth
 irusr
+isalnum
 isatty
 istream
 istreambuf
@@ -127,6 +132,7 @@ setw
 snprintf
 sockaddr
 socklen
+sprintf
 srand
 ss
 ssize
@@ -137,7 +143,9 @@ stddef
 stdint
 stdlib
 stoi
+strchr
 strcmp
+strdup
 strerror
 stricmp
 stringstream
@@ -147,6 +155,11 @@ strlen
 strncmp
 strncpy
 strpbrk
+strstr
+strtol
+strtoll
+strtoul
+strtoull
 timeradd
 timerclear
 timercmp
@@ -159,7 +172,11 @@ trunc
 typename
 uint
 unistd
+usleep
 va
+vasprintf
+vdprintf
 vfprintf
+vprintf
 wchar
 wronly

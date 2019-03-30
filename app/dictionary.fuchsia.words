@@ -19,6 +19,7 @@ appmgr
 arches
 aspace
 binfo
+blk
 blobfs
 breakpoint
 bti
@@ -51,11 +52,13 @@ fzl
 gn
 gni
 googlesource
+gpaddr
 idx
 ints
 iommu
 ipi
 ipis
+iquery
 kcounter
 killall
 kmem
@@ -63,6 +66,8 @@ koid
 koids
 kstats
 libasync
+libfidl
+libfit
 libobject
 libsyscalls
 libzircon
@@ -72,6 +77,7 @@ lockdep
 lowmem
 ltrace
 ltracef
+lx
 matred
 memgraph
 merkleroot
@@ -83,6 +89,7 @@ netaddr
 netboot
 netmask
 ngunwind
+nx
 overnet
 paddr
 physmap
@@ -97,9 +104,11 @@ psutils
 pyproto
 realtime
 refcount
+rng
 sessionctl
 spinlock
 srv
+svc
 syscalls
 sysinfo
 termina
@@ -113,12 +122,16 @@ userboot
 userspace
 vaddr
 vdso
+vfx
+virtio
 vmaps
 vmar
 vmars
+vmm
 vmos
 vsock
 waitfor
+wl
 wlan
 wordwise
 zbi
