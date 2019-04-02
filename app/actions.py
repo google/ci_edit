@@ -1518,12 +1518,12 @@ class Actions(app.mutator.Mutator):
 
     def insertPrintable(self, ch, meta):
         #app.log.info(ch, meta)
-        if curses.ascii.isprint(ch):
-            self.insert(unichr(ch))
-        elif ch is app.curses_util.BRACKETED_PASTE:
+        if ch is app.curses_util.BRACKETED_PASTE:
             self.editPasteData(meta)
         elif ch is app.curses_util.UNICODE_INPUT:
             self.insert(meta)
+        elif curses.ascii.isprint(ch):
+            self.insert(unichr(ch))
 
     def insertPrintableWithPairing(self, ch, meta):
         #app.log.info(ch, meta)
