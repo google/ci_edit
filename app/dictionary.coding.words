@@ -303,6 +303,7 @@ neq
 netmask
 netmasks
 noop
+nsec
 nullability
 nullable
 nulled
@@ -354,6 +355,7 @@ py
 pyc
 pyo
 qux
+raii
 rar
 rastered
 rastering
@@ -413,7 +415,13 @@ stdin
 stdout
 stl
 str
+strchr
+strdup
 stringified
+strtol
+strtoll
+strtoul
+strtoull
 struct
 structs
 stty
@@ -472,6 +480,8 @@ unobserve
 unparsable
 unserializable
 upsampling
+uri
+usb
 usec
 usecs
 utf

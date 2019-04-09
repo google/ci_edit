@@ -17,6 +17,7 @@ abigen
 addrs
 appmgr
 arches
+arraysize
 aspace
 binfo
 blk
@@ -89,6 +90,7 @@ netaddr
 netboot
 netmask
 ngunwind
+notreached
 nx
 overnet
 paddr
@@ -106,6 +108,8 @@ realtime
 refcount
 rng
 sessionctl
+sm
+smbug
 spinlock
 srv
 svc
@@ -118,6 +122,7 @@ tremplin
 tuf
 txid
 ulib
+unittest
 userboot
 userspace
 vaddr
