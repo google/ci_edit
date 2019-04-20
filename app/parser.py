@@ -317,10 +317,11 @@ class Parser:
                     self.rows.append(len(self.parserNodes))
             else:
                 [
-                    newGrammarIndexLimit, errorIndexLimit, keywordIndexLimit,
-                    typeIndexLimit, specialIndexLimit
+                    containsGrammarIndexLimit, nextGrammarIndexLimit,
+                    errorIndexLimit, keywordIndexLimit, typeIndexLimit,
+                    specialIndexLimit
                 ] = self.parserNodes[-1][kGrammar]['indexLimits']
-                if index < newGrammarIndexLimit:
+                if index < containsGrammarIndexLimit:
                     # A new grammar within this grammar (a 'contains').
                     if subdata[reg[0]] == '\n':
                         # This 'begin' begins with a new line.
@@ -338,6 +339,26 @@ class Parser:
                             app.regex.joinReList(markers))
                     child = (priorGrammar, cursor + reg[0],
                              len(self.parserNodes) - 1, visual + reg[0])
+                    cursor += reg[1]
+                    visual += reg[1]
+                elif index < nextGrammarIndexLimit:
+                    # A new grammar follows this grammar (a 'next').
+                    if subdata[reg[0]] == '\n':
+                        # This 'begin' begins with a new line.
+                        self.rows.append(len(self.parserNodes))
+                    priorGrammar = self.parserNodes[-1][kGrammar].get(
+                        'matchGrammars', [])[index]
+                    if priorGrammar.get('end_key'):
+                        # A dynamic end tag.
+                        hereKey = re.search(priorGrammar['end_key'],
+                                            subdata[reg[0]:]).groups()[0]
+                        markers = priorGrammar['markers']
+                        markers[1] = priorGrammar['end'].replace(
+                            r'\0', re.escape(hereKey))
+                        priorGrammar['matchRe'] = re.compile(
+                            app.regex.joinReList(markers))
+                    child = (priorGrammar, cursor + reg[0],
+                             len(self.parserNodes) - 2, visual + reg[0])
                     cursor += reg[1]
                     visual += reg[1]
                 elif index < errorIndexLimit:

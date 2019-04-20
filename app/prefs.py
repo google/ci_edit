@@ -120,6 +120,12 @@ class Prefs():
                 app.log.error('error writing prefs')
                 app.log.exception(e)
 
+    def _raiseGrammarNotFound(self):
+        app.log.startup('Available grammars:')
+        for k, v in self.grammars.items():
+            app.log.startup('  ', k, ':', len(v))
+        raise Exception('missing grammar for "' + grammarName + '" in prefs.py')
+
     def __setUpGrammars(self, defaultGrammars):
         self.grammars = {}
         # Arrange all the grammars by name.
@@ -161,11 +167,14 @@ class Prefs():
             for grammarName in v.get('contains', []):
                 g = self.grammars.get(grammarName, None)
                 if g is None:
-                    app.log.startup('Available grammars:')
-                    for k, v in self.grammars.items():
-                        app.log.startup('  ', k, ':', len(v))
-                    raise Exception('missing grammar for "' + grammarName +
-                                    '" in prefs.py')
+                    self._raiseGrammarNotFound()
+                markers.append(g['begin'])
+                matchGrammars.append(g)
+            # Index [2+len(contains)..]
+            for grammarName in v.get('next', []):
+                g = self.grammars.get(grammarName, None)
+                if g is None:
+                    self._raiseGrammarNotFound()
                 markers.append(g['begin'])
                 matchGrammars.append(g)
             # Index [2+len(contains)..]
@@ -186,12 +195,15 @@ class Prefs():
             v['matchRe'] = re.compile(app.regex.joinReList(markers))
             v['markers'] = markers
             v['matchGrammars'] = matchGrammars
-            newGrammarIndexLimit = 2 + len(v.get('contains', []))
-            errorIndexLimit = newGrammarIndexLimit + len(v.get('errors', []))
+            containsGrammarIndexLimit = 2 + len(v.get('contains', []))
+            nextGrammarIndexLimit = containsGrammarIndexLimit + len(
+                v.get('next', []))
+            errorIndexLimit = nextGrammarIndexLimit + len(v.get('errors', []))
             keywordIndexLimit = errorIndexLimit + len(v.get('keywords', []))
             typeIndexLimit = keywordIndexLimit + len(v.get('types', []))
             specialIndexLimit = typeIndexLimit + len(v.get('special', []))
-            v['indexLimits'] = (newGrammarIndexLimit, errorIndexLimit,
+            v['indexLimits'] = (containsGrammarIndexLimit,
+                                nextGrammarIndexLimit, errorIndexLimit,
                                 keywordIndexLimit, typeIndexLimit,
                                 specialIndexLimit)
 

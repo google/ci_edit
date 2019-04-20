@@ -493,6 +493,8 @@ prefs = {
         #   "error": None or list of string.
         #   "escaped": None or regex,
         #   "indent": None or string,
+        #   "next": other grammars that may follow this grammar without nesting
+        #       within it. (Contrast with "contains").
         #   "numbers": None or list of string,
         #   "keywords": None or list of string. Matches whole words only (wraps
         #       values in \b).
@@ -617,6 +619,14 @@ prefs = {
                 r"\bpragma\b",
                 r"\bundef\b",
             ],
+            "next": [
+                "c_preprocessor_include",
+            ],
+        },
+        "c_preprocessor_include": {
+            "begin": r"\binclude",
+            "end": r"(?<!\\)\n",
+            #"special": [r'"[^"]*"', r'<[^>]*>'],
             "contains": ["file_path_quoted", "file_path_bracketed"],
         },
         "c_raw_string1": {
