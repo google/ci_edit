@@ -34,9 +34,17 @@ import app.config
 import app.log
 import app.selectable
 
+# Keys to a tuple (parser node).
+# Reference to a prefs grammar dictionary.
 kGrammar = 0
+# The current grammar begins at byte offset |kBegin| in the source data.
 kBegin = 1
+# An index into the parserNodes list to the prior (or parent) grammar.
 kPrior = 2
+# Some characters display wider (or narrower) than others. Visual is a running
+# display offset. E.g. if the first character in some utf-8 data is a double
+# width and 3 bytes long the kBegin = 0, and kVisual = 0; the second character
+# will start at kBegin = 3, kVisual = 2.
 kVisual = 3
 
 
