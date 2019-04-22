@@ -34,7 +34,7 @@ import app.config
 import app.log
 import app.selectable
 
-# Keys to a tuple (parser node).
+# Keys to tuples within |parserNodes|.
 # Reference to a prefs grammar dictionary.
 kGrammar = 0
 # The current grammar begins at byte offset |kBegin| in the source data.
@@ -328,17 +328,28 @@ class Parser:
                         self.rows.append(len(self.parserNodes))
                     priorGrammar = self.parserNodes[-1][kGrammar].get(
                         'matchGrammars', [])[index]
-                    if priorGrammar.get('end_key'):
-                        # A dynamic end tag.
-                        hereKey = re.search(priorGrammar['end_key'],
-                                            subdata[reg[0]:]).groups()[0]
-                        markers = priorGrammar['markers']
-                        markers[1] = priorGrammar['end'].replace(
-                            r'\0', re.escape(hereKey))
-                        priorGrammar['matchRe'] = re.compile(
-                            app.regex.joinReList(markers))
-                    child = (priorGrammar, cursor + reg[0],
-                             len(self.parserNodes) - 1, visual + reg[0])
+                    if priorGrammar['end'] is None:
+                        # Found single regex match (a leaf grammar).
+                        self.parserNodes.append((priorGrammar, cursor + reg[0],
+                                                 len(self.parserNodes) - 1,
+                                                 visual + reg[0]))
+                        # Resume the current grammar.
+                        child = (self.parserNodes[self.parserNodes[-1][kPrior]]
+                                 [kGrammar], cursor + reg[1], self.parserNodes[
+                                     self.parserNodes[-1][kPrior]][kPrior],
+                                 visual + reg[1])
+                    else:
+                        if priorGrammar.get('end_key'):
+                            # A dynamic end tag.
+                            hereKey = re.search(priorGrammar['end_key'],
+                                                subdata[reg[0]:]).groups()[0]
+                            markers = priorGrammar['markers']
+                            markers[1] = priorGrammar['end'].replace(
+                                r'\0', re.escape(hereKey))
+                            priorGrammar['matchRe'] = re.compile(
+                                app.regex.joinReList(markers))
+                        child = (priorGrammar, cursor + reg[0],
+                                 len(self.parserNodes) - 1, visual + reg[0])
                     cursor += reg[1]
                     visual += reg[1]
                 elif index < nextGrammarIndexLimit:
