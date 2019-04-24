@@ -318,17 +318,26 @@ class Parser:
                 self.rows.append(len(self.parserNodes))
             elif index == len(foundGroups) - 2:
                 # Found double wide character.
-                self.parserNodes.append(
-                    (appPrefs.grammars['text'], cursor + reg[0],
-                     len(self.parserNodes) - 1, visual + reg[0]))
-                # Resume the current grammar.
+                topNode = self.parserNodes[-1]
+                regBegin, regEnd = reg
+                # First, add any preceding single wide characters.
+                if regBegin > 0:
+                    self.parserNodes.append(
+                        (topNode[kGrammar], cursor,
+                         topNode[kPrior], visual))
+                    cursor += regBegin
+                    visual += regBegin
+                    # Remove the regular text from reg values.
+                    regEnd -= regBegin
+                    regBegin = 0
+                # Resume current grammar; store the double wide characters.
                 child = (
-                    self.parserNodes[self.parserNodes[-1][kPrior]][kGrammar],
-                    cursor + reg[1],
-                    self.parserNodes[self.parserNodes[-1][kPrior]][kPrior],
-                    visual + reg[1] * 2)
-                cursor += reg[1]
-                visual += reg[1] * 2
+                    topNode[kGrammar],
+                    cursor,
+                    topNode[kPrior],
+                    visual)
+                cursor += regEnd
+                visual += regEnd * 2
             elif index == 1:
                 # Found end of current grammar section (an 'end').
                 child = (
