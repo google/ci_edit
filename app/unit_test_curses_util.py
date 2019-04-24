@@ -175,16 +175,16 @@ class CursesUtilTestCases(unittest.TestCase):
         self.assertEqual(u"test", app.curses_util.renderedSubStr(u"test", 0, 8))
 
     def test_rendered_width(self):
-        self.assertEqual(0, app.curses_util.renderedWidth(u""))
-        self.assertEqual(4, app.curses_util.renderedWidth(u"test"))
+        self.assertEqual(0, app.curses_util.columnWidth(u""))
+        self.assertEqual(4, app.curses_util.columnWidth(u"test"))
 
-        self.assertEqual(2, app.curses_util.renderedWidth(u"こ"))
-        self.assertEqual(4, app.curses_util.renderedWidth(u"こん"))
-        self.assertEqual(6, app.curses_util.renderedWidth(u"こんに"))
-        self.assertEqual(10, app.curses_util.renderedWidth(u"こんにちは"))
+        self.assertEqual(2, app.curses_util.columnWidth(u"こ"))
+        self.assertEqual(4, app.curses_util.columnWidth(u"こん"))
+        self.assertEqual(6, app.curses_util.columnWidth(u"こんに"))
+        self.assertEqual(10, app.curses_util.columnWidth(u"こんにちは"))
 
-        self.assertEqual(3, app.curses_util.renderedWidth(u"aこ"))
-        self.assertEqual(5, app.curses_util.renderedWidth(u"aこん"))
-        self.assertEqual(3, app.curses_util.renderedWidth(u"こc"))
-        self.assertEqual(4, app.curses_util.renderedWidth(u"aこc"))
-        self.assertEqual(7, app.curses_util.renderedWidth(u"aこbんc"))
+        self.assertEqual(3, app.curses_util.columnWidth(u"aこ"))
+        self.assertEqual(5, app.curses_util.columnWidth(u"aこん"))
+        self.assertEqual(3, app.curses_util.columnWidth(u"こc"))
+        self.assertEqual(4, app.curses_util.columnWidth(u"aこc"))
+        self.assertEqual(7, app.curses_util.columnWidth(u"aこbんc"))

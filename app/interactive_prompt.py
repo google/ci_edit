@@ -27,7 +27,6 @@ import re
 import subprocess
 
 import app.controller
-import app.string
 
 
 def functionTestEq(a, b):
@@ -323,5 +322,5 @@ class InteractivePrompt(app.controller.Controller):
         width = 80 if len(tokens) == 1 else int(tokens[1])
         indent = len(lines[0]) - len(lines[0].lstrip())
         width -= indent
-        lines = app.string.wrapLines(lines, u" " * indent, width)
+        lines = app.curses_util.wrapLines(lines, u" " * indent, width)
         return lines, u'Changed %d lines' % (len(lines),)
