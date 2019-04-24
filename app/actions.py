@@ -477,8 +477,13 @@ class Actions(app.mutator.Mutator):
                     0, self.view.scrollCol - self.view.cols // 4)
 
     def cursorMoveLeft(self):
-        if self.penCol > 0:
-            self.cursorMove(0, -1)
+        colWidth = 1
+        line, lineColWidth = self.parser.rowTextAndWidth(self.penRow)
+        if lineColWidth > 0:
+            index = app.curses_util.columnToIndex(self.penCol - 1, line)
+            colWidth = app.curses_util.columnWidth(line[index])
+        if self.penCol - colWidth >= 0:
+            self.cursorMove(0, -colWidth)
         elif self.penRow > 0:
             self.cursorMove(-1, len(self.lines[self.penRow - 1]))
         else:
@@ -487,10 +492,15 @@ class Actions(app.mutator.Mutator):
     def cursorMoveRight(self):
         if not self.lines:
             return
-        if self.penCol < len(self.lines[self.penRow]):
-            self.cursorMove(0, 1)
+        colWidth = 1
+        line, lineColWidth = self.parser.rowTextAndWidth(self.penRow)
+        if lineColWidth > 0:
+            index = app.curses_util.columnToIndex(self.penCol, line)
+            colWidth = app.curses_util.columnWidth(line[index])
+        if self.penCol + colWidth <= lineColWidth:
+            self.cursorMove(0, colWidth)
         elif self.penRow + 1 < len(self.lines):
-            self.cursorMove(1, -len(self.lines[self.penRow]))
+            self.cursorMove(1, -self.penCol)
         else:
             self.setMessage(u'Bottom of file')
 

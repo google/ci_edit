@@ -182,6 +182,9 @@ class TextIndentTestCases(unittest.TestCase):
             def grammarAt(self, row, col):
                 return {'indent': '  '}
 
+            def rowTextAndWidth(self, row):
+                return (u"hello", len(u"hello"))
+
         self.prg.prefs.editor['autoInsertClosingCharacter'] = False
         tb = self.textBuffer
         insert = self.textBuffer.insertPrintableWithPairing
