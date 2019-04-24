@@ -211,6 +211,14 @@ class Parser:
         return len(self.rows)
 
     def rowText(self, row):
+        """Get the text for |row|.
+
+        Args:
+            row (int): row is zero based.
+
+        Returns:
+            document text (unicode)
+        """
         if app.config.strict_debug:
             assert isinstance(row, int)
             assert isinstance(self.data, unicode)
@@ -224,6 +232,19 @@ class Parser:
         return self.data[begin:end]
 
     def rowTextAndWidth(self, row):
+        """Get the character data and the visual/display column width of those
+        characters.
+
+        If the text is all ASCII then len(text) will equal the column width. If
+        there are double wide characters (e.g. Chinese or some emoji) the column
+        width may be larger than len(text).
+
+        Args:
+            row (int): the row index is zero based (so it's line number - 1).
+
+        Returns:
+            (text, columnWidth) (tuple)
+        """
         begin = self.parserNodes[self.rows[row]][kBegin]
         visual = self.parserNodes[self.rows[row]][kVisual]
         if row + 1 < len(self.rows):
@@ -241,6 +262,11 @@ class Parser:
         return self.data[begin:end], visualEnd - visual
 
     def __buildGrammarList(self, bgThread, appPrefs):
+        """The guts of the parser. This is where the heavy lifting is done.
+
+        This code can be interrupted (by |bgThread|) and resumed (by calling it
+        again).
+        """
         # An arbitrary limit to avoid run-away looping.
         leash = 50000
         topNode = self.parserNodes[-1]

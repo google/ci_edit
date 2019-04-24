@@ -231,28 +231,28 @@ def cursesKeyName(keyCode):
     return None
 
 
-def columnToIndex(offset, string):
-    """If the visual cursor is on |offset|, which index of the string is the
+def columnToIndex(column, string):
+    """If the visual cursor is on |column|, which index of the string is the
     cursor on?"""
     if app.config.strict_debug:
-        assert isinstance(offset, int)
+        assert isinstance(column, int)
         assert isinstance(string, unicode)
     indexLimit = len(string) - 1
     index = 0
     for i in string:
         if i > MIN_DOUBLE_WIDE_CHARACTER:
-            offset -= 2
+            column -= 2
         else:
-            offset -= 1
-        if offset < 0 or index >= indexLimit:
+            column -= 1
+        if column < 0 or index >= indexLimit:
             break
         index += 1
     return index
 
 
 def fitToRenderedWidth(width, string):
-    """With |width| character cells available, how much of |string| can I
-    render?
+    """With |width| character cells (columns) available, how much of |string|
+    can I render?
     """
     if app.config.strict_debug:
         assert isinstance(width, int)
