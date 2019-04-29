@@ -173,19 +173,23 @@ class Parser:
                 self.parserNodes = self.parserNodes[:self.rows[beginRow]]
                 self.rows = self.rows[:beginRow]
         else:
-            # First time parse. Do a fast parse of the whole file.
+            # First time parse. Do a parse of the whole file.
             self.parserNodes = [(grammar, 0, None, 0)]
             self.rows = [0]
         if self.endRow > len(self.rows):
             self.__buildGrammarList(bgThread, appPrefs)
         self.fullyParsedToLine = len(self.rows)
         self.__fastLineParse(grammar)
+        #self._checkLines(data)
         #startTime = time.time()
         if app.log.enabledChannels.get('parser', False):
             self.debugLog(app.log.parser, data)
         #app.log.startup('parsing took', time.time() - startTime)
 
     def __fastLineParse(self, grammar):
+        """If there's not enough time to thoroughly parse the file, identify the
+        lines so that the document can still be edited.
+        """
         data = self.data
         index = self.parserNodes[self.rows[-1]][kBegin]
         visual = self.parserNodes[self.rows[-1]][kVisual]
@@ -201,6 +205,7 @@ class Parser:
                 # New line not found.
                 break
             index += 1
+            visual += 1
             self.rows.append(len(self.parserNodes))
             self.parserNodes.append((grammar, index, None, visual))
         if self.parserNodes[-1][kBegin] != sys.maxsize:
@@ -245,6 +250,8 @@ class Parser:
         Returns:
             (text, columnWidth) (tuple)
         """
+        if app.config.strict_debug:
+            assert isinstance(row, int)
         begin = self.parserNodes[self.rows[row]][kBegin]
         visual = self.parserNodes[self.rows[row]][kVisual]
         if row + 1 < len(self.rows):
@@ -322,20 +329,15 @@ class Parser:
                 regBegin, regEnd = reg
                 # First, add any preceding single wide characters.
                 if regBegin > 0:
-                    self.parserNodes.append(
-                        (topNode[kGrammar], cursor,
-                         topNode[kPrior], visual))
+                    self.parserNodes.append((topNode[kGrammar], cursor,
+                                             topNode[kPrior], visual))
                     cursor += regBegin
                     visual += regBegin
                     # Remove the regular text from reg values.
                     regEnd -= regBegin
                     regBegin = 0
                 # Resume current grammar; store the double wide characters.
-                child = (
-                    topNode[kGrammar],
-                    cursor,
-                    topNode[kPrior],
-                    visual)
+                child = (topNode[kGrammar], cursor, topNode[kPrior], visual)
                 cursor += regEnd
                 visual += regEnd * 2
             elif index == 1:
@@ -480,3 +482,35 @@ class Parser:
                 out('  ParserNode %26s prior %4s, b%4d, v%4d, %s' % (
                     node[kGrammar].get('name', 'None'), node[kPrior], nodeBegin,
                     node[kVisual], repr(data[nodeBegin:nodeBegin + 15])[1:-1]))
+
+    def _checkLines(self, data):
+        """Debug test that all the lines were recognized by the parser. This is
+        very slow, so it's normally disabled.
+        """
+        # Check that all the lines got identified.
+        lines = data.split(u"\n")
+        #app.log.parser(lines)
+        assert len(lines) == self.rowCount()
+        for i, line in enumerate(lines):
+            parsedLine, columnWidth = self.rowTextAndWidth(i)
+            assert line == parsedLine, "\nexpected:{}\n  actual:{}".format(
+                repr(line), repr(parsedLine))
+            parsedLine = self.rowText(i)
+            assert line == parsedLine, "\nexpected:{}\n  actual:{}".format(
+                line, parsedLine)
+
+            piecedLine = u""
+            k = 0
+            grammarIndex = 0
+            while True:
+                node, preceding, remaining = self.grammarAtIndex(
+                    i, k, grammarIndex)
+                grammarIndex += 1
+                piecedLine += line[k - preceding:k + remaining]
+                app.log.parser(i, preceding, remaining, i, k, piecedLine)
+                if remaining == 0 or remaining == sys.maxsize:
+                    assert piecedLine == line, (
+                        "\nexpected:{}\n  actual:{}".format(
+                            repr(line), repr(piecedLine)))
+                    break
+                k += remaining
