@@ -191,23 +191,23 @@ class Parser:
         lines so that the document can still be edited.
         """
         data = self.data
-        index = self.parserNodes[self.rows[-1]][kBegin]
+        offset = self.parserNodes[self.rows[-1]][kBegin]
         visual = self.parserNodes[self.rows[-1]][kVisual]
         limit = len(data)
         while True:
-            while index < limit and data[index] != '\n':
-                if data[index] >= app.curses_util.MIN_DOUBLE_WIDE_CHARACTER:
+            while offset < limit and data[offset] != '\n':
+                if data[offset] >= app.curses_util.MIN_DOUBLE_WIDE_CHARACTER:
                     visual += 2
                 else:
                     visual += 1
-                index += 1
-            if index >= limit:
+                offset += 1
+            if offset >= limit:
                 # New line not found.
                 break
-            index += 1
+            offset += 1
             visual += 1
             self.rows.append(len(self.parserNodes))
-            self.parserNodes.append((grammar, index, None, visual))
+            self.parserNodes.append((grammar, offset, None, visual))
         if self.parserNodes[-1][kBegin] != sys.maxsize:
             # End node, points just past the end of the document.
             self.parserNodes.append((grammar, sys.maxsize, None, visual))
