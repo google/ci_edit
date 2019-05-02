@@ -182,7 +182,7 @@ class Parser:
             self.__buildGrammarList(bgThread, appPrefs)
         self.fullyParsedToLine = len(self.rows)
         self.__fastLineParse(grammar)
-        #self._checkLines(data)
+        #self.debug_checkLines(app.log.parser, data)
         #startTime = time.time()
         if app.log.enabledChannels.get('parser', False):
             self.debugLog(app.log.parser, data)
@@ -485,13 +485,13 @@ class Parser:
                     node[kGrammar].get('name', 'None'), node[kPrior], nodeBegin,
                     node[kVisual], repr(data[nodeBegin:nodeBegin + 15])[1:-1]))
 
-    def _checkLines(self, data):
+    def debug_checkLines(self, out, data):
         """Debug test that all the lines were recognized by the parser. This is
         very slow, so it's normally disabled.
         """
         # Check that all the lines got identified.
         lines = data.split(u"\n")
-        #app.log.parser(lines)
+        out(lines)
         assert len(lines) == self.rowCount()
         for i, line in enumerate(lines):
             parsedLine, columnWidth = self.rowTextAndWidth(i)
@@ -501,6 +501,7 @@ class Parser:
             assert line == parsedLine, "\nexpected:{}\n  actual:{}".format(
                 line, parsedLine)
 
+            out("----------- ", line)
             piecedLine = u""
             k = 0
             grammarIndex = 0
@@ -509,7 +510,7 @@ class Parser:
                     i, k, grammarIndex)
                 grammarIndex += 1
                 piecedLine += line[k - preceding:k + remaining]
-                app.log.parser(i, preceding, remaining, i, k, piecedLine)
+                out(i, preceding, remaining, i, k, piecedLine)
                 if remaining == 0 or remaining == sys.maxsize:
                     assert piecedLine == line, (
                         "\nexpected:{}\n  actual:{}".format(
