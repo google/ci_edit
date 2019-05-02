@@ -145,7 +145,7 @@ class TextBuffer(app.actions.Actions):
                     grammarIndex = self.parser.grammarIndexFromRowCol(
                         startRow + i, k)
                 while k < endCol:
-                    node, preceding, remaining = self.parser.grammarAtIndex(
+                    (node, preceding, remaining, eol) = self.parser.grammarAtIndex(
                         startRow + i, k, grammarIndex)
                     grammarIndex += 1
                     if remaining == 0:

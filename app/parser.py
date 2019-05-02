@@ -120,17 +120,18 @@ class Parser:
         just for one-off needs.
         """
         grammarIndex = self.grammarIndexFromRowCol(row, col)
-        node, _, _ = self.grammarAtIndex(row, col, grammarIndex)
+        node, _, _, _ = self.grammarAtIndex(row, col, grammarIndex)
         return node.grammar
 
     def grammarAtIndex(self, row, col, index):
         """Call grammarIndexFromRowCol() to get the index parameter.
 
         Returns:
-            (node, preceding, remaining). |proceeding| and |remaining| are
+            (node, preceding, remaining, eol). |proceeding| and |remaining| are
             relative to the |col| parameter.
         """
-        finalResult = (self.emptyNode, col, sys.maxsize)
+        eol = True
+        finalResult = (self.emptyNode, col, sys.maxsize, eol)
         if row >= len(self.rows):
             return finalResult
         rowIndex = self.rows[row]
@@ -144,7 +145,8 @@ class Parser:
         if remaining < 0:
             return finalResult
         node = self.parserNodes[rowIndex + index]
-        return ParserNode(*node), offset - node[kVisual], remaining
+        eol = False
+        return ParserNode(*node), offset - node[kVisual], remaining, eol
 
     def parse(self, bgThread, appPrefs, data, grammar, beginRow, endRow):
         """
@@ -503,7 +505,7 @@ class Parser:
             k = 0
             grammarIndex = 0
             while True:
-                node, preceding, remaining = self.grammarAtIndex(
+                node, preceding, remaining, eol = self.grammarAtIndex(
                     i, k, grammarIndex)
                 grammarIndex += 1
                 piecedLine += line[k - preceding:k + remaining]
