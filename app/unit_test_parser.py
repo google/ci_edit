@@ -43,16 +43,36 @@ class ParserTestCases(unittest.TestCase):
         self.parser = None
 
     def test_parse(self):
-        test = u"""/* first comment */
+        tests = [
+            u"""/* first comment */
 two
 // second comment
 #include "test.h"
 void blah();
-"""
-        self.prefs = app.prefs.Prefs()
-        self.parser.parse(None, self.prefs, test, self.prefs.grammars[u'cpp'],
-                          0, 99999)
-        #self.assertEqual(selectable.selection(), (0, 0, 0, 0))
+// No end of line""",
+            u"""/* first comment */
+two
+// second comment
+#include "test.h"
+void blah();
+""",
+        ]
+        for test in tests:
+            #self.assertEqual(test.splitlines(), test.split(u"\n"))
+            lines = test.split(u"\n")
+            self.prefs = app.prefs.Prefs()
+            self.parser.parse(None, self.prefs, test,
+                              self.prefs.grammars[u'cpp'], 0, 99999)
+            #self.parser.debugLog(print, test)
+            self.assertEqual(len(lines), self.parser.rowCount())
+            for i, line in enumerate(lines):
+                self.assertEqual(self.parser.rowText(i), line)
+                self.assertEqual(
+                    self.parser.rowTextAndWidth(i), (line, len(line)))
+            #for node in self.parser.parserNodes:
+            #    self.assertEqual(node[app.parser.kBegin],
+            #                     node[app.parser.kVisual])
+            #self.parser.debug_checkLines(print, test)
 
     def test_parse_cpp_literal(self):
         test = u"""/* first comment */
