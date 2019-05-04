@@ -71,9 +71,8 @@ void blah();
                     self.parser.rowTextAndWidth(i), (line, len(line)))
             for node in self.parser.parserNodes:
                 # These tests have no double wide characters.
-                if node[app.parser.kBegin] != sys.maxsize:
-                    self.assertEqual(node[app.parser.kBegin],
-                                     node[app.parser.kVisual])
+                self.assertEqual(node[app.parser.kBegin],
+                                 node[app.parser.kVisual])
             self.parser.debug_checkLines(None, test)
 
     def test_parse_cpp_literal(self):

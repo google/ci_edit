@@ -205,15 +205,13 @@ class Parser:
                     visual += 1
                 offset += 1
             if offset >= limit:
-                # New line not found.
+                # Add a terminating (end) node.
+                self.parserNodes.append((grammar, len(data), None, visual))
                 break
             offset += 1
             visual += 1
             self.rows.append(len(self.parserNodes))
             self.parserNodes.append((grammar, offset, None, visual))
-        if self.parserNodes[-1][kBegin] != sys.maxsize:
-            # End node, points just past the end of the document.
-            self.parserNodes.append((grammar, sys.maxsize, None, visual))
 
     def rowCount(self):
         return len(self.rows)
@@ -231,12 +229,11 @@ class Parser:
             assert isinstance(row, int)
             assert isinstance(self.data, unicode)
         begin = self.parserNodes[self.rows[row]][kBegin]
-        if row + 1 < len(self.rows):
-            end = self.parserNodes[self.rows[row + 1]][kBegin]
-            if len(self.data) and self.data[end - 1] == '\n':
-                end -= 1
-        else:
-            end = sys.maxsize
+        if row + 1 >= len(self.rows):
+            return self.data[begin:]
+        end = self.parserNodes[self.rows[row + 1]][kBegin]
+        if len(self.data) and self.data[end - 1] == '\n':
+            end -= 1
         return self.data[begin:end]
 
     def rowTextAndWidth(self, row):
@@ -475,7 +472,7 @@ class Parser:
             if i + 1 < len(self.rows):
                 end = self.rows[i + 1]
             else:
-                end = sys.maxsize
+                end = len(self.parserNodes)
             out('row', i, '(line', str(i + 1) + ') index', start, 'to', end)
             for node in self.parserNodes[start:end]:
                 if node is None:
