@@ -111,6 +111,7 @@ class Parser:
             elif offset < gl[index][kVisual]:
                 high = index
             else:
+                #assert index < len(gl)  # Never return index to self.endNode.
                 return index
 
     def grammarAt(self, row, col):
@@ -131,7 +132,7 @@ class Parser:
             relative to the |col| parameter.
         """
         eol = True
-        finalResult = (self.emptyNode, col, sys.maxsize, eol)
+        finalResult = (self.emptyNode, 0, 0, eol)
         if row >= len(self.rows):
             return finalResult
         rowIndex = self.rows[row]
@@ -491,7 +492,8 @@ class Parser:
         """
         # Check that all the lines got identified.
         lines = data.split(u"\n")
-        out(lines)
+        if out is not None:
+            out(lines)
         assert len(lines) == self.rowCount()
         for i, line in enumerate(lines):
             parsedLine, columnWidth = self.rowTextAndWidth(i)
@@ -501,7 +503,8 @@ class Parser:
             assert line == parsedLine, "\nexpected:{}\n  actual:{}".format(
                 line, parsedLine)
 
-            out("----------- ", line)
+            if out is not None:
+                out("----------- ", line)
             piecedLine = u""
             k = 0
             grammarIndex = 0
@@ -510,8 +513,9 @@ class Parser:
                     i, k, grammarIndex)
                 grammarIndex += 1
                 piecedLine += line[k - preceding:k + remaining]
-                out(i, preceding, remaining, i, k, piecedLine)
-                if remaining == 0 or remaining == sys.maxsize:
+                if out is not None:
+                    out(i, preceding, remaining, i, k, piecedLine)
+                if eol:
                     assert piecedLine == line, (
                         "\nexpected:{}\n  actual:{}".format(
                             repr(line), repr(piecedLine)))

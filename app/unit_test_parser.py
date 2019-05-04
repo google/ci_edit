@@ -69,10 +69,12 @@ void blah();
                 self.assertEqual(self.parser.rowText(i), line)
                 self.assertEqual(
                     self.parser.rowTextAndWidth(i), (line, len(line)))
-            #for node in self.parser.parserNodes:
-            #    self.assertEqual(node[app.parser.kBegin],
-            #                     node[app.parser.kVisual])
-            #self.parser.debug_checkLines(print, test)
+            for node in self.parser.parserNodes:
+                # These tests have no double wide characters.
+                if node[app.parser.kBegin] != sys.maxsize:
+                    self.assertEqual(node[app.parser.kBegin],
+                                     node[app.parser.kVisual])
+            self.parser.debug_checkLines(None, test)
 
     def test_parse_cpp_literal(self):
         test = u"""/* first comment */
