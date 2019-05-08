@@ -131,17 +131,15 @@ class Parser:
             (node, preceding, remaining, eol). |proceeding| and |remaining| are
             relative to the |col| parameter.
         """
+        if app.config.strict_debug:
+            assert row < len(self.rows), row
         eol = True
         finalResult = (self.emptyNode, 0, 0, eol)
-        if row >= len(self.rows):
-            return finalResult
         rowIndex = self.rows[row]
-        if rowIndex + index >= len(self.parserNodes):
+        if rowIndex + index + 1 >= len(self.parserNodes):
             return finalResult
+        nextOffset = self.parserNodes[rowIndex + index + 1][kVisual]
         offset = self.parserNodes[rowIndex][kVisual] + col
-        nextOffset = sys.maxsize
-        if rowIndex + index + 1 < len(self.parserNodes):
-            nextOffset = self.parserNodes[rowIndex + index + 1][kVisual]
         remaining = nextOffset - offset
         if remaining < 0:
             return finalResult
