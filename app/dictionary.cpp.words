@@ -27,6 +27,7 @@ cerr
 cin
 closedir
 cmath
+conio
 countof
 cout
 cplusplus
@@ -53,6 +54,7 @@ etimeout
 ewouldblock
 extern
 fileno
+fmt
 fopen
 fp
 fprintf
@@ -60,6 +62,8 @@ freeifaddrs
 fstat
 fstream
 ftruncate
+getc
+getchar
 getenv
 getfl
 getifaddrs
@@ -69,8 +73,11 @@ gettimeofday
 gflags
 grpc
 htons
+icrnl
 ifaddrs
+iflag
 ifstream
+inpck
 intptr
 intrinsics
 inttypes
@@ -85,8 +92,10 @@ isatty
 istream
 istreambuf
 istringstream
+istrip
 itoa
 iwusr
+ixon
 lseek
 lu
 malloc
@@ -95,12 +104,15 @@ memcpy
 memset
 mkdir
 multimap
+ncurses
 nonblock
 noreturn
 nowait
 npos
+oflag
 opendir
 openmode
+opost
 ostream
 ostringstream
 pollerr
@@ -113,6 +125,8 @@ pollrdhup
 ppoll
 printf
 pton
+putc
+putchar
 rbegin
 rcvtimeo
 rdbuf
@@ -138,6 +152,7 @@ ss
 ssize
 sstream
 std
+stdarg
 stdbool
 stddef
 stdint
@@ -155,11 +170,16 @@ strlen
 strncmp
 strncpy
 strpbrk
+strrchr
 strstr
 strtol
 strtoll
 strtoul
 strtoull
+tcgetattr
+tcsaflush
+tcsetattr
+termios
 timeradd
 timerclear
 timercmp

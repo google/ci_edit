@@ -120,6 +120,8 @@ del
 dep
 deps
 deque
+dequeued
+dequeuing
 dereferenced
 dereferences
 dereferencing
@@ -177,6 +179,7 @@ fds
 ff
 fi
 fifo
+fifos
 filename
 filenames
 filesystem
@@ -215,6 +218,7 @@ hostnames
 hpp
 htm
 https
+hw
 hxx
 ia
 idr
@@ -361,10 +365,12 @@ rastered
 rastering
 rb
 readme
+realloc
 rect
 rects
 recurses
 recursing
+reenable
 refptr
 regex
 regexes
@@ -379,6 +385,9 @@ repo
 repos
 req
 reqs
+requeue
+requeued
+requeuing
 rhs
 ro
 rpc
@@ -405,6 +414,7 @@ sizeof
 skia
 smp
 solaris
+sp
 sql
 src
 srcs
