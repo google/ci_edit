@@ -56,6 +56,23 @@ two
 #include "test.h"
 void blah();
 """,
+            u"""/* test includes */
+// The malformed include on the next line is a regression test.
+#include <test.h"
+#include "test.h"
+#include <test.h
+#include "test.h"
+
+#include <te"st.h>
+#include "test>.h"
+
+#include "test.h>
+#include <test.h>
+#include "test.h
+#include <test.h>
+void blah();
+
+""",
         ]
         for test in tests:
             #self.assertEqual(test.splitlines(), test.split(u"\n"))

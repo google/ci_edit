@@ -679,14 +679,14 @@ prefs = {
             "single_line": True,
         },
         "c_path_bracketed_file": {
-            # Paths in includes don"t allow escapes.
-            "begin": "<[^>]*>",
+            # Paths in includes don't allow escapes.
+            "begin": """<[^>\\n]*>""",
             "end": None,  # Leaf grammar.
             "link_type": "c<",  # C system include file.
         },
         "c_path_quoted_file": {
-            # Paths in includes don"t allow escapes.
-            "begin": "\"[^\"]*\"",
+            # Paths in includes don't allow escapes.
+            "begin": '''"[^"\\n]*"''',
             "end": None,  # Leaf grammar.
             "link_type": "c\"",  # C non-system include file.
         },
