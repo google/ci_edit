@@ -118,6 +118,7 @@ class InteractivePrompt(app.controller.Controller):
             u'sort': self.sortSelectedLines,
             u'sub': self.substituteText,
             u'upper': self.upperSelectedLines,
+            u'wrap': self.wrapSelectedLines,
         }
         self.subExecute = {
             u'!': self.shellExecute,
@@ -314,3 +315,12 @@ class InteractivePrompt(app.controller.Controller):
     def unknownCommand(self, cmdLine, view):
         self.view.host.textBuffer.setMessage(u'Unknown command')
         return {}, u'Unknown command %s' % (cmdLine,)
+
+    def wrapSelectedLines(self, cmdLine, lines):
+        tokens = cmdLine.split()
+        app.log.info("tokens", tokens)
+        width = 80 if len(tokens) == 1 else int(tokens[1])
+        indent = len(lines[0]) - len(lines[0].lstrip())
+        width -= indent
+        lines = app.curses_util.wrapLines(lines, u" " * indent, width)
+        return lines, u'Changed %d lines' % (len(lines),)

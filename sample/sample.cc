@@ -17,6 +17,10 @@
 #include "project_file.h"
 #include <system_file.h>
 
+// This define used to break (the < tripped up the parser).
+#define blue red // 1 < 2
+// This should be a comment
+
 "hello"
 #ifdef SOME_FLAG
 "%s and\n %-3i or\r %u with %zu float %3.12fend"

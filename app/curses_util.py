@@ -231,28 +231,28 @@ def cursesKeyName(keyCode):
     return None
 
 
-def columnToIndex(offset, string):
-    """If the visual cursor is on |offset|, which index of the string is the
+def columnToIndex(column, string):
+    """If the visual cursor is on |column|, which index of the string is the
     cursor on?"""
     if app.config.strict_debug:
-        assert isinstance(offset, int)
+        assert isinstance(column, int)
         assert isinstance(string, unicode)
     indexLimit = len(string) - 1
     index = 0
     for i in string:
         if i > MIN_DOUBLE_WIDE_CHARACTER:
-            offset -= 2
+            column -= 2
         else:
-            offset -= 1
-        if offset < 0 or index >= indexLimit:
+            column -= 1
+        if column < 0 or index >= indexLimit:
             break
         index += 1
     return index
 
 
 def fitToRenderedWidth(width, string):
-    """With |width| character cells available, how much of |string| can I
-    render?
+    """With |width| character cells (columns) available, how much of |string|
+    can I render?
     """
     if app.config.strict_debug:
         assert isinstance(width, int)
@@ -386,8 +386,7 @@ def renderedSubStr(string, beginCol, endCol):
         i += 1
     return string[beginIndex:endIndex]
 
-
-def renderedWidth(string):
+def columnWidth(string):
     """When rendering |string| how many character cells will be used? For ASCII
     characters this will equal len(string). For many Chinese characters and
     emoji the value will be greater than len(string), since many of them use two
@@ -402,6 +401,42 @@ def renderedWidth(string):
         else:
             width += 1
     return width
+
+def wrapLines(lines, indent, width):
+    """Word wrap lines of text.
+
+    Args:
+      lines (list of unicode): input text.
+      indent (unicode): will be added as a prefix to each line of output.
+      width (int): is the column limit for the strings. Each double-wide
+        character counts as two columns.
+
+    Returns:
+      List of strings
+    """
+    if app.config.strict_debug:
+        assert isinstance(lines, tuple), repr(lines)
+        assert len(lines) == 0 or isinstance(lines[0], unicode)
+        assert isinstance(indent, unicode), repr(path)
+        assert isinstance(width, int), repr(int)
+    # There is a textwrap library in Python, but I was having trouble getting it
+    # to do exactly what I desired. It may be useful to revisit textwrap later.
+    words = u" ".join(lines).split()
+    output = [indent]
+    indentLen = columnWidth(indent)
+    index = 0
+    while index < len(words):
+        lineLen = columnWidth(output[-1])
+        word = words[index]
+        wordLen = columnWidth(word)
+        if lineLen == indentLen and lineLen + wordLen < width:
+            output[-1] += word
+        elif lineLen + wordLen + 1 < width:
+            output[-1] += u" " + word
+        else:
+            output.append(indent + word)
+        index += 1
+    return output
 
 
 # This is built-in in Python 3.

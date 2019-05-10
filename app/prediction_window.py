@@ -108,10 +108,13 @@ class PredictionList(app.window.Window):
                 else:
                     i += 1
         # Sort the list
+        sortByPrediction = appPrefs.editor[u'predictionSortAscendingByPrediction']
         sortByType = appPrefs.editor[u'predictionSortAscendingByType']
         sortByName = appPrefs.editor[u'predictionSortAscendingByName']
         sortByStatus = appPrefs.editor[u'predictionSortAscendingByStatus']
-        if sortByType is not None:
+        if sortByPrediction is not None:
+            items.sort(reverse=not sortByPrediction, key=lambda x: x[4])
+        elif sortByType is not None:
             items.sort(reverse=not sortByType, key=lambda x: x[3])
         elif sortByStatus is not None:
             items.sort(reverse=not sortByStatus, key=lambda x: x[2])

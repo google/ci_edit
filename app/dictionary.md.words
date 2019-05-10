@@ -1,4 +1,4 @@
-# Copyright 2017 Google Inc.
+# Copyright 2019 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,48 +12,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Abbreviations
-apr
-aug
-bidi
-blvd
-concat
-config
-crypto
-dbg
-dec
-dev
-expr
-feb
-fri
-fs
-idl
-ipc
-isp
-iter
-jan
-jr
-jul
-lang
-mem
-mon
-mrs
-nd
-nov
-oct
-ok
-perf
-rd
-rfc
-sep
-sept
-st
-thu
-topo
-tos
-tue
-tv
-ux
-ver
-vm
-yaml
+# Non-words that legitimately appear in .md (markdown) files.
+mdash

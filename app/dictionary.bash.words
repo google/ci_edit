@@ -19,6 +19,7 @@ cd
 chmod
 chown
 cp
+dlog
 env
 grep
 ls
@@ -32,5 +33,6 @@ sed
 symlink
 ulimit
 uname
+vlog
 wc
 xserver

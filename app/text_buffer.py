@@ -145,17 +145,17 @@ class TextBuffer(app.actions.Actions):
                     grammarIndex = self.parser.grammarIndexFromRowCol(
                         startRow + i, k)
                 while k < endCol:
-                    node, preceding, remaining = self.parser.grammarAtIndex(
+                    (node, preceding, remaining, eol) = self.parser.grammarAtIndex(
                         startRow + i, k, grammarIndex)
                     grammarIndex += 1
-                    if remaining == 0:
+                    if remaining == 0 and not eol:
                         continue
                     remaining = min(renderedWidth - k, remaining)
                     length = min(endCol - k, remaining)
                     color = colorPrefs.get(
                         node.grammar.get(u'colorIndex', defaultColor),
                         colorDelta)
-                    if length <= 0:
+                    if eol or length <= 0:
                         window.addStr(top + i, left + k - startCol,
                                       u' ' * (endCol - k), color)
                         break

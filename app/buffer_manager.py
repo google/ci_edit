@@ -80,7 +80,7 @@ class BufferManager:
         app.log.info()
         self.debugLog()
         if len(self.buffers):
-            return self.buffers[0]
+            return self.buffers[-1]
         return None
 
     def getValidTextBuffer(self, textBuffer):

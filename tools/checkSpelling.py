@@ -16,6 +16,7 @@
 
 from __future__ import print_function
 
+import glob
 import io
 import os
 import re
@@ -33,21 +34,42 @@ doValues = False
 root = (len(sys.argv) > 1 and sys.argv[1]) or "."
 filePattern = (len(sys.argv) > 2 and sys.argv[2]) or "*.*"
 
+kReWords = re.compile(r'''(\w+)''')
+# The first group is a hack to allow upper case pluralized, e.g. URLs.
+kReSubwords = re.compile(
+    r'((?:[A-Z]{2,}s\b)|(?:[A-Z][a-z]+)|(?:[A-Z]+(?![a-z]))|(?:[a-z]+))')
+
+
 kReIgnoreDirs = re.compile(r'''/\.git/''')
-kReIgnoreFiles = re.compile(r'''\.pyc$|.pyo$''')
+kReIgnoreFiles = re.compile(
+    r'''\.(pyc|pyo|png|a|jpg|tif|mp3|mp4|cpuperf|dylib|avi|so|plist|raw|webm)$''')
+kReIncludeFiles = re.compile(
+    r'''\.(cc)$''')
 assert kReIgnoreDirs.search('/apple/.git/orange')
 assert kReIgnoreFiles.search('/apple.pyc')
-app.spelling.loadWords(os.path.join(ciEditDir, 'app'))
 
-allUnrecognizedWords = set()
+dictionaryList = glob.glob(os.path.join(ciEditDir, 'app/dictionary.*.words'))
+dictionaryList = [i[15:-6] for i in dictionaryList]
+print(dictionaryList)
+pathPrefs = []
+dictionary = app.spelling.Dictionary(dictionaryList, pathPrefs)
+assert dictionary.isCorrect(u"has", 'cpp')
 
-
-def handleFile(fileName):
-    global allUnrecognizedWords
+def handleFile(fileName, unrecognizedWords):
     # print(fileName, end="")
-    with io.open(fileName, "r") as f:
-        data = f.read()
-        if not data: return set()
+    try:
+        with io.open(fileName, "r") as f:
+            data = f.read()
+            if not data: return
+            for sre in kReSubwords.finditer(data):
+                #print(repr(sre.groups()))
+                word = sre.groups()[0].lower()
+                if not dictionary.isCorrect(word, 'cpp'):
+                    if word not in unrecognizedWords:
+                        print (word, end=",")
+                    unrecognizedWords.add(word)
+    except UnicodeDecodeError:
+        print("Error decoding:", fileName)
 
 
 def walkTree(root):
@@ -58,8 +80,8 @@ def walkTree(root):
         for fileName in filter(lambda x: fnmatch(x, filePattern), fileNames):
             if kReIgnoreFiles.search(fileName):
                 continue
-            unrecognizedWords.update(
-                handleFile(os.path.join(dirPath, fileName)))
+            if kReIncludeFiles.search(fileName):
+                handleFile(os.path.join(dirPath, fileName), unrecognizedWords)
     if unrecognizedWords:
         print('found', fileName)
         print(unrecognizedWords)

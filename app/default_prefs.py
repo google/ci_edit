@@ -92,7 +92,10 @@ color8 = {
     "_pre_selection": 1,
     "bracket": 1,
     "c": 0,
+    "c_path_bracketed_file": 3,
+    "c_path_quoted_file": 3,
     "c_preprocessor": 1,
+    "c_preprocessor_include": 1,
     "c_raw_string1": 3,
     "c_raw_string2": 3,
     "c_string1": 3,
@@ -105,8 +108,6 @@ color8 = {
     "default": 0,
     "doc_block_comment": 3,
     "error": 7,
-    "file_path_bracketed": 3,
-    "file_path_quoted": 3,
     "found_find": 1,
     "highlight": 3,
     "html_block_comment": 2,
@@ -127,6 +128,8 @@ color8 = {
     "outside_document": 7,
     "popup_window": 0,
     "pound_comment": 3,
+    "py_import": 1,
+    "py_import_file": 2,
     "py_raw_string1": 2,
     "py_raw_string2": 2,
     "py_string1": 2,
@@ -166,7 +169,10 @@ color16 = {
     "_pre_selection": stringColor16Index,
     "bracket": 6,
     "c": defaultColor16Index,
+    "c_path_bracketed_file": pathColor16Index,
+    "c_path_quoted_file": pathColor16Index,
     "c_preprocessor": 1,
+    "c_preprocessor_include": specialsColor16Index,
     "c_raw_string1": stringColor16Index,
     "c_raw_string2": stringColor16Index,
     "c_string1": stringColor16Index,
@@ -179,8 +185,6 @@ color16 = {
     "default": defaultColor16Index,
     "doc_block_comment": commentColor16Index,
     "error": 9,
-    "file_path_bracketed": pathColor16Index,
-    "file_path_quoted": pathColor16Index,
     "found_find": foundColor16Index,
     "highlight": 15,
     "html_block_comment": commentColor16Index,
@@ -201,6 +205,8 @@ color16 = {
     "outside_document": outsideOfBufferColor16Index,
     "popup_window": borderColor16Index,
     "pound_comment": commentColor16Index,
+    "py_import": keywordsColor16Index,
+    "py_import_file": stringColor16Index,
     "py_raw_string1": stringColor16Index,
     "py_raw_string2": stringColor16Index,
     "py_string1": stringColor16Index,
@@ -238,7 +244,10 @@ color256 = {
     "_pre_selection": stringColorIndex,
     "bracket": 6,
     "c": defaultColorIndex,
+    "c_path_bracketed_file": pathColorIndex,
+    "c_path_quoted_file": pathColorIndex,
     "c_preprocessor": 1,
+    "c_preprocessor_include": specialsColorIndex,
     "c_raw_string1": stringColorIndex,
     "c_raw_string2": stringColorIndex,
     "c_string1": stringColorIndex,
@@ -251,8 +260,6 @@ color256 = {
     "default": defaultColorIndex,
     "doc_block_comment": commentColorIndex,
     "error": 9,
-    "file_path_bracketed": pathColorIndex,
-    "file_path_quoted": pathColorIndex,
     "found_find": foundColorIndex,
     "highlight": 96,
     "html_block_comment": commentColorIndex,
@@ -273,6 +280,8 @@ color256 = {
     "outside_document": outsideOfBufferColorIndex,
     "popup_window": 117,
     "pound_comment": commentColorIndex,
+    "py_import": keywordsColorIndex,
+    "py_import_file": stringColorIndex,
     "py_raw_string1": stringColorIndex,
     "py_raw_string2": stringColorIndex,
     "py_string1": stringColorIndex,
@@ -372,7 +381,8 @@ prefs = {
         "predictionShowOpenFiles": True,
         "predictionShowAlternateFiles": True,
         "predictionShowRecentFiles": True,
-        "predictionSortAscendingByType": True,
+        "predictionSortAscendingByPrediction": True,
+        "predictionSortAscendingByType": None,
         "predictionSortAscendingByName": None,
         "predictionSortAscendingByStatus": None,
         "saveUndo": True,
@@ -486,12 +496,15 @@ prefs = {
         #   "begin": None or regex,
         #   "continuation": None or string,
         #       Prefixed used when continuing to another line,
-        #   "end": None or regex,
+        #   "end": None or regex; a value of None means that the "begin" regex
+        #       contains the entire pattern (a leaf grammar),
         #   "end_key": None or regex to determine dynamic end tag. For "here
         #       documents" and c++ string literals.
         #   "error": None or list of string.
         #   "escaped": None or regex,
         #   "indent": None or string,
+        #   "next": other grammars that may follow this grammar without nesting
+        #       within it. (Contrast with "contains").
         #   "numbers": None or list of string,
         #   "keywords": None or list of string. Matches whole words only (wraps
         #       values in \b).
@@ -602,7 +615,7 @@ prefs = {
             r"(?<!\\)\n",
             "indent":
             "  ",
-            "disabled_special": [
+            "special": [
                 r"\bdefine\b",
                 r"\bdefined\b",
                 r"\belif\b",
@@ -616,7 +629,14 @@ prefs = {
                 r"\bpragma\b",
                 r"\bundef\b",
             ],
-            "contains": ["file_path_quoted", "file_path_bracketed"],
+            "next": [
+                "c_preprocessor_include",
+            ],
+        },
+        "c_preprocessor_include": {
+            "begin": r"\binclude",
+            "end": r"(?<!\\)\n",
+            "contains": ["c_path_quoted_file", "c_path_bracketed_file"],
         },
         "c_raw_string1": {
             "begin": "[uU]?[rR]'",
@@ -658,17 +678,17 @@ prefs = {
             "special": __special_string_escapes + ["\\\\\""],
             "single_line": True,
         },
-        "file_path_bracketed": {
-            # Paths in includes don"t allow escapes.
-            "begin": "<",
-            "end": ">",
-            "single_line": True,
+        "c_path_bracketed_file": {
+            # Paths in includes don't allow escapes.
+            "begin": """<[^>\\n]*>""",
+            "end": None,  # Leaf grammar.
+            "link_type": "c<",  # C system include file.
         },
-        "file_path_quoted": {
-            # Paths in includes don"t allow escapes.
-            "begin": "\"",
-            "end": "\"",
-            "single_line": True,
+        "c_path_quoted_file": {
+            # Paths in includes don't allow escapes.
+            "begin": '''"[^"\\n]*"''',
+            "end": None,  # Leaf grammar.
+            "link_type": "c\"",  # C non-system include file.
         },
         # Cascading Style Sheet.
         "css": {
@@ -1001,6 +1021,8 @@ prefs = {
                 "c_string1",
                 "c_string2",
                 "pound_comment",
+                "py_from",
+                "py_import",
             ],
         },
         "pound_comment": {
@@ -1013,6 +1035,33 @@ prefs = {
                 r"\bNOTE:",
                 _todo,
             ],
+        },
+        "py_from": {
+            "begin": "from",
+            "end": r"\n",
+            "contains": ["py_import_file"],
+            "next": ["py_import_after_from", "pound_comment"],
+            "spelling": False,
+        },
+        "py_import_after_from": {
+            "begin": "import",
+            "end": None,
+        },
+        "py_import": {
+            "begin": "import",
+            "end": r"\n",
+            "keywords": [
+                "as",
+            ],
+            "contains": ["py_import_file"],
+            "next": ["pound_comment"],
+            "spelling": False,
+        },
+        "py_import_file": {
+            "begin": "[\.\w]+",
+            "end": None,  # Leaf grammar.
+            "link_type": r"pi",  # Python import
+            "spelling": False,
         },
         "py_raw_string1": {
             "begin": "[uU]?[rR]'''",

@@ -2,7 +2,12 @@
 
 unit_tests="$(dirname "$0")/../unit_tests.py"
 
+echo -e "\n\nPython with threads" && \
+python --version && \
 python "$unit_tests" $* && \
+echo -e "\n\nPython3 with threads\n $(python3 --version)" && \
 python3 "$unit_tests" $* && \
+echo -e "\n\nPython single thread\n $(python --version)" && \
 CI_EDIT_SINGLE_THREAD="1" python "$unit_tests" $* && \
+echo -e "\n\nPython3 single thread\n $(python3 --version)" && \
 CI_EDIT_SINGLE_THREAD="1" python3 "$unit_tests" $*

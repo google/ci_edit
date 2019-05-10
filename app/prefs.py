@@ -120,6 +120,12 @@ class Prefs():
                 app.log.error('error writing prefs')
                 app.log.exception(e)
 
+    def _raiseGrammarNotFound(self):
+        app.log.startup('Available grammars:')
+        for k, v in self.grammars.items():
+            app.log.startup('  ', k, ':', len(v))
+        raise Exception('missing grammar for "' + grammarName + '" in prefs.py')
+
     def __setUpGrammars(self, defaultGrammars):
         self.grammars = {}
         # Arrange all the grammars by name.
@@ -157,41 +163,47 @@ class Prefs():
                 # Add a non-matchable placeholder.
                 markers.append(app.regex.kNonMatchingRegex)
                 matchGrammars.append(None)
-            # Index [2..len(contains)]
+            # |Contains| markers start at index 2.
             for grammarName in v.get('contains', []):
                 g = self.grammars.get(grammarName, None)
                 if g is None:
-                    app.log.startup('Available grammars:')
-                    for k, v in self.grammars.items():
-                        app.log.startup('  ', k, ':', len(v))
-                    raise Exception('missing grammar for "' + grammarName +
-                                    '" in prefs.py')
+                    self._raiseGrammarNotFound()
+                markers.append(g.get('begin', g.get('matches', u"")))
+                matchGrammars.append(g)
+            # |Next| markers start after |contains|.
+            for grammarName in v.get('next', []):
+                g = self.grammars.get(grammarName, None)
+                if g is None:
+                    self._raiseGrammarNotFound()
                 markers.append(g['begin'])
                 matchGrammars.append(g)
-            # Index [2+len(contains)..]
+            # |Errors| markers start after |next| markers.
             markers += v.get('errors', [])
-            # Index [2+len(contains)+len(error)..]
+            # |Keywords| markers start after |errors| markers.
             for keyword in v.get('keywords', []):
                 markers.append(r'\b' + keyword + r'\b')
-            # Index [2+len(contains)+len(error)+len(keywords)..]
+            # |Types| markers start after |keywords| markers.
             for types in v.get('types', []):
                 markers.append(r'\b' + types + r'\b')
-            # Index [2+len(contains)+len(error)+len(keywords)+len(types)..]
+            # |Special| markers start after |types| markers.
             markers += v.get('special', [])
-            # Index [-2]
+            # Double wide characters are at index [-2] in markers.
             markers.append(u'[\u3000-\uffff]+')
-            # Index [-1]
+            # Carriage return characters are at index [-1] in markers.
             markers.append(r'\n')
             #app.log.startup('markers', v['name'], markers)
             v['matchRe'] = re.compile(app.regex.joinReList(markers))
             v['markers'] = markers
             v['matchGrammars'] = matchGrammars
-            newGrammarIndexLimit = 2 + len(v.get('contains', []))
-            errorIndexLimit = newGrammarIndexLimit + len(v.get('errors', []))
+            containsGrammarIndexLimit = 2 + len(v.get('contains', []))
+            nextGrammarIndexLimit = containsGrammarIndexLimit + len(
+                v.get('next', []))
+            errorIndexLimit = nextGrammarIndexLimit + len(v.get('errors', []))
             keywordIndexLimit = errorIndexLimit + len(v.get('keywords', []))
             typeIndexLimit = keywordIndexLimit + len(v.get('types', []))
             specialIndexLimit = typeIndexLimit + len(v.get('special', []))
-            v['indexLimits'] = (newGrammarIndexLimit, errorIndexLimit,
+            v['indexLimits'] = (containsGrammarIndexLimit,
+                                nextGrammarIndexLimit, errorIndexLimit,
                                 keywordIndexLimit, typeIndexLimit,
                                 specialIndexLimit)
 

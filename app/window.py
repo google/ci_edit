@@ -1247,6 +1247,7 @@ class InputWindow(Window):
             bufferManager.loadTextBuffer(f['path'])
         if self.program.prefs.startup.get('readStdin'):
             bufferManager.readStdin()
+        bufferManager.buffers.reverse()
         tb = bufferManager.topBuffer()
         if not tb:
             tb = bufferManager.newTextBuffer()

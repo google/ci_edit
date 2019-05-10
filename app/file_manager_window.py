@@ -15,6 +15,13 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+try:
+    unicode
+except NameError:
+    unicode = str
+    unichr = chr
+
+import os
 
 import app.config
 import app.cu_editor
@@ -222,6 +229,15 @@ class FileManagerWindow(app.window.Window):
         self.reattach()
         self.parent.layout()
         self.controller.focus()
+        # Set the initial path each time the window is focused.
+        inputWindow = self.parent.inputWindow
+        if len(inputWindow.textBuffer.fullPath) == 0:
+            path = os.getcwd()
+        else:
+            path = os.path.dirname(inputWindow.textBuffer.fullPath)
+        if len(path) != 0:
+            path += os.path.sep
+        self.pathWindow.controller.setEncodedPath(unicode(path))
         self.changeFocusTo(self.pathWindow)
 
     def onPrefChanged(self, category, name):

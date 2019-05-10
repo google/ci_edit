@@ -47,6 +47,7 @@ abominable
 aboriginal
 abort
 aborted
+aborter
 aborting
 abortion
 aborts
@@ -165,6 +166,7 @@ accumulating
 accumulation
 accumulations
 accumulator
+accumulators
 accuracy
 accurate
 accurately
@@ -285,6 +287,7 @@ adds
 adequate
 adequately
 adhere
+adherence
 adheres
 adhering
 adj
@@ -404,6 +407,8 @@ affixed
 affixes
 afford
 affordable
+affordance
+affordances
 affording
 affray
 afghan
@@ -480,6 +485,7 @@ airliner
 airlines
 airplane
 airplanes
+airplay
 airport
 airy
 aisle
@@ -651,6 +657,7 @@ among
 amongst
 amortize
 amortized
+amortizes
 amount
 amounting
 amounts
@@ -659,12 +666,14 @@ ampersand
 ampersands
 amphibian
 amphitheater
+amping
 ample
 amplification
 amplifier
 amplifiers
 amplify
 amplitude
+amplitudes
 amt
 amuse
 amused
@@ -760,6 +769,9 @@ annulment
 anomalously
 anomaly
 anon
+anonymize
+anonymized
+anonymizes
 anonymous
 anonymously
 anorexia
@@ -835,6 +847,7 @@ appease
 appeasement
 append
 appended
+appender
 appending
 appendix
 appends
@@ -1026,6 +1039,7 @@ assassin
 assemble
 assembled
 assembler
+assemblers
 assembles
 assemblies
 assembling
@@ -1039,8 +1053,10 @@ assertions
 assertive
 assertiveness
 asserts
+asses
 assess
 assessed
+assesses
 assessment
 assessments
 asset
@@ -1049,6 +1065,7 @@ assign
 assignable
 assigned
 assignee
+assignees
 assigner
 assigning
 assignment
@@ -1069,6 +1086,7 @@ associating
 association
 associations
 associative
+associativities
 assorted
 assortment
 assortments
@@ -1233,6 +1251,7 @@ automobile
 automotive
 autonomous
 autopilot
+autorepeat
 autos
 autumn
 aux
@@ -1240,6 +1259,7 @@ auxiliaries
 auxiliary
 av
 avail
+availabilities
 availability
 available
 avalanche
@@ -1324,14 +1344,19 @@ backed
 backend
 backgammon
 background
+backgrounded
+backgrounding
 backgrounds
 backhanded
 backing
 backings
+backlight
 backlog
 backpack
+backplane
 backs
 backslash
+backslashed
 backslashes
 backspace
 backstop
@@ -1348,6 +1373,7 @@ badge
 badged
 badger
 badges
+badging
 badly
 badness
 bag
@@ -1418,6 +1444,7 @@ bard
 bards
 bare
 barely
+barf
 barfs
 bargain
 bargains
@@ -1429,6 +1456,7 @@ barney
 barns
 baron
 baroness
+baroquely
 barracuda
 barre
 barred
@@ -1441,6 +1469,7 @@ bars
 bartender
 base
 baseball
+baseband
 baseboards
 based
 baseline
@@ -1635,6 +1664,7 @@ bf
 bi
 bias
 biased
+biasing
 bib
 bible
 bibliography
@@ -1681,6 +1711,7 @@ binomial
 bins
 bio
 biography
+bionic
 bios
 biplane
 bird
@@ -1708,6 +1739,7 @@ biting
 bitmap
 bitmaps
 bits
+bitstream
 bitten
 bitter
 bitterly
@@ -1768,6 +1800,7 @@ bling
 blink
 blinker
 blinking
+blipped
 blips
 bliss
 blithely
@@ -1847,6 +1880,7 @@ bogus
 boil
 boiler
 boilerplate
+boilerplates
 boink
 bola
 bolas
@@ -1873,6 +1907,7 @@ bonus
 boo
 book
 booked
+bookended
 bookie
 booking
 bookings
@@ -2122,6 +2157,7 @@ buffer
 buffered
 buffering
 buffers
+buffs
 bug
 buggy
 bugs
@@ -2248,6 +2284,7 @@ cabs
 cacao
 cache
 cached
+cacher
 caches
 cachet
 caching
@@ -2347,6 +2384,8 @@ canned
 cannot
 canon
 canonical
+canonicalization
+canonicalizes
 canonicalizing
 canonize
 canopy
@@ -2378,6 +2417,7 @@ caps
 capsule
 capt
 captain
+captcha
 caption
 captioned
 captioning
@@ -2386,6 +2426,7 @@ captive
 captor
 capture
 captured
+capturers
 captures
 capturing
 car
@@ -2448,6 +2489,7 @@ cassette
 cast
 caste
 caster
+casters
 castes
 casting
 castle
@@ -2471,6 +2513,7 @@ categorical
 categories
 categorize
 categorized
+categorizer
 category
 cater
 catered
@@ -2524,6 +2567,7 @@ cellphone
 cells
 cellular
 cellulars
+celsius
 cemetery
 censor
 censurable
@@ -2709,6 +2753,7 @@ chipmunk
 chipped
 chips
 chipset
+chipsets
 chiropractic
 chis
 chive
@@ -2907,6 +2952,7 @@ clipboard
 clipboards
 clipped
 clipper
+clippers
 clipping
 clips
 clique
@@ -2950,6 +2996,7 @@ clubs
 clue
 clues
 clump
+clumped
 clumsy
 cluster
 clustered
@@ -2958,6 +3005,7 @@ clusters
 clutch
 clutter
 cluttered
+cluttering
 clutters
 cm
 co
@@ -3009,6 +3057,8 @@ coffee
 coffin
 cog
 cogs
+coherencies
+coherency
 coherent
 coherently
 cohort
@@ -3090,6 +3140,8 @@ comb
 combat
 combination
 combinations
+combinatorial
+combinatorics
 combine
 combined
 combines
@@ -3111,6 +3163,7 @@ comfortably
 comic
 comics
 coming
+comings
 comm
 comma
 command
@@ -3237,6 +3290,7 @@ compliance
 compliant
 complicate
 complicated
+complicates
 complicating
 complication
 complications
@@ -3248,6 +3302,7 @@ complying
 component
 components
 compos
+composable
 compose
 composed
 composer
@@ -3341,6 +3396,7 @@ concrete
 concretely
 concur
 concurrence
+concurrencies
 concurrency
 concurrent
 concurrently
@@ -3349,6 +3405,7 @@ condense
 condensed
 condenser
 condenses
+condensible
 condensing
 condition
 conditional
@@ -3520,6 +3577,7 @@ constrains
 constraint
 constraints
 construct
+constructable
 constructed
 constructible
 constructing
@@ -3706,6 +3764,7 @@ copier
 copies
 copper
 copperhead
+coprocessor
 cops
 copter
 copy
@@ -3771,6 +3830,7 @@ corsair
 cos
 cosh
 cosine
+cosines
 cosmetic
 cosplay
 cost
@@ -3804,8 +3864,10 @@ counteroffer
 counterpart
 counterparts
 counterpoint
+counterproductive
 counters
 countersink
+countervalue
 countess
 counting
 countless
@@ -3953,6 +4015,7 @@ cropping
 crops
 cross
 crossbar
+crossbarred
 crossbones
 crossed
 crosses
@@ -4000,6 +4063,7 @@ cu
 cub
 cube
 cubed
+cubes
 cubic
 cubit
 cubs
@@ -4081,6 +4145,7 @@ customization
 customizations
 customize
 customized
+customizer
 customizes
 customizing
 customs
@@ -4089,6 +4154,7 @@ cutback
 cute
 cuter
 cutoff
+cutoffs
 cutout
 cuts
 cutting
@@ -4108,6 +4174,7 @@ cyclone
 cyclopedia
 cylinder
 cylinders
+cyphers
 cypress
 d
 dab
@@ -4218,7 +4285,10 @@ deal
 dealer
 dealing
 dealings
+deallocate
 deallocated
+deallocating
+deallocations
 deals
 dealt
 dean
@@ -4305,6 +4375,7 @@ decompressed
 decompresses
 decompressing
 decompression
+deconstruct
 deconstruction
 decor
 decorate
@@ -4331,12 +4402,15 @@ decrementing
 decrements
 decrescendo
 decrypt
+decrypted
 decryption
+decrypts
 dedicate
 dedicated
 dedication
 deduce
 deduced
+deduces
 deduct
 deducted
 deductible
@@ -4401,6 +4475,8 @@ deflate
 deflated
 deflates
 deflect
+defocus
+defocusing
 deformed
 deforming
 deft
@@ -4419,6 +4495,7 @@ degrees
 deigned
 deigning
 deity
+deja
 delay
 delayed
 delaying
@@ -4431,6 +4508,7 @@ delegation
 deletable
 delete
 deleted
+deleter
 deletes
 deleting
 deletion
@@ -4458,6 +4536,7 @@ delta
 deltas
 deluxe
 delve
+delving
 demand
 demanded
 demanding
@@ -4540,6 +4619,7 @@ deprecated
 deprecates
 deprecating
 deprecation
+deprecations
 depress
 depressed
 depression
@@ -4548,9 +4628,12 @@ dept
 depth
 depths
 deputy
+dequeue
 derailments
 deranged
 dereference
+dereferenced
+dereferencing
 derelict
 derivation
 derivative
@@ -4559,6 +4642,7 @@ derive
 derived
 derives
 deriving
+desaturated
 desc
 descale
 descaled
@@ -4620,6 +4704,7 @@ destruct
 destructed
 destructing
 destruction
+destructions
 destructive
 destructively
 destructor
@@ -4644,6 +4729,7 @@ detectable
 detected
 detecting
 detection
+detections
 detector
 detectors
 detects
@@ -4662,6 +4748,7 @@ determines
 determining
 determinism
 deterministic
+deterministically
 detriment
 deuterium
 develop
@@ -4720,6 +4807,7 @@ diary
 dibs
 dice
 dices
+dicey
 dick
 dict
 dictate
@@ -4839,6 +4927,7 @@ directory
 directs
 dirk
 dirt
+dirtied
 dirtiness
 dirty
 dirtying
@@ -4848,6 +4937,7 @@ disability
 disable
 disabled
 disablement
+disabler
 disables
 disabling
 disadvantage
@@ -4861,6 +4951,7 @@ disallowed
 disallowing
 disallows
 disambiguate
+disambiguating
 disambiguation
 disappear
 disappearance
@@ -4874,6 +4965,9 @@ disarm
 disarmed
 disarms
 disassemble
+disassembler
+disassemblers
+disassembles
 disassembling
 disassociate
 disassociated
@@ -5009,6 +5103,7 @@ disputed
 disputes
 disqualified
 disregard
+disregarded
 disregards
 disrupt
 disrupting
@@ -5215,6 +5310,7 @@ downgrade
 downgraded
 downgrades
 downgrading
+downlink
 download
 downloadable
 downloaded
@@ -5223,6 +5319,8 @@ downloads
 downright
 downs
 downscale
+downscaled
+downscaling
 downside
 downsides
 downsize
@@ -5254,6 +5352,7 @@ drags
 drain
 drained
 drainer
+drainers
 draining
 drains
 drake
@@ -5297,6 +5396,7 @@ dropped
 dropper
 dropping
 drops
+drowned
 drub
 drudge
 drudgery
@@ -5356,6 +5456,7 @@ duplicated
 duplicates
 duplicating
 duplication
+duplications
 durability
 durable
 duration
@@ -5537,6 +5638,7 @@ elevate
 elevated
 elevating
 elevation
+elevations
 elevator
 eleven
 eleventh
@@ -5626,6 +5728,7 @@ emphasizing
 empire
 empirically
 emplace
+emplaced
 emplacement
 emplacements
 employ
@@ -5670,6 +5773,7 @@ encapsulation
 encase
 encases
 encipher
+encipherment
 encircled
 enclose
 enclosed
@@ -5757,10 +5861,12 @@ enlarged
 enlargement
 enlarging
 enlightenment
+enlisting
 enormous
 enormously
 enough
 enqueue
+enqueued
 enroll
 enrolled
 enrolling
@@ -5793,6 +5899,7 @@ enthusiastically
 entice
 entire
 entirely
+entires
 entirety
 entities
 entitled
@@ -5837,6 +5944,7 @@ epilogue
 epiphany
 episode
 episodes
+epitaphs
 epoch
 epochs
 epsilon
@@ -5907,6 +6015,7 @@ eschew
 esp
 especial
 especially
+espresso
 essay
 essayer
 essays
@@ -5930,6 +6039,7 @@ estimations
 estimator
 eta
 etc
+etcetera
 etch
 etched
 eternal
@@ -5950,6 +6060,8 @@ evaluating
 evaluation
 evaluations
 evaluative
+evaluator
+evaluators
 eve
 even
 evening
@@ -6130,6 +6242,7 @@ experiments
 expert
 experts
 expiration
+expirations
 expire
 expired
 expires
@@ -6232,9 +6345,11 @@ extraordinarily
 extrapolate
 extrapolated
 extras
+extrema
 extreme
 extremely
 extremes
+extruded
 eye
 eyeballing
 eyebrow
@@ -6262,6 +6377,7 @@ facility
 facing
 facsimile
 fact
+facto
 factor
 factored
 factorial
@@ -6275,6 +6391,7 @@ faculty
 fad
 fade
 faded
+fadeout
 fades
 fading
 faff
@@ -6305,6 +6422,7 @@ fallback
 fallbacks
 fallen
 falling
+falloff
 falls
 false
 falsehood
@@ -6395,6 +6513,7 @@ fee
 feeble
 feed
 feedback
+feedbacks
 feeder
 feeding
 feeds
@@ -6452,6 +6571,7 @@ fictional
 fiddle
 fiddled
 fiddling
+fiddly
 fidelity
 fie
 field
@@ -6502,6 +6622,7 @@ finale
 finales
 finalists
 finalization
+finalizations
 finalize
 finalized
 finalizes
@@ -6539,6 +6660,7 @@ fink
 fins
 fir
 fire
+firebase
 firebrick
 firebug
 firecracker
@@ -6742,6 +6864,7 @@ foo
 foobar
 food
 fool
+fooled
 fooling
 fools
 foolscap
@@ -6934,6 +7057,7 @@ friday
 fried
 friedcake
 friend
+friending
 friendlier
 friendly
 friends
@@ -6955,6 +7079,7 @@ frontier
 fronting
 frost
 frown
+frowned
 froze
 frozen
 fructify
@@ -6983,6 +7108,7 @@ fulfilling
 fulfillment
 fulfills
 full
+fullest
 fullness
 fulls
 fully
@@ -7300,15 +7426,18 @@ godspeed
 goes
 goggles
 going
+goings
 gold
 golden
 goldenrod
+goldens
 golf
 golfing
 golfs
 gone
 gong
 gonk
+gonna
 goo
 good
 goodbye
@@ -7612,6 +7741,7 @@ hammer
 hammering
 hammers
 hamming
+hampers
 hand
 handbook
 handed
@@ -7838,6 +7968,7 @@ hgt
 hi
 hibernate
 hibernation
+hiccups
 hicks
 hid
 hidden
@@ -7901,6 +8032,7 @@ history
 hit
 hitch
 hitched
+hitchhikers
 hits
 hitting
 hive
@@ -8015,7 +8147,9 @@ hotkeys
 hotness
 hotpot
 hotpots
+hotrod
 hotspot
+hottest
 hour
 hourglass
 houri
@@ -8536,6 +8670,7 @@ informed
 informer
 informing
 informs
+infos
 infra
 infrared
 infrastructure
@@ -8569,6 +8704,7 @@ inhibitor
 inhibits
 initial
 initialization
+initializations
 initialize
 initialized
 initializer
@@ -8599,6 +8735,7 @@ injuries
 injury
 ink
 inking
+inkjet
 inky
 inland
 inlet
@@ -8688,6 +8825,7 @@ installs
 instance
 instanced
 instances
+instancing
 instant
 instantaneous
 instantaneously
@@ -8733,6 +8871,7 @@ insured
 insures
 int
 intact
+intakes
 intangible
 intangibles
 integer
@@ -8754,8 +8893,10 @@ intelligently
 intend
 intended
 intending
+intends
 intense
 intensifier
+intensities
 intensity
 intensive
 intent
@@ -8859,6 +9000,7 @@ interpolating
 interpolation
 interpolations
 interpose
+interposes
 interposing
 interpret
 interpretation
@@ -8940,6 +9082,7 @@ invalidly
 invaluable
 invariably
 invariant
+invariants
 invasion
 invasive
 invent
@@ -8954,6 +9097,7 @@ inversion
 invert
 inverted
 invertible
+inverting
 inverts
 invested
 investigate
@@ -9131,6 +9275,7 @@ john
 johnny
 johns
 join
+joinable
 joined
 joiner
 joining
@@ -9156,6 +9301,7 @@ journeys
 joust
 joy
 joystick
+joysticks
 js
 jubilee
 judge
@@ -9214,6 +9360,7 @@ keeping
 keeps
 keg
 kelvin
+kelvins
 ken
 kept
 kern
@@ -9231,6 +9378,7 @@ keyed
 keying
 keynote
 keypad
+keyring
 keys
 keystone
 keystroke
@@ -9257,6 +9405,8 @@ killer
 killing
 kills
 kilo
+kilobit
+kilobits
 kilobyte
 kilobytes
 kilometers
@@ -9293,6 +9443,7 @@ kiwi
 kl
 kludge
 kludges
+kludgey
 km
 kn
 knee
@@ -9424,6 +9575,7 @@ latches
 latching
 late
 lately
+latencies
 latency
 latent
 later
@@ -9761,6 +9913,7 @@ loaded
 loader
 loaders
 loading
+loadings
 loads
 loaf
 loan
@@ -9810,6 +9963,7 @@ logging
 logic
 logical
 logically
+logics
 login
 logins
 logistic
@@ -9840,6 +9994,7 @@ looking
 lookout
 looks
 lookup
+lookups
 loon
 loop
 looped
@@ -10194,6 +10349,7 @@ matchable
 matchbox
 matched
 matcher
+matchers
 matches
 matching
 mate
@@ -10354,6 +10510,7 @@ merriness
 mes
 mesa
 mesh
+meshes
 mess
 message
 messaged
@@ -10401,6 +10558,7 @@ mice
 mick
 micro
 microchip
+microcode
 microcomputer
 microcontroller
 microcosm
@@ -10408,6 +10566,7 @@ microelectronic
 microelectronics
 microfiber
 micromanage
+micrometers
 micron
 microns
 microphone
@@ -10456,6 +10615,7 @@ mill
 millennium
 miller
 millet
+millidegree
 millimeter
 millimeters
 million
@@ -10487,9 +10647,11 @@ miniature
 miniaturization
 miniaturize
 miniaturized
+minify
 minim
 minimal
 minimalist
+minimalistic
 minimally
 minimization
 minimize
@@ -10535,6 +10697,7 @@ misery
 misfeature
 mishandles
 misinterpret
+misinterpreted
 mislead
 misleading
 mismatch
@@ -10587,6 +10750,7 @@ mittens
 mix
 mixed
 mixer
+mixers
 mixes
 mixing
 mixture
@@ -10647,6 +10811,7 @@ modulated
 modulation
 module
 modules
+moduli
 modulo
 modulus
 moi
@@ -10665,6 +10830,8 @@ momentary
 moments
 momentum
 moms
+monad
+monadic
 monarch
 monarchies
 monarchs
@@ -10899,6 +11066,7 @@ names
 namespace
 naming
 nanny
+nano
 nanosecond
 nanoseconds
 nap
@@ -11006,6 +11174,7 @@ nested
 nesting
 net
 nether
+nets
 netting
 network
 networked
@@ -11125,6 +11294,7 @@ nonterminal
 nontrivial
 nonzero
 noodle
+noodles
 nook
 nooky
 noon
@@ -11206,6 +11376,7 @@ nth
 ntp
 nu
 nuance
+nuances
 nub
 nuclear
 nude
@@ -11233,6 +11404,7 @@ numerator
 numeric
 numerical
 numerically
+numerics
 numerous
 nun
 nus
@@ -11415,6 +11587,7 @@ omit
 omits
 omitted
 omitting
+omni
 omnipresent
 omniscient
 oms
@@ -11439,6 +11612,7 @@ ooh
 oops
 ooze
 op
+opacities
 opacity
 opal
 opaque
@@ -11514,6 +11688,8 @@ oranges
 orb
 orbit
 orbital
+orbited
+orbiting
 orc
 orchard
 orchestra
@@ -11524,6 +11700,7 @@ ordain
 order
 ordered
 ordering
+orderings
 orderly
 orders
 ordinal
@@ -11573,6 +11750,7 @@ orthodoxy
 orthogonal
 orthographic
 orthography
+orthonormal
 oscillates
 oscillator
 oscilloscope
@@ -11650,8 +11828,10 @@ overcame
 overclock
 overcome
 overcoming
+overcommitting
 overdraw
 overdrawing
+overdrawn
 overdue
 overestimate
 overestimated
@@ -11678,6 +11858,7 @@ overlie
 overload
 overloaded
 overloading
+overloads
 overlong
 overly
 overnight
@@ -11694,6 +11875,7 @@ overruled
 overrun
 overrunning
 overs
+oversaturated
 overscan
 oversee
 overshadowed
@@ -11732,6 +11914,7 @@ owned
 owner
 owners
 ownership
+ownerships
 owning
 owns
 ox
@@ -11852,10 +12035,12 @@ parallelogram
 parallels
 param
 parameter
+parameterization
 parameterize
 parameterized
 parameters
 parametric
+parametrized
 paramount
 params
 paranoia
@@ -12314,6 +12499,7 @@ pine
 pineapple
 ping
 pinged
+pinger
 pinging
 pings
 pinion
@@ -12334,6 +12520,8 @@ pip
 pipe
 piped
 pipeline
+pipelined
+pipelines
 piper
 pipes
 piping
@@ -12520,6 +12708,8 @@ polluting
 pollution
 polo
 poly
+polyad
+polyadic
 polygon
 polygons
 polymer
@@ -12672,6 +12862,7 @@ pray
 prayers
 praying
 pre
+preallocate
 preamble
 preambles
 prearranged
@@ -12682,6 +12873,7 @@ precautions
 precede
 preceded
 precedence
+precedences
 precedent
 precedes
 preceding
@@ -12729,8 +12921,10 @@ preempt
 preempted
 preempting
 preemption
+preemptions
 preemptive
 preemptively
+preempts
 preexisting
 pref
 prefabricated
@@ -12787,8 +12981,11 @@ prepopulated
 preposition
 prepositional
 prepositions
+prepped
+prepping
 preprocess
 preprocessed
+preprocessing
 preprocessor
 preps
 prerecorded
@@ -12799,6 +12996,7 @@ prescient
 prescribed
 prescription
 prescripts
+preselected
 presence
 present
 presentation
@@ -12970,6 +13168,7 @@ prodigy
 produce
 produced
 producer
+producers
 produces
 producing
 product
@@ -12988,6 +13187,7 @@ proficient
 profile
 profiled
 profiler
+profilers
 profiles
 profiling
 profit
@@ -13028,6 +13228,7 @@ proliferation
 prolific
 prologue
 prolong
+prolonged
 prolongs
 prom
 prominent
@@ -13083,6 +13284,7 @@ proportionally
 proportionately
 proportions
 proposal
+proposals
 propose
 proposed
 proposer
@@ -13120,6 +13322,7 @@ protocol
 protocols
 proton
 prototype
+prototyped
 prototypes
 prototypical
 prototyping
@@ -13150,6 +13353,7 @@ provoke
 provoker
 provokes
 provoking
+proxied
 proxies
 proximity
 proxy
@@ -13218,6 +13422,7 @@ punch
 punching
 punctuated
 punctuation
+punctuations
 pundits
 punitive
 punk
@@ -13278,6 +13483,7 @@ pvt
 pwn
 pwns
 pyramid
+pyramids
 pyrotechnic
 python
 pyx
@@ -13296,6 +13502,7 @@ quads
 quaintness
 quake
 qualification
+qualifications
 qualified
 qualifier
 qualifiers
@@ -13310,6 +13517,8 @@ quantifier
 quantify
 quantities
 quantity
+quantized
+quantizes
 quantum
 quarantine
 quarantined
@@ -13324,6 +13533,7 @@ quarto
 quartz
 quasi
 quaternion
+quaternions
 quay
 queen
 quench
@@ -13349,6 +13559,7 @@ quicker
 quickly
 quid
 quiesce
+quiesced
 quiescence
 quiescent
 quiet
@@ -13412,6 +13623,7 @@ radii
 radio
 radios
 radius
+rads
 raffle
 raft
 rag
@@ -13443,6 +13655,7 @@ rambler
 rambling
 rammed
 ramp
+ramps
 rams
 ran
 rancher
@@ -13461,6 +13674,7 @@ ranges
 ranging
 rank
 ranked
+rankers
 ranking
 rankings
 ranks
@@ -13519,6 +13733,7 @@ raze
 rd
 re
 reach
+reachability
 reachable
 reached
 reaches
@@ -13535,6 +13750,7 @@ reactivated
 reactivates
 reactivating
 reactivation
+reactivations
 reactive
 reacts
 read
@@ -13564,6 +13780,7 @@ reallocated
 reallocates
 reallocating
 reallocation
+reallocations
 really
 realm
 realms
@@ -13689,12 +13906,14 @@ recompose
 recompute
 recomputed
 recomputes
+recomputing
 recon
 reconcile
 reconciled
 reconciles
 reconciliation
 reconfiguration
+reconfigurations
 reconfigure
 reconfigured
 reconfirm
@@ -13753,6 +13972,8 @@ recursive
 recursively
 recycle
 recycled
+recycler
+recyclers
 recycles
 recycling
 red
@@ -13780,6 +14001,7 @@ redirect
 redirected
 redirecting
 redirection
+redirections
 redirects
 rediscovered
 rediscovery
@@ -13816,6 +14038,7 @@ reeks
 reel
 reenrollment
 reenter
+reentering
 reentrant
 reentry
 reevaluate
@@ -13872,6 +14095,7 @@ reformats
 reformatted
 reformatting
 reformed
+reforming
 reformulation
 refract
 refraction
@@ -13952,19 +14176,25 @@ regurgitated
 rehab
 rehash
 rehearsals
+rehydrated
 reign
 reimburse
 reimburses
 rein
 reindeer
+reinflated
 reinitialize
 reinitialized
+reinitializes
+reinitializing
 reinsert
 reinserted
 reinsertion
+reinsertions
 reinstall
 reinstalled
 reinstalling
+reinstalls
 reinstate
 reinstated
 reintegrate
@@ -13980,6 +14210,7 @@ rejecting
 rejection
 rejections
 rejects
+rejiggered
 rejoin
 rel
 relaid
@@ -14032,6 +14263,7 @@ relinquished
 relinquishes
 relinquishment
 reload
+reloadable
 reloaded
 reloading
 reloads
@@ -14039,6 +14271,7 @@ relocatable
 relocate
 relocated
 relocation
+relocations
 reluctantly
 rely
 relying
@@ -14100,6 +14333,7 @@ renaming
 rend
 render
 rendered
+renderers
 rendering
 renderings
 renders
@@ -14229,6 +14463,7 @@ reproduced
 reproducer
 reproduces
 reproducible
+reproducibly
 reproducing
 reproduction
 reps
@@ -14239,6 +14474,7 @@ reputations
 request
 requested
 requester
+requesters
 requesting
 requests
 require
@@ -14251,6 +14487,7 @@ requisite
 requisition
 reread
 rereading
+reregistered
 reroute
 rerun
 rerunning
@@ -14267,10 +14504,13 @@ research
 researchers
 reseed
 reseeding
+reselected
 resell
 resemblance
 resembles
 resend
+resending
+resends
 resent
 reservation
 reservations
@@ -14283,6 +14523,8 @@ reset
 resets
 resetting
 reshape
+reshow
+reshowing
 reshuffle
 reshuffled
 reshuffling
@@ -14394,6 +14636,7 @@ resumed
 resumes
 resuming
 resumption
+resumptions
 resurrect
 resurrected
 resurrection
@@ -14419,6 +14662,7 @@ retire
 retired
 retires
 retiring
+retitled
 retract
 retractable
 retracting
@@ -14454,6 +14698,7 @@ reuses
 reusing
 rev
 revalidate
+revalidated
 revalue
 revamp
 reveal
@@ -14502,6 +14747,7 @@ revocation
 revocations
 revoke
 revoked
+revokers
 revokes
 revoking
 revolution
@@ -14518,6 +14764,7 @@ reworked
 reworking
 rewound
 rewrite
+rewriters
 rewrites
 rewriting
 rewritten
@@ -14895,6 +15142,7 @@ savory
 savoy
 savvy
 saw
+sawtooth
 sax
 say
 saying
@@ -14922,6 +15170,7 @@ scanners
 scanning
 scans
 scant
+scapes
 scar
 scare
 scares
@@ -15037,6 +15286,8 @@ scrubbing
 scrubby
 scrubs
 scruple
+sculpted
+sculpting
 se
 sea
 seal
@@ -15060,6 +15311,7 @@ season
 seasoned
 seasons
 seat
+seatbelt
 seated
 seating
 seats
@@ -15083,6 +15335,7 @@ sectioned
 sections
 sector
 sectors
+sects
 secure
 secured
 securely
@@ -15277,6 +15530,7 @@ severely
 severest
 severities
 severity
+severs
 sew
 sex
 sexagenarian
@@ -15416,6 +15670,7 @@ shortcake
 shortcomings
 shortcut
 shortcuts
+shortcutting
 shorten
 shortened
 shortening
@@ -15510,7 +15765,9 @@ signal
 signaled
 signaler
 signaling
+signalled
 signaller
+signalling
 signals
 signature
 signatures
@@ -15593,6 +15850,7 @@ sinking
 sinks
 sinus
 sinusoidal
+sinusoids
 sip
 siphon
 sips
@@ -15659,6 +15917,7 @@ sky
 skyline
 skyscraper
 slab
+slabs
 slack
 slag
 slagging
@@ -15804,6 +16063,7 @@ snit
 snoop
 snoops
 snooze
+snoozed
 snot
 snout
 snow
@@ -15932,6 +16192,7 @@ spacer
 spacers
 spaces
 spacing
+spacings
 spacious
 spade
 spades
@@ -15979,6 +16240,7 @@ specialization
 specializations
 specialize
 specialized
+specializes
 specializing
 specially
 specials
@@ -16055,6 +16317,7 @@ spinners
 spinning
 spins
 spiral
+spirals
 spirit
 spiritual
 spit
@@ -16359,6 +16622,7 @@ stops
 stopwatch
 storable
 storage
+storages
 store
 stored
 storefront
@@ -16397,6 +16661,7 @@ streamer
 streaming
 streamline
 streamlined
+streamlining
 streams
 street
 streets
@@ -16407,6 +16672,7 @@ strenuousness
 stress
 stressed
 stressful
+stressor
 stretch
 stretched
 stretches
@@ -16494,6 +16760,7 @@ stylize
 stylized
 stylizes
 stylus
+styluses
 suave
 sub
 subbed
@@ -16603,6 +16870,7 @@ succinctly
 such
 suck
 sucker
+sucks
 sudden
 suddenly
 sue
@@ -16823,6 +17091,7 @@ swipe
 swiped
 swipes
 swiping
+swirling
 swish
 swishing
 switch
@@ -16847,7 +17116,10 @@ symbol
 symbolic
 symbolically
 symbolization
+symbolized
 symbolizer
+symbolizes
+symbolizing
 symbols
 symmetric
 symmetry
@@ -16967,6 +17239,7 @@ talks
 tall
 taller
 tallest
+tallies
 tally
 tallying
 talon
@@ -17047,6 +17320,7 @@ team
 teams
 tear
 teardrop
+teared
 tearing
 tears
 tease
@@ -17082,6 +17356,10 @@ telemetry
 telepathically
 telephone
 telephony
+teleport
+teleported
+teleporting
+teleports
 teleprompter
 teletext
 teletype
@@ -17167,7 +17445,12 @@ terror
 terry
 terse
 tertiary
+tessellate
+tessellated
+tessellating
+tessellation
 test
+testability
 testable
 testament
 tested
@@ -17289,6 +17572,7 @@ threatens
 threats
 three
 threepence
+threes
 thresh
 threshold
 thresholds
@@ -17298,6 +17582,7 @@ thrilled
 thrillers
 thrive
 throb
+throbbers
 throbbing
 throbs
 throne
@@ -17310,6 +17595,7 @@ throttling
 through
 throughout
 throughput
+throughputs
 throw
 throwaway
 throwing
@@ -17327,6 +17613,7 @@ thunderbolt
 thundering
 thunderstorm
 thunk
+thunks
 thursday
 thus
 thusly
@@ -17346,6 +17633,7 @@ tickler
 tickles
 ticks
 tics
+tidier
 tidy
 tie
 tiebreak
@@ -17380,6 +17668,7 @@ tilted
 tilting
 timbre
 time
+timebase
 timed
 timeless
 timeline
@@ -17391,6 +17680,8 @@ timer
 timers
 times
 timescale
+timestamped
+timestamps
 timetable
 timetables
 timezone
@@ -17442,6 +17733,7 @@ toga
 together
 toggle
 toggled
+toggler
 toggles
 toggling
 togs
@@ -17603,7 +17895,9 @@ trait
 traits
 tramp
 trample
+trampling
 trampoline
+trampolines
 trampolining
 trance
 tranquility
@@ -17614,6 +17908,7 @@ transactional
 transactions
 transatlantic
 transceiver
+transceivers
 transcend
 transcendental
 transcript
@@ -17634,6 +17929,7 @@ transforming
 transforms
 transient
 transiently
+transients
 transit
 transiting
 transition
@@ -17678,6 +17974,7 @@ transports
 transpose
 transposed
 transposing
+transversal
 transverse
 trap
 trapezium
@@ -17916,6 +18213,7 @@ type
 typecast
 typed
 typeface
+typefaces
 types
 typescript
 typeset
@@ -18555,6 +18853,7 @@ vault
 vb
 vdir
 vector
+vectorized
 vectors
 veg
 veges
@@ -18586,6 +18885,7 @@ verbalized
 verbatim
 verbose
 verbosely
+verbosities
 verbosity
 verboten
 verbs
@@ -18754,6 +19054,7 @@ volunteer
 volunteers
 vortex
 vote
+voted
 voters
 votes
 voting
@@ -18795,6 +19096,7 @@ waived
 waiver
 wake
 wakes
+wakeup
 waking
 waldo
 wale
@@ -19113,6 +19415,7 @@ wished
 wishes
 wishing
 wishlist
+wishy
 wist
 wit
 witch
@@ -19182,12 +19485,14 @@ workflow
 workhorse
 working
 workings
+workload
 workman
 workplace
 works
 worksheets
 workshop
 workshops
+workspace
 workstation
 workstations
 world
@@ -19294,6 +19599,7 @@ yanked
 yap
 yard
 yaw
+yay
 ycm
 yd
 ye
