@@ -33,6 +33,9 @@ sed
 symlink
 ulimit
 uname
+usr
+vcs
 vlog
 wc
+xargs
 xserver

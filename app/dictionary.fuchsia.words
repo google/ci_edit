@@ -56,9 +56,11 @@ fidlc
 fsl
 fxl
 fzl
+gmock
 gn
 gni
 googlesource
+googletest
 gpaddr
 gtest
 idx
