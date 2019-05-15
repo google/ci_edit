@@ -250,6 +250,24 @@ def columnToIndex(column, string):
     return index
 
 
+def charAtColumn(column, string):
+    """If the visual cursor is on |column|, which index of the string is the
+    cursor on?"""
+    if app.config.strict_debug:
+        assert isinstance(column, int)
+        assert isinstance(string, unicode)
+    index = 0
+    for i in string:
+        if i > MIN_DOUBLE_WIDE_CHARACTER:
+            column -= 2
+        else:
+            column -= 1
+        if column < 0:
+            return string[index]
+        index += 1
+    return None
+
+
 def fitToRenderedWidth(width, string):
     """With |width| character cells (columns) available, how much of |string|
     can I render?

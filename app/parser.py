@@ -266,6 +266,34 @@ class Parser:
             visualEnd = lastNode[kVisual]
         return self.data[begin:end], visualEnd - visual
 
+    def rowWidth(self, row):
+        """Get the visual/display column width of a row.
+
+        If the text is all ASCII then len(text) will equal the column width. If
+        there are double wide characters (e.g. Chinese or some emoji) the column
+        width may be larger than len(text).
+
+        Args:
+            row (int): the row index is zero based (so it's line number - 1).
+
+        Returns:
+            columnWidth (int)
+        """
+        if app.config.strict_debug:
+            assert isinstance(row, int)
+        visual = self.parserNodes[self.rows[row]][kVisual]
+        if row + 1 < len(self.rows):
+            end = self.parserNodes[self.rows[row + 1]][kBegin]
+            visualEnd = self.parserNodes[self.rows[row + 1]][kVisual]
+            if len(self.data) and self.data[end - 1] == '\n':
+                visualEnd -= 1
+        else:
+            # There is a sentinel node at the end that records the end of
+            # document.
+            lastNode = self.parserNodes[-1]
+            visualEnd = lastNode[kVisual]
+        return visualEnd - visual
+
     def __buildGrammarList(self, bgThread, appPrefs):
         """The guts of the parser. This is where the heavy lifting is done.
 

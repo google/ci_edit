@@ -185,6 +185,9 @@ class TextIndentTestCases(unittest.TestCase):
             def rowTextAndWidth(self, row):
                 return (u"hello", len(u"hello"))
 
+            def rowWidth(self, row):
+                return len(u"hello")
+
         self.prg.prefs.editor['autoInsertClosingCharacter'] = False
         tb = self.textBuffer
         insert = self.textBuffer.insertPrintableWithPairing

@@ -53,6 +53,21 @@ def isStringType(value):
 BRACKETED_PASTE_BEGIN = (91, 50, 48, 48, 126)  # i.e. "[200~"
 BRACKETED_PASTE_END = (91, 50, 48, 49, 126)  # i.e. "[201~"
 BRACKETED_PASTE = ("terminal_paste",)  # Pseudo event type.
+MIN_DOUBLE_WIDE_CHARACTER = u"\u3000"
+def columnWidth(string):
+    """When rendering |string| how many character cells will be used? For ASCII
+    characters this will equal len(string). For many Chinese characters and
+    emoji the value will be greater than len(string), since many of them use two
+    cells.
+    """
+    assert isinstance(string, unicode), repr(string)
+    width = 0
+    for i in string:
+        if i > MIN_DOUBLE_WIDE_CHARACTER:
+            width += 2
+        else:
+            width += 1
+    return width
 
 
 class error(BaseException):
