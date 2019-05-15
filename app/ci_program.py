@@ -1,3 +1,5 @@
+
+# -*- coding: utf-8 -*-
 # Copyright 2016 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,9 +19,15 @@ from __future__ import division
 from __future__ import print_function
 try:
     unicode
+    def bytes_to_unicode(chars):
+        chars = "".join([chr(i) for i in chars])
+        return chars.decode("utf-8")
 except NameError:
     unicode = str
     unichr = chr
+    def bytes_to_unicode(values):
+        return bytes(values).decode("utf-8")
+assert bytes_to_unicode((226, 143, 176)) == u'⏰'
 
 import cProfile
 import pstats
@@ -233,19 +241,18 @@ class CiProgram:
                         if (ch & 0xe0) == 0xc0:
                             # Two byte utf-8.
                             b = cursesWindow.getch()
-                            u = (chr(ch) + chr(b)).decode("utf-8")
+                            u = bytes_to_unicode((ch, b))
                         elif (ch & 0xf0) == 0xe0:
                             # Three byte utf-8.
                             b = cursesWindow.getch()
                             c = cursesWindow.getch()
-                            u = (chr(ch) + chr(b) + chr(c)).decode("utf-8")
+                            u = bytes_to_unicode((ch, b, c))
                         elif (ch & 0xf8) == 0xf0:
                             # Four byte utf-8.
                             b = cursesWindow.getch()
                             c = cursesWindow.getch()
                             d = cursesWindow.getch()
-                            u = (chr(ch) + chr(b) + chr(c) +
-                                 chr(d)).decode("utf-8")
+                            u = bytes_to_unicode((ch, b, c, d))
                         assert u is not None
                         eventInfo = u
                         ch = app.curses_util.UNICODE_INPUT
