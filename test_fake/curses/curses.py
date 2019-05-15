@@ -122,6 +122,7 @@ class FakeInput:
                         self.tupleIndex = -1
                         if cmd == BRACKETED_PASTE_END:
                             self.inBracketedPaste = False
+                        if cmd != BRACKETED_PASTE_BEGIN:
                             self.waitingForRefresh = True
                         if self.isVerbose:
                             print(cmd, type(cmd))
@@ -223,6 +224,9 @@ class FakeDisplay:
 
     def draw(self, cursorRow, cursorCol, text, colorPair):
         #assert (colorPair & DEBUG_COLOR_PAIR_MASK) in self.colors.values()
+        assert isinstance(cursorRow, int)
+        assert isinstance(cursorCol, int)
+        assert isinstance(text, unicode)
         assert colorPair >= DEBUG_COLOR_PAIR_BASE
         for i in text:
             if i == '\r':
