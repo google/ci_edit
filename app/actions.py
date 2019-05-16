@@ -74,18 +74,23 @@ class Actions(app.mutator.Mutator):
           None if matching bracket isn't found.
           Position (int row, int col) of the matching bracket otherwise.
         """
-        if (self.parser.rowCount() <= self.penRow or
-                len(self.parser.rowText(self.penRow)) <= self.penCol):
+        if self.parser.rowCount() <= self.penRow:
             return None
-        ch = self.parser.rowText(self.penRow)[self.penCol]
+        text, width = self.parser.rowTextAndWidth(self.penRow)
+        if width <= self.penCol:
+            return None
+        ch = app.curses_util.charAtColumn(self.penCol, text)
 
         def searchForward(openCh, closeCh):
             count = 1
             textCol = self.penCol + 1
             for row in range(self.penRow, self.parser.rowCount()):
-                if row != self.penRow:
+                if row == self.penRow:
+                    line = self.parser.rowText(row)
+                    line = app.curses_util.renderedSubStr(line, textCol)
+                else:
                     textCol = 0
-                line = self.parser.rowText(row)[textCol:]
+                    line = self.parser.rowText(row)
                 for match in re.finditer(
                         u"(\\" + openCh + u")|(\\" + closeCh + u")", line):
                     if match.group() == openCh:
@@ -93,7 +98,8 @@ class Actions(app.mutator.Mutator):
                     else:
                         count -= 1
                     if count == 0:
-                        textCol += match.start()
+                        textCol += app.curses_util.columnWidth(
+                            line[:match.start()])
                         return row, textCol
 
         def searchBack(closeCh, openCh):
@@ -101,7 +107,7 @@ class Actions(app.mutator.Mutator):
             for row in range(self.penRow, -1, -1):
                 line = self.parser.rowText(row)
                 if row == self.penRow:
-                    line = line[:self.penCol]
+                    line = app.curses_util.renderedSubStr(line, 0, self.penCol)
                 found = [
                     i for i in re.finditer(
                         u"(\\" + openCh + u")|(\\" + closeCh + u")", line)
@@ -112,7 +118,8 @@ class Actions(app.mutator.Mutator):
                     else:
                         count -= 1
                     if count == 0:
-                        textCol = match.start()
+                        textCol = app.curses_util.columnWidth(
+                            line[:match.start()])
                         return row, textCol
 
         matcher = {
@@ -862,7 +869,7 @@ class Actions(app.mutator.Mutator):
 
     def editPaste(self):
         data = self.program.clipboard.paste()
-        if hasattr(data, 'decode'):
+        if not isinstance(data, unicode) and hasattr(data, 'decode'):
             data = data.decode('utf-8')
         if data is not None:
             self.editPasteData(data)
@@ -1851,7 +1858,7 @@ class Actions(app.mutator.Mutator):
         for i in range(len(self.lines)):
             for found in app.regex.kReEndSpaces.finditer(self.lines[i]):
                 self._performDeleteRange(i, found.regs[0][0], i,
-                                        found.regs[0][1])
+                                         found.regs[0][1])
 
     def unindent(self):
         if self.selectionMode != app.selectable.kSelectionNone:

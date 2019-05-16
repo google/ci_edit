@@ -127,6 +127,7 @@ class CursesUtilTestCases(unittest.TestCase):
         self.assertEqual(5, app.curses_util.fitToRenderedWidth(12, u"こんにちは"))
 
     def test_rendered_sub_str(self):
+        self.assertEqual(u"test", app.curses_util.renderedSubStr(u"test", 0))
         self.assertEqual(u"test", app.curses_util.renderedSubStr(u"test", 0, 4))
         self.assertEqual(u"est", app.curses_util.renderedSubStr(u"test", 1, 4))
         self.assertEqual(u"st", app.curses_util.renderedSubStr(u"test", 2, 4))
@@ -153,6 +154,7 @@ class CursesUtilTestCases(unittest.TestCase):
             u"こんにちは", 3, 10))
         self.assertEqual(u"にちは", app.curses_util.renderedSubStr(
             u"こんにちは", 4, 10))
+        self.assertEqual(u"は", app.curses_util.renderedSubStr(u"こんにちは", 8))
         self.assertEqual(u"は", app.curses_util.renderedSubStr(u"こんにちは", 8, 10))
         self.assertEqual(u" ", app.curses_util.renderedSubStr(u"こんにちは", 9, 10))
         self.assertEqual(u"", app.curses_util.renderedSubStr(u"こんにちは", 10, 10))

@@ -230,7 +230,8 @@ class TextBuffer(app.actions.Actions):
             # Match brackets.
             if (self.parser.rowCount() > self.penRow and
                     len(self.parser.rowText(self.penRow)) > self.penCol):
-                ch = self.parser.rowText(self.penRow)[self.penCol]
+                ch = app.curses_util.charAtColumn(
+                    self.penCol, self.parser.rowText(self.penRow))
                 matchingBracketRowCol = self.getMatchingBracketRowCol()
                 if matchingBracketRowCol is not None:
                     matchingBracketRow = matchingBracketRowCol[0]
@@ -238,7 +239,7 @@ class TextBuffer(app.actions.Actions):
                     window.addStr(
                         top + self.penRow - startRow,
                         self.penCol - self.view.scrollCol,
-                        self.parser.rowText(self.penRow)[self.penCol],
+                        ch,
                         colorPrefs.get(u'matching_bracket', colorDelta))
                     characterFinder = {
                         u'(': u')',

@@ -339,7 +339,7 @@ def renderedFindIter(string, beginCol, endCol, charGroups, numbers, eolSpaces):
         yield string[index:], index, index, len(charGroups) + 1
 
 
-def renderedSubStr(string, beginCol, endCol):
+def renderedSubStr(string, beginCol, endCol=None):
     """
     Get a slice (similar to `string[beginCol:endCol]`) based on the rendered
     width of the string. If columns beginCol or endCol land in the middle of a
@@ -350,11 +350,14 @@ def renderedSubStr(string, beginCol, endCol):
     Args:
       string: The string to slice.
       beginCol: The first column of text (inclusive).
-      endCol: The last column of text (exclusive).
+      endCol: The last column of text (exclusive). Omit parameter for
+              end-of-line (similar to `string[beginCol:]`).
 
     Returns:
       unicode string
     """
+    if endCol is None:
+        endCol = sys.maxsize
     if app.config.strict_debug:
         assert isinstance(string, unicode)
         assert isinstance(beginCol, int)
@@ -404,6 +407,7 @@ def renderedSubStr(string, beginCol, endCol):
         i += 1
     return string[beginIndex:endIndex]
 
+
 def columnWidth(string):
     """When rendering |string| how many character cells will be used? For ASCII
     characters this will equal len(string). For many Chinese characters and
@@ -419,6 +423,7 @@ def columnWidth(string):
         else:
             width += 1
     return width
+
 
 def wrapLines(lines, indent, width):
     """Word wrap lines of text.
