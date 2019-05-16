@@ -85,12 +85,11 @@ class Actions(app.mutator.Mutator):
             count = 1
             textCol = self.penCol + 1
             for row in range(self.penRow, self.parser.rowCount()):
+                line = self.parser.rowText(row)
                 if row == self.penRow:
-                    line = self.parser.rowText(row)
                     line = app.curses_util.renderedSubStr(line, textCol)
                 else:
                     textCol = 0
-                    line = self.parser.rowText(row)
                 for match in re.finditer(
                         u"(\\" + openCh + u")|(\\" + closeCh + u")", line):
                     if match.group() == openCh:
