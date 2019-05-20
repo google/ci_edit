@@ -1539,7 +1539,7 @@ class Actions(app.mutator.Mutator):
             self.editPasteData(meta)
         elif ch is app.curses_util.UNICODE_INPUT:
             self.insert(meta)
-        elif curses.ascii.isprint(ch):
+        elif type(ch) is int and curses.ascii.isprint(ch):
             self.insert(unichr(ch))
 
     def insertPrintableWithPairing(self, ch, meta):

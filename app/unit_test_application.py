@@ -43,6 +43,17 @@ class ApplicationTestCases(app.fake_curses_testing.FakeCursesTestCase):
             self.displayCheck(2, 7, [u"tet "]), CTRL_Q, u"n"
         ])
 
+    def test_backspace_emoji(self):
+        self.runWithTestFile(kTestFile, [
+            self.displayCheck(2, 7, [u"      "]),
+            self.cursorCheck(2, 7),
+            (226, 143, 176),
+            #self.cursorCheck(2, 9),
+            self.displayCheck(2, 7, [u"⏰"]), KEY_BACKSPACE1, u"t",
+            self.displayCheck(2, 7, [u"t     "]),
+            CTRL_Q, u"n"
+        ])
+
     def test_cursor_moves(self):
         self.runWithTestFile(kTestFile, [
             self.displayCheck(0, 0, [
