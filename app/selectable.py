@@ -76,7 +76,21 @@ class Selectable(BaseLineBuffer):
 
     def __init__(self):
         BaseLineBuffer.__init__(self)
+        # When a text document is not line wrapped then each row will represent
+        # one line in the document, thow rows are zero based and lines are one
+        # based. With line wrapping enabled there may be more rows than lines
+        # since a line may wrap into multiple rows.
         self.penRow = 0
+        # When a text document contains only ascii characters then each char
+        # (character) will represent one column in the text line (col is zero
+        # based and the column displayed in the UI is one based). When double
+        # wide character are present then a line of text will have more columns
+        # than characters.
+        # (penChar is not currently used).
+        self.penChar = 0
+        # When a text document contains only ascii characters then each column
+        # will represent one column in the text line (col is zero based and
+        # column displayed in the UI is one based).
         self.penCol = 0
         self.markerRow = 0
         self.markerCol = 0
