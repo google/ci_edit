@@ -234,6 +234,36 @@ class Parser:
             end -= 1
         return self.data[begin:end]
 
+    def charAt(self, row, col):
+        """Get the character at |row|, |col|.
+
+        Args:
+            row (int): zero based index into list of rows.
+            col (int): zero based visual offset from start of line.
+
+        Returns:
+            character (unicode) or None if row, col is outside of the document.
+        """
+        if app.config.strict_debug:
+            assert isinstance(row, int)
+            assert isinstance(col, int)
+            assert isinstance(self.data, unicode)
+        if row > len(self.rows):
+            return None
+        begin = self.parserNodes[self.rows[row]][kBegin]
+        if row + 1 >= len(self.rows):
+            end = self.parserNodes[-1][kBegin]
+        else:
+            end = self.parserNodes[self.rows[row + 1]][kBegin]
+        while begin < end:
+            if col <= 0:
+                return self.data[begin]
+            if self.data[begin] >= app.curses_util.MIN_DOUBLE_WIDE_CHARACTER:
+                col -= 1
+            col -= 1
+            begin += 1
+        return None
+
     def rowTextAndWidth(self, row):
         """Get the character data and the visual/display column width of those
         characters.

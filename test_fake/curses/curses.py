@@ -235,9 +235,13 @@ class FakeDisplay:
             try:
                 self.displayText[cursorRow][cursorCol] = i
                 self.displayStyle[cursorRow][cursorCol] = colorPair
+                cursorCol += 1
+                if columnWidth(i) > 1:
+                    self.displayText[cursorRow][cursorCol] = u" "
+                    self.displayStyle[cursorRow][cursorCol] = colorPair
+                    cursorCol += 1
             except IndexError:
                 raise error()
-            cursorCol += 1
         return cursorRow, cursorCol
 
     def findText(self, screenText):

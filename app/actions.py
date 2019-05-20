@@ -35,6 +35,7 @@ import traceback
 
 import app.bookmark
 import app.config
+from app.curses_util import columnWidth
 import app.history
 import app.log
 import app.mutator
@@ -138,11 +139,6 @@ class Actions(app.mutator.Mutator):
         if matchingBracketRowCol is not None:
             self.penRow = matchingBracketRowCol[0]
             self.penCol = matchingBracketRowCol[1]
-
-    def charAt(self, row, col):
-        if row >= len(self.lines) or col >= len(self.lines[row]):
-            return None
-        return self.lines[row][col]
 
     def performDelete(self):
         if self.selectionMode != app.selectable.kSelectionNone:
@@ -363,10 +359,11 @@ class Actions(app.mutator.Mutator):
             line = self.lines[self.penRow - 1]
             #commonIndent = len(self.program.prefs.editor['indentation'])
             nonSpace = 0
-            while nonSpace < len(line) and line[nonSpace].isspace():
+            width = columnWidth(line)
+            while nonSpace < width and line[nonSpace].isspace():
                 nonSpace += 1
             indent = line[:nonSpace]
-            if len(line):
+            if width:
                 lastChar = line.rstrip()[-1:]
                 if lastChar == u':':
                     indent += grammarIndent
@@ -398,7 +395,7 @@ class Actions(app.mutator.Mutator):
         if app.config.strict_debug:
             assert isinstance(toRow, int)
             assert 0 <= toRow < len(self.lines)
-        lineLen = len(self.lines[toRow])
+        lineLen = columnWidth(self.lines[toRow])
         if self.goalCol <= lineLen:
             return self.goalCol - self.penCol
         return lineLen - self.penCol
@@ -466,7 +463,8 @@ class Actions(app.mutator.Mutator):
         savedGoal = self.goalCol
         if self.penRow == len(self.lines) - 1:
             self.setMessage(u'End of file')
-            self.cursorMove(0, len(self.lines[self.penRow]) - self.penCol)
+            width = self.parser.rowWidth(self.penRow)
+            self.cursorMove(0, width - self.penCol)
         else:
             self.cursorMove(1, self.cursorColDelta(self.penRow + 1))
         self.goalCol = savedGoal
@@ -474,11 +472,12 @@ class Actions(app.mutator.Mutator):
 
     def adjustHorizontalScroll(self):
         if self.view.scrollCol:
-            if len(self.lines[self.penRow]) < self.view.cols:
+            width = self.parser.rowWidth(self.penRow)
+            if width < self.view.cols:
                 # The whole line fits on screen.
                 self.view.scrollCol = 0
             elif (self.view.scrollCol == self.penCol and
-                  self.penCol == len(self.lines[self.penRow])):
+                  self.penCol == width):
                 self.view.scrollCol = max(
                     0, self.view.scrollCol - self.view.cols // 4)
 
@@ -487,11 +486,11 @@ class Actions(app.mutator.Mutator):
         line, lineColWidth = self.parser.rowTextAndWidth(self.penRow)
         if lineColWidth > 0:
             index = app.curses_util.columnToIndex(self.penCol - 1, line)
-            colWidth = app.curses_util.columnWidth(line[index])
+            colWidth = columnWidth(line[index])
         if self.penCol - colWidth >= 0:
             self.cursorMove(0, -colWidth)
         elif self.penRow > 0:
-            self.cursorMove(-1, len(self.lines[self.penRow - 1]))
+            self.cursorMove(-1, self.parser.rowWidth(self.penRow - 1))
         else:
             self.setMessage(u'Top of file')
 
@@ -515,7 +514,7 @@ class Actions(app.mutator.Mutator):
             self.setMessage(u'Top of file')
             return
         savedGoal = self.goalCol
-        lineLen = len(self.lines[self.penRow - 1])
+        lineLen = columnWidth(self.lines[self.penRow - 1])
         if self.goalCol <= lineLen:
             self.cursorMove(-1, self.goalCol - self.penCol)
         else:
@@ -536,7 +535,7 @@ class Actions(app.mutator.Mutator):
             self.setMessage(u'Top of file')
             self.cursorMove(0, -self.penCol)
         else:
-            lineLen = len(self.lines[self.penRow - 1])
+            lineLen = columnWidth(self.lines[self.penRow - 1])
             if self.goalCol <= lineLen:
                 self.cursorMove(-1, self.goalCol - self.penCol)
             else:
@@ -1527,6 +1526,8 @@ class Actions(app.mutator.Mutator):
         self.redo()
 
     def insert(self, text):
+        if app.config.strict_debug:
+            assert isinstance(text, unicode)
         self.performDelete()
         self.redoAddChange((u'i', text))
         self.redo()
@@ -1554,8 +1555,8 @@ class Actions(app.mutator.Mutator):
                 }
                 skips = pairs.values()
                 mate = pairs.get(ch)
-                nextChr = self.charAt(self.penRow, self.penCol)
-                if chr(ch) in skips and chr(ch) == nextChr:
+                nextChr = self.parser.charAt(self.penRow, self.penCol)
+                if unichr(ch) in skips and unichr(ch) == nextChr:
                     self.cursorMove(0, 1)
                 elif mate is not None and (nextChr is None or
                                            nextChr.isspace()):

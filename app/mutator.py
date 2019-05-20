@@ -20,6 +20,7 @@ import os
 import re
 
 import app.buffer_file
+from app.curses_util import columnWidth
 import app.log
 import app.parser
 import app.selectable
@@ -254,22 +255,24 @@ class Mutator(app.selectable.Selectable):
     def __redoChange(self, change):
         if change[0] == 'b':  # Redo backspace.
             line = self.lines[self.penRow]
-            self.penCol -= len(change[1])
+            width = columnWidth(change[1])
+            self.penCol -= width
             x = self.penCol
-            self.lines[self.penRow] = line[:x] + line[x + len(change[1]):]
+            self.lines[self.penRow] = line[:x] + line[x + width:]
             if self.upperChangedRow > self.penRow:
                 self.upperChangedRow = self.penRow
         elif change[0] == 'bw':  # Redo backspace word.
             line = self.lines[self.penRow]
-            self.penCol -= len(change[1])
+            width = columnWidth(change[1])
+            self.penCol -= width
             x = self.penCol
-            self.lines[self.penRow] = line[:x] + line[x + len(change[1]):]
+            self.lines[self.penRow] = line[:x] + line[x + width:]
             if self.upperChangedRow > self.penRow:
                 self.upperChangedRow = self.penRow
         elif change[0] == 'd':  # Redo delete character.
             line = self.lines[self.penRow]
             x = self.penCol
-            self.lines[self.penRow] = line[:x] + line[x + len(change[1]):]
+            self.lines[self.penRow] = line[:x] + line[x + columnWidth(change[1]):]
             if self.upperChangedRow > self.penRow:
                 self.upperChangedRow = self.penRow
         elif change[0] == 'dr':  # Redo delete range.
@@ -282,7 +285,7 @@ class Mutator(app.selectable.Selectable):
             line = self.lines[self.penRow]
             x = self.penCol
             self.lines[self.penRow] = line[:x] + change[1] + line[x:]
-            self.penCol += len(change[1])
+            self.penCol += columnWidth(change[1])
             self.goalCol = self.penCol
             if self.upperChangedRow > self.penRow:
                 self.upperChangedRow = self.penRow
@@ -325,13 +328,13 @@ class Mutator(app.selectable.Selectable):
         elif change[0] == 'v':  # Redo paste.
             self.insertLines(change[1])
         elif change[0] == 'vb':  # Redo vertical backspace.
-            self.penCol -= len(change[1])
+            self.penCol -= columnWidth(change[1])
             row = min(self.markerRow, self.penRow)
             rowEnd = max(self.markerRow, self.penRow)
             for i in range(row, rowEnd + 1):
                 line = self.lines[i]
                 x = self.penCol
-                self.lines[self.penRow] = line[:x] + line[x + len(change[1]):]
+                self.lines[self.penRow] = line[:x] + line[x + columnWidth(change[1]):]
             if self.upperChangedRow > row:
                 self.upperChangedRow = row
         elif change[0] == 'vd':  # Redo vertical delete.
@@ -439,14 +442,14 @@ class Mutator(app.selectable.Selectable):
             line = self.lines[self.penRow]
             x = self.penCol
             self.lines[self.penRow] = line[:x] + change[1] + line[x:]
-            self.penCol += len(change[1])
+            self.penCol += columnWidth(change[1])
             if self.upperChangedRow > self.penRow:
                 self.upperChangedRow = self.penRow
         elif change[0] == 'bw':
             line = self.lines[self.penRow]
             x = self.penCol
             self.lines[self.penRow] = line[:x] + change[1] + line[x:]
-            self.penCol += len(change[1])
+            self.penCol += columnWidth(change[1])
             if self.upperChangedRow > self.penRow:
                 self.upperChangedRow = self.penRow
         elif change[0] == 'd':
@@ -465,8 +468,9 @@ class Mutator(app.selectable.Selectable):
         elif change[0] == 'i':  # Undo insert.
             line = self.lines[self.penRow]
             x = self.penCol
-            self.penCol -= len(change[1])
-            self.lines[self.penRow] = line[:x - len(change[1])] + line[x:]
+            width = columnWidth(change[1])
+            self.penCol -= width
+            self.lines[self.penRow] = line[:x - width] + line[x:]
             self.goalCol = self.penCol
             if self.upperChangedRow > self.penRow:
                 self.upperChangedRow = self.penRow
@@ -534,7 +538,7 @@ class Mutator(app.selectable.Selectable):
                 line = self.lines[self.penRow]
                 x = self.penCol
                 self.lines[self.penRow] = line[:x] + change[1] + line[x:]
-            self.penCol += len(change[1])
+            self.penCol += columnWidth(change[1])
             if self.upperChangedRow > row:
                 self.upperChangedRow = row
         elif change[0] == 'vd':  # Undo vertical delete
