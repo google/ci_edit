@@ -32,6 +32,7 @@ import re
 import sys
 import time
 import traceback
+import warnings
 
 import app.bookmark
 import app.config
@@ -1299,10 +1300,13 @@ class Actions(app.mutator.Mutator):
         if editorPrefs.get(u'findWholeWord'):
             searchFor = r"\b%s\b" % searchFor
         #app.log.info(searchFor, flags)
-        # The saved re is also used for highlighting.
-        self.findRe = re.compile(searchFor, flags)
-        self.findBackRe = re.compile(u"%s(?!.*%s.*)" % (searchFor, searchFor),
-                                     flags)
+        with warnings.catch_warnings():
+            # Ignore future warning with '[[' regex.
+            warnings.simplefilter("ignore")
+            # The saved re is also used for highlighting.
+            self.findRe = re.compile(searchFor, flags)
+            self.findBackRe = re.compile(u"%s(?!.*%s.*)" % (searchFor, searchFor),
+                                         flags)
         self.findCurrentPattern(direction)
 
     def replaceFound(self, replaceWith):
