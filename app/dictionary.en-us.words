@@ -15,10 +15,6 @@
 # This word list is a fallback for times when an OS dictionary is not available.
 # It's not a full list of English words (not by a long way).
 # Additional abbreviations, acronyms, and names are in dictionary.en-misc.words.
-redistributed
-funding
-cooperation
-complementing
 a
 aah
 aardvark
@@ -3277,6 +3273,7 @@ complaint
 complaints
 complement
 complementary
+complementing
 complements
 complete
 completed
@@ -3751,6 +3748,7 @@ cooper
 cooperate
 cooperates
 cooperating
+cooperation
 cooperatively
 cooperatives
 coordinate
@@ -7130,6 +7128,7 @@ fund
 fundamental
 fundamentally
 fundamentals
+funding
 funds
 funeral
 funk
@@ -9750,6 +9749,7 @@ lexer
 lexical
 lexicographic
 lexicographical
+lexicographically
 lexicon
 lg
 liabilities
@@ -9905,6 +9905,7 @@ little
 live
 lived
 lively
+liveness
 livery
 lives
 living
@@ -10132,6 +10133,7 @@ magics
 magnet
 magnetic
 magnetism
+magnetometer
 magnification
 magnified
 magnifier
@@ -10973,6 +10975,7 @@ multicolored
 multifarious
 multilayer
 multilayered
+multiline
 multilingual
 multimedia
 multipart
@@ -11310,6 +11313,7 @@ normality
 normalization
 normalize
 normalized
+normalizer
 normalizes
 normalizing
 normally
@@ -14012,6 +14016,7 @@ rediscovery
 redisplayed
 redisplaying
 redistribute
+redistributed
 redistributing
 redistribution
 redistributions
