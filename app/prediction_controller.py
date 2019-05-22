@@ -24,6 +24,7 @@ except NameError:
 import os
 import re
 import time
+import warnings
 
 import app.buffer_file
 import app.controller
@@ -111,14 +112,20 @@ class PredictionListController(app.controller.Controller):
                         items.append((None, chromiumPath, '=', 'alt', 200))
                         added.add(chromiumPath)
         if self.filter is not None:
-            regex = re.compile(self.filter)
-            i = 0
-            while i < len(items):
-                if not regex.search(items[i][1]):
-                    # Filter the list in-place.
-                    items.pop(i)
-                else:
-                    i += 1
+            try:
+                with warnings.catch_warnings():
+                    # Ignore future warning with '[[' regex.
+                    warnings.simplefilter("ignore")
+                    regex = re.compile(self.filter)
+                i = 0
+                while i < len(items):
+                    if not regex.search(items[i][1]):
+                        # Filter the list in-place.
+                        items.pop(i)
+                    else:
+                        i += 1
+            except re.error:
+                self.view.textBuffer.setMessage(u"invalid regex")
 
     def focus(self):
         #app.log.info('PredictionListController')
@@ -129,7 +136,8 @@ class PredictionListController(app.controller.Controller):
         app.log.info('PredictionListController command set')
 
     def onChange(self):
-        self.filter = self.view.parent.predictionInputWindow.controller.decodedPath()
+        controller = self.view.parent.predictionInputWindow.controller
+        self.filter = controller.decodedPath()
         if self.shownList == self.filter:
             return
         self.shownList = self.filter
