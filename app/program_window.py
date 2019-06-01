@@ -154,19 +154,23 @@ class ProgramWindow(app.window.ActiveWindow):
             win = win.parent
 
     def longTimeSlice(self):
+        """returns whether work is finished (no need to call again)."""
         win = self.focusedWindow
-        finished = True
         while win is not None and win is not self:
-            finished = finished and win.longTimeSlice()
+            if not win.longTimeSlice():
+                return False
             win = win.parent
-        return finished
+        return True
 
     def shortTimeSlice(self):
+        """returns whether work is finished (no need to call again)."""
         win = self.focusedWindow
         while win is not None and win is not self:
-            win.shortTimeSlice()
+            if not win.shortTimeSlice():
+                return False
             #assert win is not win.parent
             win = win.parent
+        return True
 
     def clickedNearby(self, row, col):
         y, x = self.priorClickRowCol

@@ -70,7 +70,7 @@ def background(inputQueue, outputQueue):
                     app.log.info('bg received quit message')
                     return
                 program.executeCommandList(message)
-                program.shortTimeSlice()
+                block = program.shortTimeSlice()
                 program.render()
                 # debugging only: program.showWindowHierarchy()
                 cmdCount += len(message)
@@ -78,7 +78,7 @@ def background(inputQueue, outputQueue):
                 os.kill(pid, signalNumber)
                 #app.profile.endPythonProfile(profile)
                 time.sleep(0)  # See note in hasMessage().
-                if not inputQueue.empty():
+                if block or not inputQueue.empty():
                     continue
             except queue.Empty:
                 pass

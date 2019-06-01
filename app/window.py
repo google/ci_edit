@@ -280,7 +280,8 @@ class ViewWindow:
         return True
 
     def shortTimeSlice(self):
-        pass
+        """returns whether work is finished (no need to call again)."""
+        return True
 
     def reshape(self, top, left, rows, cols):
         self.moveTo(top, left)
@@ -444,8 +445,12 @@ class Window(ActiveWindow):
         return finished
 
     def shortTimeSlice(self):
-        if self.textBuffer is not None:
-            self.textBuffer.parseScreenMaybe()
+        """returns whether work is finished (no need to call again)."""
+        tb = self.textBuffer
+        if tb is not None:
+            tb.parseScreenMaybe()
+            return tb.parser.fullyParsedToLine >= len(tb.lines)
+        return True
 
 
 class LabelWindow(ViewWindow):
@@ -714,7 +719,7 @@ class LogWindow(ViewWindow):
 
     def render(self):
         self.renderCounter += 1
-        app.log.meta(u" " * 10, self.renderCounter, u"- screen refresh -")
+        app.log.meta(u" " * 10, self.renderCounter, u"- screen render -")
         self.writeLineRow = 0
         colorPrefs = self.program.color
         colorA = colorPrefs.get(u'default')
