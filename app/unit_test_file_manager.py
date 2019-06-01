@@ -129,3 +129,15 @@ class FileManagerTestCases(app.fake_curses_testing.FakeCursesTestCase):
             self.displayCheck(0, 0, [u" ci     "]),
             CTRL_Q,
         ])
+
+    def test_show_hide_columns(self):
+        #self.setMovieMode(True)
+        sys.argv = []
+        self.runWithFakeInputs([
+            self.displayCheck(0, 0, [u" ci     "]),
+            CTRL_O,
+            self.displayCheck(0, 0, [u" ci    Open"]),
+            self.addClickInfo(1000, u"[x]sizes", curses.BUTTON1_PRESSED),
+            curses.KEY_MOUSE,
+            CTRL_Q
+        ])

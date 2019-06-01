@@ -242,7 +242,7 @@ class FileManagerWindow(app.window.Window):
 
     def onPrefChanged(self, category, name):
         self.directoryList.controller.optionChanged(category, name)
-        app.window.Window.onPrefChanged(self.program, self, category, name)
+        app.window.Window.onPrefChanged(self, category, name)
 
     def reshape(self, top, left, rows, cols):
         """Change self and sub-windows to fit within the given rectangle."""
