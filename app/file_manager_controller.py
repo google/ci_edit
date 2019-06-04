@@ -132,29 +132,44 @@ class DirectoryListController(app.controller.Controller):
         self.view.scrollCol = 0
         self.filter = None
 
+    def performOpen(self):
+        self.openFileOrDir(self.textBuffer.penRow)
+
     def openFileOrDir(self, row):
         if app.config.strict_debug:
             assert isinstance(row, int)
+        path = self.pathForRow(row)
+        # Clear the shown directory to trigger a refresh.
+        self.shownDirectory = None
+        self.view.parent.pathWindow.controller.setEncodedPath(path)
+        self.view.host.controller.performPrimaryAction()
+
+    def currentDirectory(self):
         pathController = self.view.parent.pathWindow.controller
         path = pathController.decodedPath()
-        if row == 0:  # Clicked on "./".
-            # Clear the shown directory to trigger a refresh.
-            self.shownDirectory = None
-            return
-        elif row == 1:  # Clicked on "../".
-            if path[-1] == os.path.sep:
-                path = path[:-1]
+        if len(path) > 0 and path[-1] != os.path.sep:
             path = os.path.dirname(path)
+            # Test that path is non-empty and there's more than just a '/'.
             if len(path) > len(os.path.sep):
                 path += os.path.sep
-            pathController.setEncodedPath(path)
-            return
-        # If there is a partially typed name in the line, clear it.
-        if path[-1:] != os.path.sep:
-            path = os.path.dirname(path) + os.path.sep
-        pathController.setEncodedPath(path + self.view.contents[row - 2])
-        if not os.path.isdir(pathController.decodedPath()):
-            self.view.host.controller.performPrimaryAction()
+        if app.config.strict_debug:
+            assert isinstance(path, unicode)
+        return path
+
+    def passDefaultToPathInput(self, ch, meta):
+        pathInput = self.findAndChangeTo(u'pathWindow')
+        pathInput.controller.doCommand(ch, meta)
+
+    def pathForRow(self, row):
+        if app.config.strict_debug:
+            assert isinstance(row, int)
+            assert row >= 0, row
+        path = self.currentDirectory()
+        if row == 0:
+            return path + u"./"
+        elif row == 1:
+            return path + u"../"
+        return path + self.view.contents[row - 2]
 
     def optionChanged(self, name, value):
         self.shownDirectory = None
@@ -203,26 +218,39 @@ class FilePathInputController(app.controller.Controller):
         }
 
     def performPrimaryAction(self):
-        directoryList = self.getNamedWindow(u'directoryList')
-        row = directoryList.textBuffer.penRow
-        if row == 0:
-            if not os.path.isdir(self.decodedPath()):
-                self.primaryActions[self.view.parent.mode]()
-        else:
-            directoryList.controller.openFileOrDir(row)
-
-    def doCreateOrOpen(self):
-        appPrefs = self.view.program.prefs
-        path, openToLine, openToColumn = app.buffer_file.pathLineColumn(
-            self.decodedPath(), appPrefs.editor[u"baseDirEnv"])
+        path = self.decodedPath()
         if len(path) == 0:
             app.log.info('path is empty')
             return
+        if path.endswith(u"/./"):
+            #self.shownDirectory = None
+            self.setEncodedPath(path[:-2])
+            return
+        if path.endswith(u"/../"):
+            path = os.path.dirname(path[:-4])
+            if len(path) > len(os.path.sep):
+                path += os.path.sep
+            self.setEncodedPath(path)
+            return
+
+        self.primaryActions[self.view.parent.mode]()
+
+    def doCreateOrOpen(self):
+        decodedPath = self.decodedPath()
+        if os.path.isdir(decodedPath):
+            app.log.info("is dir", repr(decodedPath))
+            return
+        appPrefs = self.view.program.prefs
+        path, openToLine, openToColumn = app.buffer_file.pathLineColumn(
+            decodedPath, appPrefs.editor[u"baseDirEnv"])
         if not os.access(path, os.R_OK):
             if os.path.isfile(path):
+                app.log.info(u"File not readable.")
                 return
         self.setEncodedPath(u"")
         textBuffer = self.view.program.bufferManager.loadTextBuffer(path)
+        if textBuffer is None:
+            return
         if openToLine is not None:
             textBuffer.penRow = openToLine - 1 if openToLine > 0 else 0
         if openToColumn is not None:
@@ -235,6 +263,8 @@ class FilePathInputController(app.controller.Controller):
 
     def doSaveAs(self):
         path = self.decodedPath()
+        if os.path.isdir(path):
+            return
         inputWindow = self.currentInputWindow()
         tb = inputWindow.textBuffer
         tb.setFilePath(path)
@@ -266,7 +296,8 @@ class FilePathInputController(app.controller.Controller):
         if app.config.strict_debug:
             assert isinstance(path, unicode)
             assert self.view.textBuffer is self.textBuffer
-        return self.textBuffer.replaceLines((app.string.pathEncode(path),))
+        self.textBuffer.replaceLines((app.string.pathEncode(path),))
+        self.textBuffer.parseDocument()
 
     def info(self):
         app.log.info(u'FilePathInputController command set')
@@ -285,8 +316,7 @@ class FilePathInputController(app.controller.Controller):
         self.getNamedWindow(u'directoryList').controller.shownDirectory = None
 
     def passEventToDirectoryList(self):
-        self.getNamedWindow(u'directoryList').controller.doCommand(
-            self.savedCh, None)
+        directoryList = self.findAndChangeTo(u'directoryList')
 
     def tabCompleteExtend(self):
         """Extend the selection to match characters in common."""

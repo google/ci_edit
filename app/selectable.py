@@ -68,7 +68,8 @@ class BaseLineBuffer:
                 msg += ' '
             prior = str(i)
             msg += prior
-        #app.log.caller("\n", msg)
+        if app.config.strict_debug:
+            app.log.caller("\n", msg)
         self.message = (repr(msg)[1:-1], kwargs.get('color'))
 
 

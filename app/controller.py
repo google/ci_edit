@@ -137,13 +137,14 @@ class Controller:
         window = self.getNamedWindow(windowName)
         window.bringToFront()
         self.view.changeFocusTo(window)
+        return window
 
     def changeTo(self, window):
         window.bringToFront()
         self.view.changeFocusTo(window)
 
     def focus(self):
-        app.log.info('base controller focus()')
+        pass
 
     def confirmationPromptFinish(self, *args):
         window = self.getNamedWindow('inputWindow')
@@ -351,9 +352,9 @@ class MainController:
     def onChange(self):
         tb = self.view.textBuffer
         if tb.message is None and tb.selectionMode != app.selectable.kSelectionNone:
-              charCount, lineCount = tb.countSelected()
-              tb.setMessage(
-                  u'%d characters (%d lines) selected' % (charCount, lineCount))
+            charCount, lineCount = tb.countSelected()
+            tb.setMessage(
+                u'%d characters (%d lines) selected' % (charCount, lineCount))
         self.controller.onChange()
 
     def nextController(self):

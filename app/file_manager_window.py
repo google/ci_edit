@@ -66,7 +66,6 @@ class DirectoryList(app.window.Window):
             assert self is not host
         app.window.Window.__init__(self, program, host)
         self.host = host
-        self.isFocusable = False
         self.inputWindow = inputWindow
         self.controller = app.cu_editor.DirectoryList(self)
         self.setTextBuffer(app.text_buffer.TextBuffer(self.program))

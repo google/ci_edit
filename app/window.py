@@ -1225,7 +1225,9 @@ class InputWindow(Window):
 
     def setTextBuffer(self, textBuffer):
         if app.config.strict_debug:
-            assert issubclass(textBuffer.__class__, app.text_buffer.TextBuffer)
+            assert issubclass(
+                    textBuffer.__class__, app.text_buffer.TextBuffer), \
+                    repr(textBuffer)
         app.log.info('setTextBuffer')
         if self.textBuffer is not None:
             self.savedScrollPositions[self.textBuffer.fullPath] = (
