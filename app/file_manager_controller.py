@@ -317,6 +317,7 @@ class FilePathInputController(app.controller.Controller):
 
     def passEventToDirectoryList(self):
         directoryList = self.findAndChangeTo(u'directoryList')
+        directoryList.controller.doCommand(self.savedCh, None)
 
     def tabCompleteExtend(self):
         """Extend the selection to match characters in common."""
