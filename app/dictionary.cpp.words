@@ -28,7 +28,9 @@ atexit
 atof
 atoi
 atol
+badbit
 beg
+bitset
 bmstate
 boolalpha
 bsearch
@@ -41,6 +43,7 @@ ceil
 cerr
 cin
 clearerr
+climits
 closedir
 cmath
 conio
@@ -289,6 +292,7 @@ setlocale
 setpercision
 setprecision
 setsockopt
+setstate
 setvbuf
 setw
 showbase
@@ -374,14 +378,19 @@ towctrans
 towlower
 towupper
 trunc
+typeindex
+typeinfo
 typename
 uint
 uintmax
+ull
+ullong
 ungetwc
 unistd
 unsetf
 usleep
 va
+valarray
 vasprintf
 vdprintf
 vfprintf
