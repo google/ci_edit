@@ -803,7 +803,7 @@ prefs = {
         # Generate Ninja language.
         "gn": {
             "indent": "  ",
-            "keywords": ["else", "false", "foreach", "if", "true"],
+            "keywords": ["else", "false", "foreach", "if", "import", "true"],
             "special": [],
             "types": [],
             "contains": [
