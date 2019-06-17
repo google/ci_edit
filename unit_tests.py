@@ -57,6 +57,7 @@ import app.unit_test_prediction_window
 import app.unit_test_prefs
 import app.unit_test_regex
 import app.unit_test_selectable
+import app.unit_test_startup
 import app.unit_test_string
 import app.unit_test_text_buffer
 import app.unit_test_ui
@@ -106,6 +107,8 @@ TESTS = {
     app.unit_test_regex.RegexTestCases,
     'selectable':
     app.unit_test_selectable.SelectableTestCases,
+    'startup':
+    app.unit_test_startup.StartupTestCases,
     'string':
     app.unit_test_string.StringTestCases,
     'draw':

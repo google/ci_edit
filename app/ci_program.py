@@ -158,6 +158,7 @@ class CiProgram:
         if useBgThread:
             self.bg.put((self.programWindow, []))
         else:
+            self.programWindow.shortTimeSlice()
             self.programWindow.render()
         # This is the 'main loop'. Execution doesn't leave this loop until the
         # application is closing down.

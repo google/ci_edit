@@ -120,6 +120,11 @@ class FakeCursesTestCase(unittest.TestCase):
         return displayChecker
 
     def displayFindCheck(self, *args):
+        """
+        Args:
+            find_string (unicode): locate this string.
+            check_string (unicode): verify this follows |find_string|.
+        """
         assert len(args) == 2
         assert isinstance(args[0], unicode)
         assert isinstance(args[1], unicode)

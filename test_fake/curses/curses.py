@@ -325,8 +325,12 @@ class FakeCursesWindow:
         testLog(3, *args)
         cursorRow = args[0]
         cursorCol = args[1]
+        assert isinstance(cursorRow, int)
+        assert isinstance(cursorCol, int)
+        assert isinstance(args[2], bytes), repr(args[2])
         text = args[2].decode("utf-8")
         color = args[3]
+        assert isinstance(cursorRow, int)
         self.cursorRow, self.cursorCol = fakeDisplay.draw(
             cursorRow, cursorCol, text, color)
 
