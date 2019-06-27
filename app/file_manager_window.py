@@ -137,6 +137,7 @@ class DirectoryList(app.window.Window):
         textBuffer.highlightCursorLine = True
         textBuffer.highlightTrailingWhitespace = False
         app.window.Window.setTextBuffer(self, textBuffer)
+        textBuffer.view.showCursor = False
         self.controller.setTextBuffer(textBuffer)
 
 

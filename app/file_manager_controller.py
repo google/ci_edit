@@ -128,6 +128,7 @@ class DirectoryListController(app.controller.Controller):
         self.view.textBuffer.parseScreenMaybe()
         self.view.textBuffer.penRow = 0
         self.view.textBuffer.penCol = 0
+        self.view.textBuffer.goalCol = 0
         self.view.scrollRow = 0
         self.view.scrollCol = 0
         self.filter = None
@@ -255,6 +256,7 @@ class FilePathInputController(app.controller.Controller):
             textBuffer.penRow = openToLine - 1 if openToLine > 0 else 0
         if openToColumn is not None:
             textBuffer.penCol = openToColumn - 1 if openToColumn > 0 else 0
+            textBuffer.goalCol = textBuffer.penCol
         #assert textBuffer.parser
         inputWindow = self.currentInputWindow()
         inputWindow.setTextBuffer(textBuffer)

@@ -357,7 +357,7 @@ class ProgramWindow(app.window.ActiveWindow):
         self.debugDraw(window)
         penRow = window.textBuffer.penRow
         penCol = window.textBuffer.penCol
-        if (penRow >= window.scrollRow and
+        if (window.showCursor and penRow >= window.scrollRow and
                 penRow < window.scrollRow + window.rows):
             self.program.frame.setCursor(
                 (window.top + penRow - window.scrollRow,

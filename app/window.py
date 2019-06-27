@@ -67,6 +67,7 @@ class ViewWindow:
         self.cols = 1
         self.scrollRow = 0
         self.scrollCol = 0
+        self.showCursor = True
         self.writeLineRow = 0
         self.zOrder = []
 
