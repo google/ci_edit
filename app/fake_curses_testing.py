@@ -30,8 +30,6 @@ import sys
 import tempfile
 import unittest
 
-import third_party.pyperclip as clipboard
-
 import app.ci_program
 import app.curses_util
 
@@ -54,6 +52,9 @@ class FakeCursesTestCase(unittest.TestCase):
         self.cursesScreen = curses.StandardScreen()
         self.prg = app.ci_program.CiProgram()
         self.prg.setUpCurses(self.cursesScreen)
+        # For testing, use the internal clipboard. Using the system clipboard
+        # can create races between tests running in parallel.
+        self.prg.clipboard.setOsHandlers(None, None)
 
     def addClickInfo(self, timeStamp, screenText, bState):
         caller = inspect.stack()[1]
@@ -248,8 +249,8 @@ class FakeCursesTestCase(unittest.TestCase):
                                            caller[2], caller[3])
 
         def copyToClipboard(display, cmdIndex):
-            self.assertTrue(clipboard.copy, callerText)
-            clipboard.copy(text)
+            self.assertTrue(self.prg.clipboard.copy, callerText)
+            self.prg.clipboard.copy(text)
             return None
 
         return copyToClipboard
@@ -265,15 +266,9 @@ class FakeCursesTestCase(unittest.TestCase):
                                            caller[2], caller[3])
 
         def copyToClipboard(display, cmdIndex):
-            self.assertTrue(clipboard.copy, callerText)
-            while True:
-                # Python 2.7 will sometimes fail this copy call. Keep trying.
-                try:
-                    clipboard.copy(text)
-                    return app.curses_util.CTRL_V
-                except OSError:
-                  pass
-
+            self.assertTrue(self.prg.clipboard.copy, callerText)
+            self.prg.clipboard.copy(text)
+            return app.curses_util.CTRL_V
         return copyToClipboard
 
     def notReached(self, display):
