@@ -1260,6 +1260,8 @@ class InputWindow(Window):
         if not tb:
             tb = bufferManager.newTextBuffer()
         self.setTextBuffer(tb)
+        # Should parsing the document be a standard part of setTextBuffer? TBD.
+        self.textBuffer.parseDocument()
         openToLine = self.program.prefs.startup.get('openToLine')
         if openToLine is not None:
             self.textBuffer.selectText(openToLine - 1, 0, 0,
