@@ -271,10 +271,23 @@ class FakeCursesTestCase(unittest.TestCase):
             return app.curses_util.CTRL_V
         return copyToClipboard
 
-    def notReached(self, display):
-        """Calling this will fail the test. It's expected that the code will not
-        reach this function."""
-        self.fail('Called notReached!')
+    def checkNotReached(self, depth=1):
+        """Check that this step doesn't occur. E.g. verify the app exited.
+
+        Args:
+          depth (int): how many stack frames up to report as the error location.
+        """
+        caller = inspect.stack()[depth]
+        callerText = u"\n  %s:%s:%s(): " % (os.path.split(caller[1])[1],
+                                            caller[2], caller[3])
+
+        def displayStyleChecker(display, cmdIndex):
+            self.fail(callerText +
+                    "\n  Unexpectedly ran out of fake inputs. Consider adding"
+                    " CTRL_Q (and 'n' if necessary).")
+            return None
+
+        return displayStyleChecker
 
     def runWithFakeInputs(self, fakeInputs, argv=None):
         assert hasattr(fakeInputs, "__getitem__") or hasattr(
@@ -283,7 +296,7 @@ class FakeCursesTestCase(unittest.TestCase):
             argv = ["no_argv"]
         sys.argv = argv
         self.cursesScreen.setFakeInputs(fakeInputs + [
-            self.notReached,
+            self.checkNotReached(2),
         ])
         self.assertTrue(self.prg)
         self.assertFalse(self.prg.exiting)
