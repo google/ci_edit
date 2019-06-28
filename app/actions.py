@@ -574,7 +574,7 @@ class Actions(app.mutator.Mutator):
                     break
             return self.getCursorMove(0, pos - self.penCol)
         elif self.penRow > 0:
-            return self.getCursorMove(-1, len(self.lines[self.penRow - 1]))
+            return self.getCursorMove(-1, columnWidth(self.lines[self.penRow - 1]))
 
     def doCursorMoveLeftTo(self, boundary):
         change = self.getCursorMoveLeftTo(boundary)
@@ -584,16 +584,16 @@ class Actions(app.mutator.Mutator):
     def doCursorMoveRightTo(self, boundary):
         if not self.lines:
             return
-        if self.penCol < len(self.lines[self.penRow]):
-            line = self.lines[self.penRow]
+        line, columnWidth = self.parser.rowTextAndWidth(self.penRow)
+        if self.penCol < columnWidth:
             pos = self.penCol
             for segment in re.finditer(boundary, line):
                 if segment.start() <= pos < segment.end():
                     pos = segment.end()
                     break
             self.cursorMove(0, pos - self.penCol)
-        elif self.penRow + 1 < len(self.lines):
-            self.cursorMove(1, -len(self.lines[self.penRow]))
+        elif self.penRow + 1 < self.parser.rowCount():
+            self.cursorMove(1, -columnWidth)
 
     def cursorRight(self):
         self.selectionNone()
@@ -666,7 +666,7 @@ class Actions(app.mutator.Mutator):
         self.redo()
 
     def cursorEndOfLine(self):
-        lineLen = len(self.lines[self.penRow])
+        lineLen = columnWidth(self.lines[self.penRow])
         self.cursorMove(0, lineLen - self.penCol)
 
     def cursorSelectToStartOfLine(self):
@@ -836,7 +836,7 @@ class Actions(app.mutator.Mutator):
         """Delete character to right of pen i.e. Del key."""
         if self.selectionMode != app.selectable.kSelectionNone:
             self.performDelete()
-        elif self.penCol == len(self.lines[self.penRow]):
+        elif self.penCol == columnWidth(self.lines[self.penRow]):
             if self.penRow + 1 < len(self.lines):
                 self.joinLines()
         else:
@@ -844,7 +844,7 @@ class Actions(app.mutator.Mutator):
 
     def deleteToEndOfLine(self):
         line = self.lines[self.penRow]
-        if self.penCol == len(self.lines[self.penRow]):
+        if self.penCol == columnWidth(self.lines[self.penRow]):
             if self.penRow + 1 < len(self.lines):
                 self.joinLines()
         else:
@@ -885,9 +885,10 @@ class Actions(app.mutator.Mutator):
         self.redo()
         rowDelta = len(clip) - 1
         if rowDelta == 0:
-            endCol = self.penCol + len(clip[0])
+            endCol = self.penCol + columnWidth(clip[0])
         else:
-            endCol = len(clip[-1])
+            endCol = columnWidth(clip[-1])
+        app.log.info(self.goalCol, endCol, self.penCol, endCol - self.penCol)
         self.cursorMove(rowDelta, endCol - self.penCol)
 
     def editRedo(self):
@@ -1267,7 +1268,8 @@ class Actions(app.mutator.Mutator):
 
     def selectText(self, row, col, length, mode):
         row = max(0, min(row, len(self.lines) - 1))
-        col = max(0, min(col, len(self.lines[row])))
+        _, columnWidth = self.parser.rowTextAndWidth(row)
+        col = max(0, min(col, columnWidth))
         endCol = col + length
         inView = self.isInView(row, endCol, row, endCol)
         self.doSelectionMode(app.selectable.kSelectionNone)
@@ -1620,7 +1622,7 @@ class Actions(app.mutator.Mutator):
             # Off the bottom of document.
             lastLine = len(self.lines) - 1
             self.cursorMove(lastLine - self.penRow,
-                            len(self.lines[lastLine]) - self.penCol)
+                            columnWidth(self.lines[lastLine]) - self.penCol)
             return
         row = max(0, min(virtualRow, len(self.lines)))
         col = max(0, self.view.scrollCol + paneCol)
@@ -1630,7 +1632,8 @@ class Actions(app.mutator.Mutator):
             return
         markerRow = 0
         # If not block selection, restrict col to the chars on the line.
-        col = min(col, len(self.lines[row]))
+        _, columnWidth = self.parser.rowTextAndWidth(row)
+        col = min(col, columnWidth)
         # Adjust the marker column delta when the pen and marker positions
         # cross over each other.
         markerCol = 0
@@ -1665,7 +1668,7 @@ class Actions(app.mutator.Mutator):
                 (self.penRow == self.markerRow and
                  self.penCol < self.markerCol)):
                 self.cursorSelectWordLeft()
-            elif paneCol < len(self.lines[row]):
+            elif paneCol < columnWidth:
                 self.cursorSelectWordRight()
 
     def mouseTripleClick(self, paneRow, paneCol, shift, ctrl, alt):
@@ -1828,14 +1831,15 @@ class Actions(app.mutator.Mutator):
         else:
             self.cursorMoveAndMark(
                 row - self.penRow,
-                len(self.lines[row]) - self.penCol, 0, -self.markerCol,
+                columnWidth(self.lines[row]) - self.penCol, 0, -self.markerCol,
                 app.selectable.kSelectionLine - self.selectionMode)
 
     def selectWordAt(self, row, col):
         """row and col may be from a mouse click and may not actually land in
         the document text."""
         self.selectText(row, col, 0, app.selectable.kSelectionWord)
-        if col < len(self.lines[self.penRow]):
+        _, columnWidth = self.parser.rowTextAndWidth(row)
+        if col < columnWidth:
             self.cursorSelectWordRight()
 
     def setView(self, view):
