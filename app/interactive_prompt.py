@@ -177,8 +177,8 @@ class InteractivePrompt(app.controller.Controller):
         """
         Opens the file under cursor.
 
-        Symbols that can not be part of file names are in the `fileSeparators` 
-        set.  Potentially, all of them can be a part of the file but checking 
+        Symbols that can not be part of file names are in the `fileSeparators`
+        set.  Potentially, all of them can be a part of the file but checking
         each combination on the disk would be expensive.
         """
         fileSeparators = set([' ', '<', '>', ':', ';', '\'', '"'])
@@ -192,13 +192,15 @@ class InteractivePrompt(app.controller.Controller):
 
         penLineLength = len(penLine)
 
-        while wordEnd < penLineLength and penLine[wordEnd] != ' ':
+        while (wordEnd < penLineLength and
+               penLine[wordEnd] not in fileSeparators):
             wordEnd += 1
 
-        selectedWord = penLine[wordStart: wordEnd]
+        selectedWord = penLine[wordStart:wordEnd]
         expandedPath = os.path.abspath(os.path.expanduser(selectedWord))
 
-        if not os.path.isfile(expandedPath) or not os.access(expandedPath, os.R_OK):
+        if not os.path.isfile(expandedPath) or not os.access(
+                expandedPath, os.R_OK):
             return {}, 'Path {} is not a readable file'.format(expandedPath)
 
         # Open the file
