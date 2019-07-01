@@ -107,6 +107,7 @@ class InteractivePrompt(app.controller.Controller):
             u'cua': self.changeToCuaMode,
             u'emacs': self.changeToEmacsMode,
             u'make': self.makeCommand,
+            u'open': self.openCommand,
             #u'split': self.splitCommand,  # Experimental wip.
             u'vim': self.changeToVimNormalMode,
         }
@@ -171,6 +172,44 @@ class InteractivePrompt(app.controller.Controller):
 
     def makeCommand(self, cmdLine, view):
         return {}, u'making stuff'
+
+    def openCommand(self, cmdLine, view):
+        """
+        Opens the file under cursor.
+
+        Symbols that can not be part of file names are in the `fileSeparators` 
+        set.  Potentially, all of them can be a part of the file but checking 
+        each combination on the disk would be expensive.
+        """
+        fileSeparators = set([' ', '<', '>', ':', ';', '\'', '"'])
+
+        penLine = view.textBuffer.lines[view.textBuffer.penRow]
+        wordStart = wordEnd = view.textBuffer.penCol
+
+        # Locate the boundaries of the word under the cursor
+        while wordStart > 0 and penLine[wordStart - 1] not in fileSeparators:
+            wordStart -= 1
+
+        penLineLength = len(penLine)
+
+        while wordEnd < penLineLength and penLine[wordEnd] != ' ':
+            wordEnd += 1
+
+        selectedWord = penLine[wordStart: wordEnd]
+        expandedPath = os.path.abspath(os.path.expanduser(selectedWord))
+
+        if not os.path.isfile(expandedPath) or not os.access(expandedPath, os.R_OK):
+            return {}, 'Path {} is not a readable file'.format(expandedPath)
+
+        # Open the file
+        bufferManager = view.program.bufferManager
+        textBuffer = bufferManager.loadTextBuffer(expandedPath)
+
+        inputWindow = self.currentInputWindow()
+        inputWindow.setTextBuffer(textBuffer)
+        self.changeTo(inputWindow)
+
+        return {}, 'Opened file {}'.format(expandedPath)
 
     def splitCommand(self, cmdLine, view):
         view.splitWindow()
