@@ -36,7 +36,7 @@ import warnings
 
 import app.bookmark
 import app.config
-from app.curses_util import columnWidth
+import app.curses_util
 import app.history
 import app.log
 import app.mutator
@@ -357,10 +357,9 @@ class Actions(app.mutator.Mutator):
         self.redo()
         grammarIndent = grammar.get(u'indent')
         if grammarIndent:
-            line = self.lines[self.penRow - 1]
+            line, width = self.parser.rowTextAndWidth(self.penRow - 1)
             #commonIndent = len(self.program.prefs.editor['indentation'])
             nonSpace = 0
-            width = columnWidth(line)
             while nonSpace < width and line[nonSpace].isspace():
                 nonSpace += 1
             indent = line[:nonSpace]
@@ -396,7 +395,7 @@ class Actions(app.mutator.Mutator):
         if app.config.strict_debug:
             assert isinstance(toRow, int)
             assert 0 <= toRow < self.parser.rowCount()
-        lineLen = columnWidth(self.lines[toRow])
+        lineLen = self.parser.rowWidth(toRow)
         if self.goalCol <= lineLen:
             return self.goalCol - self.penCol
         return lineLen - self.penCol
@@ -487,7 +486,7 @@ class Actions(app.mutator.Mutator):
         line, lineColWidth = self.parser.rowTextAndWidth(self.penRow)
         if lineColWidth > 0:
             index = app.curses_util.columnToIndex(self.penCol - 1, line)
-            colWidth = columnWidth(line[index])
+            colWidth = app.curses_util.columnWidth(line[index])
         if self.penCol - colWidth >= 0:
             self.cursorMove(0, -colWidth)
         elif self.penRow > 0:
@@ -515,7 +514,7 @@ class Actions(app.mutator.Mutator):
             self.setMessage(u'Top of file')
             return
         savedGoal = self.goalCol
-        lineLen = columnWidth(self.lines[self.penRow - 1])
+        lineLen = self.parser.rowWidth(self.penRow - 1)
         if self.goalCol <= lineLen:
             self.cursorMove(-1, self.goalCol - self.penCol)
         else:
@@ -536,7 +535,7 @@ class Actions(app.mutator.Mutator):
             self.setMessage(u'Top of file')
             self.cursorMove(0, -self.penCol)
         else:
-            lineLen = columnWidth(self.lines[self.penRow - 1])
+            lineLen = self.parser.rowWidth(self.penRow - 1)
             if self.goalCol <= lineLen:
                 self.cursorMove(-1, self.goalCol - self.penCol)
             else:
@@ -584,8 +583,8 @@ class Actions(app.mutator.Mutator):
     def doCursorMoveRightTo(self, boundary):
         if not self.lines:
             return
-        line, columnWidth = self.parser.rowTextAndWidth(self.penRow)
-        if self.penCol < columnWidth:
+        line, lineWidth = self.parser.rowTextAndWidth(self.penRow)
+        if self.penCol < lineWidth:
             pos = self.penCol
             for segment in re.finditer(boundary, line):
                 if segment.start() <= pos < segment.end():
@@ -593,7 +592,7 @@ class Actions(app.mutator.Mutator):
                     break
             self.cursorMove(0, pos - self.penCol)
         elif self.penRow + 1 < self.parser.rowCount():
-            self.cursorMove(1, -columnWidth)
+            self.cursorMove(1, -lineWidth)
 
     def cursorRight(self):
         self.selectionNone()
@@ -843,8 +842,8 @@ class Actions(app.mutator.Mutator):
             self.delCh()
 
     def deleteToEndOfLine(self):
-        line, columnWidth = self.parser.rowTextAndWidth(self.penRow)
-        if self.penCol == columnWidth:
+        line, lineWidth = self.parser.rowTextAndWidth(self.penRow)
+        if self.penCol == lineWidth:
             if self.penRow + 1 < self.parser.rowCount():
                 self.joinLines()
         else:
@@ -885,9 +884,9 @@ class Actions(app.mutator.Mutator):
         self.redo()
         rowDelta = len(clip) - 1
         if rowDelta == 0:
-            endCol = self.penCol + columnWidth(clip[0])
+            endCol = self.penCol + app.curses_util.columnWidth(clip[0])
         else:
-            endCol = columnWidth(clip[-1])
+            endCol = app.curses_util.columnWidth(clip[-1])
         app.log.info(self.goalCol, endCol, self.penCol, endCol - self.penCol)
         self.cursorMove(rowDelta, endCol - self.penCol)
 
@@ -1268,8 +1267,8 @@ class Actions(app.mutator.Mutator):
 
     def selectText(self, row, col, length, mode):
         row = max(0, min(row, self.parser.rowCount() - 1))
-        columnWidth = self.parser.rowWidth(row)
-        col = max(0, min(col, columnWidth))
+        rowWidth = self.parser.rowWidth(row)
+        col = max(0, min(col, rowWidth))
         endCol = col + length
         inView = self.isInView(row, endCol, row, endCol)
         self.doSelectionMode(app.selectable.kSelectionNone)
@@ -1624,7 +1623,7 @@ class Actions(app.mutator.Mutator):
             # Off the bottom of document.
             lastLine = rowCount - 1
             self.cursorMove(lastLine - self.penRow,
-                            columnWidth(self.lines[lastLine]) - self.penCol)
+                            self.parser.rowWidth(lastLine) - self.penCol)
             return
         row = max(0, min(virtualRow, rowCount))
         col = max(0, self.view.scrollCol + paneCol)
@@ -1634,8 +1633,8 @@ class Actions(app.mutator.Mutator):
             return
         markerRow = 0
         # If not block selection, restrict col to the chars on the line.
-        columnWidth = self.parser.rowWidth(row)
-        col = min(col, columnWidth)
+        rowWidth = self.parser.rowWidth(row)
+        col = min(col, rowWidth)
         # Adjust the marker column delta when the pen and marker positions
         # cross over each other.
         markerCol = 0
@@ -1670,7 +1669,7 @@ class Actions(app.mutator.Mutator):
                 (self.penRow == self.markerRow and
                  self.penCol < self.markerCol)):
                 self.cursorSelectWordLeft()
-            elif paneCol < columnWidth:
+            elif paneCol < rowWidth:
                 self.cursorSelectWordRight()
 
     def mouseTripleClick(self, paneRow, paneCol, shift, ctrl, alt):
@@ -1833,15 +1832,15 @@ class Actions(app.mutator.Mutator):
         else:
             self.cursorMoveAndMark(
                 row - self.penRow,
-                columnWidth(self.lines[row]) - self.penCol, 0, -self.markerCol,
+                self.parser.rowWidth(row) - self.penCol, 0, -self.markerCol,
                 app.selectable.kSelectionLine - self.selectionMode)
 
     def selectWordAt(self, row, col):
         """row and col may be from a mouse click and may not actually land in
         the document text."""
         self.selectText(row, col, 0, app.selectable.kSelectionWord)
-        columnWidth = self.parser.rowWidth(row)
-        if col < columnWidth:
+        rowWidth = self.parser.rowWidth(row)
+        if col < rowWidth:
             self.cursorSelectWordRight()
 
     def setView(self, view):

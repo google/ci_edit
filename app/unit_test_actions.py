@@ -187,8 +187,10 @@ class TextIndentTestCases(unittest.TestCase):
 
     def test_auto_indent(self):
         self.prg.prefs.editor['autoInsertClosingCharacter'] = False
+        def insert(*args):
+            self.textBuffer.insertPrintableWithPairing(*args)
+            self.textBuffer.parseDocument()
         tb = self.textBuffer
-        insert = self.textBuffer.insertPrintableWithPairing
         self.assertEqual(len(tb.lines), 1)
         self.assertEqual(tb.parser.rowCount(), 1)
         insert(ord('a'), None)
@@ -232,10 +234,10 @@ class TextInsertTestCases(unittest.TestCase):
 
     def test_auto_insert_pair_disable(self):
         self.prg.prefs.editor['autoInsertClosingCharacter'] = False
-        tb = self.textBuffer
         def insert(*args):
             self.textBuffer.insertPrintableWithPairing(*args)
             self.textBuffer.parseDocument()
+        tb = self.textBuffer
         self.assertEqual(len(tb.lines), 1)
         insert(ord('o'), None)
         insert(ord('('), None)
@@ -258,10 +260,10 @@ class TextInsertTestCases(unittest.TestCase):
 
     def test_auto_insert_pair_enable(self):
         self.prg.prefs.editor['autoInsertClosingCharacter'] = True
-        tb = self.textBuffer
         def insert(*args):
             self.textBuffer.insertPrintableWithPairing(*args)
             self.textBuffer.parseDocument()
+        tb = self.textBuffer
         self.assertEqual(len(tb.lines), 1)
         insert(ord('o'), None)
         insert(ord('('), None)
