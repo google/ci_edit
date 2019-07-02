@@ -331,7 +331,7 @@ class Actions(app.mutator.Mutator):
                 self.cursorLeft()
                 self.joinLines()
         else:
-            line = self.lines[self.penRow]
+            line = self.parser.rowText(self.penRow)
             change = (u'b', line[self.penCol - 1:self.penCol])
             self.redoAddChange(change)
             self.redo()
@@ -344,7 +344,7 @@ class Actions(app.mutator.Mutator):
                 self.cursorLeft()
                 self.joinLines()
         else:
-            line = self.lines[self.penRow]
+            line = self.parser.rowText(self.penRow)
             colDelta = self.getCursorMoveLeftTo(app.regex.kReWordBoundary)[1][1]
             change = (u'bw', line[self.penCol + colDelta:self.penCol])
             self.redoAddChange(change)
@@ -370,7 +370,7 @@ class Actions(app.mutator.Mutator):
                 elif lastChar in [u'[', u'{']:
                     # Check whether a \n is inserted in {} or []; if so add
                     # another line and unindent the closing character.
-                    splitLine = self.lines[self.penRow]
+                    splitLine = self.parser.rowText(self.penRow)
                     if splitLine[self.penCol:self.penCol + 1] in [u']', u'}']:
                         self.redoAddChange((u'i', indent))
                         self.redo()
@@ -495,7 +495,7 @@ class Actions(app.mutator.Mutator):
             self.setMessage(u'Top of file')
 
     def cursorMoveRight(self):
-        if not self.lines:
+        if not self.parser.rowCount():
             return
         colWidth = 1
         line, lineColWidth = self.parser.rowTextAndWidth(self.penRow)
@@ -565,7 +565,7 @@ class Actions(app.mutator.Mutator):
 
     def getCursorMoveLeftTo(self, boundary):
         if self.penCol > 0:
-            line = self.lines[self.penRow]
+            line = self.parser.rowText(self.penRow)
             pos = self.penCol
             for segment in re.finditer(boundary, line):
                 if segment.start() < pos <= segment.end():
@@ -581,7 +581,7 @@ class Actions(app.mutator.Mutator):
         self.redo()
 
     def doCursorMoveRightTo(self, boundary):
-        if not self.lines:
+        if not self.parser.rowCount():
             return
         line, lineWidth = self.parser.rowTextAndWidth(self.penRow)
         if self.penCol < lineWidth:
@@ -826,7 +826,7 @@ class Actions(app.mutator.Mutator):
         self.scrollUp()
 
     def delCh(self):
-        line = self.lines[self.penRow]
+        line = self.parser.rowText(self.penRow)
         change = (u'd', line[self.penCol:self.penCol + 1])
         self.redoAddChange(change)
         self.redo()
@@ -1005,7 +1005,7 @@ class Actions(app.mutator.Mutator):
 
     def _determineRootGrammar(self, name, extension):
         if extension == u"" and self.parser.rowCount() > 0:
-            line = self.lines[0]
+            line = self.parser.rowText(0)
             if line.startswith(u'#!'):
                 if u'python' in line:
                     extension = u'.py'
@@ -1421,7 +1421,7 @@ class Actions(app.mutator.Mutator):
             app.log.info(u'localRe is None')
             return
         # Check part of current line.
-        text = self.lines[self.penRow]
+        text = self.parser.rowText(self.penRow)
         if direction >= 0:
             text = text[offset:]
         else:
@@ -1439,7 +1439,7 @@ class Actions(app.mutator.Mutator):
             else:
                 theRange = range(self.penRow - 1, -1, -1)
             for i in theRange:
-                found = localRe.search(self.lines[i])
+                found = localRe.search(self.parser.rowText(i))
                 if found:
                     if 0:
                         for k in found.regs:
@@ -1455,16 +1455,16 @@ class Actions(app.mutator.Mutator):
                 else:
                     theRange = range(rowCount - 1, self.penRow, -1)
                 for i in theRange:
-                    found = localRe.search(self.lines[i])
+                    found = localRe.search(self.parser.rowText(i))
                     if found:
                         rowFound = i
                         break
                 if not found:
                     # Check the rest of the current line
                     if direction >= 0:
-                        text = self.lines[self.penRow]
+                        text = self.parser.rowText(self.penRow)
                     else:
-                        text = self.lines[self.penRow][self.penCol:]
+                        text = self.parser.rowText(self.penRow)[self.penCol:]
                         offset = self.penCol
                     found = localRe.search(text)
                     rowFound = self.penRow
@@ -1606,7 +1606,7 @@ class Actions(app.mutator.Mutator):
     def mouseDoubleClick(self, paneRow, paneCol, shift, ctrl, alt):
         app.log.info(u'double click', paneRow, paneCol)
         row = self.view.scrollRow + paneRow
-        if row < self.parser.rowCount() and len(self.lines[row]):
+        if row < self.parser.rowCount() and self.parser.rowWidth(row):
             self.selectWordAt(row, self.view.scrollCol + paneCol)
 
     def mouseMoved(self, paneRow, paneCol, shift, ctrl, alt):
@@ -1615,7 +1615,7 @@ class Actions(app.mutator.Mutator):
 
     def mouseRelease(self, paneRow, paneCol, shift, ctrl, alt):
         app.log.info(u' mouse release', paneRow, paneCol)
-        if not self.lines:
+        if not self.parser.rowCount():
             return
         virtualRow = self.view.scrollRow + paneRow
         rowCount = self.parser.rowCount()
@@ -1865,7 +1865,7 @@ class Actions(app.mutator.Mutator):
 
     def stripTrailingWhiteSpace(self):
         for i in range(self.parser.rowCount()):
-            for found in app.regex.kReEndSpaces.finditer(self.lines[i]):
+            for found in app.regex.kReEndSpaces.finditer(self.parser.rowText(i)):
                 self._performDeleteRange(i, found.regs[0][0], i,
                                          found.regs[0][1])
 
@@ -1875,7 +1875,7 @@ class Actions(app.mutator.Mutator):
         else:
             indentation = self.program.prefs.editor[u'indentation']
             indentationLength = len(indentation)
-            line = self.lines[self.penRow]
+            line = self.parser.rowText(self.penRow)
             start = self.penCol - indentationLength
             if indentation == line[start:self.penCol]:
                 self.verticalDelete(self.penRow, self.penRow, start,
@@ -1886,16 +1886,21 @@ class Actions(app.mutator.Mutator):
         indentationLength = len(indentation)
         row = min(self.markerRow, self.penRow)
         endRow = max(self.markerRow, self.penRow)
+        # Collect a run of lines that can be unindented as a group.
         begin = 0
-        i = -1
-        for i, line in enumerate(self.lines[row:endRow + 1]):
-            if (len(line) < indentationLength or
+        i = 0
+        for i in range(endRow + 1 - row):
+            line, lineWidth = self.parser.rowTextAndWidth(row + i)
+            if (lineWidth < indentationLength or
                     line[:indentationLength] != indentation):
                 if begin < i:
+                    # There is a run of lines that should be unindented.
                     self.verticalDelete(row + begin, row + i - 1, 0,
                                         indentation)
+                # Skip this line (don't unindent).
                 begin = i + 1
         if begin <= i:
+            # There is one last run of lines that should be unindented.
             self.verticalDelete(row + begin, row + i, 0, indentation)
 
     def updateScrollPosition(self, scrollRowDelta, scrollColDelta):

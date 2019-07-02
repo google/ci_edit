@@ -218,6 +218,109 @@ class TextIndentTestCases(unittest.TestCase):
         checkRow(self, tb, 1, '  b:')
         checkRow(self, tb, 2, '    c:')
 
+    def test_indent_unindent_lines(self):
+        def insert(*args):
+            self.textBuffer.insertPrintableWithPairing(*args)
+            self.textBuffer.parseDocument()
+        tb = self.textBuffer
+        self.assertEqual(len(tb.lines), 1)
+        self.assertEqual(tb.parser.rowCount(), 1)
+        insert(ord('a'), None)
+        tb.carriageReturn()
+        insert(ord('b'), None)
+        tb.carriageReturn()
+        insert(ord('c'), None)
+        tb.carriageReturn()
+        insert(ord('d'), None)
+        tb.carriageReturn()
+        checkRow(self, tb, 0, 'a')
+        checkRow(self, tb, 1, 'b')
+        checkRow(self, tb, 2, 'c')
+        checkRow(self, tb, 3, 'd')
+        tb.penRow = 1
+        tb.markerRow = 2
+        tb.indentLines()
+        checkRow(self, tb, 0, 'a')
+        checkRow(self, tb, 1, '  b')
+        checkRow(self, tb, 2, '  c')
+        checkRow(self, tb, 3, 'd')
+        tb.penRow = 0
+        tb.markerRow = 3
+        tb.indentLines()
+        checkRow(self, tb, 0, '  a')
+        checkRow(self, tb, 1, '    b')
+        checkRow(self, tb, 2, '    c')
+        checkRow(self, tb, 3, '  d')
+        tb.unindentLines()
+        checkRow(self, tb, 0, 'a')
+        checkRow(self, tb, 1, '  b')
+        checkRow(self, tb, 2, '  c')
+        checkRow(self, tb, 3, 'd')
+        tb.unindentLines()
+        checkRow(self, tb, 0, 'a')
+        checkRow(self, tb, 1, 'b')
+        checkRow(self, tb, 2, 'c')
+        checkRow(self, tb, 3, 'd')
+        tb.penRow = 1
+        tb.markerRow = 1
+        tb.indentLines()
+        checkRow(self, tb, 0, 'a')
+        checkRow(self, tb, 1, '  b')
+        checkRow(self, tb, 2, 'c')
+        checkRow(self, tb, 3, 'd')
+        tb.indentLines()
+        checkRow(self, tb, 0, 'a')
+        checkRow(self, tb, 1, '    b')
+        checkRow(self, tb, 2, 'c')
+        checkRow(self, tb, 3, 'd')
+        tb.unindentLines()
+        checkRow(self, tb, 0, 'a')
+        checkRow(self, tb, 1, '  b')
+        checkRow(self, tb, 2, 'c')
+        checkRow(self, tb, 3, 'd')
+        tb.penRow = 3
+        tb.markerRow = 3
+        tb.indentLines()
+        checkRow(self, tb, 0, 'a')
+        checkRow(self, tb, 1, '  b')
+        checkRow(self, tb, 2, 'c')
+        checkRow(self, tb, 3, '  d')
+        tb.penRow = 0
+        tb.markerRow = 3
+        tb.indentLines()
+        checkRow(self, tb, 0, '  a')
+        checkRow(self, tb, 1, '    b')
+        checkRow(self, tb, 2, '  c')
+        checkRow(self, tb, 3, '    d')
+        tb.penRow = 3
+        tb.markerRow = 3
+        tb.unindentLines()
+        checkRow(self, tb, 0, '  a')
+        checkRow(self, tb, 1, '    b')
+        checkRow(self, tb, 2, '  c')
+        checkRow(self, tb, 3, '  d')
+        tb.unindentLines()
+        checkRow(self, tb, 0, '  a')
+        checkRow(self, tb, 1, '    b')
+        checkRow(self, tb, 2, '  c')
+        checkRow(self, tb, 3, 'd')
+        tb.unindentLines()
+        checkRow(self, tb, 0, '  a')
+        checkRow(self, tb, 1, '    b')
+        checkRow(self, tb, 2, '  c')
+        checkRow(self, tb, 3, 'd')
+        tb.penRow = 0
+        tb.markerRow = 0
+        tb.unindentLines()
+        checkRow(self, tb, 0, 'a')
+        checkRow(self, tb, 1, '    b')
+        checkRow(self, tb, 2, '  c')
+        checkRow(self, tb, 3, 'd')
+        tb.unindentLines()
+        checkRow(self, tb, 0, 'a')
+        checkRow(self, tb, 1, '    b')
+        checkRow(self, tb, 2, '  c')
+        checkRow(self, tb, 3, 'd')
 
 class TextInsertTestCases(unittest.TestCase):
 
