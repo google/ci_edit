@@ -102,7 +102,8 @@ class DirectoryListController(app.controller.Controller):
                     fileLines.append([encodedPath, iSize, iModified, dirItem])
                 if sortBySize is not None:
                     # Sort by size.
-                    fileLines.sort(reverse=not sortBySize, key=lambda x: x[1])
+                    fileLines.sort(reverse=not sortBySize,
+                        key=lambda x: x[1] if x[1] is not None else -1)
                 elif sortByModifiedDate is not None:
                     # Sort by modification date.
                     fileLines.sort(
