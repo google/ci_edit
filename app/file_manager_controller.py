@@ -286,10 +286,6 @@ class FilePathInputController(app.controller.Controller):
         self.setEncodedPath(u"")
         self.changeToInputWindow()
 
-    def focus(self):
-        self.getNamedWindow(u'directoryList').focus()
-        app.controller.Controller.focus(self)
-
     def decodedPath(self):
         if app.config.strict_debug:
             assert self.view.textBuffer is self.textBuffer

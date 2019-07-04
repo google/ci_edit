@@ -234,13 +234,13 @@ class Controller:
         self.changeToHostWindow()
 
     def nextFocusableWindow(self):
-        window = self.view.parent.nextFocusableWindow(self.view)
+        window = self.view.nextFocusableWindow(self.view)
         if window is not None:
             self.view.changeFocusTo(window)
         return window is not None
 
     def priorFocusableWindow(self):
-        window = self.view.parent.priorFocusableWindow(self.view)
+        window = self.view.priorFocusableWindow(self.view)
         if window is not None:
             self.view.changeFocusTo(window)
         return window is not None

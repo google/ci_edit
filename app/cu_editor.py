@@ -297,6 +297,8 @@ class DirectoryList(app.file_manager_controller.DirectoryListController):
         app.file_manager_controller.DirectoryListController.setTextBuffer(
             self, textBuffer)
         commandSet = {
+            KEY_BTAB: self.priorFocusableWindow,
+            CTRL_I: self.nextFocusableWindow,
             CTRL_J: self.performOpen,
             KEY_ESCAPE: self.changeToInputWindow,
             KEY_F1: self.info,

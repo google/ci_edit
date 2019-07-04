@@ -111,6 +111,9 @@ class ViewWindow:
             topWindow = topWindow.parent
         topWindow.changeFocusTo(changeTo)
 
+    def colorPref(self, colorType, delta=0):
+        return self.program.color.get(colorType, delta)
+
     def contains(self, row, col):
         """Determine whether the position at row, col lay within this window."""
         for i in self.zOrder:
@@ -187,7 +190,7 @@ class ViewWindow:
         self.top += top
         self.left += left
 
-    def __childFocusableWindow(self, reverse=False):
+    def _childFocusableWindow(self, reverse=False):
         windows = self.zOrder[:]
         if reverse:
             windows.reverse()
@@ -195,13 +198,25 @@ class ViewWindow:
             if i.isFocusable:
                 return i
             else:
-                r = i.__childFocusableWindow(reverse)
+                r = i._childFocusableWindow(reverse)
                 if r is not None:
                     return r
 
     def nextFocusableWindow(self, start, reverse=False):
-        """Ignore |start| when searching."""
-        windows = self.zOrder[:]
+        """Windows without |isFocusable| are skipped. Ignore (skip) |start| when
+        searching.
+
+        Args:
+          start (window): the child window to start from. If |start| is not
+              found, start from the first child window.
+          reverse (bool): if True, find the prior focusable window.
+
+        Returns:
+          A window that should be focused.
+
+        See also: showFullWindowHierarchy() which can help in debugging.
+        """
+        windows = self.parent.zOrder[:]
         if reverse:
             windows.reverse()
         try:
@@ -213,13 +228,13 @@ class ViewWindow:
             if i.isFocusable:
                 return i
             else:
-                r = i.__childFocusableWindow(reverse)
+                r = i._childFocusableWindow(reverse)
                 if r is not None:
                     return r
-        r = self.parent.nextFocusableWindow(self, reverse)
+        r = self.parent.nextFocusableWindow(self.parent, reverse)
         if r is not None:
             return r
-        return self.__childFocusableWindow(reverse)
+        return self._childFocusableWindow(reverse)
 
     def normalize(self):
         self.parent.normalize()
@@ -1322,6 +1337,7 @@ class OptionsTrinaryStateWindow(Window):
         colorPrefs = self.program.color
         self.color = colorPrefs.get('keyword')
         self.focusColor = colorPrefs.get('selected')
+        self.textBuffer.view.showCursor = False
 
     def focus(self):
         Window.focus(self)
