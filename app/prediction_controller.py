@@ -65,17 +65,19 @@ class PredictionListController(app.controller.Controller):
             # Add the most resent buffer to allow flipping back and forth
             # between two files.
             if len(bufferManager.buffers) >= 2:
-                add_buffer(items, bufferManager.buffers[-2], 300)
+                add_buffer(items, bufferManager.buffers[-2], 30000)
+            order = 39999
             for i in bufferManager.buffers[:-2]:
-                add_buffer(items, i, 303)
+                add_buffer(items, i, order)
+                order -= 1
             # This is the current buffer. It's unlikely to be the goal.
             if len(bufferManager.buffers) >= 1:
-                add_buffer(items, bufferManager.buffers[-1], 900)
+                add_buffer(items, bufferManager.buffers[-1], 90000)
         if 1:
             # Add recent files.
             for recentFile in self.view.program.history.getRecentFiles():
                 if recentFile not in added:
-                    items.append((None, recentFile, '=', 'recent', 500))
+                    items.append((None, recentFile, '=', 'recent', 50000))
                     added.add(recentFile)
         if 1:
             # Add alternate files.
@@ -95,7 +97,7 @@ class PredictionListController(app.controller.Controller):
                 if fileName == f and ext != e and e not in ignoreExt:
                     fullPath = os.path.join(dirPath, i)
                     if fullPath not in added:
-                        items.append((None, fullPath, '=', 'alt', 200))
+                        items.append((None, fullPath, '=', 'alt', 20000))
                         added.add(fullPath)
             if 1:
                 # Chromium specific hack.
@@ -103,13 +105,13 @@ class PredictionListController(app.controller.Controller):
                     chromiumPath = currentFile[:-len('-extracted.js')] + '.html'
                     if os.path.isfile(
                             chromiumPath) and chromiumPath not in added:
-                        items.append((None, chromiumPath, '=', 'alt', 200))
+                        items.append((None, chromiumPath, '=', 'alt', 20000))
                         added.add(chromiumPath)
                 elif currentFile.endswith('.html'):
                     chromiumPath = currentFile[:-len('.html')] + '-extracted.js'
                     if os.path.isfile(
                             chromiumPath) and chromiumPath not in added:
-                        items.append((None, chromiumPath, '=', 'alt', 200))
+                        items.append((None, chromiumPath, '=', 'alt', 20000))
                         added.add(chromiumPath)
         if self.filter is not None:
             try:

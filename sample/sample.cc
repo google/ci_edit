@@ -15,6 +15,7 @@
 // This is a C++ sample file
 
 #include "project_file.h"
+#include "sample.h"
 #include <system_file.h>
 
 // This define used to break (the < tripped up the parser).
