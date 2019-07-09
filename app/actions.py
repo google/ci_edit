@@ -352,6 +352,8 @@ class Actions(app.mutator.Mutator):
         self.redo()
         grammarIndent = grammar.get(u'indent')
         if grammarIndent:
+            # TODO(): Hack fix. Reconsider how it should be done.
+            self.doParse(self.penRow - 1, self.penRow + 1)
             line, width = self.parser.rowTextAndWidth(self.penRow - 1)
             #commonIndent = len(self.program.prefs.editor['indentation'])
             nonSpace = 0
