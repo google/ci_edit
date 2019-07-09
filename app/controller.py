@@ -335,6 +335,9 @@ class MainController:
         self.controllers[controller.name] = controller
         self.controller = controller
 
+    def currentInputWindow(self):
+        return self.controller.currentInputWindow()
+
     def doCommand(self, ch, meta):
         self.controller.doCommand(ch, meta)
 

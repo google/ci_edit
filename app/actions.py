@@ -1670,6 +1670,37 @@ class Actions(app.mutator.Mutator):
                 0)
             self.redo()
 
+    def openFileAtCursor(self):
+        """
+        Opens the file under cursor.
+        """
+
+        def openFile(path):
+            textBuffer = self.view.program.bufferManager.loadTextBuffer(path)
+            inputWindow = self.view.controller.currentInputWindow()
+            inputWindow.setTextBuffer(textBuffer)
+            self.changeTo(inputWindow)
+            self.setMessage('Opened file {}'.format(path))
+
+        text, linkType = self.parser.grammarTextAt(self.penRow, self.penCol)
+        if linkType is None:
+            self.setMessage(u"Text is not a recognized file.")
+            return
+        if linkType in (u"c<", u"c\""):
+            # These link types include the outer quotes or brackets.
+            text = text[1:-1]
+        # Give the raw text a try (current working directory or a full path).
+        if os.access(text, os.R_OK):
+            return openFile(text)
+        # Try the path in the same directory as the current file.
+        path = os.path.join(os.path.dirname(self.fullPath), text)
+        if os.access(path, os.R_OK):
+            return openFile(path)
+        # TODO(): try a list of path prefixes. Maybe from project, prefs, build
+        # information, or another tool.
+        # Ran out of tries.
+        self.setMessage(u"No readable file \"{}\"".format(text))
+
     def nextSelectionMode(self):
         nextMode = self.selectionMode + 1
         nextMode %= app.selectable.kSelectionModeCount

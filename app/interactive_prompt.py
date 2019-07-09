@@ -176,42 +176,29 @@ class InteractivePrompt(app.controller.Controller):
     def openCommand(self, cmdLine, view):
         """
         Opens the file under cursor.
-
-        Symbols that can not be part of file names are in the `fileSeparators`
-        set.  Potentially, all of them can be a part of the file but checking
-        each combination on the disk would be expensive.
         """
-        fileSeparators = set([' ', '<', '>', ':', ';', '\'', '"'])
+        args = kReArgChain.findall(cmdLine)
+        app.log.info(args)
+        if len(args) == 1:
+            # If no args are provided, look for a path at the cursor position.
+            view.textBuffer.openFileAtCursor()
+            return {}, view.textBuffer.message[0]
+        # Try the raw path.
+        path = args[1]
+        if os.access(path, os.R_OK):
+            return self.openFile(path, view)
+        # Look in the same directory as the current file.
+        path = os.path.join(os.path.dirname(view.textBuffer.fullPath), args[1])
+        if os.access(path, os.R_OK):
+            return self.openFile(path, view)
+        return {}, u"Unable to open " + args[1]
 
-        penLine = view.textBuffer.lines[view.textBuffer.penRow]
-        wordStart = wordEnd = view.textBuffer.penCol
-
-        # Locate the boundaries of the word under the cursor
-        while wordStart > 0 and penLine[wordStart - 1] not in fileSeparators:
-            wordStart -= 1
-
-        penLineLength = len(penLine)
-
-        while (wordEnd < penLineLength and
-               penLine[wordEnd] not in fileSeparators):
-            wordEnd += 1
-
-        selectedWord = penLine[wordStart:wordEnd]
-        expandedPath = os.path.abspath(os.path.expanduser(selectedWord))
-
-        if not os.path.isfile(expandedPath) or not os.access(
-                expandedPath, os.R_OK):
-            return {}, 'Path {} is not a readable file'.format(expandedPath)
-
-        # Open the file
-        bufferManager = view.program.bufferManager
-        textBuffer = bufferManager.loadTextBuffer(expandedPath)
-
+    def openFile(self, path, view):
+        textBuffer = view.program.bufferManager.loadTextBuffer(path)
         inputWindow = self.currentInputWindow()
         inputWindow.setTextBuffer(textBuffer)
         self.changeTo(inputWindow)
-
-        return {}, 'Opened file {}'.format(expandedPath)
+        inputWindow.setMessage('Opened file {}'.format(path))
 
     def splitCommand(self, cmdLine, view):
         view.splitWindow()

@@ -132,6 +132,9 @@ class Parser:
             relative to the |col| parameter.
         """
         if app.config.strict_debug:
+            assert isinstance(row, int)
+            assert isinstance(col, int)
+            assert isinstance(index, int)
             assert row < len(self.rows), row
         eol = True
         finalResult = (self.emptyNode, 0, 0, eol)
@@ -146,6 +149,18 @@ class Parser:
         node = self.parserNodes[rowIndex + index]
         eol = False
         return ParserNode(*node), offset - node[kVisual], remaining, eol
+
+    def grammarTextAt(self, row, col):
+        """Get the run of text for the given position."""
+        if app.config.strict_debug:
+            assert isinstance(row, int)
+            assert isinstance(col, int)
+            assert row < len(self.rows), row
+        rowIndex = self.rows[row]
+        grammarIndex = self.grammarIndexFromRowCol(row, col)
+        node = self.parserNodes[rowIndex + grammarIndex]
+        nextNode = self.parserNodes[rowIndex + grammarIndex + 1]
+        return self.data[node[kBegin]:nextNode[kBegin]], node[kGrammar].get(u"link_type")
 
     def parse(self, bgThread, appPrefs, data, grammar, beginRow, endRow):
         """
