@@ -22,7 +22,6 @@ import re
 import app.buffer_file
 from app.curses_util import columnWidth
 import app.log
-import app.parser
 import app.selectable
 
 # If a change is in |noOpInstructions| then it has no real effect.
@@ -39,8 +38,8 @@ def addVectors(a, b):
 class Mutator(app.selectable.Selectable):
     """Track and enact changes to a body of text."""
 
-    def __init__(self):
-        app.selectable.Selectable.__init__(self)
+    def __init__(self, program):
+        app.selectable.Selectable.__init__(self, program)
         self.__compoundChange = []
         # |oldRedoIndex| is used to store the redo index before an action
         # occurs, so we know where to insert the compound change.
@@ -54,8 +53,6 @@ class Mutator(app.selectable.Selectable):
         self.goalCol = 0
         self.isReadOnly = False
         self.penGrammar = None
-        self.parser = None
-        self.parserTime = .0
         self.relativePath = ''
         self.redoChain = []
         # |tempChange| is used to store cursor view actions without trimming

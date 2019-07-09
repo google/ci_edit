@@ -19,6 +19,7 @@ from __future__ import print_function
 import re
 
 import app.config
+import app.line_buffer
 import app.log
 import app.regex
 
@@ -47,36 +48,10 @@ kSelectionModeNames = [
 ]
 
 
-class BaseLineBuffer:
+class Selectable(app.line_buffer.LineBuffer):
 
-    def __init__(self):
-        self.lines = [u""]
-        self.message = (u"New buffer", None)
-
-    def isEmpty(self):
-        return len(self.lines) == 1 and len(self.lines[0]) == 0
-
-    def setMessage(self, *args, **kwargs):
-        if not len(args):
-            self.message = None
-            #app.log.caller()
-            return
-        msg = str(args[0])
-        prior = msg
-        for i in args[1:]:
-            if not len(prior) or prior[-1] != '\n':
-                msg += ' '
-            prior = str(i)
-            msg += prior
-        if app.config.strict_debug:
-            app.log.caller("\n", msg)
-        self.message = (repr(msg)[1:-1], kwargs.get('color'))
-
-
-class Selectable(BaseLineBuffer):
-
-    def __init__(self):
-        BaseLineBuffer.__init__(self)
+    def __init__(self, program):
+        app.line_buffer.LineBuffer.__init__(self, program)
         # When a text document is not line wrapped then each row will represent
         # one line in the document, thow rows are zero based and lines are one
         # based. With line wrapping enabled there may be more rows than lines
@@ -96,7 +71,6 @@ class Selectable(BaseLineBuffer):
         self.markerRow = 0
         self.markerCol = 0
         self.selectionMode = kSelectionNone
-        self.upperChangedRow = 0
 
     def countSelected(self):
         lines = self.getSelectedText()
@@ -225,12 +199,12 @@ class Selectable(BaseLineBuffer):
         """Extends and existing selection to the nearest word boundaries. The
         pen and marker will be extended away from each other. The extension may
         occur in one, both, or neither direction."""
-        line = self.lines[upperRow]
+        line = self.parser.rowText(upperRow)
         for segment in re.finditer(app.regex.kReWordBoundary, line):
             if segment.start() <= upperCol < segment.end():
                 upperCol = segment.start()
                 break
-        line = self.lines[lowerRow]
+        line = self.parser.rowText(lowerRow)
         for segment in re.finditer(app.regex.kReWordBoundary, line):
             if segment.start() < lowerCol < segment.end():
                 lowerCol = segment.end()
@@ -243,8 +217,10 @@ class Selectable(BaseLineBuffer):
         if self.selectionMode == kSelectionNone:
             return (0, 0, -self.markerRow, -self.markerCol, 0)
         elif self.selectionMode == kSelectionAll:
-            return (len(self.lines) - 1 - self.penRow,
-                    len(self.lines[-1]) - self.penCol, -self.markerRow,
+            lowerRow = self.parser.rowCount() - 1
+            lowerCol = self.parser.rowWidth(-1)
+            return (lowerRow - self.penRow,
+                    lowerCol - self.penCol, -self.markerRow,
                     -self.markerCol, 0)
         elif self.selectionMode == kSelectionLine:
             return (0, -self.penCol, 0, -self.markerCol, 0)
@@ -278,8 +254,8 @@ class Selectable(BaseLineBuffer):
         elif self.selectionMode == kSelectionAll:
             upperRow = 0
             upperCol = 0
-            lowerRow = len(self.lines) - 1
-            lowerCol = len(self.lines[-1])
+            lowerRow = self.parser.rowCount() - 1
+            lowerCol = self.parser.rowWidth(-1)
         elif self.selectionMode == kSelectionBlock:
             upperRow = min(self.markerRow, self.penRow)
             upperCol = min(self.markerCol, self.penCol)

@@ -304,13 +304,15 @@ class Parser:
         width may be larger than len(text).
 
         Args:
-            row (int): the row index is zero based (so it's line number - 1).
+            row (int): the row index is zero based (so it's `line_number - 1`).
 
         Returns:
             columnWidth (int)
         """
         if app.config.strict_debug:
             assert isinstance(row, int)
+        if row < 0:
+            row = len(self.rows) + row
         visual = self.parserNodes[self.rows[row]][kVisual]
         if row + 1 < len(self.rows):
             end = self.parserNodes[self.rows[row + 1]][kBegin]
