@@ -172,9 +172,9 @@ class Parser:
               that is has changed since the previous parse of this data. Pass
               zero to parse the entire document. If beginRow >= len(data) then
               no parse is done.
-          endRow (int): The last row to parse. This stops the parser from going
-              over the entire file if, for example, only 100 rows out of a
-              million rows are needed (which can save a lot of cpu time).
+          endRow (int): The row to stop parsing. This stops the parser from
+              going over the entire file if, for example, only 100 rows out of
+              a million rows are needed (which can save a lot of cpu time).
         """
         app.log.parser('grammar', grammar['name'])
         # Trim partially parsed data.

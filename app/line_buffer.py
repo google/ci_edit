@@ -108,7 +108,7 @@ class LineBuffer:
 
     def parseDocument(self):
         begin = min(self.parser.fullyParsedToLine, self.upperChangedRow)
-        end = self.parser.rowCount()
+        end = self.parser.rowCount() + 1
         self.doParse(begin, end)
 
     def setMessage(self, *args, **kwargs):
