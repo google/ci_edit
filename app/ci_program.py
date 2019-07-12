@@ -147,7 +147,7 @@ class CiProgram:
         # (A performance measurement).
         self.mainLoopTime = 0
         self.mainLoopTimePeak = 0
-        cursesWindow = app.window.mainCursesWindow
+        self.cursesWindowGetCh = app.window.mainCursesWindow.getch
         if self.prefs.startup['timeStartup']:
             # When running a timing of the application startup, push a CTRL_Q
             # onto the curses event messages to simulate a full startup with a
@@ -197,7 +197,7 @@ class CiProgram:
                     eventInfo = None
                     if self.exiting:
                         return
-                    ch = cursesWindow.getch()
+                    ch = self.getCh()
                     # assert isinstance(ch, int), type(ch)
                     if ch == curses.ascii.ESC:
                         # Some keys are sent from the terminal as a sequence of
@@ -206,10 +206,10 @@ class CiProgram:
                         # callback functions) the sequence is converted into
                         # tuple.
                         keySequence = []
-                        n = cursesWindow.getch()
+                        n = self.getCh()
                         while n != curses.ERR:
                             keySequence.append(n)
-                            n = cursesWindow.getch()
+                            n = self.getCh()
                         #app.log.info('sequence\n', keySequence)
                         # Check for Bracketed Paste Mode begin.
                         paste_begin = app.curses_util.BRACKETED_PASTE_BEGIN
@@ -221,7 +221,7 @@ class CiProgram:
                             while tuple(
                                     keySequence[-len(paste_end):]) != paste_end:
                                 #app.log.info('waiting in paste mode')
-                                n = cursesWindow.getch()
+                                n = self.getCh()
                                 if n != curses.ERR:
                                     keySequence.append(n)
                             keySequence = keySequence[:-(len(paste_end))]
@@ -241,36 +241,23 @@ class CiProgram:
                         u = None
                         if (ch & 0xe0) == 0xc0:
                             # Two byte utf-8.
-                            b = cursesWindow.getch()
+                            b = self.getCh()
                             u = bytes_to_unicode((ch, b))
                         elif (ch & 0xf0) == 0xe0:
                             # Three byte utf-8.
-                            b = cursesWindow.getch()
-                            c = cursesWindow.getch()
+                            b = self.getCh()
+                            c = self.getCh()
                             u = bytes_to_unicode((ch, b, c))
                         elif (ch & 0xf8) == 0xf0:
                             # Four byte utf-8.
-                            b = cursesWindow.getch()
-                            c = cursesWindow.getch()
-                            d = cursesWindow.getch()
+                            b = self.getCh()
+                            c = self.getCh()
+                            d = self.getCh()
                             u = bytes_to_unicode((ch, b, c, d))
                         assert u is not None
                         eventInfo = u
                         ch = app.curses_util.UNICODE_INPUT
-                    if ch == 0 and useBgThread:
-                        # bg response.
-                        frame = None
-                        while self.bg.hasMessage():
-                            frame = self.bg.get()
-                            if frame[0] == 'exception':
-                                for line in frame[1]:
-                                    userMessage(line[:-1])
-                                self.quitNow()
-                                return
-                        if frame is not None:
-                            drawList, cursor, cmdCount = frame
-                            self.refresh(drawList, cursor, cmdCount)
-                    elif ch != curses.ERR:
+                    if ch != curses.ERR:
                         self.ch = ch
                         if ch == curses.KEY_MOUSE:
                             # On Ubuntu, Gnome terminal, curses.getmouse() may
@@ -291,9 +278,37 @@ class CiProgram:
                     self.programWindow.render()
                     cmdCount += len(cmdList)
 
+    def processBackgroundMessages(self):
+        frame = None
+        while self.bg.hasMessage():
+            frame = self.bg.get()
+            if frame[0] == 'exception':
+                for line in frame[1]:
+                    userMessage(line[:-1])
+                self.quitNow()
+                return
+        if frame is not None:
+            drawList, cursor, cmdCount = frame
+            self.refresh(drawList, cursor, cmdCount)
+
+    def getCh(self):
+        """Get an input character (or event) from curses."""
+        if self.exiting:
+            return -1
+        ch = self.cursesWindowGetCh()
+        # The background thread can send a notice at any getch call.
+        while ch == 0:
+            if self.bg is not None:
+                # Hmm, will ch ever equal 0 when self.bg is None?
+                self.processBackgroundMessages()
+            if self.exiting:
+                return -1
+            ch = self.cursesWindowGetCh()
+        return ch
+
     def startup(self):
         """A second init-like function. Called after command line arguments are
-    parsed."""
+        parsed."""
         if app.config.strict_debug:
             assert issubclass(self.__class__, app.ci_program.CiProgram), self
         self.programWindow = app.program_window.ProgramWindow(self)

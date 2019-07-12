@@ -18,7 +18,7 @@ from __future__ import print_function
 
 # These constants have specific values.
 COLORS = 256
-ERR = 0  # ERR is normally -1, but bg signal doesn't work in unit test.
+ERR = -1  # ERR is normally -1.
 
 # These constants have arbitrary values.
 KEY_ALT_A = 0  # todo
