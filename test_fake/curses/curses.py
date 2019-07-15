@@ -342,7 +342,7 @@ class FakeCursesWindow:
         self.cursorCol = 0
 
     def addstr(self, *args):
-        testLog(3, *args)
+        testLog(4, *args)
         cursorRow = args[0]
         cursorCol = args[1]
         assert isinstance(cursorRow, int)
@@ -369,21 +369,21 @@ class FakeCursesWindow:
         return val
 
     def getyx(self):
-        testLog(1)
+        testLog(2)
         return (self.cursorRow, self.cursorCol)
 
     def getmaxyx(self):
-        testLog(1)
+        testLog(2)
         return (fakeDisplay.rows, fakeDisplay.cols)
 
     def keypad(self, *args):
-        testLog(1, *args)
+        testLog(2, *args)
 
     def leaveok(self, *args):
-        testLog(1, *args)
+        testLog(2, *args)
 
     def move(self, a, b):
-        testLog(1, a, b)
+        testLog(2, a, b)
         self.cursorRow = a
         self.cursorCol = b
 
@@ -391,23 +391,23 @@ class FakeCursesWindow:
         pass
 
     def refresh(self):
-        testLog(1)
+        testLog(2)
 
     def resize(self, a, b):
-        testLog(1, a, b)
+        testLog(2, a, b)
 
     def scrollok(self, *args):
-        testLog(1, *args)
+        testLog(2, *args)
 
     def timeout(self, *args):
-        testLog(1, *args)
+        testLog(2, *args)
 
 
 class StandardScreen(FakeCursesWindow):
 
     def __init__(self):
         global fakeDisplay, fakeInput
-        testLog(1)
+        testLog(2)
         FakeCursesWindow.__init__(self, 0, 0)
         self.cmdCount = -1
         fakeDisplay = FakeDisplay()
@@ -420,11 +420,11 @@ class StandardScreen(FakeCursesWindow):
         self.fakeInput.setInputs(cmdList)
 
     def getmaxyx(self):
-        testLog(1)
+        testLog(2)
         return (self.fakeDisplay.rows, self.fakeDisplay.cols)
 
     def refresh(self, *args):
-        testLog(1, *args)
+        testLog(2, *args)
 
     def test_find_text(self, screenText):
         return fakeDisplay.findText(screenText)
@@ -438,62 +438,62 @@ class StandardScreen(FakeCursesWindow):
 
 
 def baudrate(*args):
-    testLog(1, *args)
+    testLog(2, *args)
     return -1
 
 
 def can_change_color(*args):
-    testLog(1, *args)
+    testLog(2, *args)
     return 1
 
 
 def color_content(*args):
-    testLog(1, *args)
+    testLog(2, *args)
 
 
 def color_pair(*args):
-    testLog(1, *args)
+    testLog(2, *args)
     return fakeDisplay.getColorPair(*args)
 
 
 def curs_set(*args):
-    testLog(1, *args)
+    testLog(2, *args)
 
 
 def errorpass(*args):
-    testLog(1, *args)
+    testLog(2, *args)
 
 
 def getch(*args):
-    testLog(1, *args)
+    testLog(2, *args)
     return constants.ERR
 
 
 def addMouseEvent(mouseEvent):
-    testLog(1)
+    testLog(2)
     return mouseEvents.append(mouseEvent)
 
 
 def getmouse(*args):
-    testLog(1, *args)
+    testLog(2, *args)
     return mouseEvents.pop()
 
 
 def has_colors(*args):
-    testLog(1, *args)
+    testLog(2, *args)
     return True
 
 
 def init_color(*args):
-    testLog(1, *args)
+    testLog(2, *args)
 
 
 def init_pair(*args):
-    testLog(3, *args)
+    testLog(4, *args)
 
 
 def keyname(*args):
-    testLog(1, *args)
+    testLog(2, *args)
     # Raise expected exception types.
     a = int(*args)  # ValueError.
     if a >= 2**31:
@@ -503,45 +503,45 @@ def keyname(*args):
 
 
 def meta(*args):
-    testLog(1, *args)
+    testLog(2, *args)
 
 
 def mouseinterval(*args):
-    testLog(1, *args)
+    testLog(2, *args)
 
 
 def mousemask(*args):
-    testLog(1, *args)
+    testLog(2, *args)
 
 
 def newwin(*args):
-    testLog(1, *args)
+    testLog(2, *args)
     return FakeCursesWindow(args[0], args[1])
 
 
 def raw(*args):
-    testLog(1, *args)
+    testLog(2, *args)
 
 
 def resizeterm(*args):
-    testLog(1, *args)
+    testLog(2, *args)
 
 
 def start_color(*args):
-    testLog(1, *args)
+    testLog(2, *args)
 
 
 def ungetch(*args):
-    testLog(1, *args)
+    testLog(2, *args)
 
 
 def use_default_colors(*args):
-    testLog(1, *args)
+    testLog(2, *args)
 
 
 def get_pair(*args):
     fakeDisplay.getColorPair(*args)
-    testLog(1, *args)
+    testLog(2, *args)
 
 
 def wrapper(fun, *args, **kw):
