@@ -66,6 +66,11 @@ def background(inputQueue, outputQueue):
             try:
                 program, message = inputQueue.get(block)
                 #profile = app.profile.beginPythonProfile()
+                if message == 'render':
+                    app.log.info('bg received render message')
+                    program.shortTimeSlice()
+                    program.render()
+                    continue
                 if message == 'quit':
                     app.log.info('bg received quit message')
                     return
