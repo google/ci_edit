@@ -74,9 +74,8 @@ def background(inputQueue, outputQueue):
                 program.render()
                 # debugging only: program.showWindowHierarchy()
                 cmdCount += len(message)
-                outputQueue.put(
-                        program.program.backgroundFrame.grabFrame() +
-                        (cmdCount,))
+                program.program.backgroundFrame.setCmdCount(cmdCount)
+                outputQueue.put(program.program.backgroundFrame.grabFrame())
                 os.kill(pid, signalNumber)
                 #app.profile.endPythonProfile(profile)
                 time.sleep(0)  # See note in hasMessage().
@@ -87,7 +86,7 @@ def background(inputQueue, outputQueue):
             block = program.longTimeSlice()
             if block:
                 program.render()
-                outputQueue.put(program.program.backgroundFrame.grabFrame() + (cmdCount,))
+                outputQueue.put(program.program.backgroundFrame.grabFrame())
                 os.kill(pid, signalNumber)
         except Exception as e:
             app.log.exception(e)

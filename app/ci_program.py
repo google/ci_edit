@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 # Copyright 2016 Google Inc.
 #
@@ -19,14 +18,18 @@ from __future__ import division
 from __future__ import print_function
 try:
     unicode
+
     def bytes_to_unicode(chars):
         chars = "".join([chr(i) for i in chars])
         return chars.decode("utf-8")
 except NameError:
     unicode = str
     unichr = chr
+
     def bytes_to_unicode(values):
         return bytes(values).decode("utf-8")
+
+
 assert bytes_to_unicode((226, 143, 176)) == u'⏰'
 
 import cProfile
@@ -165,6 +168,7 @@ class CiProgram:
         else:
             self.programWindow.shortTimeSlice()
             self.programWindow.render()
+            self.backgroundFrame.setCmdCount(0)
         # This is the 'main loop'. Execution doesn't leave this loop until the
         # application is closing down.
         while not self.exiting:
@@ -185,13 +189,15 @@ class CiProgram:
             # (A performance optimization).
             cmdList = []
             while not len(cmdList):
-                if self.frontFrame is not None:
-                    drawList, cursor, cmdCount = self.frontFrame
-                    self.refresh(drawList, cursor, cmdCount)
-                    self.frontFrame = None
                 if not useBgThread:
-                    drawList, cursor = self.backgroundFrame.grabFrame()
-                    self.refresh(drawList, cursor, cmdCount)
+                    (drawList, cursor,
+                     frameCmdCount) = self.backgroundFrame.grabFrame()
+                    if frameCmdCount is not None:
+                        self.frontFrame = (drawList, cursor, frameCmdCount)
+                if self.frontFrame is not None:
+                    drawList, cursor, frameCmdCount = self.frontFrame
+                    self.refresh(drawList, cursor, frameCmdCount)
+                    self.frontFrame = None
                 for _ in range(5):
                     eventInfo = None
                     if self.exiting:
@@ -276,6 +282,7 @@ class CiProgram:
                     self.programWindow.shortTimeSlice()
                     self.programWindow.render()
                     cmdCount += len(cmdList)
+                    self.backgroundFrame.setCmdCount(cmdCount)
 
     def processBackgroundMessages(self):
         while self.bg.hasMessage():

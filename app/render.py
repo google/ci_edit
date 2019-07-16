@@ -20,17 +20,24 @@ from __future__ import print_function
 class Frame:
 
     def __init__(self):
+        # Track the total number of commands processed to create this frame.
+        # This is used to match a point in the command stream to a frame.
+        self.cmdCount = None
         self.cursor = None
         self.drawList = []
 
     def addStr(self, row, col, text, style):
         self.drawList.append((row, col, text, style))
 
+    def setCmdCount(self, count):
+        self.cmdCount = count
+
     def setCursor(self, cursor):
         self.cursor = cursor
 
     def grabFrame(self):
-        r = self.drawList, self.cursor
+        r = self.drawList, self.cursor, self.cmdCount
         self.drawList = []
         self.cursor = None
+        self.cmdCount = None
         return r
