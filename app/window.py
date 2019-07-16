@@ -79,7 +79,7 @@ class ViewWindow:
         if app.config.strict_debug:
             app.log.check_le(row, self.rows)
             app.log.check_le(col, self.cols)
-        self.program.frame.addStr(self.top + row, self.left + col,
+        self.program.backgroundFrame.addStr(self.top + row, self.left + col,
                                   text.encode('utf-8'), colorPair)
 
     def reattach(self):
@@ -344,7 +344,7 @@ class ViewWindow:
             assert isinstance(text, unicode)
         text = text[:self.cols]
         text = text + u' ' * max(0, self.cols - len(text))
-        self.program.frame.addStr(self.top + self.writeLineRow, self.left,
+        self.program.backgroundFrame.addStr(self.top + self.writeLineRow, self.left,
                                   text.encode(u'utf-8'), color)
         self.writeLineRow += 1
 

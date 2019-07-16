@@ -83,7 +83,12 @@ class CiProgram:
             self.prefs.dictionaries[u"base"],
             self.prefs.dictionaries[u"path_match"])
         self.clipboard = app.clipboard.Clipboard()
-        self.frame = app.render.Frame()
+        # There is a background frame that is being build up/created. Once it's
+        # completed it becomes the new front frame that will be drawn on the
+        # screen. This frees up the background frame to begin drawing the next
+        # frame (similar to, but not exactly like double buffering video).
+        self.backgroundFrame = app.render.Frame()
+        self.frontFrame = None
         self.history = app.history.History(
             self.prefs.userData.get('historyPath'))
         self.bufferManager = app.buffer_manager.BufferManager(self, self.prefs)
@@ -163,20 +168,7 @@ class CiProgram:
         # This is the 'main loop'. Execution doesn't leave this loop until the
         # application is closing down.
         while not self.exiting:
-            if useBgThread:
-                while self.bg.hasMessage():
-                    frame = self.bg.get()
-                    if frame[0] == 'exception':
-                        for line in frame[1]:
-                            userMessage(line[:-1])
-                        self.quitNow()
-                        return
-                    drawList, cursor, cmdCount = frame
-                    self.refresh(drawList, cursor, cmdCount)
-            elif 1:
-                drawList, cursor = self.frame.grabFrame()
-                self.refresh(drawList, cursor, cmdCount)
-            else:
+            if 0:
                 profile = cProfile.Profile()
                 profile.enable()
                 self.refresh(drawList, cursor, cmdCount)
@@ -193,6 +185,13 @@ class CiProgram:
             # (A performance optimization).
             cmdList = []
             while not len(cmdList):
+                if self.frontFrame is not None:
+                    drawList, cursor, cmdCount = self.frontFrame
+                    self.refresh(drawList, cursor, cmdCount)
+                    self.frontFrame = None
+                if not useBgThread:
+                    drawList, cursor = self.backgroundFrame.grabFrame()
+                    self.refresh(drawList, cursor, cmdCount)
                 for _ in range(5):
                     eventInfo = None
                     if self.exiting:
@@ -279,7 +278,6 @@ class CiProgram:
                     cmdCount += len(cmdList)
 
     def processBackgroundMessages(self):
-        frame = None
         while self.bg.hasMessage():
             frame = self.bg.get()
             if frame[0] == 'exception':
@@ -287,9 +285,9 @@ class CiProgram:
                     userMessage(line[:-1])
                 self.quitNow()
                 return
-        if frame is not None:
-            drawList, cursor, cmdCount = frame
-            self.refresh(drawList, cursor, cmdCount)
+            # It's unlikely that more than one frame would be present in the
+            # queue. If/when it happens, only the las/most recent frame matters.
+            self.frontFrame = frame
 
     def getCh(self):
         """Get an input character (or event) from curses."""

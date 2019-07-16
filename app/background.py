@@ -66,11 +66,6 @@ def background(inputQueue, outputQueue):
             try:
                 program, message = inputQueue.get(block)
                 #profile = app.profile.beginPythonProfile()
-                if message == 'render':
-                    app.log.info('bg received render message')
-                    program.shortTimeSlice()
-                    program.render()
-                    continue
                 if message == 'quit':
                     app.log.info('bg received quit message')
                     return
@@ -79,7 +74,9 @@ def background(inputQueue, outputQueue):
                 program.render()
                 # debugging only: program.showWindowHierarchy()
                 cmdCount += len(message)
-                outputQueue.put(program.program.frame.grabFrame() + (cmdCount,))
+                outputQueue.put(
+                        program.program.backgroundFrame.grabFrame() +
+                        (cmdCount,))
                 os.kill(pid, signalNumber)
                 #app.profile.endPythonProfile(profile)
                 time.sleep(0)  # See note in hasMessage().
@@ -90,7 +87,7 @@ def background(inputQueue, outputQueue):
             block = program.longTimeSlice()
             if block:
                 program.render()
-                outputQueue.put(program.program.frame.grabFrame() + (cmdCount,))
+                outputQueue.put(program.program.backgroundFrame.grabFrame() + (cmdCount,))
                 os.kill(pid, signalNumber)
         except Exception as e:
             app.log.exception(e)
