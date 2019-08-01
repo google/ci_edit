@@ -176,6 +176,35 @@ class CursesUtilTestCases(unittest.TestCase):
         self.assertEqual(u"", app.curses_util.renderedSubStr(u"", 1, 1))
         self.assertEqual(u"test", app.curses_util.renderedSubStr(u"test", 0, 8))
 
+        # Test with tabs.
+        self.assertEqual(u"   ", app.curses_util.renderedSubStr(
+            u"\tこんにちは", 0, 3))
+        self.assertEqual(u"     こ",
+                         app.curses_util.renderedSubStr(u"\tこんにちは", 3, 10))
+        self.assertEqual(u"        こん",
+                         app.curses_util.renderedSubStr(u"\tこんにちは", 0, 12))
+        self.assertEqual(u"        <tab",
+                         app.curses_util.renderedSubStr(u"\t<tab", 0, None))
+        self.assertEqual(
+            u"         <tab+space",
+            app.curses_util.renderedSubStr(u"\t <tab+space", 0, None))
+        self.assertEqual(
+            u"        <space+tab",
+            app.curses_util.renderedSubStr(u" \t<space+tab", 0, None))
+        self.assertEqual(u"a       <",
+                         app.curses_util.renderedSubStr(u"a\t<", 0, None))
+        self.assertEqual(
+            u"some text.>     <",
+            app.curses_util.renderedSubStr(u"some text.>\t<", 0, None))
+        self.assertEqual(u"                <2tabs",
+                         app.curses_util.renderedSubStr(u"\t\t<2tabs", 0, None))
+        self.assertEqual(
+            u"line    with    tabs",
+            app.curses_util.renderedSubStr(u"line\twith\ttabs", 0, None))
+        self.assertEqual(
+            u"ends with tab>  ",
+            app.curses_util.renderedSubStr(u"ends with tab>\t", 0, None))
+
     def test_rendered_width(self):
         self.assertEqual(0, app.curses_util.columnWidth(u""))
         self.assertEqual(4, app.curses_util.columnWidth(u"test"))
@@ -190,3 +219,16 @@ class CursesUtilTestCases(unittest.TestCase):
         self.assertEqual(3, app.curses_util.columnWidth(u"こc"))
         self.assertEqual(4, app.curses_util.columnWidth(u"aこc"))
         self.assertEqual(7, app.curses_util.columnWidth(u"aこbんc"))
+
+    def test_char_width(self):
+        self.assertEqual(0, app.curses_util.charWidth(u"", 0))
+        self.assertEqual(8, app.curses_util.charWidth(u"\t", 0))
+        self.assertEqual(1, app.curses_util.charWidth(u" ", 0))
+        self.assertEqual(7, app.curses_util.charWidth(u"\t", 1))
+        self.assertEqual(6, app.curses_util.charWidth(u"\t", 2))
+        self.assertEqual(2, app.curses_util.charWidth(u"\t", 6))
+        self.assertEqual(1, app.curses_util.charWidth(u"\t", 7))
+        self.assertEqual(0, app.curses_util.charWidth(u"", 8))
+        self.assertEqual(8, app.curses_util.charWidth(u"\t", 8))
+        self.assertEqual(7, app.curses_util.charWidth(u"\t", 9))
+        self.assertEqual(2, app.curses_util.charWidth(u"こ", 0))

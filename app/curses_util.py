@@ -363,49 +363,48 @@ def renderedSubStr(string, beginCol, endCol=None):
         assert isinstance(beginCol, int)
         assert isinstance(endCol, int)
     column = 0
-    beginIndex = sys.maxsize
-    endIndex = sys.maxsize
     i = 0
     limit = len(string)
+    output = []
     while column < beginCol:
         if i >= limit:
             # The |string| is entirely before |beginCol|.
             return u""
-        column += 2 if string[i] >= MIN_DOUBLE_WIDE_CHARACTER else 1
+        ch = string[i]
+        column += charWidth(ch, column)
         i += 1
-    if beginCol == column:
-        # An exact (aligned) trimming (not splitting a double-wide
-        # character).
-        beginIndex = i
-    else:
-        # Splitting a double-wide character. Prepend a space and adjust.
-        string = u" " + string[i:]
-        beginIndex = 0
-        # Trim these to account for what was trimmed.
-        endCol -= column
-        limit -= i
-        # Add one to each of these for the space.
-        endCol += 1
-        limit += 1
-        column = 1
-        i = 1
-    while True:
-        if endCol <= column:
-            if endCol == column:
-                # An exact (aligned) trimming (not splitting a double-wide
-                # character).
-                endIndex = i
+        if column > beginCol:
+            # Split the leading character.
+            paddingWidth = column - beginCol
+            output.append(u" " * paddingWidth)
+    while i < limit and column < endCol:
+        ch = string[i]
+        lastCharWidth = charWidth(ch, column)
+        column += lastCharWidth
+        i += 1
+        if column > endCol:
+            # Split the trailing character.
+            paddingWidth = min(endCol - (column - lastCharWidth),
+                               lastCharWidth - 1)
+            output.append(u" " * paddingWidth)
+        else:
+            if ch == u"\t":
+                output.append(u" " * lastCharWidth)
             else:
-                # Splitting a double-wide character. Prepend a space and adjust.
-                string = string[:i - 1] + u" "
-                endIndex = len(string)
-            break
-        if i >= limit:
-            endIndex = limit
-            break
-        column += 2 if string[i] >= MIN_DOUBLE_WIDE_CHARACTER else 1
-        i += 1
-    return string[beginIndex:endIndex]
+                output.append(ch)
+    return u"".join(output)
+
+
+def charWidth(ch, column):
+    if ch == u"\t":
+        tabWidth = 8
+        return tabWidth - (column % tabWidth)
+    elif ch > MIN_DOUBLE_WIDE_CHARACTER:
+        return 2
+    elif ch == u"":
+        return 0
+    else:
+        return 1
 
 
 def columnWidth(string):
