@@ -45,6 +45,15 @@ __c_primitive_types = [
     "uint_least64_t", "uint_max_t", "uintptr_t", "unsigned", "void", "wchar_t"
 ]
 
+__linux_commands = [
+    "ag", "basename", "bash", "cd", "chmod", "cp",
+    "dircolors", "dirname", "echo", "egrep",
+    "find",
+    "grep", "ixoff", "ixon", "lesspipe", "ln", "ls", "mkdir", "read", "rm",
+    "rmdir", "rxvt", "sed", "sh", "shell", "sleep", "ssh", "tput", "wc"
+]
+
+
 if sys.version_info[0] == 2:
     # The Python2 re limits the number of named groups. Reduce the keywords
     # recognized.
@@ -468,6 +477,11 @@ prefs = {
             "ext": [".json", ".js"],
             "grammar": "js",
         },
+        "make": {
+            "ext": [],
+            "grammar": "make",
+            "name": ["Makefile"],
+        },
         "md": {
             "ext": [".md"],
             "grammar": "md",
@@ -540,11 +554,7 @@ prefs = {
                 "while"
             ],
             # Not really types.
-            "types": [
-                "ag", "basename", "chmod", "cp", "dircolors", "dirname", "find",
-                "ixoff", "ixon", "lesspipe", "ln", "mkdir", "read", "rm",
-                "rmdir", "rxvt", "sed", "sleep", "ssh", "tput", "wc"
-            ],
+            "types": __linux_commands,
             "contains": ["c_string1", "c_string2", "pound_comment"],
         },
         "binary": {
@@ -946,6 +956,21 @@ prefs = {
             "indent": "  ",
             "spelling": False,
         },
+        # Makefile
+        "make": {
+            "indent": "\t",
+            "keywords": [
+                "ifeq", "endif", "ifneq",
+                "break", "case", "continue", "do", "done", "echo", "else",
+                "esac", "exit", "fi", "if", "for", "return", "switch", "then",
+                "while"
+            ],
+            "keepTabs": True,
+            "tabToSpaces": False,
+            # Not really types.
+            "types": __linux_commands,
+            "contains": ["c_string1", "c_string2", "pound_comment"],
+        },
         # Markdown language.
         "md": {
             "indent": "  ",
@@ -1163,6 +1188,10 @@ prefs = {
         },
         "special": {
             "indent": "  ",
+            "spelling": False,
+        },
+        "tabs": {
+            "indent": "",
             "spelling": False,
         },
         "text": {
