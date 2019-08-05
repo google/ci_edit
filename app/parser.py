@@ -413,6 +413,30 @@ class Parser:
                 child = (topNode[kGrammar], cursor, topNode[kPrior], visual)
                 cursor += regEnd
                 visual += regEnd * 2
+            elif index == len(foundGroups) - 3:
+                # Found variable width character.
+                topNode = self.parserNodes[-1]
+                regBegin, regEnd = reg
+                # First, add any preceding single wide characters.
+                if regBegin > 0:
+                    self.parserNodes.append((topNode[kGrammar], cursor,
+                                             topNode[kPrior], visual))
+                    cursor += regBegin
+                    visual += regBegin
+                    # Remove the regular text from reg values.
+                    regEnd -= regBegin
+                    regBegin = 0
+                # Add tabs grammar; store the variable width characters.
+                rowStart = self.parserNodes[self.rows[-1]][kVisual]
+                col = visual - rowStart
+                # Advance to the next tab stop.
+                visual = rowStart + ((col + 8) // 8 * 8)
+                self.parserNodes.append((appPrefs.grammars['tabs'], cursor,
+                        topNode[kPrior], visual))
+                cursor += regEnd
+                visual += (regEnd - 1) * 8
+                # Resume current grammar; store the variable width characters.
+                child = (topNode[kGrammar], cursor, topNode[kPrior], visual)
             elif index == 1:
                 # Found end of current grammar section (an 'end').
                 child = (

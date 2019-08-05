@@ -187,6 +187,8 @@ class Prefs():
                 markers.append(r'\b' + types + r'\b')
             # |Special| markers start after |types| markers.
             markers += v.get('special', [])
+            # Variable width characters are at index [-3] in markers.
+            markers.append(r'\t+')
             # Double wide characters are at index [-2] in markers.
             markers.append(u'[\u3000-\uffff]+')
             # Carriage return characters are at index [-1] in markers.
