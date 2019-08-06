@@ -41,7 +41,7 @@ class PerformanceTestCases(unittest.TestCase):
         #print("\n%s | %s %s | %s %s | %s %s" % (a, b, a/b, c, a/c, d, a/d))
         # Calling a function or member is significantly slower than direct
         # access.
-        self.assertGreater(b, a * 1.6)
+        self.assertGreater(b, a * 1.5)
         self.assertGreater(c, a * 2)
         self.assertGreater(d, a * 2)
 

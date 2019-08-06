@@ -154,19 +154,23 @@ class ProgramWindow(app.window.ActiveWindow):
             win = win.parent
 
     def longTimeSlice(self):
+        """returns whether work is finished (no need to call again)."""
         win = self.focusedWindow
-        finished = True
         while win is not None and win is not self:
-            finished = finished and win.longTimeSlice()
+            if not win.longTimeSlice():
+                return False
             win = win.parent
-        return finished
+        return True
 
     def shortTimeSlice(self):
+        """returns whether work is finished (no need to call again)."""
         win = self.focusedWindow
         while win is not None and win is not self:
-            win.shortTimeSlice()
+            if not win.shortTimeSlice():
+                return False
             #assert win is not win.parent
             win = win.parent
+        return True
 
     def clickedNearby(self, row, col):
         y, x = self.priorClickRowCol
@@ -353,13 +357,13 @@ class ProgramWindow(app.window.ActiveWindow):
         self.debugDraw(window)
         penRow = window.textBuffer.penRow
         penCol = window.textBuffer.penCol
-        if (penRow >= window.scrollRow and
+        if (window.showCursor and penRow >= window.scrollRow and
                 penRow < window.scrollRow + window.rows):
-            self.program.frame.setCursor(
+            self.program.backgroundFrame.setCursor(
                 (window.top + penRow - window.scrollRow,
                  window.left + penCol - window.scrollCol))
         else:
-            self.program.frame.setCursor(None)
+            self.program.backgroundFrame.setCursor(None)
 
     def reshape(self, top, left, rows, cols):
         app.window.ActiveWindow.reshape(self, top, left, rows, cols)

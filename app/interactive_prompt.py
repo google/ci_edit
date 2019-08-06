@@ -107,6 +107,7 @@ class InteractivePrompt(app.controller.Controller):
             u'cua': self.changeToCuaMode,
             u'emacs': self.changeToEmacsMode,
             u'make': self.makeCommand,
+            u'open': self.openCommand,
             #u'split': self.splitCommand,  # Experimental wip.
             u'vim': self.changeToVimNormalMode,
         }
@@ -171,6 +172,33 @@ class InteractivePrompt(app.controller.Controller):
 
     def makeCommand(self, cmdLine, view):
         return {}, u'making stuff'
+
+    def openCommand(self, cmdLine, view):
+        """
+        Opens the file under cursor.
+        """
+        args = kReArgChain.findall(cmdLine)
+        app.log.info(args)
+        if len(args) == 1:
+            # If no args are provided, look for a path at the cursor position.
+            view.textBuffer.openFileAtCursor()
+            return {}, view.textBuffer.message[0]
+        # Try the raw path.
+        path = args[1]
+        if os.access(path, os.R_OK):
+            return self.openFile(path, view)
+        # Look in the same directory as the current file.
+        path = os.path.join(os.path.dirname(view.textBuffer.fullPath), args[1])
+        if os.access(path, os.R_OK):
+            return self.openFile(path, view)
+        return {}, u"Unable to open " + args[1]
+
+    def openFile(self, path, view):
+        textBuffer = view.program.bufferManager.loadTextBuffer(path)
+        inputWindow = self.currentInputWindow()
+        inputWindow.setTextBuffer(textBuffer)
+        self.changeTo(inputWindow)
+        inputWindow.setMessage('Opened file {}'.format(path))
 
     def splitCommand(self, cmdLine, view):
         view.splitWindow()

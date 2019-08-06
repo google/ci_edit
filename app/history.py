@@ -54,10 +54,15 @@ def calculateChecksum(filePath, data=None):
     hasher = hashlib.sha512()
     try:
         if data is not None:
+            if len(data) == 0:
+                return None
             hasher.update(data.encode(u"utf-8"))
         else:
             with open(filePath, 'rb') as dataFile:
-                hasher.update(dataFile.read())
+                data = dataFile.read()
+                if len(data) == 0:
+                    return None
+                hasher.update(data)
         return hasher.hexdigest()
     except FileNotFoundError as e:
         pass
@@ -141,6 +146,9 @@ class History():
             if self.pathToHistory is not None:
                 self.userHistory.pop((lastChecksum, lastFileSize), None)
                 newChecksum, newFileSize = getFileInfo(filePath)
+                if newChecksum is None:
+                    app.log.info(u"Failed to checksum", repr(filePath))
+                    return
                 self.userHistory[(newChecksum, newFileSize)] = fileHistory
                 with open(self.pathToHistory, 'wb') as historyFile:
                     pickle.dump(self.userHistory, historyFile)
@@ -166,7 +174,10 @@ class History():
           The file history (dict) of the desired file if it exists.
         """
         checksum, fileSize = getFileInfo(filePath, data)
-        fileHistory = self.userHistory.get((checksum, fileSize), {})
+        if checksum is None:
+            fileHistory = {}
+        else:
+            fileHistory = self.userHistory.get((checksum, fileSize), {})
         fileHistory['adate'] = time.time()
         return fileHistory
 

@@ -97,6 +97,7 @@ fstat
 fstatvfs
 fsync
 ftruncate
+fullmatch
 getattr
 getch
 getcheckinterval
@@ -199,6 +200,7 @@ makedev
 makedirs
 max
 maxsize
+maxsplit
 maxunicode
 memmove
 metavar
@@ -263,6 +265,7 @@ regex
 regs
 relpath
 removedirs
+repl
 repr
 resizeterm
 restype

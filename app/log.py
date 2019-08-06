@@ -49,11 +49,11 @@ def parseLines(frame, logChannel, *args):
                                     frame[2], frame[3], msg)
     prior = msg
     for i in args[1:]:
-        if not len(prior) or prior[-1] != u'\n':
-            msg += u' '
+        if not len(prior) or prior[-1] != u"\n":
+            msg += u" "
         prior = repr(i)  #unicode(i)
         msg += prior
-    return msg.split("\n")
+    return msg.split(u"\n")
 
 
 def channelEnable(logChannel, isEnabled):

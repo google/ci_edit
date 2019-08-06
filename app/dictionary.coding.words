@@ -58,6 +58,7 @@ args
 argv
 ascii
 asm
+aspx
 async
 attr
 attrs
@@ -98,6 +99,8 @@ codebase
 codec
 codecs
 codeview
+combinator
+combinators
 conf
 configs
 constexpr
@@ -408,6 +411,7 @@ scrollbar
 serializable
 sha
 shader
+shtml
 sig
 sigbus
 signin
@@ -448,7 +452,9 @@ sys
 syscall
 sysex
 syslog
+sz
 tar
+tcp
 templated
 templatizer
 templatizers
@@ -497,9 +503,15 @@ usb
 usec
 usecs
 utf
+util
+utils
+uv
+ux
 variadic
+vc
 vdso
 versioning
+vi
 vimrc
 vkey
 vpn
@@ -521,6 +533,7 @@ wifi
 wildcard
 wildcards
 wireframe
+xhtml
 xorg
 xss
 xterm

@@ -30,8 +30,6 @@ import sys
 import tempfile
 import unittest
 
-import third_party.pyperclip as clipboard
-
 import app.ci_program
 import app.curses_util
 
@@ -54,6 +52,9 @@ class FakeCursesTestCase(unittest.TestCase):
         self.cursesScreen = curses.StandardScreen()
         self.prg = app.ci_program.CiProgram()
         self.prg.setUpCurses(self.cursesScreen)
+        # For testing, use the internal clipboard. Using the system clipboard
+        # can create races between tests running in parallel.
+        self.prg.clipboard.setOsHandlers(None, None)
 
     def addClickInfo(self, timeStamp, screenText, bState):
         caller = inspect.stack()[1]
@@ -120,6 +121,11 @@ class FakeCursesTestCase(unittest.TestCase):
         return displayChecker
 
     def displayFindCheck(self, *args):
+        """
+        Args:
+            find_string (unicode): locate this string.
+            check_string (unicode): verify this follows |find_string|.
+        """
         assert len(args) == 2
         assert isinstance(args[0], unicode)
         assert isinstance(args[1], unicode)
@@ -243,8 +249,8 @@ class FakeCursesTestCase(unittest.TestCase):
                                            caller[2], caller[3])
 
         def copyToClipboard(display, cmdIndex):
-            self.assertTrue(clipboard.copy, callerText)
-            clipboard.copy(text)
+            self.assertTrue(self.prg.clipboard.copy, callerText)
+            self.prg.clipboard.copy(text)
             return None
 
         return copyToClipboard
@@ -260,21 +266,28 @@ class FakeCursesTestCase(unittest.TestCase):
                                            caller[2], caller[3])
 
         def copyToClipboard(display, cmdIndex):
-            self.assertTrue(clipboard.copy, callerText)
-            while True:
-                # Python 2.7 will sometimes fail this copy call. Keep trying.
-                try:
-                    clipboard.copy(text)
-                    return app.curses_util.CTRL_V
-                except OSError:
-                  pass
-
+            self.assertTrue(self.prg.clipboard.copy, callerText)
+            self.prg.clipboard.copy(text)
+            return app.curses_util.CTRL_V
         return copyToClipboard
 
-    def notReached(self, display):
-        """Calling this will fail the test. It's expected that the code will not
-        reach this function."""
-        self.fail('Called notReached!')
+    def checkNotReached(self, depth=1):
+        """Check that this step doesn't occur. E.g. verify the app exited.
+
+        Args:
+          depth (int): how many stack frames up to report as the error location.
+        """
+        caller = inspect.stack()[depth]
+        callerText = u"\n  %s:%s:%s(): " % (os.path.split(caller[1])[1],
+                                            caller[2], caller[3])
+
+        def displayStyleChecker(display, cmdIndex):
+            self.fail(callerText +
+                    "\n  Unexpectedly ran out of fake inputs. Consider adding"
+                    " CTRL_Q (and 'n' if necessary).")
+            return None
+
+        return displayStyleChecker
 
     def runWithFakeInputs(self, fakeInputs, argv=None):
         assert hasattr(fakeInputs, "__getitem__") or hasattr(
@@ -283,7 +296,7 @@ class FakeCursesTestCase(unittest.TestCase):
             argv = ["no_argv"]
         sys.argv = argv
         self.cursesScreen.setFakeInputs(fakeInputs + [
-            self.notReached,
+            self.checkNotReached(2),
         ])
         self.assertTrue(self.prg)
         self.assertFalse(self.prg.exiting)

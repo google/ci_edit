@@ -66,40 +66,14 @@ class DirectoryList(app.window.Window):
             assert self is not host
         app.window.Window.__init__(self, program, host)
         self.host = host
-        self.isFocusable = False
         self.inputWindow = inputWindow
         self.controller = app.cu_editor.DirectoryList(self)
         self.setTextBuffer(app.text_buffer.TextBuffer(self.program))
-        # Set up table headers.
-        color = self.program.color.get(u'top_info')
-        self.optionsRow = app.window.OptionsSelectionWindow(self.program, self)
-        self.optionsRow.setParent(self)
-        app.window.SortableHeaderWindow(self.program, self.optionsRow, u'Name',
-                                        u'editor', u'filesSortAscendingByName',
-                                        -41)
-        label = app.window.LabelWindow(self.program, self.optionsRow, u'|')
-        label.setParent(self.optionsRow)
-        label.color = color
-        app.window.SortableHeaderWindow(self.program, self.optionsRow, u'Size ',
-                                        u'editor', u'filesSortAscendingBySize',
-                                        16)
-        label = app.window.LabelWindow(self.program, self.optionsRow, u'|')
-        label.setParent(self.optionsRow)
-        label.color = color
-        app.window.SortableHeaderWindow(self.program, self.optionsRow,
-                                        u'Modified ', u'editor',
-                                        u'filesSortAscendingByModifiedDate', 25)
-        label = app.window.LabelWindow(self.program, self.optionsRow, u'|')
-        label.setParent(self.optionsRow)
-        label.color = color
 
-    def reshape(self, top, left, rows, cols):
-        """Change self and sub-windows to fit within the given rectangle."""
-        app.log.detail(u'reshape', top, left, rows, cols)
-        self.optionsRow.reshape(top, left, 1, cols)
-        top += 1
-        rows -= 1
-        app.window.Window.reshape(self, top, left, rows, cols)
+    def colorPref(self, colorType, delta=0):
+        if colorType == u"current_line":
+            return self.program.color.get("selected", delta)
+        return self.program.color.get(colorType, delta)
 
     def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
         row = self.scrollRow + paneRow
@@ -138,6 +112,7 @@ class DirectoryList(app.window.Window):
         textBuffer.highlightCursorLine = True
         textBuffer.highlightTrailingWhitespace = False
         app.window.Window.setTextBuffer(self, textBuffer)
+        textBuffer.view.showCursor = False
         self.controller.setTextBuffer(textBuffer)
 
 
@@ -193,6 +168,29 @@ class FileManagerWindow(app.window.Window):
         self.pathWindow = PathWindow(self.program, self)
         self.pathWindow.setParent(self)
 
+        # Set up table headers.
+        color = self.program.color.get(u'top_info')
+        self.tableHeaders = app.window.OptionsSelectionWindow(self.program, self)
+        self.tableHeaders.setParent(self)
+        app.window.SortableHeaderWindow(self.program, self.tableHeaders, u'Name',
+                                        u'editor', u'filesSortAscendingByName',
+                                        -41)
+        label = app.window.LabelWindow(self.program, self.tableHeaders, u'|')
+        label.setParent(self.tableHeaders)
+        label.color = color
+        app.window.SortableHeaderWindow(self.program, self.tableHeaders, u'Size ',
+                                        u'editor', u'filesSortAscendingBySize',
+                                        16)
+        label = app.window.LabelWindow(self.program, self.tableHeaders, u'|')
+        label.setParent(self.tableHeaders)
+        label.color = color
+        app.window.SortableHeaderWindow(self.program, self.tableHeaders,
+                                        u'Modified ', u'editor',
+                                        u'filesSortAscendingByModifiedDate', 25)
+        label = app.window.LabelWindow(self.program, self.tableHeaders, u'|')
+        label.setParent(self.tableHeaders)
+        label.color = color
+
         self.directoryList = DirectoryList(self.program, self, inputWindow)
         self.directoryList.setParent(self)
 
@@ -242,7 +240,12 @@ class FileManagerWindow(app.window.Window):
 
     def onPrefChanged(self, category, name):
         self.directoryList.controller.optionChanged(category, name)
-        app.window.Window.onPrefChanged(self.program, self, category, name)
+        app.window.Window.onPrefChanged(self, category, name)
+
+    def nextFocusableWindow(self, start, reverse=False):
+        # Keep the tab focus in the children. This is a top-level window, don't
+        # tab out of it.
+        return self._childFocusableWindow(reverse)
 
     def reshape(self, top, left, rows, cols):
         """Change self and sub-windows to fit within the given rectangle."""
@@ -252,6 +255,9 @@ class FileManagerWindow(app.window.Window):
         top += 1
         rows -= 1
         self.pathWindow.reshape(top, left, 1, cols)
+        top += 1
+        rows -= 1
+        self.tableHeaders.reshape(top, left, 1, cols)
         top += 1
         rows -= 1
         self.messageLine.reshape(top + rows - 1, left, 1, cols)

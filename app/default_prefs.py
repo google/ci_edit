@@ -104,6 +104,7 @@ color8 = {
     "cpp_block_comment": 2,
     "cpp_line_comment": 2,
     "cpp_string_literal": 2,
+    "current_line": 1,
     "debug_window": 1,
     "default": 0,
     "doc_block_comment": 3,
@@ -181,6 +182,7 @@ color16 = {
     "cpp_block_comment": commentColor16Index,
     "cpp_line_comment": commentColor16Index,
     "cpp_string_literal": stringColor16Index,
+    "current_line": 15,
     "debug_window": defaultColor16Index,
     "default": defaultColor16Index,
     "doc_block_comment": commentColor16Index,
@@ -256,6 +258,7 @@ color256 = {
     "cpp_block_comment": commentColorIndex,
     "cpp_line_comment": commentColorIndex,
     "cpp_string_literal": stringColorIndex,
+    "current_line": 180,
     "debug_window": defaultColorIndex,
     "default": defaultColorIndex,
     "doc_block_comment": commentColorIndex,
@@ -803,7 +806,7 @@ prefs = {
         # Generate Ninja language.
         "gn": {
             "indent": "  ",
-            "keywords": ["else", "false", "foreach", "if", "true"],
+            "keywords": ["else", "false", "foreach", "if", "import", "true"],
             "special": [],
             "types": [],
             "contains": [

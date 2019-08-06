@@ -67,6 +67,7 @@ class ViewWindow:
         self.cols = 1
         self.scrollRow = 0
         self.scrollCol = 0
+        self.showCursor = True
         self.writeLineRow = 0
         self.zOrder = []
 
@@ -78,7 +79,7 @@ class ViewWindow:
         if app.config.strict_debug:
             app.log.check_le(row, self.rows)
             app.log.check_le(col, self.cols)
-        self.program.frame.addStr(self.top + row, self.left + col,
+        self.program.backgroundFrame.addStr(self.top + row, self.left + col,
                                   text.encode('utf-8'), colorPair)
 
     def reattach(self):
@@ -109,6 +110,9 @@ class ViewWindow:
         while topWindow.parent:
             topWindow = topWindow.parent
         topWindow.changeFocusTo(changeTo)
+
+    def colorPref(self, colorType, delta=0):
+        return self.program.color.get(colorType, delta)
 
     def contains(self, row, col):
         """Determine whether the position at row, col lay within this window."""
@@ -186,7 +190,7 @@ class ViewWindow:
         self.top += top
         self.left += left
 
-    def __childFocusableWindow(self, reverse=False):
+    def _childFocusableWindow(self, reverse=False):
         windows = self.zOrder[:]
         if reverse:
             windows.reverse()
@@ -194,13 +198,25 @@ class ViewWindow:
             if i.isFocusable:
                 return i
             else:
-                r = i.__childFocusableWindow(reverse)
+                r = i._childFocusableWindow(reverse)
                 if r is not None:
                     return r
 
     def nextFocusableWindow(self, start, reverse=False):
-        """Ignore |start| when searching."""
-        windows = self.zOrder[:]
+        """Windows without |isFocusable| are skipped. Ignore (skip) |start| when
+        searching.
+
+        Args:
+          start (window): the child window to start from. If |start| is not
+              found, start from the first child window.
+          reverse (bool): if True, find the prior focusable window.
+
+        Returns:
+          A window that should be focused.
+
+        See also: showFullWindowHierarchy() which can help in debugging.
+        """
+        windows = self.parent.zOrder[:]
         if reverse:
             windows.reverse()
         try:
@@ -212,13 +228,13 @@ class ViewWindow:
             if i.isFocusable:
                 return i
             else:
-                r = i.__childFocusableWindow(reverse)
+                r = i._childFocusableWindow(reverse)
                 if r is not None:
                     return r
-        r = self.parent.nextFocusableWindow(self, reverse)
+        r = self.parent.nextFocusableWindow(self.parent, reverse)
         if r is not None:
             return r
-        return self.__childFocusableWindow(reverse)
+        return self._childFocusableWindow(reverse)
 
     def normalize(self):
         self.parent.normalize()
@@ -280,7 +296,8 @@ class ViewWindow:
         return True
 
     def shortTimeSlice(self):
-        pass
+        """returns whether work is finished (no need to call again)."""
+        return True
 
     def reshape(self, top, left, rows, cols):
         self.moveTo(top, left)
@@ -327,7 +344,7 @@ class ViewWindow:
             assert isinstance(text, unicode)
         text = text[:self.cols]
         text = text + u' ' * max(0, self.cols - len(text))
-        self.program.frame.addStr(self.top + self.writeLineRow, self.left,
+        self.program.backgroundFrame.addStr(self.top + self.writeLineRow, self.left,
                                   text.encode(u'utf-8'), color)
         self.writeLineRow += 1
 
@@ -444,8 +461,12 @@ class Window(ActiveWindow):
         return finished
 
     def shortTimeSlice(self):
-        if self.textBuffer is not None:
-            self.textBuffer.parseScreenMaybe()
+        """returns whether work is finished (no need to call again)."""
+        tb = self.textBuffer
+        if tb is not None:
+            tb.parseScreenMaybe()
+            return tb.parser.fullyParsedToLine >= len(tb.lines)
+        return True
 
 
 class LabelWindow(ViewWindow):
@@ -714,7 +735,7 @@ class LogWindow(ViewWindow):
 
     def render(self):
         self.renderCounter += 1
-        app.log.meta(u" " * 10, self.renderCounter, u"- screen refresh -")
+        app.log.meta(u" " * 10, self.renderCounter, u"- screen render -")
         self.writeLineRow = 0
         colorPrefs = self.program.color
         colorA = colorPrefs.get(u'default')
@@ -1220,7 +1241,9 @@ class InputWindow(Window):
 
     def setTextBuffer(self, textBuffer):
         if app.config.strict_debug:
-            assert issubclass(textBuffer.__class__, app.text_buffer.TextBuffer)
+            assert issubclass(
+                    textBuffer.__class__, app.text_buffer.TextBuffer), \
+                    repr(textBuffer)
         app.log.info('setTextBuffer')
         if self.textBuffer is not None:
             self.savedScrollPositions[self.textBuffer.fullPath] = (
@@ -1252,6 +1275,8 @@ class InputWindow(Window):
         if not tb:
             tb = bufferManager.newTextBuffer()
         self.setTextBuffer(tb)
+        # Should parsing the document be a standard part of setTextBuffer? TBD.
+        self.textBuffer.parseDocument()
         openToLine = self.program.prefs.startup.get('openToLine')
         if openToLine is not None:
             self.textBuffer.selectText(openToLine - 1, 0, 0,
@@ -1312,6 +1337,7 @@ class OptionsTrinaryStateWindow(Window):
         colorPrefs = self.program.color
         self.color = colorPrefs.get('keyword')
         self.focusColor = colorPrefs.get('selected')
+        self.textBuffer.view.showCursor = False
 
     def focus(self):
         Window.focus(self)

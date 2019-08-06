@@ -132,6 +132,9 @@ class Parser:
             relative to the |col| parameter.
         """
         if app.config.strict_debug:
+            assert isinstance(row, int)
+            assert isinstance(col, int)
+            assert isinstance(index, int)
             assert row < len(self.rows), row
         eol = True
         finalResult = (self.emptyNode, 0, 0, eol)
@@ -147,6 +150,18 @@ class Parser:
         eol = False
         return ParserNode(*node), offset - node[kVisual], remaining, eol
 
+    def grammarTextAt(self, row, col):
+        """Get the run of text for the given position."""
+        if app.config.strict_debug:
+            assert isinstance(row, int)
+            assert isinstance(col, int)
+            assert row < len(self.rows), row
+        rowIndex = self.rows[row]
+        grammarIndex = self.grammarIndexFromRowCol(row, col)
+        node = self.parserNodes[rowIndex + grammarIndex]
+        nextNode = self.parserNodes[rowIndex + grammarIndex + 1]
+        return self.data[node[kBegin]:nextNode[kBegin]], node[kGrammar].get(u"link_type")
+
     def parse(self, bgThread, appPrefs, data, grammar, beginRow, endRow):
         """
         Args:
@@ -157,9 +172,9 @@ class Parser:
               that is has changed since the previous parse of this data. Pass
               zero to parse the entire document. If beginRow >= len(data) then
               no parse is done.
-          endRow (int): The last row to parse. This stops the parser from going
-              over the entire file if, for example, only 100 rows out of a
-              million rows are needed (which can save a lot of cpu time).
+          endRow (int): The row to stop parsing. This stops the parser from
+              going over the entire file if, for example, only 100 rows out of
+              a million rows are needed (which can save a lot of cpu time).
         """
         app.log.parser('grammar', grammar['name'])
         # Trim partially parsed data.
@@ -234,6 +249,36 @@ class Parser:
             end -= 1
         return self.data[begin:end]
 
+    def charAt(self, row, col):
+        """Get the character at |row|, |col|.
+
+        Args:
+            row (int): zero based index into list of rows.
+            col (int): zero based visual offset from start of line.
+
+        Returns:
+            character (unicode) or None if row, col is outside of the document.
+        """
+        if app.config.strict_debug:
+            assert isinstance(row, int)
+            assert isinstance(col, int)
+            assert isinstance(self.data, unicode)
+        if row > len(self.rows):
+            return None
+        begin = self.parserNodes[self.rows[row]][kBegin]
+        if row + 1 >= len(self.rows):
+            end = self.parserNodes[-1][kBegin]
+        else:
+            end = self.parserNodes[self.rows[row + 1]][kBegin]
+        while begin < end:
+            if col <= 0:
+                return self.data[begin]
+            if self.data[begin] >= app.curses_util.MIN_DOUBLE_WIDE_CHARACTER:
+                col -= 1
+            col -= 1
+            begin += 1
+        return None
+
     def rowTextAndWidth(self, row):
         """Get the character data and the visual/display column width of those
         characters.
@@ -265,6 +310,36 @@ class Parser:
             end = lastNode[kBegin]
             visualEnd = lastNode[kVisual]
         return self.data[begin:end], visualEnd - visual
+
+    def rowWidth(self, row):
+        """Get the visual/display column width of a row.
+
+        If the text is all ASCII then len(text) will equal the column width. If
+        there are double wide characters (e.g. Chinese or some emoji) the column
+        width may be larger than len(text).
+
+        Args:
+            row (int): the row index is zero based (so it's `line_number - 1`).
+
+        Returns:
+            columnWidth (int)
+        """
+        if app.config.strict_debug:
+            assert isinstance(row, int)
+        if row < 0:
+            row = len(self.rows) + row
+        visual = self.parserNodes[self.rows[row]][kVisual]
+        if row + 1 < len(self.rows):
+            end = self.parserNodes[self.rows[row + 1]][kBegin]
+            visualEnd = self.parserNodes[self.rows[row + 1]][kVisual]
+            if len(self.data) and self.data[end - 1] == '\n':
+                visualEnd -= 1
+        else:
+            # There is a sentinel node at the end that records the end of
+            # document.
+            lastNode = self.parserNodes[-1]
+            visualEnd = lastNode[kVisual]
+        return visualEnd - visual
 
     def __buildGrammarList(self, bgThread, appPrefs):
         """The guts of the parser. This is where the heavy lifting is done.

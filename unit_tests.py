@@ -50,6 +50,7 @@ import app.unit_test_execute_prompt
 import app.unit_test_file_manager
 import app.unit_test_find_window
 import app.unit_test_intention
+import app.unit_test_line_buffer
 import app.unit_test_misspellings
 import app.unit_test_parser
 import app.unit_test_performance
@@ -57,6 +58,7 @@ import app.unit_test_prediction_window
 import app.unit_test_prefs
 import app.unit_test_regex
 import app.unit_test_selectable
+import app.unit_test_startup
 import app.unit_test_string
 import app.unit_test_text_buffer
 import app.unit_test_ui
@@ -92,6 +94,8 @@ TESTS = {
     app.unit_test_execute_prompt.ExecutePromptTestCases,
     'intention':
     app.unit_test_intention.IntentionTestCases,
+    'line_buffer':
+    app.unit_test_line_buffer.LineBufferTestCases,
     'misspellings':
     app.unit_test_misspellings.MisspellingsTestCases,
     'parser':
@@ -106,6 +110,8 @@ TESTS = {
     app.unit_test_regex.RegexTestCases,
     'selectable':
     app.unit_test_selectable.SelectableTestCases,
+    'startup':
+    app.unit_test_startup.StartupTestCases,
     'string':
     app.unit_test_string.StringTestCases,
     'draw':

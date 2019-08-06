@@ -40,6 +40,14 @@ class FakeView:
         self.scrollRow = 0
         self.scrollCol = 0
 
+def checkRow(test, text_buffer, row, expected):
+    text_buffer.parseDocument()
+    if not (text_buffer.lines[row] == expected == text_buffer.parser.rowText(row)):
+        test.fail("\n\nExpected these to match: "
+            "lines {}, expected {}, parser {}".format(
+                repr(text_buffer.lines[row]), repr(expected),
+                repr(text_buffer.parser.rowText(row))))
+
 
 class MouseTestCases(unittest.TestCase):
 
@@ -56,9 +64,11 @@ apple banana carrot
 void blah();
 """
         self.textBuffer.insertLines(tuple(test.split('\n')))
+        self.textBuffer.parseDocument()
         #self.assertEqual(self.textBuffer.scrollRow, 0)
         #self.assertEqual(self.textBuffer.scrollCol, 0)
         self.assertEqual(self.textBuffer.lines[1], 'two')
+        self.assertEqual(self.textBuffer.parser.rowText(1), 'two')
 
     def tearDown(self):
         self.textBuffer = None
@@ -175,40 +185,142 @@ class TextIndentTestCases(unittest.TestCase):
     def tearDown(self):
         self.textBuffer = None
 
-    def test_auto_insert_pair_disable(self):
-
-        class FakeParser:
-
-            def grammarAt(self, row, col):
-                return {'indent': '  '}
-
-            def rowTextAndWidth(self, row):
-                return (u"hello", len(u"hello"))
-
+    def test_auto_indent(self):
         self.prg.prefs.editor['autoInsertClosingCharacter'] = False
+        def insert(*args):
+            self.textBuffer.insertPrintableWithPairing(*args)
+            self.textBuffer.parseDocument()
         tb = self.textBuffer
-        insert = self.textBuffer.insertPrintableWithPairing
         self.assertEqual(len(tb.lines), 1)
+        self.assertEqual(tb.parser.rowCount(), 1)
         insert(ord('a'), None)
         insert(ord(':'), None)
         tb.carriageReturn()
-        self.assertEqual(tb.lines[0], 'a:')
-        self.assertEqual(tb.lines[1], '')
-        tb.parser = FakeParser()
+        checkRow(self, tb, 0, 'a:')
+        checkRow(self, tb, 1, '')
+
+        # Replace member function to return a grammar with and indent.
+        def grammarAt(row, col):
+            return {'indent': '  '}
+
+        tb.parser.grammarAt = grammarAt
         tb.backspace()
         tb.carriageReturn()
-        self.assertEqual(tb.lines[0], 'a:')
-        self.assertEqual(tb.lines[1], '  ')
+        checkRow(self, tb, 0, 'a:')
+        checkRow(self, tb, 1, '  ')
         insert(ord('b'), None)
         insert(ord(':'), None)
         tb.carriageReturn()
         insert(ord('c'), None)
         insert(ord(':'), None)
         tb.carriageReturn()
-        self.assertEqual(tb.lines[0], 'a:')
-        self.assertEqual(tb.lines[1], '  b:')
-        self.assertEqual(tb.lines[2], '    c:')
+        checkRow(self, tb, 0, 'a:')
+        checkRow(self, tb, 1, '  b:')
+        checkRow(self, tb, 2, '    c:')
 
+    def test_indent_unindent_lines(self):
+        def insert(*args):
+            self.textBuffer.insertPrintableWithPairing(*args)
+            self.textBuffer.parseDocument()
+        tb = self.textBuffer
+        self.assertEqual(len(tb.lines), 1)
+        self.assertEqual(tb.parser.rowCount(), 1)
+        insert(ord('a'), None)
+        tb.carriageReturn()
+        insert(ord('b'), None)
+        tb.carriageReturn()
+        insert(ord('c'), None)
+        tb.carriageReturn()
+        insert(ord('d'), None)
+        tb.carriageReturn()
+        checkRow(self, tb, 0, 'a')
+        checkRow(self, tb, 1, 'b')
+        checkRow(self, tb, 2, 'c')
+        checkRow(self, tb, 3, 'd')
+        tb.penRow = 1
+        tb.markerRow = 2
+        tb.indentLines()
+        checkRow(self, tb, 0, 'a')
+        checkRow(self, tb, 1, '  b')
+        checkRow(self, tb, 2, '  c')
+        checkRow(self, tb, 3, 'd')
+        tb.penRow = 0
+        tb.markerRow = 3
+        tb.indentLines()
+        checkRow(self, tb, 0, '  a')
+        checkRow(self, tb, 1, '    b')
+        checkRow(self, tb, 2, '    c')
+        checkRow(self, tb, 3, '  d')
+        tb.unindentLines()
+        checkRow(self, tb, 0, 'a')
+        checkRow(self, tb, 1, '  b')
+        checkRow(self, tb, 2, '  c')
+        checkRow(self, tb, 3, 'd')
+        tb.unindentLines()
+        checkRow(self, tb, 0, 'a')
+        checkRow(self, tb, 1, 'b')
+        checkRow(self, tb, 2, 'c')
+        checkRow(self, tb, 3, 'd')
+        tb.penRow = 1
+        tb.markerRow = 1
+        tb.indentLines()
+        checkRow(self, tb, 0, 'a')
+        checkRow(self, tb, 1, '  b')
+        checkRow(self, tb, 2, 'c')
+        checkRow(self, tb, 3, 'd')
+        tb.indentLines()
+        checkRow(self, tb, 0, 'a')
+        checkRow(self, tb, 1, '    b')
+        checkRow(self, tb, 2, 'c')
+        checkRow(self, tb, 3, 'd')
+        tb.unindentLines()
+        checkRow(self, tb, 0, 'a')
+        checkRow(self, tb, 1, '  b')
+        checkRow(self, tb, 2, 'c')
+        checkRow(self, tb, 3, 'd')
+        tb.penRow = 3
+        tb.markerRow = 3
+        tb.indentLines()
+        checkRow(self, tb, 0, 'a')
+        checkRow(self, tb, 1, '  b')
+        checkRow(self, tb, 2, 'c')
+        checkRow(self, tb, 3, '  d')
+        tb.penRow = 0
+        tb.markerRow = 3
+        tb.indentLines()
+        checkRow(self, tb, 0, '  a')
+        checkRow(self, tb, 1, '    b')
+        checkRow(self, tb, 2, '  c')
+        checkRow(self, tb, 3, '    d')
+        tb.penRow = 3
+        tb.markerRow = 3
+        tb.unindentLines()
+        checkRow(self, tb, 0, '  a')
+        checkRow(self, tb, 1, '    b')
+        checkRow(self, tb, 2, '  c')
+        checkRow(self, tb, 3, '  d')
+        tb.unindentLines()
+        checkRow(self, tb, 0, '  a')
+        checkRow(self, tb, 1, '    b')
+        checkRow(self, tb, 2, '  c')
+        checkRow(self, tb, 3, 'd')
+        tb.unindentLines()
+        checkRow(self, tb, 0, '  a')
+        checkRow(self, tb, 1, '    b')
+        checkRow(self, tb, 2, '  c')
+        checkRow(self, tb, 3, 'd')
+        tb.penRow = 0
+        tb.markerRow = 0
+        tb.unindentLines()
+        checkRow(self, tb, 0, 'a')
+        checkRow(self, tb, 1, '    b')
+        checkRow(self, tb, 2, '  c')
+        checkRow(self, tb, 3, 'd')
+        tb.unindentLines()
+        checkRow(self, tb, 0, 'a')
+        checkRow(self, tb, 1, '    b')
+        checkRow(self, tb, 2, '  c')
+        checkRow(self, tb, 3, 'd')
 
 class TextInsertTestCases(unittest.TestCase):
 
@@ -225,49 +337,53 @@ class TextInsertTestCases(unittest.TestCase):
 
     def test_auto_insert_pair_disable(self):
         self.prg.prefs.editor['autoInsertClosingCharacter'] = False
+        def insert(*args):
+            self.textBuffer.insertPrintableWithPairing(*args)
+            self.textBuffer.parseDocument()
         tb = self.textBuffer
-        insert = self.textBuffer.insertPrintableWithPairing
         self.assertEqual(len(tb.lines), 1)
         insert(ord('o'), None)
         insert(ord('('), None)
-        self.assertEqual(tb.lines[0], 'o(')
+        checkRow(self, tb, 0, 'o(')
         insert(ord('a'), None)
-        self.assertEqual(tb.lines[0], 'o(a')
+        checkRow(self, tb, 0, 'o(a')
         tb.editUndo()
-        self.assertEqual(tb.lines[0], 'o(')
+        checkRow(self, tb, 0, 'o(')
         tb.editUndo()
-        self.assertEqual(tb.lines[0], 'o')
+        checkRow(self, tb, 0, 'o')
         tb.editUndo()
-        self.assertEqual(tb.lines[0], '')
+        checkRow(self, tb, 0, '')
         # Don't insert pair if the next char is not whitespace.
         insert(ord('o'), None)
-        self.assertEqual(tb.lines[0], 'o')
+        checkRow(self, tb, 0, 'o')
         tb.cursorLeft()
-        self.assertEqual(tb.lines[0], 'o')
+        checkRow(self, tb, 0, 'o')
         insert(ord('('), None)
-        self.assertEqual(tb.lines[0], '(o')
+        checkRow(self, tb, 0, '(o')
 
     def test_auto_insert_pair_enable(self):
         self.prg.prefs.editor['autoInsertClosingCharacter'] = True
+        def insert(*args):
+            self.textBuffer.insertPrintableWithPairing(*args)
+            self.textBuffer.parseDocument()
         tb = self.textBuffer
-        insert = self.textBuffer.insertPrintableWithPairing
         self.assertEqual(len(tb.lines), 1)
         insert(ord('o'), None)
         insert(ord('('), None)
-        self.assertEqual(tb.lines[0], 'o()')
+        checkRow(self, tb, 0, 'o()')
         insert(ord('a'), None)
-        self.assertEqual(tb.lines[0], 'o(a)')
+        checkRow(self, tb, 0, 'o(a)')
         tb.editUndo()
-        self.assertEqual(tb.lines[0], 'o()')
+        checkRow(self, tb, 0, 'o()')
         tb.editUndo()
-        self.assertEqual(tb.lines[0], '')
+        checkRow(self, tb, 0, '')
         # Don't insert pair if the next char is not whitespace.
         insert(ord('o'), None)
-        self.assertEqual(tb.lines[0], 'o')
+        checkRow(self, tb, 0, 'o')
         tb.cursorLeft()
-        self.assertEqual(tb.lines[0], 'o')
+        checkRow(self, tb, 0, 'o')
         insert(ord('('), None)
-        self.assertEqual(tb.lines[0], '(o')
+        checkRow(self, tb, 0, '(o')
 
 class GrammarDeterminationTestCases(unittest.TestCase):
 
