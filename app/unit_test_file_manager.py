@@ -126,6 +126,7 @@ class FileManagerTestCases(app.fake_curses_testing.FakeCursesTestCase):
     def test_show_hide_columns(self):
         #self.setMovieMode(True)
         self.runWithFakeInputs([
+            self.prefCheck(u'editor', u'filesShowSizes', True),
             self.displayCheck(0, 0, [u" ci     "]),
             CTRL_O,
             self.displayCheck(0, 0, [u" ci    Open"]),

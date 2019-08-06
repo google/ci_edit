@@ -86,6 +86,7 @@ def background(inputQueue, outputQueue):
             block = program.longTimeSlice()
             if block:
                 program.render()
+                program.program.backgroundFrame.setCmdCount(cmdCount)
                 outputQueue.put(program.program.backgroundFrame.grabFrame())
                 os.kill(pid, signalNumber)
         except Exception as e:
