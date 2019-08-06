@@ -159,7 +159,7 @@ ends with tab>\t
         p = self.parser
         self.parser.parse(None, self.prefs, test, self.prefs.grammars[u'rs'], 0,
                           99999)
-        if 1:
+        if 0:
             for i,t in enumerate(test.splitlines()):
                 print("{}: {}".format(i, repr(t)))
             p.debugLog(print, test)
