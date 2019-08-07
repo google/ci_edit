@@ -88,8 +88,32 @@ class CursesUtilTestCases(unittest.TestCase):
         self.assertEqual(2, app.curses_util.columnToIndex(2, u"test"))
         self.assertEqual(3, app.curses_util.columnToIndex(3, u"test"))
         # Test past the length of the string.
-        self.assertEqual(3, app.curses_util.columnToIndex(4, u"test"))
-        self.assertEqual(3, app.curses_util.columnToIndex(8, u"test"))
+        self.assertIs(None, app.curses_util.columnToIndex(4, u"test"))
+        self.assertIs(None, app.curses_util.columnToIndex(8, u"test"))
+
+        self.assertEqual(0, app.curses_util.columnToIndex(0, u"\ttest\ttabs"))
+        self.assertEqual(0, app.curses_util.columnToIndex(1, u"\ttest\ttabs"))
+        self.assertEqual(0, app.curses_util.columnToIndex(2, u"\ttest\ttabs"))
+        self.assertEqual(0, app.curses_util.columnToIndex(3, u"\ttest\ttabs"))
+        self.assertEqual(0, app.curses_util.columnToIndex(4, u"\ttest\ttabs"))
+        self.assertEqual(0, app.curses_util.columnToIndex(5, u"\ttest\ttabs"))
+        self.assertEqual(0, app.curses_util.columnToIndex(6, u"\ttest\ttabs"))
+        self.assertEqual(0, app.curses_util.columnToIndex(7, u"\ttest\ttabs"))
+        self.assertEqual(1, app.curses_util.columnToIndex(8, u"\ttest\ttabs"))
+        self.assertEqual(2, app.curses_util.columnToIndex(9, u"\ttest\ttabs"))
+        self.assertEqual(3, app.curses_util.columnToIndex(10, u"\ttest\ttabs"))
+        self.assertEqual(4, app.curses_util.columnToIndex(11, u"\ttest\ttabs"))
+        self.assertEqual(5, app.curses_util.columnToIndex(12, u"\ttest\ttabs"))
+        self.assertEqual(5, app.curses_util.columnToIndex(13, u"\ttest\ttabs"))
+        self.assertEqual(5, app.curses_util.columnToIndex(14, u"\ttest\ttabs"))
+        self.assertEqual(5, app.curses_util.columnToIndex(15, u"\ttest\ttabs"))
+        self.assertEqual(6, app.curses_util.columnToIndex(16, u"\ttest\ttabs"))
+        self.assertEqual(7, app.curses_util.columnToIndex(17, u"\ttest\ttabs"))
+        self.assertEqual(8, app.curses_util.columnToIndex(18, u"\ttest\ttabs"))
+        # Test past the length of the string.
+        self.assertIs(None, app.curses_util.columnToIndex(21, u"\ttest\ttabs"))
+        self.assertIs(None, app.curses_util.columnToIndex(22, u"\ttest\ttabs"))
+        self.assertIs(None, app.curses_util.columnToIndex(999, u"\ttest\ttabs"))
 
         self.assertEqual(0, app.curses_util.columnToIndex(0, u"こんにちは"))
         self.assertEqual(0, app.curses_util.columnToIndex(1, u"こんにちは"))
@@ -98,11 +122,58 @@ class CursesUtilTestCases(unittest.TestCase):
         self.assertEqual(2, app.curses_util.columnToIndex(4, u"こんにちは"))
         self.assertEqual(4, app.curses_util.columnToIndex(8, u"こんにちは"))
         self.assertEqual(4, app.curses_util.columnToIndex(9, u"こんにちは"))
-
         # Test past the length of the string.
-        self.assertEqual(4, app.curses_util.columnToIndex(10, u"こんにちは"))
-        self.assertEqual(4, app.curses_util.columnToIndex(11, u"こんにちは"))
-        self.assertEqual(4, app.curses_util.columnToIndex(12, u"こんにちは"))
+        self.assertIs(None, app.curses_util.columnToIndex(10, u"こんにちは"))
+        self.assertIs(None, app.curses_util.columnToIndex(11, u"こんにちは"))
+        self.assertIs(None, app.curses_util.columnToIndex(12, u"こんにちは"))
+
+
+    def test_charAtColumn(self):
+        cu = app.curses_util
+        self.assertEqual(u"t", cu.charAtColumn(0, u"test"))
+        self.assertEqual(u"e", cu.charAtColumn(1, u"test"))
+        self.assertEqual(u"s", cu.charAtColumn(2, u"test"))
+        self.assertEqual(u"t", cu.charAtColumn(3, u"test"))
+        # Test past the length of the string.
+        self.assertIs(None, cu.charAtColumn(4, u"test"))
+        self.assertIs(None, cu.charAtColumn(8, u"test"))
+
+        self.assertEqual(u"\t", cu.charAtColumn(0, u"\ttest\ttabs"))
+        self.assertEqual(u"\t", cu.charAtColumn(1, u"\ttest\ttabs"))
+        self.assertEqual(u"\t", cu.charAtColumn(2, u"\ttest\ttabs"))
+        self.assertEqual(u"\t", cu.charAtColumn(3, u"\ttest\ttabs"))
+        self.assertEqual(u"\t", cu.charAtColumn(4, u"\ttest\ttabs"))
+        self.assertEqual(u"\t", cu.charAtColumn(5, u"\ttest\ttabs"))
+        self.assertEqual(u"\t", cu.charAtColumn(6, u"\ttest\ttabs"))
+        self.assertEqual(u"\t", cu.charAtColumn(7, u"\ttest\ttabs"))
+        self.assertEqual(u"t", cu.charAtColumn(8, u"\ttest\ttabs"))
+        self.assertEqual(u"e", cu.charAtColumn(9, u"\ttest\ttabs"))
+        self.assertEqual(u"s", cu.charAtColumn(10, u"\ttest\ttabs"))
+        self.assertEqual(u"t", cu.charAtColumn(11, u"\ttest\ttabs"))
+        self.assertEqual(u"\t", cu.charAtColumn(12, u"\ttest\ttabs"))
+        self.assertEqual(u"\t", cu.charAtColumn(13, u"\ttest\ttabs"))
+        self.assertEqual(u"\t", cu.charAtColumn(14, u"\ttest\ttabs"))
+        self.assertEqual(u"\t", cu.charAtColumn(15, u"\ttest\ttabs"))
+        self.assertEqual(u"t", cu.charAtColumn(16, u"\ttest\ttabs"))
+        self.assertEqual(u"a", cu.charAtColumn(17, u"\ttest\ttabs"))
+        self.assertEqual(u"b", cu.charAtColumn(18, u"\ttest\ttabs"))
+        self.assertEqual(u"s", cu.charAtColumn(19, u"\ttest\ttabs"))
+        # Test past the length of the string.
+        self.assertIs(None, cu.charAtColumn(20, u"\ttest\ttabs"))
+        self.assertIs(None, cu.charAtColumn(21, u"\ttest\ttabs"))
+        self.assertIs(None, cu.charAtColumn(999, u"\ttest\ttabs"))
+
+        self.assertEqual(u"こ", cu.charAtColumn(0, u"こんにちは"))
+        self.assertEqual(u"こ", cu.charAtColumn(1, u"こんにちは"))
+        self.assertEqual(u"ん", cu.charAtColumn(2, u"こんにちは"))
+        self.assertEqual(u"ん", cu.charAtColumn(3, u"こんにちは"))
+        self.assertEqual(u"に", cu.charAtColumn(4, u"こんにちは"))
+        self.assertEqual(u"は", cu.charAtColumn(8, u"こんにちは"))
+        self.assertEqual(u"は", cu.charAtColumn(9, u"こんにちは"))
+        # Test past the length of the string.
+        self.assertIs(None, cu.charAtColumn(10, u"こんにちは"))
+        self.assertIs(None, cu.charAtColumn(11, u"こんにちは"))
+        self.assertIs(None, cu.charAtColumn(12, u"こんにちは"))
 
     def test_fit_to_rendered_width(self):
         self.assertEqual(0, app.curses_util.fitToRenderedWidth(0, u"test"))

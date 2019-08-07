@@ -498,6 +498,8 @@ class Actions(app.mutator.Mutator):
         line, lineColWidth = self.parser.rowTextAndWidth(self.penRow)
         if lineColWidth > 0:
             index = app.curses_util.columnToIndex(self.penCol, line)
+            if index is None:
+                index = -1
             colWidth = app.curses_util.columnWidth(line[index])
         if self.penCol + colWidth <= lineColWidth:
             self.cursorMove(0, colWidth)

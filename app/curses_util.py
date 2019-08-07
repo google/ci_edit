@@ -238,15 +238,15 @@ def columnToIndex(column, string):
         assert isinstance(column, int)
         assert isinstance(string, unicode)
     indexLimit = len(string) - 1
+    colCursor = 0
     index = 0
-    for i in string:
-        if i > MIN_DOUBLE_WIDE_CHARACTER:
-            column -= 2
-        else:
-            column -= 1
-        if column < 0 or index >= indexLimit:
+    for ch in string:
+        colCursor += charWidth(ch, colCursor)
+        if colCursor > column:
             break
         index += 1
+        if index > indexLimit:
+            return None
     return index
 
 
@@ -256,15 +256,9 @@ def charAtColumn(column, string):
     if app.config.strict_debug:
         assert isinstance(column, int)
         assert isinstance(string, unicode)
-    index = 0
-    for i in string:
-        if i > MIN_DOUBLE_WIDE_CHARACTER:
-            column -= 2
-        else:
-            column -= 1
-        if column < 0:
-            return string[index]
-        index += 1
+    index = columnToIndex(column, string)
+    if index is not None:
+        return string[index]
     return None
 
 
