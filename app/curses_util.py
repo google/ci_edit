@@ -327,10 +327,10 @@ def renderedFindIter(string, beginCol, endCol, charGroups, numbers, eolSpaces):
                         column += index - begin
                         break
                 else:
-                    column += 2 if c > MIN_DOUBLE_WIDE_CHARACTER else 1
+                    column += charWidth(c, column)
                     index += 1
         else:
-            column += 2 if c > MIN_DOUBLE_WIDE_CHARACTER else 1
+            column += charWidth(c, column)
             index += 1
     if eolSpaces and limit and string[-1] == ' ':
         index = limit - 1
