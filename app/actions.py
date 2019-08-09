@@ -1133,7 +1133,7 @@ class Actions(app.mutator.Mutator):
         return horizontally and vertically
 
     def fenceRedoChain(self):
-        self.redoAddChange((u'f'))
+        self.redoAddChange((u'f',))
         self.redo()
 
     def fileWrite(self):
