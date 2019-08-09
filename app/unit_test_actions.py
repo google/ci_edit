@@ -172,6 +172,104 @@ void blah();
         self.assertEqual(self.textBuffer.penCol, 0)
 
 
+
+class SelectionTestCases(unittest.TestCase):
+
+    def setUp(self):
+        app.log.shouldWritePrintLog = False
+        self.prg = app.ci_program.CiProgram()
+        self.textBuffer = app.text_buffer.TextBuffer(self.prg)
+        self.textBuffer.setView(FakeView())
+        test = """/* first comment */
+two
+// second comment
+apple banana carrot
+#include "test.h"
+void blah();
+"""
+        self.textBuffer.insertLines(tuple(test.split('\n')))
+        self.textBuffer.parseDocument()
+        #self.assertEqual(self.textBuffer.scrollRow, 0)
+        #self.assertEqual(self.textBuffer.scrollCol, 0)
+        self.assertEqual(self.textBuffer.lines[1], 'two')
+        self.assertEqual(self.textBuffer.parser.rowText(1), 'two')
+
+    def test_cursor_select_word_left(self):
+        tb = self.textBuffer
+
+        self.textBuffer.markerRow = 0
+        self.textBuffer.markerCol = 0
+        self.textBuffer.penRow = 2
+        self.textBuffer.penCol = 5
+
+        self.textBuffer.cursorSelectWordLeft()
+        self.assertEqual(self.textBuffer.markerRow, 2)
+        self.assertEqual(self.textBuffer.markerCol, 5)
+        self.assertEqual(self.textBuffer.penRow, 2)
+        self.assertEqual(self.textBuffer.penCol, 3)
+
+        self.textBuffer.cursorSelectWordLeft()
+        self.assertEqual(self.textBuffer.markerRow, 2)
+        self.assertEqual(self.textBuffer.markerCol, 5)
+        self.assertEqual(self.textBuffer.penRow, 2)
+        self.assertEqual(self.textBuffer.penCol, 0)
+
+        self.textBuffer.cursorSelectWordLeft()
+        self.assertEqual(self.textBuffer.markerRow, 2)
+        self.assertEqual(self.textBuffer.markerCol, 5)
+        self.assertEqual(self.textBuffer.penRow, 1)
+        self.assertEqual(self.textBuffer.penCol, 3)
+
+        self.textBuffer.cursorSelectWordLeft()
+        self.assertEqual(self.textBuffer.markerRow, 2)
+        self.assertEqual(self.textBuffer.markerCol, 5)
+        self.assertEqual(self.textBuffer.penRow, 1)
+        self.assertEqual(self.textBuffer.penCol, 0)
+
+        self.textBuffer.cursorSelectWordLeft()
+        self.assertEqual(self.textBuffer.markerRow, 2)
+        self.assertEqual(self.textBuffer.markerCol, 5)
+        self.assertEqual(self.textBuffer.penRow, 0)
+        self.assertEqual(self.textBuffer.penCol, 19)
+
+        self.textBuffer.cursorSelectWordLeft()
+        self.assertEqual(self.textBuffer.markerRow, 2)
+        self.assertEqual(self.textBuffer.markerCol, 5)
+        self.assertEqual(self.textBuffer.penRow, 0)
+        self.assertEqual(self.textBuffer.penCol, 16)
+
+        self.textBuffer.cursorSelectWordLeft()
+        self.assertEqual(self.textBuffer.markerRow, 2)
+        self.assertEqual(self.textBuffer.markerCol, 5)
+        self.assertEqual(self.textBuffer.penRow, 0)
+        self.assertEqual(self.textBuffer.penCol, 9)
+
+        self.textBuffer.cursorSelectWordLeft()
+        self.assertEqual(self.textBuffer.markerRow, 2)
+        self.assertEqual(self.textBuffer.markerCol, 5)
+        self.assertEqual(self.textBuffer.penRow, 0)
+        self.assertEqual(self.textBuffer.penCol, 8)
+
+        self.textBuffer.cursorSelectWordLeft()
+        self.assertEqual(self.textBuffer.markerRow, 2)
+        self.assertEqual(self.textBuffer.markerCol, 5)
+        self.assertEqual(self.textBuffer.penRow, 0)
+        self.assertEqual(self.textBuffer.penCol, 3)
+
+        self.textBuffer.cursorSelectWordLeft()
+        self.assertEqual(self.textBuffer.markerRow, 2)
+        self.assertEqual(self.textBuffer.markerCol, 5)
+        self.assertEqual(self.textBuffer.penRow, 0)
+        self.assertEqual(self.textBuffer.penCol, 0)
+
+        # Top of document. This call should have no effect (and not crash).
+        self.textBuffer.cursorSelectWordLeft()
+        self.assertEqual(self.textBuffer.markerRow, 2)
+        self.assertEqual(self.textBuffer.markerCol, 5)
+        self.assertEqual(self.textBuffer.penRow, 0)
+        self.assertEqual(self.textBuffer.penCol, 0)
+
+
 class TextIndentTestCases(unittest.TestCase):
 
     def setUp(self):

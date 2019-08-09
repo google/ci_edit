@@ -573,6 +573,7 @@ class Actions(app.mutator.Mutator):
             return self.getCursorMove(0, pos - self.penCol)
         elif self.penRow > 0:
             return self.getCursorMove(-1, self.parser.rowWidth(self.penRow - 1))
+        return self.getCursorMove(0, 0)
 
     def doCursorMoveLeftTo(self, boundary):
         change = self.getCursorMoveLeftTo(boundary)
