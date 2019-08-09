@@ -291,6 +291,7 @@ mixins
 mmu
 mmus
 msec
+msecs
 msg
 multibyte
 multicast
@@ -311,6 +312,7 @@ netmask
 netmasks
 noop
 nsec
+nsecs
 nullability
 nullable
 nulled
@@ -346,6 +348,7 @@ preemptible
 prefetch
 prerender
 prerendered
+presubmit
 prev
 prg
 proc

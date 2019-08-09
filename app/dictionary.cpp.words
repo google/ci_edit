@@ -84,6 +84,7 @@ etimedout
 etimeout
 ewouldblock
 extern
+failbit
 fclose
 feof
 ferror
@@ -93,6 +94,7 @@ fgetpos
 fgets
 fgetwc
 fgetws
+filebuf
 fileno
 fmt
 fmtflags
@@ -245,6 +247,7 @@ opost
 ord
 ostream
 ostringstream
+pbackfail
 perror
 pollerr
 pollfd
@@ -278,7 +281,9 @@ ret
 scanf
 seekdir
 seekg
+seekoff
 seekp
+seekpos
 sendto
 setbase
 setbuf
@@ -286,9 +291,11 @@ setenv
 setf
 setfill
 setfl
+setg
 setiosflags
 setjmp
 setlocale
+setp
 setpercision
 setprecision
 setsockopt
@@ -296,6 +303,7 @@ setstate
 setvbuf
 setw
 showbase
+showmanyc
 showpoint
 showpos
 sigabrt
@@ -329,6 +337,7 @@ strcoll
 strcpy
 strcspn
 strdup
+streambuf
 streamoff
 streampos
 streamsize
@@ -381,6 +390,7 @@ trunc
 typeindex
 typeinfo
 typename
+uflow
 uint
 uintmax
 ull
@@ -436,11 +446,15 @@ wctomb
 wctrans
 wctype
 weof
+wfilebuf
+wfstream
+wifstream
 wmemchr
 wmemcmp
 wmemcpy
 wmemmove
 wmemset
+wofstream
 wprintf
 wronly
 wscanf
