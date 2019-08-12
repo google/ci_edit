@@ -48,27 +48,32 @@ def pathRowColumn(path, projectDir):
         return path, openToRow, openToColumn
     pieces = path.split(u":")
     app.log.debug(u"pieces\n", pieces)
-    if len(pieces) == 4 and pieces[-1] == u"":
-        try:
-            openToRow = int(pieces[1]) - 1
-            openToColumn = int(pieces[2]) - 1
-            path = pieces[0]
-        except ValueError:
-            pass
-    elif pieces[-1] != u"":
+    if pieces[-1] == u"":
+        if len(pieces) == 3:
+            try:
+                openToRow = int(pieces[1]) - 1
+            except ValueError:
+                pass
+        elif len(pieces) == 4:
+            try:
+                openToRow = int(pieces[1]) - 1
+                openToColumn = int(pieces[2]) - 1
+            except ValueError:
+                pass
+    else:
         if len(pieces) == 2:
             try:
                 openToRow = int(pieces[1]) - 1
-                path = pieces[0]
             except ValueError:
                 pass
         elif len(pieces) == 3:
             try:
                 openToRow = int(pieces[1]) - 1
                 openToColumn = int(pieces[2]) - 1
-                path = pieces[0]
             except ValueError:
                 pass
+    if openToRow is not None:
+        path = pieces[0]
     if len(path) > 2:  #  and not os.path.isdir(path[:2]):
         if projectDir is not None and path.startswith(u"//"):
             path = projectDir + path[1:]
