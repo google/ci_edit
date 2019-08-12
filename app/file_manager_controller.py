@@ -56,7 +56,7 @@ class DirectoryListController(app.controller.Controller):
             return
         self.shownDirectory = pathInput
         appPrefs = self.view.program.prefs
-        fullPath, openToLine, openToColumn = app.buffer_file.pathLineColumn(
+        fullPath, openToRow, openToColumn = app.buffer_file.pathRowColumn(
             pathInput, appPrefs.editor[u"baseDirEnv"])
         fullPath = app.buffer_file.expandFullPath(fullPath)
         dirPath = fullPath
@@ -243,7 +243,7 @@ class FilePathInputController(app.controller.Controller):
             app.log.info("is dir", repr(decodedPath))
             return
         appPrefs = self.view.program.prefs
-        path, openToLine, openToColumn = app.buffer_file.pathLineColumn(
+        path, openToRow, openToColumn = app.buffer_file.pathRowColumn(
             decodedPath, appPrefs.editor[u"baseDirEnv"])
         if not os.access(path, os.R_OK):
             if os.path.isfile(path):
@@ -253,10 +253,10 @@ class FilePathInputController(app.controller.Controller):
         textBuffer = self.view.program.bufferManager.loadTextBuffer(path)
         if textBuffer is None:
             return
-        if openToLine is not None:
-            textBuffer.penRow = openToLine - 1 if openToLine > 0 else 0
+        if openToRow is not None:
+            textBuffer.penRow = openToRow if openToRow > 0 else 0
         if openToColumn is not None:
-            textBuffer.penCol = openToColumn - 1 if openToColumn > 0 else 0
+            textBuffer.penCol = openToColumn if openToColumn > 0 else 0
             textBuffer.goalCol = textBuffer.penCol
         #assert textBuffer.parser
         inputWindow = self.currentInputWindow()

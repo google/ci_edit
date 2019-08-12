@@ -1267,7 +1267,14 @@ class InputWindow(Window):
     def startup(self):
         bufferManager = self.program.bufferManager
         for f in self.program.prefs.startup.get('cliFiles', []):
-            bufferManager.loadTextBuffer(f['path'])
+            tb = bufferManager.loadTextBuffer(f['path'])
+            tb.parseDocument()
+            if f['row'] is not None:
+                if f['col'] is not None:
+                    tb.selectText(f['row'], f['col'], 0,
+                            app.selectable.kSelectionNone)
+                else:
+                    tb.selectText(f['row'], 0, 0, app.selectable.kSelectionNone)
         if self.program.prefs.startup.get('readStdin'):
             bufferManager.readStdin()
         bufferManager.buffers.reverse()

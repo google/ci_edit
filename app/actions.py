@@ -1213,6 +1213,11 @@ class Actions(app.mutator.Mutator):
         self.determineFileType()
 
     def selectText(self, row, col, length, mode):
+        if app.config.strict_debug:
+            assert isinstance(row, int)
+            assert isinstance(col, int)
+            assert isinstance(length, int)
+            assert isinstance(mode, int)
         row = max(0, min(row, self.parser.rowCount() - 1))
         rowWidth = self.parser.rowWidth(row)
         col = max(0, min(col, rowWidth))

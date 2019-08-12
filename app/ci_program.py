@@ -394,9 +394,9 @@ class CiProgram:
         if openToLine is None:
             decodedPaths = []
             for file in cliFiles:
-                path, openToLine, openToColumn = app.buffer_file.pathLineColumn(
+                path, openToRow, openToColumn = app.buffer_file.pathRowColumn(
                     file[u"path"], self.prefs.editor[u"baseDirEnv"])
-                decodedPaths.append({'path': path})
+                decodedPaths.append({'path': path, 'row': openToRow, 'col': openToColumn})
             cliFiles = decodedPaths
         self.prefs.startup = {
             'debugRedo': debugRedo,

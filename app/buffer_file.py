@@ -26,7 +26,7 @@ import os
 import app.config
 
 
-def pathLineColumn(path, projectDir):
+def pathRowColumn(path, projectDir):
     """Guess whether unrecognized file path refers to another file or has line
     and column information.
 
@@ -36,36 +36,36 @@ def pathLineColumn(path, projectDir):
     error ':<line number>' may be appended. If the file doesn't exist as-is, try
     removing those decorations, and if that exists use that path instead.
 
-    Returns: (fullPath, openToLine)
+    Returns: (fullPath, openToRow, openToCol)
     """
     if app.config.strict_debug:
         assert isinstance(path, unicode)
         assert projectDir is None or isinstance(projectDir, unicode)
     app.log.debug(u"path", path)
-    openToLine = None
+    openToRow = None
     openToColumn = None
     if os.path.isfile(path):  # or os.path.isdir(os.path.dirname(path)):
-        return path, openToLine, openToColumn
+        return path, openToRow, openToColumn
     pieces = path.split(u":")
     app.log.debug(u"pieces\n", pieces)
     if len(pieces) == 4 and pieces[-1] == u"":
         try:
-            openToLine = int(pieces[1])
-            openToColumn = int(pieces[2])
+            openToRow = int(pieces[1]) - 1
+            openToColumn = int(pieces[2]) - 1
             path = pieces[0]
         except ValueError:
             pass
     elif pieces[-1] != u"":
         if len(pieces) == 2:
             try:
-                openToLine = int(pieces[1])
+                openToRow = int(pieces[1]) - 1
                 path = pieces[0]
             except ValueError:
                 pass
         elif len(pieces) == 3:
             try:
-                openToLine = int(pieces[1])
-                openToColumn = int(pieces[2])
+                openToRow = int(pieces[1]) - 1
+                openToColumn = int(pieces[2]) - 1
                 path = pieces[0]
             except ValueError:
                 pass
@@ -75,8 +75,8 @@ def pathLineColumn(path, projectDir):
         elif path[1] == u"/":
             if os.path.isfile(path[2:]):
                 path = path[2:]
-    app.log.debug(u"return\n", path, openToLine, openToColumn)
-    return path, openToLine, openToColumn
+    app.log.debug(u"return\n", path, openToRow, openToColumn)
+    return path, openToRow, openToColumn
 
 
 def expandFullPath(path):
