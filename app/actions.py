@@ -494,19 +494,11 @@ class Actions(app.mutator.Mutator):
     def cursorMoveRight(self):
         if not self.parser.rowCount():
             return
-        colWidth = 1
-        line, lineColWidth = self.parser.rowTextAndWidth(self.penRow)
-        if lineColWidth > 0:
-            index = app.curses_util.columnToIndex(self.penCol, line)
-            if index is None:
-                index = -1
-            colWidth = app.curses_util.columnWidth(line[index])
-        if self.penCol + colWidth <= lineColWidth:
-            self.cursorMove(0, colWidth)
-        elif self.penRow + 1 < self.parser.rowCount():
-            self.cursorMove(1, -self.penCol)
-        else:
+        rowCol = self.parser.nextCharRowCol(self.penRow, self.penCol, self.program.prefs)
+        if rowCol is None:
             self.setMessage(u'Bottom of file')
+        else:
+            self.cursorMove(*rowCol)
 
     def unused_____cursorMoveUp(self):
         if self.penRow <= 0:

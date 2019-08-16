@@ -160,7 +160,33 @@ class Parser:
         grammarIndex = self.grammarIndexFromRowCol(row, col)
         node = self.parserNodes[rowIndex + grammarIndex]
         nextNode = self.parserNodes[rowIndex + grammarIndex + 1]
-        return self.data[node[kBegin]:nextNode[kBegin]], node[kGrammar].get(u"link_type")
+        return (self.data[node[kBegin]:nextNode[kBegin]],
+                node[kGrammar].get(u"link_type"))
+
+    def inDocument(self, row, col):
+        if app.config.strict_debug:
+            assert isinstance(row, int)
+            assert isinstance(col, int)
+            assert row >= 0
+            assert col >= 0
+        return (row < len(self.rows) and
+            col < self.parserNodes[self.rows[row]][kVisual])
+
+    def nextCharRowCol(self, row, col, appPrefs):
+        """Get the next column value for the character to the right.
+        Returns: None if there is no remaining characters.
+                 or (row, col) deltas of the next character in the document.
+        """
+        if app.config.strict_debug:
+            assert isinstance(row, int)
+            assert isinstance(col, int)
+            assert row >= 0
+            assert col >= 0
+            assert len(self.rows) > 0
+        ch = self.charAt(row, col)
+        if ch is None:
+            return (1, -col) if self.inDocument(row + 1, 0) else None
+        return 0, app.curses_util.charWidth(ch, col)
 
     def parse(self, bgThread, appPrefs, data, grammar, beginRow, endRow):
         """
@@ -263,21 +289,14 @@ class Parser:
             assert isinstance(row, int)
             assert isinstance(col, int)
             assert isinstance(self.data, unicode)
+            assert row >= 0
+            assert col >= 0
         if row > len(self.rows):
             return None
-        begin = self.parserNodes[self.rows[row]][kBegin]
-        if row + 1 >= len(self.rows):
-            end = self.parserNodes[-1][kBegin]
-        else:
-            end = self.parserNodes[self.rows[row + 1]][kBegin]
-        while begin < end:
-            if col <= 0:
-                return self.data[begin]
-            if self.data[begin] >= app.curses_util.MIN_DOUBLE_WIDE_CHARACTER:
-                col -= 1
-            col -= 1
-            begin += 1
-        return None
+        string, width = self.rowTextAndWidth(row)
+        if col > width:
+            return None
+        return app.curses_util.charAtColumn(col, string)
 
     def rowTextAndWidth(self, row):
         """Get the character data and the visual/display column width of those
@@ -430,10 +449,10 @@ class Parser:
                 rowStart = self.parserNodes[self.rows[-1]][kVisual]
                 col = visual - rowStart
                 # Advance to the next tab stop.
-                visual = rowStart + ((col + 8) // 8 * 8)
                 self.parserNodes.append((appPrefs.grammars['tabs'], cursor,
                         topNode[kPrior], visual))
                 cursor += regEnd
+                visual = rowStart + ((col + 8) // 8 * 8)
                 visual += (regEnd - 1) * 8
                 # Resume current grammar; store the variable width characters.
                 child = (topNode[kGrammar], cursor, topNode[kPrior], visual)

@@ -160,9 +160,13 @@ ends with tab>\t
         self.parser.parse(None, self.prefs, test, self.prefs.grammars[u'rs'], 0,
                           99999)
         if 0:
+            print("")
             for i,t in enumerate(test.splitlines()):
                 print("{}: {}".format(i, repr(t)))
             p.debugLog(print, test)
+
+        self.assertEqual(p.rowCount(), 11)
+
         self.assertEqual(p.rowText(0), u"\t<tab")
         self.assertEqual(p.rowText(1), u"\t <tab+space")
         self.assertEqual(p.rowText(2), u" \t<space+tab")
@@ -196,14 +200,31 @@ ends with tab>\t
         self.assertEqual(p.rowWidth(8), 16)
         self.assertEqual(p.rowWidth(9), 8)
 
-        self.assertEqual(p.grammarIndexFromRowCol(0, 0), 0)
-        self.assertEqual(p.grammarIndexFromRowCol(0, 7), 0)
+        self.assertEqual(p.grammarIndexFromRowCol(0, 0), 1)
+        self.assertEqual(p.grammarIndexFromRowCol(0, 7), 1)
         self.assertEqual(p.grammarIndexFromRowCol(0, 8), 2)
-        self.assertEqual(p.grammarIndexFromRowCol(1, 0), 0)
+        self.assertEqual(p.grammarIndexFromRowCol(1, 0), 1)
 
         #self.assertEqual(p.grammarAt(0, 0), 0)
 
-        self.assertEqual(p.rowCount(), 11)
+
+        self.assertEqual(p.nextCharRowCol(999999, 0, None), None)
+        # Test u"\t<tab".
+        self.assertEqual(p.nextCharRowCol(0, 0, None), (0, 8))
+        self.assertEqual(p.nextCharRowCol(0, 1, None), (0, 7))
+        self.assertEqual(p.nextCharRowCol(0, 7, None), (0, 1))
+        self.assertEqual(p.nextCharRowCol(0, 8, None), (0, 1))
+        self.assertEqual(p.nextCharRowCol(0, 11, None), (0, 1))
+        self.assertEqual(p.nextCharRowCol(0, 12, None), (1, -12))
+        # Test u"\t\t<2tabs".
+        self.assertEqual(p.nextCharRowCol(6, 0, None), (0, 8))
+        self.assertEqual(p.nextCharRowCol(6, 8, None), (0, 8))
+        self.assertEqual(p.nextCharRowCol(6, 16, None), (0, 1))
+        self.assertEqual(p.nextCharRowCol(6, 22, None), (1, -22))
+        # Test u"\t".
+        self.assertEqual(p.nextCharRowCol(9, 0, None), (0, 8))
+        self.assertEqual(p.nextCharRowCol(9, 8, None), (1, -8))
+        self.assertEqual(p.nextCharRowCol(10, 0, None), None)
 
     if 0:
 

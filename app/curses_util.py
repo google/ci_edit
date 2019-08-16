@@ -237,6 +237,8 @@ def columnToIndex(column, string):
     if app.config.strict_debug:
         assert isinstance(column, int)
         assert isinstance(string, unicode)
+    if not string:
+        return None
     indexLimit = len(string) - 1
     colCursor = 0
     index = 0
