@@ -479,22 +479,18 @@ class Actions(app.mutator.Mutator):
                     0, self.view.scrollCol - self.view.cols // 4)
 
     def cursorMoveLeft(self):
-        colWidth = 1
-        line, lineColWidth = self.parser.rowTextAndWidth(self.penRow)
-        if lineColWidth > 0:
-            index = app.curses_util.columnToIndex(self.penCol - 1, line)
-            colWidth = app.curses_util.columnWidth(line[index])
-        if self.penCol - colWidth >= 0:
-            self.cursorMove(0, -colWidth)
-        elif self.penRow > 0:
-            self.cursorMove(-1, self.parser.rowWidth(self.penRow - 1))
-        else:
+        if not self.parser.rowCount():
+            return
+        rowCol = self.parser.priorCharRowCol(self.penRow, self.penCol)
+        if rowCol is None:
             self.setMessage(u'Top of file')
+        else:
+            self.cursorMove(*rowCol)
 
     def cursorMoveRight(self):
         if not self.parser.rowCount():
             return
-        rowCol = self.parser.nextCharRowCol(self.penRow, self.penCol, self.program.prefs)
+        rowCol = self.parser.nextCharRowCol(self.penRow, self.penCol)
         if rowCol is None:
             self.setMessage(u'Bottom of file')
         else:

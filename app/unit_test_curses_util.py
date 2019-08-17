@@ -303,3 +303,25 @@ class CursesUtilTestCases(unittest.TestCase):
         self.assertEqual(8, app.curses_util.charWidth(u"\t", 8))
         self.assertEqual(7, app.curses_util.charWidth(u"\t", 9))
         self.assertEqual(2, app.curses_util.charWidth(u"こ", 0))
+
+    def test_prior_col(self):
+        test = u"""\tfive\t"""
+        prior_col = app.curses_util.priorCol
+        self.assertEqual(None, prior_col(0, test))
+        self.assertEqual(0, prior_col(1, test))
+        self.assertEqual(0, prior_col(2, test))
+        self.assertEqual(0, prior_col(3, test))
+        self.assertEqual(0, prior_col(4, test))
+        self.assertEqual(0, prior_col(5, test))
+        self.assertEqual(0, prior_col(6, test))
+        self.assertEqual(0, prior_col(7, test))
+        self.assertEqual(0, prior_col(8, test))
+        self.assertEqual(8, prior_col(9, test))
+        self.assertEqual(9, prior_col(10, test))
+        self.assertEqual(10, prior_col(11, test))
+        self.assertEqual(11, prior_col(12, test))
+        self.assertEqual(12, prior_col(13, test))
+        self.assertEqual(12, prior_col(14, test))
+        self.assertEqual(12, prior_col(15, test))
+        self.assertEqual(12, prior_col(16, test))
+        self.assertEqual(None, prior_col(17, test))

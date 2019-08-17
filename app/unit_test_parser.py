@@ -208,23 +208,43 @@ ends with tab>\t
         #self.assertEqual(p.grammarAt(0, 0), 0)
 
 
-        self.assertEqual(p.nextCharRowCol(999999, 0, None), None)
+        self.assertEqual(p.nextCharRowCol(999999, 0), None)
         # Test u"\t<tab".
-        self.assertEqual(p.nextCharRowCol(0, 0, None), (0, 8))
-        self.assertEqual(p.nextCharRowCol(0, 1, None), (0, 7))
-        self.assertEqual(p.nextCharRowCol(0, 7, None), (0, 1))
-        self.assertEqual(p.nextCharRowCol(0, 8, None), (0, 1))
-        self.assertEqual(p.nextCharRowCol(0, 11, None), (0, 1))
-        self.assertEqual(p.nextCharRowCol(0, 12, None), (1, -12))
+        self.assertEqual(p.nextCharRowCol(0, 0), (0, 8))
+        self.assertEqual(p.nextCharRowCol(0, 1), (0, 7))
+        self.assertEqual(p.nextCharRowCol(0, 7), (0, 1))
+        self.assertEqual(p.nextCharRowCol(0, 8), (0, 1))
+        self.assertEqual(p.nextCharRowCol(0, 11), (0, 1))
+        self.assertEqual(p.nextCharRowCol(0, 12), (1, -12))
         # Test u"\t\t<2tabs".
-        self.assertEqual(p.nextCharRowCol(6, 0, None), (0, 8))
-        self.assertEqual(p.nextCharRowCol(6, 8, None), (0, 8))
-        self.assertEqual(p.nextCharRowCol(6, 16, None), (0, 1))
-        self.assertEqual(p.nextCharRowCol(6, 22, None), (1, -22))
+        self.assertEqual(p.nextCharRowCol(6, 0), (0, 8))
+        self.assertEqual(p.nextCharRowCol(6, 8), (0, 8))
+        self.assertEqual(p.nextCharRowCol(6, 16), (0, 1))
+        self.assertEqual(p.nextCharRowCol(6, 22), (1, -22))
         # Test u"\t".
-        self.assertEqual(p.nextCharRowCol(9, 0, None), (0, 8))
-        self.assertEqual(p.nextCharRowCol(9, 8, None), (1, -8))
-        self.assertEqual(p.nextCharRowCol(10, 0, None), None)
+        self.assertEqual(p.nextCharRowCol(9, 0), (0, 8))
+        self.assertEqual(p.nextCharRowCol(9, 8), (1, -8))
+        self.assertEqual(p.nextCharRowCol(10, 0), None)
+
+        # Test u"\t<tab".
+        self.assertEqual(p.priorCharRowCol(0, 0), None)
+        self.assertEqual(p.priorCharRowCol(0, 1), (0, -1))
+        self.assertEqual(p.priorCharRowCol(0, 7), (0, -7))
+        # Test u"\t\t<2tabs".
+        self.assertEqual(p.priorCharRowCol(6, 1), (0, -1))
+        self.assertEqual(p.priorCharRowCol(6, 5), (0, -5))
+        self.assertEqual(p.priorCharRowCol(6, 8), (0, -8))
+        self.assertEqual(p.priorCharRowCol(6, 9), (0, -1))
+        self.assertEqual(p.priorCharRowCol(6, 15), (0, -7))
+        self.assertEqual(p.priorCharRowCol(6, 16), (0, -8))
+        self.assertEqual(p.priorCharRowCol(6, 17), (0, -1))
+        self.assertEqual(p.priorCharRowCol(6, 18), (0, -1))
+        self.assertEqual(p.priorCharRowCol(6, 19), (0, -1))
+        self.assertEqual(p.priorCharRowCol(6, 20), (0, -1))
+        # Test u"\t".
+        self.assertEqual(p.priorCharRowCol(9, 1), (0, -1))
+        self.assertEqual(p.priorCharRowCol(9, 5), (0, -5))
+        self.assertEqual(p.priorCharRowCol(9, 8), (0, -8))
 
     if 0:
 

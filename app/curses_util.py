@@ -402,6 +402,19 @@ def charWidth(ch, column):
     else:
         return 1
 
+def priorCol(column, line):
+    if app.config.strict_debug:
+        assert isinstance(column, int)
+        assert isinstance(line, unicode)
+    if column == 0:
+        return None
+    priorColumn = 0
+    for ch in line:
+        width = charWidth(ch, priorColumn)
+        if priorColumn + width >= column:
+            return priorColumn
+        priorColumn += width
+    return None
 
 def columnWidth(string):
     """When rendering |string| how many character cells will be used? For ASCII

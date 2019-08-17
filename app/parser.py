@@ -172,7 +172,7 @@ class Parser:
         return (row < len(self.rows) and
             col < self.parserNodes[self.rows[row]][kVisual])
 
-    def nextCharRowCol(self, row, col, appPrefs):
+    def nextCharRowCol(self, row, col):
         """Get the next column value for the character to the right.
         Returns: None if there is no remaining characters.
                  or (row, col) deltas of the next character in the document.
@@ -187,6 +187,23 @@ class Parser:
         if ch is None:
             return (1, -col) if self.inDocument(row + 1, 0) else None
         return 0, app.curses_util.charWidth(ch, col)
+
+    def priorCharRowCol(self, row, col):
+        """Get the prior column value for the character to the left.
+        Returns: None if there is no remaining characters.
+                 or (row, col) deltas of the next character in the document.
+        """
+        if app.config.strict_debug:
+            assert isinstance(row, int)
+            assert isinstance(col, int)
+            assert row >= 0
+            assert col >= 0
+            assert len(self.rows) > 0
+        if col == 0:
+            if row == 0:
+                return None
+            return (-1, self.rowWidth(row - 1))
+        return 0, app.curses_util.priorCol(col, self.rowText(row)) - col
 
     def parse(self, bgThread, appPrefs, data, grammar, beginRow, endRow):
         """
