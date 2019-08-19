@@ -176,26 +176,34 @@ class CursesUtilTestCases(unittest.TestCase):
         self.assertIs(None, cu.charAtColumn(12, u"こんにちは"))
 
     def test_fit_to_rendered_width(self):
-        self.assertEqual(0, app.curses_util.fitToRenderedWidth(0, u"test"))
-        self.assertEqual(1, app.curses_util.fitToRenderedWidth(1, u"test"))
-        self.assertEqual(2, app.curses_util.fitToRenderedWidth(2, u"test"))
-        self.assertEqual(3, app.curses_util.fitToRenderedWidth(3, u"test"))
-        self.assertEqual(4, app.curses_util.fitToRenderedWidth(4, u"test"))
-        # Test past the length of the string.
-        self.assertEqual(4, app.curses_util.fitToRenderedWidth(8, u"test"))
+        fitToRenderedWidth = app.curses_util.fitToRenderedWidth
 
-        self.assertEqual(0, app.curses_util.fitToRenderedWidth(0, u"こんにちは"))
-        self.assertEqual(0, app.curses_util.fitToRenderedWidth(1, u"こんにちは"))
-        self.assertEqual(1, app.curses_util.fitToRenderedWidth(2, u"こんにちは"))
-        self.assertEqual(1, app.curses_util.fitToRenderedWidth(3, u"こんにちは"))
-        self.assertEqual(2, app.curses_util.fitToRenderedWidth(4, u"こんにちは"))
-        self.assertEqual(4, app.curses_util.fitToRenderedWidth(8, u"こんにちは"))
-        self.assertEqual(4, app.curses_util.fitToRenderedWidth(9, u"こんにちは"))
-        self.assertEqual(5, app.curses_util.fitToRenderedWidth(10, u"こんにちは"))
+        self.assertEqual(0, fitToRenderedWidth(0, 0, u"test"))
+        self.assertEqual(1, fitToRenderedWidth(0, 1, u"test"))
+        self.assertEqual(2, fitToRenderedWidth(0, 2, u"test"))
+        self.assertEqual(3, fitToRenderedWidth(0, 3, u"test"))
+        self.assertEqual(4, fitToRenderedWidth(0, 4, u"test"))
+        # Test past the length of the string.
+        self.assertEqual(4, fitToRenderedWidth(0, 8, u"test"))
+
+        # Test double wide characters (theses characters render as two cells in
+        # a fixed width font).
+        self.assertEqual(0, fitToRenderedWidth(0, 0, u"こんにちは"))
+        self.assertEqual(0, fitToRenderedWidth(0, 1, u"こんにちは"))
+        self.assertEqual(1, fitToRenderedWidth(0, 2, u"こんにちは"))
+        self.assertEqual(1, fitToRenderedWidth(0, 3, u"こんにちは"))
+        self.assertEqual(2, fitToRenderedWidth(0, 4, u"こんにちは"))
+        self.assertEqual(4, fitToRenderedWidth(0, 8, u"こんにちは"))
+        self.assertEqual(4, fitToRenderedWidth(0, 9, u"こんにちは"))
+        self.assertEqual(5, fitToRenderedWidth(0, 10, u"こんにちは"))
 
         # Test past the length of the string.
-        self.assertEqual(5, app.curses_util.fitToRenderedWidth(11, u"こんにちは"))
-        self.assertEqual(5, app.curses_util.fitToRenderedWidth(12, u"こんにちは"))
+        self.assertEqual(5, fitToRenderedWidth(0, 11, u"こんにちは"))
+        self.assertEqual(5, fitToRenderedWidth(0, 12, u"こんにちは"))
+
+        # Test tabs.
+        self.assertEqual(1, fitToRenderedWidth(0, 8, u"\t"))
+        self.assertEqual(0, fitToRenderedWidth(0, 7, u"\t"))
 
     def test_rendered_sub_str(self):
         self.assertEqual(u"test", app.curses_util.renderedSubStr(u"test", 0))
@@ -279,6 +287,10 @@ class CursesUtilTestCases(unittest.TestCase):
     def test_rendered_width(self):
         self.assertEqual(0, app.curses_util.columnWidth(u""))
         self.assertEqual(4, app.curses_util.columnWidth(u"test"))
+        self.assertEqual(8, app.curses_util.columnWidth(u"\t"))
+        self.assertEqual(9, app.curses_util.columnWidth(u"\ta"))
+        self.assertEqual(16, app.curses_util.columnWidth(u"\ta\t"))
+        self.assertEqual(8, app.curses_util.columnWidth(u"i\t"))
 
         self.assertEqual(2, app.curses_util.columnWidth(u"こ"))
         self.assertEqual(4, app.curses_util.columnWidth(u"こん"))

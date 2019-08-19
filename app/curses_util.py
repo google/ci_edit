@@ -264,9 +264,13 @@ def charAtColumn(column, string):
     return None
 
 
-def fitToRenderedWidth(width, string):
+def fitToRenderedWidth(column, width, string):
     """With |width| character cells (columns) available, how much of |string|
-    can I render?
+    can I render? The start |column| is required to calculate tab stops.
+
+    The result can vary for double-wide characters, zero-width characters, and
+    tabs. For plain, printable ASCII, the result will always be the lesser of
+    |width| or len(string).
     """
     if app.config.strict_debug:
         assert isinstance(width, int)
@@ -274,10 +278,9 @@ def fitToRenderedWidth(width, string):
     indexLimit = len(string)
     index = 0
     for i in string:
-        if i > MIN_DOUBLE_WIDE_CHARACTER:
-            width -= 2
-        else:
-            width -= 1
+        cols = charWidth(i, column)
+        width -= cols
+        column += cols
         if width < 0 or index >= indexLimit:
             break
         index += 1
@@ -426,10 +429,7 @@ def columnWidth(string):
         assert isinstance(string, unicode)
     width = 0
     for i in string:
-        if i > MIN_DOUBLE_WIDE_CHARACTER:
-            width += 2
-        else:
-            width += 1
+        width += charWidth(i, width)
     return width
 
 
