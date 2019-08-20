@@ -407,6 +407,8 @@ prefs = {
         "showLineNumbers": True,
         "showStatusLine": True,
         "showTopInfo": True,
+        # Convert/expand tabs to spaces (see tabSize).
+        "tabToSpaces": True,
         # When expanding tabs to spaces, how many spaces to use. This is not
         # used for indentation, see "indentation" or grammar "indent".
         "tabSize": 8,
@@ -417,6 +419,13 @@ prefs = {
         "bash": {
             "ext": [".bash", ".sh"],
             "grammar": "bash",
+            "tabToSpaces": True,
+        },
+        "bazel": {
+            "ext": [],
+            "grammar": "bazel",
+            "name": ["BUILD"],
+            "tabToSpaces": True,
         },
         "binary": {
             "ext": [
@@ -425,10 +434,12 @@ prefs = {
             ],
             "grammar":
             "binary",
+            "tabToSpaces": False,
         },
         "c": {
             "ext": [".c"],
             "grammar": "c",
+            "tabToSpaces": True,
         },
         "cpp": {
             "ext": [
@@ -442,75 +453,90 @@ prefs = {
                 ".inc",
                 ".h"  # Hmm, some source uses .h for cpp headers.
             ],
-            "grammar":
-            "cpp",
+            "grammar": "cpp",
+            "tabToSpaces": True,
         },
         "css": {
             "ext": [".css", "_css.html"],
             "grammar": "css",
+            "tabToSpaces": True,
         },
         "dart": {
             "ext": [
                 ".dart",
             ],
             "grammar": "dart",
+            "tabToSpaces": True,
         },
         "gn": {
             "ext": [".gn"],
             "grammar": "gn",
+            "tabToSpaces": True,
         },
         "golang": {
             "ext": [
                 ".go",
             ],
             "grammar": "golang",
+            "tabToSpaces": True,
         },
         "grd": {
             "ext": [".grd", ".grdp"],
             "grammar": "grd",
+            "tabToSpaces": True,
         },
         "html": {
             "ext": [".htm", ".html"],
             "grammar": "html",
+            "tabToSpaces": True,
         },
         "java": {
             "ext": [
                 ".java",
             ],
             "grammar": "java",
+            "tabToSpaces": True,
         },
         "js": {
             "ext": [".json", ".js"],
             "grammar": "js",
+            "tabToSpaces": True,
         },
         "make": {
             "ext": [],
             "grammar": "make",
             "name": ["Makefile"],
+            "tabToSpaces": False,
         },
         "md": {
             "ext": [".md"],
             "grammar": "md",
+            "tabToSpaces": True,
         },
         "proto": {
             "ext": [".proto"],
             "grammar": "proto",
+            "tabToSpaces": True,
         },
         "python": {
             "ext": [".py"],
             "grammar": "py",
+            "tabToSpaces": True,
         },
         "rust": {
             "ext": [".rs"],
             "grammar": "rs",
+            "tabToSpaces": True,
         },
         "text": {
-            "ext": [".txt", ""],
+            "ext": [".txt"],
             "grammar": "text",
+            "tabToSpaces": False,
         },
         "words": {
             "ext": [".words", ""],
             "grammar": "words",
+            "tabToSpaces": True,
         },
     },
     "grammar": {
@@ -534,6 +560,7 @@ prefs = {
         #   "single_line": Boolean, Whether entire grammar must be on a single
         #       line,
         #   "special": None or list of string.
+        #   "tabToSpaces": Boolean, Convert/expand tabs to spaces (see tabSize).
         #   "type": text or binary. default: text.
         #   "contains": other grammars that may be contained within this
         #       grammar.
@@ -562,6 +589,16 @@ prefs = {
             # Not really types.
             "types": __linux_commands,
             "contains": ["c_string1", "c_string2", "pound_comment"],
+        },
+        # Bazel build script. See https://www.bazel.build/
+        "bazel": {
+            "indent":
+            "  ",
+            "keywords": [
+                "testonly"
+            ],
+            "types": "",
+            "contains": ["py_string1", "py_string2", "pound_comment"],
         },
         "binary": {
             "spelling": False,
@@ -971,8 +1008,6 @@ prefs = {
                 "esac", "exit", "fi", "if", "for", "return", "switch", "then",
                 "while"
             ],
-            "keepTabs": True,
-            "tabToSpaces": False,
             # Not really types.
             "types": __linux_commands,
             "contains": ["c_string1", "c_string2", "pound_comment"],

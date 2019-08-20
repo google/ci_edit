@@ -38,7 +38,8 @@ class LineBuffer:
         self.parser = app.parser.Parser()
         self.parserTime = .0
         self.message = (u"New buffer", None)
-        self.rootGrammar = self.program.prefs.getGrammar(None)
+        self.fileType = "words"
+        self.rootGrammar = self.program.prefs.getGrammar(self.fileType)
         self.upperChangedRow = 0
 
     def doLinesToBinaryData(self, lines):
@@ -69,8 +70,9 @@ class LineBuffer:
         # .replace() calls to minimize the number of calls to parse().
         data = data.replace(u'\r\n', u'\n')
         data = data.replace(u'\r', u'\n')
-        tabSize = self.program.prefs.editor.get(u"tabSize", 8)
-        data = data.expandtabs(tabSize)
+        if self.program.prefs.tabsToSpaces(self.fileType):
+            tabSize = self.program.prefs.editor.get(u"tabSize", 8)
+            data = data.expandtabs(tabSize)
 
         def parse(sre):
             return u"\x01%02x" % ord(sre.groups()[0])

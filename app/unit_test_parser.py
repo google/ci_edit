@@ -26,13 +26,6 @@ import unittest
 import app.parser
 import app.prefs
 
-performance1 = u'''
-import app.parser
-path = 'app/actions.py'
-data = open(path).read()
-grammar = self.prefs.getGrammar(path)
-'''
-
 
 class ParserTestCases(unittest.TestCase):
 
@@ -253,7 +246,8 @@ ends with tab>\t
             parser = app.parser.Parser()
             path = u'app/actions.py'
             data = io.open(path).read()
-            grammar = self.prefs.getGrammar(path)
+            fileType = self.prefs.getFileType(path)
+            grammar = self.prefs.getGrammar(fileType)
 
             profile.enable()
             parser.parse(data, grammar, 0, sys.maxsize)

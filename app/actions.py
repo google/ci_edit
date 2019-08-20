@@ -961,7 +961,8 @@ class Actions(app.mutator.Mutator):
         if self.fileExtension != extension:
             self.fileExtension = extension
             self.upperChangedRow = 0
-        return self.program.prefs.getGrammar(name + extension)
+        self.fileType = self.program.prefs.getFileType(name + extension)
+        return self.program.prefs.getGrammar(self.fileType)
 
     def determineFileType(self):
         self.rootGrammar = self._determineRootGrammar(
