@@ -22,6 +22,7 @@ except NameError:
     unichr = chr
 
 import re
+import sys
 import time
 
 import app.config
@@ -36,10 +37,14 @@ class LineBuffer:
         self.isBinary = False
         self.lines = [u""]
         self.parser = app.parser.Parser()
-        self.parserTime = .0
+        self.parserTime = 0.0
         self.message = (u"New buffer", None)
-        self.fileType = "words"
+        self.setFileType("words")
+
+    def setFileType(self, fileType):
+        self.fileType = fileType
         self.rootGrammar = self.program.prefs.getGrammar(self.fileType)
+        # Parse from the beginning.
         self.upperChangedRow = 0
 
     def doLinesToBinaryData(self, lines):
@@ -110,7 +115,7 @@ class LineBuffer:
 
     def parseDocument(self):
         begin = min(self.parser.fullyParsedToLine, self.upperChangedRow)
-        end = self.parser.rowCount() + 1
+        end = sys.maxsize
         self.doParse(begin, end)
 
     def setMessage(self, *args, **kwargs):

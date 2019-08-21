@@ -186,88 +186,92 @@ two
 apple banana carrot
 #include "test.h"
 void blah();
+\ta\t
+a\twith tab
+\t\t
+\twhile
+{
 """
+        self.textBuffer.setFileType(u"text")
         self.textBuffer.insertLines(tuple(test.split('\n')))
         self.textBuffer.parseDocument()
+        #self.textBuffer.parser.debugLog(print, test)
         #self.assertEqual(self.textBuffer.scrollRow, 0)
         #self.assertEqual(self.textBuffer.scrollCol, 0)
         self.assertEqual(self.textBuffer.lines[1], 'two')
         self.assertEqual(self.textBuffer.parser.rowText(1), 'two')
+        self.assertEqual(self.textBuffer.parser.rowTextAndWidth(8),
+                ('\t\t', 16))
+
+    def currentRowText(self):
+        return self.textBuffer.parser.rowText(self.textBuffer.penRow)
+
+    def setMarkerPenRowCol(self, mRow, mCol, row, col):
+        self.textBuffer.markerRow = mRow
+        self.textBuffer.markerCol = mCol
+        self.textBuffer.penRow = row
+        self.textBuffer.penCol = col
+
+    def markerPenRowCol(self):
+        return (self.textBuffer.markerRow, self.textBuffer.markerCol,
+                self.textBuffer.penRow, self.textBuffer.penCol)
+
+    def test_cursor_move_left(self):
+        tb = self.textBuffer
+
+        self.setMarkerPenRowCol(0, 0, 2, 5)
+        self.assertEqual(self.currentRowText(), u"// second comment")
+        self.textBuffer.cursorMoveLeft()
+        self.assertEqual(self.markerPenRowCol(), (0, 0, 2, 4))
+
+        self.setMarkerPenRowCol(0, 0, 8, 16)
+        self.assertEqual(self.currentRowText(), u"\t\t")
+        self.textBuffer.cursorMoveLeft()
+        self.assertEqual(self.markerPenRowCol(), (0, 0, 8, 8))
+        self.textBuffer.cursorMoveLeft()
+        self.assertEqual(self.markerPenRowCol(), (0, 0, 8, 0))
+        self.textBuffer.cursorMoveLeft()
+        self.assertEqual(self.currentRowText(), u"a\twith tab")
+        self.assertEqual(self.markerPenRowCol(), (0, 0, 7, 16))
 
     def test_cursor_select_word_left(self):
         tb = self.textBuffer
+        self.setMarkerPenRowCol(0, 0, 2, 5)
 
-        self.textBuffer.markerRow = 0
-        self.textBuffer.markerCol = 0
-        self.textBuffer.penRow = 2
-        self.textBuffer.penCol = 5
+        self.assertEqual(self.currentRowText(), u"// second comment")
+        self.textBuffer.cursorSelectWordLeft()
+        self.assertEqual(self.markerPenRowCol(), (2, 5, 2, 3))
 
         self.textBuffer.cursorSelectWordLeft()
-        self.assertEqual(self.textBuffer.markerRow, 2)
-        self.assertEqual(self.textBuffer.markerCol, 5)
-        self.assertEqual(self.textBuffer.penRow, 2)
-        self.assertEqual(self.textBuffer.penCol, 3)
+        self.assertEqual(self.markerPenRowCol(), (2, 5, 2, 0))
 
         self.textBuffer.cursorSelectWordLeft()
-        self.assertEqual(self.textBuffer.markerRow, 2)
-        self.assertEqual(self.textBuffer.markerCol, 5)
-        self.assertEqual(self.textBuffer.penRow, 2)
-        self.assertEqual(self.textBuffer.penCol, 0)
+        self.assertEqual(self.markerPenRowCol(), (2, 5, 1, 3))
 
         self.textBuffer.cursorSelectWordLeft()
-        self.assertEqual(self.textBuffer.markerRow, 2)
-        self.assertEqual(self.textBuffer.markerCol, 5)
-        self.assertEqual(self.textBuffer.penRow, 1)
-        self.assertEqual(self.textBuffer.penCol, 3)
+        self.assertEqual(self.markerPenRowCol(), (2, 5, 1, 0))
 
         self.textBuffer.cursorSelectWordLeft()
-        self.assertEqual(self.textBuffer.markerRow, 2)
-        self.assertEqual(self.textBuffer.markerCol, 5)
-        self.assertEqual(self.textBuffer.penRow, 1)
-        self.assertEqual(self.textBuffer.penCol, 0)
+        self.assertEqual(self.markerPenRowCol(), (2, 5, 0, 19))
 
         self.textBuffer.cursorSelectWordLeft()
-        self.assertEqual(self.textBuffer.markerRow, 2)
-        self.assertEqual(self.textBuffer.markerCol, 5)
-        self.assertEqual(self.textBuffer.penRow, 0)
-        self.assertEqual(self.textBuffer.penCol, 19)
+        self.assertEqual(self.markerPenRowCol(), (2, 5, 0, 16))
 
         self.textBuffer.cursorSelectWordLeft()
-        self.assertEqual(self.textBuffer.markerRow, 2)
-        self.assertEqual(self.textBuffer.markerCol, 5)
-        self.assertEqual(self.textBuffer.penRow, 0)
-        self.assertEqual(self.textBuffer.penCol, 16)
+        self.assertEqual(self.markerPenRowCol(), (2, 5, 0, 9))
 
         self.textBuffer.cursorSelectWordLeft()
-        self.assertEqual(self.textBuffer.markerRow, 2)
-        self.assertEqual(self.textBuffer.markerCol, 5)
-        self.assertEqual(self.textBuffer.penRow, 0)
-        self.assertEqual(self.textBuffer.penCol, 9)
+        self.assertEqual(self.markerPenRowCol(), (2, 5, 0, 8))
 
         self.textBuffer.cursorSelectWordLeft()
-        self.assertEqual(self.textBuffer.markerRow, 2)
-        self.assertEqual(self.textBuffer.markerCol, 5)
-        self.assertEqual(self.textBuffer.penRow, 0)
-        self.assertEqual(self.textBuffer.penCol, 8)
+        self.assertEqual(self.markerPenRowCol(), (2, 5, 0, 3))
 
         self.textBuffer.cursorSelectWordLeft()
-        self.assertEqual(self.textBuffer.markerRow, 2)
-        self.assertEqual(self.textBuffer.markerCol, 5)
-        self.assertEqual(self.textBuffer.penRow, 0)
-        self.assertEqual(self.textBuffer.penCol, 3)
-
-        self.textBuffer.cursorSelectWordLeft()
-        self.assertEqual(self.textBuffer.markerRow, 2)
-        self.assertEqual(self.textBuffer.markerCol, 5)
-        self.assertEqual(self.textBuffer.penRow, 0)
-        self.assertEqual(self.textBuffer.penCol, 0)
+        self.assertEqual(self.markerPenRowCol(), (2, 5, 0, 0))
 
         # Top of document. This call should have no effect (and not crash).
         self.textBuffer.cursorSelectWordLeft()
-        self.assertEqual(self.textBuffer.markerRow, 2)
-        self.assertEqual(self.textBuffer.markerCol, 5)
-        self.assertEqual(self.textBuffer.penRow, 0)
-        self.assertEqual(self.textBuffer.penCol, 0)
+        self.assertEqual(self.markerPenRowCol(), (2, 5, 0, 0))
 
 
 class TextIndentTestCases(unittest.TestCase):
