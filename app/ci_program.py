@@ -564,6 +564,8 @@ def run_ci():
         app.log.writeToFile('~/.ci_edit/recentLog')
         # Disable Bracketed Paste Mode.
         sys.stdout.write('\033[?2004l')
+        # Disable mouse tracking in xterm.
+        sys.stdout.write('\033[?1002;l')
         sys.stdout.flush()
     if userConsoleMessage:
         fullPath = app.buffer_file.expandFullPath(
