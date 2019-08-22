@@ -393,7 +393,6 @@ def renderedSubStr(string, beginCol, endCol=None):
                 output.append(ch)
     return u"".join(output)
 
-
 def charWidth(ch, column):
     if ch == u"\t":
         tabWidth = 8
@@ -406,6 +405,11 @@ def charWidth(ch, column):
         return 1
 
 def priorCol(column, line):
+    """Round off the column so that it aligns with the start of a character.
+    For lines without multi-column characters the result will equal |column|.
+    If |column| is midway in a multi-column character the result will be less
+    than |column| (i.e. rounding the column number downward).
+    """
     if app.config.strict_debug:
         assert isinstance(column, int)
         assert isinstance(line, unicode)

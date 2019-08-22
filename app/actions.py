@@ -522,11 +522,12 @@ class Actions(app.mutator.Mutator):
             self.setMessage(u'Top of file')
             self.cursorMove(0, -self.penCol)
         else:
-            lineLen = self.parser.rowWidth(self.penRow - 1)
+            line, lineLen = self.parser.rowTextAndWidth(self.penRow - 1)
             if self.goalCol <= lineLen:
-                self.cursorMove(-1, self.goalCol - self.penCol)
+                col = app.curses_util.priorCol(self.goalCol, line)
             else:
-                self.cursorMove(-1, lineLen - self.penCol)
+                col = lineLen
+            self.cursorMove(-1, col - self.penCol)
         self.goalCol = savedGoal
         self.adjustHorizontalScroll()
 

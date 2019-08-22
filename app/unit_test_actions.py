@@ -49,7 +49,23 @@ def checkRow(test, text_buffer, row, expected):
                 repr(text_buffer.parser.rowText(row))))
 
 
-class MouseTestCases(unittest.TestCase):
+class ActionsTestCase(unittest.TestCase):
+
+    def currentRowText(self):
+        return self.textBuffer.parser.rowText(self.textBuffer.penRow)
+
+    def setMarkerPenRowCol(self, mRow, mCol, row, col):
+        self.textBuffer.markerRow = mRow
+        self.textBuffer.markerCol = mCol
+        self.textBuffer.penRow = row
+        self.textBuffer.penCol = col
+
+    def markerPenRowCol(self):
+        return (self.textBuffer.markerRow, self.textBuffer.markerCol,
+                self.textBuffer.penRow, self.textBuffer.penCol)
+
+
+class MouseTestCases(ActionsTestCase):
 
     def setUp(self):
         app.log.shouldWritePrintLog = False
@@ -79,42 +95,23 @@ void blah();
         self.assertEqual(self.textBuffer.penCol, 9)
 
         self.textBuffer.mouseClick(3, 8, True, False, False)
-        self.assertEqual(self.textBuffer.markerRow, 3)
-        self.assertEqual(self.textBuffer.markerCol, 9)
-        self.assertEqual(self.textBuffer.penRow, 3)
-        self.assertEqual(self.textBuffer.penCol, 8)
+        self.assertEqual(self.markerPenRowCol(), (3, 9, 3, 8))
 
         self.textBuffer.mouseClick(4, 8, True, False, False)
-        self.assertEqual(self.textBuffer.markerRow, 3)
-        self.assertEqual(self.textBuffer.markerCol, 9)
-        self.assertEqual(self.textBuffer.penRow, 4)
-        self.assertEqual(self.textBuffer.penCol, 8)
+        self.assertEqual(self.markerPenRowCol(), (3, 9, 4, 8))
 
         self.textBuffer.mouseClick(3, 8, True, False, False)
-        self.assertEqual(self.textBuffer.markerRow, 3)
-        self.assertEqual(self.textBuffer.markerCol, 9)
-        self.assertEqual(self.textBuffer.penRow, 3)
-        self.assertEqual(self.textBuffer.penCol, 8)
+        self.assertEqual(self.markerPenRowCol(), (3, 9, 3, 8))
 
         self.textBuffer.mouseClick(4, 8, True, False, False)
         self.textBuffer.mouseClick(4, 9, True, False, False)
-        self.assertEqual(self.textBuffer.markerRow, 3)
-        self.assertEqual(self.textBuffer.markerCol, 9)
-        self.assertEqual(self.textBuffer.penRow, 4)
-        self.assertEqual(self.textBuffer.penCol, 9)
+        self.assertEqual(self.markerPenRowCol(), (3, 9, 4, 9))
 
         self.textBuffer.mouseClick(4, 10, True, False, False)
-        self.assertEqual(self.textBuffer.markerRow, 3)
-        self.assertEqual(self.textBuffer.markerCol, 9)
-        self.assertEqual(self.textBuffer.penRow, 4)
-        self.assertEqual(self.textBuffer.penCol, 10)
+        self.assertEqual(self.markerPenRowCol(), (3, 9, 4, 10))
 
         self.textBuffer.mouseClick(4, 11, True, False, False)
-        self.assertEqual(self.textBuffer.markerRow, 3)
-        self.assertEqual(self.textBuffer.markerCol, 9)
-        self.assertEqual(self.textBuffer.penRow, 4)
-        #self.assertEqual(self.textBuffer.penCol, 11)
-        #self.assertEqual(self.textBuffer.scrollCol, 0)
+        self.assertEqual(self.markerPenRowCol(), (3, 9, 4, 11))
 
     def test_mouse_word_selection(self):
         #self.assertEqual(self.textBuffer.scrollCol, 0)
@@ -173,7 +170,7 @@ void blah();
 
 
 
-class SelectionTestCases(unittest.TestCase):
+class SelectionTestCases(ActionsTestCase):
 
     def setUp(self):
         app.log.shouldWritePrintLog = False
@@ -203,26 +200,13 @@ a\twith tab
         self.assertEqual(self.textBuffer.parser.rowTextAndWidth(8),
                 ('\t\t', 16))
 
-    def currentRowText(self):
-        return self.textBuffer.parser.rowText(self.textBuffer.penRow)
-
-    def setMarkerPenRowCol(self, mRow, mCol, row, col):
-        self.textBuffer.markerRow = mRow
-        self.textBuffer.markerCol = mCol
-        self.textBuffer.penRow = row
-        self.textBuffer.penCol = col
-
-    def markerPenRowCol(self):
-        return (self.textBuffer.markerRow, self.textBuffer.markerCol,
-                self.textBuffer.penRow, self.textBuffer.penCol)
-
-    def test_cursor_move_left(self):
-        tb = self.textBuffer
-
+    def test_cursor_move(self):
         self.setMarkerPenRowCol(0, 0, 2, 5)
         self.assertEqual(self.currentRowText(), u"// second comment")
         self.textBuffer.cursorMoveLeft()
         self.assertEqual(self.markerPenRowCol(), (0, 0, 2, 4))
+        self.textBuffer.cursorMoveRight()
+        self.assertEqual(self.markerPenRowCol(), (0, 0, 2, 5))
 
         self.setMarkerPenRowCol(0, 0, 8, 16)
         self.assertEqual(self.currentRowText(), u"\t\t")
@@ -233,6 +217,25 @@ a\twith tab
         self.textBuffer.cursorMoveLeft()
         self.assertEqual(self.currentRowText(), u"a\twith tab")
         self.assertEqual(self.markerPenRowCol(), (0, 0, 7, 16))
+        self.textBuffer.cursorMoveRight()
+        self.assertEqual(self.currentRowText(), u"\t\t")
+        self.assertEqual(self.markerPenRowCol(), (0, 0, 8, 0))
+        self.textBuffer.cursorMoveRight()
+        self.assertEqual(self.markerPenRowCol(), (0, 0, 8, 8))
+        self.textBuffer.cursorMoveRight()
+        self.assertEqual(self.markerPenRowCol(), (0, 0, 8, 16))
+        self.textBuffer.cursorMoveRight()
+        self.assertEqual(self.currentRowText(), u"\twhile")
+        self.assertEqual(self.markerPenRowCol(), (0, 0, 9, 0))
+        self.textBuffer.cursorMoveRight()
+        self.assertEqual(self.markerPenRowCol(), (0, 0, 9, 8))
+        self.textBuffer.cursorMoveRight()
+        self.assertEqual(self.markerPenRowCol(), (0, 0, 9, 9))
+        self.textBuffer.cursorMoveRight()
+        self.assertEqual(self.markerPenRowCol(), (0, 0, 9, 10))
+        self.textBuffer.cursorMoveUpOrBegin()
+        self.assertEqual(self.currentRowText(), u"\t\t")
+        self.assertEqual(self.markerPenRowCol(), (0, 0, 8, 8))
 
     def test_cursor_select_word_left(self):
         tb = self.textBuffer
@@ -274,7 +277,7 @@ a\twith tab
         self.assertEqual(self.markerPenRowCol(), (2, 5, 0, 0))
 
 
-class TextIndentTestCases(unittest.TestCase):
+class TextIndentTestCases(ActionsTestCase):
 
     def setUp(self):
         app.log.shouldWritePrintLog = False
@@ -424,7 +427,7 @@ class TextIndentTestCases(unittest.TestCase):
         checkRow(self, tb, 2, '  c')
         checkRow(self, tb, 3, 'd')
 
-class TextInsertTestCases(unittest.TestCase):
+class TextInsertTestCases(ActionsTestCase):
 
     def setUp(self):
         app.log.shouldWritePrintLog = False
@@ -487,7 +490,7 @@ class TextInsertTestCases(unittest.TestCase):
         insert(ord('('), None)
         checkRow(self, tb, 0, '(o')
 
-class GrammarDeterminationTestCases(unittest.TestCase):
+class GrammarDeterminationTestCases(ActionsTestCase):
 
     def setUp(self):
         app.log.shouldWritePrintLog = False
