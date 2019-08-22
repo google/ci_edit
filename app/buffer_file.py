@@ -41,13 +41,11 @@ def pathRowColumn(path, projectDir):
     if app.config.strict_debug:
         assert isinstance(path, unicode)
         assert projectDir is None or isinstance(projectDir, unicode)
-    app.log.debug(u"path", path)
     openToRow = None
     openToColumn = None
     if os.path.isfile(path):  # or os.path.isdir(os.path.dirname(path)):
         return path, openToRow, openToColumn
     pieces = path.split(u":")
-    app.log.debug(u"pieces\n", pieces)
     if pieces[-1] == u"":
         if len(pieces) == 3:
             try:
@@ -80,7 +78,6 @@ def pathRowColumn(path, projectDir):
         elif path[1] == u"/":
             if os.path.isfile(path[2:]):
                 path = path[2:]
-    app.log.debug(u"return\n", path, openToRow, openToColumn)
     return path, openToRow, openToColumn
 
 

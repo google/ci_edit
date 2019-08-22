@@ -1268,6 +1268,9 @@ class InputWindow(Window):
         bufferManager = self.program.bufferManager
         for f in self.program.prefs.startup.get('cliFiles', []):
             tb = bufferManager.loadTextBuffer(f['path'])
+            if tb is None:
+                # app.log.info('failed to load', repr(f["path"]))
+                continue
             tb.parseDocument()
             if f['row'] is not None:
                 if f['col'] is not None:
