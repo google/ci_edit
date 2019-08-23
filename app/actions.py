@@ -392,10 +392,11 @@ class Actions(app.mutator.Mutator):
         if app.config.strict_debug:
             assert isinstance(toRow, int)
             assert 0 <= toRow < self.parser.rowCount()
-        lineLen = self.parser.rowWidth(toRow)
+        line, lineLen = self.parser.rowTextAndWidth(toRow)
         if self.goalCol <= lineLen:
-            return self.goalCol - self.penCol
-        return lineLen - self.penCol
+            return app.curses_util.floorCol(self.goalCol, line) - self.penCol
+        else:
+            return lineLen - self.penCol
 
     def cursorDown(self):
         self.selectionNone()
@@ -522,12 +523,7 @@ class Actions(app.mutator.Mutator):
             self.setMessage(u'Top of file')
             self.cursorMove(0, -self.penCol)
         else:
-            line, lineLen = self.parser.rowTextAndWidth(self.penRow - 1)
-            if self.goalCol <= lineLen:
-                col = app.curses_util.priorCol(self.goalCol, line)
-            else:
-                col = lineLen
-            self.cursorMove(-1, col - self.penCol)
+            self.cursorMove(-1, self.cursorColDelta(self.penRow - 1))
         self.goalCol = savedGoal
         self.adjustHorizontalScroll()
 

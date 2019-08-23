@@ -316,24 +316,58 @@ class CursesUtilTestCases(unittest.TestCase):
         self.assertEqual(7, app.curses_util.charWidth(u"\t", 9))
         self.assertEqual(2, app.curses_util.charWidth(u"こ", 0))
 
-    def test_prior_col(self):
+    def test_floor_col(self):
         test = u"""\tfive\t"""
-        prior_col = app.curses_util.priorCol
-        self.assertEqual(None, prior_col(0, test))
-        self.assertEqual(0, prior_col(1, test))
-        self.assertEqual(0, prior_col(2, test))
-        self.assertEqual(0, prior_col(3, test))
-        self.assertEqual(0, prior_col(4, test))
-        self.assertEqual(0, prior_col(5, test))
-        self.assertEqual(0, prior_col(6, test))
-        self.assertEqual(0, prior_col(7, test))
-        self.assertEqual(0, prior_col(8, test))
-        self.assertEqual(8, prior_col(9, test))
-        self.assertEqual(9, prior_col(10, test))
-        self.assertEqual(10, prior_col(11, test))
-        self.assertEqual(11, prior_col(12, test))
-        self.assertEqual(12, prior_col(13, test))
-        self.assertEqual(12, prior_col(14, test))
-        self.assertEqual(12, prior_col(15, test))
-        self.assertEqual(12, prior_col(16, test))
-        self.assertEqual(None, prior_col(17, test))
+        floor_col = app.curses_util.floorCol
+        self.assertEqual(0, floor_col(0, test))
+        self.assertEqual(0, floor_col(1, test))
+        self.assertEqual(0, floor_col(2, test))
+        self.assertEqual(0, floor_col(3, test))
+        self.assertEqual(0, floor_col(4, test))
+        self.assertEqual(0, floor_col(5, test))
+        self.assertEqual(0, floor_col(6, test))
+        self.assertEqual(0, floor_col(7, test))
+        self.assertEqual(8, floor_col(8, test))
+        self.assertEqual(9, floor_col(9, test))
+        self.assertEqual(10, floor_col(10, test))
+        self.assertEqual(11, floor_col(11, test))
+        self.assertEqual(12, floor_col(12, test))
+        self.assertEqual(12, floor_col(13, test))
+        self.assertEqual(12, floor_col(14, test))
+        self.assertEqual(12, floor_col(15, test))
+        self.assertEqual(16, floor_col(16, test))
+        self.assertEqual(16, floor_col(17, test))
+        self.assertEqual(16, floor_col(99, test))
+
+        test2 = u"""more testing"""
+        self.assertEqual(0, floor_col(0, test2))
+        self.assertEqual(2, floor_col(2, test2))
+        self.assertEqual(12, floor_col(99, test2))
+
+    def test_prior_char_col(self):
+        test = u"""\tfive\t"""
+        prior_char_col = app.curses_util.priorCharCol
+        self.assertEqual(None, prior_char_col(0, test))
+        self.assertEqual(0, prior_char_col(1, test))
+        self.assertEqual(0, prior_char_col(2, test))
+        self.assertEqual(0, prior_char_col(3, test))
+        self.assertEqual(0, prior_char_col(4, test))
+        self.assertEqual(0, prior_char_col(5, test))
+        self.assertEqual(0, prior_char_col(6, test))
+        self.assertEqual(0, prior_char_col(7, test))
+        self.assertEqual(0, prior_char_col(8, test))
+        self.assertEqual(8, prior_char_col(9, test))
+        self.assertEqual(9, prior_char_col(10, test))
+        self.assertEqual(10, prior_char_col(11, test))
+        self.assertEqual(11, prior_char_col(12, test))
+        self.assertEqual(12, prior_char_col(13, test))
+        self.assertEqual(12, prior_char_col(14, test))
+        self.assertEqual(12, prior_char_col(15, test))
+        self.assertEqual(12, prior_char_col(16, test))
+        self.assertEqual(None, prior_char_col(17, test))
+
+        test2 = u"""more testing"""
+        self.assertEqual(None, prior_char_col(0, test2))
+        self.assertEqual(1, prior_char_col(2, test2))
+        self.assertEqual(11, prior_char_col(12, test2))
+        self.assertEqual(None, prior_char_col(13, test2))

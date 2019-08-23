@@ -55,10 +55,20 @@ class ActionsTestCase(unittest.TestCase):
         return self.textBuffer.parser.rowText(self.textBuffer.penRow)
 
     def setMarkerPenRowCol(self, mRow, mCol, row, col):
+        self.assertTrue(isinstance(mRow, int))
+        self.assertTrue(isinstance(mCol, int))
+        self.assertTrue(isinstance(row, int))
+        self.assertTrue(isinstance(col, int))
+        self.assertTrue(hasattr(self.textBuffer, "markerRow"))
+        self.assertTrue(hasattr(self.textBuffer, "markerCol"))
+        self.assertTrue(hasattr(self.textBuffer, "penRow"))
+        self.assertTrue(hasattr(self.textBuffer, "penCol"))
+        self.assertTrue(hasattr(self.textBuffer, "goalCol"))
         self.textBuffer.markerRow = mRow
         self.textBuffer.markerCol = mCol
         self.textBuffer.penRow = row
         self.textBuffer.penCol = col
+        self.textBuffer.goalCol = col
 
     def markerPenRowCol(self):
         return (self.textBuffer.markerRow, self.textBuffer.markerCol,
@@ -200,6 +210,14 @@ a\twith tab
         self.assertEqual(self.textBuffer.parser.rowTextAndWidth(8),
                 ('\t\t', 16))
 
+    def test_cursor_col_delta(self):
+        self.setMarkerPenRowCol(0, 0, 0, 2)
+        self.assertEqual(self.textBuffer.cursorColDelta(4), 0)
+        self.assertEqual(self.textBuffer.cursorColDelta(6), -2)
+        self.setMarkerPenRowCol(0, 0, 0, 12)
+        self.assertEqual(self.textBuffer.cursorColDelta(4), 0)
+        self.assertEqual(self.textBuffer.cursorColDelta(6), -3)
+
     def test_cursor_move(self):
         self.setMarkerPenRowCol(0, 0, 2, 5)
         self.assertEqual(self.currentRowText(), u"// second comment")
@@ -236,6 +254,19 @@ a\twith tab
         self.textBuffer.cursorMoveUpOrBegin()
         self.assertEqual(self.currentRowText(), u"\t\t")
         self.assertEqual(self.markerPenRowCol(), (0, 0, 8, 8))
+        self.textBuffer.cursorMoveUpOrBegin()
+        self.assertEqual(self.currentRowText(), u"a\twith tab")
+        # The column is 10 because of the prior move right which set goalCol.
+        self.assertEqual(self.markerPenRowCol(), (0, 0, 7, 10))
+        self.textBuffer.cursorMoveLeft()
+        self.assertEqual(self.markerPenRowCol(), (0, 0, 7, 9))
+        self.textBuffer.cursorMoveLeft()
+        self.assertEqual(self.markerPenRowCol(), (0, 0, 7, 8))
+        self.textBuffer.cursorMoveLeft()
+        self.assertEqual(self.markerPenRowCol(), (0, 0, 7, 1))
+        self.textBuffer.cursorMoveDownOrEnd()
+        self.assertEqual(self.currentRowText(), u"\t\t")
+        self.assertEqual(self.markerPenRowCol(), (0, 0, 8, 0))
 
     def test_cursor_select_word_left(self):
         tb = self.textBuffer

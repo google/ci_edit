@@ -404,11 +404,25 @@ def charWidth(ch, column):
     else:
         return 1
 
-def priorCol(column, line):
+def floorCol(column, line):
     """Round off the column so that it aligns with the start of a character.
     For lines without multi-column characters the result will equal |column|.
     If |column| is midway in a multi-column character the result will be less
     than |column| (i.e. rounding the column number downward).
+    """
+    if app.config.strict_debug:
+        assert isinstance(column, int)
+        assert isinstance(line, unicode)
+    floorColumn = 0
+    for ch in line:
+        width = charWidth(ch, floorColumn)
+        if floorColumn + width > column:
+            return floorColumn
+        floorColumn += width
+    return floorColumn
+
+def priorCharCol(column, line):
+    """Return the start column of the character before |column|.
     """
     if app.config.strict_debug:
         assert isinstance(column, int)

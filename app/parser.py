@@ -203,7 +203,7 @@ class Parser:
             if row == 0:
                 return None
             return (-1, self.rowWidth(row - 1))
-        return 0, app.curses_util.priorCol(col, self.rowText(row)) - col
+        return 0, app.curses_util.priorCharCol(col, self.rowText(row)) - col
 
     def parse(self, bgThread, appPrefs, data, grammar, beginRow, endRow):
         """
