@@ -127,8 +127,20 @@ class SelectableTestCases(unittest.TestCase):
         selectable.parseDocument()
         selectable.selectionMode = app.selectable.kSelectionBlock
         self.assertEqual(selectable.extendSelection(), (0, 0, 0, 0, 0))
+        selectable.markerRow = 0
+        selectable.markerCol = 1
+        selectable.penRow = 2
         selectable.penCol = 3
         self.assertEqual(selectable.extendSelection(), (0, 0, 0, 0, 0))
+        self.assertEqual(selectable.lines,
+                         [u"oneTwo", u"", u"five"])
+        selectable.doDeleteSelection()
+        self.assertEqual(selectable.lines,
+                         [u"oTwo", u"", u"fe"])
+        selectable.insertLinesAt(0, 1, (u"wx", u"", u"yz"),
+                app.selectable.kSelectionBlock)
+        self.assertEqual(selectable.lines,
+                         [u"owxTwo", u"", u"fyze"])
 
     def test_deletion_character(self):
         selectable = self.selectable

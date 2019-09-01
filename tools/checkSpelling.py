@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Copyright 2017 Google Inc.
 #
@@ -19,6 +19,7 @@ from __future__ import print_function
 import glob
 import io
 import os
+import pprint
 import re
 import sys
 from fnmatch import fnmatch
@@ -49,8 +50,8 @@ assert kReIgnoreDirs.search('/apple/.git/orange')
 assert kReIgnoreFiles.search('/apple.pyc')
 
 dictionaryList = glob.glob(os.path.join(ciEditDir, 'app/dictionary.*.words'))
-dictionaryList = [i[15:-6] for i in dictionaryList]
-print(dictionaryList)
+dictionaryList = [os.path.basename(i)[11:-6] for i in dictionaryList]
+print(pprint.pprint(dictionaryList))
 pathPrefs = []
 dictionary = app.spelling.Dictionary(dictionaryList, pathPrefs)
 assert dictionary.isCorrect(u"has", 'cpp')
@@ -98,4 +99,4 @@ elif os.path.isdir(root):
 else:
     print("root is not a file or directory")
 
-print("end")
+print("---- end ----")

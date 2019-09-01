@@ -26,13 +26,6 @@ import unittest
 import app.parser
 import app.prefs
 
-performance1 = u'''
-import app.parser
-path = 'app/actions.py'
-data = open(path).read()
-grammar = self.prefs.getGrammar(path)
-'''
-
 
 class ParserTestCases(unittest.TestCase):
 
@@ -143,6 +136,109 @@ fn main { }
         self.assertEqual(
             self.parser.grammarAt(4, 7), self.prefs.grammars[u'rs'])
 
+    def test_parse_tabs(self):
+        test = u"""\t<tab
+\t <tab+space
+ \t<space+tab
+\ta<
+a\t<
+some text.>\t<
+\t\t<2tabs
+line\twith\ttabs
+ends with tab>\t
+\t
+"""
+        self.prefs = app.prefs.Prefs()
+        p = self.parser
+        self.parser.parse(None, self.prefs, test, self.prefs.grammars[u'rs'], 0,
+                          99999)
+        if 0:
+            print("")
+            for i,t in enumerate(test.splitlines()):
+                print("{}: {}".format(i, repr(t)))
+            p.debugLog(print, test)
+
+        self.assertEqual(p.rowCount(), 11)
+
+        self.assertEqual(p.rowText(0), u"\t<tab")
+        self.assertEqual(p.rowText(1), u"\t <tab+space")
+        self.assertEqual(p.rowText(2), u" \t<space+tab")
+        self.assertEqual(p.rowText(3), u"\ta<")
+        self.assertEqual(p.rowText(4), u"a\t<")
+        self.assertEqual(p.rowText(5), u"some text.>\t<")
+        self.assertEqual(p.rowText(6), u"\t\t<2tabs")
+        self.assertEqual(p.rowText(7), u"line\twith\ttabs")
+        self.assertEqual(p.rowText(8), u"ends with tab>\t")
+        self.assertEqual(p.rowText(9), u"\t")
+
+        self.assertEqual(p.rowTextAndWidth(0), (u"\t<tab", 12))
+        self.assertEqual(p.rowTextAndWidth(1), (u"\t <tab+space", 19))
+        self.assertEqual(p.rowTextAndWidth(2), (u" \t<space+tab", 18))
+        self.assertEqual(p.rowTextAndWidth(3), (u"\ta<", 10))
+        self.assertEqual(p.rowTextAndWidth(4), (u"a\t<", 9))
+        self.assertEqual(p.rowTextAndWidth(5), (u"some text.>\t<", 17))
+        self.assertEqual(p.rowTextAndWidth(6), (u"\t\t<2tabs", 22))
+        self.assertEqual(p.rowTextAndWidth(7), (u"line\twith\ttabs", 20))
+        self.assertEqual(p.rowTextAndWidth(8), (u"ends with tab>\t", 16))
+        self.assertEqual(p.rowTextAndWidth(9), (u"\t", 8))
+
+        self.assertEqual(p.rowWidth(0), 12)
+        self.assertEqual(p.rowWidth(1), 19)
+        self.assertEqual(p.rowWidth(2), 18)
+        self.assertEqual(p.rowWidth(3), 10)
+        self.assertEqual(p.rowWidth(4), 9)
+        self.assertEqual(p.rowWidth(5), 17)
+        self.assertEqual(p.rowWidth(6), 22)
+        self.assertEqual(p.rowWidth(7), 20)
+        self.assertEqual(p.rowWidth(8), 16)
+        self.assertEqual(p.rowWidth(9), 8)
+
+        self.assertEqual(p.grammarIndexFromRowCol(0, 0), 1)
+        self.assertEqual(p.grammarIndexFromRowCol(0, 7), 1)
+        self.assertEqual(p.grammarIndexFromRowCol(0, 8), 2)
+        self.assertEqual(p.grammarIndexFromRowCol(1, 0), 1)
+
+        #self.assertEqual(p.grammarAt(0, 0), 0)
+
+
+        self.assertEqual(p.nextCharRowCol(999999, 0), None)
+        # Test u"\t<tab".
+        self.assertEqual(p.nextCharRowCol(0, 0), (0, 8))
+        self.assertEqual(p.nextCharRowCol(0, 1), (0, 7))
+        self.assertEqual(p.nextCharRowCol(0, 7), (0, 1))
+        self.assertEqual(p.nextCharRowCol(0, 8), (0, 1))
+        self.assertEqual(p.nextCharRowCol(0, 11), (0, 1))
+        self.assertEqual(p.nextCharRowCol(0, 12), (1, -12))
+        # Test u"\t\t<2tabs".
+        self.assertEqual(p.nextCharRowCol(6, 0), (0, 8))
+        self.assertEqual(p.nextCharRowCol(6, 8), (0, 8))
+        self.assertEqual(p.nextCharRowCol(6, 16), (0, 1))
+        self.assertEqual(p.nextCharRowCol(6, 22), (1, -22))
+        # Test u"\t".
+        self.assertEqual(p.nextCharRowCol(9, 0), (0, 8))
+        self.assertEqual(p.nextCharRowCol(9, 8), (1, -8))
+        self.assertEqual(p.nextCharRowCol(10, 0), None)
+
+        # Test u"\t<tab".
+        self.assertEqual(p.priorCharRowCol(0, 0), None)
+        self.assertEqual(p.priorCharRowCol(0, 1), (0, -1))
+        self.assertEqual(p.priorCharRowCol(0, 7), (0, -7))
+        # Test u"\t\t<2tabs".
+        self.assertEqual(p.priorCharRowCol(6, 1), (0, -1))
+        self.assertEqual(p.priorCharRowCol(6, 5), (0, -5))
+        self.assertEqual(p.priorCharRowCol(6, 8), (0, -8))
+        self.assertEqual(p.priorCharRowCol(6, 9), (0, -1))
+        self.assertEqual(p.priorCharRowCol(6, 15), (0, -7))
+        self.assertEqual(p.priorCharRowCol(6, 16), (0, -8))
+        self.assertEqual(p.priorCharRowCol(6, 17), (0, -1))
+        self.assertEqual(p.priorCharRowCol(6, 18), (0, -1))
+        self.assertEqual(p.priorCharRowCol(6, 19), (0, -1))
+        self.assertEqual(p.priorCharRowCol(6, 20), (0, -1))
+        # Test u"\t".
+        self.assertEqual(p.priorCharRowCol(9, 1), (0, -1))
+        self.assertEqual(p.priorCharRowCol(9, 5), (0, -5))
+        self.assertEqual(p.priorCharRowCol(9, 8), (0, -8))
+
     if 0:
 
         def test_profile_parse(self):
@@ -150,7 +246,8 @@ fn main { }
             parser = app.parser.Parser()
             path = u'app/actions.py'
             data = io.open(path).read()
-            grammar = self.prefs.getGrammar(path)
+            fileType = self.prefs.getFileType(path)
+            grammar = self.prefs.getGrammar(fileType)
 
             profile.enable()
             parser.parse(data, grammar, 0, sys.maxsize)

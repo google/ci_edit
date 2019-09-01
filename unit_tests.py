@@ -44,6 +44,7 @@ import app.unit_test_application
 import app.unit_test_automatic_column_adjustment
 import app.unit_test_bookmarks
 import app.unit_test_brace_matching
+import app.unit_test_buffer_file
 import app.unit_test_copy_paste
 import app.unit_test_curses_util
 import app.unit_test_execute_prompt
@@ -70,6 +71,8 @@ TESTS = {
     app.unit_test_actions.GrammarDeterminationTestCases,
     'actions_mouse':
     app.unit_test_actions.MouseTestCases,
+    'actions_selection':
+    app.unit_test_actions.SelectionTestCases,
     'actions_text_indent':
     app.unit_test_actions.TextIndentTestCases,
     'actions_text_insert':
@@ -82,6 +85,8 @@ TESTS = {
     app.unit_test_bookmarks.BookmarkTestCases,
     'brace_matching':
     app.unit_test_brace_matching.BraceMatchingTestCases,
+    'buffer_file':
+    app.unit_test_buffer_file.pathRowColumnTestCases,
     'copy_paste':
     app.unit_test_copy_paste.CopyPasteTestCases,
     'curses_util':

@@ -347,6 +347,8 @@ class Mutator(app.selectable.Selectable):
         Push a change onto the end of the redoChain. Call redo() to enact the
         change.
         """
+        if app.config.strict_debug:
+            assert isinstance(change, tuple), change
         if self.debugRedo:
             app.log.info('redoAddChange', change)
         # Handle new trivial actions, which are defined as standalone cursor

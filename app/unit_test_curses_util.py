@@ -88,8 +88,32 @@ class CursesUtilTestCases(unittest.TestCase):
         self.assertEqual(2, app.curses_util.columnToIndex(2, u"test"))
         self.assertEqual(3, app.curses_util.columnToIndex(3, u"test"))
         # Test past the length of the string.
-        self.assertEqual(3, app.curses_util.columnToIndex(4, u"test"))
-        self.assertEqual(3, app.curses_util.columnToIndex(8, u"test"))
+        self.assertIs(None, app.curses_util.columnToIndex(4, u"test"))
+        self.assertIs(None, app.curses_util.columnToIndex(8, u"test"))
+
+        self.assertEqual(0, app.curses_util.columnToIndex(0, u"\ttest\ttabs"))
+        self.assertEqual(0, app.curses_util.columnToIndex(1, u"\ttest\ttabs"))
+        self.assertEqual(0, app.curses_util.columnToIndex(2, u"\ttest\ttabs"))
+        self.assertEqual(0, app.curses_util.columnToIndex(3, u"\ttest\ttabs"))
+        self.assertEqual(0, app.curses_util.columnToIndex(4, u"\ttest\ttabs"))
+        self.assertEqual(0, app.curses_util.columnToIndex(5, u"\ttest\ttabs"))
+        self.assertEqual(0, app.curses_util.columnToIndex(6, u"\ttest\ttabs"))
+        self.assertEqual(0, app.curses_util.columnToIndex(7, u"\ttest\ttabs"))
+        self.assertEqual(1, app.curses_util.columnToIndex(8, u"\ttest\ttabs"))
+        self.assertEqual(2, app.curses_util.columnToIndex(9, u"\ttest\ttabs"))
+        self.assertEqual(3, app.curses_util.columnToIndex(10, u"\ttest\ttabs"))
+        self.assertEqual(4, app.curses_util.columnToIndex(11, u"\ttest\ttabs"))
+        self.assertEqual(5, app.curses_util.columnToIndex(12, u"\ttest\ttabs"))
+        self.assertEqual(5, app.curses_util.columnToIndex(13, u"\ttest\ttabs"))
+        self.assertEqual(5, app.curses_util.columnToIndex(14, u"\ttest\ttabs"))
+        self.assertEqual(5, app.curses_util.columnToIndex(15, u"\ttest\ttabs"))
+        self.assertEqual(6, app.curses_util.columnToIndex(16, u"\ttest\ttabs"))
+        self.assertEqual(7, app.curses_util.columnToIndex(17, u"\ttest\ttabs"))
+        self.assertEqual(8, app.curses_util.columnToIndex(18, u"\ttest\ttabs"))
+        # Test past the length of the string.
+        self.assertIs(None, app.curses_util.columnToIndex(21, u"\ttest\ttabs"))
+        self.assertIs(None, app.curses_util.columnToIndex(22, u"\ttest\ttabs"))
+        self.assertIs(None, app.curses_util.columnToIndex(999, u"\ttest\ttabs"))
 
         self.assertEqual(0, app.curses_util.columnToIndex(0, u"こんにちは"))
         self.assertEqual(0, app.curses_util.columnToIndex(1, u"こんにちは"))
@@ -98,33 +122,88 @@ class CursesUtilTestCases(unittest.TestCase):
         self.assertEqual(2, app.curses_util.columnToIndex(4, u"こんにちは"))
         self.assertEqual(4, app.curses_util.columnToIndex(8, u"こんにちは"))
         self.assertEqual(4, app.curses_util.columnToIndex(9, u"こんにちは"))
-
         # Test past the length of the string.
-        self.assertEqual(4, app.curses_util.columnToIndex(10, u"こんにちは"))
-        self.assertEqual(4, app.curses_util.columnToIndex(11, u"こんにちは"))
-        self.assertEqual(4, app.curses_util.columnToIndex(12, u"こんにちは"))
+        self.assertIs(None, app.curses_util.columnToIndex(10, u"こんにちは"))
+        self.assertIs(None, app.curses_util.columnToIndex(11, u"こんにちは"))
+        self.assertIs(None, app.curses_util.columnToIndex(12, u"こんにちは"))
+
+
+    def test_charAtColumn(self):
+        cu = app.curses_util
+        self.assertEqual(u"t", cu.charAtColumn(0, u"test"))
+        self.assertEqual(u"e", cu.charAtColumn(1, u"test"))
+        self.assertEqual(u"s", cu.charAtColumn(2, u"test"))
+        self.assertEqual(u"t", cu.charAtColumn(3, u"test"))
+        # Test past the length of the string.
+        self.assertIs(None, cu.charAtColumn(4, u"test"))
+        self.assertIs(None, cu.charAtColumn(8, u"test"))
+
+        self.assertEqual(u"\t", cu.charAtColumn(0, u"\ttest\ttabs"))
+        self.assertEqual(u"\t", cu.charAtColumn(1, u"\ttest\ttabs"))
+        self.assertEqual(u"\t", cu.charAtColumn(2, u"\ttest\ttabs"))
+        self.assertEqual(u"\t", cu.charAtColumn(3, u"\ttest\ttabs"))
+        self.assertEqual(u"\t", cu.charAtColumn(4, u"\ttest\ttabs"))
+        self.assertEqual(u"\t", cu.charAtColumn(5, u"\ttest\ttabs"))
+        self.assertEqual(u"\t", cu.charAtColumn(6, u"\ttest\ttabs"))
+        self.assertEqual(u"\t", cu.charAtColumn(7, u"\ttest\ttabs"))
+        self.assertEqual(u"t", cu.charAtColumn(8, u"\ttest\ttabs"))
+        self.assertEqual(u"e", cu.charAtColumn(9, u"\ttest\ttabs"))
+        self.assertEqual(u"s", cu.charAtColumn(10, u"\ttest\ttabs"))
+        self.assertEqual(u"t", cu.charAtColumn(11, u"\ttest\ttabs"))
+        self.assertEqual(u"\t", cu.charAtColumn(12, u"\ttest\ttabs"))
+        self.assertEqual(u"\t", cu.charAtColumn(13, u"\ttest\ttabs"))
+        self.assertEqual(u"\t", cu.charAtColumn(14, u"\ttest\ttabs"))
+        self.assertEqual(u"\t", cu.charAtColumn(15, u"\ttest\ttabs"))
+        self.assertEqual(u"t", cu.charAtColumn(16, u"\ttest\ttabs"))
+        self.assertEqual(u"a", cu.charAtColumn(17, u"\ttest\ttabs"))
+        self.assertEqual(u"b", cu.charAtColumn(18, u"\ttest\ttabs"))
+        self.assertEqual(u"s", cu.charAtColumn(19, u"\ttest\ttabs"))
+        # Test past the length of the string.
+        self.assertIs(None, cu.charAtColumn(20, u"\ttest\ttabs"))
+        self.assertIs(None, cu.charAtColumn(21, u"\ttest\ttabs"))
+        self.assertIs(None, cu.charAtColumn(999, u"\ttest\ttabs"))
+
+        self.assertEqual(u"こ", cu.charAtColumn(0, u"こんにちは"))
+        self.assertEqual(u"こ", cu.charAtColumn(1, u"こんにちは"))
+        self.assertEqual(u"ん", cu.charAtColumn(2, u"こんにちは"))
+        self.assertEqual(u"ん", cu.charAtColumn(3, u"こんにちは"))
+        self.assertEqual(u"に", cu.charAtColumn(4, u"こんにちは"))
+        self.assertEqual(u"は", cu.charAtColumn(8, u"こんにちは"))
+        self.assertEqual(u"は", cu.charAtColumn(9, u"こんにちは"))
+        # Test past the length of the string.
+        self.assertIs(None, cu.charAtColumn(10, u"こんにちは"))
+        self.assertIs(None, cu.charAtColumn(11, u"こんにちは"))
+        self.assertIs(None, cu.charAtColumn(12, u"こんにちは"))
 
     def test_fit_to_rendered_width(self):
-        self.assertEqual(0, app.curses_util.fitToRenderedWidth(0, u"test"))
-        self.assertEqual(1, app.curses_util.fitToRenderedWidth(1, u"test"))
-        self.assertEqual(2, app.curses_util.fitToRenderedWidth(2, u"test"))
-        self.assertEqual(3, app.curses_util.fitToRenderedWidth(3, u"test"))
-        self.assertEqual(4, app.curses_util.fitToRenderedWidth(4, u"test"))
-        # Test past the length of the string.
-        self.assertEqual(4, app.curses_util.fitToRenderedWidth(8, u"test"))
+        fitToRenderedWidth = app.curses_util.fitToRenderedWidth
 
-        self.assertEqual(0, app.curses_util.fitToRenderedWidth(0, u"こんにちは"))
-        self.assertEqual(0, app.curses_util.fitToRenderedWidth(1, u"こんにちは"))
-        self.assertEqual(1, app.curses_util.fitToRenderedWidth(2, u"こんにちは"))
-        self.assertEqual(1, app.curses_util.fitToRenderedWidth(3, u"こんにちは"))
-        self.assertEqual(2, app.curses_util.fitToRenderedWidth(4, u"こんにちは"))
-        self.assertEqual(4, app.curses_util.fitToRenderedWidth(8, u"こんにちは"))
-        self.assertEqual(4, app.curses_util.fitToRenderedWidth(9, u"こんにちは"))
-        self.assertEqual(5, app.curses_util.fitToRenderedWidth(10, u"こんにちは"))
+        self.assertEqual(0, fitToRenderedWidth(0, 0, u"test"))
+        self.assertEqual(1, fitToRenderedWidth(0, 1, u"test"))
+        self.assertEqual(2, fitToRenderedWidth(0, 2, u"test"))
+        self.assertEqual(3, fitToRenderedWidth(0, 3, u"test"))
+        self.assertEqual(4, fitToRenderedWidth(0, 4, u"test"))
+        # Test past the length of the string.
+        self.assertEqual(4, fitToRenderedWidth(0, 8, u"test"))
+
+        # Test double wide characters (theses characters render as two cells in
+        # a fixed width font).
+        self.assertEqual(0, fitToRenderedWidth(0, 0, u"こんにちは"))
+        self.assertEqual(0, fitToRenderedWidth(0, 1, u"こんにちは"))
+        self.assertEqual(1, fitToRenderedWidth(0, 2, u"こんにちは"))
+        self.assertEqual(1, fitToRenderedWidth(0, 3, u"こんにちは"))
+        self.assertEqual(2, fitToRenderedWidth(0, 4, u"こんにちは"))
+        self.assertEqual(4, fitToRenderedWidth(0, 8, u"こんにちは"))
+        self.assertEqual(4, fitToRenderedWidth(0, 9, u"こんにちは"))
+        self.assertEqual(5, fitToRenderedWidth(0, 10, u"こんにちは"))
 
         # Test past the length of the string.
-        self.assertEqual(5, app.curses_util.fitToRenderedWidth(11, u"こんにちは"))
-        self.assertEqual(5, app.curses_util.fitToRenderedWidth(12, u"こんにちは"))
+        self.assertEqual(5, fitToRenderedWidth(0, 11, u"こんにちは"))
+        self.assertEqual(5, fitToRenderedWidth(0, 12, u"こんにちは"))
+
+        # Test tabs.
+        self.assertEqual(1, fitToRenderedWidth(0, 8, u"\t"))
+        self.assertEqual(0, fitToRenderedWidth(0, 7, u"\t"))
 
     def test_rendered_sub_str(self):
         self.assertEqual(u"test", app.curses_util.renderedSubStr(u"test", 0))
@@ -176,9 +255,42 @@ class CursesUtilTestCases(unittest.TestCase):
         self.assertEqual(u"", app.curses_util.renderedSubStr(u"", 1, 1))
         self.assertEqual(u"test", app.curses_util.renderedSubStr(u"test", 0, 8))
 
+        # Test with tabs.
+        self.assertEqual(u"   ", app.curses_util.renderedSubStr(
+            u"\tこんにちは", 0, 3))
+        self.assertEqual(u"     こ",
+                         app.curses_util.renderedSubStr(u"\tこんにちは", 3, 10))
+        self.assertEqual(u"        こん",
+                         app.curses_util.renderedSubStr(u"\tこんにちは", 0, 12))
+        self.assertEqual(u"        <tab",
+                         app.curses_util.renderedSubStr(u"\t<tab", 0, None))
+        self.assertEqual(
+            u"         <tab+space",
+            app.curses_util.renderedSubStr(u"\t <tab+space", 0, None))
+        self.assertEqual(
+            u"        <space+tab",
+            app.curses_util.renderedSubStr(u" \t<space+tab", 0, None))
+        self.assertEqual(u"a       <",
+                         app.curses_util.renderedSubStr(u"a\t<", 0, None))
+        self.assertEqual(
+            u"some text.>     <",
+            app.curses_util.renderedSubStr(u"some text.>\t<", 0, None))
+        self.assertEqual(u"                <2tabs",
+                         app.curses_util.renderedSubStr(u"\t\t<2tabs", 0, None))
+        self.assertEqual(
+            u"line    with    tabs",
+            app.curses_util.renderedSubStr(u"line\twith\ttabs", 0, None))
+        self.assertEqual(
+            u"ends with tab>  ",
+            app.curses_util.renderedSubStr(u"ends with tab>\t", 0, None))
+
     def test_rendered_width(self):
         self.assertEqual(0, app.curses_util.columnWidth(u""))
         self.assertEqual(4, app.curses_util.columnWidth(u"test"))
+        self.assertEqual(8, app.curses_util.columnWidth(u"\t"))
+        self.assertEqual(9, app.curses_util.columnWidth(u"\ta"))
+        self.assertEqual(16, app.curses_util.columnWidth(u"\ta\t"))
+        self.assertEqual(8, app.curses_util.columnWidth(u"i\t"))
 
         self.assertEqual(2, app.curses_util.columnWidth(u"こ"))
         self.assertEqual(4, app.curses_util.columnWidth(u"こん"))
@@ -190,3 +302,72 @@ class CursesUtilTestCases(unittest.TestCase):
         self.assertEqual(3, app.curses_util.columnWidth(u"こc"))
         self.assertEqual(4, app.curses_util.columnWidth(u"aこc"))
         self.assertEqual(7, app.curses_util.columnWidth(u"aこbんc"))
+
+    def test_char_width(self):
+        self.assertEqual(0, app.curses_util.charWidth(u"", 0))
+        self.assertEqual(8, app.curses_util.charWidth(u"\t", 0))
+        self.assertEqual(1, app.curses_util.charWidth(u" ", 0))
+        self.assertEqual(7, app.curses_util.charWidth(u"\t", 1))
+        self.assertEqual(6, app.curses_util.charWidth(u"\t", 2))
+        self.assertEqual(2, app.curses_util.charWidth(u"\t", 6))
+        self.assertEqual(1, app.curses_util.charWidth(u"\t", 7))
+        self.assertEqual(0, app.curses_util.charWidth(u"", 8))
+        self.assertEqual(8, app.curses_util.charWidth(u"\t", 8))
+        self.assertEqual(7, app.curses_util.charWidth(u"\t", 9))
+        self.assertEqual(2, app.curses_util.charWidth(u"こ", 0))
+
+    def test_floor_col(self):
+        test = u"""\tfive\t"""
+        floor_col = app.curses_util.floorCol
+        self.assertEqual(0, floor_col(0, test))
+        self.assertEqual(0, floor_col(1, test))
+        self.assertEqual(0, floor_col(2, test))
+        self.assertEqual(0, floor_col(3, test))
+        self.assertEqual(0, floor_col(4, test))
+        self.assertEqual(0, floor_col(5, test))
+        self.assertEqual(0, floor_col(6, test))
+        self.assertEqual(0, floor_col(7, test))
+        self.assertEqual(8, floor_col(8, test))
+        self.assertEqual(9, floor_col(9, test))
+        self.assertEqual(10, floor_col(10, test))
+        self.assertEqual(11, floor_col(11, test))
+        self.assertEqual(12, floor_col(12, test))
+        self.assertEqual(12, floor_col(13, test))
+        self.assertEqual(12, floor_col(14, test))
+        self.assertEqual(12, floor_col(15, test))
+        self.assertEqual(16, floor_col(16, test))
+        self.assertEqual(16, floor_col(17, test))
+        self.assertEqual(16, floor_col(99, test))
+
+        test2 = u"""more testing"""
+        self.assertEqual(0, floor_col(0, test2))
+        self.assertEqual(2, floor_col(2, test2))
+        self.assertEqual(12, floor_col(99, test2))
+
+    def test_prior_char_col(self):
+        test = u"""\tfive\t"""
+        prior_char_col = app.curses_util.priorCharCol
+        self.assertEqual(None, prior_char_col(0, test))
+        self.assertEqual(0, prior_char_col(1, test))
+        self.assertEqual(0, prior_char_col(2, test))
+        self.assertEqual(0, prior_char_col(3, test))
+        self.assertEqual(0, prior_char_col(4, test))
+        self.assertEqual(0, prior_char_col(5, test))
+        self.assertEqual(0, prior_char_col(6, test))
+        self.assertEqual(0, prior_char_col(7, test))
+        self.assertEqual(0, prior_char_col(8, test))
+        self.assertEqual(8, prior_char_col(9, test))
+        self.assertEqual(9, prior_char_col(10, test))
+        self.assertEqual(10, prior_char_col(11, test))
+        self.assertEqual(11, prior_char_col(12, test))
+        self.assertEqual(12, prior_char_col(13, test))
+        self.assertEqual(12, prior_char_col(14, test))
+        self.assertEqual(12, prior_char_col(15, test))
+        self.assertEqual(12, prior_char_col(16, test))
+        self.assertEqual(None, prior_char_col(17, test))
+
+        test2 = u"""more testing"""
+        self.assertEqual(None, prior_char_col(0, test2))
+        self.assertEqual(1, prior_char_col(2, test2))
+        self.assertEqual(11, prior_char_col(12, test2))
+        self.assertEqual(None, prior_char_col(13, test2))

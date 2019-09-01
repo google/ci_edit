@@ -392,10 +392,11 @@ class Actions(app.mutator.Mutator):
         if app.config.strict_debug:
             assert isinstance(toRow, int)
             assert 0 <= toRow < self.parser.rowCount()
-        lineLen = self.parser.rowWidth(toRow)
+        line, lineLen = self.parser.rowTextAndWidth(toRow)
         if self.goalCol <= lineLen:
-            return self.goalCol - self.penCol
-        return lineLen - self.penCol
+            return app.curses_util.floorCol(self.goalCol, line) - self.penCol
+        else:
+            return lineLen - self.penCol
 
     def cursorDown(self):
         self.selectionNone()
@@ -479,32 +480,22 @@ class Actions(app.mutator.Mutator):
                     0, self.view.scrollCol - self.view.cols // 4)
 
     def cursorMoveLeft(self):
-        colWidth = 1
-        line, lineColWidth = self.parser.rowTextAndWidth(self.penRow)
-        if lineColWidth > 0:
-            index = app.curses_util.columnToIndex(self.penCol - 1, line)
-            colWidth = app.curses_util.columnWidth(line[index])
-        if self.penCol - colWidth >= 0:
-            self.cursorMove(0, -colWidth)
-        elif self.penRow > 0:
-            self.cursorMove(-1, self.parser.rowWidth(self.penRow - 1))
-        else:
+        if not self.parser.rowCount():
+            return
+        rowCol = self.parser.priorCharRowCol(self.penRow, self.penCol)
+        if rowCol is None:
             self.setMessage(u'Top of file')
+        else:
+            self.cursorMove(*rowCol)
 
     def cursorMoveRight(self):
         if not self.parser.rowCount():
             return
-        colWidth = 1
-        line, lineColWidth = self.parser.rowTextAndWidth(self.penRow)
-        if lineColWidth > 0:
-            index = app.curses_util.columnToIndex(self.penCol, line)
-            colWidth = app.curses_util.columnWidth(line[index])
-        if self.penCol + colWidth <= lineColWidth:
-            self.cursorMove(0, colWidth)
-        elif self.penRow + 1 < self.parser.rowCount():
-            self.cursorMove(1, -self.penCol)
-        else:
+        rowCol = self.parser.nextCharRowCol(self.penRow, self.penCol)
+        if rowCol is None:
             self.setMessage(u'Bottom of file')
+        else:
+            self.cursorMove(*rowCol)
 
     def unused_____cursorMoveUp(self):
         if self.penRow <= 0:
@@ -532,11 +523,7 @@ class Actions(app.mutator.Mutator):
             self.setMessage(u'Top of file')
             self.cursorMove(0, -self.penCol)
         else:
-            lineLen = self.parser.rowWidth(self.penRow - 1)
-            if self.goalCol <= lineLen:
-                self.cursorMove(-1, self.goalCol - self.penCol)
-            else:
-                self.cursorMove(-1, lineLen - self.penCol)
+            self.cursorMove(-1, self.cursorColDelta(self.penRow - 1))
         self.goalCol = savedGoal
         self.adjustHorizontalScroll()
 
@@ -571,6 +558,7 @@ class Actions(app.mutator.Mutator):
             return self.getCursorMove(0, pos - self.penCol)
         elif self.penRow > 0:
             return self.getCursorMove(-1, self.parser.rowWidth(self.penRow - 1))
+        return self.getCursorMove(0, 0)
 
     def doCursorMoveLeftTo(self, boundary):
         change = self.getCursorMoveLeftTo(boundary)
@@ -970,7 +958,8 @@ class Actions(app.mutator.Mutator):
         if self.fileExtension != extension:
             self.fileExtension = extension
             self.upperChangedRow = 0
-        return self.program.prefs.getGrammar(name + extension)
+        self.fileType = self.program.prefs.getFileType(name + extension)
+        return self.program.prefs.getGrammar(self.fileType)
 
     def determineFileType(self):
         self.rootGrammar = self._determineRootGrammar(
@@ -1130,7 +1119,7 @@ class Actions(app.mutator.Mutator):
         return horizontally and vertically
 
     def fenceRedoChain(self):
-        self.redoAddChange((u'f'))
+        self.redoAddChange((u'f',))
         self.redo()
 
     def fileWrite(self):
@@ -1210,6 +1199,11 @@ class Actions(app.mutator.Mutator):
         self.determineFileType()
 
     def selectText(self, row, col, length, mode):
+        if app.config.strict_debug:
+            assert isinstance(row, int)
+            assert isinstance(col, int)
+            assert isinstance(length, int)
+            assert isinstance(mode, int)
         row = max(0, min(row, self.parser.rowCount() - 1))
         rowWidth = self.parser.rowWidth(row)
         col = max(0, min(col, rowWidth))

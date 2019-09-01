@@ -96,7 +96,7 @@ class Prefs():
             'startup': self.startup,
         }[name]
 
-    def getGrammar(self, filePath):
+    def getFileType(self, filePath):
         if filePath is None:
             return self.grammars.get('text')
         name = os.path.split(filePath)[1]
@@ -104,6 +104,16 @@ class Prefs():
         if fileType is None:
             fileExtension = os.path.splitext(name)[1]
             fileType = self.extensions.get(fileExtension, 'text')
+        return fileType
+
+    def tabsToSpaces(self, fileType):
+        prefs = app.default_prefs.prefs.get(u"fileType", {})
+        if fileType is None or prefs is None:
+            return False
+        file_prefs = prefs.get(fileType)
+        return file_prefs and file_prefs.get(u"tabToSpaces")
+
+    def getGrammar(self, fileType):
         return self.grammars.get(fileType)
 
     def save(self, category, label, value):
@@ -187,6 +197,8 @@ class Prefs():
                 markers.append(r'\b' + types + r'\b')
             # |Special| markers start after |types| markers.
             markers += v.get('special', [])
+            # Variable width characters are at index [-3] in markers.
+            markers.append(r'\t+')
             # Double wide characters are at index [-2] in markers.
             markers.append(u'[\u3000-\uffff]+')
             # Carriage return characters are at index [-1] in markers.

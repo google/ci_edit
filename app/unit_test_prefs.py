@@ -28,9 +28,31 @@ class PrefsTestCases(app.fake_curses_testing.FakeCursesTestCase):
     def setUp(self):
         self.longMessage = True
         app.fake_curses_testing.FakeCursesTestCase.setUp(self)
+        self.prefs = app.prefs.Prefs()
 
     def test_default_prefs(self):
         self.runWithFakeInputs([
             self.prefCheck(u'editor', u'saveUndo', True),
             CTRL_Q,
         ])
+
+    def test_get_file_type(self):
+        getFileType = self.prefs.getFileType
+        self.assertEqual(getFileType(""), "words")
+        self.assertEqual(getFileType("a.py"), "py")
+        self.assertEqual(getFileType("a.cc"), "cpp")
+        self.assertEqual(getFileType("a.c"), "c")
+        self.assertEqual(getFileType("a.h"), "cpp")
+        self.assertEqual(getFileType("Makefile"), "make")
+        self.assertEqual(getFileType("BUILD"), "bazel")
+        self.assertEqual(getFileType("build"), "words")
+        self.assertEqual(getFileType("BUILD.gn"), "gn")
+        self.assertEqual(getFileType("a.md"), "md")
+
+    def test_tabs_to_spaces(self):
+        tabsToSpaces = self.prefs.tabsToSpaces
+        self.assertEqual(tabsToSpaces("words"), True)
+        self.assertEqual(tabsToSpaces("make"), False)
+        self.assertEqual(tabsToSpaces("cpp"), True)
+        self.assertEqual(tabsToSpaces(None), False)
+        self.assertEqual(tabsToSpaces("foo"), None)
