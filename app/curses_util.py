@@ -421,6 +421,9 @@ def floorCol(column, line):
         floorColumn += width
     return floorColumn
 
+def isDoubleWidth(ch):
+    return ch > MIN_DOUBLE_WIDE_CHARACTER
+
 def priorCharCol(column, line):
     """Return the start column of the character before |column|.
     """
