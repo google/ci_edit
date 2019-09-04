@@ -87,6 +87,34 @@ class Parser:
         self.rows = [0]  # Row parserNodes index.
         app.log.parser('__init__')
 
+    def dataOffset(self, row, col):
+        if row >= len(self.rows):
+            return None
+        rowIndex = self.rows[row]
+        node = self.parserNodes[rowIndex]
+        nextLineNode = self.parserNodes[self.rows[row + 1]]
+        if col > nextLineNode[kVisual] - node[kVisual]:
+            # The requested column is past the end of the line.
+            return None
+        subRowIndex = self.grammarIndexFromRowCol(row, col)
+        subnode = self.parserNodes[rowIndex + subRowIndex]
+        remainingCols = col - (subnode[kVisual] - node[kVisual])
+        offset = subnode[kBegin]
+        if self.data[offset] == u"\t":
+            tabWidth = 8
+            flooredTabGrammarCol = (
+                    (subnode[kVisual] - node[kVisual]) // tabWidth * tabWidth)
+            offset += (col - flooredTabGrammarCol) // tabWidth
+        elif app.curses_util.isDoubleWidth(self.data[offset]):
+            charWidth = 2
+            offset += remainingCols // charWidth
+        else:
+            offset += remainingCols
+        return offset
+
+    def defaultGrammar(self):
+        return self.emptyNode.grammar
+
     def grammarIndexFromRowCol(self, row, col):
         """
         Returns:

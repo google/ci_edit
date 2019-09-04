@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright 2016 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -147,6 +148,7 @@ some text.>\t<
 line\twith\ttabs
 ends with tab>\t
 \t
+parse\t\t\tz
 """
         self.prefs = app.prefs.Prefs()
         p = self.parser
@@ -158,7 +160,7 @@ ends with tab>\t
                 print("{}: {}".format(i, repr(t)))
             p.debugLog(print, test)
 
-        self.assertEqual(p.rowCount(), 11)
+        self.assertEqual(p.rowCount(), 12)
 
         self.assertEqual(p.rowText(0), u"\t<tab")
         self.assertEqual(p.rowText(1), u"\t <tab+space")
@@ -170,6 +172,8 @@ ends with tab>\t
         self.assertEqual(p.rowText(7), u"line\twith\ttabs")
         self.assertEqual(p.rowText(8), u"ends with tab>\t")
         self.assertEqual(p.rowText(9), u"\t")
+        self.assertEqual(p.rowText(10), u"parse\t\t\tz")
+        self.assertEqual(p.rowText(11), u"")
 
         self.assertEqual(p.rowTextAndWidth(0), (u"\t<tab", 12))
         self.assertEqual(p.rowTextAndWidth(1), (u"\t <tab+space", 19))
@@ -217,7 +221,15 @@ ends with tab>\t
         # Test u"\t".
         self.assertEqual(p.nextCharRowCol(9, 0), (0, 8))
         self.assertEqual(p.nextCharRowCol(9, 8), (1, -8))
-        self.assertEqual(p.nextCharRowCol(10, 0), None)
+        # Test u"parse\t\t\tz".
+        self.assertEqual(p.nextCharRowCol(10, 0), (0, 1))
+        self.assertEqual(p.nextCharRowCol(10, 4), (0, 1))
+        self.assertEqual(p.nextCharRowCol(10, 5), (0, 3))
+        self.assertEqual(p.nextCharRowCol(10, 8), (0, 8))
+        self.assertEqual(p.nextCharRowCol(10, 16), (0, 8))
+        self.assertEqual(p.nextCharRowCol(10, 24), (0, 1))
+        self.assertEqual(p.nextCharRowCol(10, 25), (1, -25))
+        self.assertEqual(p.nextCharRowCol(11, 0), None)
 
         # Test u"\t<tab".
         self.assertEqual(p.priorCharRowCol(0, 0), None)
@@ -238,6 +250,200 @@ ends with tab>\t
         self.assertEqual(p.priorCharRowCol(9, 1), (0, -1))
         self.assertEqual(p.priorCharRowCol(9, 5), (0, -5))
         self.assertEqual(p.priorCharRowCol(9, 8), (0, -8))
+
+        # Test u"\t<tab".
+        self.assertEqual(p.dataOffset(0, 0), 0)
+        self.assertEqual(p.dataOffset(0, 1), 0)
+        self.assertEqual(p.dataOffset(0, 2), 0)
+        self.assertEqual(p.dataOffset(0, 3), 0)
+        self.assertEqual(p.dataOffset(0, 7), 0)
+        self.assertEqual(p.dataOffset(0, 8), 1)
+        self.assertEqual(p.dataOffset(0, 9), 2)
+        self.assertEqual(p.dataOffset(0, 12), 5)
+        self.assertEqual(p.dataOffset(0, 13), 6)
+        self.assertEqual(p.dataOffset(0, 99), None)
+        # Test u"\t <tab+space".
+        self.assertEqual(p.dataOffset(1, 0), 6)
+        self.assertEqual(p.dataOffset(1, 1), 6)
+        self.assertEqual(p.dataOffset(1, 2), 6)
+        self.assertEqual(p.dataOffset(1, 3), 6)
+        self.assertEqual(p.dataOffset(1, 7), 6)
+        self.assertEqual(p.dataOffset(1, 8), 7)
+        self.assertEqual(p.dataOffset(1, 12), 11)
+        self.assertEqual(p.dataOffset(1, 14), 13)
+        self.assertEqual(p.dataOffset(1, 19), 18)
+        self.assertEqual(p.dataOffset(1, 29), None)
+        # Test u" \t<space+tab".
+        self.assertEqual(p.dataOffset(2, 0), 19)
+        self.assertEqual(p.dataOffset(2, 1), 20)
+        self.assertEqual(p.dataOffset(2, 2), 20)
+        self.assertEqual(p.dataOffset(2, 12), 25)
+        # Test u"\ta<".
+        # Test u"a\t<".
+        self.assertEqual(p.dataOffset(4, 0), 36)
+        self.assertEqual(p.dataOffset(4, 1), 37)
+        self.assertEqual(p.dataOffset(4, 2), 37)
+        # Test u"some text.>\t<".
+        # Test u"\t\t<2tabs".
+        self.assertEqual(p.dataOffset(6, 0), 54)
+        self.assertEqual(p.dataOffset(6, 7), 54)
+        self.assertEqual(p.dataOffset(6, 8), 55)
+        self.assertEqual(p.dataOffset(6, 15), 55)
+        self.assertEqual(p.dataOffset(6, 16), 56)
+        self.assertEqual(p.dataOffset(6, 17), 57)
+        # Test u"line\twith\ttabs".
+        # Test u"ends with tab>\t".
+        # Test u"\t".
+        # Test u"parse\t\t\tz".
+        self.assertEqual(p.dataOffset(10, 0), 96)
+        self.assertEqual(p.dataOffset(10, 4), 100)
+        self.assertEqual(p.dataOffset(10, 5), 101)
+        self.assertEqual(p.dataOffset(10, 6), 101)
+        self.assertEqual(p.dataOffset(10, 7), 101)
+        self.assertEqual(p.dataOffset(10, 8), 102)
+        self.assertEqual(p.dataOffset(10, 9), 102)
+        self.assertEqual(p.dataOffset(10, 15), 102)
+        self.assertEqual(p.dataOffset(10, 16), 103)
+        self.assertEqual(p.dataOffset(10, 23), 103)
+        self.assertEqual(p.dataOffset(10, 24), 104)
+        self.assertEqual(p.dataOffset(10, 25), 105)
+
+    def test_parse_mixed(self):
+        test = u"""ち\t<tab
+\tち<
+\t<ち
+sちome text.>\t<
+line\tち\ttabs
+\tち
+ち\t\t\tz
+Здравствуйте
+こんにちはtranslate
+"""
+        self.prefs = app.prefs.Prefs()
+        p = self.parser
+        self.parser.parse(None, self.prefs, test, self.prefs.grammars[u'rs'], 0,
+                          99999)
+        if 0:
+            print("")
+            for i,t in enumerate(test.splitlines()):
+                print("{}: {}".format(i, repr(t)))
+            p.debugLog(print, test)
+
+        self.assertEqual(p.rowCount(), 10)
+
+        self.assertEqual(p.rowText(0), u"ち\t<tab")
+        self.assertEqual(p.rowText(1), u"\tち<")
+        self.assertEqual(p.rowText(2), u"\t<ち")
+        self.assertEqual(p.rowText(3), u"sちome text.>\t<")
+        self.assertEqual(p.rowText(4), u"line\tち\ttabs")
+        self.assertEqual(p.rowText(5), u"\tち")
+        self.assertEqual(p.rowText(6), u"ち\t\t\tz")
+        self.assertEqual(p.rowText(7), u"Здравствуйте")
+        self.assertEqual(p.rowText(8), u"こんにちはtranslate")
+        self.assertEqual(p.rowText(9), u"")
+
+        self.assertEqual(p.rowTextAndWidth(0), (u"ち\t<tab", 12))
+        self.assertEqual(p.rowTextAndWidth(1), (u"\tち<", 11))
+        self.assertEqual(p.rowTextAndWidth(2), (u"\t<ち", 11))
+        self.assertEqual(p.rowTextAndWidth(3), (u"sちome text.>\t<", 17))
+        self.assertEqual(p.rowTextAndWidth(4), (u"line\tち\ttabs", 20))
+        self.assertEqual(p.rowTextAndWidth(5), (u"\tち", 10))
+        self.assertEqual(p.rowTextAndWidth(6), (u"ち\t\t\tz", 25))
+        self.assertEqual(p.rowTextAndWidth(7), (u"Здравствуйте", 12))
+        self.assertEqual(p.rowTextAndWidth(8), (u"こんにちはtranslate", 19))
+        self.assertEqual(p.rowTextAndWidth(9), (u"", 0))
+
+        self.assertEqual(p.rowWidth(0), 12)
+        self.assertEqual(p.rowWidth(1), 11)
+        self.assertEqual(p.rowWidth(2), 11)
+        self.assertEqual(p.rowWidth(3), 17)
+        self.assertEqual(p.rowWidth(4), 20)
+        self.assertEqual(p.rowWidth(5), 10)
+        self.assertEqual(p.rowWidth(6), 25)
+        self.assertEqual(p.rowWidth(7), 12)
+        self.assertEqual(p.rowWidth(8), 19)
+        self.assertEqual(p.rowWidth(9), 0)
+
+        self.assertEqual(p.grammarIndexFromRowCol(0, 0), 1)
+        self.assertEqual(p.grammarIndexFromRowCol(0, 7), 2)
+        self.assertEqual(p.grammarIndexFromRowCol(0, 8), 3)
+        self.assertEqual(p.grammarIndexFromRowCol(1, 0), 1)
+
+        self.assertEqual(p.nextCharRowCol(999999, 0), None)
+        # Test u"ち\t<tab".
+        self.assertEqual(p.nextCharRowCol(0, 0), (0, 2))
+        self.assertEqual(p.nextCharRowCol(0, 1), (0, 2))
+        self.assertEqual(p.nextCharRowCol(0, 2), (0, 6))
+        self.assertEqual(p.nextCharRowCol(0, 8), (0, 1))
+        self.assertEqual(p.nextCharRowCol(0, 11), (0, 1))
+        self.assertEqual(p.nextCharRowCol(0, 12), (1, -12))
+        # Test u"ち\t\t\tz".
+        self.assertEqual(p.nextCharRowCol(6, 0), (0, 2))
+        self.assertEqual(p.nextCharRowCol(6, 8), (0, 8))
+        self.assertEqual(p.nextCharRowCol(6, 16), (0, 8))
+        self.assertEqual(p.nextCharRowCol(6, 25), (1, -25))
+        # Test u"".
+        self.assertEqual(p.nextCharRowCol(9, 0), None)
+
+        # Test u"ち\t<tab".
+        self.assertEqual(p.priorCharRowCol(0, 0), None)
+        self.assertEqual(p.priorCharRowCol(0, 1), (0, -1))
+        self.assertEqual(p.priorCharRowCol(0, 2), (0, -2))
+        self.assertEqual(p.priorCharRowCol(0, 3), (0, -1))
+        self.assertEqual(p.priorCharRowCol(0, 7), (0, -5))
+        # Test u"ち\t\t\tz".
+        self.assertEqual(p.priorCharRowCol(6, 1), (0, -1))
+        self.assertEqual(p.priorCharRowCol(6, 5), (0, -3))
+        self.assertEqual(p.priorCharRowCol(6, 8), (0, -6))
+        self.assertEqual(p.priorCharRowCol(6, 9), (0, -1))
+        self.assertEqual(p.priorCharRowCol(6, 15), (0, -7))
+        self.assertEqual(p.priorCharRowCol(6, 16), (0, -8))
+        self.assertEqual(p.priorCharRowCol(6, 17), (0, -1))
+        self.assertEqual(p.priorCharRowCol(6, 18), (0, -2))
+        self.assertEqual(p.priorCharRowCol(6, 19), (0, -3))
+        self.assertEqual(p.priorCharRowCol(6, 20), (0, -4))
+
+        # Test u"ち\t<tab".
+        self.assertEqual(p.dataOffset(0, 0), 0)
+        self.assertEqual(p.dataOffset(0, 1), 0)
+        self.assertEqual(p.dataOffset(0, 2), 1)
+        self.assertEqual(p.dataOffset(0, 3), 1)
+        self.assertEqual(p.dataOffset(0, 7), 1)
+        self.assertEqual(p.dataOffset(0, 8), 2)
+        self.assertEqual(p.dataOffset(0, 9), 3)
+        self.assertEqual(p.dataOffset(0, 12), 6)
+        self.assertEqual(p.dataOffset(0, 13), 7)
+        self.assertEqual(p.dataOffset(0, 99), None)
+        # Test u"\tち<".
+        self.assertEqual(p.dataOffset(1, 0), 7)
+        self.assertEqual(p.dataOffset(1, 1), 7)
+        self.assertEqual(p.dataOffset(1, 2), 7)
+        self.assertEqual(p.dataOffset(1, 3), 7)
+        self.assertEqual(p.dataOffset(1, 7), 7)
+        self.assertEqual(p.dataOffset(1, 8), 8)
+        self.assertEqual(p.dataOffset(1, 12), 10)
+        self.assertEqual(p.dataOffset(1, 14), None)
+        # Test u"\t<ち".
+        self.assertEqual(p.dataOffset(2, 0), 11)
+        self.assertEqual(p.dataOffset(2, 1), 11)
+        self.assertEqual(p.dataOffset(2, 2), 11)
+        self.assertEqual(p.dataOffset(2, 12), 14)
+        # Test u"sちome text.>\t<".
+        # Test u"line\tち\ttabs".
+        self.assertEqual(p.dataOffset(4, 0), 30)
+        self.assertEqual(p.dataOffset(4, 1), 31)
+        self.assertEqual(p.dataOffset(4, 2), 32)
+        # Test u"\tち".
+        # Test u"ち\t\t\tz".
+        self.assertEqual(p.dataOffset(6, 0), 45)
+        self.assertEqual(p.dataOffset(6, 7), 46)
+        self.assertEqual(p.dataOffset(6, 8), 47)
+        self.assertEqual(p.dataOffset(6, 15), 47)
+        self.assertEqual(p.dataOffset(6, 16), 48)
+        self.assertEqual(p.dataOffset(6, 17), 48)
+        # Test u"Здравствуйте".
+        # Test u"こんにちはtranslate".
+        # Test u"".
 
     if 0:
 
