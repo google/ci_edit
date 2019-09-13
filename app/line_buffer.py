@@ -36,7 +36,7 @@ class LineBuffer:
         self.debugUpperChangedRow = -1
         self.isBinary = False
         self.lines = [u""]
-        self.parser = app.parser.Parser()
+        self.parser = app.parser.Parser(program.prefs)
         self.parserTime = 0.0
         self.message = (u"New buffer", None)
         self.setFileType("words")
@@ -96,7 +96,7 @@ class LineBuffer:
     def doParse(self, begin, end):
         start = time.time()
         self.linesToData()
-        self.parser.parse(self.program.bg, self.program.prefs, self.data,
+        self.parser.parse(self.program.bg, self.data,
                           self.rootGrammar, begin, end)
         self.debugUpperChangedRow = self.upperChangedRow
         self.upperChangedRow = self.parser.fullyParsedToLine

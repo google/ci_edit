@@ -71,7 +71,8 @@ class ParserNode:
 class Parser:
     """A parser generates a set of grammar segments (ParserNode objects)."""
 
-    def __init__(self):
+    def __init__(self, appPrefs):
+        self.appPrefs = appPrefs
         self.data = u""
         self.emptyNode = ParserNode({}, None, None, 0)
         self.endNode = ({}, sys.maxsize, sys.maxsize, sys.maxsize)
@@ -233,7 +234,7 @@ class Parser:
             return (-1, self.rowWidth(row - 1))
         return 0, app.curses_util.priorCharCol(col, self.rowText(row)) - col
 
-    def parse(self, bgThread, appPrefs, data, grammar, beginRow, endRow):
+    def parse(self, bgThread, data, grammar, beginRow, endRow):
         """
         Args:
           data (string): The file contents. The document.
@@ -264,7 +265,7 @@ class Parser:
             self.parserNodes = [(grammar, 0, None, 0)]
             self.rows = [0]
         if self.endRow > len(self.rows):
-            self.__buildGrammarList(bgThread, appPrefs)
+            self._buildGrammarList(bgThread)
         self.fullyParsedToLine = len(self.rows)
         self.__fastLineParse(grammar)
         #self.debug_checkLines(app.log.parser, data)
@@ -405,12 +406,13 @@ class Parser:
             visualEnd = lastNode[kVisual]
         return visualEnd - visual
 
-    def __buildGrammarList(self, bgThread, appPrefs):
+    def _buildGrammarList(self, bgThread):
         """The guts of the parser. This is where the heavy lifting is done.
 
         This code can be interrupted (by |bgThread|) and resumed (by calling it
         again).
         """
+        appPrefs = self.appPrefs
         # An arbitrary limit to avoid run-away looping.
         leash = 50000
         topNode = self.parserNodes[-1]

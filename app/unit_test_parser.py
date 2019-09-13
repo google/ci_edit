@@ -31,7 +31,7 @@ import app.prefs
 class ParserTestCases(unittest.TestCase):
 
     def setUp(self):
-        self.parser = app.parser.Parser()
+        self.parser = app.parser.Parser(app.prefs.Prefs())
 
     def tearDown(self):
         self.parser = None
@@ -72,7 +72,7 @@ void blah();
             #self.assertEqual(test.splitlines(), test.split(u"\n"))
             lines = test.split(u"\n")
             self.prefs = app.prefs.Prefs()
-            self.parser.parse(None, self.prefs, test,
+            self.parser.parse(None, test,
                               self.prefs.grammars[u'cpp'], 0, 99999)
             #self.parser.debugLog(print, test)
             self.assertEqual(len(lines), self.parser.rowCount())
@@ -93,7 +93,7 @@ char stuff = R"mine(two
 void blah();
 """
         self.prefs = app.prefs.Prefs()
-        self.parser.parse(None, self.prefs, test, self.prefs.grammars['cpp'], 0,
+        self.parser.parse(None, test, self.prefs.grammars['cpp'], 0,
                           99999)
         self.assertEqual(self.parser.rowText(0), u"/* first comment */")
         self.assertEqual(self.parser.rowText(1), u"""char stuff = R"mine(two""")
@@ -117,7 +117,7 @@ fn main { }
 // two
 """
         self.prefs = app.prefs.Prefs()
-        self.parser.parse(None, self.prefs, test, self.prefs.grammars[u'rs'], 0,
+        self.parser.parse(None, test, self.prefs.grammars[u'rs'], 0,
                           99999)
         self.assertEqual(self.parser.rowText(0), u"// one")
         self.assertEqual(self.parser.rowText(1), u"""let stuff = r###"two""")
@@ -152,7 +152,7 @@ parse\t\t\tz
 """
         self.prefs = app.prefs.Prefs()
         p = self.parser
-        self.parser.parse(None, self.prefs, test, self.prefs.grammars[u'rs'], 0,
+        self.parser.parse(None, test, self.prefs.grammars[u'rs'], 0,
                           99999)
         if 0:
             print("")
@@ -321,7 +321,7 @@ line\tち\ttabs
 """
         self.prefs = app.prefs.Prefs()
         p = self.parser
-        self.parser.parse(None, self.prefs, test, self.prefs.grammars[u'rs'], 0,
+        self.parser.parse(None, test, self.prefs.grammars[u'rs'], 0,
                           99999)
         if 0:
             print("")
