@@ -99,7 +99,7 @@ class LineBuffer:
         self.parser.parse(self.program.bg, self.data,
                           self.rootGrammar, begin, end)
         self.debugUpperChangedRow = self.upperChangedRow
-        self.upperChangedRow = self.parser.fullyParsedToLine
+        self.upperChangedRow = self.parser.resumeAtRow
         self.parserTime = time.time() - start
 
     def isEmpty(self):
@@ -114,7 +114,7 @@ class LineBuffer:
             self.data = self.doLinesToData(self.lines)
 
     def parseDocument(self):
-        begin = min(self.parser.fullyParsedToLine, self.upperChangedRow)
+        begin = min(self.parser.resumeAtRow, self.upperChangedRow)
         end = sys.maxsize
         self.doParse(begin, end)
 

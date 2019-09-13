@@ -76,7 +76,8 @@ class Parser:
         self.data = u""
         self.emptyNode = ParserNode({}, None, None, 0)
         self.endNode = ({}, sys.maxsize, sys.maxsize, sys.maxsize)
-        self.fullyParsedToLine = -1
+        self.resumeAtRow = -1
+        self.pauseAtRow = 0
         # A row on screen will consist of one or more ParserNodes. When a
         # ParserNode is returned from the parser it will be an instance of
         # ParserNode, but internally tuples are used in place of ParserNodes.
@@ -250,12 +251,12 @@ class Parser:
         """
         app.log.parser('grammar', grammar['name'])
         # Trim partially parsed data.
-        if self.fullyParsedToLine < beginRow:
-            beginRow = self.fullyParsedToLine
+        if self.resumeAtRow < beginRow:
+            beginRow = self.resumeAtRow
 
         self.emptyNode = ParserNode(grammar, None, None, 0)
         self.data = data
-        self.endRow = endRow
+        self.pauseAtRow = endRow
         if beginRow > 0:  # and len(self.rows):
             if beginRow < len(self.rows):
                 self.parserNodes = self.parserNodes[:self.rows[beginRow]]
@@ -264,9 +265,8 @@ class Parser:
             # First time parse. Do a parse of the whole file.
             self.parserNodes = [(grammar, 0, None, 0)]
             self.rows = [0]
-        if self.endRow > len(self.rows):
+        if self.pauseAtRow > len(self.rows):
             self._buildGrammarList(bgThread)
-        self.fullyParsedToLine = len(self.rows)
         self.__fastLineParse(grammar)
         #self.debug_checkLines(app.log.parser, data)
         #startTime = time.time()
@@ -428,7 +428,7 @@ class Parser:
                 if sre is not None:
                     cursor += sre.regs[0][1]
                     visual += sre.regs[0][1]  # Assumes single-wide characters.
-        while self.endRow > len(self.rows):
+        while len(self.rows) < self.pauseAtRow:
             if not leash:
                 #app.log.error('grammar likely caught in a loop')
                 break
@@ -627,6 +627,7 @@ class Parser:
                 else:
                     app.log.error('invalid grammar index')
             self.parserNodes.append(child)
+        self.resumeAtRow = len(self.rows)
 
     def debugLog(self, out, data):
         out('parser debug:')

@@ -1715,7 +1715,7 @@ class Actions(app.mutator.Mutator):
         self.view.normalize()
 
     def parseScreenMaybe(self):
-        begin = min(self.parser.fullyParsedToLine, self.upperChangedRow)
+        begin = min(self.parser.resumeAtRow, self.upperChangedRow)
         end = self.view.scrollRow + self.view.rows + 1
         if end > begin + 100:
             # Call doParse with an empty range.
@@ -1727,7 +1727,7 @@ class Actions(app.mutator.Mutator):
             return
         scrollRow = self.view.scrollRow
         # If there is a gap, leave it to the background parsing.
-        if (self.parser.fullyParsedToLine < scrollRow or
+        if (self.parser.resumeAtRow < scrollRow or
                 self.upperChangedRow < scrollRow):
             return
         end = self.view.scrollRow + self.view.rows + 1
