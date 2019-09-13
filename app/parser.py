@@ -73,6 +73,7 @@ class Parser:
 
     def __init__(self, appPrefs):
         self.appPrefs = appPrefs
+        self._defaultGrammar = appPrefs.grammars['tabs']
         self.data = u""
         self.emptyNode = ParserNode({}, None, None, 0)
         self.endNode = ({}, sys.maxsize, sys.maxsize, sys.maxsize)
@@ -90,6 +91,11 @@ class Parser:
         app.log.parser('__init__')
 
     def dataOffset(self, row, col):
+        """Return the offset within self.data for the start of the character at
+        (row, col). Normally this will be the character the cursor is 'on' when
+        using a block cursor; or to the 'right' of the when using a vertical
+        cursor. I.e. it would be the character deleted by the 'del' key."""
+        self._fullyParseTo(row)
         if row >= len(self.rows):
             return None
         rowIndex = self.rows[row]
@@ -267,14 +273,35 @@ class Parser:
             self.rows = [0]
         if self.pauseAtRow > len(self.rows):
             self._buildGrammarList(bgThread)
-        self.__fastLineParse(grammar)
+        self._fastLineParse(grammar)
         #self.debug_checkLines(app.log.parser, data)
         #startTime = time.time()
         if app.log.enabledChannels.get('parser', False):
             self.debugLog(app.log.parser, data)
         #app.log.startup('parsing took', time.time() - startTime)
 
-    def __fastLineParse(self, grammar):
+    def _beginParsingAt(self, beginRow):
+        if app.config.strict_debug:
+            assert isinstance(beginRow, int)
+            assert beginRow >= 0, beginRow
+            assert isinstance(self.resumeAtRow, int)
+            assert self.resumeAtRow >= 0, self.resumeAtRow
+        if beginRow > self.resumeAtRow:
+            # Already beginning at an earlier row.
+            return
+        if beginRow > 0:
+            # Trim partially parsed data.
+            if beginRow < len(self.rows):
+                self.parserNodes = self.parserNodes[:self.rows[beginRow]]
+                self.rows = self.rows[:beginRow]
+            self.resumeAtRow = len(self.rows)
+        else:
+            # Parse the whole file.
+            self.parserNodes = [(self.defaultGrammar(), 0, None, 0)]
+            self.rows = [0]
+            self.resumeAtRow = len(self.rows) - 1
+
+    def _fastLineParse(self, grammar):
         """If there's not enough time to thoroughly parse the file, identify the
         lines so that the document can still be edited.
         """
@@ -297,6 +324,26 @@ class Parser:
             visual += 1
             self.rows.append(len(self.parserNodes))
             self.parserNodes.append((grammar, offset, None, visual))
+
+    def _fullyParseTo(self, endRow, bgThread=None):
+        """Parse up to and including |endRow|."""
+        if app.config.strict_debug:
+            assert isinstance(endRow, int)
+            assert endRow >= 0
+            assert bgThread is None or isinstance(bgThread, Thread)
+        # To parse |endRow| go one past because of the exclusive end of range.
+        self.pauseAtRow = endRow + 1
+        if self.pauseAtRow <= self.resumeAtRow:
+            # Already parsed to that row.
+            return
+        self._beginParsingAt(self.resumeAtRow)
+        self._buildGrammarList(bgThread)
+        self._fastLineParse(self.defaultGrammar())
+        if app.config.strict_debug:
+            assert self.resumeAtRow >= 0
+            assert self.resumeAtRow <= len(self.rows)
+            if endRow <= len(self.rows):
+                assert self.resumeAtRow >= endRow + 1
 
     def rowCount(self):
         return len(self.rows)
