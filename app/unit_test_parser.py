@@ -95,6 +95,7 @@ void blah();
         self.prefs = app.prefs.Prefs()
         self.parser.parse(None, test, self.prefs.grammars['cpp'], 0,
                           99999)
+        # self.parser.debugLog(print, test)
         self.assertEqual(self.parser.rowText(0), u"/* first comment */")
         self.assertEqual(self.parser.rowText(1), u"""char stuff = R"mine(two""")
         self.assertEqual(
@@ -434,6 +435,10 @@ line\tち\ttabs
         self.assertEqual(p.dataOffset(4, 1), 31)
         self.assertEqual(p.dataOffset(4, 2), 32)
         # Test u"\tち".
+        self.assertEqual(p.dataOffset(5, 0), 42)
+        self.assertEqual(p.dataOffset(5, 1), 42)
+        self.assertEqual(p.dataOffset(5, 7), 42)
+        self.assertEqual(p.dataOffset(5, 8), 43)
         # Test u"ち\t\t\tz".
         self.assertEqual(p.dataOffset(6, 0), 45)
         self.assertEqual(p.dataOffset(6, 7), 46)

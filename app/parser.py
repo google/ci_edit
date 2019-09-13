@@ -25,6 +25,7 @@ import curses.ascii
 import os
 import re
 import sys
+import threading
 import time
 import traceback
 
@@ -73,11 +74,11 @@ class Parser:
 
     def __init__(self, appPrefs):
         self.appPrefs = appPrefs
-        self._defaultGrammar = appPrefs.grammars['tabs']
+        self._defaultGrammar = appPrefs.grammars['none']
         self.data = u""
         self.emptyNode = ParserNode({}, None, None, 0)
         self.endNode = ({}, sys.maxsize, sys.maxsize, sys.maxsize)
-        self.resumeAtRow = -1
+        self.resumeAtRow = 0
         self.pauseAtRow = 0
         # A row on screen will consist of one or more ParserNodes. When a
         # ParserNode is returned from the parser it will be an instance of
@@ -104,24 +105,23 @@ class Parser:
         if col > nextLineNode[kVisual] - node[kVisual]:
             # The requested column is past the end of the line.
             return None
-        subRowIndex = self.grammarIndexFromRowCol(row, col)
-        subnode = self.parserNodes[rowIndex + subRowIndex]
-        remainingCols = col - (subnode[kVisual] - node[kVisual])
+        subnode = self.parserNodes[rowIndex + self.grammarIndexFromRowCol(row, col)]
+        subnodeCol = subnode[kVisual] - node[kVisual]
+        subnodeColDelta = col - subnodeCol
         offset = subnode[kBegin]
         if self.data[offset] == u"\t":
             tabWidth = 8
-            flooredTabGrammarCol = (
-                    (subnode[kVisual] - node[kVisual]) // tabWidth * tabWidth)
+            flooredTabGrammarCol = subnodeCol // tabWidth * tabWidth
             offset += (col - flooredTabGrammarCol) // tabWidth
         elif app.curses_util.isDoubleWidth(self.data[offset]):
             charWidth = 2
-            offset += remainingCols // charWidth
+            offset += subnodeColDelta // charWidth
         else:
-            offset += remainingCols
+            offset += subnodeColDelta
         return offset
 
     def defaultGrammar(self):
-        return self.emptyNode.grammar
+        return self._defaultGrammar
 
     def grammarIndexFromRowCol(self, row, col):
         """
@@ -255,25 +255,20 @@ class Parser:
               going over the entire file if, for example, only 100 rows out of
               a million rows are needed (which can save a lot of cpu time).
         """
-        app.log.parser('grammar', grammar['name'])
-        # Trim partially parsed data.
-        if self.resumeAtRow < beginRow:
-            beginRow = self.resumeAtRow
-
+        if app.config.strict_debug:
+            assert bgThread is None or isinstance(bgThread, threading.Thread)
+            assert isinstance(data, unicode)
+            assert isinstance(grammar, dict)
+            assert isinstance(beginRow, int)
+            assert isinstance(endRow, int)
+            assert beginRow >= 0
+            assert endRow >= 0
+            assert isinstance(self.appPrefs, app.prefs.Prefs)
+        self._defaultGrammar = grammar
         self.emptyNode = ParserNode(grammar, None, None, 0)
         self.data = data
-        self.pauseAtRow = endRow
-        if beginRow > 0:  # and len(self.rows):
-            if beginRow < len(self.rows):
-                self.parserNodes = self.parserNodes[:self.rows[beginRow]]
-                self.rows = self.rows[:beginRow]
-        else:
-            # First time parse. Do a parse of the whole file.
-            self.parserNodes = [(grammar, 0, None, 0)]
-            self.rows = [0]
-        if self.pauseAtRow > len(self.rows):
-            self._buildGrammarList(bgThread)
-        self._fastLineParse(grammar)
+        self._beginParsingAt(beginRow)
+        self._fullyParseTo(endRow, bgThread)
         #self.debug_checkLines(app.log.parser, data)
         #startTime = time.time()
         if app.log.enabledChannels.get('parser', False):
@@ -330,7 +325,7 @@ class Parser:
         if app.config.strict_debug:
             assert isinstance(endRow, int)
             assert endRow >= 0
-            assert bgThread is None or isinstance(bgThread, Thread)
+            assert bgThread is None or isinstance(bgThread, threading.Thread)
         # To parse |endRow| go one past because of the exclusive end of range.
         self.pauseAtRow = endRow + 1
         if self.pauseAtRow <= self.resumeAtRow:
@@ -342,8 +337,8 @@ class Parser:
         if app.config.strict_debug:
             assert self.resumeAtRow >= 0
             assert self.resumeAtRow <= len(self.rows)
-            if endRow <= len(self.rows):
-                assert self.resumeAtRow >= endRow + 1
+            if bgThread is not None and endRow <= len(self.rows):
+                assert self.resumeAtRow >= endRow + 1, (self.resumeAtRow, endRow)
 
     def rowCount(self):
         return len(self.rows)
@@ -360,6 +355,7 @@ class Parser:
         if app.config.strict_debug:
             assert isinstance(row, int)
             assert isinstance(self.data, unicode)
+        self._fullyParseTo(row)
         begin = self.parserNodes[self.rows[row]][kBegin]
         if row + 1 >= len(self.rows):
             return self.data[begin:]
@@ -407,6 +403,7 @@ class Parser:
         """
         if app.config.strict_debug:
             assert isinstance(row, int)
+        self._fullyParseTo(row)
         begin = self.parserNodes[self.rows[row]][kBegin]
         visual = self.parserNodes[self.rows[row]][kVisual]
         if row + 1 < len(self.rows):
@@ -440,6 +437,7 @@ class Parser:
             assert isinstance(row, int)
         if row < 0:
             row = len(self.rows) + row
+        self._fullyParseTo(row)
         visual = self.parserNodes[self.rows[row]][kVisual]
         if row + 1 < len(self.rows):
             end = self.parserNodes[self.rows[row + 1]][kBegin]
@@ -475,7 +473,7 @@ class Parser:
                 if sre is not None:
                     cursor += sre.regs[0][1]
                     visual += sre.regs[0][1]  # Assumes single-wide characters.
-        while len(self.rows) < self.pauseAtRow:
+        while len(self.rows) <= self.pauseAtRow:
             if not leash:
                 #app.log.error('grammar likely caught in a loop')
                 break
