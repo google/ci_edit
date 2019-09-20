@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # TODO(dschuyler): !/usr/bin/python -O
 
-# Copyright 2016 Google Inc.
+# Copyright 2019 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -38,9 +38,16 @@ setup(
     description='A terminal text editor with mouse support and ctrl+Q to quit.',
     long_description=get_long_description(),
     long_description_content_type='text/markdown',
-    author='Google Inc.',
-    author_email='opensource@google.com',
+    maintainer='Dave Schuyler',
+    maintainer_email='dschuyler@chromium.org',
     url='https://github.com/google/ci_edit',
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "Environment :: Console",
+        "Environment :: Console :: Curses",
+        "License :: OSI Approved :: Apache Software License",
+        "Topic :: Text Editors",
+    ],
     packages=find_packages(),
     scripts=['ci.py'],
     license='Apache 2.0',
