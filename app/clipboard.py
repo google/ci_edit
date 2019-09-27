@@ -15,8 +15,15 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+try:
+    unicode
+except NameError:
+    unicode = str
+    unichr = chr
 
 import third_party.pyperclip as clipboard
+
+import app.config
 
 
 class Clipboard():
@@ -27,6 +34,8 @@ class Clipboard():
 
     def copy(self, text):
         """Add text onto clipList. Empty |text| is not stored."""
+        if app.config.strict_debug:
+            assert isinstance(text, unicode), type(text)
         if text and len(text):
             self._clipList.append(text)
             if self._copy:
@@ -35,6 +44,8 @@ class Clipboard():
     def paste(self, clipIndex=None):
         """Fetch top of clipList; or clip at index |clipIndex|. The |clipIndex|
         will wrap around if it's larger than the clipList length."""
+        if app.config.strict_debug:
+            assert clipIndex is None or isinstance(clipIndex, int)
         if clipIndex is None:
             osClip = self._paste and self._paste()
             if osClip:
