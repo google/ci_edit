@@ -261,7 +261,7 @@ parse\t\t\tz
         self.assertEqual(p.dataOffset(0, 8), 1)
         self.assertEqual(p.dataOffset(0, 9), 2)
         self.assertEqual(p.dataOffset(0, 12), 5)
-        self.assertEqual(p.dataOffset(0, 13), 6)
+        self.assertEqual(p.dataOffset(0, 13), None)
         self.assertEqual(p.dataOffset(0, 99), None)
         # Test u"\t <tab+space".
         self.assertEqual(p.dataOffset(1, 0), 6)
@@ -413,7 +413,7 @@ line\tち\ttabs
         self.assertEqual(p.dataOffset(0, 8), 2)
         self.assertEqual(p.dataOffset(0, 9), 3)
         self.assertEqual(p.dataOffset(0, 12), 6)
-        self.assertEqual(p.dataOffset(0, 13), 7)
+        self.assertEqual(p.dataOffset(0, 13), None)
         self.assertEqual(p.dataOffset(0, 99), None)
         # Test u"\tち<".
         self.assertEqual(p.dataOffset(1, 0), 7)
@@ -422,13 +422,14 @@ line\tち\ttabs
         self.assertEqual(p.dataOffset(1, 3), 7)
         self.assertEqual(p.dataOffset(1, 7), 7)
         self.assertEqual(p.dataOffset(1, 8), 8)
-        self.assertEqual(p.dataOffset(1, 12), 10)
+        self.assertEqual(p.dataOffset(1, 12), None)
         self.assertEqual(p.dataOffset(1, 14), None)
         # Test u"\t<ち".
         self.assertEqual(p.dataOffset(2, 0), 11)
         self.assertEqual(p.dataOffset(2, 1), 11)
         self.assertEqual(p.dataOffset(2, 2), 11)
-        self.assertEqual(p.dataOffset(2, 12), 14)
+        self.assertEqual(p.dataOffset(2, 11), 14)
+        self.assertEqual(p.dataOffset(2, 12), None)
         # Test u"sちome text.>\t<".
         # Test u"line\tち\ttabs".
         self.assertEqual(p.dataOffset(4, 0), 30)

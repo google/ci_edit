@@ -92,8 +92,10 @@ class Parser:
         app.log.parser('__init__')
 
     def dataOffset(self, row, col):
-        """Return the offset within self.data for the start of the character at
-        (row, col). Normally this will be the character the cursor is 'on' when
+        """Return the offset within self.data (as unicode, not utf-8) for the
+        start of the character at (row, col).
+
+        Normally this will be the character the cursor is 'on' when
         using a block cursor; or to the 'right' of the when using a vertical
         cursor. I.e. it would be the character deleted by the 'del' key."""
         self._fullyParseTo(row)
@@ -101,11 +103,15 @@ class Parser:
             return None
         rowIndex = self.rows[row]
         node = self.parserNodes[rowIndex]
+        if row + 1 >= len(self.rows):
+            # The requested column is past the end of the document.
+            return None
         nextLineNode = self.parserNodes[self.rows[row + 1]]
-        if col > nextLineNode[kVisual] - node[kVisual]:
+        if col >= nextLineNode[kVisual] - node[kVisual]:
             # The requested column is past the end of the line.
             return None
-        subnode = self.parserNodes[rowIndex + self.grammarIndexFromRowCol(row, col)]
+        subnode = self.parserNodes[
+            rowIndex + self.grammarIndexFromRowCol(row, col)]
         subnodeCol = subnode[kVisual] - node[kVisual]
         subnodeColDelta = col - subnodeCol
         offset = subnode[kBegin]

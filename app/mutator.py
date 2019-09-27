@@ -269,7 +269,8 @@ class Mutator(app.selectable.Selectable):
         elif change[0] == 'd':  # Redo delete character.
             line = self.lines[self.penRow]
             x = self.penCol
-            self.lines[self.penRow] = line[:x] + line[x + columnWidth(change[1]):]
+            self.lines[self.penRow] = line[:x] + line[
+                x + columnWidth(change[1]):]
             if self.upperChangedRow > self.penRow:
                 self.upperChangedRow = self.penRow
         elif change[0] == 'dr':  # Redo delete range.
