@@ -199,10 +199,16 @@ class FakeCursesTestCase(unittest.TestCase):
                                            caller[2], caller[3])
 
         def cursorChecker(display, cmdIndex):
-            penRow, penCol = self.cursesScreen.getyx()
             if self.cursesScreen.movie:
                 return None
-            self.assertEqual((expectedRow, expectedCol), (penRow, penCol),
+            win = self.prg.programWindow.focusedWindow
+            tb = win.textBuffer
+            screenRow, screenCol = self.cursesScreen.getyx()
+            self.assertEqual((win.top + tb.penRow - win.scrollRow,
+                              win.left + tb.penCol - win.scrollCol),
+                             (screenRow, screenCol),
+                             callerText + u"internal mismatch")
+            self.assertEqual((expectedRow, expectedCol), (screenRow, screenCol),
                              callerText)
             return None
 
