@@ -34,6 +34,9 @@ import sys
 import time
 import traceback
 import types
+import unicodedata
+
+import app.curses_util
 
 from . import ascii
 from . import constants
@@ -53,21 +56,6 @@ def isStringType(value):
 BRACKETED_PASTE_BEGIN = (91, 50, 48, 48, 126)  # i.e. "[200~"
 BRACKETED_PASTE_END = (91, 50, 48, 49, 126)  # i.e. "[201~"
 BRACKETED_PASTE = ("terminal_paste",)  # Pseudo event type.
-MIN_DOUBLE_WIDE_CHARACTER = u"\u3000"
-def columnWidth(string):
-    """When rendering |string| how many character cells will be used? For ASCII
-    characters this will equal len(string). For many Chinese characters and
-    emoji the value will be greater than len(string), since many of them use two
-    cells.
-    """
-    assert isinstance(string, unicode), repr(string)
-    width = 0
-    for i in string:
-        if i > MIN_DOUBLE_WIDE_CHARACTER:
-            width += 2
-        else:
-            width += 1
-    return width
 
 
 class error(BaseException):
@@ -144,13 +132,15 @@ class FakeInput:
                         self.tupleIndex = -1
                         if cmd == BRACKETED_PASTE_END:
                             self.inBracketedPaste = False
-                        if cmd != BRACKETED_PASTE_BEGIN:
-                            self.waitingForRefresh = True
                         self.log("next(u)", cmd, type(cmd))
                         self.log("return", constants.ERR)
                         return constants.ERR
+                    if (self.tupleIndex + 1 == len(cmd) and
+                            cmd != BRACKETED_PASTE_BEGIN):
+                        self.waitingForRefresh = True
                     self.inputsIndex -= 1
-                    self.log("return", cmd[self.tupleIndex])
+                    self.log("return", cmd[self.tupleIndex], self.tupleIndex,
+                        len(cmd))
                     return cmd[self.tupleIndex]
                 else:
                     if (not self.inBracketedPaste) and cmd != ascii.ESC:
@@ -217,29 +207,30 @@ class FakeDisplay:
         assert isinstance(verbose, int)
         for i in range(len(lines)):
             line = lines[i]
-            for k in range(len(line)):
+            displayCol = col
+            for ch in line:
                 if row + i >= self.rows:
                     return u"\n  Row %d is outside of the %d row display" % (
                         row + i, self.rows)
-                if col + k >= self.cols:
+                if displayCol >= self.cols:
                     return (u"\n  Column %d is outside of the %d column display"
-                            % (col + k, self.cols))
-                d = self.displayText[row + i][col + k]
-                c = line[k]
-                if d != c:
+                            % (displayCol, self.cols))
+                displayCh = self.displayText[row + i][displayCol]
+                if displayCh != ch:
                     #self.show()
                     result = u"\n  row %s, col %s mismatch '%s' != '%s'" % (
-                        row + i, col + k, d, c)
+                        row + i, displayCol, displayCh, ch)
                     if verbose >= 1:
                         actualLine = u"".join(self.displayText[row + i])
                         result += u"\n  actual:   |%s|" % actualLine
                     if verbose >= 2:
                         expectedText = u"".join(line)
-                        result += u"\n  expected: %s|%s|" % (u" " * col,
+                        result += u"\n  expected: %s|%s|" % (u" " * displayCol,
                                                              expectedText)
                     if verbose >= 3:
-                        result += u"\n  mismatch:  %*s^" % (col + k, u"")
+                        result += u"\n  mismatch:  %*s^" % (displayCol, u"")
                     return result
+                displayCol += app.curses_util.charWidth(displayCh, displayCol)
         return None
 
     def draw(self, cursorRow, cursorCol, text, colorPair):
@@ -256,7 +247,7 @@ class FakeDisplay:
                 self.displayText[cursorRow][cursorCol] = i
                 self.displayStyle[cursorRow][cursorCol] = colorPair
                 cursorCol += 1
-                if columnWidth(i) > 1:
+                if app.curses_util.charWidth(i, cursorCol) > 1:
                     self.displayText[cursorRow][cursorCol] = u" "
                     self.displayStyle[cursorRow][cursorCol] = colorPair
                     cursorCol += 1
