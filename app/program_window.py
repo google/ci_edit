@@ -41,6 +41,7 @@ class ProgramWindow(app.window.ActiveWindow):
             assert issubclass(program.__class__, app.ci_program.CiProgram), self
         app.window.ActiveWindow.__init__(self, program, None)
         self.clicks = 0
+        self.focusedWindow = None
         self.modalUi = None
         self.program = program
         self.priorClick = 0

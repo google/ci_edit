@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # Copyright 2019 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,6 +24,7 @@ import sys
 
 from app.curses_util import *
 import app.ci_program
+import app.curses_util
 import app.fake_curses_testing
 
 kTestFile = u'#application_test_file_with_unlikely_file_name~'
@@ -34,6 +37,7 @@ class CopyPasteTestCases(app.fake_curses_testing.FakeCursesTestCase):
         app.fake_curses_testing.FakeCursesTestCase.setUp(self)
 
     def test_bracketed_paste(self):
+        self.assertEqual(app.curses_util.charWidth(u"ế", 0), 1)
         self.runWithFakeInputs([
                 self.displayCheck(2, 7, [u"      "]),
                 curses.ascii.ESC,
