@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # Copyright 2016 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -310,17 +312,26 @@ class Parser:
         offset = self.parserNodes[self.rows[-1]][kBegin]
         visual = self.parserNodes[self.rows[-1]][kVisual]
         limit = len(data)
+        # Track the |visual| value for the start of the line. The difference
+        # between |visual| and |visualStartCol| is the column index of the line.
+        visualStartCol = 0
         while True:
             while offset < limit and data[offset] != '\n':
-                if data[offset] >= app.curses_util.MIN_DOUBLE_WIDE_CHARACTER:
-                    visual += 2
-                else:
+                if data[offset] < u"ᄀ":
+                    # The char is less than the first double width character.
+                    # (An optimization to avoid calling charWidth().)
                     visual += 1
+                else:
+                    # From here on, the width of the character is messy to
+                    # determine, ask an authority.
+                    visual += app.curses_util.charWidth(data[offset],
+                            visual - visualStartCol)
                 offset += 1
             if offset >= limit:
                 # Add a terminating (end) node.
                 self.parserNodes.append((grammar, len(data), None, visual))
                 break
+            visualStartCol = visual
             offset += 1
             visual += 1
             self.rows.append(len(self.parserNodes))

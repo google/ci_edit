@@ -75,8 +75,14 @@ class PerformanceTestCases(unittest.TestCase):
         # Note: empirically, this is affected (on a MacBook Air) by whether the
         # machine is running from battery or plugged in.
         # It also appears to vary between Python 2 and Python 3.
-        self.assertGreater(a, b * 0.67)
-        self.assertGreater(b, a * 0.67)
+        self.assertGreater(a, b * 0.6)
+        self.assertGreater(b, a * 0.6)
+
+    def test_char_vs_ord(self):
+        setup = '''a="apple"\n'''
+        a = timeit('''a[0] > "z";''' * 100,  setup=setup, number=10000)
+        b = timeit('''ord(a[0]) > 100;''' * 100,  setup=setup, number=10000)
+        self.assertGreater(b, a)
 
     def test_insert1(self):
         # Disabled due to running time.
