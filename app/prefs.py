@@ -200,7 +200,7 @@ class Prefs():
             # Variable width characters are at index [-3] in markers.
             markers.append(r'\t+')
             # Double wide characters are at index [-2] in markers.
-            markers.append(u'[\u3000-\uffff]+')
+            markers.append(u'[\u1100-\uffff]+')
             # Carriage return characters are at index [-1] in markers.
             markers.append(r'\n')
             #app.log.startup('markers', v['name'], markers)
