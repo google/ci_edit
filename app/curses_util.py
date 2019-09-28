@@ -29,6 +29,7 @@ import signal
 import struct
 import sys
 import termios
+import unicodedata
 
 import app.config
 
@@ -397,12 +398,11 @@ def charWidth(ch, column):
     if ch == u"\t":
         tabWidth = 8
         return tabWidth - (column % tabWidth)
-    elif ch > MIN_DOUBLE_WIDE_CHARACTER:
+    elif isDoubleWidth(ch):
         return 2
-    elif ch == u"":
+    elif isZeroWidth(ch):
         return 0
-    else:
-        return 1
+    return 1
 
 def floorCol(column, line):
     """Round off the column so that it aligns with the start of a character.
@@ -422,7 +422,11 @@ def floorCol(column, line):
     return floorColumn
 
 def isDoubleWidth(ch):
-    return ch > MIN_DOUBLE_WIDE_CHARACTER
+    #return ch != u"" and unicodedata.east_asian_width(ch) in ("A", "F", "W")
+    return ch != u"" and unicodedata.east_asian_width(ch) == "W"
+
+def isZeroWidth(ch):
+    return ch == u"" or ch < u" " #or unicodedata.east_asian_width(ch) == "N"
 
 def priorCharCol(column, line):
     """Return the start column of the character before |column|.
