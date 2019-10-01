@@ -52,7 +52,6 @@ class ApplicationTestCases(app.fake_curses_testing.FakeCursesTestCase):
         ])
 
     def test_backspace_emoji(self):
-        return  # Disabled.
         #self.setMovieMode(True)
         self.runWithTestFile(kTestFile, [
             self.displayCheck(2, 7, [u"      "]),
@@ -67,7 +66,6 @@ class ApplicationTestCases(app.fake_curses_testing.FakeCursesTestCase):
         ])
 
     def test_backspace_emoji2(self):
-        return  # Disabled.
         self.runWithTestFile(kTestFile, [
             self.displayCheck(2, 7, [u"      "]),
             self.cursorCheck(2, 7),
