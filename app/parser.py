@@ -93,6 +93,31 @@ class Parser:
         self.rows = [0]  # Row parserNodes index.
         app.log.parser('__init__')
 
+    def backspace(self, row, col):
+        """Delete the character prior to |row, col|.
+        Return the new (row, col) position."""
+        self._fullyParseTo(row)
+        offset = self.dataOffset(row, col)
+        if offset == 0:
+            # Top of file, nothing to do.
+            return row, col
+        if offset is None:
+            # Bottom of file (or past end of line, but assuming end of file).
+            offset = len(self.data)
+        ch = self.data[offset - 1]
+        if ch == u"\n":
+            row -= 1
+            col = self.rowWidth(row)
+        elif ch == u"\t":
+            col += self.priorCharRowCol(row, col)[1]
+        elif app.curses_util.isDoubleWidth(ch):
+            col -= 2
+        else:
+            col -= 1
+        self.data = self.data[:offset - 1] + self.data[offset:]
+        self._beginParsingAt(row)
+        return row, col
+
     def dataOffset(self, row, col):
         """Return the offset within self.data (as unicode, not utf-8) for the
         start of the character at (row, col).

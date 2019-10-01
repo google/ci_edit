@@ -477,8 +477,6 @@ line\tち\ttabs
 
         self.assertEqual(p.dataOffset(4, 5), 34)
         self.assertEqual(p.rowTextAndWidth(0), (u"ち\t<tab", 12))
-
-        return  # Disabled.
         self.assertEqual(p.backspace(0, 0), (0, 0))
         self.assertEqual(p.dataOffset(4, 5), 34)
         self.assertEqual(p.rowTextAndWidth(0), (u"ち\t<tab", 12))
