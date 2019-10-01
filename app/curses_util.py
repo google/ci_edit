@@ -35,8 +35,6 @@ import unicodedata
 
 import app.config
 
-MIN_DOUBLE_WIDE_CHARACTER = u"\u3000"
-
 # Strings are found using the cursesKeyName() function.
 # Constants are found using the curses.getch() function.
 
