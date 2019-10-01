@@ -88,7 +88,8 @@ class CursesUtilTestCases(unittest.TestCase):
         self.assertEqual(unicodedata.east_asian_width(u" "), "Na")
         self.assertEqual(unicodedata.east_asian_width(u"\b"), "N")
         self.assertEqual(unicodedata.east_asian_width(u"こ"), "W")
-        self.assertEqual(unicodedata.east_asian_width(u"⏰"), "W")
+        # This is "W" in python3 and "F" in python2.
+        self.assertIn(unicodedata.east_asian_width(u"⏰"), ("F", "W"))
 
     def test_column_to_index(self):
         self.assertEqual(0, app.curses_util.columnToIndex(0, u"test"))
