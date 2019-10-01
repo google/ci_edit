@@ -116,6 +116,10 @@ class Parser:
             col -= 1
         self.data = self.data[:offset - 1] + self.data[offset:]
         self._beginParsingAt(row)
+        if app.config.strict_debug:
+            assert isinstance(self.data, unicode)
+            assert row >= 0
+            assert col >= 0
         return row, col
 
     def dataOffset(self, row, col):
@@ -161,6 +165,7 @@ class Parser:
         Returns:
             index. |index| may then be passed to grammarAtIndex().
         """
+        self._fullyParseTo(row)
         if row + 1 >= len(
                 self.rows):  # or self.rows[row + 1] > len(self.parserNodes):
             # This file is too large. There's other ways to handle this, but for
@@ -189,6 +194,7 @@ class Parser:
         individually if grammars are requested contiguously. This function is
         just for one-off needs.
         """
+        self._fullyParseTo(row)
         grammarIndex = self.grammarIndexFromRowCol(row, col)
         node, _, _, _ = self.grammarAtIndex(row, col, grammarIndex)
         return node.grammar
@@ -205,6 +211,7 @@ class Parser:
             assert isinstance(col, int)
             assert isinstance(index, int)
             assert row < len(self.rows), row
+        self._fullyParseTo(row)
         eol = True
         finalResult = (self.emptyNode, 0, 0, eol)
         rowIndex = self.rows[row]
@@ -225,6 +232,7 @@ class Parser:
             assert isinstance(row, int)
             assert isinstance(col, int)
             assert row < len(self.rows), row
+        self._fullyParseTo(row)
         rowIndex = self.rows[row]
         grammarIndex = self.grammarIndexFromRowCol(row, col)
         node = self.parserNodes[rowIndex + grammarIndex]
@@ -238,6 +246,7 @@ class Parser:
             assert isinstance(col, int)
             assert row >= 0
             assert col >= 0
+        self._fullyParseTo(row)
         return (row < len(self.rows) and
             col < self.parserNodes[self.rows[row]][kVisual])
 
@@ -252,6 +261,7 @@ class Parser:
             assert row >= 0
             assert col >= 0
             assert len(self.rows) > 0
+        self._fullyParseTo(row)
         ch = self.charAt(row, col)
         if ch is None:
             return (1, -col) if self.inDocument(row + 1, 0) else None
@@ -268,6 +278,7 @@ class Parser:
             assert row >= 0
             assert col >= 0
             assert len(self.rows) > 0
+        self._fullyParseTo(row)
         if col == 0:
             if row == 0:
                 return None
@@ -422,6 +433,7 @@ class Parser:
             assert isinstance(self.data, unicode)
             assert row >= 0
             assert col >= 0
+        self._fullyParseTo(row)
         if row > len(self.rows):
             return None
         string, width = self.rowTextAndWidth(row)

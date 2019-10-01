@@ -268,6 +268,16 @@ a\twith tab
         self.assertEqual(self.currentRowText(), u"\t\t")
         self.assertEqual(self.markerPenRowCol(), (0, 0, 8, 0))
 
+    def test_backspace(self):
+        self.setMarkerPenRowCol(0, 0, 6, 8)
+        self.assertEqual(self.currentRowText(), u"\ta\t")
+        self.textBuffer.backspace()
+        self.textBuffer.parseDocument()
+        self.assertEqual(self.markerPenRowCol(), (0, 0, 6, 0))
+        self.assertEqual(self.currentRowText(), u"a\t")
+        self.textBuffer.cursorMoveRight()
+        self.assertEqual(self.markerPenRowCol(), (0, 0, 6, 1))
+
     def test_cursor_select_word_left(self):
         tb = self.textBuffer
         self.setMarkerPenRowCol(0, 0, 2, 5)

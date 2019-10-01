@@ -608,6 +608,12 @@ class LineNumbers(ViewWindow):
         self.host = host
 
     def drawLineNumbers(self):
+        if app.config.strict_debug:
+            assert isinstance(self.rows, int)
+            assert isinstance(self.host.scrollRow, int)
+            assert self.rows >= 1
+            assert len(self.host.textBuffer.lines) >= 1
+            assert self.host.scrollRow >= 0
         limit = min(self.rows,
                     len(self.host.textBuffer.lines) - self.host.scrollRow)
         cursorBookmarkColorIndex = None

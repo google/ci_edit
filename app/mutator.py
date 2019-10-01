@@ -251,13 +251,11 @@ class Mutator(app.selectable.Selectable):
 
     def __redoChange(self, change):
         if change[0] == 'b':  # Redo backspace.
-            line = self.lines[self.penRow]
-            width = columnWidth(change[1])
-            self.penCol -= width
-            x = self.penCol
-            self.lines[self.penRow] = line[:x] + line[x + width:]
-            if self.upperChangedRow > self.penRow:
-                self.upperChangedRow = self.penRow
+            self.penRow, self.penCol = self.parser.backspace(self.penRow,
+                self.penCol)
+            if 1:  # Hack in old lines system.
+                self.data = self.parser.data
+                self.dataToLines()
         elif change[0] == 'bw':  # Redo backspace word.
             line = self.lines[self.penRow]
             width = columnWidth(change[1])
