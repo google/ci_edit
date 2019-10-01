@@ -451,6 +451,129 @@ line\tち\ttabs
         # Test u"こんにちはtranslate".
         # Test u"".
 
+    def test_backspace(self):
+        test = u"""ち\t<tab
+\tち<
+\t<ち
+sちome text.>\t<
+line\tち\ttabs
+\tち
+ち\t\t\tz
+Здравствуйте
+こんにちはtranslate
+"""
+        self.prefs = app.prefs.Prefs()
+        p = self.parser
+        self.assertEqual(p.resumeAtRow, 0)
+        self.parser.parse(None, test, self.prefs.grammars[u'rs'], 0,
+                          99999)
+        self.assertEqual(p.resumeAtRow, 10)
+        if 0:
+            print("")
+            for i,t in enumerate(test.splitlines()):
+                print("{}: {}".format(i, repr(t)))
+            p.debugLog(print, test)
+        self.assertEqual(p.dataOffset(4, 5), 34)
+
+        self.assertEqual(p.dataOffset(4, 5), 34)
+        self.assertEqual(p.rowTextAndWidth(0), (u"ち\t<tab", 12))
+
+        return  # Disabled.
+        self.assertEqual(p.backspace(0, 0), (0, 0))
+        self.assertEqual(p.dataOffset(4, 5), 34)
+        self.assertEqual(p.rowTextAndWidth(0), (u"ち\t<tab", 12))
+        self.assertEqual(p.backspace(0, 1), (0, 1))
+        self.assertEqual(p.dataOffset(4, 5), 34)
+        self.assertEqual(p.rowTextAndWidth(0), (u"ち\t<tab", 12))
+        self.assertEqual(p.backspace(0, 2), (0, 0))
+        self.assertEqual(p.dataOffset(4, 5), 33)
+        self.assertEqual(p.rowText(0), u"\t<tab")
+        self.assertEqual(p.rowWidth(0), 12)
+        self.assertEqual(p.rowTextAndWidth(0), (u"\t<tab", 12))
+        self.assertEqual(p.priorCharRowCol(0, 0), None)
+        self.assertEqual(p.priorCharRowCol(0, 1), (0, -1))
+        self.assertEqual(p.priorCharRowCol(0, 2), (0, -2))
+        self.assertEqual(p.priorCharRowCol(0, 3), (0, -3))
+        self.assertEqual(p.priorCharRowCol(0, 7), (0, -7))
+        self.assertEqual(p.priorCharRowCol(0, 8), (0, -8))
+        self.assertEqual(p.priorCharRowCol(0, 9), (0, -1))
+        self.assertEqual(p.backspace(0, 8), (0, 0))
+        self.assertEqual(p.rowText(0), u"<tab")
+        self.assertEqual(p.backspace(0, 2), (0, 1))
+        self.assertEqual(p.rowText(0), u"<ab")
+
+        self.assertEqual(p.rowText(4), u"line\tち\ttabs")
+        self.assertEqual(p.priorCharRowCol(4, 20), (0, -1))
+        p.dataOffset(4, 19)
+        self.assertEqual(p.dataOffset(0, 0), 0)
+        self.assertEqual(p.dataOffset(4, 0), 27)
+        self.assertEqual(p.dataOffset(4, 3), 30)
+        self.assertEqual(p.dataOffset(4, 4), 31)
+        self.assertEqual(p.dataOffset(4, 5), 31)
+        self.assertEqual(p.dataOffset(4, 7), 31)
+        self.assertEqual(p.dataOffset(4, 8), 32)
+        self.assertEqual(p.dataOffset(4, 9), 32)
+        self.assertEqual(p.dataOffset(4, 10), 33)
+        self.assertEqual(p.dataOffset(4, 16), 34)
+        self.assertEqual(p.dataOffset(4, 19), 37)
+        self.assertEqual(p.data[p.dataOffset(4, 19)], u"s")
+        self.assertEqual(p.dataOffset(4, 20), 38)
+        self.assertEqual(p.backspace(4, 20), (4, 19))
+        self.assertEqual(p.rowText(4), u"line\tち\ttab")
+        self.assertEqual(p.backspace(4, 19), (4, 18))
+        self.assertEqual(p.rowText(4), u"line\tち\tta")
+        self.assertEqual(p.backspace(4, 16), (4, 10))
+        self.assertEqual(p.rowText(4), u"line\tちta")
+        self.assertEqual(p.backspace(4, 10), (4, 8))
+        self.assertEqual(p.rowText(4), u"line\tta")
+        self.assertEqual(p.backspace(4, 8), (4, 4))
+        self.assertEqual(p.rowText(4), u"lineta")
+        self.assertEqual(p.backspace(4, 4), (4, 3))
+        self.assertEqual(p.rowText(4), u"linta")
+
+        self.assertEqual(p.rowTextAndWidth(3), (u"sちome text.>\t<", 17))
+        self.assertEqual(p.rowWidth(3), 17)
+        self.assertEqual(p.rowText(5), u"\tち")
+        self.assertEqual(p.backspace(4, 0), (3, 17))
+        self.assertEqual(p.rowText(3), u"sちome text.>\t<linta")
+        self.assertEqual(p.rowText(4), u"\tち")
+
+    def test_parse_short(self):
+        test = u"""a⏰
+e
+"""
+        self.prefs = app.prefs.Prefs()
+        p = self.parser
+        self.parser.parse(None, test, self.prefs.grammars[u'rs'], 0,
+                          99999)
+        if 0:
+            print("")
+            for i,t in enumerate(test.splitlines()):
+                print("{}: {}".format(i, repr(t)))
+            p.debugLog(print, test)
+
+        self.assertEqual(p.rowCount(), 3)
+
+        self.assertEqual(p.rowText(0), u"a⏰")
+        self.assertEqual(p.rowWidth(0), 3)
+        self.assertEqual(p.rowText(1), u"e")
+        self.assertEqual(p.dataOffset(0, 0), 0)
+        self.assertEqual(test[p.dataOffset(0, 0)], u"a")
+        self.assertEqual(p.dataOffset(0, 1), 1)
+        self.assertEqual(test[p.dataOffset(0, 1)], u"⏰")
+        self.assertEqual(p.dataOffset(0, 2), 1)
+        self.assertEqual(p.dataOffset(0, 3), 2)
+        self.assertEqual(test[p.dataOffset(0, 3)], u"\n")
+        self.assertEqual(p.dataOffset(0, 4), None)
+        self.assertEqual(p.dataOffset(1, 0), 3)
+        self.assertEqual(test[p.dataOffset(1, 0)], u"e")
+        self.assertEqual(p.dataOffset(1, 1), 4)
+        self.assertEqual(test[p.dataOffset(1, 1)], u"\n")
+        self.assertEqual(p.dataOffset(1, 2), None)
+        self.assertEqual(p.dataOffset(1, 3), None)
+        self.assertEqual(p.dataOffset(2, 0), None)
+
+
     if 0:
 
         def test_profile_parse(self):

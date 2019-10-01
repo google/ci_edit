@@ -43,18 +43,46 @@ class ApplicationTestCases(app.fake_curses_testing.FakeCursesTestCase):
             self.displayCheck(2, 7, [u"tet "]), CTRL_Q, u"n"
         ])
 
+    def test_backspace_with_colon(self):
+        self.runWithTestFile(kTestFile, [
+            self.displayCheck(2, 0, [u"     1       "]),
+            u":",
+            self.displayCheck(2, 0, [u"     1 :     "]), KEY_BACKSPACE1,
+            self.displayCheck(2, 0, [u"     1       "]), CTRL_Q, u"n"
+        ])
+
     def test_backspace_emoji(self):
-        return # disabled.
+        return  # Disabled.
+        #self.setMovieMode(True)
         self.runWithTestFile(kTestFile, [
             self.displayCheck(2, 7, [u"      "]),
             self.cursorCheck(2, 7),
             (226, 143, 176),
-            #self.cursorCheck(2, 9),
-            self.displayCheck(2, 7, [u"⏰"]), KEY_BACKSPACE1, u"t",
-            self.displayCheck(2, 7, [u"t     "]),
+            self.displayCheck(2, 7, [u"⏰"]),
+            self.cursorCheck(2, 9),
+            KEY_BACKSPACE1,
+            self.cursorCheck(2, 7),
+            self.displayCheck(2, 7, [u"      "]),
             CTRL_Q, u"n"
         ])
 
+    def test_backspace_emoji2(self):
+        return  # Disabled.
+        self.runWithTestFile(kTestFile, [
+            self.displayCheck(2, 7, [u"      "]),
+            self.cursorCheck(2, 7),
+            u'a',
+            self.cursorCheck(2, 8),
+            (226, 143, 176),
+            self.displayCheck(2, 7, [u"a⏰"]),
+            self.cursorCheck(2, 10),
+            KEY_BACKSPACE1,
+            self.cursorCheck(2, 8),
+            self.displayCheck(2, 7, [u"a      "]),
+            u"t",
+            self.displayCheck(2, 7, [u"at     "]),
+            CTRL_Q, u"n"
+        ])
     def test_cursor_moves(self):
         self.runWithTestFile(kTestFile, [
             self.displayCheck(0, 0, [
