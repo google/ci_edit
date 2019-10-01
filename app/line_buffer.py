@@ -56,7 +56,10 @@ class LineBuffer:
         def encode(line):
             return chr(int(line.groups()[0], 16))
 
-        return re.sub(u'\x01([0-9a-fA-F][0-9a-fA-F])', encode, "\n".join(lines))
+        out = re.sub(u'\x01([0-9a-fA-F][0-9a-fA-F])', encode, u"\n".join(lines))
+        if app.config.strict_debug:
+            assert isinstance(out, unicode)
+        return out
 
     def doBinaryDataToLines(self, data):
         long_hex = binascii.hexlify(data)

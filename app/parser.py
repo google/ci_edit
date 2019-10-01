@@ -265,7 +265,7 @@ class Parser:
         """
         if app.config.strict_debug:
             assert bgThread is None or isinstance(bgThread, threading.Thread)
-            assert isinstance(data, unicode)
+            assert isinstance(data, unicode), type(data)
             assert isinstance(grammar, dict)
             assert isinstance(beginRow, int)
             assert isinstance(endRow, int)
