@@ -134,12 +134,18 @@ class Parser:
             return None
         rowIndex = self.rows[row]
         node = self.parserNodes[rowIndex]
-        if row + 1 >= len(self.rows):
+        if row + 1 < len(self.rows):
+            nextLineNode = self.parserNodes[self.rows[row + 1]]
+            if col >= nextLineNode[kVisual] - node[kVisual]:
+                # The requested column is past the end of the line.
+                return None
+        elif row + 1 == len(self.rows):
+            # On the last row.
+            if col >= self.parserNodes[-1][kVisual] - node[kVisual]:
+                # The requested column is past the end of the line.
+                return None
+        else:
             # The requested column is past the end of the document.
-            return None
-        nextLineNode = self.parserNodes[self.rows[row + 1]]
-        if col >= nextLineNode[kVisual] - node[kVisual]:
-            # The requested column is past the end of the line.
             return None
         subnode = self.parserNodes[
             rowIndex + self.grammarIndexFromRowCol(row, col)]
@@ -338,7 +344,7 @@ class Parser:
             # Parse the whole file.
             self.parserNodes = [(self.defaultGrammar(), 0, None, 0)]
             self.rows = [0]
-            self.resumeAtRow = len(self.rows) - 1
+            self.resumeAtRow = 0
 
     def _fastLineParse(self, grammar):
         """If there's not enough time to thoroughly parse the file, identify the
