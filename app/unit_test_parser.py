@@ -36,6 +36,43 @@ class ParserTestCases(unittest.TestCase):
     def tearDown(self):
         self.parser = None
 
+    def checkParserNodes(self, expected, actual, startIndex=None):
+        kBegin = app.parser.kBegin
+        kPrior = app.parser.kPrior
+        kVisual = app.parser.kVisual
+        if startIndex is None:
+            # Test for exact match.
+            startIndex = 0
+            self.assertEqual(len(expected), len(actual))
+        else:
+            # Test a subset.
+            self.assertLessEqual(len(expected), startIndex + len(actual))
+        for index, expectedNode in enumerate(expected):
+            actualNode = actual[startIndex + index]
+            self.assertTrue(isinstance(actualNode, tuple))
+            # print("Node:", startIndex + index, expectedNode, actualNode[1:])
+            self.assertEqual(expectedNode[kBegin], actualNode[kBegin])
+            self.assertEqual(expectedNode[kPrior], actualNode[kPrior])
+            self.assertEqual(expectedNode[kVisual], actualNode[kVisual])
+
+    def checkParserRows(self, expected, actual, startIndex=None):
+        if startIndex is None:
+            # Test for exact match.
+            startIndex = 0
+            self.assertEqual(len(expected), len(actual))
+        else:
+            # Test a subset.
+            self.assertLessEqual(len(expected), startIndex + len(actual))
+        for index, expectedRow in enumerate(expected):
+            actualRow = actual[startIndex + index]
+            self.assertTrue(isinstance(actualRow, int))
+            # print("Node:", startIndex + index, expectedNode, actualRow)
+            self.assertEqual(expectedRow, actualRow)
+
+    def printParserNodes(self, nodes):
+        for n in nodes:
+            print("({}, {}, {}, {}),".format({}, n[1], n[2], n[3]))
+
     def test_parse(self):
         tests = [
             u"""/* first comment */
@@ -536,14 +573,44 @@ line\tち\ttabs
         self.assertEqual(p.rowText(3), u"sちome text.>\t<linta")
         self.assertEqual(p.rowText(4), u"\tち")
 
+    def test_reparse_short(self):
+        test = u"""a⏰
+e
+"""
+        expectedNodes = [
+            ({}, 0, None, 0),
+            ({}, 0, None, 0),
+            ({}, 1, None, 1),
+            ({}, 3, None, 4),
+            ({}, 5, None, 6),
+        ]
+        expectedRows = [0, 3, 4]
+        self.prefs = app.prefs.Prefs()
+        p = self.parser
+        self.parser.parse(None, test, self.prefs.grammars[u'rs'], 0, 99999)
+        if 0:
+            print("")
+            for i,t in enumerate(test.splitlines()):
+                print("{}: {}".format(i, repr(t)))
+            p.debugLog(print, test)
+
+        self.checkParserNodes(expectedNodes, p.parserNodes)
+        self.checkParserRows(expectedRows, p.rows)
+        # Regression test: a reparse should not add nodes.
+        self.parser.parse(None, test, self.prefs.grammars[u'rs'], 3, 4)
+        self.parser.parse(None, test, self.prefs.grammars[u'rs'], 3, 4)
+        self.parser.parse(None, test, self.prefs.grammars[u'rs'], 3, 4)
+        self.parser.parse(None, test, self.prefs.grammars[u'rs'], 3, 4)
+        self.checkParserNodes(expectedNodes, p.parserNodes)
+        self.checkParserRows(expectedRows, p.rows)
+
     def test_parse_short(self):
         test = u"""a⏰
 e
 """
         self.prefs = app.prefs.Prefs()
         p = self.parser
-        self.parser.parse(None, test, self.prefs.grammars[u'rs'], 0,
-                          99999)
+        self.parser.parse(None, test, self.prefs.grammars[u'rs'], 0, 99999)
         if 0:
             print("")
             for i,t in enumerate(test.splitlines()):
