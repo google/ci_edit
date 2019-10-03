@@ -745,6 +745,13 @@ class Parser:
             self.parserNodes.append(child)
         self.resumeAtRow = len(self.rows)
 
+    def _printLastNode(self, msg):
+        node = self.parserNodes[-1]
+        print("_printNode", node[0]["name"], node[1], node[2], node[3], msg, repr(self.data))
+
+    def _printNode(self, node, msg):
+        print("_printNode", node[0]["name"], node[1], node[2], node[3], msg)
+
     def debugLog(self, out, data):
         out('parser debug:')
         out('RowList ----------------', len(self.rows))

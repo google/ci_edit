@@ -326,8 +326,11 @@ class Actions(app.mutator.Mutator):
                 self.cursorLeft()
                 self.joinLines()
         else:
-            line = self.parser.rowText(self.penRow)
-            change = (u'b', line[self.penCol - 1:self.penCol])
+            offset = self.parser.dataOffset(self.penRow, self.penCol)
+            if offset is None:
+                change = (u'b', self.parser.data[-1])
+            else:
+                change = (u'b', self.parser.data[offset - 1])
             self.redoAddChange(change)
             self.redo()
 

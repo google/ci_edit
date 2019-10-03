@@ -62,6 +62,9 @@ class ApplicationTestCases(app.fake_curses_testing.FakeCursesTestCase):
             KEY_BACKSPACE1,
             self.cursorCheck(2, 7),
             self.displayCheck(2, 7, [u"      "]),
+            CTRL_Z,
+            self.cursorCheck(2, 9),
+            self.displayCheck(2, 7, [u"⏰      "]),
             CTRL_Q, u"n"
         ])
 
