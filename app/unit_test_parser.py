@@ -37,6 +37,7 @@ class ParserTestCases(unittest.TestCase):
         self.parser = None
 
     def checkParserNodes(self, expected, actual, startIndex=None):
+        kGrammar = app.parser.kGrammar
         kBegin = app.parser.kBegin
         kPrior = app.parser.kPrior
         kVisual = app.parser.kVisual
@@ -51,6 +52,8 @@ class ParserTestCases(unittest.TestCase):
             actualNode = actual[startIndex + index]
             self.assertTrue(isinstance(actualNode, tuple))
             # print("Node:", startIndex + index, expectedNode, actualNode[1:])
+            self.assertEqual(expectedNode[kGrammar],
+                    actualNode[kGrammar]["name"])
             self.assertEqual(expectedNode[kBegin], actualNode[kBegin])
             self.assertEqual(expectedNode[kPrior], actualNode[kPrior])
             self.assertEqual(expectedNode[kVisual], actualNode[kVisual])
@@ -71,7 +74,7 @@ class ParserTestCases(unittest.TestCase):
 
     def printParserNodes(self, nodes):
         for n in nodes:
-            print("({}, {}, {}, {}),".format({}, n[1], n[2], n[3]))
+            print("({}, {}, {}, {}),".format(n[0]["name"], n[1], n[2], n[3]))
 
     def test_parse(self):
         tests = [
@@ -578,11 +581,11 @@ line\tち\ttabs
 e
 """
         expectedNodes = [
-            ({}, 0, None, 0),
-            ({}, 0, None, 0),
-            ({}, 1, None, 1),
-            ({}, 3, None, 4),
-            ({}, 5, None, 6),
+            (u"rs", 0, None, 0),
+            (u"rs", 0, None, 0),
+            (u"rs", 1, None, 1),
+            (u"rs", 3, None, 4),
+            (u"rs", 5, None, 6),
         ]
         expectedRows = [0, 3, 4]
         self.prefs = app.prefs.Prefs()
