@@ -641,6 +641,59 @@ e
         self.assertEqual(p.dataOffset(1, 3), None)
         self.assertEqual(p.dataOffset(2, 0), None)
 
+    def test_insert(self):
+        self.prefs = app.prefs.Prefs()
+        p = self.parser
+        self.assertEqual(p.resumeAtRow, 0)
+        self.parser.parse(None, u"", self.prefs.grammars[u'rs'], 0,
+                          99999)
+        self.assertEqual(p.resumeAtRow, 1)
+        if 0:
+            print("")
+            for i,t in enumerate(test.splitlines()):
+                print("{}: {}".format(i, repr(t)))
+            p.debugLog(print, test)
+
+        self.checkParserNodes([(u"rs", 0, None, 0),], p.parserNodes)
+        self.assertEqual(p.dataOffset(4, 5), None)
+        p.insert(0, 0, u"a")
+        self.checkParserNodes([(u"rs", 0, None, 0),], p.parserNodes)
+        self.assertEqual(p.rowTextAndWidth(0), (u"a", 1))
+        self.checkParserNodes([
+            (u"rs", 0, None, 0),
+            (u"rs", 0, None, 0),
+            (u"rs", 1, None, 1),
+            ], p.parserNodes)
+        # An insert to an invalid row, col will append to the end.
+        p.insert(2, 2, u"z")
+        self.assertEqual(p.rowCount(), 1)
+        self.assertEqual(p.rowTextAndWidth(0), (u"az", 2))
+        self.checkParserNodes([
+            (u"rs", 0, None, 0),
+            (u"rs", 0, None, 0),
+            (u"rs", 2, None, 2),
+            ], p.parserNodes)
+        p.insert(0, 0, u"ち")
+        self.assertEqual(p.rowTextAndWidth(0), (u"ちaz", 4))
+        self.checkParserNodes([
+            (u"rs", 0, None, 0),
+            (u"rs", 0, None, 0),
+            (u"rs", 1, None, 2),
+            (u"rs", 3, None, 4),
+            ], p.parserNodes)
+        p.insert(0, 2, u"b")
+        self.assertEqual(p.rowTextAndWidth(0), (u"ちbaz", 5))
+        self.checkParserNodes([
+            (u"rs", 0, None, 0),
+            (u"rs", 0, None, 0),
+            (u"rs", 1, None, 2),
+            (u"rs", 4, None, 5),
+            ], p.parserNodes)
+        p.insert(0, 0, u"x")
+        self.assertEqual(p.rowTextAndWidth(0), (u"xちbaz", 6))
+        #p.debugLog(print, p.data)
+        #self.printParserNodes(p.parserNodes)
+
     def test_data_offset(self):
         test = u"xちbaz"
         self.prefs = app.prefs.Prefs()

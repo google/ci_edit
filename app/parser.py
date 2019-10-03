@@ -260,6 +260,22 @@ class Parser:
         return (row < len(self.rows) and
             col < self.parserNodes[self.rows[row]][kVisual])
 
+    def insert(self, row, col, text):
+        if app.config.strict_debug:
+            assert isinstance(row, int)
+            assert isinstance(col, int)
+            assert isinstance(text, unicode)
+            assert row >= 0
+            assert col >= 0
+            assert len(text) > 0
+        offset = self.dataOffset(row, col)
+        if offset is None:
+            row = len(self.rows) - 1
+            self.data += text
+        else:
+            self.data = self.data[:offset] + text + self.data[offset:]
+        self._beginParsingAt(row)
+
     def nextCharRowCol(self, row, col):
         """Get the next column value for the character to the right.
         Returns: None if there is no remaining characters.
