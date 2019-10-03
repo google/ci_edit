@@ -641,6 +641,66 @@ e
         self.assertEqual(p.dataOffset(1, 3), None)
         self.assertEqual(p.dataOffset(2, 0), None)
 
+    def test_data_offset(self):
+        test = u"xちbaz"
+        self.prefs = app.prefs.Prefs()
+        p = self.parser
+        self.assertEqual(p.resumeAtRow, 0)
+        self.parser.parse(None, test, self.prefs.grammars[u'rs'], 0,
+                          99999)
+        self.assertEqual(p.resumeAtRow, 1)
+
+        self.checkParserNodes([
+            (u"rs", 0, None, 0),
+            (u"rs", 0, None, 0),
+            (u"rs", 1, None, 1),
+            (u"rs", 2, None, 3),
+            (u"rs", 5, None, 6),
+            ], p.parserNodes)
+        self.assertEqual(p.data[p.dataOffset(0, 0)], u"x")
+        self.assertEqual(p.data[p.dataOffset(0, 1)], u"ち")
+        self.assertEqual(p.data[p.dataOffset(0, 2)], u"ち")
+        self.assertEqual(p.data[p.dataOffset(0, 3)], u"b")
+        self.assertEqual(p.data[p.dataOffset(0, 4)], u"a")
+        self.assertEqual(p.data[p.dataOffset(0, 5)], u"z")
+
+        test = u"xちbちaz"
+        self.parser.parse(None, test, self.prefs.grammars[u'rs'], 0,
+                          99999)
+        self.checkParserNodes([
+            (u"rs", 0, None, 0),
+            (u"rs", 0, None, 0),
+            (u"rs", 1, None, 1),
+            (u"rs", 2, None, 3),
+            (u"rs", 3, None, 4),
+            (u"rs", 4, None, 6),
+            (u"rs", 6, None, 8),
+            ], p.parserNodes)
+        self.assertEqual(p.data[p.dataOffset(0, 0)], u"x")
+        self.assertEqual(p.data[p.dataOffset(0, 1)], u"ち")
+        self.assertEqual(p.data[p.dataOffset(0, 2)], u"ち")
+        self.assertEqual(p.data[p.dataOffset(0, 3)], u"b")
+        self.assertEqual(p.data[p.dataOffset(0, 4)], u"ち")
+        self.assertEqual(p.data[p.dataOffset(0, 5)], u"ち")
+        self.assertEqual(p.data[p.dataOffset(0, 6)], u"a")
+        self.assertEqual(p.data[p.dataOffset(0, 7)], u"z")
+
+        test = u"ちbち"
+        self.parser.parse(None, test, self.prefs.grammars[u'rs'], 0,
+                          99999)
+        self.checkParserNodes([
+            (u"rs", 0, None, 0),
+            (u"rs", 0, None, 0),
+            (u"rs", 1, None, 2),
+            (u"rs", 2, None, 3),
+            (u"rs", 3, None, 5),
+            ], p.parserNodes)
+        self.assertEqual(p.data[p.dataOffset(0, 0)], u"ち")
+        self.assertEqual(p.data[p.dataOffset(0, 1)], u"ち")
+        self.assertEqual(p.data[p.dataOffset(0, 2)], u"b")
+        self.assertEqual(p.data[p.dataOffset(0, 3)], u"ち")
+        self.assertEqual(p.data[p.dataOffset(0, 4)], u"ち")
+
 
     if 0:
 
