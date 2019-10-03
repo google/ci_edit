@@ -168,18 +168,22 @@ class Parser:
 
     def grammarIndexFromRowCol(self, row, col):
         """
+        tip: as an optimization, check if |col == 0| prior to calling. The
+            result will always be zero (so the call can be avoided).
+
         Returns:
             index. |index| may then be passed to grammarAtIndex().
         """
         self._fullyParseTo(row)
-        if row + 1 >= len(
-                self.rows):  # or self.rows[row + 1] > len(self.parserNodes):
-            # This file is too large. There's other ways to handle this, but for
-            # now let's leave the tail un-highlighted.
-            return 0
-        gl = self.parserNodes[self.rows[row]:self.rows[row + 1]] + [
-            self.endNode
-        ]
+        if app.config.strict_debug:
+            assert row < len(self.rows)
+        if row == len(self.rows) - 1:
+            # The last line.
+            assert row + 1 >= len(
+                self.rows)
+            gl = self.parserNodes[self.rows[row]:] + [self.endNode]
+        else:
+            gl = self.parserNodes[self.rows[row]:self.rows[row + 1]] + [self.endNode]
         offset = gl[0][kVisual] + col
         # Binary search to find the node for the column.
         low = 0
@@ -550,6 +554,10 @@ class Parser:
                 #app.log.info('parser exit, match not found')
                 # todo(dschuyler): mark parent grammars as unterminated (if they
                 # expect be terminated). e.g. unmatched string quote or xml tag.
+                if cursor != len(self.data):
+                    # The last bit of the last line.
+                    self.parserNodes.append((topNode[kGrammar], cursor,
+                                             topNode[kPrior], visual))
                 break
             index = -1
             foundGroups = found.groups()
