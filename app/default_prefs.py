@@ -35,13 +35,11 @@ __c_keywords = __common_keywords + [
 ]
 
 __linux_commands = [
-    "ag", "basename", "bash", "cd", "chmod", "cp",
-    "dircolors", "dirname", "echo", "egrep",
-    "find",
-    "grep", "ixoff", "ixon", "lesspipe", "ln", "ls", "mkdir", "read", "rm",
-    "rmdir", "rxvt", "sed", "sh", "shell", "sleep", "ssh", "tput", "wc"
+    "ag", "basename", "bash", "cd", "chmod", "cp", "dircolors", "dirname",
+    "echo", "egrep", "find", "grep", "ixoff", "ixon", "lesspipe", "ln", "ls",
+    "mkdir", "read", "rm", "rmdir", "rxvt", "sed", "sh", "shell", "sleep",
+    "ssh", "tput", "wc"
 ]
-
 
 if sys.version_info[0] == 2:
     # The Python2 re limits the number of named groups. Reduce the keywords
@@ -55,11 +53,11 @@ if sys.version_info[0] == 2:
         "throw", "true", "typedef", "typename", "virtual", "while"
     ]
     __c_primitive_types = [
-        "bool", "char", "double", "float", "int", "int8_t", "int16_t", "int32_t",
-        "int64_t",
-        "int_max_t", "int8_t", "int16_t", "int32_t", "int64_t", "intptr_t",
-        "ptrdiff_t", "size_t", "long", "signed", "short", "uint8_t", "uint16_t",
-        "uint32_t", "uint_max_t", "uintptr_t", "unsigned", "void", "wchar_t"
+        "bool", "char", "double", "float", "int", "int8_t", "int16_t",
+        "int32_t", "int64_t", "int_max_t", "int8_t", "int16_t", "int32_t",
+        "int64_t", "intptr_t", "ptrdiff_t", "size_t", "long", "signed", "short",
+        "uint8_t", "uint16_t", "uint32_t", "uint_max_t", "uintptr_t",
+        "unsigned", "void", "wchar_t"
     ]
 else:
     __cpp_keywords = [
@@ -76,14 +74,15 @@ else:
         "typedef", "typename", "virtual", "volatile", "while", "xor", "xor_eq"
     ]
     __c_primitive_types = [
-        "bool", "char", "double", "float", "int", "int8_t", "int16_t", "int32_t",
-        "int64_t", "int_fast8_t", "int_fast16_t", "int_fast32_t", "int_fast64_t",
-        "int_least8_t", "int_least16_t", "int_least32_t", "int_least64_t",
-        "int_max_t", "int8_t", "int16_t", "int32_t", "int64_t", "intptr_t",
-        "ptrdiff_t", "size_t", "long", "signed", "short", "uint8_t", "uint16_t",
-        "uint32_t", "uint64_t", "uint_fast8_t", "uint_fast16_t", "uint_fast32_t",
-        "uint_fast64_t", "uint_least8_t", "uint_least16_t", "uint_least32_t",
-        "uint_least64_t", "uint_max_t", "uintptr_t", "unsigned", "void", "wchar_t"
+        "bool", "char", "double", "float", "int", "int8_t", "int16_t",
+        "int32_t", "int64_t", "int_fast8_t", "int_fast16_t", "int_fast32_t",
+        "int_fast64_t", "int_least8_t", "int_least16_t", "int_least32_t",
+        "int_least64_t", "int_max_t", "int8_t", "int16_t", "int32_t", "int64_t",
+        "intptr_t", "ptrdiff_t", "size_t", "long", "signed", "short", "uint8_t",
+        "uint16_t", "uint32_t", "uint64_t", "uint_fast8_t", "uint_fast16_t",
+        "uint_fast32_t", "uint_fast64_t", "uint_least8_t", "uint_least16_t",
+        "uint_least32_t", "uint_least64_t", "uint_max_t", "uintptr_t",
+        "unsigned", "void", "wchar_t"
     ]
 
 __chrome_extension = r"""\b[a-z]{32}\b"""
@@ -1003,10 +1002,9 @@ prefs = {
         "make": {
             "indent": "\t",
             "keywords": [
-                "ifeq", "endif", "ifneq",
-                "break", "case", "continue", "do", "done", "echo", "else",
-                "esac", "exit", "fi", "if", "for", "return", "switch", "then",
-                "while"
+                "ifeq", "endif", "ifneq", "break", "case", "continue", "do",
+                "done", "echo", "else", "esac", "exit", "fi", "if", "for",
+                "return", "switch", "then", "while"
             ],
             # Not really types.
             "types": __linux_commands,

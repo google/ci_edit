@@ -394,7 +394,9 @@ def renderedSubStr(string, beginCol, endCol=None):
                 output.append(ch)
     return u"".join(output)
 
+
 if sys.version_info[0] == 2:
+
     def charWidth(ch, column):
         if ch == u"\t":
             tabWidth = 8
@@ -409,12 +411,13 @@ if sys.version_info[0] == 2:
         return 1
 
     def isDoubleWidth(ch):
-        return ch != u"" and unicodedata.east_asian_width(ch) in (
-                u"A", u"F", u"W")
+        return ch != u"" and unicodedata.east_asian_width(ch) in (u"A", u"F",
+                                                                  u"W")
 
     def isZeroWidth(ch):
-        return ch == u"" or ch < u" " #or unicodedata.east_asian_width(ch) == "N"
+        return ch == u"" or ch < u" "  #or unicodedata.east_asian_width(ch) == "N"
 else:
+
     def charWidth(ch, column):
         if ch == u"\t":
             tabWidth = 8
@@ -432,7 +435,8 @@ else:
         return ch != u"" and unicodedata.east_asian_width(ch) == "W"
 
     def isZeroWidth(ch):
-        return ch == u"" or ch < u" " #or unicodedata.east_asian_width(ch) == "N"
+        return ch == u"" or ch < u" "  #or unicodedata.east_asian_width(ch) == "N"
+
 
 def floorCol(column, line):
     """Round off the column so that it aligns with the start of a character.
@@ -451,6 +455,7 @@ def floorCol(column, line):
         floorColumn += width
     return floorColumn
 
+
 def priorCharCol(column, line):
     """Return the start column of the character before |column|.
     """
@@ -466,6 +471,7 @@ def priorCharCol(column, line):
             return priorColumn
         priorColumn += width
     return None
+
 
 def columnWidth(string):
     """When rendering |string| how many character cells will be used? For ASCII
