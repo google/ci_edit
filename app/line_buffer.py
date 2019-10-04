@@ -106,7 +106,7 @@ class LineBuffer:
         self.parserTime = time.time() - start
 
     def isEmpty(self):
-        return len(self.lines) == 1 and len(self.lines[0]) == 0
+        return len(self.parser.data) == 0
 
     def linesToData(self):
         if self.isBinary:

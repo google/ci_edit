@@ -1326,7 +1326,8 @@ class Actions(app.mutator.Mutator):
         return re.sub(find, replace, text, flags=flags)
 
     def applyDocumentUpdate(self, data):
-        diff = difflib.ndiff(self.lines, self.doDataToLines(data))
+        lines = self.doDataToLines(self.parser.data)
+        diff = difflib.ndiff(lines, self.doDataToLines(data))
         ndiff = []
         counter = 0
         for i in diff:
