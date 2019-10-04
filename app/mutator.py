@@ -437,12 +437,16 @@ class Mutator(app.selectable.Selectable):
 
     def __undoChange(self, change):
         if change[0] == 'b':
-            line = self.lines[self.penRow]
-            x = self.penCol
-            self.lines[self.penRow] = line[:x] + change[1] + line[x:]
-            self.penCol += columnWidth(change[1])
-            if self.upperChangedRow > self.penRow:
-                self.upperChangedRow = self.penRow
+            self.parser.insert(self.penRow, self.penCol, change[1])
+            position = self.parser.nextCharRowCol(self.penRow, self.penCol)
+            if position is not None:
+                self.penRow += position[0]
+                self.penCol += position[1]
+            if 1:  # Hack in old lines system.
+                self.data = self.parser.data
+                self.dataToLines()
+                if self.upperChangedRow > self.penRow:
+                    self.upperChangedRow = self.penRow
         elif change[0] == 'bw':
             line = self.lines[self.penRow]
             x = self.penCol
