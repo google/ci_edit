@@ -477,8 +477,7 @@ class Actions(app.mutator.Mutator):
             if width < self.view.cols:
                 # The whole line fits on screen.
                 self.view.scrollCol = 0
-            elif (self.view.scrollCol == self.penCol and
-                  self.penCol == width):
+            elif (self.view.scrollCol == self.penCol and self.penCol == width):
                 self.view.scrollCol = max(
                     0, self.view.scrollCol - self.view.cols // 4)
 
@@ -798,8 +797,8 @@ class Actions(app.mutator.Mutator):
         maxRow = self.view.rows
         rowDelta = min(
             max(0,
-                self.parser.rowCount() - maxRow), max(
-                    0, self.penRow - maxRow // 2)) - self.view.scrollRow
+                self.parser.rowCount() - maxRow),
+            max(0, self.penRow - maxRow // 2)) - self.view.scrollRow
         self.cursorMoveScroll(0, 0, rowDelta, 0)
 
     def cursorStartOfLine(self):
@@ -1075,8 +1074,7 @@ class Actions(app.mutator.Mutator):
             optimalRowRatio = self.program.prefs.editor[u'optimalCursorRow']
             scrollRow = max(
                 0,
-                min(
-                    self.parser.rowCount() - 1,
+                min(self.parser.rowCount() - 1,
                     top - int(optimalRowRatio * (maxRows - 1))))
         else:
             scrollRow = top
@@ -1247,8 +1245,8 @@ class Actions(app.mutator.Mutator):
             warnings.simplefilter("ignore")
             # The saved re is also used for highlighting.
             self.findRe = re.compile(searchFor, flags)
-            self.findBackRe = re.compile(u"%s(?!.*%s.*)" % (searchFor, searchFor),
-                                         flags)
+            self.findBackRe = re.compile(
+                u"%s(?!.*%s.*)" % (searchFor, searchFor), flags)
         self.findCurrentPattern(direction)
 
     def replaceFound(self, replaceWith):
@@ -1823,7 +1821,8 @@ class Actions(app.mutator.Mutator):
 
     def stripTrailingWhiteSpace(self):
         for i in range(self.parser.rowCount()):
-            for found in app.regex.kReEndSpaces.finditer(self.parser.rowText(i)):
+            for found in app.regex.kReEndSpaces.finditer(
+                    self.parser.rowText(i)):
                 self._performDeleteRange(i, found.regs[0][0], i,
                                          found.regs[0][1])
 
