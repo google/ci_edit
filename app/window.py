@@ -80,7 +80,7 @@ class ViewWindow:
             app.log.check_le(row, self.rows)
             app.log.check_le(col, self.cols)
         self.program.backgroundFrame.addStr(self.top + row, self.left + col,
-                                  text.encode('utf-8'), colorPair)
+                                            text.encode('utf-8'), colorPair)
 
     def reattach(self):
         self.setParent(self.parent)
@@ -344,8 +344,9 @@ class ViewWindow:
             assert isinstance(text, unicode)
         text = text[:self.cols]
         text = text + u' ' * max(0, self.cols - len(text))
-        self.program.backgroundFrame.addStr(self.top + self.writeLineRow, self.left,
-                                  text.encode(u'utf-8'), color)
+        self.program.backgroundFrame.addStr(self.top + self.writeLineRow,
+                                            self.left, text.encode(u'utf-8'),
+                                            color)
         self.writeLineRow += 1
 
     def getProgram(self):
@@ -1281,7 +1282,7 @@ class InputWindow(Window):
             if f['row'] is not None:
                 if f['col'] is not None:
                     tb.selectText(f['row'], f['col'], 0,
-                            app.selectable.kSelectionNone)
+                                  app.selectable.kSelectionNone)
                 else:
                     tb.selectText(f['row'], 0, 0, app.selectable.kSelectionNone)
         if self.program.prefs.startup.get('readStdin'):
