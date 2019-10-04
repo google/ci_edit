@@ -166,6 +166,16 @@ class Parser:
     def defaultGrammar(self):
         return self._defaultGrammar
 
+    def deleteChar(self, row, col):
+        """Delete the character after (or "at") |row, col|."""
+        self._fullyParseTo(row)
+        offset = self.dataOffset(row, col)
+        if offset is None:
+            # Bottom of file, nothing to do.
+            return
+        self.data = self.data[:offset] + self.data[offset + 1:]
+        self._beginParsingAt(row)
+
     def grammarIndexFromRowCol(self, row, col):
         """
         tip: as an optimization, check if |col == 0| prior to calling. The
@@ -183,7 +193,8 @@ class Parser:
                 self.rows)
             gl = self.parserNodes[self.rows[row]:] + [self.endNode]
         else:
-            gl = self.parserNodes[self.rows[row]:self.rows[row + 1]] + [self.endNode]
+            gl = self.parserNodes[self.rows[row]:self.rows[row + 1]] + [
+              self.endNode]
         offset = gl[0][kVisual] + col
         # Binary search to find the node for the column.
         low = 0

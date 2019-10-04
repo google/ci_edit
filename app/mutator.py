@@ -265,12 +265,10 @@ class Mutator(app.selectable.Selectable):
             if self.upperChangedRow > self.penRow:
                 self.upperChangedRow = self.penRow
         elif change[0] == 'd':  # Redo delete character.
-            line = self.lines[self.penRow]
-            x = self.penCol
-            self.lines[self.penRow] = line[:x] + line[
-                x + columnWidth(change[1]):]
-            if self.upperChangedRow > self.penRow:
-                self.upperChangedRow = self.penRow
+            self.parser.deleteChar(self.penRow, self.penCol)
+            if 1:  # Hack in old lines system.
+                self.data = self.parser.data
+                self.dataToLines()
         elif change[0] == 'dr':  # Redo delete range.
             self.doDelete(*change[1])
         elif change[0] == 'ds':  # Redo delete selection.
@@ -455,11 +453,12 @@ class Mutator(app.selectable.Selectable):
             if self.upperChangedRow > self.penRow:
                 self.upperChangedRow = self.penRow
         elif change[0] == 'd':
-            line = self.lines[self.penRow]
-            x = self.penCol
-            self.lines[self.penRow] = line[:x] + change[1] + line[x:]
-            if self.upperChangedRow > self.penRow:
-                self.upperChangedRow = self.penRow
+            self.parser.insert(self.penRow, self.penCol, change[1])
+            if 1:  # Hack in old lines system.
+                self.data = self.parser.data
+                self.dataToLines()
+                if self.upperChangedRow > self.penRow:
+                    self.upperChangedRow = self.penRow
         elif change[0] == 'dr':  # Undo delete range.
             self.insertLinesAt(change[1][0], change[1][1], change[2],
                                app.selectable.kSelectionCharacter)

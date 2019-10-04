@@ -576,6 +576,71 @@ line\tち\ttabs
         self.assertEqual(p.rowText(3), u"sちome text.>\t<linta")
         self.assertEqual(p.rowText(4), u"\tち")
 
+    def test_delete_char(self):
+        test = u"""ち\t<tab
+\tち<
+\t<ち
+sちome text.>\t<
+line\tち\ttabs
+\tち
+ち\t\t\tz
+Здравствуйте
+こんにちはtranslate
+"""
+        self.prefs = app.prefs.Prefs()
+        p = self.parser
+        self.assertEqual(p.resumeAtRow, 0)
+        self.parser.parse(None, test, self.prefs.grammars[u'rs'], 0,
+                          99999)
+        self.assertEqual(p.resumeAtRow, 10)
+        if 0:
+            print("")
+            for i,t in enumerate(test.splitlines()):
+                print("{}: {}".format(i, repr(t)))
+            p.debugLog(print, test)
+
+        self.assertEqual(p.dataOffset(4, 5), 34)
+        self.assertEqual(p.rowTextAndWidth(0), (u"ち\t<tab", 12))
+        p.deleteChar(0, 0)
+        self.assertEqual(p.dataOffset(4, 5), 33)
+        self.assertEqual(p.rowTextAndWidth(0), (u"\t<tab", 12))
+        p.deleteChar(0, 1)
+        self.assertEqual(p.dataOffset(4, 5), 32)
+        self.assertEqual(p.rowTextAndWidth(0), (u"<tab", 4))
+        p.deleteChar(0, 2)
+        self.assertEqual(p.dataOffset(4, 5), 31)
+        self.assertEqual(p.rowText(0), u"<tb")
+        self.assertEqual(p.rowWidth(0), 3)
+        self.assertEqual(p.rowTextAndWidth(0), (u"<tb", 3))
+        p.deleteChar(0, 8)
+        self.assertEqual(p.rowText(0), u"<tb")
+        p.deleteChar(0, 2)
+        self.assertEqual(p.rowText(0), u"<t")
+
+        self.assertEqual(p.rowText(4), u"line\tち\ttabs")
+        self.assertEqual(p.priorCharRowCol(4, 20), (0, -1))
+        self.assertEqual(p.data[p.dataOffset(4, 19)], u"s")
+        self.assertEqual(p.dataOffset(4, 20), 37)
+        p.deleteChar(4, 19)
+        self.assertEqual(p.rowText(4), u"line\tち\ttab")
+        p.deleteChar(4, 18)
+        self.assertEqual(p.rowText(4), u"line\tち\tta")
+        p.deleteChar(4, 15)
+        self.assertEqual(p.rowText(4), u"line\tちta")
+        p.deleteChar(4, 9)
+        self.assertEqual(p.rowText(4), u"line\tta")
+        p.deleteChar(4, 7)
+        self.assertEqual(p.rowText(4), u"lineta")
+        p.deleteChar(4, 3)
+        self.assertEqual(p.rowText(4), u"linta")
+
+        self.assertEqual(p.rowTextAndWidth(3), (u"sちome text.>\t<", 17))
+        self.assertEqual(p.rowWidth(3), 17)
+        self.assertEqual(p.rowText(5), u"\tち")
+        p.deleteChar(3, 17)
+        self.assertEqual(p.rowText(3), u"sちome text.>\t<linta")
+        self.assertEqual(p.rowText(4), u"\tち")
+
     def test_reparse_short(self):
         test = u"""a⏰
 e
