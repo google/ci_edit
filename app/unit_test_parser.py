@@ -216,6 +216,15 @@ parse\t\t\tz
         self.assertEqual(p.rowText(10), u"parse\t\t\tz")
         self.assertEqual(p.rowText(11), u"")
 
+        self.assertEqual(p.rowText(0, 8), u"<tab")
+        self.assertEqual(p.rowText(0, 8, 9), u"<")
+        self.assertEqual(p.rowText(0, 8, -3), u"<")
+        self.assertEqual(p.rowText(0, -4, -3), u"<")
+        self.assertEqual(p.rowText(0, -1), u"b")
+        self.assertEqual(p.rowText(0, -2, -1), u"a")
+        self.assertEqual(p.rowText(0, -3, -2), u"t")
+        self.assertEqual(p.rowText(0, 11), u"b")
+
         self.assertEqual(p.rowTextAndWidth(0), (u"\t<tab", 12))
         self.assertEqual(p.rowTextAndWidth(1), (u"\t <tab+space", 19))
         self.assertEqual(p.rowTextAndWidth(2), (u" \t<space+tab", 18))
@@ -349,6 +358,10 @@ parse\t\t\tz
         self.assertEqual(p.dataOffset(10, 24), 104)
         self.assertEqual(p.dataOffset(10, 25), 105)
 
+        self.assertEqual(p.rowText(10, 5), u"\t\t\tz")
+        self.assertEqual(p.rowText(10, 7), u"\t\t\tz")
+        self.assertEqual(p.rowText(10, 8), u"\t\tz")
+
     def test_parse_mixed(self):
         test = u"""ち\t<tab
 \tち<
@@ -382,6 +395,27 @@ line\tち\ttabs
         self.assertEqual(p.rowText(7), u"Здравствуйте")
         self.assertEqual(p.rowText(8), u"こんにちはtranslate")
         self.assertEqual(p.rowText(9), u"")
+
+        self.assertEqual(app.curses_util.charWidth(u"З", 0), 1)
+        self.assertEqual(app.curses_util.charWidth(u"こ", 0), 2)
+        self.assertEqual(app.curses_util.charWidth(u"ん", 0), 2)
+        self.assertEqual(app.curses_util.charWidth(u"に", 0), 2)
+        self.assertEqual(p.dataOffset(7, 0), 51)
+        self.assertEqual(p.dataOffset(7, 1), 52)
+        self.assertEqual(p.dataOffset(7, 2), 53)
+        self.assertEqual(p.rowText(7, 0), u"Здравствуйте")
+        self.assertEqual(p.rowText(7, 1), u"дравствуйте")
+        self.assertEqual(p.rowText(7, 2), u"равствуйте")
+        self.assertEqual(p.rowText(7, 3), u"авствуйте")
+        self.assertEqual(p.rowText(7, 0, -1), u"Здравствуйт")
+        self.assertEqual(p.rowText(7, 1, -3), u"дравству")
+        self.assertEqual(p.rowText(7, 2, -5), u"равст")
+        self.assertEqual(p.rowText(7, 3, -7), u"ав")
+        self.assertEqual(p.rowText(8, 0), u"こんにちはtranslate")
+        self.assertEqual(p.rowText(8, 2), u"んにちはtranslate")
+        self.assertEqual(p.rowText(8, 4), u"にちはtranslate")
+        self.assertEqual(p.rowText(8, 6), u"ちはtranslate")
+        self.assertEqual(p.rowText(8, 8), u"はtranslate")
 
         self.assertEqual(p.rowTextAndWidth(0), (u"ち\t<tab", 12))
         self.assertEqual(p.rowTextAndWidth(1), (u"\tち<", 11))

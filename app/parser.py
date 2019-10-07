@@ -440,25 +440,50 @@ class Parser:
     def rowCount(self):
         return len(self.rows)
 
-    def rowText(self, row):
+    def rowText(self, row, beginCol=0, endCol=0):
         """Get the text for |row|.
 
         Args:
             row (int): row is zero based.
+            beginCol (int): subindex within the row (similar to a slice).
+            endCol (int): subindex within the row (similar to a slice).
 
         Returns:
             document text (unicode)
         """
         if app.config.strict_debug:
             assert isinstance(row, int)
+            assert isinstance(beginCol, int)
+            assert isinstance(endCol, int)
+            assert row >= 0
             assert isinstance(self.data, unicode)
         self._fullyParseTo(row)
-        begin = self.parserNodes[self.rows[row]][kBegin]
-        if row + 1 >= len(self.rows):
-            return self.data[begin:]
-        end = self.parserNodes[self.rows[row + 1]][kBegin]
-        if len(self.data) and self.data[end - 1] == '\n':
-            end -= 1
+        if beginCol == endCol == 0:
+            begin = self.parserNodes[self.rows[row]][kBegin]
+            if row + 1 >= len(self.rows):
+                return self.data[begin:]
+            end = self.parserNodes[self.rows[row + 1]][kBegin]
+            if len(self.data) and self.data[end - 1] == u"\n":
+                end -= 1
+            return self.data[begin:end]
+
+        if beginCol >= 0:
+            begin = self.dataOffset(row, beginCol)
+        else:
+            width = self.rowWidth(row)
+            begin = self.dataOffset(row, width + beginCol)
+
+        if endCol == 0:
+            end = self.dataOffset(row + 1, 0)
+            if end is None:
+                end = len(self.data)
+            if self.data[end - 1] == u"\n":
+                end -= 1
+        elif endCol < 0:
+            width = self.rowWidth(row)
+            end = self.dataOffset(row, width + endCol)
+        else:
+            end = self.dataOffset(row, endCol)
         return self.data[begin:end]
 
     def charAt(self, row, col):
