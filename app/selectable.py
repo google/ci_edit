@@ -197,7 +197,10 @@ class Selectable(app.line_buffer.LineBuffer):
     def __extendWords(self, upperRow, upperCol, lowerRow, lowerCol):
         """Extends and existing selection to the nearest word boundaries. The
         pen and marker will be extended away from each other. The extension may
-        occur in one, both, or neither direction."""
+        occur in one, both, or neither direction.
+
+        Returns: tuple of (upperCol, lowerCol).
+        """
         line = self.parser.rowText(upperRow)
         for segment in re.finditer(app.regex.kReWordBoundary, line):
             if segment.start() <= upperCol < segment.end():
@@ -211,8 +214,13 @@ class Selectable(app.line_buffer.LineBuffer):
         return upperCol, lowerCol
 
     def extendSelection(self):
-        """Get a tuple of:
-        (penRow, penCol, markerRow, markerCol, selectionMode)"""
+        """Expand the current selection to fit the selection mode. E.g. if the
+        pen in the middle of a word, selection word will extend the selection to
+        the left and right so that the whole word is selected.
+
+        Returns: tuple of (penRow, penCol, markerRow, markerCol, selectionMode)
+            which are the delta values to accomplish the selection mode.
+        """
         if self.selectionMode == kSelectionNone:
             return (0, 0, -self.markerRow, -self.markerCol, 0)
         elif self.selectionMode == kSelectionAll:

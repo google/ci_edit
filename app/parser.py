@@ -128,7 +128,11 @@ class Parser:
 
         Normally this will be the character the cursor is 'on' when
         using a block cursor; or to the 'right' of the when using a vertical
-        cursor. I.e. it would be the character deleted by the 'del' key."""
+        cursor. I.e. it would be the character deleted by the 'del' key.
+
+        Returns: offset (int) into self.data buffer; or None if (row, col) is
+            outside the document.
+        """
         self._fullyParseTo(row)
         if row >= len(self.rows):
             return None
