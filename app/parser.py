@@ -387,11 +387,11 @@ class Parser:
         """
         data = self.data
         offset = self.parserNodes[self.rows[-1]][kBegin]
-        visual = self.parserNodes[self.rows[-1]][kVisual]
         limit = len(data)
         if offset == limit:
             # Already parsed to end of data.
             return
+        visual = self.parserNodes[self.rows[-1]][kVisual]
         # Track the |visual| value for the start of the line. The difference
         # between |visual| and |visualStartCol| is the column index of the line.
         visualStartCol = 0
@@ -438,6 +438,7 @@ class Parser:
                 assert self.resumeAtRow >= endRow + 1, (self.resumeAtRow, endRow)
 
     def rowCount(self):
+        self._fastLineParse(self.defaultGrammar())
         return len(self.rows)
 
     def rowText(self, row, beginCol=0, endCol=0):
