@@ -406,13 +406,18 @@ if sys.version_info[0] == 2:
         elif ch < u"ᄀ":
             # Optimization.
             return 1
-        elif unicodedata.east_asian_width(ch) in (u"A", u"F", r"W"):
+        elif unicodedata.east_asian_width(ch) in (u"F", r"W"):
             return 2
         return 1
 
     def isDoubleWidth(ch):
-        return ch != u"" and unicodedata.east_asian_width(ch) in (u"A", u"F",
-                                                                  u"W")
+        if ch == u"" or ch < u"ᄀ":
+            # Optimization.
+            return False
+        width = unicodedata.east_asian_width(ch)
+        if width in (u"F", u"W"):
+            return True
+        return False
 
     def isZeroWidth(ch):
         return ch == u"" or ch < u" "  #or unicodedata.east_asian_width(ch) == "N"
@@ -432,7 +437,10 @@ else:
         return 1
 
     def isDoubleWidth(ch):
-        return ch != u"" and unicodedata.east_asian_width(ch) == "W"
+        if ch == u"" or ch < u"ᄀ":
+            # Optimization.
+            return False
+        return unicodedata.east_asian_width(ch) == "W"
 
     def isZeroWidth(ch):
         return ch == u"" or ch < u" "  #or unicodedata.east_asian_width(ch) == "N"
