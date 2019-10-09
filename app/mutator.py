@@ -222,6 +222,25 @@ class Mutator(app.selectable.Selectable):
         self.markerCol += change[1][3]
         self.selectionMode += change[1][4]
 
+    def printRedoState(self, out):
+        out(u"---- Redo State begin ----")
+        out(u"procTemp %d temp %r" % (
+                self.processTempChange,
+                self.tempChange,
+            ))
+        out(u"redoIndex %3d savedAt %3d depth %3d" %
+            (self.redoIndex, self.savedAtRedoIndex,
+             len(self.redoChain)))
+        index = len(self.redoChain)
+        while index > 0:
+            if index == self.redoIndex:
+                out(u"  -----> next redo ^; next undo v")
+            if index == self.savedAtRedoIndex:
+                out(u"  <saved>")
+            index -= 1
+            out(u"    {}".format(repr(self.redoChain[index])))
+        out(u"---- Redo State end ----")
+
     def redo(self):
         """Replay the next action on the redoChain."""
         assert 0 <= self.redoIndex <= len(self.redoChain)

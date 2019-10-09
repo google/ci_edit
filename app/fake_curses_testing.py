@@ -100,6 +100,22 @@ class FakeCursesTestCase(unittest.TestCase):
 
         return createEvent
 
+    def call(self, *args):
+        """Call arbitrary function as a 'fake input'."""
+        caller = inspect.stack()[1]
+        callerText = u"\n  %s:%s:%s(): " % (os.path.split(caller[1])[1],
+                                            caller[2], caller[3])
+        def caller(display, cmdIndex):
+            try:
+                args[0](*args[1:])
+            except Exception as e:
+                output = callerText + u' at index ' + str(cmdIndex)
+                print(output)
+                self.fail(e)
+            return None
+
+        return caller
+
     def displayCheck(self, *args):
         assert isinstance(args[0], int)
         assert isinstance(args[1], int)
@@ -238,6 +254,30 @@ class FakeCursesTestCase(unittest.TestCase):
             return None
 
         return prefChecker
+
+    def printParserState(self):
+        caller = inspect.stack()[1]
+        callerText = u"in %s:%s:%s(): " % (os.path.split(caller[1])[1],
+                                           caller[2], caller[3])
+
+        def redoChain(display, cmdIndex):
+            tb = self.prg.programWindow.focusedWindow.textBuffer
+            tb.parser.debugLog(print, tb.parser.data)
+            return None
+
+        return redoChain
+
+    def printRedoState(self):
+        caller = inspect.stack()[1]
+        callerText = u"in %s:%s:%s(): " % (os.path.split(caller[1])[1],
+                                           caller[2], caller[3])
+
+        def redoState(display, cmdIndex):
+            tb = self.prg.programWindow.focusedWindow.textBuffer
+            tb.printRedoState(print)
+            return None
+
+        return redoState
 
     def resizeScreen(self, rows, cols):
         assert isinstance(rows, int)
