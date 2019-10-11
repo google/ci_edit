@@ -408,8 +408,9 @@ class Parser:
                             visual - visualStartCol)
                 offset += 1
             if offset >= limit:
-                # Add a terminating (end) node.
-                self.parserNodes.append((grammar, len(data), None, visual))
+                if self.parserNodes[-1][kBegin] != limit:
+                    # Add a terminating (end) node.
+                    self.parserNodes.append((grammar, limit, None, visual))
                 break
             visualStartCol = visual
             offset += 1
