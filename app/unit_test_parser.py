@@ -216,6 +216,9 @@ parse\t\t\tz
         self.assertEqual(p.rowText(10), u"parse\t\t\tz")
         self.assertEqual(p.rowText(11), u"")
 
+        self.assertEqual(p.rowText(0, 0), u"\t<tab")
+        self.assertEqual(p.rowText(0, 0, 0), u"")
+        self.assertEqual(p.rowText(0, 0, 30), u"\t<tab")
         self.assertEqual(p.rowText(0, 8), u"<tab")
         self.assertEqual(p.rowText(0, 8, 9), u"<")
         self.assertEqual(p.rowText(0, 8, -3), u"<")

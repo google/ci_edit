@@ -442,7 +442,7 @@ class Parser:
         self._fastLineParse(self.defaultGrammar())
         return len(self.rows)
 
-    def rowText(self, row, beginCol=0, endCol=0):
+    def rowText(self, row, beginCol=None, endCol=None):
         """Get the text for |row|.
 
         Args:
@@ -455,12 +455,12 @@ class Parser:
         """
         if app.config.strict_debug:
             assert isinstance(row, int)
-            assert isinstance(beginCol, int)
-            assert isinstance(endCol, int)
+            assert beginCol is None or isinstance(beginCol, int)
+            assert endCol is None or isinstance(endCol, int)
             assert row >= 0
             assert isinstance(self.data, unicode)
         self._fullyParseTo(row)
-        if beginCol == endCol == 0:
+        if beginCol is endCol is None:
             begin = self.parserNodes[self.rows[row]][kBegin]
             if row + 1 >= len(self.rows):
                 return self.data[begin:]
@@ -475,7 +475,7 @@ class Parser:
             width = self.rowWidth(row)
             begin = self.dataOffset(row, width + beginCol)
 
-        if endCol == 0:
+        if endCol is None:
             end = self.dataOffset(row + 1, 0)
             if end is None:
                 end = len(self.data)
@@ -485,6 +485,9 @@ class Parser:
             width = self.rowWidth(row)
             end = self.dataOffset(row, width + endCol)
         else:
+            width = self.rowWidth(row)
+            if endCol >= width:
+                endCol = width
             end = self.dataOffset(row, endCol)
         return self.data[begin:end]
 
