@@ -261,6 +261,7 @@ class FakeCursesTestCase(unittest.TestCase):
                                            caller[2], caller[3])
 
         def redoChain(display, cmdIndex):
+            print("Parser state", callerText)
             tb = self.prg.programWindow.focusedWindow.textBuffer
             tb.parser.debugLog(print, tb.parser.data)
             return None
@@ -273,6 +274,7 @@ class FakeCursesTestCase(unittest.TestCase):
                                            caller[2], caller[3])
 
         def redoState(display, cmdIndex):
+            print("Redo state", callerText)
             tb = self.prg.programWindow.focusedWindow.textBuffer
             tb.printRedoState(print)
             return None
