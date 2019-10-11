@@ -291,6 +291,17 @@ class Parser:
             self.data = self.data[:offset] + text + self.data[offset:]
         self._beginParsingAt(row)
 
+    def insertLines(self, row, col, lines):
+        if app.config.strict_debug:
+            assert isinstance(row, int)
+            assert isinstance(col, int)
+            #assert isinstance(lines, tuple)
+            assert row >= 0
+            assert col >= 0
+            assert len(lines) > 0
+        text = u"\n".join(lines)
+        self.insert(row, col, text)
+
     def nextCharRowCol(self, row, col):
         """Get the next column value for the character to the right.
         Returns: None if there is no remaining characters.
