@@ -486,12 +486,11 @@ class Parser:
             width = self.rowWidth(row)
             begin = self.dataOffset(row, width + beginCol)
 
+        if begin is None:
+            return u""
+
         if endCol is None:
             end = self.dataOffset(row + 1, 0)
-            if end is None:
-                end = len(self.data)
-            if self.data[end - 1] == u"\n":
-                end -= 1
         elif endCol < 0:
             width = self.rowWidth(row)
             end = self.dataOffset(row, width + endCol)
@@ -500,6 +499,12 @@ class Parser:
             if endCol >= width:
                 endCol = width
             end = self.dataOffset(row, endCol)
+
+        if end is None:
+            end = len(self.data)
+        if end > 0 and self.data[end - 1] == u"\n":
+            end -= 1
+
         return self.data[begin:end]
 
     def charAt(self, row, col):
