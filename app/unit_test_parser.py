@@ -681,6 +681,37 @@ line\tち\ttabs
         self.assertEqual(p.rowText(3), u"sちome text.>\t<linta")
         self.assertEqual(p.rowText(4), u"\tち")
 
+    def test_delete_range(self):
+        test = u"""ち\t<tab
+\tち<
+\t<ち
+sちome text.>\t<
+line\tち\ttabs
+\tち
+ち\t\t\tz
+Здравствуйте
+こんにちはtranslate
+"""
+        self.prefs = app.prefs.Prefs()
+        p = self.parser
+        self.assertEqual(p.resumeAtRow, 0)
+        self.parser.parse(None, test, self.prefs.grammars[u'rs'], 0,
+                          99999)
+        self.assertEqual(p.resumeAtRow, 10)
+        if 0:
+            print("")
+            for i,t in enumerate(test.splitlines()):
+                print("{}: {}".format(i, repr(t)))
+            p.debugLog(print, test)
+
+        self.assertEqual(p.dataOffset(4, 5), 34)
+        self.assertEqual(p.rowTextAndWidth(0), (u"ち\t<tab", 12))
+        self.assertEqual(p.rowTextAndWidth(3), (u"sちome text.>\t<", 17))
+        self.assertEqual(p.rowTextAndWidth(4), (u"line\tち\ttabs", 20))
+        p.deleteRange(3, 0, 3, 1)
+        self.assertEqual(p.dataOffset(4, 5), 33)
+        self.assertEqual(p.rowTextAndWidth(3), (u"ちome text.>\t<", 17))
+
     def test_reparse_short(self):
         test = u"""a⏰
 e

@@ -114,12 +114,31 @@ class SelectableTestCases(unittest.TestCase):
 
     def test_deletion_all(self):
         selectable = self.selectable
+
+        def applySelection(args):
+            selectable.penRow += args[0]
+            selectable.penCol += args[1]
+            selectable.markerRow += args[2]
+            selectable.markerCol += args[3]
+            selectable.selectionMode += args[4]
+
+        self.assertEqual(selectable.selection(), (0, 0, 0, 0))
         selectable.lines = [u"oneTwo", u"", u"five"]
         selectable.parseDocument()
+        self.assertEqual(selectable.selection(), (0, 0, 0, 0))
         selectable.selectionMode = app.selectable.kSelectionAll
         self.assertEqual(selectable.extendSelection(), (2, 4, 0, 0, 0))
         selectable.penCol = 3
         self.assertEqual(selectable.extendSelection(), (2, 1, 0, 0, 0))
+
+        applySelection(selectable.extendSelection())
+        self.assertEqual(selectable.selection(), (2, 4, 0, 0))
+        selectable.doDeleteSelection()
+        self.assertEqual(selectable.lines, [u""])
+
+        selectable.insertLinesAt(0, 0, (u"wx", u"", u"yz"),
+                app.selectable.kSelectionAll)
+        self.assertEqual(selectable.lines, [u"wx", u"", u"yz"])
 
     def test_deletion_block(self):
         selectable = self.selectable
