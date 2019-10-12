@@ -534,11 +534,12 @@ class Mutator(app.selectable.Selectable):
         elif change[0] == 'n':
             # Undo split lines.
             self.__undoMove(change[2])
-            self.lines[self.penRow] += self.lines[self.penRow + change[1]]
-            for _ in range(change[1]):
-                del self.lines[self.penRow + 1]
-            if self.upperChangedRow > self.penRow:
-                self.upperChangedRow = self.penRow
+            self.parser.backspace(self.penRow + 1, 0)
+            if 1:
+                self.data = self.parser.data
+                self.dataToLines()
+                if self.upperChangedRow > self.penRow:
+                    self.upperChangedRow = self.penRow
         elif change[0] == 'v':  # undo paste
             clip = change[1]
             row = self.penRow

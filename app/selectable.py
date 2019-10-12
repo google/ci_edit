@@ -153,11 +153,25 @@ class Selectable(app.line_buffer.LineBuffer):
               self.selectionMode == kSelectionCharacter or
               self.selectionMode == kSelectionLine or
               self.selectionMode == kSelectionWord):
-            upperLine = self.lines[upperRow]
-            lowerLine = self.lines[lowerRow]
-            self.lines[upperRow] = upperLine[:upperCol] + lowerLine[lowerCol:]
-            if upperRow != lowerRow:
-                del self.lines[upperRow + 1:lowerRow + 1]
+            self.parser.deleteRange(upperRow, upperCol, lowerRow, lowerCol)
+
+            if 0:
+                          begin = self.parser.dataOffset(upperRow, upperCol)
+                          end = self.parser.dataOffset(lowerRow, lowerCol)
+
+                          if end is None:
+                              self.parser.data = self.parser.data[:begin]
+                          else:
+                              self.parser.data = self.parser.data[:begin] + self.parser.data[end:]
+            if 1:
+                self.data = self.parser.data
+                self.dataToLines()
+            if 0:
+                upperLine = self.lines[upperRow]
+                lowerLine = self.lines[lowerRow]
+                self.lines[upperRow] = upperLine[:upperCol] + lowerLine[lowerCol:]
+                if upperRow != lowerRow:
+                    del self.lines[upperRow + 1:lowerRow + 1]
 
     def insertLines(self, lines):
         if app.config.strict_debug:
