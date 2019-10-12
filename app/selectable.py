@@ -128,10 +128,13 @@ class Selectable(app.line_buffer.LineBuffer):
         return tuple(lines)
 
     def doDeleteSelection(self):
+        """Call doDelete() with current pen and marker values."""
         upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
         self.doDelete(upperRow, upperCol, lowerRow, lowerCol)
 
     def doDelete(self, upperRow, upperCol, lowerRow, lowerCol):
+        """Delete characters from (upperRow, upperCol) up to (lowerRow,
+        lowerCol) using the current selection mode."""
         if app.config.strict_debug:
             assert isinstance(upperRow, int)
             assert isinstance(upperCol, int)
@@ -167,8 +170,10 @@ class Selectable(app.line_buffer.LineBuffer):
             assert isinstance(col, int)
             assert isinstance(lines, tuple)
             assert isinstance(selectionMode, int)
-        if len(lines) == 0:
-            return
+        if len(lines) <= 1:
+            if len(lines) == 0 or len(lines[0]) == 0:
+                # Optimization. There's nothing to insert.
+                return
         lines = list(lines)
         if self.upperChangedRow > row:
             self.upperChangedRow = row

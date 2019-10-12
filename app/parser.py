@@ -180,6 +180,15 @@ class Parser:
         self.data = self.data[:offset] + self.data[offset + 1:]
         self._beginParsingAt(row)
 
+    def deleteRange(self, upperRow, upperCol, lowerRow, lowerCol):
+        begin = self.dataOffset(upperRow, upperCol)
+        end = self.dataOffset(lowerRow, lowerCol)
+        if end is None:
+            self.data = self.data[:begin]
+        else:
+            self.data = self.data[:begin] + self.data[end:]
+        self._beginParsingAt(upperRow)
+
     def grammarIndexFromRowCol(self, row, col):
         """
         tip: as an optimization, check if |col == 0| prior to calling. The

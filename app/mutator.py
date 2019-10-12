@@ -275,6 +275,8 @@ class Mutator(app.selectable.Selectable):
             if 1:  # Hack in old lines system.
                 self.data = self.parser.data
                 self.dataToLines()
+                if self.upperChangedRow > self.penRow:
+                    self.upperChangedRow = self.penRow
         elif change[0] == 'bw':  # Redo backspace word.
             line = self.lines[self.penRow]
             width = columnWidth(change[1])
@@ -288,6 +290,8 @@ class Mutator(app.selectable.Selectable):
             if 1:  # Hack in old lines system.
                 self.data = self.parser.data
                 self.dataToLines()
+                if self.upperChangedRow > self.penRow:
+                    self.upperChangedRow = self.penRow
         elif change[0] == 'dr':  # Redo delete range.
             self.doDelete(*change[1])
         elif change[0] == 'ds':  # Redo delete selection.
