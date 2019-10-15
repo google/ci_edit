@@ -209,9 +209,14 @@ class Parser:
         Returns:
             index. |index| may then be passed to grammarAtIndex().
         """
+        if app.config.strict_debug:
+            assert isinstance(row, int)
+            assert isinstance(col, int)
+            assert row >= 0
+            assert col >= 0
         self._fullyParseTo(row)
         if app.config.strict_debug:
-            assert row < len(self.rows)
+            assert row < len(self.rows), (row, len(self.rows), repr(self.data))
         if row == len(self.rows) - 1:
             # The last line.
             assert row + 1 >= len(
