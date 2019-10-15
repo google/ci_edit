@@ -107,24 +107,28 @@ class Selectable(app.line_buffer.LineBuffer):
             assert kSelectionNone <= selectionMode < kSelectionModeCount
         lines = []
         if selectionMode == kSelectionBlock:
-            if (lowerRow + 1 < len(self.lines)):
+            if (lowerRow + 1 < self.parser.rowCount()):
                 lowerRow += 1
             for i in range(upperRow, lowerRow):
-                lines.append(self.lines[i][upperCol:lowerCol])
+                lines.append(self.parser.rowText(i, upperCol, lowerCol))
         elif (selectionMode == kSelectionAll or
               selectionMode == kSelectionCharacter or
               selectionMode == kSelectionLine or
               selectionMode == kSelectionWord):
             if upperRow == lowerRow:
-                lines.append(self.lines[upperRow][upperCol:lowerCol])
+                lines.append(self.parser.rowText(upperRow, upperCol, lowerCol))
             else:
                 for i in range(upperRow, lowerRow + 1):
                     if i == upperRow:
-                        lines.append(self.lines[i][upperCol:])
+                        lines.append(self.parser.rowText(i, upperCol))
                     elif i == lowerRow:
-                        lines.append(self.lines[i][:lowerCol])
+                        lines.append(self.parser.rowText(i, 0, lowerCol))
                     else:
-                        lines.append(self.lines[i])
+                        assert self.lines[i] == self.parser.rowText(i)
+                        lines.append(self.parser.rowText(i))
+        if 1:
+            self.data = self.parser.data
+            self.dataToLines()
         return tuple(lines)
 
     def doDeleteSelection(self):
@@ -192,6 +196,7 @@ class Selectable(app.line_buffer.LineBuffer):
             self.dataToLines()
             if self.upperChangedRow > self.penRow:
                 self.upperChangedRow = self.penRow
+
     def __extendWords(self, upperRow, upperCol, lowerRow, lowerCol):
         """Extends and existing selection to the nearest word boundaries. The
         pen and marker will be extended away from each other. The extension may
