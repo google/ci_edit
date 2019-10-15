@@ -145,33 +145,16 @@ class Selectable(app.line_buffer.LineBuffer):
         if self.upperChangedRow > upperRow:
             self.upperChangedRow = upperRow
         if self.selectionMode == kSelectionBlock:
-            for i in range(upperRow, lowerRow + 1):
-                line = self.lines[i]
-                self.lines[i] = line[:upperCol] + line[lowerCol:]
+            self.parser.deleteBlock(upperRow, upperCol, lowerRow, lowerCol)
         elif (self.selectionMode == kSelectionNone or
               self.selectionMode == kSelectionAll or
               self.selectionMode == kSelectionCharacter or
               self.selectionMode == kSelectionLine or
               self.selectionMode == kSelectionWord):
             self.parser.deleteRange(upperRow, upperCol, lowerRow, lowerCol)
-
-            if 0:
-                          begin = self.parser.dataOffset(upperRow, upperCol)
-                          end = self.parser.dataOffset(lowerRow, lowerCol)
-
-                          if end is None:
-                              self.parser.data = self.parser.data[:begin]
-                          else:
-                              self.parser.data = self.parser.data[:begin] + self.parser.data[end:]
-            if 1:
-                self.data = self.parser.data
-                self.dataToLines()
-            if 0:
-                upperLine = self.lines[upperRow]
-                lowerLine = self.lines[lowerRow]
-                self.lines[upperRow] = upperLine[:upperCol] + lowerLine[lowerCol:]
-                if upperRow != lowerRow:
-                    del self.lines[upperRow + 1:lowerRow + 1]
+        if 1:
+            self.data = self.parser.data
+            self.dataToLines()
 
     def insertLines(self, lines):
         if app.config.strict_debug:
@@ -192,27 +175,23 @@ class Selectable(app.line_buffer.LineBuffer):
         if self.upperChangedRow > row:
             self.upperChangedRow = row
         if selectionMode == kSelectionBlock:
-            for i, line in enumerate(lines):
-                self.lines[row + i] = (self.lines[row + i][:col] + line +
-                                       self.lines[row + i][col:])
+            self.parser.insertBlock(row, col, lines)
         elif (selectionMode == kSelectionNone or
               selectionMode == kSelectionAll or
               selectionMode == kSelectionCharacter or
               selectionMode == kSelectionLine or
               selectionMode == kSelectionWord):
-            lines.reverse()
-            firstLine = self.lines[row]
             if len(lines) == 1:
-                self.lines[row] = (firstLine[:col] + lines[0] + firstLine[col:])
+                self.parser.insert(row, col, lines[0])
             else:
-                self.lines[row] = (firstLine[:col] + lines[-1])
-                currentRow = row + 1
-                self.lines.insert(currentRow, lines[0] + firstLine[col:])
-                for line in lines[1:-1]:
-                    self.lines.insert(currentRow, line)
+                self.parser.insertLines(row, col, lines)
         else:
             app.log.info('selection mode not recognized', selectionMode)
-
+        if 1:
+            self.data = self.parser.data
+            self.dataToLines()
+            if self.upperChangedRow > self.penRow:
+                self.upperChangedRow = self.penRow
     def __extendWords(self, upperRow, upperCol, lowerRow, lowerCol):
         """Extends and existing selection to the nearest word boundaries. The
         pen and marker will be extended away from each other. The extension may

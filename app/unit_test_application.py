@@ -294,7 +294,6 @@ class ApplicationTestCases(app.fake_curses_testing.FakeCursesTestCase):
             self.selectionCheck(1, 0, 1, 0, 0),
             self.displayCheck(-2, 0, [u"copied 4 lines  ",]),
             self.displayCheck(2, 7, [u"test", u"twenty five",]),
-            #self.printRedoState(),
             CTRL_Z,
             self.selectionCheck(1, 0, 4, 0, 4),
             self.displayCheck(-2, 0, [u"17 characters (4 lines) selected",]),

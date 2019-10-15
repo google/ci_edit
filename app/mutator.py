@@ -542,20 +542,13 @@ class Mutator(app.selectable.Selectable):
                     self.upperChangedRow = self.penRow
         elif change[0] == 'v':  # undo paste
             clip = change[1]
-            row = self.penRow
-            col = self.penCol
-            app.log.info('len clip', len(clip))
-            if len(clip) == 1:
-                self.lines[row] = (self.lines[row][:col] +
-                                   self.lines[row][col + len(clip[0]):])
-            else:
-                self.lines[row] = (
-                    self.lines[row][:col] +
-                    self.lines[row + len(clip) - 1][len(clip[-1]):])
-                delLineCount = len(clip[1:-1])
-                del self.lines[row + 1:row + 1 + delLineCount + 1]
-            if self.upperChangedRow > row:
-                self.upperChangedRow = row
+            self.parser.deleteRange(self.penRow, self.penCol,
+                self.penRow + len(clip) - 1, self.penCol + len(clip[-1]))
+            if 1:
+                self.data = self.parser.data
+                self.dataToLines()
+                if self.upperChangedRow > self.penRow:
+                    self.upperChangedRow = self.penRow
         elif change[0] == 'vb':
             row = min(self.markerRow, self.penRow)
             endRow = max(self.markerRow, self.penRow)

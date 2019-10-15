@@ -170,6 +170,17 @@ class Parser:
     def defaultGrammar(self):
         return self._defaultGrammar
 
+    def deleteBlock(self, upperRow, upperCol, lowerRow, lowerCol):
+        for row in range(lowerRow, upperRow - 1, -1):
+            begin = self.dataOffset(row, upperCol)
+            end = self.dataOffset(row, lowerCol)
+            if end is None:
+                if begin is not None:
+                    self.data = self.data[:begin]
+            else:
+                self.data = self.data[:begin] + self.data[end:]
+        self._beginParsingAt(upperRow)
+
     def deleteChar(self, row, col):
         """Delete the character after (or "at") |row, col|."""
         self._fullyParseTo(row)
@@ -184,7 +195,8 @@ class Parser:
         begin = self.dataOffset(upperRow, upperCol)
         end = self.dataOffset(lowerRow, lowerCol)
         if end is None:
-            self.data = self.data[:begin]
+            if begin is not None:
+                self.data = self.data[:begin]
         else:
             self.data = self.data[:begin] + self.data[end:]
         self._beginParsingAt(upperRow)
@@ -298,6 +310,15 @@ class Parser:
             self.data += text
         else:
             self.data = self.data[:offset] + text + self.data[offset:]
+        self._beginParsingAt(row)
+
+    def insertBlock(self, row, col, lines):
+        for i in range(len(lines) - 1, -1, -1):
+            offset = self.dataOffset(row + i, col)
+            if offset is None:
+                self.data += lines[i]
+            else:
+                self.data = self.data[:offset] + lines[i] + self.data[offset:]
         self._beginParsingAt(row)
 
     def insertLines(self, row, col, lines):
