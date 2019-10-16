@@ -464,8 +464,7 @@ class Actions(app.mutator.Mutator):
         savedGoal = self.goalCol
         if self.penRow == self.parser.rowCount() - 1:
             self.setMessage(u'End of file')
-            width = self.parser.rowWidth(self.penRow)
-            self.cursorMove(0, width - self.penCol)
+            self.cursorEndOfLine()
         else:
             self.cursorMove(1, self.cursorColDelta(self.penRow + 1))
         self.goalCol = savedGoal
@@ -1779,10 +1778,11 @@ class Actions(app.mutator.Mutator):
         Returns:
           None
         """
-        if row >= self.parser.rowCount():
+        rowCount = self.parser.rowCount()
+        if row >= rowCount:
             self.selectionNone()
             return
-        if row + 1 < self.parser.rowCount():
+        if row + 1 < rowCount:
             self.cursorMoveAndMark(
                 (row + 1) - self.penRow, -self.penCol, 0, -self.markerCol,
                 app.selectable.kSelectionLine - self.selectionMode)
