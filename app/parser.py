@@ -205,7 +205,7 @@ class Parser:
         if remainingOffset > 0:
             ch = self.data[nodes[index][kBegin]]
             if ch == u"\t":
-                tabWidth = self.program.prefs.editor.get(u"tabSize", 8)
+                tabWidth = self.appPrefs.editor.get(u"tabSize", 8)
                 # Add the (potentially) fractional tab.
                 col += app.curses_util.charWidth(ch, col, tabWidth)
                 # Add the remaining tabs.
