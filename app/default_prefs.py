@@ -745,6 +745,10 @@ prefs = {
             "end": None,  # Leaf grammar.
             "link_type": "c\"",  # C non-system include file.
         },
+        "carriage_return": {
+            "begin": "\\n",
+            "end": None,  # Leaf grammar.
+        },
         # Cascading Style Sheet.
         "css": {
             "begin": "<style",
