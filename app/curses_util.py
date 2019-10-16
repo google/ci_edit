@@ -397,9 +397,8 @@ def renderedSubStr(string, beginCol, endCol=None):
 
 if sys.version_info[0] == 2:
 
-    def charWidth(ch, column):
+    def charWidth(ch, column, tabWidth=8):
         if ch == u"\t":
-            tabWidth = 8
             return tabWidth - (column % tabWidth)
         elif ch == u"" or ch < u" ":
             return 0
@@ -423,9 +422,8 @@ if sys.version_info[0] == 2:
         return ch == u"" or ch < u" "  #or unicodedata.east_asian_width(ch) == "N"
 else:
 
-    def charWidth(ch, column):
+    def charWidth(ch, column, tabWidth=8):
         if ch == u"\t":
-            tabWidth = 8
             return tabWidth - (column % tabWidth)
         elif ch == u"" or ch < u" ":
             return 0

@@ -173,7 +173,7 @@ class Parser:
         if app.config.strict_debug:
             assert isinstance(offset, int)
             assert offset >= 0
-        # Binary search to find the node for the column.
+        # Binary search to find the row, then the col.
         nodes = self.parserNodes
         if offset >= nodes[-1][kBegin]:
             return None
@@ -194,7 +194,6 @@ class Parser:
         high = rows[row + 1]
         while True:
             index = (high + low) // 2
-            assert not (low == index == high)
             if offset >= nodes[index + 1][kBegin]:
                 low = index
             elif offset < nodes[index][kBegin]:
@@ -206,11 +205,11 @@ class Parser:
         if remainingOffset > 0:
             ch = self.data[nodes[index][kBegin]]
             if ch == u"\t":
+                tabWidth = self.program.prefs.editor.get(u"tabSize", 8)
                 # Add the (potentially) fractional tab.
-                col += app.curses_util.charWidth(ch, col)
+                col += app.curses_util.charWidth(ch, col, tabWidth)
                 # Add the remaining tabs.
-                col += app.curses_util.charWidth(ch, col) * (
-                        remainingOffset - 1)
+                col += tabWidth * (remainingOffset - 1)
             else:
                 col += app.curses_util.charWidth(ch, col) * remainingOffset
         return row, col
