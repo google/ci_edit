@@ -167,6 +167,54 @@ class Parser:
             offset += subnodeColDelta
         return offset
 
+    def dataOffsetRowCol(self, offset):
+        """Get the (row, col) for the given data |offset| or None if the offset
+        is beyond the file."""
+        if app.config.strict_debug:
+            assert isinstance(offset, int)
+            assert offset >= 0
+        # Binary search to find the node for the column.
+        nodes = self.parserNodes
+        if offset >= nodes[-1][kBegin]:
+            return None
+        # Determine the row.
+        rows = self.rows
+        low = 0
+        high = len(rows) - 1
+        while True:
+            row = (high + low) // 2
+            if offset >= nodes[rows[row + 1]][kBegin]:
+                low = row
+            elif offset < nodes[rows[row]][kBegin]:
+                high = row
+            else:
+                break
+        # Determine the col.
+        low = rows[row]
+        high = rows[row + 1]
+        while True:
+            index = (high + low) // 2
+            assert not (low == index == high)
+            if offset >= nodes[index + 1][kBegin]:
+                low = index
+            elif offset < nodes[index][kBegin]:
+                high = index
+            else:
+                break
+        col = nodes[index][kVisual] - nodes[rows[row]][kVisual]
+        remainingOffset = offset - nodes[index][kBegin]
+        if remainingOffset > 0:
+            ch = self.data[nodes[index][kBegin]]
+            if ch == u"\t":
+                # Add the (potentially) fractional tab.
+                col += app.curses_util.charWidth(ch, col)
+                # Add the remaining tabs.
+                col += app.curses_util.charWidth(ch, col) * (
+                        remainingOffset - 1)
+            else:
+                col += app.curses_util.charWidth(ch, col) * remainingOffset
+        return row, col
+
     def defaultGrammar(self):
         return self._defaultGrammar
 
