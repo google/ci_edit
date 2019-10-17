@@ -276,13 +276,15 @@ class Mutator(app.selectable.Selectable):
                 if self.upperChangedRow > self.penRow:
                     self.upperChangedRow = self.penRow
         elif change[0] == 'bw':  # Redo backspace word.
-            line = self.lines[self.penRow]
             width = columnWidth(change[1])
+            self.parser.deleteRange(self.penRow, self.penCol - width,
+                self.penRow, self.penCol)
             self.penCol -= width
-            x = self.penCol
-            self.lines[self.penRow] = line[:x] + line[x + width:]
-            if self.upperChangedRow > self.penRow:
-                self.upperChangedRow = self.penRow
+            if app.config.use_tb_lines:  # Hack in old lines system.
+                self.data = self.parser.data
+                self.dataToLines()
+                if self.upperChangedRow > self.penRow:
+                    self.upperChangedRow = self.penRow
         elif change[0] == 'd':  # Redo delete character.
             self.parser.deleteChar(self.penRow, self.penCol)
             if app.config.use_tb_lines:  # Hack in old lines system.
@@ -297,18 +299,21 @@ class Mutator(app.selectable.Selectable):
         elif change[0] == 'f':  # Redo fence.
             pass
         elif change[0] == 'i':  # Redo insert.
-            line = self.lines[self.penRow]
-            x = self.penCol
-            self.lines[self.penRow] = line[:x] + change[1] + line[x:]
+            self.parser.insert(self.penRow, self.penCol, change[1])
             self.penCol += columnWidth(change[1])
             self.goalCol = self.penCol
-            if self.upperChangedRow > self.penRow:
-                self.upperChangedRow = self.penRow
+            if app.config.use_tb_lines:  # Hack in old lines system.
+                self.data = self.parser.data
+                self.dataToLines()
+                if self.upperChangedRow > self.penRow:
+                    self.upperChangedRow = self.penRow
         elif change[0] == 'j':  # Redo join lines (delete \n).
-            self.lines[self.penRow] += self.lines[self.penRow + 1]
-            del self.lines[self.penRow + 1]
-            if self.upperChangedRow > self.penRow:
-                self.upperChangedRow = self.penRow
+            self.parser.insert(self.penRow, self.penCol, u"\n")
+            if app.config.use_tb_lines:  # Hack in old lines system.
+                self.data = self.parser.data
+                self.dataToLines()
+                if self.upperChangedRow > self.penRow:
+                    self.upperChangedRow = self.penRow
         elif change[0] == 'ld':  # Redo line diff.
             lines = []
             index = 0
