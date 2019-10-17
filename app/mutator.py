@@ -115,13 +115,6 @@ class Mutator(app.selectable.Selectable):
         self.__compoundChange = []
         self.oldRedoIndex = self.redoIndex
 
-    def getPenOffset(self, row, col):
-        """inefficient test hack. wip on parser"""
-        offset = 0
-        for i in range(row):
-            offset += len(self.lines[i])
-        return offset + row + col
-
     def cursorGrammarName(self):
         """inefficient test hack. wip on parser"""
         if not self.parser:
@@ -170,8 +163,8 @@ class Mutator(app.selectable.Selectable):
         self.fullPath = app.buffer_file.expandFullPath(path)
 
     def __doMoveLines(self, begin, end, to):
-        lines = self.lines[begin:end]
-        del self.lines[begin:end]
+        lines = self.parser.textRange(begin, 0, end, 0)
+        self.parser.deleteRange(begin, 0, end, 0)
         count = end - begin
         if begin < to:
             assert end < to
@@ -193,7 +186,10 @@ class Mutator(app.selectable.Selectable):
                 self.markerRow += count
             if self.upperChangedRow > to:
                 self.upperChangedRow = to
-        self.lines = self.lines[:to] + lines + self.lines[to:]
+        self.parser.insertLines(to, 0, lines.split(u"\n"))
+        if app.config.use_tb_lines:
+            self.data = self.parser.data
+            self.dataToLines()
 
     def __doVerticalInsert(self, change):
         text, row, endRow, col = change[1]

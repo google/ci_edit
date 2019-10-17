@@ -248,6 +248,14 @@ class Parser:
             self.data = self.data[:begin] + self.data[end:]
         self._beginParsingAt(upperRow)
 
+    def textRange(self, upperRow, upperCol, lowerRow, lowerCol):
+        begin = self.dataOffset(upperRow, upperCol)
+        end = self.dataOffset(lowerRow, lowerCol)
+        if end is None:
+            if begin is not None:
+                return self.data[begin:]
+        return self.data[begin:end]
+
     def grammarIndexFromRowCol(self, row, col):
         """
         tip: as an optimization, check if |col == 0| prior to calling. The
