@@ -44,9 +44,10 @@ def checkRow(test, text_buffer, row, expected):
     text_buffer.parseDocument()
     if not (text_buffer.lines[row] == expected == text_buffer.parser.rowText(row)):
         test.fail("\n\nExpected these to match: "
-            "lines {}, expected {}, parser {}".format(
+            "row {}: lines {}, expected {}, parser {}".format(
+                row,
                 repr(text_buffer.lines[row]), repr(expected),
-                repr(text_buffer.parser.rowText(row))))
+                repr(text_buffer.parser.data)))
 
 
 class ActionsTestCase(unittest.TestCase):
@@ -467,6 +468,78 @@ class TextIndentTestCases(ActionsTestCase):
         checkRow(self, tb, 1, '    b')
         checkRow(self, tb, 2, '  c')
         checkRow(self, tb, 3, 'd')
+
+    def test_indent_unindent_lines2(self):
+
+        def insert(input):
+            for i in input:
+                if i == u"\n":
+                    self.textBuffer.carriageReturn()
+                else:
+                    self.textBuffer.insertPrintableWithPairing(ord(i), None)
+                    self.textBuffer.parseDocument()
+            self.assertEqual(self.textBuffer.parser.data, input)
+            self.assertEqual(self.textBuffer.data, input)
+
+        def checkPenMarker(penRow, penCol, markerRow, markerCol):
+            self.assertEqual((penRow, penCol, markerRow, markerCol), (
+                    tb.penRow, tb.penCol, tb.markerRow, tb.markerCol))
+
+        def selectChar(penRow, penCol, markerRow, markerCol):
+            self.textBuffer.penRow = penRow
+            self.textBuffer.penCol = penCol
+            self.textBuffer.markerRow = markerRow
+            self.textBuffer.markerCol = markerCol
+            self.textBuffer.selectionMode = app.selectable.kSelectionCharacter
+
+        tb = self.textBuffer
+        self.assertEqual(len(tb.lines), 1)
+        self.assertEqual(tb.parser.rowCount(), 1)
+        checkPenMarker(0, 0, 0, 0)
+        insert(u"apple\nbanana\ncarrot\ndate\neggplant\n")
+        checkRow(self, tb, 0, 'apple')
+        checkRow(self, tb, 1, 'banana')
+        checkRow(self, tb, 2, 'carrot')
+        checkRow(self, tb, 3, 'date')
+        checkRow(self, tb, 4, 'eggplant')
+        selectChar(0, 3, 2, 2)
+        checkPenMarker(0, 3, 2, 2)
+        tb.indent()
+        checkRow(self, tb, 0, '  apple')
+        checkRow(self, tb, 1, '  banana')
+        checkRow(self, tb, 2, '  carrot')
+        checkRow(self, tb, 3, 'date')
+        checkRow(self, tb, 4, 'eggplant')
+        checkPenMarker(0, 5, 2, 4)
+        tb.indent()
+        checkRow(self, tb, 0, '    apple')
+        checkRow(self, tb, 1, '    banana')
+        checkRow(self, tb, 2, '    carrot')
+        checkRow(self, tb, 3, 'date')
+        checkRow(self, tb, 4, 'eggplant')
+        checkPenMarker(0, 7, 2, 6)
+
+        selectChar(0, 3, 0, 2)
+        tb.unindent()
+        checkRow(self, tb, 0, '  apple')
+        checkRow(self, tb, 1, '    banana')
+        checkRow(self, tb, 2, '    carrot')
+        checkRow(self, tb, 3, 'date')
+        checkRow(self, tb, 4, 'eggplant')
+        checkPenMarker(0, 1, 0, 0)
+
+        selectChar(0, 3, 2, 2)
+        tb.indent()
+        checkRow(self, tb, 0, '    apple')
+        checkRow(self, tb, 1, '      banana')
+        checkRow(self, tb, 2, '      carrot')
+        checkRow(self, tb, 3, 'date')
+        checkRow(self, tb, 4, 'eggplant')
+        checkPenMarker(0, 5, 2, 4)
+        tb.indent()
+        checkPenMarker(0, 7, 2, 6)
+        tb.indent()
+        checkPenMarker(0, 9, 2, 8)
 
 class TextInsertTestCases(ActionsTestCase):
 

@@ -124,9 +124,8 @@ class Selectable(app.line_buffer.LineBuffer):
                     elif i == lowerRow:
                         lines.append(self.parser.rowText(i, 0, lowerCol))
                     else:
-                        assert self.lines[i] == self.parser.rowText(i)
                         lines.append(self.parser.rowText(i))
-        if 1:
+        if app.config.use_tb_lines:
             self.data = self.parser.data
             self.dataToLines()
         return tuple(lines)
@@ -156,7 +155,7 @@ class Selectable(app.line_buffer.LineBuffer):
               self.selectionMode == kSelectionLine or
               self.selectionMode == kSelectionWord):
             self.parser.deleteRange(upperRow, upperCol, lowerRow, lowerCol)
-        if 1:
+        if app.config.use_tb_lines:
             self.data = self.parser.data
             self.dataToLines()
 
@@ -191,7 +190,7 @@ class Selectable(app.line_buffer.LineBuffer):
                 self.parser.insertLines(row, col, lines)
         else:
             app.log.info('selection mode not recognized', selectionMode)
-        if 1:
+        if app.config.use_tb_lines:
             self.data = self.parser.data
             self.dataToLines()
             if self.upperChangedRow > self.penRow:
