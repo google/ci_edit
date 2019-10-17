@@ -347,15 +347,16 @@ class Mutator(app.selectable.Selectable):
         elif change[0] == 'v':  # Redo paste.
             self.insertLines(change[1])
         elif change[0] == 'vb':  # Redo vertical backspace.
-            self.penCol -= columnWidth(change[1])
-            row = min(self.markerRow, self.penRow)
-            rowEnd = max(self.markerRow, self.penRow)
-            for i in range(row, rowEnd + 1):
-                line = self.lines[i]
-                x = self.penCol
-                self.lines[self.penRow] = line[:x] + line[x + columnWidth(change[1]):]
-            if self.upperChangedRow > row:
-                self.upperChangedRow = row
+            assert False  # Not yet used.
+            width = columnWidth(change[1][0])
+            self.parser.deleteBlock(self.penRow, self.penCol - width,
+                    self.penRow + len(change[1]), self.penCol)
+            self.penCol -= width
+            if app.config.use_tb_lines:  # Hack in old lines system.
+                self.data = self.parser.data
+                self.dataToLines()
+                if self.upperChangedRow > self.penRow:
+                    self.upperChangedRow = self.penRow
         elif change[0] == 'vd':  # Redo vertical delete.
             self.__doVerticalDelete(change)
         elif change[0] == 'vi':  # Redo vertical insert.
@@ -551,16 +552,15 @@ class Mutator(app.selectable.Selectable):
                 self.dataToLines()
                 if self.upperChangedRow > self.penRow:
                     self.upperChangedRow = self.penRow
-        elif change[0] == 'vb':
-            row = min(self.markerRow, self.penRow)
-            endRow = max(self.markerRow, self.penRow)
-            for _ in range(row, endRow + 1):
-                line = self.lines[self.penRow]
-                x = self.penCol
-                self.lines[self.penRow] = line[:x] + change[1] + line[x:]
-            self.penCol += columnWidth(change[1])
-            if self.upperChangedRow > row:
-                self.upperChangedRow = row
+        elif change[0] == 'vb':  # Undo vertical backspace.
+            assert False  # Not yet used.
+            self.parser.insertBlock(self.penRow, self.penCol, change[1])
+            self.penCol += columnWidth(change[1][0])
+            if app.config.use_tb_lines:
+                self.data = self.parser.data
+                self.dataToLines()
+                if self.upperChangedRow > self.penRow:
+                    self.upperChangedRow = self.penRow
         elif change[0] == 'vd':  # Undo vertical delete
             self.__doVerticalInsert(change)
         elif change[0] == 'vi':  # Undo vertical insert
