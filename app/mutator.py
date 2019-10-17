@@ -308,7 +308,7 @@ class Mutator(app.selectable.Selectable):
                 if self.upperChangedRow > self.penRow:
                     self.upperChangedRow = self.penRow
         elif change[0] == 'j':  # Redo join lines (delete \n).
-            self.parser.insert(self.penRow, self.penCol, u"\n")
+            self.parser.deleteChar(self.penRow, self.penCol)
             if app.config.use_tb_lines:  # Hack in old lines system.
                 self.data = self.parser.data
                 self.dataToLines()
@@ -471,13 +471,14 @@ class Mutator(app.selectable.Selectable):
                 self.dataToLines()
                 if self.upperChangedRow > self.penRow:
                     self.upperChangedRow = self.penRow
-        elif change[0] == 'bw':
-            line = self.lines[self.penRow]
-            x = self.penCol
-            self.lines[self.penRow] = line[:x] + change[1] + line[x:]
+        elif change[0] == 'bw':  # Undo backspace word.
+            self.parser.insert(self.penRow, self.penCol, change[1])
             self.penCol += columnWidth(change[1])
-            if self.upperChangedRow > self.penRow:
-                self.upperChangedRow = self.penRow
+            if app.config.use_tb_lines:  # Hack in old lines system.
+                self.data = self.parser.data
+                self.dataToLines()
+                if self.upperChangedRow > self.penRow:
+                    self.upperChangedRow = self.penRow
         elif change[0] == 'd':
             self.parser.insert(self.penRow, self.penCol, change[1])
             if app.config.use_tb_lines:  # Hack in old lines system.
@@ -493,20 +494,23 @@ class Mutator(app.selectable.Selectable):
         elif change[0] == 'f':  # Undo fence.
             pass
         elif change[0] == 'i':  # Undo insert.
-            line = self.lines[self.penRow]
-            x = self.penCol
             width = columnWidth(change[1])
+            self.parser.deleteRange(self.penRow, self.penCol - width,
+                    self.penRow, self.penCol)
             self.penCol -= width
-            self.lines[self.penRow] = line[:x - width] + line[x:]
             self.goalCol = self.penCol
-            if self.upperChangedRow > self.penRow:
-                self.upperChangedRow = self.penRow
+            if app.config.use_tb_lines:  # Hack in old lines system.
+                self.data = self.parser.data
+                self.dataToLines()
+                if self.upperChangedRow > self.penRow:
+                    self.upperChangedRow = self.penRow
         elif change[0] == 'j':  # Undo join lines.
-            line = self.lines[self.penRow]
-            self.lines.insert(self.penRow + 1, line[self.penCol:])
-            self.lines[self.penRow] = line[:self.penCol]
-            if self.upperChangedRow > self.penRow:
-                self.upperChangedRow = self.penRow
+            self.parser.insert(self.penRow, self.penCol, u"\n")
+            if app.config.use_tb_lines:  # Hack in old lines system.
+                self.data = self.parser.data
+                self.dataToLines()
+                if self.upperChangedRow > self.penRow:
+                    self.upperChangedRow = self.penRow
         elif change[0] == 'ld':  # Undo line diff.
             lines = []
             index = 0

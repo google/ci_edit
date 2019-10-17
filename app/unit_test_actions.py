@@ -342,7 +342,9 @@ class TextIndentTestCases(ActionsTestCase):
         self.assertEqual(tb.parser.rowCount(), 1)
         insert(ord('a'), None)
         insert(ord(':'), None)
+        self.assertEqual(tb.penRow, 0)
         tb.carriageReturn()
+        self.assertEqual(tb.penRow, 1)
         checkRow(self, tb, 0, 'a:')
         checkRow(self, tb, 1, '')
 
