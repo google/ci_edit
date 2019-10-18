@@ -315,22 +315,26 @@ class Mutator(app.selectable.Selectable):
                 if self.upperChangedRow > self.penRow:
                     self.upperChangedRow = self.penRow
         elif change[0] == 'ld':  # Redo line diff.
+            assert False  # Not used.
             lines = []
             index = 0
             for ii in change[1]:
                 if type(ii) is type(0):
-                    for line in self.lines[index:index + ii]:
+                    for line in self.parser.textLines(index, index + ii):
                         lines.append(line)
                     index += ii
                 elif ii[0] == '+':
                     lines.append(ii[2:])
                 elif ii[0] == '-':
                     index += 1
-            self.lines = lines
+            self.parser.data = lines.join(u"\n")
             firstChangedRow = change[1][0] if type(
                 change[1][0]) is type(0) else 0
-            if self.upperChangedRow > firstChangedRow:
-                self.upperChangedRow = firstChangedRow
+            if app.config.use_tb_lines:  # Hack in old lines system.
+                self.data = self.parser.data
+                self.dataToLines()
+                if self.upperChangedRow > self.penRow:
+                    self.upperChangedRow = self.penRow
         elif change[0] == 'm':  # Redo move
             self.__redoMove(change)
         elif change[0] == 'ml':  # Redo move lines
@@ -512,22 +516,26 @@ class Mutator(app.selectable.Selectable):
                 if self.upperChangedRow > self.penRow:
                     self.upperChangedRow = self.penRow
         elif change[0] == 'ld':  # Undo line diff.
+            assert False  # Not used.
             lines = []
             index = 0
             for ii in change[1]:
                 if type(ii) is type(0):
-                    for line in self.lines[index:index + ii]:
+                    for line in self.parser.textLines(index, index + ii):
                         lines.append(line)
                     index += ii
                 elif ii[0] == '+':
                     index += 1
                 elif ii[0] == '-':
                     lines.append(ii[2:])
-            self.lines = lines
+            self.parser.data = lines.join(u"\n")
             firstChangedRow = change[1][0] if type(
                 change[1][0]) is type(0) else 0
-            if self.upperChangedRow > firstChangedRow:
-                self.upperChangedRow = firstChangedRow
+            if app.config.use_tb_lines:  # Hack in old lines system.
+                self.data = self.parser.data
+                self.dataToLines()
+                if self.upperChangedRow > self.penRow:
+                    self.upperChangedRow = self.penRow
         elif change[0] == 'm':
             self.__undoMove(change)
         elif change[0] == 'ml':
