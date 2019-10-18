@@ -985,7 +985,7 @@ class TopInfo(ViewWindow):
         tb = self.host.textBuffer
         lines = []
         # TODO: Make dynamic topInfo work properly
-        if len(tb.lines):
+        if tb.parser.rowCount():
             lineCursor = self.host.scrollRow
             line = ""
             # Check for extremely small window.
