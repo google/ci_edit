@@ -227,7 +227,7 @@ class PredictionInputController(app.controller.Controller):
     def decodedPath(self):
         if app.config.strict_debug:
             assert self.view.textBuffer is self.textBuffer
-        return app.string.pathDecode(self.textBuffer.lines[0])
+        return app.string.pathDecode(self.textBuffer.parser.rowText(0))
 
     def setEncodedPath(self, path):
         if app.config.strict_debug:

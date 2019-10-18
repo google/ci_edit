@@ -429,7 +429,7 @@ class Window(ActiveWindow):
             self.textBuffer.mouseWheelUp(shift, ctrl, alt)
 
     def preferredSize(self, rowLimit, colLimit):
-        return min(rowLimit, len(self.textBuffer.lines)), colLimit
+        return min(rowLimit, self.textBuffer.parser.rowCount()), colLimit
 
     def render(self):
         if self.textBuffer:
@@ -991,13 +991,13 @@ class TopInfo(ViewWindow):
             # Check for extremely small window.
             if tb.parser.rowCount() > lineCursor:
                 while len(line) == 0 and lineCursor > 0:
-                    line = tb.lines[lineCursor]
+                    line = tb.parser.rowText(lineCursor)
                     lineCursor -= 1
             if len(line):
                 indent = len(line) - len(line.lstrip(u' '))
                 lineCursor += 1
                 while lineCursor < tb.parser.rowCount():
-                    line = tb.lines[lineCursor]
+                    line = tb.parser.rowText(lineCursor)
                     if not len(line):
                         continue
                     z = len(line) - len(line.lstrip(u' '))
@@ -1007,7 +1007,7 @@ class TopInfo(ViewWindow):
                     else:
                         break
                 while indent and lineCursor > 0:
-                    line = tb.lines[lineCursor]
+                    line = tb.parser.rowText(lineCursor)
                     if len(line):
                         z = len(line) - len(line.lstrip(u' '))
                         if z < indent:

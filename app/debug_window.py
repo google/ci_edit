@@ -55,7 +55,7 @@ class DebugWindow(app.window.ActiveWindow):
              textBuffer.selectionMode), color)
         self.writeLine(
             u"scrlRow %3d scrlCol %2d lines %3d" %
-            (win.scrollRow, win.scrollCol, len(textBuffer.lines)), color)
+            (win.scrollRow, win.scrollCol, textBuffer.parser.rowCount()), color)
         y, x = win.top, win.left
         maxRow, maxCol = win.rows, win.cols
         self.writeLine(

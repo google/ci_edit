@@ -77,7 +77,7 @@ class DirectoryList(app.window.Window):
 
     def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
         row = self.scrollRow + paneRow
-        if row >= len(self.textBuffer.lines):
+        if row >= self.textBuffer.parser.rowCount():
             return
         self.controller.openFileOrDir(row)
 

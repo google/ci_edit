@@ -289,7 +289,7 @@ class FilePathInputController(app.controller.Controller):
     def decodedPath(self):
         if app.config.strict_debug:
             assert self.view.textBuffer is self.textBuffer
-        return app.string.pathDecode(self.textBuffer.lines[0])
+        return app.string.pathDecode(self.textBuffer.parser.rowText(0))
 
     def setEncodedPath(self, path):
         if app.config.strict_debug:
@@ -302,9 +302,9 @@ class FilePathInputController(app.controller.Controller):
         app.log.info(u'FilePathInputController command set')
 
     def maybeSlash(self, expandedPath):
-        if (self.textBuffer.lines[0] and
-                self.textBuffer.lines[0][-1] != u'/' and
-                os.path.isdir(expandedPath)):
+        # TODO Maybe just get the last character instead.
+        line = self.textBuffer.parser.rowText(0)
+        if (line and line[-1] != u'/' and os.path.isdir(expandedPath)):
             self.textBuffer.insert(u'/')
 
     def onChange(self):

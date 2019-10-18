@@ -62,7 +62,8 @@ class BufferManager:
 
     def newTextBuffer(self):
         textBuffer = app.text_buffer.TextBuffer(self.program)
-        textBuffer.lines = [u""]
+        if app.config.use_tb_lines:
+            textBuffer.lines = [u""]
         textBuffer.savedAtRedoIndex = 0
         self.buffers.append(textBuffer)
         app.log.info(textBuffer)
