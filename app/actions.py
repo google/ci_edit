@@ -861,7 +861,10 @@ class Actions(app.mutator.Mutator):
             app.log.info(u'clipboard empty')
 
     def editPasteData(self, data):
-        self.editPasteLines(tuple(self.doDataToLines(data)))
+        if app.config.use_tb_lines:
+            self.editPasteLines(tuple(self.doDataToLines(data)))
+        else:
+            self.editPasteLines(tuple(self.parser.data.split(u"\n")))
 
     def editPasteLines(self, clip):
         if self.selectionMode != app.selectable.kSelectionNone:
@@ -988,7 +991,7 @@ class Actions(app.mutator.Mutator):
         """
         # Restore the file history.
         self.fileHistory = self.program.history.getFileHistory(
-            self.fullPath, self.data)
+            self.fullPath, self.parser.data)
 
         # Restore all positions and values of variables.
         self.penRow, self.penCol = self.fileHistory.setdefault(u'pen', (0, 0))

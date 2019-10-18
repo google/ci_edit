@@ -452,11 +452,11 @@ class Window(ActiveWindow):
         """returns whether work is finished (no need to call again)."""
         finished = True
         tb = self.textBuffer
-        if tb is not None and tb.parser.resumeAtRow < len(tb.lines):
+        if tb is not None and tb.parser.resumeAtRow < tb.parser.rowCount():
             tb.parseDocument()
             # If a user event came in while parsing, the parsing will be paused
             # (to be resumed after handling the event).
-            finished = tb.parser.resumeAtRow >= len(tb.lines)
+            finished = tb.parser.resumeAtRow >= tb.parser.rowCount()
         for child in self.zOrder:
             finished = finished and child.longTimeSlice()
         return finished
@@ -466,7 +466,7 @@ class Window(ActiveWindow):
         tb = self.textBuffer
         if tb is not None:
             tb.parseScreenMaybe()
-            return tb.parser.resumeAtRow >= len(tb.lines)
+            return tb.parser.resumeAtRow >= tb.parser.rowCount()
         return True
 
 
@@ -613,10 +613,10 @@ class LineNumbers(ViewWindow):
             assert isinstance(self.rows, int)
             assert isinstance(self.host.scrollRow, int)
             assert self.rows >= 1
-            assert len(self.host.textBuffer.lines) >= 1
+            assert self.host.textBuffer.parser.rowCount() >= 1
             assert self.host.scrollRow >= 0
         limit = min(self.rows,
-                    len(self.host.textBuffer.lines) - self.host.scrollRow)
+                    self.host.textBuffer.parser.rowCount() - self.host.scrollRow)
         cursorBookmarkColorIndex = None
         visibleBookmarks = self.getVisibleBookmarks(self.host.scrollRow,
                                                     self.host.scrollRow + limit)
@@ -693,7 +693,7 @@ class LineNumbers(ViewWindow):
             return
         self.host.changeFocusTo(self.host)
         tb = self.host.textBuffer
-        if self.host.scrollRow + paneRow >= len(tb.lines):
+        if self.host.scrollRow + paneRow >= tb.parser.rowCount():
             tb.selectionNone()
             return
         if shift:
@@ -949,10 +949,10 @@ class StatusLine(ViewWindow):
         # Percentages.
         rowPercentage = 0
         colPercentage = 0
-        lineCount = len(tb.lines)
+        lineCount = tb.parser.rowCount()
         if lineCount:
             rowPercentage = self.host.textBuffer.penRow * 100 // lineCount
-            charCount = len(tb.lines[self.host.textBuffer.penRow])
+            charCount = tb.parser.rowWidth(self.host.textBuffer.penRow)
             if charCount and self.host.textBuffer.penCol != 0:
                 colPercentage = self.host.textBuffer.penCol * 100 // charCount
         # Format.
@@ -989,14 +989,14 @@ class TopInfo(ViewWindow):
             lineCursor = self.host.scrollRow
             line = ""
             # Check for extremely small window.
-            if len(tb.lines) > lineCursor:
+            if tb.parser.rowCount() > lineCursor:
                 while len(line) == 0 and lineCursor > 0:
                     line = tb.lines[lineCursor]
                     lineCursor -= 1
             if len(line):
                 indent = len(line) - len(line.lstrip(u' '))
                 lineCursor += 1
-                while lineCursor < len(tb.lines):
+                while lineCursor < tb.parser.rowCount():
                     line = tb.lines[lineCursor]
                     if not len(line):
                         continue
@@ -1210,12 +1210,11 @@ class InputWindow(Window):
         """Draw makers to indicate text extending past the right edge of the
         window."""
         maxRow, maxCol = self.rows, self.cols
-        limit = min(maxRow, len(self.textBuffer.lines) - self.scrollRow)
+        limit = min(maxRow, self.textBuffer.parser.rowCount() - self.scrollRow)
         colorPrefs = self.program.color
         for i in range(limit):
             color = colorPrefs.get('right_column')
-            if len(self.textBuffer.lines[
-                    i + self.scrollRow]) - self.scrollCol > maxCol:
+            if self.textBuffer.parser.rowWidth(i + self.scrollRow) - self.scrollCol > maxCol:
                 color = colorPrefs.get('line_overflow')
             self.rightColumn.addStr(i, 0, u' ', color)
         color = colorPrefs.get('outside_document')
