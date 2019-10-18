@@ -969,7 +969,8 @@ class Actions(app.mutator.Mutator):
         self.rootGrammar = self._determineRootGrammar(
             *os.path.splitext(self.fullPath))
         self.parseGrammars()
-        self.dataToLines()
+        if app.config.use_tb_lines:
+            self.dataToLines()
 
         # Restore all user history.
         self.restoreUserHistory()
@@ -1144,7 +1145,8 @@ class Actions(app.mutator.Mutator):
                 self.fileHistory[u'marker'] = (self.markerRow, self.markerCol)
                 self.fileHistory[u'selectionMode'] = self.selectionMode
                 self.fileHistory[u'bookmarks'] = self.bookmarks
-                self.linesToData()
+                if app.config.use_tb_lines:
+                    self.linesToData()
                 if self.isBinary:
                     removeWhitespace = {
                         ord(u' '): None,
@@ -1319,7 +1321,8 @@ class Actions(app.mutator.Mutator):
                             u' separators')
             return
         _, find, replace, flags = splitCmd
-        self.linesToData()
+        if app.config.use_tb_lines:
+            self.linesToData()
         data = self.findReplaceText(find, replace, flags, self.data)
         self.applyDocumentUpdate(data)
 

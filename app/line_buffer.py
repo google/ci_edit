@@ -35,7 +35,8 @@ class LineBuffer:
         self.program = program
         self.debugUpperChangedRow = -1
         self.isBinary = False
-        self.lines = [u""]
+        if app.config.use_tb_lines:
+            self.lines = [u""]
         self.parser = app.parser.Parser(program.prefs)
         self.parserTime = 0.0
         self.message = (u"New buffer", None)
@@ -98,8 +99,10 @@ class LineBuffer:
 
     def doParse(self, begin, end):
         start = time.time()
-        self.linesToData()
-        self.parser.parse(self.program.bg, self.data,
+        if app.config.use_tb_lines:
+            self.linesToData()
+        data = self.data if app.config.use_tb_lines else self.parser.data
+        self.parser.parse(self.program.bg, data,
                           self.rootGrammar, begin, end)
         self.debugUpperChangedRow = self.upperChangedRow
         self.upperChangedRow = self.parser.resumeAtRow
