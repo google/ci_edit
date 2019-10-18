@@ -892,9 +892,11 @@ class Actions(app.mutator.Mutator):
             self.scrollToOptimalScrollPosition()
 
     def fileFilter(self, data):
-        self.data = data
-        self.dataToLines()
-        self.upperChangedRow = 0
+        self.parser.data = data
+        if app.config.use_tb_lines:
+          self.data = data
+          self.dataToLines()
+          self.upperChangedRow = 0
         self.savedAtRedoIndex = self.redoIndex
 
     def fileLoad(self):
