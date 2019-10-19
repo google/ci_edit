@@ -557,8 +557,12 @@ class Mutator(app.selectable.Selectable):
                     self.upperChangedRow = self.penRow
         elif change[0] == 'v':  # undo paste
             clip = change[1]
-            self.parser.deleteRange(self.penRow, self.penCol,
-                self.penRow + len(clip) - 1, self.penCol + len(clip[-1]))
+            if len(clip) == 1:
+                self.parser.deleteRange(self.penRow, self.penCol,
+                    self.penRow + len(clip) - 1, self.penCol + len(clip[-1]))
+            else:
+                self.parser.deleteRange(self.penRow, self.penCol,
+                    self.penRow + len(clip) - 1, len(clip[-1]))
             if app.config.use_tb_lines:
                 self.data = self.parser.data
                 self.dataToLines()

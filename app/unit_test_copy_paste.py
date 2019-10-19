@@ -55,6 +55,97 @@ class CopyPasteTestCases(app.fake_curses_testing.FakeCursesTestCase):
                 u'n'
             ])
 
+    def test_cut_paste_undo_redo(self):
+        #self.setMovieMode(True)
+        self.runWithFakeInputs([
+                self.displayCheck(2, 7, [u"      "]),
+                self.writeText(u'apple\nbanana\ncarrot\ndate\neggplant\nfig'),
+                self.displayCheck(2, 7, [
+                    u'apple   ',
+                    u'banana   ',
+                    u'carrot   ',
+                    u'date   ',
+                    u'eggplant   ',
+                    u'fig   ',
+                    u'         ',
+                    ]),
+                self.selectionCheck(5, 3, 0, 0, 0),
+                KEY_UP, KEY_UP,
+                KEY_SHIFT_UP,
+                KEY_SHIFT_UP,
+                KEY_SHIFT_LEFT,
+                self.selectionCheck(1, 2, 3, 3, 3),
+                CTRL_X,
+                self.displayCheck(2, 7, [
+                    u'apple   ',
+                    u'bae   ',
+                    u'eggplant   ',
+                    u'fig   ',
+                    u'         ',
+                    ]),
+                self.selectionCheck(1, 2, 1, 2, 0),
+                CTRL_V,
+                self.displayCheck(2, 7, [
+                    u'apple   ',
+                    u'banana   ',
+                    u'carrot   ',
+                    u'date   ',
+                    u'eggplant   ',
+                    u'fig   ',
+                    u'         ',
+                    ]),
+                self.selectionCheck(3, 3, 1, 2, 0),
+                CTRL_V,
+                self.displayCheck(2, 7, [
+                    u'apple   ',
+                    u'banana   ',
+                    u'carrot   ',
+                    u"datnana   ",
+                    u'carrot   ',
+                    u"date   ",
+                    u'eggplant   ',
+                    u'fig   ',
+                    u'         ',
+                    ]),
+                self.selectionCheck(5, 3, 1, 2, 0),
+                self.printRedoState(),
+                CTRL_Z,
+                self.displayCheck(2, 7, [
+                    u'apple   ',
+                    u'banana   ',
+                    u'carrot   ',
+                    u'date   ',
+                    u'eggplant   ',
+                    u'fig   ',
+                    u'         ',
+                    ]),
+                self.selectionCheck(3, 3, 1, 2, 0),
+                CTRL_Z,
+                self.displayCheck(2, 7, [
+                    u'apple   ',
+                    u'bae   ',
+                    u'eggplant   ',
+                    u'fig   ',
+                    u'         ',
+                    ]),
+                self.selectionCheck(1, 2, 1, 2, 0),
+                CTRL_Y,
+                CTRL_Y,
+                self.displayCheck(2, 7, [
+                    u'apple   ',
+                    u'banana   ',
+                    u'carrot   ',
+                    u"datnana   ",
+                    u'carrot   ',
+                    u"date   ",
+                    u'eggplant   ',
+                    u'fig   ',
+                    u'         ',
+                    ]),
+                self.selectionCheck(5, 3, 1, 2, 0),
+                CTRL_Q, u'n'
+            ])
+
     def test_write_text(self):
         self.runWithFakeInputs([
             self.writeText(u'test\n'),
