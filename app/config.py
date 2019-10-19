@@ -21,4 +21,4 @@ strict_debug = False
 # This supports an old system of a lines list on the text buffer. This will be
 # removed in the future. All the code within a `if app.config.use_tb_lines:`
 # block will also be deleted.
-use_tb_lines = True
+use_tb_lines = False
