@@ -48,6 +48,34 @@ class LineBuffer:
         # Parse from the beginning.
         self.upperChangedRow = 0
 
+    def escapeBinaryChars(self, data):
+        if app.config.strict_debug:
+            assert isinstance(data, unicode)
+        # Performance: in a 1000 line test it appears fastest to do some simple
+        # .replace() calls to minimize the number of calls to parse().
+        data = data.replace(u'\r\n', u'\n')
+        data = data.replace(u'\r', u'\n')
+        if self.program.prefs.tabsToSpaces(self.fileType):
+            tabSize = self.program.prefs.editor.get(u"tabSize", 8)
+            data = data.expandtabs(tabSize)
+
+        def parse(sre):
+            return u"\x01%02x" % ord(sre.groups()[0])
+
+        #data = re.sub(u'([\0-\x09\x0b-\x1f\x7f-\xff])', parse, data)
+        data = re.sub(u'([\0-\x09\x0b-\x1f])', parse, data)
+        return data
+
+    def unescapeBinaryChars(self, data):
+
+        def encode(line):
+            return chr(int(line.groups()[0], 16))
+
+        out = re.sub(u'\x01([0-9a-fA-F][0-9a-fA-F])', encode, data)
+        if app.config.strict_debug:
+            assert isinstance(out, unicode)
+        return out
+
     if app.config.use_tb_lines:
         def doLinesToBinaryData(self, lines):
             # TODO(dschuyler): convert lines to binary data.

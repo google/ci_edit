@@ -645,7 +645,8 @@ class LineNumbers(ViewWindow):
         if self.host.scrollCol > 0:
             color = colorPrefs.get(u'line_overflow')
             for i in range(limit):
-                if len(self.host.textBuffer.lines[self.host.scrollRow + i]) > 0:
+                if self.host.textBuffer.parser.rowWidth(
+                        self.host.scrollRow + i) > 0:
                     self.addStr(i, 6, u' ', color)
         # Draw blank line number rows past the end of the document.
         color = colorPrefs.get(u'outside_document')

@@ -38,7 +38,10 @@ class SelectableTestCases(unittest.TestCase):
 
     def test_selection_none(self):
         selectable = self.selectable
-        selectable.lines = [u"oneTwo", u"", u"five"]
+        if app.config.use_tb_lines:
+            selectable.lines = [u"oneTwo", u"", u"five"]
+        else:
+            selectable.parser.data = u"oneTwo\n\nfive"
         selectable.parseDocument()
         selectable.selectionMode = app.selectable.kSelectionNone
         self.assertEqual(selectable.extendSelection(), (0, 0, 0, 0, 0))
@@ -47,7 +50,10 @@ class SelectableTestCases(unittest.TestCase):
 
     def test_selection_all(self):
         selectable = self.selectable
-        selectable.lines = [u"oneTwo", u"", u"five"]
+        if app.config.use_tb_lines:
+            selectable.lines = [u"oneTwo", u"", u"five"]
+        else:
+            selectable.parser.data = u"oneTwo\n\nfive"
         selectable.parseDocument()
         selectable.selectionMode = app.selectable.kSelectionAll
         self.assertEqual(selectable.extendSelection(), (2, 4, 0, 0, 0))
@@ -56,7 +62,10 @@ class SelectableTestCases(unittest.TestCase):
 
     def test_selection_block(self):
         selectable = self.selectable
-        selectable.lines = [u"oneTwo", u"", u"five"]
+        if app.config.use_tb_lines:
+            selectable.lines = [u"oneTwo", u"", u"five"]
+        else:
+            selectable.parser.data = u"oneTwo\n\nfive"
         selectable.parseDocument()
         selectable.selectionMode = app.selectable.kSelectionBlock
         self.assertEqual(selectable.extendSelection(), (0, 0, 0, 0, 0))
@@ -65,7 +74,10 @@ class SelectableTestCases(unittest.TestCase):
 
     def test_selection_character(self):
         selectable = self.selectable
-        selectable.lines = [u"oneTwo", u"", u"five"]
+        if app.config.use_tb_lines:
+            selectable.lines = [u"oneTwo", u"", u"five"]
+        else:
+            selectable.parser.data = u"oneTwo\n\nfive"
         selectable.parseDocument()
         selectable.selectionMode = app.selectable.kSelectionCharacter
         self.assertEqual(selectable.extendSelection(), (0, 0, 0, 0, 0))
@@ -74,7 +86,10 @@ class SelectableTestCases(unittest.TestCase):
 
     def test_selection_line(self):
         selectable = self.selectable
-        selectable.lines = [u"one two", u"", u"five"]
+        if app.config.use_tb_lines:
+            selectable.lines = [u"one two", u"", u"five"]
+        else:
+            selectable.parser.data = u"one two\n\nfive"
         selectable.parseDocument()
         selectable.penRow = 1
         selectable.selectionMode = app.selectable.kSelectionLine
@@ -89,7 +104,10 @@ class SelectableTestCases(unittest.TestCase):
 
     def test_selection_word(self):
         selectable = self.selectable
-        selectable.lines = [u"one two", u"Several test words.", u"five"]
+        if app.config.use_tb_lines:
+            selectable.lines = [u"one two", u"Several test words.", u"five"]
+        else:
+            selectable.parser.data = u"one two\nSeveral test words\nfive"
         selectable.parseDocument()
         selectable.selectionMode = app.selectable.kSelectionWord
         selectable.penRow = 1
@@ -104,13 +122,16 @@ class SelectableTestCases(unittest.TestCase):
 
     def test_deletion_none(self):
         selectable = self.selectable
-        selectable.lines = [u"one two", u"Several test words.", u"five"]
+        if app.config.use_tb_lines:
+            selectable.lines = [u"one two", u"Several test words.", u"five"]
+        else:
+            selectable.parser.data = u"one two\nSeveral test words.\nfive"
         selectable.parseDocument()
         selectable.selectionMode = app.selectable.kSelectionNone
         selectable.penCol = 1
         selectable.doDeleteSelection()
-        self.assertEqual(selectable.lines,
-                         [u"one two", u"Several test words.", u"five"])
+        self.assertEqual(selectable.parser.data,
+                         u"one two\nSeveral test words.\nfive")
 
     def test_deletion_all(self):
         selectable = self.selectable
@@ -123,7 +144,10 @@ class SelectableTestCases(unittest.TestCase):
             selectable.selectionMode += args[4]
 
         self.assertEqual(selectable.selection(), (0, 0, 0, 0))
-        selectable.lines = [u"oneTwo", u"", u"five"]
+        if app.config.use_tb_lines:
+            selectable.lines = [u"oneTwo", u"", u"five"]
+        else:
+            selectable.parser.data = u"oneTwo\n\nfive"
         selectable.parseDocument()
         self.assertEqual(selectable.selection(), (0, 0, 0, 0))
         selectable.selectionMode = app.selectable.kSelectionAll
@@ -134,15 +158,18 @@ class SelectableTestCases(unittest.TestCase):
         applySelection(selectable.extendSelection())
         self.assertEqual(selectable.selection(), (2, 4, 0, 0))
         selectable.doDeleteSelection()
-        self.assertEqual(selectable.lines, [u""])
+        self.assertEqual(selectable.parser.data, u"")
 
         selectable.insertLinesAt(0, 0, (u"wx", u"", u"yz"),
                 app.selectable.kSelectionAll)
-        self.assertEqual(selectable.lines, [u"wx", u"", u"yz"])
+        self.assertEqual(selectable.parser.data, u"wx\n\nyz")
 
     def test_deletion_block(self):
         selectable = self.selectable
-        selectable.lines = [u"oneTwo", u"", u"five"]
+        if app.config.use_tb_lines:
+            selectable.lines = [u"oneTwo", u"", u"five"]
+        else:
+            selectable.parser.data = u"oneTwo\n\nfive"
         selectable.parseDocument()
         selectable.selectionMode = app.selectable.kSelectionBlock
         self.assertEqual(selectable.extendSelection(), (0, 0, 0, 0, 0))
@@ -151,37 +178,40 @@ class SelectableTestCases(unittest.TestCase):
         selectable.penRow = 2
         selectable.penCol = 3
         self.assertEqual(selectable.extendSelection(), (0, 0, 0, 0, 0))
-        self.assertEqual(selectable.lines,
-                         [u"oneTwo", u"", u"five"])
+        self.assertEqual(selectable.parser.data, u"oneTwo\n\nfive")
         selectable.doDeleteSelection()
-        self.assertEqual(selectable.lines,
-                         [u"oTwo", u"", u"fe"])
+        self.assertEqual(selectable.parser.data, u"oTwo\n\nfe")
         selectable.insertLinesAt(0, 1, (u"wx", u"", u"yz"),
                 app.selectable.kSelectionBlock)
-        self.assertEqual(selectable.lines,
-                         [u"owxTwo", u"", u"fyze"])
+        self.assertEqual(selectable.parser.data, u"owxTwo\n\nfyze")
 
     def test_deletion_character(self):
         selectable = self.selectable
-        selectable.lines = [u"one two", u"Several test words.", u"five"]
+        if app.config.use_tb_lines:
+            selectable.lines = [u"one two", u"Several test words.", u"five"]
+        else:
+            selectable.parser.data = u"one two\nSeveral test words.\nfive"
         selectable.parseDocument()
         selectable.selectionMode = app.selectable.kSelectionCharacter
         selectable.penCol = 1
         selectable.doDeleteSelection()
-        self.assertEqual(selectable.lines,
-                         [u"ne two", u"Several test words.", u"five"])
+        self.assertEqual(selectable.parser.data,
+                         u"ne two\nSeveral test words.\nfive")
         selectable.markerCol = 3
         selectable.doDeleteSelection()
-        self.assertEqual(selectable.lines,
-                         [u"ntwo", u"Several test words.", u"five"])
+        self.assertEqual(selectable.parser.data,
+                         u"ntwo\nSeveral test words.\nfive")
         selectable.penRow = 1
         selectable.penCol = 1
         selectable.doDeleteSelection()
-        self.assertEqual(selectable.lines, [u"ntweveral test words.", u"five"])
+        self.assertEqual(selectable.parser.data, u"ntweveral test words.\nfive")
 
     def test_deletion_line(self):
         selectable = self.selectable
-        selectable.lines = [u"one two", u"", u"five"]
+        if app.config.use_tb_lines:
+            selectable.lines = [u"one two", u"", u"five"]
+        else:
+            selectable.parser.data = u"one two\n\nfive"
         selectable.parseDocument()
         selectable.penRow = 1
         selectable.selectionMode = app.selectable.kSelectionLine
@@ -196,7 +226,10 @@ class SelectableTestCases(unittest.TestCase):
 
     def test_deletion_word(self):
         selectable = self.selectable
-        selectable.lines = [u"one two", u"Several test words.", u"five"]
+        if app.config.use_tb_lines:
+            selectable.lines = [u"one two", u"Several test words.", u"five"]
+        else:
+            selectable.parser.data = u"one two\nSeveral test words.\nfive"
         selectable.parseDocument()
         selectable.selectionMode = app.selectable.kSelectionWord
         selectable.penRow = 1

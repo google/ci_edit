@@ -840,7 +840,10 @@ class Actions(app.mutator.Mutator):
     def editCopy(self):
         text = self.getSelectedText()
         if len(text):
-            data = self.doLinesToData(text)
+            if app.config.use_tb_lines:
+                data = self.doLinesToData(text)
+            else:
+                data = u"\n".join(text)
             self.program.clipboard.copy(data)
             if len(text) == 1:
                 self.setMessage(u'copied %d characters' % len(text[0]))
@@ -864,7 +867,7 @@ class Actions(app.mutator.Mutator):
         if app.config.use_tb_lines:
             self.editPasteLines(tuple(self.doDataToLines(data)))
         else:
-            self.editPasteLines(tuple(self.parser.data.split(u"\n")))
+            self.editPasteLines(tuple(data.split(u"\n")))
 
     def editPasteLines(self, clip):
         if self.selectionMode != app.selectable.kSelectionNone:
@@ -876,7 +879,6 @@ class Actions(app.mutator.Mutator):
             endCol = self.penCol + app.curses_util.columnWidth(clip[0])
         else:
             endCol = app.curses_util.columnWidth(clip[-1])
-        app.log.info(self.goalCol, endCol, self.penCol, endCol - self.penCol)
         self.cursorMove(rowDelta, endCol - self.penCol)
 
     def editRedo(self):
@@ -1157,14 +1159,14 @@ class Actions(app.mutator.Mutator):
                         ord(u'\t'): None,
                     }
                     outputData = binascii.unhexlify(
-                        self.data.translate(removeWhitespace))
+                        self.parser.data.translate(removeWhitespace))
                     outputFile = io.open(self.fullPath, u'wb+')
                 elif self.fileEncoding is None:
-                    outputData = self.data
+                    outputData = self.parser.data
                     outputFile = io.open(
                         self.fullPath, u'w+', encoding=u'UTF-8')
                 else:
-                    outputData = self.data
+                    outputData = self.parser.data
                     outputFile = io.open(
                         self.fullPath, 'w+', encoding=self.fileEncoding)
                 outputFile.seek(0)
@@ -1325,7 +1327,10 @@ class Actions(app.mutator.Mutator):
         _, find, replace, flags = splitCmd
         if app.config.use_tb_lines:
             self.linesToData()
-        data = self.findReplaceText(find, replace, flags, self.data)
+            input = self.data
+        else:
+            input = self.parser.data
+        data = self.findReplaceText(find, replace, flags, input)
         self.applyDocumentUpdate(data)
 
     def findReplaceText(self, find, replace, flags, text):
