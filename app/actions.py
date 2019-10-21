@@ -840,10 +840,7 @@ class Actions(app.mutator.Mutator):
     def editCopy(self):
         text = self.getSelectedText()
         if len(text):
-            if app.config.use_tb_lines:
-                data = self.doLinesToData(text)
-            else:
-                data = u"\n".join(text)
+            data = u"\n".join(text)
             self.program.clipboard.copy(data)
             if len(text) == 1:
                 self.setMessage(u'copied %d characters' % len(text[0]))
@@ -864,10 +861,7 @@ class Actions(app.mutator.Mutator):
             app.log.info(u'clipboard empty')
 
     def editPasteData(self, data):
-        if app.config.use_tb_lines:
-            self.editPasteLines(tuple(self.doDataToLines(data)))
-        else:
-            self.editPasteLines(tuple(data.split(u"\n")))
+        self.editPasteLines(tuple(data.split(u"\n")))
 
     def editPasteLines(self, clip):
         if self.selectionMode != app.selectable.kSelectionNone:
@@ -895,10 +889,6 @@ class Actions(app.mutator.Mutator):
 
     def fileFilter(self, data):
         self.parser.data = data
-        if app.config.use_tb_lines:
-          self.data = data
-          self.dataToLines()
-          self.upperChangedRow = 0
         self.savedAtRedoIndex = self.redoIndex
 
     def fileLoad(self):
@@ -973,8 +963,6 @@ class Actions(app.mutator.Mutator):
         self.rootGrammar = self._determineRootGrammar(
             *os.path.splitext(self.fullPath))
         self.parseGrammars()
-        if app.config.use_tb_lines:
-            self.dataToLines()
 
         # Restore all user history.
         self.restoreUserHistory()
@@ -1149,8 +1137,6 @@ class Actions(app.mutator.Mutator):
                 self.fileHistory[u'marker'] = (self.markerRow, self.markerCol)
                 self.fileHistory[u'selectionMode'] = self.selectionMode
                 self.fileHistory[u'bookmarks'] = self.bookmarks
-                if app.config.use_tb_lines:
-                    self.linesToData()
                 if self.isBinary:
                     removeWhitespace = {
                         ord(u' '): None,
@@ -1325,12 +1311,7 @@ class Actions(app.mutator.Mutator):
                             u' separators')
             return
         _, find, replace, flags = splitCmd
-        if app.config.use_tb_lines:
-            self.linesToData()
-            input = self.data
-        else:
-            input = self.parser.data
-        data = self.findReplaceText(find, replace, flags, input)
+        data = self.findReplaceText(find, replace, flags, self.parser.data)
         self.applyDocumentUpdate(data)
 
     def findReplaceText(self, find, replace, flags, text):

@@ -187,27 +187,14 @@ class Mutator(app.selectable.Selectable):
             if self.upperChangedRow > to:
                 self.upperChangedRow = to
         self.parser.insertLines(to, 0, lines.split(u"\n"))
-        if app.config.use_tb_lines:
-            self.data = self.parser.data
-            self.dataToLines()
 
     def __doVerticalInsert(self, change):
         text, row, endRow, col = change[1]
         self.parser.insertBlock(row, col, [text] * (endRow - row + 1))
-        if app.config.use_tb_lines:
-            self.data = self.parser.data
-            self.dataToLines()
-            if self.upperChangedRow > row:
-                self.upperChangedRow = row
 
     def __doVerticalDelete(self, change):
         text, row, endRow, col = change[1]
         self.parser.deleteBlock(row, col, endRow, col + len(text))
-        if app.config.use_tb_lines:
-            self.data = self.parser.data
-            self.dataToLines()
-            if self.upperChangedRow > row:
-                self.upperChangedRow = row
 
     def __redoMove(self, change):
         assert self.penRow + change[1][0] >= 0, "%s %s" % (self.penRow,
@@ -270,28 +257,13 @@ class Mutator(app.selectable.Selectable):
         if change[0] == 'b':  # Redo backspace.
             self.penRow, self.penCol = self.parser.backspace(self.penRow,
                 self.penCol)
-            if app.config.use_tb_lines:  # Hack in old lines system.
-                self.data = self.parser.data
-                self.dataToLines()
-                if self.upperChangedRow > self.penRow:
-                    self.upperChangedRow = self.penRow
         elif change[0] == 'bw':  # Redo backspace word.
             width = columnWidth(change[1])
             self.parser.deleteRange(self.penRow, self.penCol - width,
                 self.penRow, self.penCol)
             self.penCol -= width
-            if app.config.use_tb_lines:  # Hack in old lines system.
-                self.data = self.parser.data
-                self.dataToLines()
-                if self.upperChangedRow > self.penRow:
-                    self.upperChangedRow = self.penRow
         elif change[0] == 'd':  # Redo delete character.
             self.parser.deleteChar(self.penRow, self.penCol)
-            if app.config.use_tb_lines:  # Hack in old lines system.
-                self.data = self.parser.data
-                self.dataToLines()
-                if self.upperChangedRow > self.penRow:
-                    self.upperChangedRow = self.penRow
         elif change[0] == 'dr':  # Redo delete range.
             self.doDelete(*change[1])
         elif change[0] == 'ds':  # Redo delete selection.
@@ -302,18 +274,8 @@ class Mutator(app.selectable.Selectable):
             self.parser.insert(self.penRow, self.penCol, change[1])
             self.penCol += columnWidth(change[1])
             self.goalCol = self.penCol
-            if app.config.use_tb_lines:  # Hack in old lines system.
-                self.data = self.parser.data
-                self.dataToLines()
-                if self.upperChangedRow > self.penRow:
-                    self.upperChangedRow = self.penRow
         elif change[0] == 'j':  # Redo join lines (delete \n).
             self.parser.deleteChar(self.penRow, self.penCol)
-            if app.config.use_tb_lines:  # Hack in old lines system.
-                self.data = self.parser.data
-                self.dataToLines()
-                if self.upperChangedRow > self.penRow:
-                    self.upperChangedRow = self.penRow
         elif change[0] == 'ld':  # Redo line diff.
             assert False  # Not used.
             lines = []
@@ -330,11 +292,6 @@ class Mutator(app.selectable.Selectable):
             self.parser.data = lines.join(u"\n")
             firstChangedRow = change[1][0] if type(
                 change[1][0]) is type(0) else 0
-            if app.config.use_tb_lines:  # Hack in old lines system.
-                self.data = self.parser.data
-                self.dataToLines()
-                if self.upperChangedRow > self.penRow:
-                    self.upperChangedRow = self.penRow
         elif change[0] == 'm':  # Redo move
             self.__redoMove(change)
         elif change[0] == 'ml':  # Redo move lines
@@ -343,11 +300,6 @@ class Mutator(app.selectable.Selectable):
         elif change[0] == 'n':  # Redo split lines (insert \n).
             self.parser.insert(self.penRow, self.penCol, u"\n")
             self.__redoMove(change[2])
-            if app.config.use_tb_lines:  # Hack in old lines system.
-                self.data = self.parser.data
-                self.dataToLines()
-                if self.upperChangedRow > self.penRow:
-                    self.upperChangedRow = self.penRow
         elif change[0] == 'v':  # Redo paste.
             self.insertLines(change[1])
         elif change[0] == 'vb':  # Redo vertical backspace.
@@ -356,11 +308,6 @@ class Mutator(app.selectable.Selectable):
             self.parser.deleteBlock(self.penRow, self.penCol - width,
                     self.penRow + len(change[1]), self.penCol)
             self.penCol -= width
-            if app.config.use_tb_lines:  # Hack in old lines system.
-                self.data = self.parser.data
-                self.dataToLines()
-                if self.upperChangedRow > self.penRow:
-                    self.upperChangedRow = self.penRow
         elif change[0] == 'vd':  # Redo vertical delete.
             self.__doVerticalDelete(change)
         elif change[0] == 'vi':  # Redo vertical insert.
@@ -470,26 +417,11 @@ class Mutator(app.selectable.Selectable):
             if position is not None:
                 self.penRow += position[0]
                 self.penCol += position[1]
-            if app.config.use_tb_lines:  # Hack in old lines system.
-                self.data = self.parser.data
-                self.dataToLines()
-                if self.upperChangedRow > self.penRow:
-                    self.upperChangedRow = self.penRow
         elif change[0] == 'bw':  # Undo backspace word.
             self.parser.insert(self.penRow, self.penCol, change[1])
             self.penCol += columnWidth(change[1])
-            if app.config.use_tb_lines:  # Hack in old lines system.
-                self.data = self.parser.data
-                self.dataToLines()
-                if self.upperChangedRow > self.penRow:
-                    self.upperChangedRow = self.penRow
         elif change[0] == 'd':
             self.parser.insert(self.penRow, self.penCol, change[1])
-            if app.config.use_tb_lines:  # Hack in old lines system.
-                self.data = self.parser.data
-                self.dataToLines()
-                if self.upperChangedRow > self.penRow:
-                    self.upperChangedRow = self.penRow
         elif change[0] == 'dr':  # Undo delete range.
             self.insertLinesAt(change[1][0], change[1][1], change[2],
                                app.selectable.kSelectionCharacter)
@@ -503,18 +435,8 @@ class Mutator(app.selectable.Selectable):
                     self.penRow, self.penCol)
             self.penCol -= width
             self.goalCol = self.penCol
-            if app.config.use_tb_lines:  # Hack in old lines system.
-                self.data = self.parser.data
-                self.dataToLines()
-                if self.upperChangedRow > self.penRow:
-                    self.upperChangedRow = self.penRow
         elif change[0] == 'j':  # Undo join lines.
             self.parser.insert(self.penRow, self.penCol, u"\n")
-            if app.config.use_tb_lines:  # Hack in old lines system.
-                self.data = self.parser.data
-                self.dataToLines()
-                if self.upperChangedRow > self.penRow:
-                    self.upperChangedRow = self.penRow
         elif change[0] == 'ld':  # Undo line diff.
             assert False  # Not used.
             lines = []
@@ -531,11 +453,6 @@ class Mutator(app.selectable.Selectable):
             self.parser.data = lines.join(u"\n")
             firstChangedRow = change[1][0] if type(
                 change[1][0]) is type(0) else 0
-            if app.config.use_tb_lines:  # Hack in old lines system.
-                self.data = self.parser.data
-                self.dataToLines()
-                if self.upperChangedRow > self.penRow:
-                    self.upperChangedRow = self.penRow
         elif change[0] == 'm':
             self.__undoMove(change)
         elif change[0] == 'ml':
@@ -550,11 +467,6 @@ class Mutator(app.selectable.Selectable):
             # Undo split lines.
             self.__undoMove(change[2])
             self.parser.backspace(self.penRow + 1, 0)
-            if app.config.use_tb_lines:
-                self.data = self.parser.data
-                self.dataToLines()
-                if self.upperChangedRow > self.penRow:
-                    self.upperChangedRow = self.penRow
         elif change[0] == 'v':  # undo paste
             clip = change[1]
             if len(clip) == 1:
@@ -563,20 +475,10 @@ class Mutator(app.selectable.Selectable):
             else:
                 self.parser.deleteRange(self.penRow, self.penCol,
                     self.penRow + len(clip) - 1, len(clip[-1]))
-            if app.config.use_tb_lines:
-                self.data = self.parser.data
-                self.dataToLines()
-                if self.upperChangedRow > self.penRow:
-                    self.upperChangedRow = self.penRow
         elif change[0] == 'vb':  # Undo vertical backspace.
             assert False  # Not yet used.
             self.parser.insertBlock(self.penRow, self.penCol, change[1])
             self.penCol += columnWidth(change[1][0])
-            if app.config.use_tb_lines:
-                self.data = self.parser.data
-                self.dataToLines()
-                if self.upperChangedRow > self.penRow:
-                    self.upperChangedRow = self.penRow
         elif change[0] == 'vd':  # Undo vertical delete
             self.__doVerticalInsert(change)
         elif change[0] == 'vi':  # Undo vertical insert

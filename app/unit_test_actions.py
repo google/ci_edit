@@ -42,19 +42,11 @@ class FakeView:
 
 def checkRow(test, text_buffer, row, expected):
     text_buffer.parseDocument()
-    if app.config.use_tb_lines:
-        if not (text_buffer.lines[row] == expected == text_buffer.parser.rowText(row)):
-            test.fail("\n\nExpected these to match: "
-                "row {}: lines {}, expected {}, parser {}".format(
-                    row,
-                    repr(text_buffer.lines[row]), repr(expected),
-                    repr(text_buffer.parser.data)))
-    else:
-        if not (expected == text_buffer.parser.rowText(row)):
-            test.fail("\n\nExpected these to match: "
-                "row {}: expected {}, parser {}".format(
-                    row, repr(expected),
-                    repr(text_buffer.parser.data)))
+    if not (expected == text_buffer.parser.rowText(row)):
+        test.fail("\n\nExpected these to match: "
+            "row {}: expected {}, parser {}".format(
+                row, repr(expected),
+                repr(text_buffer.parser.data)))
 
 
 class ActionsTestCase(unittest.TestCase):
@@ -101,8 +93,6 @@ void blah();
         self.textBuffer.parseDocument()
         #self.assertEqual(self.textBuffer.scrollRow, 0)
         #self.assertEqual(self.textBuffer.scrollCol, 0)
-        if app.config.use_tb_lines:
-            self.assertEqual(self.textBuffer.lines[1], 'two')
         self.assertEqual(self.textBuffer.parser.rowText(1), 'two')
 
     def tearDown(self):
@@ -214,8 +204,6 @@ a\twith tab
         #self.textBuffer.parser.debugLog(print, test)
         #self.assertEqual(self.textBuffer.scrollRow, 0)
         #self.assertEqual(self.textBuffer.scrollCol, 0)
-        if app.config.use_tb_lines:
-            self.assertEqual(self.textBuffer.lines[1], 'two')
         self.assertEqual(self.textBuffer.parser.rowText(1), 'two')
         self.assertEqual(self.textBuffer.parser.rowTextAndWidth(8),
                 ('\t\t', 16))
@@ -347,8 +335,6 @@ class TextIndentTestCases(ActionsTestCase):
             self.textBuffer.insertPrintableWithPairing(*args)
             self.textBuffer.parseDocument()
         tb = self.textBuffer
-        if app.config.use_tb_lines:
-            self.assertEqual(len(tb.lines), 1)
         self.assertEqual(tb.parser.rowCount(), 1)
         insert(ord('a'), None)
         insert(ord(':'), None)
@@ -382,8 +368,6 @@ class TextIndentTestCases(ActionsTestCase):
             self.textBuffer.insertPrintableWithPairing(*args)
             self.textBuffer.parseDocument()
         tb = self.textBuffer
-        if app.config.use_tb_lines:
-            self.assertEqual(len(tb.lines), 1)
         self.assertEqual(tb.parser.rowCount(), 1)
         insert(ord('a'), None)
         tb.carriageReturn()
@@ -492,8 +476,6 @@ class TextIndentTestCases(ActionsTestCase):
                     self.textBuffer.insertPrintableWithPairing(ord(i), None)
                     self.textBuffer.parseDocument()
             self.assertEqual(self.textBuffer.parser.data, input)
-            if app.config.use_tb_lines:
-                self.assertEqual(self.textBuffer.data, input)
 
         def checkPenMarker(penRow, penCol, markerRow, markerCol):
             self.assertEqual((penRow, penCol, markerRow, markerCol), (
@@ -507,8 +489,6 @@ class TextIndentTestCases(ActionsTestCase):
             self.textBuffer.selectionMode = app.selectable.kSelectionCharacter
 
         tb = self.textBuffer
-        if app.config.use_tb_lines:
-            self.assertEqual(len(tb.lines), 1)
         self.assertEqual(tb.parser.rowCount(), 1)
         checkPenMarker(0, 0, 0, 0)
         insert(u"apple\nbanana\ncarrot\ndate\neggplant\n")
@@ -575,8 +555,6 @@ class TextInsertTestCases(ActionsTestCase):
             self.textBuffer.insertPrintableWithPairing(*args)
             self.textBuffer.parseDocument()
         tb = self.textBuffer
-        if app.config.use_tb_lines:
-            self.assertEqual(len(tb.lines), 1)
         insert(ord('o'), None)
         insert(ord('('), None)
         checkRow(self, tb, 0, 'o(')
@@ -602,8 +580,6 @@ class TextInsertTestCases(ActionsTestCase):
             self.textBuffer.insertPrintableWithPairing(*args)
             self.textBuffer.parseDocument()
         tb = self.textBuffer
-        if app.config.use_tb_lines:
-            self.assertEqual(len(tb.lines), 1)
         insert(ord('o'), None)
         insert(ord('('), None)
         checkRow(self, tb, 0, 'o()')

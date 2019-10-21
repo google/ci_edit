@@ -17,8 +17,3 @@ from __future__ import division
 from __future__ import print_function
 
 strict_debug = False
-
-# This supports an old system of a lines list on the text buffer. This will be
-# removed in the future. All the code within a `if app.config.use_tb_lines:`
-# block will also be deleted.
-use_tb_lines = False
