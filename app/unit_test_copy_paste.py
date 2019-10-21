@@ -108,7 +108,6 @@ class CopyPasteTestCases(app.fake_curses_testing.FakeCursesTestCase):
                     u'         ',
                     ]),
                 self.selectionCheck(5, 3, 1, 2, 0),
-                self.printRedoState(),
                 CTRL_Z,
                 self.displayCheck(2, 7, [
                     u'apple   ',
