@@ -125,9 +125,6 @@ class Selectable(app.line_buffer.LineBuffer):
                         lines.append(self.parser.rowText(i, 0, lowerCol))
                     else:
                         lines.append(self.parser.rowText(i))
-        if app.config.use_tb_lines:
-            self.data = self.parser.data
-            self.dataToLines()
         return tuple(lines)
 
     def doDeleteSelection(self):
@@ -155,9 +152,6 @@ class Selectable(app.line_buffer.LineBuffer):
               self.selectionMode == kSelectionLine or
               self.selectionMode == kSelectionWord):
             self.parser.deleteRange(upperRow, upperCol, lowerRow, lowerCol)
-        if app.config.use_tb_lines:
-            self.data = self.parser.data
-            self.dataToLines()
 
     def insertLines(self, lines):
         if app.config.strict_debug:
@@ -190,11 +184,6 @@ class Selectable(app.line_buffer.LineBuffer):
                 self.parser.insertLines(row, col, lines)
         else:
             app.log.info('selection mode not recognized', selectionMode)
-        if app.config.use_tb_lines:
-            self.data = self.parser.data
-            self.dataToLines()
-            if self.upperChangedRow > self.penRow:
-                self.upperChangedRow = self.penRow
 
     def __extendWords(self, upperRow, upperCol, lowerRow, lowerCol):
         """Extends and existing selection to the nearest word boundaries. The

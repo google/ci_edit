@@ -100,8 +100,6 @@ class InteractivePrompt(app.controller.Controller):
     def setTextBuffer(self, textBuffer):
         app.controller.Controller.setTextBuffer(self, textBuffer)
         self.textBuffer = textBuffer
-        if app.config.use_tb_lines:
-            self.textBuffer.lines = [u""]
         self.commands = {
             u'bm': self.bookmarkCommand,
             u'build': self.buildCommand,
@@ -166,14 +164,9 @@ class InteractivePrompt(app.controller.Controller):
 
         fileName, ext = os.path.splitext(self.view.host.textBuffer.fullPath)
         app.log.info(fileName, ext)
-        if app.config.use_tb_lines:
-            lines = self.view.host.textBuffer.doDataToLines(
-                formatter.get(ext,
-                          noOp)(self.view.host.textBuffer.doLinesToData(lines)))
-        else:
-            data = formatter.get(ext,
-                          noOp)(self.view.host.textBuffer.parser.data)
-            lines = data.split(u"\n")
+        data = formatter.get(ext,
+                      noOp)(self.view.host.textBuffer.parser.data)
+        lines = data.split(u"\n")
 
         return lines, u'Changed %d lines' % (len(lines),)
 
@@ -220,21 +213,13 @@ class InteractivePrompt(app.controller.Controller):
             tb = self.view.host.textBuffer
             lines = list(tb.getSelectedText())
             if cmdLine[0] in self.subExecute:
-                if app.config.use_tb_lines:
-                    data = self.view.host.textBuffer.doLinesToData(
-                        lines).encode('utf-8')
-                else:
-                    data = self.view.host.textBuffer.parser.data.encode('utf-8')
+                data = self.view.host.textBuffer.parser.data.encode('utf-8')
                 output, message = self.subExecute.get(cmdLine[0])(cmdLine[1:],
                                                                   data)
                 if app.config.strict_debug:
                     assert isinstance(output, bytes)
                     assert isinstance(message, unicode)
-                if app.config.use_tb_lines:
-                    output = tb.doDataToLines(output.decode('utf-8'))
-                else:
-                    output = output.decode('utf-8').split(u"\n")
-                tb.editPasteLines(tuple(output))
+                tb.editPasteLines(tuple(output.decode('utf-8').split(u"\n")))
                 tb.setMessage(message)
             else:
                 cmd = re.split(u'\\W', cmdLine)[0]
@@ -342,16 +327,10 @@ class InteractivePrompt(app.controller.Controller):
         except ValueError:
             return (lines, u'''Separator punctuation missing, there should be'''
                     u''' three '%s'.''' % (separator,))
-        if app.config.use_tb_lines:
-            data = self.view.host.textBuffer.doLinesToData(lines)
-        else:
-            data = self.view.host.textBuffer.parser.data
+        data = self.view.host.textBuffer.parser.data
         output = self.view.host.textBuffer.findReplaceText(
             find, replace, flags, data)
-        if app.config.use_tb_lines:
-            lines = self.view.host.textBuffer.doDataToLines(output)
-        else:
-            lines = output.split(u"\n")
+        lines = output.split(u"\n")
         return lines, u'Changed %d lines' % (len(lines),)
 
     def upperSelectedLines(self, cmdLine, lines):
