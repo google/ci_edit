@@ -33,7 +33,6 @@ class LineBuffer:
 
     def __init__(self, program):
         self.program = program
-        self.debugUpperChangedRow = -1
         self.isBinary = False
         self.parser = app.parser.Parser(program.prefs)
         self.parserTime = 0.0
@@ -44,7 +43,7 @@ class LineBuffer:
         self.fileType = fileType
         self.rootGrammar = self.program.prefs.getGrammar(self.fileType)
         # Parse from the beginning.
-        self.upperChangedRow = 0
+        self.parser.resumeAtRow = 0
 
     def escapeBinaryChars(self, data):
         if app.config.strict_debug:
@@ -78,17 +77,14 @@ class LineBuffer:
         start = time.time()
         self.parser.parse(self.program.bg, self.parser.data,
                           self.rootGrammar, begin, end)
-        self.debugUpperChangedRow = self.upperChangedRow
-        self.upperChangedRow = self.parser.resumeAtRow
+        self.debugUpperChangedRow = self.parser.resumeAtRow
         self.parserTime = time.time() - start
 
     def isEmpty(self):
         return len(self.parser.data) == 0
 
     def parseDocument(self):
-        begin = min(self.parser.resumeAtRow, self.upperChangedRow)
-        end = sys.maxsize
-        self.doParse(begin, end)
+        self.doParse(self.parser.resumeAtRow, sys.maxsize)
 
     def setMessage(self, *args, **kwargs):
         if not len(args):

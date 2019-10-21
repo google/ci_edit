@@ -142,8 +142,6 @@ class Selectable(app.line_buffer.LineBuffer):
             assert isinstance(lowerCol, int)
             assert upperRow <= lowerRow
             assert upperRow != lowerRow or upperCol <= lowerCol
-        if self.upperChangedRow > upperRow:
-            self.upperChangedRow = upperRow
         if self.selectionMode == kSelectionBlock:
             self.parser.deleteBlock(upperRow, upperCol, lowerRow, lowerCol)
         elif (self.selectionMode == kSelectionNone or
@@ -169,8 +167,6 @@ class Selectable(app.line_buffer.LineBuffer):
                 # Optimization. There's nothing to insert.
                 return
         lines = list(lines)
-        if self.upperChangedRow > row:
-            self.upperChangedRow = row
         if selectionMode == kSelectionBlock:
             self.parser.insertBlock(row, col, lines)
         elif (selectionMode == kSelectionNone or

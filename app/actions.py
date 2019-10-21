@@ -955,7 +955,7 @@ class Actions(app.mutator.Mutator):
                     extension = u'.sh'
         if self.fileExtension != extension:
             self.fileExtension = extension
-            self.upperChangedRow = 0
+            self.parser.resumeAtRow = 0
         self.fileType = self.program.prefs.getFileType(name + extension)
         return self.program.prefs.getGrammar(self.fileType)
 
@@ -1710,7 +1710,7 @@ class Actions(app.mutator.Mutator):
         self.view.normalize()
 
     def parseScreenMaybe(self):
-        begin = min(self.parser.resumeAtRow, self.upperChangedRow)
+        begin = self.parser.resumeAtRow
         end = self.view.scrollRow + self.view.rows + 1
         if end > begin + 100:
             # Call doParse with an empty range.
@@ -1722,11 +1722,10 @@ class Actions(app.mutator.Mutator):
             return
         scrollRow = self.view.scrollRow
         # If there is a gap, leave it to the background parsing.
-        if (self.parser.resumeAtRow < scrollRow or
-                self.upperChangedRow < scrollRow):
+        if self.parser.resumeAtRow < scrollRow:
             return
         end = self.view.scrollRow + self.view.rows + 1
-        self.doParse(self.upperChangedRow, end)
+        self.doParse(self.parser.resumeAtRow, end)
 
     def doSelectionMode(self, mode):
         if self.selectionMode != mode:

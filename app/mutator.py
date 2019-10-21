@@ -175,8 +175,6 @@ class Mutator(app.selectable.Selectable):
                 assert self.markerRow < to + count
                 assert self.markerRow >= count
                 self.markerRow -= count
-            if self.upperChangedRow > begin:
-                self.upperChangedRow = begin
         else:
             assert end > to
             assert self.penRow >= to
@@ -184,8 +182,6 @@ class Mutator(app.selectable.Selectable):
             if self.selectionMode != app.selectable.kSelectionNone:
                 assert self.markerRow >= to
                 self.markerRow += count
-            if self.upperChangedRow > to:
-                self.upperChangedRow = to
         self.parser.insertLines(to, 0, lines.split(u"\n"))
 
     def __doVerticalInsert(self, change):
