@@ -128,7 +128,7 @@ Within the Goto line prompt:
 
     'version': \
 """\
-  Version (build iteration): v47
+  Version (build iteration): v48
   Within Python %s
   See LICENSE for license information
   See readme.md for an introduction
