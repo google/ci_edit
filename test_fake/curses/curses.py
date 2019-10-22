@@ -225,7 +225,7 @@ class FakeDisplay:
                         result += u"\n  actual:   |%s|" % actualLine
                     if verbose >= 2:
                         expectedText = u"".join(line)
-                        result += u"\n  expected: %s|%s|" % (u" " * displayCol,
+                        result += u"\n  expected: %s|%s|" % (u" " * col,
                                                              expectedText)
                     if verbose >= 3:
                         result += u"\n  mismatch:  %*s^" % (displayCol, u"")

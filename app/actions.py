@@ -1530,7 +1530,7 @@ class Actions(app.mutator.Mutator):
         if shift:
             if alt:
                 self.selectionBlock()
-            elif self.selectionMode == app.selectable.kSelectionNone:
+            else:
                 self.selectionCharacter()
         else:
             self.selectionNone()
@@ -1544,7 +1544,11 @@ class Actions(app.mutator.Mutator):
 
     def mouseMoved(self, paneRow, paneCol, shift, ctrl, alt):
         app.log.info(u' mouseMoved', paneRow, paneCol, shift, ctrl, alt)
-        self.mouseClick(paneRow, paneCol, True, ctrl, alt)
+        if alt:
+            self.selectionBlock()
+        elif self.selectionMode == app.selectable.kSelectionNone:
+            self.selectionCharacter()
+        self.mouseRelease(paneRow, paneCol, shift, ctrl, alt)
 
     def mouseRelease(self, paneRow, paneCol, shift, ctrl, alt):
         app.log.info(u' mouse release', paneRow, paneCol)
