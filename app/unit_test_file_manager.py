@@ -74,6 +74,32 @@ class FileManagerTestCases(app.fake_curses_testing.FakeCursesTestCase):
             CTRL_Q
         ])
 
+    def test_mouse_scroll(self):
+        #self.setMovieMode(True)
+        dirList = [
+            u"./     ", u"../     ", u"._ A name with cr\\r/",
+        ]
+        self.runWithFakeInputs([
+            self.displayCheck(0, 0, [u" ci     "]),
+            self.displayCheck(2, 7, [u"     "]), CTRL_O,
+            self.displayCheck(0, 0, [u" ci    Open File  "]), CTRL_A,
+            self.writeText(self.pathToSample(u"")),
+            self.displayCheck(3, 0, dirList[0:3]),
+            self.mouseEvent(0, 5, 0, curses.REPORT_MOUSE_POSITION),
+            self.displayCheck(3, 0, dirList[0:3]),
+            self.mouseEvent(1, 5, 0, curses.REPORT_MOUSE_POSITION),
+            self.displayCheck(3, 0, dirList[1:3]),
+            self.mouseEvent(2, 5, 0, curses.REPORT_MOUSE_POSITION),
+            self.displayCheck(3, 0, dirList[2:3]),
+            self.mouseEvent(0, 5, 0, curses.BUTTON4_PRESSED),
+            self.displayCheck(3, 0, dirList[1:3]),
+            self.mouseEvent(1, 5, 0, curses.BUTTON4_PRESSED),
+            self.displayCheck(3, 0, dirList[0:3]),
+            self.mouseEvent(2, 5, 0, curses.BUTTON4_PRESSED),
+            self.displayCheck(3, 0, dirList[0:3]),
+            CTRL_Q, CTRL_Q
+        ])
+
     def test_open(self):
         #self.setMovieMode(True)
         self.runWithFakeInputs([
