@@ -56,7 +56,7 @@ class FakeCursesTestCase(unittest.TestCase):
         # can create races between tests running in parallel.
         self.prg.clipboard.setOsHandlers(None, None)
 
-    def addClickInfo(self, timeStamp, screenText, bState):
+    def findTextAndClick(self, timeStamp, screenText, bState):
         caller = inspect.stack()[1]
         callerText = u"\n  %s:%s:%s(): " % (os.path.split(caller[1])[1],
                                             caller[2], caller[3])
@@ -73,7 +73,30 @@ class FakeCursesTestCase(unittest.TestCase):
             # Note that the mouse info is x,y (col, row).
             info = (timeStamp, col, row, 0, bState)
             curses.addMouseEvent(info)
-            return None
+            return curses.KEY_MOUSE
+
+        return createEvent
+
+    def mouseEvent(self, timeStamp, mouseRow, mouseCol, bState):
+        """
+        bState may be a logical or of:
+          curses.BUTTON1_PRESSED;
+          curses.BUTTON1_RELEASED;
+          ...
+          curses.BUTTON_SHIFT
+          curses.BUTTON_CTRL
+          curses.BUTTON_ALT
+        """
+        assert isinstance(timeStamp, int)
+        assert isinstance(mouseRow, int)
+        assert isinstance(mouseCol, int)
+        assert isinstance(bState, int)
+        # Note that the mouse info is x,y (col, row).
+        info = (timeStamp, mouseCol, mouseRow, 0, bState)
+
+        def createEvent(display, cmdIndex):
+            curses.addMouseEvent(info)
+            return curses.KEY_MOUSE
 
         return createEvent
 

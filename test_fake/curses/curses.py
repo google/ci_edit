@@ -48,7 +48,7 @@ DEBUG_COLOR_PAIR_MASK = (DEBUG_COLOR_PAIR_BASE * 2) - 1
 def isStringType(value):
     if sys.version_info[0] == 2:
         return type(value) in types.StringTypes
-    return type(value) is str
+    return isinstance(value, str)
 
 
 # Avoiding importing app.curses_util.
@@ -110,7 +110,7 @@ class FakeInput:
                 assert not self.waitingForRefresh
                 self.inputsIndex += 1
                 cmd = self.inputs[self.inputsIndex]
-                if type(cmd) == types.FunctionType:
+                if isinstance(cmd, types.FunctionType):
                     result = cmd(self.fakeDisplay, self.inputsIndex)
                     if result is not None:
                         self.waitingForRefresh = True
@@ -118,12 +118,13 @@ class FakeInput:
                         return result
                     self.log("next(f)", repr(cmd)[:8], repr(result))
                 elif isStringType(cmd) and len(cmd) == 1:
+                    # A single character.
                     if (not self.inBracketedPaste) and cmd != ascii.ESC:
                         self.waitingForRefresh = True
                     self.log("next(q) ", repr(cmd), ord(cmd))
                     return ord(cmd)
-                elif (type(cmd) is tuple and len(cmd) > 1 and
-                      type(cmd[0]) is int):
+                elif (isinstance(cmd, tuple) and len(cmd) > 1 and
+                      isinstance(cmd[0], int)):
                     if cmd == BRACKETED_PASTE_BEGIN:
                         self.inBracketedPaste = True
                     self.log("next(s) ", cmd, type(cmd))
@@ -142,11 +143,13 @@ class FakeInput:
                     self.log("return", cmd[self.tupleIndex], self.tupleIndex,
                         len(cmd))
                     return cmd[self.tupleIndex]
-                else:
+                elif isinstance(cmd, int) or  isinstance(cmd, bytes):
                     if (not self.inBracketedPaste) and cmd != ascii.ESC:
                         self.waitingForRefresh = True
                     self.log("return", cmd, type(cmd))
                     return cmd
+                else:
+                    assert False, (cmd, type(cmd))
         self.log("return", constants.ERR)
         return constants.ERR
 

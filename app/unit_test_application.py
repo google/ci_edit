@@ -271,8 +271,7 @@ class ApplicationTestCases(app.fake_curses_testing.FakeCursesTestCase):
             self.selectionCheck(4, 0, 3, 0, 4), CTRL_L,
             self.selectionCheck(4, 11, 3, 0, 4),
             self.displayCheck(-2, 0, [u"15 characters (2 lines) selected",]),
-            self.addMouseInfo(0, 2, 10, curses.BUTTON1_PRESSED | curses.BUTTON_SHIFT),
-            curses.KEY_MOUSE,
+            self.mouseEvent(0, 2, 10, curses.BUTTON1_PRESSED | curses.BUTTON_SHIFT),
             self.selectionCheck(0, 3, 4, 11, 3),
             self.displayCheck(-2, 0, [u"30 characters (5 lines) selected",]),
             KEY_UP, KEY_UP, KEY_UP,
@@ -327,6 +326,6 @@ class ApplicationTestCases(app.fake_curses_testing.FakeCursesTestCase):
             self.cursorCheck(2, 7), u'a', u'b', u'c', CTRL_J, u'd', u'e',
             CTRL_J, u'f', u'g', u'h', u'i',
             self.cursorCheck(4, 11),
-            self.addMouseInfo(0, 3, 2, curses.BUTTON1_PRESSED),
-            curses.KEY_MOUSE, CTRL_L, CTRL_Q, u'n'
+            self.mouseEvent(0, 3, 2, curses.BUTTON1_PRESSED),
+            CTRL_L, CTRL_Q, u'n'
         ])

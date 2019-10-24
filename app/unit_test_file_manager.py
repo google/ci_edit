@@ -61,8 +61,7 @@ class FileManagerTestCases(app.fake_curses_testing.FakeCursesTestCase):
             self.writeText(self.pathToSample(u"")),
             self.displayCheck(3, 0, [u"./     ", u"../     "]),
             self.displayCheck(5, 0, [u"._ A name with cr\\r/"]),
-            self.addMouseInfo(0, 5, 0,
-                              curses.BUTTON1_PRESSED), curses.KEY_MOUSE,
+            self.mouseEvent(0, 5, 0, curses.BUTTON1_PRESSED),
             self.displayCheck(5, 0, [u"example"]),
             self.displayFindCheck(u"/._ A name with ",
                                   u"cr\\r/"), KEY_ESCAPE, curses.ERR,
@@ -130,8 +129,7 @@ class FileManagerTestCases(app.fake_curses_testing.FakeCursesTestCase):
             self.displayCheck(0, 0, [u" ci     "]),
             CTRL_O,
             self.displayCheck(0, 0, [u" ci    Open"]),
-            self.addClickInfo(1000, u"[x]sizes", curses.BUTTON1_PRESSED),
-            curses.KEY_MOUSE,
+            self.findTextAndClick(1000, u"[x]sizes", curses.BUTTON1_PRESSED),
             CTRL_Q
         ])
 
