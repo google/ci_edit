@@ -1,3 +1,5 @@
+
+# -*- coding: utf-8 -*-
 # Copyright 2017 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,6 +43,47 @@ class ApplicationTestCases(app.fake_curses_testing.FakeCursesTestCase):
             self.displayCheck(2, 7, [u"tet "]), CTRL_Q, u"n"
         ])
 
+    def test_backspace_with_colon(self):
+        self.runWithTestFile(kTestFile, [
+            self.displayCheck(2, 0, [u"     1       "]),
+            u":",
+            self.displayCheck(2, 0, [u"     1 :     "]), KEY_BACKSPACE1,
+            self.displayCheck(2, 0, [u"     1       "]), CTRL_Q, u"n"
+        ])
+
+    def test_backspace_emoji(self):
+        #self.setMovieMode(True)
+        self.runWithTestFile(kTestFile, [
+            self.displayCheck(2, 7, [u"      "]),
+            self.cursorCheck(2, 7),
+            (226, 143, 176),
+            self.displayCheck(2, 7, [u"⏰"]),
+            self.cursorCheck(2, 9),
+            KEY_BACKSPACE1,
+            self.cursorCheck(2, 7),
+            self.displayCheck(2, 7, [u"      "]),
+            CTRL_Z,
+            self.cursorCheck(2, 9),
+            self.displayCheck(2, 7, [u"⏰      "]),
+            CTRL_Q, u"n"
+        ])
+
+    def test_backspace_emoji2(self):
+        self.runWithTestFile(kTestFile, [
+            self.displayCheck(2, 7, [u"      "]),
+            self.cursorCheck(2, 7),
+            u'a',
+            self.cursorCheck(2, 8),
+            (226, 143, 176),
+            self.displayCheck(2, 7, [u"a⏰"]),
+            self.cursorCheck(2, 10),
+            KEY_BACKSPACE1,
+            self.cursorCheck(2, 8),
+            self.displayCheck(2, 7, [u"a      "]),
+            u"t",
+            self.displayCheck(2, 7, [u"at     "]),
+            CTRL_Q, u"n"
+        ])
     def test_cursor_moves(self):
         self.runWithTestFile(kTestFile, [
             self.displayCheck(0, 0, [
@@ -176,6 +219,14 @@ class ApplicationTestCases(app.fake_curses_testing.FakeCursesTestCase):
             ]),
             self.cursorCheck(2, 7),
             self.writeText(u'test\napple bananaCarrot DogElephantFrog\norange'),
+            self.displayCheck(0, 0, [
+                u" ci    _file_with_unlikely_file_name~ * ",
+                u"                                        ",
+                u"     1 test                             ",
+                u"     2 apple bananaCarrot DogElephantFr ",
+                u"     3 orange                           ",
+                u"                                        ",
+            ]),
             self.cursorCheck(4, 13),
             self.selectionCheck(2, 6, 0, 0, 0), KEY_CTRL_LEFT,
             self.cursorCheck(4, 7),
@@ -204,36 +255,51 @@ class ApplicationTestCases(app.fake_curses_testing.FakeCursesTestCase):
             ]),
             self.cursorCheck(2, 7),
             self.writeText(u'test\napple\norange\none\ntwenty five'),
+            #self.printParserState(),
             self.cursorCheck(6, 18),
             self.displayCheck(-2, 0, [u"             ",]),
             self.selectionCheck(4, 11, 0, 0, 0), CTRL_L,
+            self.selectionCheck(4, 11, 4, 0, 4),
             self.displayCheck(-2, 0, [u"11 characters (1 lines) selected",]),
             self.selectionCheck(4, 11, 4, 0, 4),
             self.displayCheckStyle(0, 0, 1, len(u" ci "),
                                    self.prg.color.get(u'logo', 0)), KEY_UP,
             self.displayCheck(-2, 0, [u"                       ",]),
             self.selectionCheck(3, 3, 4, 11, 0), CTRL_L,
+            self.selectionCheck(4, 0, 3, 0, 4),
             self.displayCheck(-2, 0, [u"4 characters (2 lines) selected",]),
             self.selectionCheck(4, 0, 3, 0, 4), CTRL_L,
-            self.displayCheck(-2, 0, [u"15 characters (2 lines) selected",]),
             self.selectionCheck(4, 11, 3, 0, 4),
-            self.addMouseInfo(0, 2, 10, curses.BUTTON1_PRESSED),
-            curses.KEY_MOUSE,
-            self.displayCheck(-2, 0, [u"9 characters (4 lines) selected",]),
-            self.selectionCheck(4, 11, 0, 3, 2),
+            self.displayCheck(-2, 0, [u"15 characters (2 lines) selected",]),
+            self.mouseEvent(0, 2, 10, curses.BUTTON1_PRESSED | curses.BUTTON_SHIFT),
+            self.selectionCheck(0, 3, 4, 11, 3),
+            self.displayCheck(-2, 0, [u"30 characters (5 lines) selected",]),
             KEY_UP, KEY_UP, KEY_UP,
-            self.cursorCheck(3, 12),
-            self.displayCheck(-2, 0, [u"                       ",]),
-            CTRL_L, CTRL_L, CTRL_L,
+            self.cursorCheck(2, 7),
+            self.displayCheck(-2, 0, [u"Top of file ",]),
+            KEY_DOWN,
+            self.cursorCheck(3, 10),
+            CTRL_L,
+            self.selectionCheck(2, 0, 1, 0, 4),
+            CTRL_L,
+            self.selectionCheck(3, 0, 1, 0, 4),
+            CTRL_L,
+            self.selectionCheck(4, 0, 1, 0, 4),
             self.cursorCheck(6, 7),
             self.displayCheck(-2, 0, [u"17 characters (4 lines) selected",]),
             # Test cut then undo (regression test).
+            self.displayCheck(2, 7, [u"test", u"apple", u"orange", u"one",
+                    u"twenty five",]),
             CTRL_X,
+            self.selectionCheck(1, 0, 1, 0, 0),
             self.displayCheck(-2, 0, [u"copied 4 lines  ",]),
+            self.displayCheck(2, 7, [u"test", u"twenty five",]),
             CTRL_Z,
+            self.selectionCheck(1, 0, 4, 0, 4),
             self.displayCheck(-2, 0, [u"17 characters (4 lines) selected",]),
             # Test backspace.
             CTRL_A,
+            self.selectionCheck(4, 11, 0, 0, 1),
             self.displayCheck(-2, 0, [u"33 characters (5 lines) selected",]),
             KEY_BACKSPACE1,
             self.displayCheck(-2, 0, [u"                       ",]),
@@ -260,6 +326,6 @@ class ApplicationTestCases(app.fake_curses_testing.FakeCursesTestCase):
             self.cursorCheck(2, 7), u'a', u'b', u'c', CTRL_J, u'd', u'e',
             CTRL_J, u'f', u'g', u'h', u'i',
             self.cursorCheck(4, 11),
-            self.addMouseInfo(0, 3, 2, curses.BUTTON1_PRESSED),
-            curses.KEY_MOUSE, CTRL_L, CTRL_Q, u'n'
+            self.mouseEvent(0, 3, 2, curses.BUTTON1_PRESSED),
+            CTRL_L, CTRL_Q, u'n'
         ])

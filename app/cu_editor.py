@@ -296,17 +296,19 @@ class DirectoryList(app.file_manager_controller.DirectoryListController):
         assert textBuffer is self.view.textBuffer, textBuffer
         app.file_manager_controller.DirectoryListController.setTextBuffer(
             self, textBuffer)
-        commandSet = initCommandSet(self, textBuffer)
-        commandSet.update({
+        commandSet = {
+            KEY_BTAB: self.priorFocusableWindow,
+            CTRL_I: self.nextFocusableWindow,
+            CTRL_J: self.performOpen,
             KEY_ESCAPE: self.changeToInputWindow,
             KEY_F1: self.info,
             KEY_PAGE_DOWN: textBuffer.cursorSelectNonePageDown,
             KEY_PAGE_UP: textBuffer.cursorSelectNonePageUp,
             KEY_DOWN: textBuffer.cursorDown,
             KEY_UP: textBuffer.cursorUp,
-        })
+        }
         self.commandSet = commandSet
-        self.commandDefault = self.textBuffer.insertPrintable
+        self.commandDefault = self.passDefaultToPathInput
 
 
 class FileOpener(app.file_manager_controller.FileManagerController):

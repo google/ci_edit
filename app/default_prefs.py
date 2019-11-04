@@ -34,15 +34,11 @@ __c_keywords = __common_keywords + [
     "struct", "switch", "typedef"
 ]
 
-__c_primitive_types = [
-    "bool", "char", "double", "float", "int", "int8_t", "int16_t", "int32_t",
-    "int64_t", "int_fast8_t", "int_fast16_t", "int_fast32_t", "int_fast64_t",
-    "int_least8_t", "int_least16_t", "int_least32_t", "int_least64_t",
-    "int_max_t", "int8_t", "int16_t", "int32_t", "int64_t", "intptr_t",
-    "ptrdiff_t", "size_t", "long", "signed", "short", "uint8_t", "uint16_t",
-    "uint32_t", "uint64_t", "uint_fast8_t", "uint_fast16_t", "uint_fast32_t",
-    "uint_fast64_t", "uint_least8_t", "uint_least16_t", "uint_least32_t",
-    "uint_least64_t", "uint_max_t", "uintptr_t", "unsigned", "void", "wchar_t"
+__linux_commands = [
+    "ag", "basename", "bash", "cd", "chmod", "cp", "dircolors", "dirname",
+    "echo", "egrep", "find", "grep", "ixoff", "ixon", "lesspipe", "ln", "ls",
+    "mkdir", "read", "rm", "rmdir", "rxvt", "sed", "sh", "shell", "sleep",
+    "ssh", "tput", "wc"
 ]
 
 if sys.version_info[0] == 2:
@@ -55,6 +51,13 @@ if sys.version_info[0] == 2:
         "noexcept", "nullptr", "override", "private", "protected", "public",
         "return", "sizeof", "static", "struct", "switch", "template", "this",
         "throw", "true", "typedef", "typename", "virtual", "while"
+    ]
+    __c_primitive_types = [
+        "bool", "char", "double", "float", "int", "int8_t", "int16_t",
+        "int32_t", "int64_t", "int_max_t", "int8_t", "int16_t", "int32_t",
+        "int64_t", "intptr_t", "ptrdiff_t", "size_t", "long", "signed", "short",
+        "uint8_t", "uint16_t", "uint32_t", "uint_max_t", "uintptr_t",
+        "unsigned", "void", "wchar_t"
     ]
 else:
     __cpp_keywords = [
@@ -69,6 +72,17 @@ else:
         "return", "sizeof", "static", "static_assert", "static_cast", "struct",
         "switch", "template", "this", "thread_local", "throw", "true",
         "typedef", "typename", "virtual", "volatile", "while", "xor", "xor_eq"
+    ]
+    __c_primitive_types = [
+        "bool", "char", "double", "float", "int", "int8_t", "int16_t",
+        "int32_t", "int64_t", "int_fast8_t", "int_fast16_t", "int_fast32_t",
+        "int_fast64_t", "int_least8_t", "int_least16_t", "int_least32_t",
+        "int_least64_t", "int_max_t", "int8_t", "int16_t", "int32_t", "int64_t",
+        "intptr_t", "ptrdiff_t", "size_t", "long", "signed", "short", "uint8_t",
+        "uint16_t", "uint32_t", "uint64_t", "uint_fast8_t", "uint_fast16_t",
+        "uint_fast32_t", "uint_fast64_t", "uint_least8_t", "uint_least16_t",
+        "uint_least32_t", "uint_least64_t", "uint_max_t", "uintptr_t",
+        "unsigned", "void", "wchar_t"
     ]
 
 __chrome_extension = r"""\b[a-z]{32}\b"""
@@ -92,7 +106,10 @@ color8 = {
     "_pre_selection": 1,
     "bracket": 1,
     "c": 0,
+    "c_path_bracketed_file": 3,
+    "c_path_quoted_file": 3,
     "c_preprocessor": 1,
+    "c_preprocessor_include": 1,
     "c_raw_string1": 3,
     "c_raw_string2": 3,
     "c_string1": 3,
@@ -101,12 +118,11 @@ color8 = {
     "cpp_block_comment": 2,
     "cpp_line_comment": 2,
     "cpp_string_literal": 2,
+    "current_line": 1,
     "debug_window": 1,
     "default": 0,
     "doc_block_comment": 3,
     "error": 7,
-    "file_path_bracketed": 3,
-    "file_path_quoted": 3,
     "found_find": 1,
     "highlight": 3,
     "html_block_comment": 2,
@@ -127,6 +143,8 @@ color8 = {
     "outside_document": 7,
     "popup_window": 0,
     "pound_comment": 3,
+    "py_import": 1,
+    "py_import_file": 2,
     "py_raw_string1": 2,
     "py_raw_string2": 2,
     "py_string1": 2,
@@ -166,7 +184,10 @@ color16 = {
     "_pre_selection": stringColor16Index,
     "bracket": 6,
     "c": defaultColor16Index,
+    "c_path_bracketed_file": pathColor16Index,
+    "c_path_quoted_file": pathColor16Index,
     "c_preprocessor": 1,
+    "c_preprocessor_include": specialsColor16Index,
     "c_raw_string1": stringColor16Index,
     "c_raw_string2": stringColor16Index,
     "c_string1": stringColor16Index,
@@ -175,12 +196,11 @@ color16 = {
     "cpp_block_comment": commentColor16Index,
     "cpp_line_comment": commentColor16Index,
     "cpp_string_literal": stringColor16Index,
+    "current_line": 15,
     "debug_window": defaultColor16Index,
     "default": defaultColor16Index,
     "doc_block_comment": commentColor16Index,
     "error": 9,
-    "file_path_bracketed": pathColor16Index,
-    "file_path_quoted": pathColor16Index,
     "found_find": foundColor16Index,
     "highlight": 15,
     "html_block_comment": commentColor16Index,
@@ -201,6 +221,8 @@ color16 = {
     "outside_document": outsideOfBufferColor16Index,
     "popup_window": borderColor16Index,
     "pound_comment": commentColor16Index,
+    "py_import": keywordsColor16Index,
+    "py_import_file": stringColor16Index,
     "py_raw_string1": stringColor16Index,
     "py_raw_string2": stringColor16Index,
     "py_string1": stringColor16Index,
@@ -238,7 +260,10 @@ color256 = {
     "_pre_selection": stringColorIndex,
     "bracket": 6,
     "c": defaultColorIndex,
+    "c_path_bracketed_file": pathColorIndex,
+    "c_path_quoted_file": pathColorIndex,
     "c_preprocessor": 1,
+    "c_preprocessor_include": specialsColorIndex,
     "c_raw_string1": stringColorIndex,
     "c_raw_string2": stringColorIndex,
     "c_string1": stringColorIndex,
@@ -247,12 +272,11 @@ color256 = {
     "cpp_block_comment": commentColorIndex,
     "cpp_line_comment": commentColorIndex,
     "cpp_string_literal": stringColorIndex,
+    "current_line": 180,
     "debug_window": defaultColorIndex,
     "default": defaultColorIndex,
     "doc_block_comment": commentColorIndex,
     "error": 9,
-    "file_path_bracketed": pathColorIndex,
-    "file_path_quoted": pathColorIndex,
     "found_find": foundColorIndex,
     "highlight": 96,
     "html_block_comment": commentColorIndex,
@@ -273,6 +297,8 @@ color256 = {
     "outside_document": outsideOfBufferColorIndex,
     "popup_window": 117,
     "pound_comment": commentColorIndex,
+    "py_import": keywordsColorIndex,
+    "py_import_file": stringColorIndex,
     "py_raw_string1": stringColorIndex,
     "py_raw_string2": stringColorIndex,
     "py_string1": stringColorIndex,
@@ -380,6 +406,8 @@ prefs = {
         "showLineNumbers": True,
         "showStatusLine": True,
         "showTopInfo": True,
+        # Convert/expand tabs to spaces (see tabSize).
+        "tabToSpaces": True,
         # When expanding tabs to spaces, how many spaces to use. This is not
         # used for indentation, see "indentation" or grammar "indent".
         "tabSize": 8,
@@ -390,6 +418,13 @@ prefs = {
         "bash": {
             "ext": [".bash", ".sh"],
             "grammar": "bash",
+            "tabToSpaces": True,
+        },
+        "bazel": {
+            "ext": [],
+            "grammar": "bazel",
+            "name": ["BUILD"],
+            "tabToSpaces": True,
         },
         "binary": {
             "ext": [
@@ -398,10 +433,12 @@ prefs = {
             ],
             "grammar":
             "binary",
+            "tabToSpaces": False,
         },
         "c": {
             "ext": [".c"],
             "grammar": "c",
+            "tabToSpaces": True,
         },
         "cpp": {
             "ext": [
@@ -415,70 +452,90 @@ prefs = {
                 ".inc",
                 ".h"  # Hmm, some source uses .h for cpp headers.
             ],
-            "grammar":
-            "cpp",
+            "grammar": "cpp",
+            "tabToSpaces": True,
         },
         "css": {
             "ext": [".css", "_css.html"],
             "grammar": "css",
+            "tabToSpaces": True,
         },
         "dart": {
             "ext": [
                 ".dart",
             ],
             "grammar": "dart",
+            "tabToSpaces": True,
         },
         "gn": {
             "ext": [".gn"],
             "grammar": "gn",
+            "tabToSpaces": True,
         },
         "golang": {
             "ext": [
                 ".go",
             ],
             "grammar": "golang",
+            "tabToSpaces": True,
         },
         "grd": {
             "ext": [".grd", ".grdp"],
             "grammar": "grd",
+            "tabToSpaces": True,
         },
         "html": {
             "ext": [".htm", ".html"],
             "grammar": "html",
+            "tabToSpaces": True,
         },
         "java": {
             "ext": [
                 ".java",
             ],
             "grammar": "java",
+            "tabToSpaces": True,
         },
         "js": {
             "ext": [".json", ".js"],
             "grammar": "js",
+            "tabToSpaces": True,
+        },
+        "make": {
+            "ext": [],
+            "grammar": "make",
+            "name": ["Makefile"],
+            "tabToSpaces": False,
         },
         "md": {
             "ext": [".md"],
             "grammar": "md",
+            "tabToSpaces": True,
         },
         "proto": {
             "ext": [".proto"],
             "grammar": "proto",
+            "tabToSpaces": True,
         },
         "python": {
             "ext": [".py"],
             "grammar": "py",
+            "tabToSpaces": True,
         },
         "rust": {
             "ext": [".rs"],
             "grammar": "rs",
+            "tabToSpaces": True,
         },
         "text": {
-            "ext": [".txt", ""],
+            "ext": [".txt"],
             "grammar": "text",
+            "tabToSpaces": False,
         },
         "words": {
             "ext": [".words", ""],
             "grammar": "words",
+            "tabToSpaces": True,
         },
     },
     "grammar": {
@@ -487,18 +544,22 @@ prefs = {
         #   "begin": None or regex,
         #   "continuation": None or string,
         #       Prefixed used when continuing to another line,
-        #   "end": None or regex,
+        #   "end": None or regex; a value of None means that the "begin" regex
+        #       contains the entire pattern (a leaf grammar),
         #   "end_key": None or regex to determine dynamic end tag. For "here
         #       documents" and c++ string literals.
         #   "error": None or list of string.
         #   "escaped": None or regex,
         #   "indent": None or string,
+        #   "next": other grammars that may follow this grammar without nesting
+        #       within it. (Contrast with "contains").
         #   "numbers": None or list of string,
         #   "keywords": None or list of string. Matches whole words only (wraps
         #       values in \b).
         #   "single_line": Boolean, Whether entire grammar must be on a single
         #       line,
         #   "special": None or list of string.
+        #   "tabToSpaces": Boolean, Convert/expand tabs to spaces (see tabSize).
         #   "type": text or binary. default: text.
         #   "contains": other grammars that may be contained within this
         #       grammar.
@@ -525,12 +586,18 @@ prefs = {
                 "while"
             ],
             # Not really types.
-            "types": [
-                "ag", "basename", "chmod", "cp", "dircolors", "dirname", "find",
-                "ixoff", "ixon", "lesspipe", "ln", "mkdir", "read", "rm",
-                "rmdir", "rxvt", "sed", "sleep", "ssh", "tput", "wc"
-            ],
+            "types": __linux_commands,
             "contains": ["c_string1", "c_string2", "pound_comment"],
+        },
+        # Bazel build script. See https://www.bazel.build/
+        "bazel": {
+            "indent":
+            "  ",
+            "keywords": [
+                "testonly"
+            ],
+            "types": "",
+            "contains": ["py_string1", "py_string2", "pound_comment"],
         },
         "binary": {
             "spelling": False,
@@ -603,7 +670,7 @@ prefs = {
             r"(?<!\\)\n",
             "indent":
             "  ",
-            "disabled_special": [
+            "special": [
                 r"\bdefine\b",
                 r"\bdefined\b",
                 r"\belif\b",
@@ -617,7 +684,14 @@ prefs = {
                 r"\bpragma\b",
                 r"\bundef\b",
             ],
-            "contains": ["file_path_quoted", "file_path_bracketed"],
+            "next": [
+                "c_preprocessor_include",
+            ],
+        },
+        "c_preprocessor_include": {
+            "begin": r"\binclude",
+            "end": r"(?<!\\)\n",
+            "contains": ["c_path_quoted_file", "c_path_bracketed_file"],
         },
         "c_raw_string1": {
             "begin": "[uU]?[rR]'",
@@ -659,17 +733,21 @@ prefs = {
             "special": __special_string_escapes + ["\\\\\""],
             "single_line": True,
         },
-        "file_path_bracketed": {
-            # Paths in includes don"t allow escapes.
-            "begin": "<",
-            "end": ">",
-            "single_line": True,
+        "c_path_bracketed_file": {
+            # Paths in includes don't allow escapes.
+            "begin": """<[^>\\n]*>""",
+            "end": None,  # Leaf grammar.
+            "link_type": "c<",  # C system include file.
         },
-        "file_path_quoted": {
-            # Paths in includes don"t allow escapes.
-            "begin": "\"",
-            "end": "\"",
-            "single_line": True,
+        "c_path_quoted_file": {
+            # Paths in includes don't allow escapes.
+            "begin": '''"[^"\\n]*"''',
+            "end": None,  # Leaf grammar.
+            "link_type": "c\"",  # C non-system include file.
+        },
+        "carriage_return": {
+            "begin": "\\n",
+            "end": None,  # Leaf grammar.
         },
         # Cascading Style Sheet.
         "css": {
@@ -784,7 +862,7 @@ prefs = {
         # Generate Ninja language.
         "gn": {
             "indent": "  ",
-            "keywords": ["else", "false", "foreach", "if", "true"],
+            "keywords": ["else", "false", "foreach", "if", "import", "true"],
             "special": [],
             "types": [],
             "contains": [
@@ -924,6 +1002,18 @@ prefs = {
             "indent": "  ",
             "spelling": False,
         },
+        # Makefile
+        "make": {
+            "indent": "\t",
+            "keywords": [
+                "ifeq", "endif", "ifneq", "break", "case", "continue", "do",
+                "done", "echo", "else", "esac", "exit", "fi", "if", "for",
+                "return", "switch", "then", "while"
+            ],
+            # Not really types.
+            "types": __linux_commands,
+            "contains": ["c_string1", "c_string2", "pound_comment"],
+        },
         # Markdown language.
         "md": {
             "indent": "  ",
@@ -1002,6 +1092,8 @@ prefs = {
                 "c_string1",
                 "c_string2",
                 "pound_comment",
+                "py_from",
+                "py_import",
             ],
         },
         "pound_comment": {
@@ -1014,6 +1106,33 @@ prefs = {
                 r"\bNOTE:",
                 _todo,
             ],
+        },
+        "py_from": {
+            "begin": "from",
+            "end": r"\n",
+            "contains": ["py_import_file"],
+            "next": ["py_import_after_from", "pound_comment"],
+            "spelling": False,
+        },
+        "py_import_after_from": {
+            "begin": "import",
+            "end": None,
+        },
+        "py_import": {
+            "begin": "import",
+            "end": r"\n",
+            "keywords": [
+                "as",
+            ],
+            "contains": ["py_import_file"],
+            "next": ["pound_comment"],
+            "spelling": False,
+        },
+        "py_import_file": {
+            "begin": "[\.\w]+",
+            "end": None,  # Leaf grammar.
+            "link_type": r"pi",  # Python import
+            "spelling": False,
         },
         "py_raw_string1": {
             "begin": "[uU]?[rR]'''",
@@ -1112,6 +1231,10 @@ prefs = {
         },
         "special": {
             "indent": "  ",
+            "spelling": False,
+        },
+        "tabs": {
+            "indent": "",
             "spelling": False,
         },
         "text": {

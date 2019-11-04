@@ -63,7 +63,7 @@ class InteractivePrediction(app.controller.Controller):
         if app.config.strict_debug:
             assert issubclass(self.__class__, InteractivePrediction), self
             assert issubclass(view.__class__, app.window.ViewWindow), view
-        app.controller.Controller.__init__(self, view, 'prediction')
+        app.controller.Controller.__init__(self, view, u"prediction")
 
     def cancel(self):
         self.items = [(self.priorTextBuffer, self.priorTextBuffer.fullPath, '')]
@@ -146,6 +146,7 @@ class InteractivePrediction(app.controller.Controller):
         return (len(bufferManager.buffers) - 2) % len(self.items)
 
     def onChange(self):
+        assert False
         clip = []
         limit = max(5, self.view.host.cols - 10)
         for i, item in enumerate(self.items):
@@ -281,27 +282,28 @@ class InteractiveGoto(app.controller.Controller):
     def focus(self):
         app.log.info('InteractiveGoto.focus')
         self.textBuffer.selectionAll()
-        self.textBuffer.insert(str(self.view.host.textBuffer.penRow + 1))
+        self.textBuffer.insert(unicode(self.view.host.textBuffer.penRow + 1))
         self.textBuffer.selectionAll()
 
     def info(self):
-        app.log.info('InteractiveGoto command set')
+        app.log.info(u"InteractiveGoto command set")
 
     def gotoBottom(self):
         app.log.info()
         self.textBuffer.selectionAll()
-        self.textBuffer.insert(str(self.view.host.textBuffer.parser.rowCount()))
+        self.textBuffer.insert(
+                unicode(self.view.host.textBuffer.parser.rowCount()))
         self.changeToHostWindow()
 
     def gotoHalfway(self):
         self.textBuffer.selectionAll()
         self.textBuffer.insert(
-            str(self.view.host.textBuffer.parser.rowCount() // 2 + 1))
+                unicode(self.view.host.textBuffer.parser.rowCount() // 2 + 1))
         self.changeToHostWindow()
 
     def gotoTop(self):
         self.textBuffer.selectionAll()
-        self.textBuffer.insert("0")
+        self.textBuffer.insert(u"0")
         self.changeToHostWindow()
 
     def cursorMoveTo(self, row, col):
@@ -327,7 +329,7 @@ class ToggleController(app.controller.Controller):
         if app.config.strict_debug:
             assert issubclass(self.__class__, ToggleController), self
             assert issubclass(view.__class__, app.window.ViewWindow), view
-        app.controller.Controller.__init__(self, view, 'toggle')
+        app.controller.Controller.__init__(self, view, u"toggle")
 
     def clearValue(self):
         category = self.view.prefCategory

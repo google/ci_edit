@@ -34,6 +34,9 @@ import sys
 import time
 import traceback
 import types
+import unicodedata
+
+import app.curses_util
 
 from . import ascii
 from . import constants
@@ -45,7 +48,7 @@ DEBUG_COLOR_PAIR_MASK = (DEBUG_COLOR_PAIR_BASE * 2) - 1
 def isStringType(value):
     if sys.version_info[0] == 2:
         return type(value) in types.StringTypes
-    return type(value) is str
+    return isinstance(value, str)
 
 
 # Avoiding importing app.curses_util.
@@ -74,55 +77,81 @@ class FakeInput:
         self.tupleIndex = -1
         self.waitingForRefresh = True
         self.isVerbose = False
+        self.bgCounter = 1
+        if self.isVerbose:
+            print("")
+
+    def log(self, *msg):
+        if not self.isVerbose:
+            return
+        functionLine = inspect.stack()[1][2]
+        function = inspect.stack()[1][3]
+        frame = inspect.stack()[3]
+        callingFile = os.path.split(frame[1])[1]
+        callingLine = frame[2]
+        caller = "%16s %5s %3s %s " % (callingFile, callingLine,
+                                            function, functionLine)
+        waiting = u"waitingForRefresh" if self.waitingForRefresh else ""
+        print(caller + " ".join([repr(i) for i in msg]), waiting)
 
     def next(self):
+        self.log("start")
+        if self.waitingForRefresh:
+            if self.bgCounter == 0:
+                self.bgCounter = 1
+                self.log("    ", self.bgCounter, 0)
+                return 0
+            self.bgCounter -= 1
+            self.log("    ", self.bgCounter, -1)
+            return -1
+        self.bgCounter = 1
         if not self.waitingForRefresh:
             while self.inputsIndex + 1 < len(self.inputs):
                 assert not self.waitingForRefresh
                 self.inputsIndex += 1
                 cmd = self.inputs[self.inputsIndex]
-                if type(cmd) == types.FunctionType:
+                if isinstance(cmd, types.FunctionType):
                     result = cmd(self.fakeDisplay, self.inputsIndex)
-                    if self.isVerbose:
-                        print(repr(cmd), repr(result))
                     if result is not None:
                         self.waitingForRefresh = True
-                        if self.isVerbose:
-                            print(repr(cmd), repr(result), u"waitingForRefresh")
+                        self.log("next(k)", repr(cmd)[:8], repr(result))
                         return result
+                    self.log("next(f)", repr(cmd)[:8], repr(result))
                 elif isStringType(cmd) and len(cmd) == 1:
+                    # A single character.
                     if (not self.inBracketedPaste) and cmd != ascii.ESC:
                         self.waitingForRefresh = True
-                    if self.isVerbose:
-                        print(repr(cmd), ord(cmd))
+                    self.log("next(q) ", repr(cmd), ord(cmd))
                     return ord(cmd)
-                elif (type(cmd) is tuple and len(cmd) > 1 and
-                      type(cmd[0]) is int):
+                elif (isinstance(cmd, tuple) and len(cmd) > 1 and
+                      isinstance(cmd[0], int)):
                     if cmd == BRACKETED_PASTE_BEGIN:
                         self.inBracketedPaste = True
-                    if self.isVerbose and self.tupleIndex == 0:
-                        print(cmd, type(cmd))
+                    self.log("next(s) ", cmd, type(cmd))
                     self.tupleIndex += 1
                     if self.tupleIndex >= len(cmd):
                         self.tupleIndex = -1
                         if cmd == BRACKETED_PASTE_END:
                             self.inBracketedPaste = False
-                            self.waitingForRefresh = True
-                        if self.isVerbose:
-                            print(cmd, type(cmd))
+                        self.log("next(u)", cmd, type(cmd))
+                        self.log("return", constants.ERR)
                         return constants.ERR
+                    if (self.tupleIndex + 1 == len(cmd) and
+                            cmd != BRACKETED_PASTE_BEGIN):
+                        self.waitingForRefresh = True
                     self.inputsIndex -= 1
-                    if self.isVerbose:
-                        print(cmd, type(cmd))
+                    self.log("return", cmd[self.tupleIndex], self.tupleIndex,
+                        len(cmd))
                     return cmd[self.tupleIndex]
-                else:
+                elif isinstance(cmd, int) or  isinstance(cmd, bytes):
                     if (not self.inBracketedPaste) and cmd != ascii.ESC:
                         self.waitingForRefresh = True
-                    if self.isVerbose:
-                        print(cmd, type(cmd))
+                    self.log("return", cmd, type(cmd))
                     return cmd
+                else:
+                    assert False, (cmd, type(cmd))
+        self.log("return", constants.ERR)
         return constants.ERR
-
 
 def testLog(log_level, *msg):
     # Adjust constant to increase verbosity.
@@ -181,19 +210,19 @@ class FakeDisplay:
         assert isinstance(verbose, int)
         for i in range(len(lines)):
             line = lines[i]
-            for k in range(len(line)):
+            displayCol = col
+            for ch in line:
                 if row + i >= self.rows:
                     return u"\n  Row %d is outside of the %d row display" % (
                         row + i, self.rows)
-                if col + k >= self.cols:
+                if displayCol >= self.cols:
                     return (u"\n  Column %d is outside of the %d column display"
-                            % (col + k, self.cols))
-                d = self.displayText[row + i][col + k]
-                c = line[k]
-                if d != c:
+                            % (displayCol, self.cols))
+                displayCh = self.displayText[row + i][displayCol]
+                if displayCh != ch:
                     #self.show()
                     result = u"\n  row %s, col %s mismatch '%s' != '%s'" % (
-                        row + i, col + k, d, c)
+                        row + i, displayCol, displayCh, ch)
                     if verbose >= 1:
                         actualLine = u"".join(self.displayText[row + i])
                         result += u"\n  actual:   |%s|" % actualLine
@@ -202,12 +231,16 @@ class FakeDisplay:
                         result += u"\n  expected: %s|%s|" % (u" " * col,
                                                              expectedText)
                     if verbose >= 3:
-                        result += u"\n  mismatch:  %*s^" % (col + k, u"")
+                        result += u"\n  mismatch:  %*s^" % (displayCol, u"")
                     return result
+                displayCol += app.curses_util.charWidth(displayCh, displayCol)
         return None
 
     def draw(self, cursorRow, cursorCol, text, colorPair):
         #assert (colorPair & DEBUG_COLOR_PAIR_MASK) in self.colors.values()
+        assert isinstance(cursorRow, int)
+        assert isinstance(cursorCol, int)
+        assert isinstance(text, unicode)
         assert colorPair >= DEBUG_COLOR_PAIR_BASE
         for i in text:
             if i == '\r':
@@ -216,9 +249,13 @@ class FakeDisplay:
             try:
                 self.displayText[cursorRow][cursorCol] = i
                 self.displayStyle[cursorRow][cursorCol] = colorPair
+                cursorCol += 1
+                if app.curses_util.charWidth(i, cursorCol) > 1:
+                    self.displayText[cursorRow][cursorCol] = u" "
+                    self.displayStyle[cursorRow][cursorCol] = colorPair
+                    cursorCol += 1
             except IndexError:
                 raise error()
-            cursorCol += 1
         return cursorRow, cursorCol
 
     def findText(self, screenText):
@@ -299,22 +336,26 @@ class FakeCursesWindow:
         self.cursorCol = 0
 
     def addstr(self, *args):
-        testLog(3, *args)
+        testLog(4, *args)
         cursorRow = args[0]
         cursorCol = args[1]
+        assert isinstance(cursorRow, int)
+        assert isinstance(cursorCol, int)
+        assert isinstance(args[2], bytes), repr(args[2])
         text = args[2].decode("utf-8")
         color = args[3]
+        assert isinstance(cursorRow, int)
         self.cursorRow, self.cursorCol = fakeDisplay.draw(
             cursorRow, cursorCol, text, color)
 
     def getch(self):
-        testLog(3)
+        testLog(4)
         if 1:
             if getchCallback:
                 val = getchCallback()
                 return val
         val = fakeInput.next()
-        if self.movie and val != constants.ERR:
+        if self.movie and val != constants.ERR and val != 0:
             if val == 409:
                 print(u"val", val, u"mouse_info", mouseEvents[-1])
             else:
@@ -322,21 +363,21 @@ class FakeCursesWindow:
         return val
 
     def getyx(self):
-        testLog(1)
+        testLog(2)
         return (self.cursorRow, self.cursorCol)
 
     def getmaxyx(self):
-        testLog(1)
+        testLog(2)
         return (fakeDisplay.rows, fakeDisplay.cols)
 
     def keypad(self, *args):
-        testLog(1, *args)
+        testLog(2, *args)
 
     def leaveok(self, *args):
-        testLog(1, *args)
+        testLog(2, *args)
 
     def move(self, a, b):
-        testLog(1, a, b)
+        testLog(2, a, b)
         self.cursorRow = a
         self.cursorCol = b
 
@@ -344,23 +385,23 @@ class FakeCursesWindow:
         pass
 
     def refresh(self):
-        testLog(1)
+        testLog(2)
 
     def resize(self, a, b):
-        testLog(1, a, b)
+        testLog(2, a, b)
 
     def scrollok(self, *args):
-        testLog(1, *args)
+        testLog(2, *args)
 
     def timeout(self, *args):
-        testLog(1, *args)
+        testLog(2, *args)
 
 
 class StandardScreen(FakeCursesWindow):
 
     def __init__(self):
         global fakeDisplay, fakeInput
-        testLog(1)
+        testLog(2)
         FakeCursesWindow.__init__(self, 0, 0)
         self.cmdCount = -1
         fakeDisplay = FakeDisplay()
@@ -373,11 +414,11 @@ class StandardScreen(FakeCursesWindow):
         self.fakeInput.setInputs(cmdList)
 
     def getmaxyx(self):
-        testLog(1)
+        testLog(2)
         return (self.fakeDisplay.rows, self.fakeDisplay.cols)
 
     def refresh(self, *args):
-        testLog(1, *args)
+        testLog(2, *args)
 
     def test_find_text(self, screenText):
         return fakeDisplay.findText(screenText)
@@ -391,62 +432,62 @@ class StandardScreen(FakeCursesWindow):
 
 
 def baudrate(*args):
-    testLog(1, *args)
+    testLog(2, *args)
     return -1
 
 
 def can_change_color(*args):
-    testLog(1, *args)
+    testLog(2, *args)
     return 1
 
 
 def color_content(*args):
-    testLog(1, *args)
+    testLog(2, *args)
 
 
 def color_pair(*args):
-    testLog(1, *args)
+    testLog(2, *args)
     return fakeDisplay.getColorPair(*args)
 
 
 def curs_set(*args):
-    testLog(1, *args)
+    testLog(2, *args)
 
 
 def errorpass(*args):
-    testLog(1, *args)
+    testLog(2, *args)
 
 
 def getch(*args):
-    testLog(1, *args)
+    testLog(2, *args)
     return constants.ERR
 
 
 def addMouseEvent(mouseEvent):
-    testLog(1)
+    testLog(2)
     return mouseEvents.append(mouseEvent)
 
 
 def getmouse(*args):
-    testLog(1, *args)
+    testLog(2, *args)
     return mouseEvents.pop()
 
 
 def has_colors(*args):
-    testLog(1, *args)
+    testLog(2, *args)
     return True
 
 
 def init_color(*args):
-    testLog(1, *args)
+    testLog(2, *args)
 
 
 def init_pair(*args):
-    testLog(3, *args)
+    testLog(4, *args)
 
 
 def keyname(*args):
-    testLog(1, *args)
+    testLog(2, *args)
     # Raise expected exception types.
     a = int(*args)  # ValueError.
     if a >= 2**31:
@@ -456,45 +497,45 @@ def keyname(*args):
 
 
 def meta(*args):
-    testLog(1, *args)
+    testLog(2, *args)
 
 
 def mouseinterval(*args):
-    testLog(1, *args)
+    testLog(2, *args)
 
 
 def mousemask(*args):
-    testLog(1, *args)
+    testLog(2, *args)
 
 
 def newwin(*args):
-    testLog(1, *args)
+    testLog(2, *args)
     return FakeCursesWindow(args[0], args[1])
 
 
 def raw(*args):
-    testLog(1, *args)
+    testLog(2, *args)
 
 
 def resizeterm(*args):
-    testLog(1, *args)
+    testLog(2, *args)
 
 
 def start_color(*args):
-    testLog(1, *args)
+    testLog(2, *args)
 
 
 def ungetch(*args):
-    testLog(1, *args)
+    testLog(2, *args)
 
 
 def use_default_colors(*args):
-    testLog(1, *args)
+    testLog(2, *args)
 
 
 def get_pair(*args):
     fakeDisplay.getColorPair(*args)
-    testLog(1, *args)
+    testLog(2, *args)
 
 
 def wrapper(fun, *args, **kw):

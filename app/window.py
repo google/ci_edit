@@ -67,6 +67,7 @@ class ViewWindow:
         self.cols = 1
         self.scrollRow = 0
         self.scrollCol = 0
+        self.showCursor = True
         self.writeLineRow = 0
         self.zOrder = []
 
@@ -78,8 +79,8 @@ class ViewWindow:
         if app.config.strict_debug:
             app.log.check_le(row, self.rows)
             app.log.check_le(col, self.cols)
-        self.program.frame.addStr(self.top + row, self.left + col,
-                                  text.encode('utf-8'), colorPair)
+        self.program.backgroundFrame.addStr(self.top + row, self.left + col,
+                                            text.encode('utf-8'), colorPair)
 
     def reattach(self):
         self.setParent(self.parent)
@@ -109,6 +110,9 @@ class ViewWindow:
         while topWindow.parent:
             topWindow = topWindow.parent
         topWindow.changeFocusTo(changeTo)
+
+    def colorPref(self, colorType, delta=0):
+        return self.program.color.get(colorType, delta)
 
     def contains(self, row, col):
         """Determine whether the position at row, col lay within this window."""
@@ -186,7 +190,7 @@ class ViewWindow:
         self.top += top
         self.left += left
 
-    def __childFocusableWindow(self, reverse=False):
+    def _childFocusableWindow(self, reverse=False):
         windows = self.zOrder[:]
         if reverse:
             windows.reverse()
@@ -194,13 +198,25 @@ class ViewWindow:
             if i.isFocusable:
                 return i
             else:
-                r = i.__childFocusableWindow(reverse)
+                r = i._childFocusableWindow(reverse)
                 if r is not None:
                     return r
 
     def nextFocusableWindow(self, start, reverse=False):
-        """Ignore |start| when searching."""
-        windows = self.zOrder[:]
+        """Windows without |isFocusable| are skipped. Ignore (skip) |start| when
+        searching.
+
+        Args:
+          start (window): the child window to start from. If |start| is not
+              found, start from the first child window.
+          reverse (bool): if True, find the prior focusable window.
+
+        Returns:
+          A window that should be focused.
+
+        See also: showFullWindowHierarchy() which can help in debugging.
+        """
+        windows = self.parent.zOrder[:]
         if reverse:
             windows.reverse()
         try:
@@ -212,13 +228,13 @@ class ViewWindow:
             if i.isFocusable:
                 return i
             else:
-                r = i.__childFocusableWindow(reverse)
+                r = i._childFocusableWindow(reverse)
                 if r is not None:
                     return r
-        r = self.parent.nextFocusableWindow(self, reverse)
+        r = self.parent.nextFocusableWindow(self.parent, reverse)
         if r is not None:
             return r
-        return self.__childFocusableWindow(reverse)
+        return self._childFocusableWindow(reverse)
 
     def normalize(self):
         self.parent.normalize()
@@ -280,7 +296,8 @@ class ViewWindow:
         return True
 
     def shortTimeSlice(self):
-        pass
+        """returns whether work is finished (no need to call again)."""
+        return True
 
     def reshape(self, top, left, rows, cols):
         self.moveTo(top, left)
@@ -327,8 +344,9 @@ class ViewWindow:
             assert isinstance(text, unicode)
         text = text[:self.cols]
         text = text + u' ' * max(0, self.cols - len(text))
-        self.program.frame.addStr(self.top + self.writeLineRow, self.left,
-                                  text.encode(u'utf-8'), color)
+        self.program.backgroundFrame.addStr(self.top + self.writeLineRow,
+                                            self.left, text.encode(u'utf-8'),
+                                            color)
         self.writeLineRow += 1
 
     def getProgram(self):
@@ -411,7 +429,7 @@ class Window(ActiveWindow):
             self.textBuffer.mouseWheelUp(shift, ctrl, alt)
 
     def preferredSize(self, rowLimit, colLimit):
-        return min(rowLimit, len(self.textBuffer.lines)), colLimit
+        return min(rowLimit, self.textBuffer.parser.rowCount()), colLimit
 
     def render(self):
         if self.textBuffer:
@@ -434,18 +452,22 @@ class Window(ActiveWindow):
         """returns whether work is finished (no need to call again)."""
         finished = True
         tb = self.textBuffer
-        if tb is not None and tb.parser.fullyParsedToLine < len(tb.lines):
+        if tb is not None and tb.parser.resumeAtRow < tb.parser.rowCount():
             tb.parseDocument()
             # If a user event came in while parsing, the parsing will be paused
             # (to be resumed after handling the event).
-            finished = tb.parser.fullyParsedToLine >= len(tb.lines)
+            finished = tb.parser.resumeAtRow >= tb.parser.rowCount()
         for child in self.zOrder:
             finished = finished and child.longTimeSlice()
         return finished
 
     def shortTimeSlice(self):
-        if self.textBuffer is not None:
-            self.textBuffer.parseScreenMaybe()
+        """returns whether work is finished (no need to call again)."""
+        tb = self.textBuffer
+        if tb is not None:
+            tb.parseScreenMaybe()
+            return tb.parser.resumeAtRow >= tb.parser.rowCount()
+        return True
 
 
 class LabelWindow(ViewWindow):
@@ -587,8 +609,14 @@ class LineNumbers(ViewWindow):
         self.host = host
 
     def drawLineNumbers(self):
+        if app.config.strict_debug:
+            assert isinstance(self.rows, int)
+            assert isinstance(self.host.scrollRow, int)
+            assert self.rows >= 1
+            assert self.host.textBuffer.parser.rowCount() >= 1
+            assert self.host.scrollRow >= 0
         limit = min(self.rows,
-                    len(self.host.textBuffer.lines) - self.host.scrollRow)
+                    self.host.textBuffer.parser.rowCount() - self.host.scrollRow)
         cursorBookmarkColorIndex = None
         visibleBookmarks = self.getVisibleBookmarks(self.host.scrollRow,
                                                     self.host.scrollRow + limit)
@@ -617,7 +645,8 @@ class LineNumbers(ViewWindow):
         if self.host.scrollCol > 0:
             color = colorPrefs.get(u'line_overflow')
             for i in range(limit):
-                if len(self.host.textBuffer.lines[self.host.scrollRow + i]) > 0:
+                if self.host.textBuffer.parser.rowWidth(
+                        self.host.scrollRow + i) > 0:
                     self.addStr(i, 6, u' ', color)
         # Draw blank line number rows past the end of the document.
         color = colorPrefs.get(u'outside_document')
@@ -665,7 +694,7 @@ class LineNumbers(ViewWindow):
             return
         self.host.changeFocusTo(self.host)
         tb = self.host.textBuffer
-        if self.host.scrollRow + paneRow >= len(tb.lines):
+        if self.host.scrollRow + paneRow >= tb.parser.rowCount():
             tb.selectionNone()
             return
         if shift:
@@ -714,7 +743,7 @@ class LogWindow(ViewWindow):
 
     def render(self):
         self.renderCounter += 1
-        app.log.meta(u" " * 10, self.renderCounter, u"- screen refresh -")
+        app.log.meta(u" " * 10, self.renderCounter, u"- screen render -")
         self.writeLineRow = 0
         colorPrefs = self.program.color
         colorA = colorPrefs.get(u'default')
@@ -921,10 +950,10 @@ class StatusLine(ViewWindow):
         # Percentages.
         rowPercentage = 0
         colPercentage = 0
-        lineCount = len(tb.lines)
+        lineCount = tb.parser.rowCount()
         if lineCount:
             rowPercentage = self.host.textBuffer.penRow * 100 // lineCount
-            charCount = len(tb.lines[self.host.textBuffer.penRow])
+            charCount = tb.parser.rowWidth(self.host.textBuffer.penRow)
             if charCount and self.host.textBuffer.penCol != 0:
                 colPercentage = self.host.textBuffer.penCol * 100 // charCount
         # Format.
@@ -957,19 +986,19 @@ class TopInfo(ViewWindow):
         tb = self.host.textBuffer
         lines = []
         # TODO: Make dynamic topInfo work properly
-        if len(tb.lines):
+        if tb.parser.rowCount():
             lineCursor = self.host.scrollRow
             line = ""
             # Check for extremely small window.
-            if len(tb.lines) > lineCursor:
+            if tb.parser.rowCount() > lineCursor:
                 while len(line) == 0 and lineCursor > 0:
-                    line = tb.lines[lineCursor]
+                    line = tb.parser.rowText(lineCursor)
                     lineCursor -= 1
             if len(line):
                 indent = len(line) - len(line.lstrip(u' '))
                 lineCursor += 1
-                while lineCursor < len(tb.lines):
-                    line = tb.lines[lineCursor]
+                while lineCursor < tb.parser.rowCount():
+                    line = tb.parser.rowText(lineCursor)
                     if not len(line):
                         continue
                     z = len(line) - len(line.lstrip(u' '))
@@ -979,7 +1008,7 @@ class TopInfo(ViewWindow):
                     else:
                         break
                 while indent and lineCursor > 0:
-                    line = tb.lines[lineCursor]
+                    line = tb.parser.rowText(lineCursor)
                     if len(line):
                         z = len(line) - len(line.lstrip(u' '))
                         if z < indent:
@@ -1182,12 +1211,11 @@ class InputWindow(Window):
         """Draw makers to indicate text extending past the right edge of the
         window."""
         maxRow, maxCol = self.rows, self.cols
-        limit = min(maxRow, len(self.textBuffer.lines) - self.scrollRow)
+        limit = min(maxRow, self.textBuffer.parser.rowCount() - self.scrollRow)
         colorPrefs = self.program.color
         for i in range(limit):
             color = colorPrefs.get('right_column')
-            if len(self.textBuffer.lines[
-                    i + self.scrollRow]) - self.scrollCol > maxCol:
+            if self.textBuffer.parser.rowWidth(i + self.scrollRow) - self.scrollCol > maxCol:
                 color = colorPrefs.get('line_overflow')
             self.rightColumn.addStr(i, 0, u' ', color)
         color = colorPrefs.get('outside_document')
@@ -1220,7 +1248,9 @@ class InputWindow(Window):
 
     def setTextBuffer(self, textBuffer):
         if app.config.strict_debug:
-            assert issubclass(textBuffer.__class__, app.text_buffer.TextBuffer)
+            assert issubclass(
+                    textBuffer.__class__, app.text_buffer.TextBuffer), \
+                    repr(textBuffer)
         app.log.info('setTextBuffer')
         if self.textBuffer is not None:
             self.savedScrollPositions[self.textBuffer.fullPath] = (
@@ -1244,7 +1274,17 @@ class InputWindow(Window):
     def startup(self):
         bufferManager = self.program.bufferManager
         for f in self.program.prefs.startup.get('cliFiles', []):
-            bufferManager.loadTextBuffer(f['path'])
+            tb = bufferManager.loadTextBuffer(f['path'])
+            if tb is None:
+                # app.log.info('failed to load', repr(f["path"]))
+                continue
+            tb.parseDocument()
+            if f['row'] is not None:
+                if f['col'] is not None:
+                    tb.selectText(f['row'], f['col'], 0,
+                                  app.selectable.kSelectionNone)
+                else:
+                    tb.selectText(f['row'], 0, 0, app.selectable.kSelectionNone)
         if self.program.prefs.startup.get('readStdin'):
             bufferManager.readStdin()
         bufferManager.buffers.reverse()
@@ -1252,6 +1292,8 @@ class InputWindow(Window):
         if not tb:
             tb = bufferManager.newTextBuffer()
         self.setTextBuffer(tb)
+        # Should parsing the document be a standard part of setTextBuffer? TBD.
+        self.textBuffer.parseDocument()
         openToLine = self.program.prefs.startup.get('openToLine')
         if openToLine is not None:
             self.textBuffer.selectText(openToLine - 1, 0, 0,
@@ -1312,6 +1354,7 @@ class OptionsTrinaryStateWindow(Window):
         colorPrefs = self.program.color
         self.color = colorPrefs.get('keyword')
         self.focusColor = colorPrefs.get('selected')
+        self.textBuffer.view.showCursor = False
 
     def focus(self):
         Window.focus(self)

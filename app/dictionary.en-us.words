@@ -921,6 +921,7 @@ archduke
 archetype
 architect
 architectural
+architecturally
 architecture
 architectures
 archival
@@ -1108,6 +1109,7 @@ asthmatic
 astonish
 astonishment
 astral
+astro
 astronaut
 astronomer
 astronomy
@@ -1164,6 +1166,7 @@ attentive
 attentiveness
 attenuate
 attenuated
+attenuates
 attenuation
 attest
 attestation
@@ -2835,6 +2838,7 @@ circulation
 circumference
 circumflex
 circumscribed
+circumscribes
 circumstance
 circumstances
 circumvent
@@ -3057,6 +3061,8 @@ coffee
 coffin
 cog
 cogs
+coherencies
+coherency
 coherent
 coherently
 cohort
@@ -3271,6 +3277,7 @@ complaint
 complaints
 complement
 complementary
+complementing
 complements
 complete
 completed
@@ -3745,6 +3752,7 @@ cooper
 cooperate
 cooperates
 cooperating
+cooperation
 cooperatively
 cooperatives
 coordinate
@@ -5442,6 +5450,7 @@ dunk
 dunning
 duo
 duos
+dup
 dupe
 duped
 duper
@@ -5455,6 +5464,7 @@ duplicates
 duplicating
 duplication
 duplications
+dups
 durability
 durable
 duration
@@ -6037,6 +6047,7 @@ estimations
 estimator
 eta
 etc
+etcetera
 etch
 etched
 eternal
@@ -7123,6 +7134,7 @@ fund
 fundamental
 fundamentally
 fundamentals
+funding
 funds
 funeral
 funk
@@ -8040,6 +8052,7 @@ hoard
 hob
 hobbies
 hobby
+hoc
 hock
 hockey
 hod
@@ -8313,6 +8326,7 @@ illegally
 illegitimate
 illogical
 ills
+illuminance
 illuminate
 illuminated
 illusion
@@ -9718,6 +9732,7 @@ lent
 lento
 leopard
 leopards
+lerp
 less
 lessen
 lessened
@@ -9743,6 +9758,7 @@ lexer
 lexical
 lexicographic
 lexicographical
+lexicographically
 lexicon
 lg
 liabilities
@@ -9875,6 +9891,7 @@ list
 listable
 listed
 listen
+listenable
 listened
 listener
 listeners
@@ -9898,6 +9915,7 @@ little
 live
 lived
 lively
+liveness
 livery
 lives
 living
@@ -9923,6 +9941,7 @@ locale
 locales
 locality
 localization
+localizations
 localize
 localized
 localizer
@@ -10125,6 +10144,7 @@ magics
 magnet
 magnetic
 magnetism
+magnetometer
 magnification
 magnified
 magnifier
@@ -10644,6 +10664,7 @@ miniature
 miniaturization
 miniaturize
 miniaturized
+minify
 minim
 minimal
 minimalist
@@ -10965,6 +10986,7 @@ multicolored
 multifarious
 multilayer
 multilayered
+multiline
 multilingual
 multimedia
 multipart
@@ -11302,6 +11324,7 @@ normality
 normalization
 normalize
 normalized
+normalizer
 normalizes
 normalizing
 normally
@@ -12696,6 +12719,8 @@ poll
 pollable
 pollard
 polled
+poller
+pollers
 polling
 polls
 pollster
@@ -12917,6 +12942,7 @@ preempt
 preempted
 preempting
 preemption
+preemptions
 preemptive
 preemptively
 preempts
@@ -13299,6 +13325,7 @@ prospective
 prospectively
 prosper
 prosthetic
+protanomaly
 protect
 protected
 protecting
@@ -14003,6 +14030,7 @@ rediscovery
 redisplayed
 redisplaying
 redistribute
+redistributed
 redistributing
 redistribution
 redistributions
@@ -14382,6 +14410,7 @@ reparent
 reparented
 reparenting
 reparse
+reparsing
 repeat
 repeatable
 repeatably
@@ -14471,6 +14500,7 @@ requested
 requester
 requesters
 requesting
+requestor
 requests
 require
 required
@@ -15537,6 +15567,8 @@ shack
 shad
 shade
 shaded
+shader
+shaders
 shades
 shading
 shadow
@@ -15734,6 +15766,7 @@ sick
 sickle
 sickness
 side
+sideband
 sidebar
 sidebars
 sideburns
@@ -16354,6 +16387,8 @@ spoon
 sporadic
 spore
 sporing
+spork
+sporks
 sport
 sporting
 sports
@@ -16930,6 +16965,7 @@ sunshine
 sunspots
 sup
 super
+superceded
 superficial
 superficially
 superfine
@@ -18429,6 +18465,7 @@ ungraceful
 ungracefully
 unguarded
 unhanded
+unhandled
 unhappy
 unhardened
 unhelpful
@@ -18509,6 +18546,8 @@ unlike
 unlikelihood
 unlikely
 unlimited
+unlink
+unlinked
 unlisted
 unload
 unloaded
@@ -18542,6 +18581,7 @@ unoccupied
 unofficial
 unopened
 unordered
+unowned
 unpack
 unpacked
 unpacking
@@ -18615,7 +18655,9 @@ unseen
 unselectable
 unsent
 unset
+unshadowed
 unshakable
+unshared
 unshift
 unsigned
 unsnap
@@ -18624,6 +18666,7 @@ unsolicited
 unsorted
 unspecified
 unstable
+unstick
 unstop
 unstructured
 unstuck
@@ -18668,6 +18711,7 @@ unusual
 unusually
 unverifiable
 unverified
+unvisited
 unwanted
 unwieldy
 unwind

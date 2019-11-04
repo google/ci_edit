@@ -33,7 +33,6 @@ class FileManagerTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
     def test_save_as(self):
         #self.setMovieMode(True)
-        sys.argv = []
         self.runWithFakeInputs([
             self.displayCheck(0, 0, [u" ci     "]),
             self.displayCheck(2, 7, [u"     "]), CTRL_S,
@@ -42,7 +41,6 @@ class FileManagerTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
     def test_save_as_to_quit(self):
         #self.setMovieMode(True)
-        sys.argv = []
         self.runWithFakeInputs([
             self.displayCheck(0, 0, [u" ci     "]),
             self.displayCheck(2, 7, [u"     "]),
@@ -56,7 +54,6 @@ class FileManagerTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
     def test_dir_and_path_with_cr(self):
         #self.setMovieMode(True)
-        sys.argv = []
         self.runWithFakeInputs([
             self.displayCheck(0, 0, [u" ci     "]),
             self.displayCheck(2, 7, [u"     "]), CTRL_O,
@@ -64,8 +61,7 @@ class FileManagerTestCases(app.fake_curses_testing.FakeCursesTestCase):
             self.writeText(self.pathToSample(u"")),
             self.displayCheck(3, 0, [u"./     ", u"../     "]),
             self.displayCheck(5, 0, [u"._ A name with cr\\r/"]),
-            self.addMouseInfo(0, 5, 0,
-                              curses.BUTTON1_PRESSED), curses.KEY_MOUSE,
+            self.mouseEvent(0, 5, 0, curses.BUTTON1_PRESSED),
             self.displayCheck(5, 0, [u"example"]),
             self.displayFindCheck(u"/._ A name with ",
                                   u"cr\\r/"), KEY_ESCAPE, curses.ERR,
@@ -78,9 +74,34 @@ class FileManagerTestCases(app.fake_curses_testing.FakeCursesTestCase):
             CTRL_Q
         ])
 
+    def test_mouse_scroll(self):
+        #self.setMovieMode(True)
+        dirList = [
+            u"./     ", u"../     ", u"._ A name with cr\\r/",
+        ]
+        self.runWithFakeInputs([
+            self.displayCheck(0, 0, [u" ci     "]),
+            self.displayCheck(2, 7, [u"     "]), CTRL_O,
+            self.displayCheck(0, 0, [u" ci    Open File  "]), CTRL_A,
+            self.writeText(self.pathToSample(u"")),
+            self.displayCheck(3, 0, dirList[0:3]),
+            self.mouseEvent(0, 5, 0, curses.REPORT_MOUSE_POSITION),
+            self.displayCheck(3, 0, dirList[0:3]),
+            self.mouseEvent(1, 5, 0, curses.REPORT_MOUSE_POSITION),
+            self.displayCheck(3, 0, dirList[1:3]),
+            self.mouseEvent(2, 5, 0, curses.REPORT_MOUSE_POSITION),
+            self.displayCheck(3, 0, dirList[2:3]),
+            self.mouseEvent(0, 5, 0, curses.BUTTON4_PRESSED),
+            self.displayCheck(3, 0, dirList[1:3]),
+            self.mouseEvent(1, 5, 0, curses.BUTTON4_PRESSED),
+            self.displayCheck(3, 0, dirList[0:3]),
+            self.mouseEvent(2, 5, 0, curses.BUTTON4_PRESSED),
+            self.displayCheck(3, 0, dirList[0:3]),
+            CTRL_Q, CTRL_Q
+        ])
+
     def test_open(self):
         #self.setMovieMode(True)
-        sys.argv = []
         self.runWithFakeInputs([
             self.displayCheck(0, 0, [u" ci     "]),
             self.displayCheck(2, 7, [u"     "]), CTRL_O,
@@ -89,7 +110,6 @@ class FileManagerTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
     def test_open_binary_file(self):
         #self.setMovieMode(True)
-        sys.argv = []
         self.runWithFakeInputs([
             self.displayCheck(0, 0, [u" ci     "]),
             self.displayCheck(2, 7, [u"     "]), CTRL_O,
@@ -101,7 +121,6 @@ class FileManagerTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
     def test_open_valid_unicode_file(self):
         #self.setMovieMode(True)
-        sys.argv = []
         self.runWithFakeInputs([
             self.displayCheck(0, 0, [u" ci     "]),
             self.displayCheck(2, 7, [u"     "]), CTRL_O,
@@ -113,7 +132,6 @@ class FileManagerTestCases(app.fake_curses_testing.FakeCursesTestCase):
     def test_empty_path_input(self):
         """Avoid crash when pressing return when the path input is empty."""
         #self.setMovieMode(True)
-        sys.argv = []
         self.runWithFakeInputs([
             self.displayCheck(0, 0, [u" ci     "]),
             self.displayCheck(2, 7, [u"     "]),
@@ -127,5 +145,30 @@ class FileManagerTestCases(app.fake_curses_testing.FakeCursesTestCase):
             KEY_ESCAPE,
             curses.ERR,
             self.displayCheck(0, 0, [u" ci     "]),
+            CTRL_Q,
+        ])
+
+    def test_show_hide_columns(self):
+        #self.setMovieMode(True)
+        self.runWithFakeInputs([
+            self.prefCheck(u'editor', u'filesShowSizes', True),
+            self.displayCheck(0, 0, [u" ci     "]),
+            CTRL_O,
+            self.displayCheck(0, 0, [u" ci    Open"]),
+            self.findTextAndClick(1000, u"[x]sizes", curses.BUTTON1_PRESSED),
+            CTRL_Q
+        ])
+
+    def test_click_scroll(self):
+        #self.setMovieMode(True)
+        self.runWithFakeInputs([
+            self.displayCheck(0, 0, [u" ci     "]),
+            CTRL_O,
+            self.displayCheck(0, 0, [u" ci    Open"]),
+            KEY_PAGE_DOWN,
+            self.displayFindCheck(u"AUTHORS", u""),
+            CTRL_Q,
+            # TODO(dschuyler): Quitting from the file manager uses two frame
+            # updates. When that is fixed, this second CTRL_Q should be removed.
             CTRL_Q,
         ])

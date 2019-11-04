@@ -58,6 +58,7 @@ args
 argv
 ascii
 asm
+aspx
 async
 attr
 attrs
@@ -98,6 +99,8 @@ codebase
 codec
 codecs
 codeview
+combinator
+combinators
 conf
 configs
 constexpr
@@ -120,6 +123,8 @@ del
 dep
 deps
 deque
+dequeued
+dequeuing
 dereferenced
 dereferences
 dereferencing
@@ -177,6 +182,7 @@ fds
 ff
 fi
 fifo
+fifos
 filename
 filenames
 filesystem
@@ -215,6 +221,7 @@ hostnames
 hpp
 htm
 https
+hw
 hxx
 ia
 idr
@@ -284,6 +291,7 @@ mixins
 mmu
 mmus
 msec
+msecs
 msg
 multibyte
 multicast
@@ -304,6 +312,7 @@ netmask
 netmasks
 noop
 nsec
+nsecs
 nullability
 nullable
 nulled
@@ -339,6 +348,7 @@ preemptible
 prefetch
 prerender
 prerendered
+presubmit
 prev
 prg
 proc
@@ -361,10 +371,12 @@ rastered
 rastering
 rb
 readme
+realloc
 rect
 rects
 recurses
 recursing
+reenable
 refptr
 regex
 regexes
@@ -379,6 +391,9 @@ repo
 repos
 req
 reqs
+requeue
+requeued
+requeuing
 rhs
 ro
 rpc
@@ -397,6 +412,7 @@ scrollbar
 serializable
 sha
 shader
+shtml
 sig
 sigbus
 signin
@@ -405,6 +421,7 @@ sizeof
 skia
 smp
 solaris
+sp
 sql
 src
 srcs
@@ -436,7 +453,9 @@ sys
 syscall
 sysex
 syslog
+sz
 tar
+tcp
 templated
 templatizer
 templatizers
@@ -485,9 +504,15 @@ usb
 usec
 usecs
 utf
+util
+utils
+uv
+ux
 variadic
+vc
 vdso
 versioning
+vi
 vimrc
 vkey
 vpn
@@ -509,6 +534,7 @@ wifi
 wildcard
 wildcards
 wireframe
+xhtml
 xorg
 xss
 xterm

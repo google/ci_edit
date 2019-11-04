@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # Copyright 2016 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,10 +31,9 @@ import signal
 import struct
 import sys
 import termios
+import unicodedata
 
 import app.config
-
-MIN_DOUBLE_WIDE_CHARACTER = u"\u3000"
 
 # Strings are found using the cursesKeyName() function.
 # Constants are found using the curses.getch() function.
@@ -231,28 +232,46 @@ def cursesKeyName(keyCode):
     return None
 
 
-def columnToIndex(offset, string):
-    """If the visual cursor is on |offset|, which index of the string is the
+def columnToIndex(column, string):
+    """If the visual cursor is on |column|, which index of the string is the
     cursor on?"""
     if app.config.strict_debug:
-        assert isinstance(offset, int)
+        assert isinstance(column, int)
         assert isinstance(string, unicode)
+    if not string:
+        return None
     indexLimit = len(string) - 1
+    colCursor = 0
     index = 0
-    for i in string:
-        if i > MIN_DOUBLE_WIDE_CHARACTER:
-            offset -= 2
-        else:
-            offset -= 1
-        if offset < 0 or index >= indexLimit:
+    for ch in string:
+        colCursor += charWidth(ch, colCursor)
+        if colCursor > column:
             break
         index += 1
+        if index > indexLimit:
+            return None
     return index
 
 
-def fitToRenderedWidth(width, string):
-    """With |width| character cells available, how much of |string| can I
-    render?
+def charAtColumn(column, string):
+    """If the visual cursor is on |column|, which index of the string is the
+    cursor on?"""
+    if app.config.strict_debug:
+        assert isinstance(column, int)
+        assert isinstance(string, unicode)
+    index = columnToIndex(column, string)
+    if index is not None:
+        return string[index]
+    return None
+
+
+def fitToRenderedWidth(column, width, string):
+    """With |width| character cells (columns) available, how much of |string|
+    can I render? The start |column| is required to calculate tab stops.
+
+    The result can vary for double-wide characters, zero-width characters, and
+    tabs. For plain, printable ASCII, the result will always be the lesser of
+    |width| or len(string).
     """
     if app.config.strict_debug:
         assert isinstance(width, int)
@@ -260,10 +279,9 @@ def fitToRenderedWidth(width, string):
     indexLimit = len(string)
     index = 0
     for i in string:
-        if i > MIN_DOUBLE_WIDE_CHARACTER:
-            width -= 2
-        else:
-            width -= 1
+        cols = charWidth(i, column)
+        width -= cols
+        column += cols
         if width < 0 or index >= indexLimit:
             break
         index += 1
@@ -309,10 +327,10 @@ def renderedFindIter(string, beginCol, endCol, charGroups, numbers, eolSpaces):
                         column += index - begin
                         break
                 else:
-                    column += 2 if c > MIN_DOUBLE_WIDE_CHARACTER else 1
+                    column += charWidth(c, column)
                     index += 1
         else:
-            column += 2 if c > MIN_DOUBLE_WIDE_CHARACTER else 1
+            column += charWidth(c, column)
             index += 1
     if eolSpaces and limit and string[-1] == ' ':
         index = limit - 1
@@ -321,7 +339,7 @@ def renderedFindIter(string, beginCol, endCol, charGroups, numbers, eolSpaces):
         yield string[index:], index, index, len(charGroups) + 1
 
 
-def renderedSubStr(string, beginCol, endCol):
+def renderedSubStr(string, beginCol, endCol=None):
     """
     Get a slice (similar to `string[beginCol:endCol]`) based on the rendered
     width of the string. If columns beginCol or endCol land in the middle of a
@@ -332,62 +350,136 @@ def renderedSubStr(string, beginCol, endCol):
     Args:
       string: The string to slice.
       beginCol: The first column of text (inclusive).
-      endCol: The last column of text (exclusive).
+      endCol: The last column of text (exclusive). Omit parameter for
+              end-of-line (similar to `string[beginCol:]`).
 
     Returns:
       unicode string
     """
+    if endCol is None:
+        endCol = sys.maxsize
     if app.config.strict_debug:
         assert isinstance(string, unicode)
         assert isinstance(beginCol, int)
         assert isinstance(endCol, int)
     column = 0
-    beginIndex = sys.maxsize
-    endIndex = sys.maxsize
     i = 0
     limit = len(string)
+    output = []
     while column < beginCol:
         if i >= limit:
             # The |string| is entirely before |beginCol|.
             return u""
-        column += 2 if string[i] >= MIN_DOUBLE_WIDE_CHARACTER else 1
+        ch = string[i]
+        column += charWidth(ch, column)
         i += 1
-    if beginCol == column:
-        # An exact (aligned) trimming (not splitting a double-wide
-        # character).
-        beginIndex = i
-    else:
-        # Splitting a double-wide character. Prepend a space and adjust.
-        string = u" " + string[i:]
-        beginIndex = 0
-        # Trim these to account for what was trimmed.
-        endCol -= column
-        limit -= i
-        # Add one to each of these for the space.
-        endCol += 1
-        limit += 1
-        column = 1
-        i = 1
-    while True:
-        if endCol <= column:
-            if endCol == column:
-                # An exact (aligned) trimming (not splitting a double-wide
-                # character).
-                endIndex = i
+        if column > beginCol:
+            # Split the leading character.
+            paddingWidth = column - beginCol
+            output.append(u" " * paddingWidth)
+    while i < limit and column < endCol:
+        ch = string[i]
+        lastCharWidth = charWidth(ch, column)
+        column += lastCharWidth
+        i += 1
+        if column > endCol:
+            # Split the trailing character.
+            paddingWidth = min(endCol - (column - lastCharWidth),
+                               lastCharWidth - 1)
+            output.append(u" " * paddingWidth)
+        else:
+            if ch == u"\t":
+                output.append(u" " * lastCharWidth)
             else:
-                # Splitting a double-wide character. Prepend a space and adjust.
-                string = string[:i - 1] + u" "
-                endIndex = len(string)
-            break
-        if i >= limit:
-            endIndex = limit
-            break
-        column += 2 if string[i] >= MIN_DOUBLE_WIDE_CHARACTER else 1
-        i += 1
-    return string[beginIndex:endIndex]
+                output.append(ch)
+    return u"".join(output)
 
 
-def renderedWidth(string):
+if sys.version_info[0] == 2:
+
+    def charWidth(ch, column, tabWidth=8):
+        if ch == u"\t":
+            return tabWidth - (column % tabWidth)
+        elif ch == u"" or ch < u" ":
+            return 0
+        elif ch < u"ᄀ":
+            # Optimization.
+            return 1
+        elif unicodedata.east_asian_width(ch) in (u"F", r"W"):
+            return 2
+        return 1
+
+    def isDoubleWidth(ch):
+        if ch == u"" or ch < u"ᄀ":
+            # Optimization.
+            return False
+        width = unicodedata.east_asian_width(ch)
+        if width in (u"F", u"W"):
+            return True
+        return False
+
+    def isZeroWidth(ch):
+        return ch == u"" or ch < u" "  #or unicodedata.east_asian_width(ch) == "N"
+else:
+
+    def charWidth(ch, column, tabWidth=8):
+        if ch == u"\t":
+            return tabWidth - (column % tabWidth)
+        elif ch == u"" or ch < u" ":
+            return 0
+        elif ch < u"ᄀ":
+            # Optimization.
+            return 1
+        elif unicodedata.east_asian_width(ch) == u"W":
+            return 2
+        return 1
+
+    def isDoubleWidth(ch):
+        if ch == u"" or ch < u"ᄀ":
+            # Optimization.
+            return False
+        return unicodedata.east_asian_width(ch) == "W"
+
+    def isZeroWidth(ch):
+        return ch == u"" or ch < u" "  #or unicodedata.east_asian_width(ch) == "N"
+
+
+def floorCol(column, line):
+    """Round off the column so that it aligns with the start of a character.
+    For lines without multi-column characters the result will equal |column|.
+    If |column| is midway in a multi-column character the result will be less
+    than |column| (i.e. rounding the column number downward).
+    """
+    if app.config.strict_debug:
+        assert isinstance(column, int)
+        assert isinstance(line, unicode)
+    floorColumn = 0
+    for ch in line:
+        width = charWidth(ch, floorColumn)
+        if floorColumn + width > column:
+            return floorColumn
+        floorColumn += width
+    return floorColumn
+
+
+def priorCharCol(column, line):
+    """Return the start column of the character before |column|.
+    """
+    if app.config.strict_debug:
+        assert isinstance(column, int)
+        assert isinstance(line, unicode)
+    if column == 0:
+        return None
+    priorColumn = 0
+    for ch in line:
+        width = charWidth(ch, priorColumn)
+        if priorColumn + width >= column:
+            return priorColumn
+        priorColumn += width
+    return None
+
+
+def columnWidth(string):
     """When rendering |string| how many character cells will be used? For ASCII
     characters this will equal len(string). For many Chinese characters and
     emoji the value will be greater than len(string), since many of them use two
@@ -397,11 +489,45 @@ def renderedWidth(string):
         assert isinstance(string, unicode)
     width = 0
     for i in string:
-        if i > MIN_DOUBLE_WIDE_CHARACTER:
-            width += 2
-        else:
-            width += 1
+        width += charWidth(i, width)
     return width
+
+
+def wrapLines(lines, indent, width):
+    """Word wrap lines of text.
+
+    Args:
+      lines (list of unicode): input text.
+      indent (unicode): will be added as a prefix to each line of output.
+      width (int): is the column limit for the strings. Each double-wide
+        character counts as two columns.
+
+    Returns:
+      List of strings
+    """
+    if app.config.strict_debug:
+        assert isinstance(lines, tuple), repr(lines)
+        assert len(lines) == 0 or isinstance(lines[0], unicode)
+        assert isinstance(indent, unicode), repr(path)
+        assert isinstance(width, int), repr(int)
+    # There is a textwrap library in Python, but I was having trouble getting it
+    # to do exactly what I desired. It may be useful to revisit textwrap later.
+    words = u" ".join(lines).split()
+    output = [indent]
+    indentLen = columnWidth(indent)
+    index = 0
+    while index < len(words):
+        lineLen = columnWidth(output[-1])
+        word = words[index]
+        wordLen = columnWidth(word)
+        if lineLen == indentLen and lineLen + wordLen < width:
+            output[-1] += word
+        elif lineLen + wordLen + 1 < width:
+            output[-1] += u" " + word
+        else:
+            output.append(indent + word)
+        index += 1
+    return output
 
 
 # This is built-in in Python 3.

@@ -24,6 +24,7 @@ except NameError:
 import os
 import re
 import time
+import warnings
 
 import app.buffer_file
 import app.controller
@@ -64,17 +65,19 @@ class PredictionListController(app.controller.Controller):
             # Add the most resent buffer to allow flipping back and forth
             # between two files.
             if len(bufferManager.buffers) >= 2:
-                add_buffer(items, bufferManager.buffers[-2], 300)
+                add_buffer(items, bufferManager.buffers[-2], 30000)
+            order = 39999
             for i in bufferManager.buffers[:-2]:
-                add_buffer(items, i, 303)
+                add_buffer(items, i, order)
+                order -= 1
             # This is the current buffer. It's unlikely to be the goal.
             if len(bufferManager.buffers) >= 1:
-                add_buffer(items, bufferManager.buffers[-1], 900)
+                add_buffer(items, bufferManager.buffers[-1], 90000)
         if 1:
             # Add recent files.
             for recentFile in self.view.program.history.getRecentFiles():
                 if recentFile not in added:
-                    items.append((None, recentFile, '=', 'recent', 500))
+                    items.append((None, recentFile, '=', 'recent', 50000))
                     added.add(recentFile)
         if 1:
             # Add alternate files.
@@ -94,7 +97,7 @@ class PredictionListController(app.controller.Controller):
                 if fileName == f and ext != e and e not in ignoreExt:
                     fullPath = os.path.join(dirPath, i)
                     if fullPath not in added:
-                        items.append((None, fullPath, '=', 'alt', 200))
+                        items.append((None, fullPath, '=', 'alt', 20000))
                         added.add(fullPath)
             if 1:
                 # Chromium specific hack.
@@ -102,23 +105,29 @@ class PredictionListController(app.controller.Controller):
                     chromiumPath = currentFile[:-len('-extracted.js')] + '.html'
                     if os.path.isfile(
                             chromiumPath) and chromiumPath not in added:
-                        items.append((None, chromiumPath, '=', 'alt', 200))
+                        items.append((None, chromiumPath, '=', 'alt', 20000))
                         added.add(chromiumPath)
                 elif currentFile.endswith('.html'):
                     chromiumPath = currentFile[:-len('.html')] + '-extracted.js'
                     if os.path.isfile(
                             chromiumPath) and chromiumPath not in added:
-                        items.append((None, chromiumPath, '=', 'alt', 200))
+                        items.append((None, chromiumPath, '=', 'alt', 20000))
                         added.add(chromiumPath)
         if self.filter is not None:
-            regex = re.compile(self.filter)
-            i = 0
-            while i < len(items):
-                if not regex.search(items[i][1]):
-                    # Filter the list in-place.
-                    items.pop(i)
-                else:
-                    i += 1
+            try:
+                with warnings.catch_warnings():
+                    # Ignore future warning with '[[' regex.
+                    warnings.simplefilter("ignore")
+                    regex = re.compile(self.filter)
+                i = 0
+                while i < len(items):
+                    if not regex.search(items[i][1]):
+                        # Filter the list in-place.
+                        items.pop(i)
+                    else:
+                        i += 1
+            except re.error:
+                self.view.textBuffer.setMessage(u"invalid regex")
 
     def focus(self):
         #app.log.info('PredictionListController')
@@ -129,7 +138,8 @@ class PredictionListController(app.controller.Controller):
         app.log.info('PredictionListController command set')
 
     def onChange(self):
-        self.filter = self.view.parent.predictionInputWindow.controller.decodedPath()
+        controller = self.view.parent.predictionInputWindow.controller
+        self.filter = controller.decodedPath()
         if self.shownList == self.filter:
             return
         self.shownList = self.filter
@@ -217,7 +227,7 @@ class PredictionInputController(app.controller.Controller):
     def decodedPath(self):
         if app.config.strict_debug:
             assert self.view.textBuffer is self.textBuffer
-        return app.string.pathDecode(self.textBuffer.lines[0])
+        return app.string.pathDecode(self.textBuffer.parser.rowText(0))
 
     def setEncodedPath(self, path):
         if app.config.strict_debug:

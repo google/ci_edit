@@ -41,6 +41,7 @@ class ProgramWindow(app.window.ActiveWindow):
             assert issubclass(program.__class__, app.ci_program.CiProgram), self
         app.window.ActiveWindow.__init__(self, program, None)
         self.clicks = 0
+        self.focusedWindow = None
         self.modalUi = None
         self.program = program
         self.priorClick = 0
@@ -154,19 +155,23 @@ class ProgramWindow(app.window.ActiveWindow):
             win = win.parent
 
     def longTimeSlice(self):
+        """returns whether work is finished (no need to call again)."""
         win = self.focusedWindow
-        finished = True
         while win is not None and win is not self:
-            finished = finished and win.longTimeSlice()
+            if not win.longTimeSlice():
+                return False
             win = win.parent
-        return finished
+        return True
 
     def shortTimeSlice(self):
+        """returns whether work is finished (no need to call again)."""
         win = self.focusedWindow
         while win is not None and win is not self:
-            win.shortTimeSlice()
+            if not win.shortTimeSlice():
+                return False
             #assert win is not win.parent
             win = win.parent
+        return True
 
     def clickedNearby(self, row, col):
         y, x = self.priorClickRowCol
@@ -238,7 +243,7 @@ class ProgramWindow(app.window.ActiveWindow):
                 window.mouseClick(
                     mouseRow, mouseCol, bState & curses.BUTTON_SHIFT,
                     bState & curses.BUTTON_CTRL, bState & curses.BUTTON_ALT)
-        elif bState & curses.BUTTON2_PRESSED:
+        elif bState & (curses.BUTTON2_PRESSED | 0x200000):
             window.mouseWheelUp(bState & curses.BUTTON_SHIFT,
                                 bState & curses.BUTTON_CTRL,
                                 bState & curses.BUTTON_ALT)
@@ -271,10 +276,11 @@ class ProgramWindow(app.window.ActiveWindow):
                     bState & curses.BUTTON_CTRL, bState & curses.BUTTON_ALT)
         elif bState & curses.BUTTON4_RELEASED:
             # Mouse drag or mouse wheel movement done.
+            app.log.mouse("BUTTON4_RELEASED")
             pass
         else:
             app.log.mouse('got bState', app.curses_util.mouseButtonName(bState),
-                          bState)
+                          hex(bState))
         self.savedMouseWindow = window
         self.savedMouseX = mouseCol
         self.savedMouseY = mouseRow
@@ -353,13 +359,13 @@ class ProgramWindow(app.window.ActiveWindow):
         self.debugDraw(window)
         penRow = window.textBuffer.penRow
         penCol = window.textBuffer.penCol
-        if (penRow >= window.scrollRow and
+        if (window.showCursor and penRow >= window.scrollRow and
                 penRow < window.scrollRow + window.rows):
-            self.program.frame.setCursor(
+            self.program.backgroundFrame.setCursor(
                 (window.top + penRow - window.scrollRow,
                  window.left + penCol - window.scrollCol))
         else:
-            self.program.frame.setCursor(None)
+            self.program.backgroundFrame.setCursor(None)
 
     def reshape(self, top, left, rows, cols):
         app.window.ActiveWindow.reshape(self, top, left, rows, cols)

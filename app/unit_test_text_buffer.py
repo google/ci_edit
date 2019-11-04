@@ -35,6 +35,34 @@ class DrawTestCases(app.fake_curses_testing.FakeCursesTestCase):
             self.displayCheck(2, 7, [u"tet "]), CTRL_Q, u"n"
         ])
 
+    def test_draw_tabs(self):
+        test = u"""\t<tab
+\t <tab+space
+ \t<space+tab
+\ta<
+a\t<
+some text.>\t<
+\t\t<2tabs
+line\twith\ttabs
+ends with tab>\t
+\t
+"""
+        self.runWithFakeInputs([
+            self.displayCheck(2, 7, [u"                           "]),
+            self.writeText(test),
+            self.displayCheck(2, 7, [u"        <tab               "]),
+            self.displayCheck(3, 7, [u"         <tab+space        "]),
+            self.displayCheck(4, 7, [u"        <space+tab         "]),
+            self.displayCheck(5, 7, [u"        a<                 "]),
+            self.displayCheck(6, 7, [u"a       <                  "]),
+            self.displayCheck(7, 7, [u"some text.>     <          "]),
+            self.displayCheck(8, 7, [u"                <2tabs     "]),
+            self.displayCheck(9, 7, [u"line    with    tabs       "]),
+            self.displayCheck(10, 7, [u"ends with tab>             "]),
+            self.displayCheck(11, 7, [u"                           "]),
+            CTRL_Q, u"n"
+        ])
+
     def test_draw_text(self):
         self.runWithFakeInputs([
             self.displayCheck(2, 7, [u"      "]),

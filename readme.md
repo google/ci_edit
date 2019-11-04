@@ -116,6 +116,9 @@ Some other editors provide these features, but not all of them.
   - No Python experience is required. Being written in Python means that many
     users will be able to review the code.
   - Python 3.7+ and Python 2.7+ are supported.
+  - Python 2 support may be phased out in favor of focusing on Python 3
+    features. If you'd prefer that Python 2 support continue, please comment on
+    https://github.com/google/ci_edit/issues/205
 - saved undo/redo
   - Open a file and undo prior edits of that document
 - runs on nCurses
@@ -224,6 +227,6 @@ You may obtain a copy of the License at
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
+See the [License](LICENSE) for the specific language governing permissions and
 limitations under the License.
 

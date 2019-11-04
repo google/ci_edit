@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright 2016 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,10 +17,21 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 try:
+    # Python2.
     unicode
+
+    def bytes_to_unicode(chars):
+        chars = "".join([chr(i) for i in chars])
+        return chars.decode("utf-8")
 except NameError:
     unicode = str
     unichr = chr
+
+    def bytes_to_unicode(values):
+        return bytes(values).decode("utf-8")
+
+
+assert bytes_to_unicode((226, 143, 176)) == u'⏰'
 
 import cProfile
 import pstats
@@ -75,7 +87,12 @@ class CiProgram:
             self.prefs.dictionaries[u"base"],
             self.prefs.dictionaries[u"path_match"])
         self.clipboard = app.clipboard.Clipboard()
-        self.frame = app.render.Frame()
+        # There is a background frame that is being build up/created. Once it's
+        # completed it becomes the new front frame that will be drawn on the
+        # screen. This frees up the background frame to begin drawing the next
+        # frame (similar to, but not exactly like double buffering video).
+        self.backgroundFrame = app.render.Frame()
+        self.frontFrame = None
         self.history = app.history.History(
             self.prefs.userData.get('historyPath'))
         self.bufferManager = app.buffer_manager.BufferManager(self, self.prefs)
@@ -139,7 +156,7 @@ class CiProgram:
         # (A performance measurement).
         self.mainLoopTime = 0
         self.mainLoopTimePeak = 0
-        cursesWindow = app.window.mainCursesWindow
+        self.cursesWindowGetCh = app.window.mainCursesWindow.getch
         if self.prefs.startup['timeStartup']:
             # When running a timing of the application startup, push a CTRL_Q
             # onto the curses event messages to simulate a full startup with a
@@ -150,24 +167,13 @@ class CiProgram:
         if useBgThread:
             self.bg.put((self.programWindow, []))
         else:
+            self.programWindow.shortTimeSlice()
             self.programWindow.render()
+            self.backgroundFrame.setCmdCount(0)
         # This is the 'main loop'. Execution doesn't leave this loop until the
         # application is closing down.
         while not self.exiting:
-            if useBgThread:
-                while self.bg.hasMessage():
-                    frame = self.bg.get()
-                    if frame[0] == 'exception':
-                        for line in frame[1]:
-                            userMessage(line[:-1])
-                        self.quitNow()
-                        return
-                    drawList, cursor, cmdCount = frame
-                    self.refresh(drawList, cursor, cmdCount)
-            elif 1:
-                drawList, cursor = self.frame.grabFrame()
-                self.refresh(drawList, cursor, cmdCount)
-            else:
+            if 0:
                 profile = cProfile.Profile()
                 profile.enable()
                 self.refresh(drawList, cursor, cmdCount)
@@ -184,11 +190,20 @@ class CiProgram:
             # (A performance optimization).
             cmdList = []
             while not len(cmdList):
+                if not useBgThread:
+                    (drawList, cursor,
+                     frameCmdCount) = self.backgroundFrame.grabFrame()
+                    if frameCmdCount is not None:
+                        self.frontFrame = (drawList, cursor, frameCmdCount)
+                if self.frontFrame is not None:
+                    drawList, cursor, frameCmdCount = self.frontFrame
+                    self.refresh(drawList, cursor, frameCmdCount)
+                    self.frontFrame = None
                 for _ in range(5):
                     eventInfo = None
                     if self.exiting:
                         return
-                    ch = cursesWindow.getch()
+                    ch = self.getCh()
                     # assert isinstance(ch, int), type(ch)
                     if ch == curses.ascii.ESC:
                         # Some keys are sent from the terminal as a sequence of
@@ -197,10 +212,10 @@ class CiProgram:
                         # callback functions) the sequence is converted into
                         # tuple.
                         keySequence = []
-                        n = cursesWindow.getch()
+                        n = self.getCh()
                         while n != curses.ERR:
                             keySequence.append(n)
-                            n = cursesWindow.getch()
+                            n = self.getCh()
                         #app.log.info('sequence\n', keySequence)
                         # Check for Bracketed Paste Mode begin.
                         paste_begin = app.curses_util.BRACKETED_PASTE_BEGIN
@@ -212,7 +227,7 @@ class CiProgram:
                             while tuple(
                                     keySequence[-len(paste_end):]) != paste_end:
                                 #app.log.info('waiting in paste mode')
-                                n = cursesWindow.getch()
+                                n = self.getCh()
                                 if n != curses.ERR:
                                     keySequence.append(n)
                             keySequence = keySequence[:-(len(paste_end))]
@@ -232,37 +247,23 @@ class CiProgram:
                         u = None
                         if (ch & 0xe0) == 0xc0:
                             # Two byte utf-8.
-                            b = cursesWindow.getch()
-                            u = (chr(ch) + chr(b)).decode("utf-8")
+                            b = self.getCh()
+                            u = bytes_to_unicode((ch, b))
                         elif (ch & 0xf0) == 0xe0:
                             # Three byte utf-8.
-                            b = cursesWindow.getch()
-                            c = cursesWindow.getch()
-                            u = (chr(ch) + chr(b) + chr(c)).decode("utf-8")
+                            b = self.getCh()
+                            c = self.getCh()
+                            u = bytes_to_unicode((ch, b, c))
                         elif (ch & 0xf8) == 0xf0:
                             # Four byte utf-8.
-                            b = cursesWindow.getch()
-                            c = cursesWindow.getch()
-                            d = cursesWindow.getch()
-                            u = (chr(ch) + chr(b) + chr(c) +
-                                 chr(d)).decode("utf-8")
+                            b = self.getCh()
+                            c = self.getCh()
+                            d = self.getCh()
+                            u = bytes_to_unicode((ch, b, c, d))
                         assert u is not None
                         eventInfo = u
                         ch = app.curses_util.UNICODE_INPUT
-                    if ch == 0 and useBgThread:
-                        # bg response.
-                        frame = None
-                        while self.bg.hasMessage():
-                            frame = self.bg.get()
-                            if frame[0] == 'exception':
-                                for line in frame[1]:
-                                    userMessage(line[:-1])
-                                self.quitNow()
-                                return
-                        if frame is not None:
-                            drawList, cursor, cmdCount = frame
-                            self.refresh(drawList, cursor, cmdCount)
-                    elif ch != curses.ERR:
+                    if ch != curses.ERR:
                         self.ch = ch
                         if ch == curses.KEY_MOUSE:
                             # On Ubuntu, Gnome terminal, curses.getmouse() may
@@ -282,10 +283,38 @@ class CiProgram:
                     self.programWindow.shortTimeSlice()
                     self.programWindow.render()
                     cmdCount += len(cmdList)
+                    self.backgroundFrame.setCmdCount(cmdCount)
+
+    def processBackgroundMessages(self):
+        while self.bg.hasMessage():
+            frame = self.bg.get()
+            if frame[0] == 'exception':
+                for line in frame[1]:
+                    userMessage(line[:-1])
+                self.quitNow()
+                return
+            # It's unlikely that more than one frame would be present in the
+            # queue. If/when it happens, only the las/most recent frame matters.
+            self.frontFrame = frame
+
+    def getCh(self):
+        """Get an input character (or event) from curses."""
+        if self.exiting:
+            return -1
+        ch = self.cursesWindowGetCh()
+        # The background thread can send a notice at any getch call.
+        while ch == 0:
+            if self.bg is not None:
+                # Hmm, will ch ever equal 0 when self.bg is None?
+                self.processBackgroundMessages()
+            if self.exiting:
+                return -1
+            ch = self.cursesWindowGetCh()
+        return ch
 
     def startup(self):
         """A second init-like function. Called after command line arguments are
-    parsed."""
+        parsed."""
         if app.config.strict_debug:
             assert issubclass(self.__class__, app.ci_program.CiProgram), self
         self.programWindow = app.program_window.ProgramWindow(self)
@@ -366,9 +395,13 @@ class CiProgram:
         if openToLine is None:
             decodedPaths = []
             for file in cliFiles:
-                path, openToLine, openToColumn = app.buffer_file.pathLineColumn(
+                path, openToRow, openToColumn = app.buffer_file.pathRowColumn(
                     file[u"path"], self.prefs.editor[u"baseDirEnv"])
-                decodedPaths.append({'path': path})
+                decodedPaths.append({
+                    'path': path,
+                    'row': openToRow,
+                    'col': openToColumn
+                })
             cliFiles = decodedPaths
         self.prefs.startup = {
             'debugRedo': debugRedo,
@@ -536,6 +569,8 @@ def run_ci():
         app.log.writeToFile('~/.ci_edit/recentLog')
         # Disable Bracketed Paste Mode.
         sys.stdout.write('\033[?2004l')
+        # Disable mouse tracking in xterm.
+        sys.stdout.write('\033[?1002;l')
         sys.stdout.flush()
     if userConsoleMessage:
         fullPath = app.buffer_file.expandFullPath(

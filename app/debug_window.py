@@ -54,9 +54,8 @@ class DebugWindow(app.window.ActiveWindow):
             (textBuffer.markerRow, textBuffer.markerCol,
              textBuffer.selectionMode), color)
         self.writeLine(
-            u"scrlRow %3d scrlCol %2d lines %3d" % (win.scrollRow, win.scrollCol,
-                                                   len(textBuffer.lines)),
-            color)
+            u"scrlRow %3d scrlCol %2d lines %3d" %
+            (win.scrollRow, win.scrollCol, textBuffer.parser.rowCount()), color)
         y, x = win.top, win.left
         maxRow, maxCol = win.rows, win.cols
         self.writeLine(
@@ -69,10 +68,11 @@ class DebugWindow(app.window.ActiveWindow):
             (screenRows, screenCols, program.mainLoopTime,
              program.mainLoopTimePeak, textBuffer.parserTime), color)
         self.writeLine(
-            u"ch %3s %s" % (program.ch, app.curses_util.cursesKeyName(program.ch)
-                           or u'UNKNOWN'), color)
+            u"ch %3s %s" % (program.ch, app.curses_util.cursesKeyName(
+                program.ch) or u'UNKNOWN'), color)
         self.writeLine(u"win %r" % (win,), color)
-        self.writeLine(u"foc %r" % (program.programWindow.focusedWindow,), color)
+        self.writeLine(u"foc %r" % (program.programWindow.focusedWindow,),
+                       color)
         self.writeLine(u"tb %r" % (textBuffer,), color)
         (id, mouseCol, mouseRow, mouseZ, bState) = program.debugMouseEvent
         self.writeLine(

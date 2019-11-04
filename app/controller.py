@@ -137,13 +137,14 @@ class Controller:
         window = self.getNamedWindow(windowName)
         window.bringToFront()
         self.view.changeFocusTo(window)
+        return window
 
     def changeTo(self, window):
         window.bringToFront()
         self.view.changeFocusTo(window)
 
     def focus(self):
-        app.log.info('base controller focus()')
+        pass
 
     def confirmationPromptFinish(self, *args):
         window = self.getNamedWindow('inputWindow')
@@ -233,13 +234,13 @@ class Controller:
         self.changeToHostWindow()
 
     def nextFocusableWindow(self):
-        window = self.view.parent.nextFocusableWindow(self.view)
+        window = self.view.nextFocusableWindow(self.view)
         if window is not None:
             self.view.changeFocusTo(window)
         return window is not None
 
     def priorFocusableWindow(self):
-        window = self.view.parent.priorFocusableWindow(self.view)
+        window = self.view.priorFocusableWindow(self.view)
         if window is not None:
             self.view.changeFocusTo(window)
         return window is not None
@@ -334,6 +335,9 @@ class MainController:
         self.controllers[controller.name] = controller
         self.controller = controller
 
+    def currentInputWindow(self):
+        return self.controller.currentInputWindow()
+
     def doCommand(self, ch, meta):
         self.controller.doCommand(ch, meta)
 
@@ -351,9 +355,9 @@ class MainController:
     def onChange(self):
         tb = self.view.textBuffer
         if tb.message is None and tb.selectionMode != app.selectable.kSelectionNone:
-              charCount, lineCount = tb.countSelected()
-              tb.setMessage(
-                  u'%d characters (%d lines) selected' % (charCount, lineCount))
+            charCount, lineCount = tb.countSelected()
+            tb.setMessage(
+                u'%d characters (%d lines) selected' % (charCount, lineCount))
         self.controller.onChange()
 
     def nextController(self):

@@ -101,13 +101,13 @@ class InteractivePrompt(app.controller.Controller):
     def setTextBuffer(self, textBuffer):
         app.controller.Controller.setTextBuffer(self, textBuffer)
         self.textBuffer = textBuffer
-        self.textBuffer.lines = [u""]
         self.commands = {
             u'bm': self.bookmarkCommand,
             u'build': self.buildCommand,
             u'cua': self.changeToCuaMode,
             u'emacs': self.changeToEmacsMode,
             u'make': self.makeCommand,
+            u'open': self.openCommand,
             #u'split': self.splitCommand,  # Experimental wip.
             u'vim': self.changeToVimNormalMode,
         }
@@ -119,6 +119,7 @@ class InteractivePrompt(app.controller.Controller):
             u'sort': self.sortSelectedLines,
             u'sub': self.substituteText,
             u'upper': self.upperSelectedLines,
+            u'wrap': self.wrapSelectedLines,
         }
         self.subExecute = {
             u'!': self.shellExecute,
@@ -162,24 +163,48 @@ class InteractivePrompt(app.controller.Controller):
         fileName, ext = os.path.splitext(self.view.host.textBuffer.fullPath)
 
         app.log.info(fileName, ext)
-
         formatter = formatters.get(ext)
 
         if not formatter:
             return lines, u'No formatter for extension {}'.format(ext)
 
-        text = self.view.host.textBuffer.doLinesToData(lines)
-
         try:
-            formattedText = formatter(text)
+            formattedText = formatter(self.view.host.textBuffer.parser.data)
         except RuntimeError as err:
             return lines, str(err)
 
-        lines = self.view.host.textBuffer.doDataToLines(formattedText)
+        lines = lines = formattedText.split(u"\n")
         return lines, u'Changed %d lines' % (len(lines),)
 
     def makeCommand(self, cmdLine, view):
         return {}, u'making stuff'
+
+    def openCommand(self, cmdLine, view):
+        """
+        Opens the file under cursor.
+        """
+        args = kReArgChain.findall(cmdLine)
+        app.log.info(args)
+        if len(args) == 1:
+            # If no args are provided, look for a path at the cursor position.
+            view.textBuffer.openFileAtCursor()
+            return {}, view.textBuffer.message[0]
+        # Try the raw path.
+        path = args[1]
+        if os.access(path, os.R_OK):
+            return self.openFile(path, view)
+        # Look in the same directory as the current file.
+        path = os.path.join(os.path.dirname(view.textBuffer.fullPath), args[1])
+        if os.access(path, os.R_OK):
+            return self.openFile(path, view)
+        return {}, u"Unable to open " + args[1]
+
+    def openFile(self, path, view):
+        textBuffer = view.program.bufferManager.loadTextBuffer(path)
+        inputWindow = self.currentInputWindow()
+        inputWindow.setTextBuffer(textBuffer)
+        self.changeTo(inputWindow)
+        inputWindow.setMessage('Opened file {}'.format(path))
 
     def splitCommand(self, cmdLine, view):
         view.splitWindow()
@@ -187,23 +212,20 @@ class InteractivePrompt(app.controller.Controller):
 
     def execute(self):
         try:
-            inputLines = self.textBuffer.lines
-            if not len(inputLines) or not len(inputLines[0]):
+            cmdLine = self.textBuffer.parser.data
+            if not len(cmdLine):
                 self.changeToHostWindow()
                 return
-            cmdLine = inputLines[0]
             tb = self.view.host.textBuffer
             lines = list(tb.getSelectedText())
             if cmdLine[0] in self.subExecute:
-                data = self.view.host.textBuffer.doLinesToData(lines).encode(
-                    'utf-8')
+                data = self.view.host.textBuffer.parser.data.encode('utf-8')
                 output, message = self.subExecute.get(cmdLine[0])(cmdLine[1:],
                                                                   data)
                 if app.config.strict_debug:
                     assert isinstance(output, bytes)
                     assert isinstance(message, unicode)
-                output = tb.doDataToLines(output.decode('utf-8'))
-                tb.editPasteLines(tuple(output))
+                tb.editPasteLines(tuple(output.decode('utf-8').split(u"\n")))
                 tb.setMessage(message)
             else:
                 cmd = re.split(u'\\W', cmdLine)[0]
@@ -311,10 +333,10 @@ class InteractivePrompt(app.controller.Controller):
         except ValueError:
             return (lines, u'''Separator punctuation missing, there should be'''
                     u''' three '%s'.''' % (separator,))
-        data = self.view.host.textBuffer.doLinesToData(lines)
+        data = self.view.host.textBuffer.parser.data
         output = self.view.host.textBuffer.findReplaceText(
             find, replace, flags, data)
-        lines = self.view.host.textBuffer.doDataToLines(output)
+        lines = output.split(u"\n")
         return lines, u'Changed %d lines' % (len(lines),)
 
     def upperSelectedLines(self, cmdLine, lines):
@@ -324,3 +346,12 @@ class InteractivePrompt(app.controller.Controller):
     def unknownCommand(self, cmdLine, view):
         self.view.host.textBuffer.setMessage(u'Unknown command')
         return {}, u'Unknown command %s' % (cmdLine,)
+
+    def wrapSelectedLines(self, cmdLine, lines):
+        tokens = cmdLine.split()
+        app.log.info("tokens", tokens)
+        width = 80 if len(tokens) == 1 else int(tokens[1])
+        indent = len(lines[0]) - len(lines[0].lstrip())
+        width -= indent
+        lines = app.curses_util.wrapLines(lines, u" " * indent, width)
+        return lines, u'Changed %d lines' % (len(lines),)
