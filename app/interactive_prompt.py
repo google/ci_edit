@@ -27,6 +27,7 @@ import re
 import subprocess
 
 import app.controller
+import app.formatter
 
 
 def functionTestEq(a, b):
@@ -153,21 +154,26 @@ class InteractivePrompt(app.controller.Controller):
         self.textBuffer.selectionAll()
 
     def formatCommand(self, cmdLine, lines):
-        formatter = {
+        formatters = {
             #".js": app.format_javascript.format
-            #".py": app.format_python.format
             #".html": app.format_html.format,
+            ".py": app.formatter.formatPython
         }
 
-        def noOp(data):
-            return data
-
         fileName, ext = os.path.splitext(self.view.host.textBuffer.fullPath)
-        app.log.info(fileName, ext)
-        data = formatter.get(ext,
-                      noOp)(self.view.host.textBuffer.parser.data)
-        lines = data.split(u"\n")
 
+        app.log.info(fileName, ext)
+        formatter = formatters.get(ext)
+
+        if not formatter:
+            return lines, u'No formatter for extension {}'.format(ext)
+
+        try:
+            formattedText = formatter(self.view.host.textBuffer.parser.data)
+        except RuntimeError as err:
+            return lines, str(err)
+
+        lines = lines = formattedText.split(u"\n")
         return lines, u'Changed %d lines' % (len(lines),)
 
     def makeCommand(self, cmdLine, view):
