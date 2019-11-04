@@ -173,7 +173,7 @@ class InteractivePrompt(app.controller.Controller):
         except RuntimeError as err:
             return lines, str(err)
 
-        lines = lines = formattedText.split(u"\n")
+        lines = formattedText.split(u"\n")
         return lines, u'Changed %d lines' % (len(lines),)
 
     def makeCommand(self, cmdLine, view):
