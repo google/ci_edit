@@ -209,6 +209,7 @@ class FakeCursesTestCase(unittest.TestCase):
         return displayCheckerNot
 
     def displayCheckStyle(self, *args):
+        """*args are (row, col, height, width, colorPair)."""
         caller = inspect.stack()[1]
         callerText = u"\n  %s:%s:%s(): " % (os.path.split(caller[1])[1],
                                             caller[2], caller[3])

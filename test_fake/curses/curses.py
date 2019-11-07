@@ -285,7 +285,17 @@ class FakeDisplay:
         ]
 
     def getText(self):
-        return [u"".join(self.displayText[i]) for i in range(self.rows)]
+        rows = []
+        for rowIndex in range(self.rows):
+            rowChars = self.displayText[rowIndex]
+            line = []
+            limit = len(rowChars)
+            col = 0
+            while col < limit:
+                line.append(rowChars[col])
+                col += app.curses_util.charWidth(rowChars[col], col)
+            rows.append(u"".join(line))
+        return rows
 
     def setScreenSize(self, rows, cols):
         self.rows = rows

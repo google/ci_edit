@@ -733,6 +733,7 @@ line\tち\ttabs
 e
 """
         expectedNodes = [
+            # (NodeName, begin, prior, visual).
             (u"rs", 0, None, 0),
             (u"rs", 0, None, 0),
             (u"rs", 1, None, 1),
