@@ -1,3 +1,5 @@
+
+# -*- coding: utf-8 -*-
 # Copyright 2017 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -203,6 +205,17 @@ class SelectableTestCases(unittest.TestCase):
         selectable.penCol = 9
         selectable.markerCol = 2
         self.assertEqual(selectable.extendSelection(), (0, 3, 0, -2, 0))
+
+    def test_unicode(self):
+        selectable = self.selectable
+        selectable.parser.data = u"one two\n😀Several test words.\nfive"
+        selectable.parseDocument()
+        selectable.selectionMode = app.selectable.kSelectionCharacter
+        selectable.penRow = 1
+        selectable.penCol = 0
+        self.assertEqual(selectable.markerCol, 0)
+        selectable.penCol = 2
+        self.assertEqual(selectable.markerCol, 0)
 
 if __name__ == "__main__":
     unittest.main()

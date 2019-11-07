@@ -310,21 +310,29 @@ class TextBuffer(app.actions.Actions):
                             if (i == lowerRow - startRow and
                                     i == upperRow - startRow):
                                 # Selection entirely on one line.
+                                text = self.parser.rowText(startRow + i,
+                                        selStartCol, selEndCol)
                                 window.addStr(top + i, paneCol,
-                                              line[selStartCol:selEndCol],
+                                              text,
                                               colorSelected)
                             elif i == lowerRow - startRow:
                                 # End of multi-line selection.
+                                text = self.parser.rowText(startRow + i,
+                                        startCol, selEndCol)
                                 window.addStr(top + i, left,
-                                              line[startCol:selEndCol],
+                                              text,
                                               colorSelected)
                             elif i == upperRow - startRow:
                                 # Start of multi-line selection.
+                                text = self.parser.rowText(startRow + i,
+                                        selStartCol, endCol)
                                 window.addStr(top + i, paneCol,
-                                              line[selStartCol:endCol],
+                                              text,
                                               colorSelected)
                             else:
                                 # Middle of multi-line selection.
+                                text = self.parser.rowText(startRow + i,
+                                        startCol, endCol)
                                 window.addStr(top + i, left,
-                                              line[startCol:endCol],
+                                              text,
                                               colorSelected)
