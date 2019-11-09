@@ -746,24 +746,57 @@ class Parser:
                 visual += reg[1]
                 self.rows.append(len(self.parserNodes))
             elif index == len(foundGroups) - 2:
-                # Found double wide character.
+                # Found potentially double wide characters.
                 topNode = self.parserNodes[-1]
                 regBegin, regEnd = reg
-                # First, add any preceding single wide characters.
+                width = app.curses_util.charWidth
                 if regBegin > 0:
+                    # Add single wide characters.
                     self.parserNodes.append((topNode[kGrammar], cursor,
                                              topNode[kPrior], visual))
                     cursor += regBegin
                     visual += regBegin
-                    # Remove the regular text from reg values.
                     regEnd -= regBegin
                     regBegin = 0
-                # Resume current grammar; store the double wide characters.
-                child = (topNode[kGrammar], cursor, topNode[kPrior], visual)
-                cursor += regEnd
-                visual += regEnd * 2
+                while regBegin < regEnd:
+                    # Check for zero width characters.
+                    while (regBegin < regEnd and
+                            width(self.data[cursor + regBegin], 0) == 0):
+                        regBegin += 1
+                    if regBegin > 0:
+                        # Add zero width characters.
+                        self.parserNodes.append((topNode[kGrammar], cursor,
+                                                 topNode[kPrior], visual))
+                        cursor += regBegin
+                        regEnd -= regBegin
+                        regBegin = 0
+                    # Check for single wide characters.
+                    while (regBegin < regEnd and
+                            width(self.data[cursor + regBegin], 0) == 1):
+                        regBegin += 1
+                    if regBegin > 0:
+                        # Add single wide characters.
+                        self.parserNodes.append((topNode[kGrammar], cursor,
+                                                 topNode[kPrior], visual))
+                        cursor += regBegin
+                        visual += regBegin
+                        regEnd -= regBegin
+                        regBegin = 0
+                    # Check for double wide characters.
+                    while (regBegin < regEnd and
+                            width(self.data[cursor + regBegin], 0) == 2):
+                        regBegin += 1
+                    if regBegin > 0:
+                        # Add double wide characters.
+                        self.parserNodes.append((topNode[kGrammar], cursor,
+                                                 topNode[kPrior], visual))
+                        cursor += regBegin
+                        visual += regBegin * 2
+                        regEnd -= regBegin
+                        regBegin = 0
+                continue
             elif index == len(foundGroups) - 3:
-                # Found variable width character.
+                # Found variable width (tab) character.
                 topNode = self.parserNodes[-1]
                 regBegin, regEnd = reg
                 # First, add any preceding single wide characters.
