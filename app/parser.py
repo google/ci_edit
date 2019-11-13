@@ -702,14 +702,18 @@ class Parser:
         visual = topNode[kVisual]
         # If we are at the start of a grammar, skip the 'begin' part of the
         # grammar.
-        if (len(self.parserNodes) == 1 or
-                topNode[kGrammar] is not self.parserNodes[-2][kGrammar]):
-            beginRegex = topNode[kGrammar].get('begin')
-            if beginRegex is not None:
-                sre = re.match(beginRegex, self.data[cursor:])
-                if sre is not None:
-                    cursor += sre.regs[0][1]
-                    visual += sre.regs[0][1]  # Assumes single-wide characters.
+        if 0:
+            if (len(self.parserNodes) == 1 or
+                    (topNode[kGrammar] is not self.parserNodes[-2][kGrammar]) and
+                    topNode[kGrammar].get("end") is not None):
+                beginRegex = topNode[kGrammar].get('begin')
+                if beginRegex is not None:
+                    sre = re.match(beginRegex, self.data[cursor:])
+                    if sre is not None:
+                        assert False
+                        cursor += sre.regs[0][1]
+                        # Assumes single-wide characters.
+                        visual += sre.regs[0][1]
         while len(self.rows) <= self.pauseAtRow:
             if not leash:
                 #app.log.error('grammar likely caught in a loop')
@@ -872,7 +876,7 @@ class Parser:
                     cursor += reg[1]
                     visual += reg[1]
                 elif index < nextGrammarIndexLimit:
-                    # A new grammar follows this grammar (a 'next').
+                    # A new grammar follows this grammar (a 'begin').
                     if subdata[reg[0]] == '\n':
                         # This 'begin' begins with a new line.
                         self.rows.append(len(self.parserNodes))
@@ -950,7 +954,8 @@ class Parser:
 
     def _printLastNode(self, msg):
         node = self.parserNodes[-1]
-        print("_printNode", node[0]["name"], node[1], node[2], node[3], msg, repr(self.data))
+        print("_printNode", node[0]["name"], node[1], node[2], node[3], msg,
+                repr(self.data))
 
     def _printNode(self, node, msg):
         print("_printNode", node[0]["name"], node[1], node[2], node[3], msg)
