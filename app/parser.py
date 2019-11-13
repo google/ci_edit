@@ -487,12 +487,13 @@ class Parser:
         lines so that the document can still be edited.
         """
         data = self.data
-        offset = self.parserNodes[self.rows[-1]][kBegin]
+        offset = self.parserNodes[-1][kBegin]
         limit = len(data)
         if offset == limit:
             # Already parsed to end of data.
             return
-        visual = self.parserNodes[self.rows[-1]][kVisual]
+        visual = self.parserNodes[-1][kVisual]
+
         # Track the |visual| value for the start of the line. The difference
         # between |visual| and |visualStartCol| is the column index of the line.
         visualStartCol = 0
@@ -509,6 +510,7 @@ class Parser:
                             visual - visualStartCol)
                 offset += 1
             if offset >= limit:
+                # The document is missing the last new-line.
                 if self.parserNodes[-1][kBegin] != limit:
                     # Add a terminating (end) node.
                     self.parserNodes.append((grammar, limit, None, visual))
@@ -531,7 +533,8 @@ class Parser:
             # Already parsed to that row.
             return
         self._beginParsingAt(self.resumeAtRow)
-        self._buildGrammarList(bgThread)
+        if len(self.rows) <= self.pauseAtRow:
+            self._buildGrammarList(bgThread)
         self._fastLineParse(self.defaultGrammar())
         if app.config.strict_debug:
             assert self.resumeAtRow >= 0
