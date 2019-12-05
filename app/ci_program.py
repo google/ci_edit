@@ -469,9 +469,9 @@ class CiProgram:
         self.makeHomeDirs(homePath)
         self.history.loadUserHistory()
         app.curses_util.hackCursesFixes()
+        self.startup()
         if self.prefs.editor['useBgThread']:
             self.bg = app.background.startupBackground()
-        self.startup()
         if self.prefs.startup.get('profile'):
             profile = cProfile.Profile()
             profile.enable()
