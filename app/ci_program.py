@@ -471,7 +471,7 @@ class CiProgram:
         app.curses_util.hackCursesFixes()
         self.startup()
         if self.prefs.editor['useBgThread']:
-            self.bg = app.background.startupBackground()
+            self.bg = app.background.startupBackground(self.programWindow)
         if self.prefs.startup.get('profile'):
             profile = cProfile.Profile()
             profile.enable()

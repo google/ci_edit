@@ -56,7 +56,7 @@ class BackgroundThread(threading.Thread):
         self.toBackground.put(data)
 
 
-def background(inputQueue, outputQueue):
+def background(programWindow, inputQueue, outputQueue):
     cmdCount = 0
     block = True
     pid = os.getpid()
@@ -64,18 +64,19 @@ def background(inputQueue, outputQueue):
     while True:
         try:
             try:
-                program, message = inputQueue.get(block)
+                program_deprecated, message = inputQueue.get(block)
                 #profile = app.profile.beginPythonProfile()
                 if message == 'quit':
                     app.log.info('bg received quit message')
                     return
-                program.executeCommandList(message)
-                block = program.shortTimeSlice()
-                program.render()
-                # debugging only: program.showWindowHierarchy()
+                programWindow.executeCommandList(message)
+                block = programWindow.shortTimeSlice()
+                programWindow.render()
+                # debugging only: programWindow.showWindowHierarchy()
                 cmdCount += len(message)
-                program.program.backgroundFrame.setCmdCount(cmdCount)
-                outputQueue.put(program.program.backgroundFrame.grabFrame())
+                programWindow.program.backgroundFrame.setCmdCount(cmdCount)
+                outputQueue.put(
+                        programWindow.program.backgroundFrame.grabFrame())
                 os.kill(pid, signalNumber)
                 #app.profile.endPythonProfile(profile)
                 time.sleep(0)  # See note in hasMessage().
@@ -83,11 +84,12 @@ def background(inputQueue, outputQueue):
                     continue
             except queue.Empty:
                 pass
-            block = program.longTimeSlice()
+            block = programWindow.longTimeSlice()
             if block:
-                program.render()
-                program.program.backgroundFrame.setCmdCount(cmdCount)
-                outputQueue.put(program.program.backgroundFrame.grabFrame())
+                programWindow.render()
+                programWindow.program.backgroundFrame.setCmdCount(cmdCount)
+                outputQueue.put(
+                        programWindow.program.backgroundFrame.grabFrame())
                 os.kill(pid, signalNumber)
         except Exception as e:
             app.log.exception(e)
@@ -97,17 +99,18 @@ def background(inputQueue, outputQueue):
             outputQueue.put(('exception', out))
             os.kill(pid, signalNumber)
             while True:
-                program, message = inputQueue.get()
+                program_deprecated, message = inputQueue.get()
                 if message == 'quit':
                     app.log.info('bg received quit message')
                     return
 
 
-def startupBackground():
+
+def startupBackground(programWindow):
     toBackground = queue.Queue()
     fromBackground = queue.Queue()
     bg = BackgroundThread(
-        target=background, args=(toBackground, fromBackground))
+        target=background, args=(programWindow, toBackground, fromBackground))
     bg.setName('ci_edit_bg')
     bg.setDaemon(True)
     bg.start()
