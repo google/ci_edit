@@ -16,6 +16,11 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+try:
+    unicode
+except NameError:
+    unicode = str
+    unichr = chr
 
 import os
 try:
@@ -28,32 +33,57 @@ import threading
 import time
 import traceback
 
+import app.config
 import app.profile
 import app.render
 
 
-class BackgroundThread(threading.Thread):
+class InstructionQueue(queue.Queue):
 
     def __init__(self, *args, **keywords):
+        queue.Queue.__init__(self, *args, **keywords)
+
+    def get(self, *args, **keywords):
+        result = queue.Queue.get(self, *args, **keywords)
+        if app.config.strict_debug:
+            assert isinstance(result, tuple), repr(result)
+            assert isinstance(result[0], unicode), repr(result[0])
+        return result[0], result[1]
+
+    def empty(self, *args, **keywords):
+        # This thread yield (time.sleep(0)) dramatically improves Python3
+        # performance. Without this line empty() will be called far too often.
+        time.sleep(0)
+        return queue.Queue.empty(self, *args, **keywords)
+
+    def put(self, instruction, message):
+        if app.config.strict_debug:
+            assert isinstance(instruction, unicode), repr(instruction)
+        queue.Queue.put(self, (instruction, message))
+
+
+class BackgroundThread(threading.Thread):
+
+    def __init__(self, toBackground, fromBackground, *args, **keywords):
         threading.Thread.__init__(self, *args, **keywords)
-        self.toBackground = None
-        self.fromBackground = None
+        self._toBackground = toBackground
+        self._fromBackground = fromBackground
 
     def get(self):
-        return self.fromBackground.get()
+        return self._fromBackground.get()
 
     def hasMessage(self):
         # This thread yield (time.sleep(0)) dramatically improves Python3
         # performance. Without this line empty() will be called far too often.
         time.sleep(0)
-        return not self.fromBackground.empty()
+        return not self._fromBackground.empty()
 
     def hasUserEvent(self):
         time.sleep(0)  # See note in hasMessage().
-        return not self.toBackground.empty()
+        return not self._toBackground.empty()
 
-    def put(self, data):
-        self.toBackground.put(data)
+    def put(self, instruction, message):
+        self._toBackground.put(instruction, message)
 
 
 def background(programWindow, inputQueue, outputQueue):
@@ -64,18 +94,23 @@ def background(programWindow, inputQueue, outputQueue):
     while True:
         try:
             try:
-                program_deprecated, message = inputQueue.get(block)
+                instruction, message = inputQueue.get(block)
                 #profile = app.profile.beginPythonProfile()
-                if message == 'quit':
+                if instruction == u"quit":
                     app.log.info('bg received quit message')
                     return
-                programWindow.executeCommandList(message)
+                elif instruction == u"cmdList":
+                    app.log.info(programWindow, message)
+                    programWindow.executeCommandList(message)
+                else:
+                    assert False, instruction
                 block = programWindow.shortTimeSlice()
                 programWindow.render()
                 # debugging only: programWindow.showWindowHierarchy()
                 cmdCount += len(message)
                 programWindow.program.backgroundFrame.setCmdCount(cmdCount)
                 outputQueue.put(
+                        u"render",
                         programWindow.program.backgroundFrame.grabFrame())
                 os.kill(pid, signalNumber)
                 #app.profile.endPythonProfile(profile)
@@ -89,6 +124,7 @@ def background(programWindow, inputQueue, outputQueue):
                 programWindow.render()
                 programWindow.program.backgroundFrame.setCmdCount(cmdCount)
                 outputQueue.put(
+                        u"render",
                         programWindow.program.backgroundFrame.grabFrame())
                 os.kill(pid, signalNumber)
         except Exception as e:
@@ -96,24 +132,24 @@ def background(programWindow, inputQueue, outputQueue):
             app.log.error('bg thread exception', e)
             errorType, value, tracebackInfo = sys.exc_info()
             out = traceback.format_exception(errorType, value, tracebackInfo)
-            outputQueue.put(('exception', out))
+            outputQueue.put(u"exception", out)
             os.kill(pid, signalNumber)
             while True:
-                program_deprecated, message = inputQueue.get()
-                if message == 'quit':
+                instruction, message = inputQueue.get()
+                if instruction == u"quit":
                     app.log.info('bg received quit message')
                     return
 
 
 
 def startupBackground(programWindow):
-    toBackground = queue.Queue()
-    fromBackground = queue.Queue()
-    bg = BackgroundThread(
+    toBackground = InstructionQueue()
+    fromBackground = InstructionQueue()
+    bg = BackgroundThread(toBackground, fromBackground,
         target=background, args=(programWindow, toBackground, fromBackground))
     bg.setName('ci_edit_bg')
     bg.setDaemon(True)
     bg.start()
-    bg.toBackground = toBackground
-    bg.fromBackground = fromBackground
+    #bg.toBackground = toBackground
+    #bg.fromBackground = fromBackground
     return bg

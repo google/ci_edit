@@ -165,7 +165,7 @@ class CiProgram:
         start = time.time()
         # The first render, to get something on the screen.
         if useBgThread:
-            self.bg.put((self.programWindow, []))
+            self.bg.put(u"cmdList", [])
         else:
             self.programWindow.shortTimeSlice()
             self.programWindow.render()
@@ -277,7 +277,7 @@ class CiProgram:
             start = time.time()
             if len(cmdList):
                 if useBgThread:
-                    self.bg.put((self.programWindow, cmdList))
+                    self.bg.put(u"cmdList", cmdList)
                 else:
                     self.programWindow.executeCommandList(cmdList)
                     self.programWindow.shortTimeSlice()
@@ -287,15 +287,19 @@ class CiProgram:
 
     def processBackgroundMessages(self):
         while self.bg.hasMessage():
-            frame = self.bg.get()
-            if frame[0] == 'exception':
-                for line in frame[1]:
+            instruction, message = self.bg.get()
+            if instruction == u"exception":
+                for line in message:
                     userMessage(line[:-1])
                 self.quitNow()
                 return
-            # It's unlikely that more than one frame would be present in the
-            # queue. If/when it happens, only the las/most recent frame matters.
-            self.frontFrame = frame
+            elif instruction == u"render":
+                # It's unlikely that more than one frame would be present in the
+                # queue. If/when it happens, only the las/most recent frame
+                # matters.
+                self.frontFrame = message
+            else:
+                assert False
 
     def getCh(self):
         """Get an input character (or event) from curses."""
@@ -485,7 +489,7 @@ class CiProgram:
         else:
             self.commandLoop()
         if self.prefs.editor['useBgThread']:
-            self.bg.put((self.programWindow, 'quit'))
+            self.bg.put(u"quit", None)
             self.bg.join()
 
     def setUpPalette(self):
