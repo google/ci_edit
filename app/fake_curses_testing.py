@@ -210,6 +210,10 @@ class FakeCursesTestCase(unittest.TestCase):
 
     def displayCheckStyle(self, *args):
         """*args are (row, col, height, width, colorPair)."""
+        (row, col, height, width, colorPair) = args
+        assert height != 0
+        assert width != 0
+        assert colorPair is not None
         caller = inspect.stack()[1]
         callerText = u"\n  %s:%s:%s(): " % (os.path.split(caller[1])[1],
                                             caller[2], caller[3])
@@ -354,13 +358,13 @@ class FakeCursesTestCase(unittest.TestCase):
         callerText = u"\n  %s:%s:%s(): " % (os.path.split(caller[1])[1],
                                             caller[2], caller[3])
 
-        def displayStyleChecker(display, cmdIndex):
+        def checkEndOfInputs(display, cmdIndex):
             self.fail(callerText +
                     "\n  Unexpectedly ran out of fake inputs. Consider adding"
                     " CTRL_Q (and 'n' if necessary).")
             return None
 
-        return displayStyleChecker
+        return checkEndOfInputs
 
     def runWithFakeInputs(self, fakeInputs, argv=None):
         assert hasattr(fakeInputs, "__getitem__") or hasattr(

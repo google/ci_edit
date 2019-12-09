@@ -37,6 +37,7 @@ class TextBuffer(app.actions.Actions):
         self.highlightRe = None
         self.highlightCursorLine = False
         self.highlightTrailingWhitespace = True
+        self.shouldReparse = False
 
     def checkScrollToCursor(self, window):
         """Move the selected view rectangle so that the cursor is visible."""
@@ -145,8 +146,9 @@ class TextBuffer(app.actions.Actions):
                     grammarIndex = self.parser.grammarIndexFromRowCol(
                         startRow + i, k)
                 while k < endCol:
-                    (node, preceding, remaining, eol) = self.parser.grammarAtIndex(
-                        startRow + i, k, grammarIndex)
+                    (node, preceding,
+                     remaining, eol) = self.parser.grammarAtIndex(
+                         startRow + i, k, grammarIndex)
                     grammarIndex += 1
                     if remaining == 0 and not eol:
                         continue
@@ -169,8 +171,7 @@ class TextBuffer(app.actions.Actions):
                     if spellChecking and node.grammar.get(u'spelling', True):
                         # Highlight spelling errors
                         grammarName = node.grammar.get(u'name', 'unknown')
-                        misspellingColor = colorPref(
-                            u'misspelling', colorDelta)
+                        misspellingColor = colorPref(u'misspelling', colorDelta)
                         for found in re.finditer(app.regex.kReSubwords,
                                                  subLine):
                             reg = found.regs[0]  # Mispelllled word
@@ -236,11 +237,9 @@ class TextBuffer(app.actions.Actions):
                 if matchingBracketRowCol is not None:
                     matchingBracketRow = matchingBracketRowCol[0]
                     matchingBracketCol = matchingBracketRowCol[1]
-                    window.addStr(
-                        top + self.penRow - startRow,
-                        self.penCol - self.view.scrollCol,
-                        ch,
-                        colorPref(u'matching_bracket', colorDelta))
+                    window.addStr(top + self.penRow - startRow,
+                                  self.penCol - self.view.scrollCol, ch,
+                                  colorPref(u'matching_bracket', colorDelta))
                     characterFinder = {
                         u'(': u')',
                         u'[': u']',
@@ -250,13 +249,14 @@ class TextBuffer(app.actions.Actions):
                         u'}': u'{',
                     }
                     oppCharacter = characterFinder[ch]
-                    window.addStr(
-                        top + matchingBracketRow - startRow,
-                        matchingBracketCol - self.view.scrollCol, oppCharacter,
-                        colorPref(u'matching_bracket', colorDelta))
+                    window.addStr(top + matchingBracketRow - startRow,
+                                  matchingBracketCol - self.view.scrollCol,
+                                  oppCharacter,
+                                  colorPref(u'matching_bracket', colorDelta))
         if self.highlightCursorLine:
             # Highlight the whole line at the cursor location.
-            if self.view.hasFocus and startRow <= self.penRow < startRow + rowLimit:
+            if (self.view.hasFocus and
+                    startRow <= self.penRow < startRow + rowLimit):
                 line = self.parser.rowText(self.penRow)[startCol:endCol]
                 window.addStr(top + self.penRow - startRow, left, line,
                               colorPref(u'current_line', colorDelta))
@@ -299,40 +299,34 @@ class TextBuffer(app.actions.Actions):
                                 min(end + 1,
                                     self.parser.rowCount() - startRow)):
                             line = self.parser.rowText(startRow + i)
+                            line += " "  # Maybe do: "\\n".
                             # TODO(dschuyler): This is essentially
                             # left + (upperCol or (scrollCol + left)) -
                             #    scrollCol - left
                             # which seems like it could be simplified.
                             paneCol = left + selStartCol - startCol
-                            if len(line) == len(
-                                    self.parser.rowText(startRow + i)):
-                                line += " "  # Maybe do: "\\n".
                             if (i == lowerRow - startRow and
                                     i == upperRow - startRow):
                                 # Selection entirely on one line.
-                                text = self.parser.rowText(startRow + i,
-                                        selStartCol, selEndCol)
-                                window.addStr(top + i, paneCol,
-                                              text,
+                                text = app.curses_util.renderedSubStr(
+                                    line, selStartCol, selEndCol)
+                                window.addStr(top + i, paneCol, text,
                                               colorSelected)
                             elif i == lowerRow - startRow:
                                 # End of multi-line selection.
-                                text = self.parser.rowText(startRow + i,
-                                        startCol, selEndCol)
-                                window.addStr(top + i, left,
-                                              text,
+                                text = app.curses_util.renderedSubStr(
+                                    line, startCol, selEndCol)
+                                window.addStr(top + i, left, text,
                                               colorSelected)
                             elif i == upperRow - startRow:
                                 # Start of multi-line selection.
-                                text = self.parser.rowText(startRow + i,
-                                        selStartCol, endCol)
-                                window.addStr(top + i, paneCol,
-                                              text,
+                                text = app.curses_util.renderedSubStr(
+                                    line, selStartCol, endCol)
+                                window.addStr(top + i, paneCol, text,
                                               colorSelected)
                             else:
                                 # Middle of multi-line selection.
-                                text = self.parser.rowText(startRow + i,
-                                        startCol, endCol)
-                                window.addStr(top + i, left,
-                                              text,
+                                text = app.curses_util.renderedSubStr(
+                                    line, startCol, endCol)
+                                window.addStr(top + i, left, text,
                                               colorSelected)

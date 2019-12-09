@@ -191,7 +191,10 @@ class FakeDisplay:
 
     def checkStyle(self, row, col, height, width, colorPair):
         #assert (colorPair & DEBUG_COLOR_PAIR_MASK) in self.colors.values()
+        assert colorPair is not None
         assert colorPair >= DEBUG_COLOR_PAIR_BASE
+        assert height != 0
+        assert width != 0
         for i in range(height):
             for k in range(width):
                 d = self.displayStyle[row + i][col + k]
