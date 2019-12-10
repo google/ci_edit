@@ -1,3 +1,4 @@
+[![Run on Repl.it](https://repl.it/badge/github/google/ci_edit)](https://repl.it/github/google/ci_edit)
 # What is ci_edit
 
 ci_edit is a text editor. It can help you view or edit text files.
