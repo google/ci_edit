@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # Copyright 2016 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,6 +27,7 @@ import curses.ascii
 import os
 import re
 import sys
+import threading
 import time
 import traceback
 
@@ -71,11 +74,14 @@ class ParserNode:
 class Parser:
     """A parser generates a set of grammar segments (ParserNode objects)."""
 
-    def __init__(self):
+    def __init__(self, appPrefs):
+        self.appPrefs = appPrefs
+        self._defaultGrammar = appPrefs.grammars['none']
         self.data = u""
         self.emptyNode = ParserNode({}, None, None, 0)
         self.endNode = ({}, sys.maxsize, sys.maxsize, sys.maxsize)
-        self.fullyParsedToLine = -1
+        self.resumeAtRow = 0
+        self.pauseAtRow = 0
         # A row on screen will consist of one or more ParserNodes. When a
         # ParserNode is returned from the parser it will be an instance of
         # ParserNode, but internally tuples are used in place of ParserNodes.
@@ -87,19 +93,193 @@ class Parser:
         self.rows = [0]  # Row parserNodes index.
         app.log.parser('__init__')
 
+    def backspace(self, row, col):
+        """Delete the character prior to |row, col|.
+        Return the new (row, col) position."""
+        self._fullyParseTo(row)
+        offset = self.dataOffset(row, col)
+        if offset == 0:
+            # Top of file, nothing to do.
+            return row, col
+        if offset is None:
+            # Bottom of file (or past end of line, but assuming end of file).
+            offset = len(self.data)
+        ch = self.data[offset - 1]
+        if ch == u"\n":
+            row -= 1
+            col = self.rowWidth(row)
+        elif ch == u"\t":
+            col += self.priorCharRowCol(row, col)[1]
+        elif app.curses_util.isDoubleWidth(ch):
+            col -= 2
+        else:
+            col -= 1
+        self.data = self.data[:offset - 1] + self.data[offset:]
+        self._beginParsingAt(row)
+        if app.config.strict_debug:
+            assert isinstance(self.data, unicode)
+            assert row >= 0
+            assert col >= 0
+        return row, col
+
+    def dataOffset(self, row, col):
+        """Return the offset within self.data (as unicode, not utf-8) for the
+        start of the character at (row, col).
+
+        Normally this will be the character the cursor is 'on' when
+        using a block cursor; or to the 'right' of the when using a vertical
+        cursor. I.e. it would be the character deleted by the 'del' key.
+
+        Returns: offset (int) into self.data buffer; or None if (row, col) is
+            outside the document.
+        """
+        self._fullyParseTo(row)
+        if row >= len(self.rows):
+            return None
+        rowIndex = self.rows[row]
+        node = self.parserNodes[rowIndex]
+        if row + 1 < len(self.rows):
+            nextLineNode = self.parserNodes[self.rows[row + 1]]
+            if col >= nextLineNode[kVisual] - node[kVisual]:
+                # The requested column is past the end of the line.
+                return None
+        elif row + 1 == len(self.rows):
+            # On the last row.
+            if col >= self.parserNodes[-1][kVisual] - node[kVisual]:
+                # The requested column is past the end of the line.
+                return None
+        else:
+            # The requested column is past the end of the document.
+            return None
+        subnode = self.parserNodes[
+            rowIndex + self.grammarIndexFromRowCol(row, col)]
+        subnodeCol = subnode[kVisual] - node[kVisual]
+        subnodeColDelta = col - subnodeCol
+        offset = subnode[kBegin]
+        if self.data[offset] == u"\t":
+            tabWidth = 8
+            flooredTabGrammarCol = subnodeCol // tabWidth * tabWidth
+            offset += (col - flooredTabGrammarCol) // tabWidth
+        elif app.curses_util.isDoubleWidth(self.data[offset]):
+            charWidth = 2
+            offset += subnodeColDelta // charWidth
+        else:
+            offset += subnodeColDelta
+        return offset
+
+    def dataOffsetRowCol(self, offset):
+        """Get the (row, col) for the given data |offset| or None if the offset
+        is beyond the file."""
+        if app.config.strict_debug:
+            assert isinstance(offset, int)
+            assert offset >= 0
+        # Binary search to find the row, then the col.
+        nodes = self.parserNodes
+        if offset >= nodes[-1][kBegin]:
+            return None
+        # Determine the row.
+        rows = self.rows
+        low = 0
+        high = len(rows) - 1
+        while True:
+            row = (high + low) // 2
+            if offset >= nodes[rows[row + 1]][kBegin]:
+                low = row
+            elif offset < nodes[rows[row]][kBegin]:
+                high = row
+            else:
+                break
+        # Determine the col.
+        low = rows[row]
+        high = rows[row + 1]
+        while True:
+            index = (high + low) // 2
+            if offset >= nodes[index + 1][kBegin]:
+                low = index
+            elif offset < nodes[index][kBegin]:
+                high = index
+            else:
+                break
+        col = nodes[index][kVisual] - nodes[rows[row]][kVisual]
+        remainingOffset = offset - nodes[index][kBegin]
+        if remainingOffset > 0:
+            ch = self.data[nodes[index][kBegin]]
+            if ch == u"\t":
+                tabWidth = self.appPrefs.editor.get(u"tabSize", 8)
+                # Add the (potentially) fractional tab.
+                col += app.curses_util.charWidth(ch, col, tabWidth)
+                # Add the remaining tabs.
+                col += tabWidth * (remainingOffset - 1)
+            else:
+                col += app.curses_util.charWidth(ch, col) * remainingOffset
+        return row, col
+
+    def defaultGrammar(self):
+        return self._defaultGrammar
+
+    def deleteBlock(self, upperRow, upperCol, lowerRow, lowerCol):
+        for row in range(lowerRow, upperRow - 1, -1):
+            begin = self.dataOffset(row, upperCol)
+            end = self.dataOffset(row, lowerCol)
+            if end is None:
+                if begin is not None:
+                    self.data = self.data[:begin]
+            else:
+                self.data = self.data[:begin] + self.data[end:]
+        self._beginParsingAt(upperRow)
+
+    def deleteChar(self, row, col):
+        """Delete the character after (or "at") |row, col|."""
+        self._fullyParseTo(row)
+        offset = self.dataOffset(row, col)
+        if offset is None:
+            # Bottom of file, nothing to do.
+            return
+        self.data = self.data[:offset] + self.data[offset + 1:]
+        self._beginParsingAt(row)
+
+    def deleteRange(self, upperRow, upperCol, lowerRow, lowerCol):
+        begin = self.dataOffset(upperRow, upperCol)
+        end = self.dataOffset(lowerRow, lowerCol)
+        if end is None:
+            if begin is not None:
+                self.data = self.data[:begin]
+        else:
+            self.data = self.data[:begin] + self.data[end:]
+        self._beginParsingAt(upperRow)
+
+    def textRange(self, upperRow, upperCol, lowerRow, lowerCol):
+        begin = self.dataOffset(upperRow, upperCol)
+        end = self.dataOffset(lowerRow, lowerCol)
+        if end is None:
+            if begin is not None:
+                return self.data[begin:]
+        return self.data[begin:end]
+
     def grammarIndexFromRowCol(self, row, col):
         """
+        tip: as an optimization, check if |col == 0| prior to calling. The
+            result will always be zero (so the call can be avoided).
+
         Returns:
             index. |index| may then be passed to grammarAtIndex().
         """
-        if row + 1 >= len(
-                self.rows):  # or self.rows[row + 1] > len(self.parserNodes):
-            # This file is too large. There's other ways to handle this, but for
-            # now let's leave the tail un-highlighted.
-            return 0
-        gl = self.parserNodes[self.rows[row]:self.rows[row + 1]] + [
-            self.endNode
-        ]
+        if app.config.strict_debug:
+            assert isinstance(row, int)
+            assert isinstance(col, int)
+            assert row >= 0
+            assert col >= 0
+        self._fullyParseTo(row)
+        if app.config.strict_debug:
+            assert row < len(self.rows), (row, len(self.rows), repr(self.data))
+        if row == len(self.rows) - 1:
+            # The last line.
+            assert row + 1 >= len(
+                self.rows)
+            gl = self.parserNodes[self.rows[row]:] + [self.endNode]
+        else:
+            gl = self.parserNodes[self.rows[row]:self.rows[row + 1]] + [
+              self.endNode]
         offset = gl[0][kVisual] + col
         # Binary search to find the node for the column.
         low = 0
@@ -120,6 +300,7 @@ class Parser:
         individually if grammars are requested contiguously. This function is
         just for one-off needs.
         """
+        self._fullyParseTo(row)
         grammarIndex = self.grammarIndexFromRowCol(row, col)
         node, _, _, _ = self.grammarAtIndex(row, col, grammarIndex)
         return node.grammar
@@ -136,6 +317,7 @@ class Parser:
             assert isinstance(col, int)
             assert isinstance(index, int)
             assert row < len(self.rows), row
+        self._fullyParseTo(row)
         eol = True
         finalResult = (self.emptyNode, 0, 0, eol)
         rowIndex = self.rows[row]
@@ -156,6 +338,7 @@ class Parser:
             assert isinstance(row, int)
             assert isinstance(col, int)
             assert row < len(self.rows), row
+        self._fullyParseTo(row)
         rowIndex = self.rows[row]
         grammarIndex = self.grammarIndexFromRowCol(row, col)
         node = self.parserNodes[rowIndex + grammarIndex]
@@ -169,8 +352,45 @@ class Parser:
             assert isinstance(col, int)
             assert row >= 0
             assert col >= 0
+        self._fullyParseTo(row)
         return (row < len(self.rows) and
             col < self.parserNodes[self.rows[row]][kVisual])
+
+    def insert(self, row, col, text):
+        if app.config.strict_debug:
+            assert isinstance(row, int)
+            assert isinstance(col, int)
+            assert isinstance(text, unicode)
+            assert row >= 0
+            assert col >= 0
+            assert len(text) > 0
+        offset = self.dataOffset(row, col)
+        if offset is None:
+            row = len(self.rows) - 1
+            self.data += text
+        else:
+            self.data = self.data[:offset] + text + self.data[offset:]
+        self._beginParsingAt(row)
+
+    def insertBlock(self, row, col, lines):
+        for i in range(len(lines) - 1, -1, -1):
+            offset = self.dataOffset(row + i, col)
+            if offset is None:
+                self.data += lines[i]
+            else:
+                self.data = self.data[:offset] + lines[i] + self.data[offset:]
+        self._beginParsingAt(row)
+
+    def insertLines(self, row, col, lines):
+        if app.config.strict_debug:
+            assert isinstance(row, int)
+            assert isinstance(col, int)
+            #assert isinstance(lines, tuple)
+            assert row >= 0
+            assert col >= 0
+            assert len(lines) > 0
+        text = u"\n".join(lines)
+        self.insert(row, col, text)
 
     def nextCharRowCol(self, row, col):
         """Get the next column value for the character to the right.
@@ -183,6 +403,7 @@ class Parser:
             assert row >= 0
             assert col >= 0
             assert len(self.rows) > 0
+        self._fullyParseTo(row)
         ch = self.charAt(row, col)
         if ch is None:
             return (1, -col) if self.inDocument(row + 1, 0) else None
@@ -199,13 +420,14 @@ class Parser:
             assert row >= 0
             assert col >= 0
             assert len(self.rows) > 0
+        self._fullyParseTo(row)
         if col == 0:
             if row == 0:
                 return None
             return (-1, self.rowWidth(row - 1))
         return 0, app.curses_util.priorCharCol(col, self.rowText(row)) - col
 
-    def parse(self, bgThread, appPrefs, data, grammar, beginRow, endRow):
+    def parse(self, bgThread, data, grammar, beginRow, endRow):
         """
         Args:
           data (string): The file contents. The document.
@@ -219,77 +441,163 @@ class Parser:
               going over the entire file if, for example, only 100 rows out of
               a million rows are needed (which can save a lot of cpu time).
         """
-        app.log.parser('grammar', grammar['name'])
-        # Trim partially parsed data.
-        if self.fullyParsedToLine < beginRow:
-            beginRow = self.fullyParsedToLine
-
+        if app.config.strict_debug:
+            assert bgThread is None or isinstance(bgThread, threading.Thread)
+            assert isinstance(data, unicode), type(data)
+            assert isinstance(grammar, dict)
+            assert isinstance(beginRow, int)
+            assert isinstance(endRow, int)
+            assert beginRow >= 0
+            assert endRow >= 0
+            assert isinstance(self.appPrefs, app.prefs.Prefs)
+        self._defaultGrammar = grammar
         self.emptyNode = ParserNode(grammar, None, None, 0)
         self.data = data
-        self.endRow = endRow
-        if beginRow > 0:  # and len(self.rows):
-            if beginRow < len(self.rows):
-                self.parserNodes = self.parserNodes[:self.rows[beginRow]]
-                self.rows = self.rows[:beginRow]
-        else:
-            # First time parse. Do a parse of the whole file.
-            self.parserNodes = [(grammar, 0, None, 0)]
-            self.rows = [0]
-        if self.endRow > len(self.rows):
-            self.__buildGrammarList(bgThread, appPrefs)
-        self.fullyParsedToLine = len(self.rows)
-        self.__fastLineParse(grammar)
+        self._beginParsingAt(beginRow)
+        self._fullyParseTo(endRow, bgThread)
         #self.debug_checkLines(app.log.parser, data)
         #startTime = time.time()
         if app.log.enabledChannels.get('parser', False):
             self.debugLog(app.log.parser, data)
         #app.log.startup('parsing took', time.time() - startTime)
 
-    def __fastLineParse(self, grammar):
+    def _beginParsingAt(self, beginRow):
+        if app.config.strict_debug:
+            assert isinstance(beginRow, int)
+            assert beginRow >= 0, beginRow
+            assert isinstance(self.resumeAtRow, int)
+            assert self.resumeAtRow >= 0, self.resumeAtRow
+        if beginRow > self.resumeAtRow:
+            # Already beginning at an earlier row.
+            return
+        if beginRow > 0:
+            # Trim partially parsed data.
+            if beginRow < len(self.rows):
+                self.parserNodes = self.parserNodes[:self.rows[beginRow]]
+                self.rows = self.rows[:beginRow]
+            self.resumeAtRow = len(self.rows)
+        else:
+            # Parse the whole file.
+            self.parserNodes = [(self.defaultGrammar(), 0, None, 0)]
+            self.rows = [0]
+            self.resumeAtRow = 0
+
+    def _fastLineParse(self, grammar):
         """If there's not enough time to thoroughly parse the file, identify the
         lines so that the document can still be edited.
         """
         data = self.data
-        offset = self.parserNodes[self.rows[-1]][kBegin]
-        visual = self.parserNodes[self.rows[-1]][kVisual]
+        offset = self.parserNodes[-1][kBegin]
         limit = len(data)
+        if offset == limit:
+            # Already parsed to end of data.
+            return
+        visual = self.parserNodes[-1][kVisual]
+
+        # Track the |visual| value for the start of the line. The difference
+        # between |visual| and |visualStartCol| is the column index of the line.
+        visualStartCol = 0
         while True:
             while offset < limit and data[offset] != '\n':
-                if data[offset] >= app.curses_util.MIN_DOUBLE_WIDE_CHARACTER:
-                    visual += 2
-                else:
+                if data[offset] < u"ᄀ":
+                    # The char is less than the first double width character.
+                    # (An optimization to avoid calling charWidth().)
                     visual += 1
+                else:
+                    # From here on, the width of the character is messy to
+                    # determine, ask an authority.
+                    visual += app.curses_util.charWidth(data[offset],
+                            visual - visualStartCol)
                 offset += 1
             if offset >= limit:
-                # Add a terminating (end) node.
-                self.parserNodes.append((grammar, len(data), None, visual))
+                # The document is missing the last new-line.
+                if self.parserNodes[-1][kBegin] != limit:
+                    # Add a terminating (end) node.
+                    self.parserNodes.append((grammar, limit, None, visual))
                 break
+            visualStartCol = visual
             offset += 1
             visual += 1
             self.rows.append(len(self.parserNodes))
             self.parserNodes.append((grammar, offset, None, visual))
 
+    def _fullyParseTo(self, endRow, bgThread=None):
+        """Parse up to and including |endRow|."""
+        if app.config.strict_debug:
+            assert isinstance(endRow, int)
+            assert endRow >= 0
+            assert bgThread is None or isinstance(bgThread, threading.Thread)
+        # To parse |endRow| go one past because of the exclusive end of range.
+        self.pauseAtRow = endRow + 1
+        if self.pauseAtRow <= self.resumeAtRow:
+            # Already parsed to that row.
+            return
+        self._beginParsingAt(self.resumeAtRow)
+        if len(self.rows) <= self.pauseAtRow:
+            self._buildGrammarList(bgThread)
+        self._fastLineParse(self.defaultGrammar())
+        if app.config.strict_debug:
+            assert self.resumeAtRow >= 0
+            assert self.resumeAtRow <= len(self.rows)
+            if bgThread is not None and endRow <= len(self.rows):
+                assert self.resumeAtRow >= endRow + 1, (self.resumeAtRow, endRow)
+
     def rowCount(self):
+        self._fastLineParse(self.defaultGrammar())
         return len(self.rows)
 
-    def rowText(self, row):
+    def rowText(self, row, beginCol=None, endCol=None):
         """Get the text for |row|.
 
         Args:
             row (int): row is zero based.
+            beginCol (int): subindex within the row (similar to a slice).
+            endCol (int): subindex within the row (similar to a slice).
 
         Returns:
             document text (unicode)
         """
         if app.config.strict_debug:
             assert isinstance(row, int)
+            assert beginCol is None or isinstance(beginCol, int)
+            assert endCol is None or isinstance(endCol, int)
+            assert row >= 0
             assert isinstance(self.data, unicode)
-        begin = self.parserNodes[self.rows[row]][kBegin]
-        if row + 1 >= len(self.rows):
-            return self.data[begin:]
-        end = self.parserNodes[self.rows[row + 1]][kBegin]
-        if len(self.data) and self.data[end - 1] == '\n':
+        self._fullyParseTo(row)
+        if beginCol is endCol is None:
+            begin = self.parserNodes[self.rows[row]][kBegin]
+            if row + 1 >= len(self.rows):
+                return self.data[begin:]
+            end = self.parserNodes[self.rows[row + 1]][kBegin]
+            if len(self.data) and self.data[end - 1] == u"\n":
+                end -= 1
+            return self.data[begin:end]
+
+        if beginCol >= 0:
+            begin = self.dataOffset(row, beginCol)
+        else:
+            width = self.rowWidth(row)
+            begin = self.dataOffset(row, width + beginCol)
+
+        if begin is None:
+            return u""
+
+        if endCol is None:
+            end = self.dataOffset(row + 1, 0)
+        elif endCol < 0:
+            width = self.rowWidth(row)
+            end = self.dataOffset(row, width + endCol)
+        else:
+            width = self.rowWidth(row)
+            if endCol >= width:
+                endCol = width
+            end = self.dataOffset(row, endCol)
+
+        if end is None:
+            end = len(self.data)
+        if end > 0 and self.data[end - 1] == u"\n":
             end -= 1
+
         return self.data[begin:end]
 
     def charAt(self, row, col):
@@ -308,6 +616,7 @@ class Parser:
             assert isinstance(self.data, unicode)
             assert row >= 0
             assert col >= 0
+        self._fullyParseTo(row)
         if row > len(self.rows):
             return None
         string, width = self.rowTextAndWidth(row)
@@ -331,6 +640,7 @@ class Parser:
         """
         if app.config.strict_debug:
             assert isinstance(row, int)
+        self._fullyParseTo(row)
         begin = self.parserNodes[self.rows[row]][kBegin]
         visual = self.parserNodes[self.rows[row]][kVisual]
         if row + 1 < len(self.rows):
@@ -364,6 +674,7 @@ class Parser:
             assert isinstance(row, int)
         if row < 0:
             row = len(self.rows) + row
+        self._fullyParseTo(row)
         visual = self.parserNodes[self.rows[row]][kVisual]
         if row + 1 < len(self.rows):
             end = self.parserNodes[self.rows[row + 1]][kBegin]
@@ -377,12 +688,13 @@ class Parser:
             visualEnd = lastNode[kVisual]
         return visualEnd - visual
 
-    def __buildGrammarList(self, bgThread, appPrefs):
+    def _buildGrammarList(self, bgThread):
         """The guts of the parser. This is where the heavy lifting is done.
 
         This code can be interrupted (by |bgThread|) and resumed (by calling it
         again).
         """
+        appPrefs = self.appPrefs
         # An arbitrary limit to avoid run-away looping.
         leash = 50000
         topNode = self.parserNodes[-1]
@@ -390,15 +702,19 @@ class Parser:
         visual = topNode[kVisual]
         # If we are at the start of a grammar, skip the 'begin' part of the
         # grammar.
-        if (len(self.parserNodes) == 1 or
-                topNode[kGrammar] is not self.parserNodes[-2][kGrammar]):
-            beginRegex = topNode[kGrammar].get('begin')
-            if beginRegex is not None:
-                sre = re.match(beginRegex, self.data[cursor:])
-                if sre is not None:
-                    cursor += sre.regs[0][1]
-                    visual += sre.regs[0][1]  # Assumes single-wide characters.
-        while self.endRow > len(self.rows):
+        if 0:
+            if (len(self.parserNodes) == 1 or
+                    (topNode[kGrammar] is not self.parserNodes[-2][kGrammar]) and
+                    topNode[kGrammar].get("end") is not None):
+                beginRegex = topNode[kGrammar].get('begin')
+                if beginRegex is not None:
+                    sre = re.match(beginRegex, self.data[cursor:])
+                    if sre is not None:
+                        assert False
+                        cursor += sre.regs[0][1]
+                        # Assumes single-wide characters.
+                        visual += sre.regs[0][1]
+        while len(self.rows) <= self.pauseAtRow:
             if not leash:
                 #app.log.error('grammar likely caught in a loop')
                 break
@@ -412,6 +728,10 @@ class Parser:
                 #app.log.info('parser exit, match not found')
                 # todo(dschuyler): mark parent grammars as unterminated (if they
                 # expect be terminated). e.g. unmatched string quote or xml tag.
+                if cursor != len(self.data):
+                    # The last bit of the last line.
+                    self.parserNodes.append((topNode[kGrammar], cursor,
+                                             topNode[kPrior], visual))
                 break
             index = -1
             foundGroups = found.groups()
@@ -433,24 +753,57 @@ class Parser:
                 visual += reg[1]
                 self.rows.append(len(self.parserNodes))
             elif index == len(foundGroups) - 2:
-                # Found double wide character.
+                # Found potentially double wide characters.
                 topNode = self.parserNodes[-1]
                 regBegin, regEnd = reg
-                # First, add any preceding single wide characters.
+                width = app.curses_util.charWidth
                 if regBegin > 0:
+                    # Add single wide characters.
                     self.parserNodes.append((topNode[kGrammar], cursor,
                                              topNode[kPrior], visual))
                     cursor += regBegin
                     visual += regBegin
-                    # Remove the regular text from reg values.
                     regEnd -= regBegin
                     regBegin = 0
-                # Resume current grammar; store the double wide characters.
-                child = (topNode[kGrammar], cursor, topNode[kPrior], visual)
-                cursor += regEnd
-                visual += regEnd * 2
+                while regBegin < regEnd:
+                    # Check for zero width characters.
+                    while (regBegin < regEnd and
+                            width(self.data[cursor + regBegin], 0) == 0):
+                        regBegin += 1
+                    if regBegin > 0:
+                        # Add zero width characters.
+                        self.parserNodes.append((topNode[kGrammar], cursor,
+                                                 topNode[kPrior], visual))
+                        cursor += regBegin
+                        regEnd -= regBegin
+                        regBegin = 0
+                    # Check for single wide characters.
+                    while (regBegin < regEnd and
+                            width(self.data[cursor + regBegin], 0) == 1):
+                        regBegin += 1
+                    if regBegin > 0:
+                        # Add single wide characters.
+                        self.parserNodes.append((topNode[kGrammar], cursor,
+                                                 topNode[kPrior], visual))
+                        cursor += regBegin
+                        visual += regBegin
+                        regEnd -= regBegin
+                        regBegin = 0
+                    # Check for double wide characters.
+                    while (regBegin < regEnd and
+                            width(self.data[cursor + regBegin], 0) == 2):
+                        regBegin += 1
+                    if regBegin > 0:
+                        # Add double wide characters.
+                        self.parserNodes.append((topNode[kGrammar], cursor,
+                                                 topNode[kPrior], visual))
+                        cursor += regBegin
+                        visual += regBegin * 2
+                        regEnd -= regBegin
+                        regBegin = 0
+                continue
             elif index == len(foundGroups) - 3:
-                # Found variable width character.
+                # Found variable width (tab) character.
                 topNode = self.parserNodes[-1]
                 regBegin, regEnd = reg
                 # First, add any preceding single wide characters.
@@ -523,7 +876,7 @@ class Parser:
                     cursor += reg[1]
                     visual += reg[1]
                 elif index < nextGrammarIndexLimit:
-                    # A new grammar follows this grammar (a 'next').
+                    # A new grammar follows this grammar (a 'begin').
                     if subdata[reg[0]] == '\n':
                         # This 'begin' begins with a new line.
                         self.rows.append(len(self.parserNodes))
@@ -597,6 +950,15 @@ class Parser:
                 else:
                     app.log.error('invalid grammar index')
             self.parserNodes.append(child)
+        self.resumeAtRow = len(self.rows)
+
+    def _printLastNode(self, msg):
+        node = self.parserNodes[-1]
+        print("_printNode", node[0]["name"], node[1], node[2], node[3], msg,
+                repr(self.data))
+
+    def _printNode(self, node, msg):
+        print("_printNode", node[0]["name"], node[1], node[2], node[3], msg)
 
     def debugLog(self, out, data):
         out('parser debug:')

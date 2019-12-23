@@ -72,9 +72,17 @@ class PerformanceTestCases(unittest.TestCase):
         a = timeit('''withDefault(5);''' * 100, setup=setup, number=10000)
         b = timeit('''withoutDefault(5, 0);''' * 100, setup=setup, number=10000)
         # Assert that neither too much faster than the other
-        self.assertGreater(a, b * 0.77)
-        # This check is not performing the same in Python3.
-        #self.assertGreater(b, a * 0.71)
+        # Note: empirically, this is affected (on a MacBook Air) by whether the
+        # machine is running from battery or plugged in.
+        # It also appears to vary between Python 2 and Python 3.
+        self.assertGreater(a, b * 0.6)
+        self.assertGreater(b, a * 0.6)
+
+    def test_char_vs_ord(self):
+        setup = '''a="apple"\n'''
+        a = timeit('''a[0] > "z";''' * 100,  setup=setup, number=10000)
+        b = timeit('''ord(a[0]) > 100;''' * 100,  setup=setup, number=10000)
+        self.assertGreater(b, a)
 
     def test_insert1(self):
         # Disabled due to running time.

@@ -199,8 +199,7 @@ class FindWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
             # https://github.com/google/ci_edit/issues/170.
             CTRL_F,
             self.displayCheck(-3, 0, [u"Find: ", u"Replace: ", u"["]),
-            self.addMouseInfo(0, 2, 10, curses.BUTTON1_PRESSED),
-            curses.KEY_MOUSE,
+            self.mouseEvent(0, 2, 10, curses.BUTTON1_PRESSED),
             #self.displayCheck(-3, 0, ["   ", "   ", "   "]),
             self.displayCheckStyle(-2, 0, 1, 10,
                                    self.prg.color.get(u'status_line', 0)),

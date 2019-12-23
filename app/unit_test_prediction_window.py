@@ -41,12 +41,10 @@ class PredictionWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
             self.displayCheck(0, 0, [u" ci               "]),
             self.displayCheck(2, 2, [u"- Type|Name "]),
             #self.displayCheckNot(3, 0, [u"    open <new file> "]),
-            self.addClickInfo(1000, u"[x]open", curses.BUTTON1_PRESSED),
-            curses.KEY_MOUSE,
+            self.findTextAndClick(1000, u"[x]open", curses.BUTTON1_PRESSED),
             self.displayCheckNot(3, 0, [u"    open <new file> "]),
             self.displayCheck(2, 2, [u"- Type|Name "]),
-            self.addClickInfo(2000, u"[ ]open", curses.BUTTON1_PRESSED),
-            curses.KEY_MOUSE,
+            self.findTextAndClick(2000, u"[ ]open", curses.BUTTON1_PRESSED),
             # TODO(dschuyler): Look into why this fails:
             #self.displayCheck(3, 0, ["    open <new file> "]),
             CTRL_Q

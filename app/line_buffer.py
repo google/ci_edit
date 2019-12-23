@@ -33,10 +33,8 @@ class LineBuffer:
 
     def __init__(self, program):
         self.program = program
-        self.debugUpperChangedRow = -1
         self.isBinary = False
-        self.lines = [u""]
-        self.parser = app.parser.Parser()
+        self.parser = app.parser.Parser(program.prefs)
         self.parserTime = 0.0
         self.message = (u"New buffer", None)
         self.setFileType("words")
@@ -45,30 +43,9 @@ class LineBuffer:
         self.fileType = fileType
         self.rootGrammar = self.program.prefs.getGrammar(self.fileType)
         # Parse from the beginning.
-        self.upperChangedRow = 0
+        self.parser.resumeAtRow = 0
 
-    def doLinesToBinaryData(self, lines):
-        # TODO(dschuyler): convert lines to binary data.
-        return ''
-
-    def doLinesToData(self, lines):
-
-        def encode(line):
-            return chr(int(line.groups()[0], 16))
-
-        return re.sub(u'\x01([0-9a-fA-F][0-9a-fA-F])', encode, "\n".join(lines))
-
-    def doBinaryDataToLines(self, data):
-        long_hex = binascii.hexlify(data)
-        hex_list = []
-        i = 0
-        width = 32
-        while i < len(long_hex):
-            hex_list.append(long_hex[i:i + width] + '\n')
-            i += width
-        return hex_list
-
-    def doDataToLines(self, data):
+    def escapeBinaryChars(self, data):
         if app.config.strict_debug:
             assert isinstance(data, unicode)
         # Performance: in a 1000 line test it appears fastest to do some simple
@@ -84,39 +61,30 @@ class LineBuffer:
 
         #data = re.sub(u'([\0-\x09\x0b-\x1f\x7f-\xff])', parse, data)
         data = re.sub(u'([\0-\x09\x0b-\x1f])', parse, data)
-        return data.split(u'\n')
+        return data
 
-    def dataToLines(self):
-        if self.isBinary:
-            self.lines = self.doDataToLines(self.data)
-            #self.lines = self.doBinaryDataToLines(self.data)
-        else:
-            self.lines = self.doDataToLines(self.data)
+    def unescapeBinaryChars(self, data):
+
+        def encode(line):
+            return chr(int(line.groups()[0], 16))
+
+        out = re.sub(u'\x01([0-9a-fA-F][0-9a-fA-F])', encode, data)
+        if app.config.strict_debug:
+            assert isinstance(out, unicode)
+        return out
 
     def doParse(self, begin, end):
         start = time.time()
-        self.linesToData()
-        self.parser.parse(self.program.bg, self.program.prefs, self.data,
+        self.parser.parse(self.program.bg, self.parser.data,
                           self.rootGrammar, begin, end)
-        self.debugUpperChangedRow = self.upperChangedRow
-        self.upperChangedRow = self.parser.fullyParsedToLine
+        self.debugUpperChangedRow = self.parser.resumeAtRow
         self.parserTime = time.time() - start
 
     def isEmpty(self):
-        return len(self.lines) == 1 and len(self.lines[0]) == 0
-
-    def linesToData(self):
-        if self.isBinary:
-            self.data = self.doLinesToData(self.lines)
-            # TODO(dschuyler): convert binary data.
-            #self.data = self.doLinesToBinaryData(self.lines)
-        else:
-            self.data = self.doLinesToData(self.lines)
+        return len(self.parser.data) == 0
 
     def parseDocument(self):
-        begin = min(self.parser.fullyParsedToLine, self.upperChangedRow)
-        end = sys.maxsize
-        self.doParse(begin, end)
+        self.doParse(self.parser.resumeAtRow, sys.maxsize)
 
     def setMessage(self, *args, **kwargs):
         if not len(args):

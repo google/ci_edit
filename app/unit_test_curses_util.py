@@ -20,6 +20,7 @@ from __future__ import print_function
 
 import curses
 import unittest
+import unicodedata
 
 import app.curses_util
 
@@ -81,6 +82,14 @@ class CursesUtilTestCases(unittest.TestCase):
                  (u')}]](', 8, 5, 0),
                  (u'23432u', 13, 6, 1),
              ])
+
+    def test_unicode_data(self):
+        self.assertEqual(unicodedata.east_asian_width(u"a"), "Na")
+        self.assertEqual(unicodedata.east_asian_width(u" "), "Na")
+        self.assertEqual(unicodedata.east_asian_width(u"\b"), "N")
+        self.assertEqual(unicodedata.east_asian_width(u"こ"), "W")
+        # This is "W" in python3 and "F" in python2.
+        self.assertIn(unicodedata.east_asian_width(u"⏰"), ("F", "W"))
 
     def test_column_to_index(self):
         self.assertEqual(0, app.curses_util.columnToIndex(0, u"test"))
@@ -315,6 +324,9 @@ class CursesUtilTestCases(unittest.TestCase):
         self.assertEqual(8, app.curses_util.charWidth(u"\t", 8))
         self.assertEqual(7, app.curses_util.charWidth(u"\t", 9))
         self.assertEqual(2, app.curses_util.charWidth(u"こ", 0))
+        self.assertEqual(0, app.curses_util.charWidth(u"\b", 0))
+        self.assertEqual(0, app.curses_util.charWidth(u"\n", 0))
+        self.assertEqual(2, app.curses_util.charWidth(u"⏰", 0))
 
     def test_floor_col(self):
         test = u"""\tfive\t"""

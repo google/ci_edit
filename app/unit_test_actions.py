@@ -42,11 +42,11 @@ class FakeView:
 
 def checkRow(test, text_buffer, row, expected):
     text_buffer.parseDocument()
-    if not (text_buffer.lines[row] == expected == text_buffer.parser.rowText(row)):
+    if not (expected == text_buffer.parser.rowText(row)):
         test.fail("\n\nExpected these to match: "
-            "lines {}, expected {}, parser {}".format(
-                repr(text_buffer.lines[row]), repr(expected),
-                repr(text_buffer.parser.rowText(row))))
+            "row {}: expected {}, parser {}".format(
+                row, repr(expected),
+                repr(text_buffer.parser.data)))
 
 
 class ActionsTestCase(unittest.TestCase):
@@ -93,7 +93,6 @@ void blah();
         self.textBuffer.parseDocument()
         #self.assertEqual(self.textBuffer.scrollRow, 0)
         #self.assertEqual(self.textBuffer.scrollCol, 0)
-        self.assertEqual(self.textBuffer.lines[1], 'two')
         self.assertEqual(self.textBuffer.parser.rowText(1), 'two')
 
     def tearDown(self):
@@ -205,7 +204,6 @@ a\twith tab
         #self.textBuffer.parser.debugLog(print, test)
         #self.assertEqual(self.textBuffer.scrollRow, 0)
         #self.assertEqual(self.textBuffer.scrollCol, 0)
-        self.assertEqual(self.textBuffer.lines[1], 'two')
         self.assertEqual(self.textBuffer.parser.rowText(1), 'two')
         self.assertEqual(self.textBuffer.parser.rowTextAndWidth(8),
                 ('\t\t', 16))
@@ -268,6 +266,16 @@ a\twith tab
         self.assertEqual(self.currentRowText(), u"\t\t")
         self.assertEqual(self.markerPenRowCol(), (0, 0, 8, 0))
 
+    def test_backspace(self):
+        self.setMarkerPenRowCol(0, 0, 6, 8)
+        self.assertEqual(self.currentRowText(), u"\ta\t")
+        self.textBuffer.backspace()
+        self.textBuffer.parseDocument()
+        self.assertEqual(self.markerPenRowCol(), (0, 0, 6, 0))
+        self.assertEqual(self.currentRowText(), u"a\t")
+        self.textBuffer.cursorMoveRight()
+        self.assertEqual(self.markerPenRowCol(), (0, 0, 6, 1))
+
     def test_cursor_select_word_left(self):
         tb = self.textBuffer
         self.setMarkerPenRowCol(0, 0, 2, 5)
@@ -327,11 +335,12 @@ class TextIndentTestCases(ActionsTestCase):
             self.textBuffer.insertPrintableWithPairing(*args)
             self.textBuffer.parseDocument()
         tb = self.textBuffer
-        self.assertEqual(len(tb.lines), 1)
         self.assertEqual(tb.parser.rowCount(), 1)
         insert(ord('a'), None)
         insert(ord(':'), None)
+        self.assertEqual(tb.penRow, 0)
         tb.carriageReturn()
+        self.assertEqual(tb.penRow, 1)
         checkRow(self, tb, 0, 'a:')
         checkRow(self, tb, 1, '')
 
@@ -359,7 +368,6 @@ class TextIndentTestCases(ActionsTestCase):
             self.textBuffer.insertPrintableWithPairing(*args)
             self.textBuffer.parseDocument()
         tb = self.textBuffer
-        self.assertEqual(len(tb.lines), 1)
         self.assertEqual(tb.parser.rowCount(), 1)
         insert(ord('a'), None)
         tb.carriageReturn()
@@ -458,6 +466,76 @@ class TextIndentTestCases(ActionsTestCase):
         checkRow(self, tb, 2, '  c')
         checkRow(self, tb, 3, 'd')
 
+    def test_indent_unindent_lines2(self):
+
+        def insert(input):
+            for i in input:
+                if i == u"\n":
+                    self.textBuffer.carriageReturn()
+                else:
+                    self.textBuffer.insertPrintableWithPairing(ord(i), None)
+                    self.textBuffer.parseDocument()
+            self.assertEqual(self.textBuffer.parser.data, input)
+
+        def checkPenMarker(penRow, penCol, markerRow, markerCol):
+            self.assertEqual((penRow, penCol, markerRow, markerCol), (
+                    tb.penRow, tb.penCol, tb.markerRow, tb.markerCol))
+
+        def selectChar(penRow, penCol, markerRow, markerCol):
+            self.textBuffer.penRow = penRow
+            self.textBuffer.penCol = penCol
+            self.textBuffer.markerRow = markerRow
+            self.textBuffer.markerCol = markerCol
+            self.textBuffer.selectionMode = app.selectable.kSelectionCharacter
+
+        tb = self.textBuffer
+        self.assertEqual(tb.parser.rowCount(), 1)
+        checkPenMarker(0, 0, 0, 0)
+        insert(u"apple\nbanana\ncarrot\ndate\neggplant\n")
+        checkRow(self, tb, 0, 'apple')
+        checkRow(self, tb, 1, 'banana')
+        checkRow(self, tb, 2, 'carrot')
+        checkRow(self, tb, 3, 'date')
+        checkRow(self, tb, 4, 'eggplant')
+        selectChar(0, 3, 2, 2)
+        checkPenMarker(0, 3, 2, 2)
+        tb.indent()
+        checkRow(self, tb, 0, '  apple')
+        checkRow(self, tb, 1, '  banana')
+        checkRow(self, tb, 2, '  carrot')
+        checkRow(self, tb, 3, 'date')
+        checkRow(self, tb, 4, 'eggplant')
+        checkPenMarker(0, 5, 2, 4)
+        tb.indent()
+        checkRow(self, tb, 0, '    apple')
+        checkRow(self, tb, 1, '    banana')
+        checkRow(self, tb, 2, '    carrot')
+        checkRow(self, tb, 3, 'date')
+        checkRow(self, tb, 4, 'eggplant')
+        checkPenMarker(0, 7, 2, 6)
+
+        selectChar(0, 3, 0, 2)
+        tb.unindent()
+        checkRow(self, tb, 0, '  apple')
+        checkRow(self, tb, 1, '    banana')
+        checkRow(self, tb, 2, '    carrot')
+        checkRow(self, tb, 3, 'date')
+        checkRow(self, tb, 4, 'eggplant')
+        checkPenMarker(0, 1, 0, 0)
+
+        selectChar(0, 3, 2, 2)
+        tb.indent()
+        checkRow(self, tb, 0, '    apple')
+        checkRow(self, tb, 1, '      banana')
+        checkRow(self, tb, 2, '      carrot')
+        checkRow(self, tb, 3, 'date')
+        checkRow(self, tb, 4, 'eggplant')
+        checkPenMarker(0, 5, 2, 4)
+        tb.indent()
+        checkPenMarker(0, 7, 2, 6)
+        tb.indent()
+        checkPenMarker(0, 9, 2, 8)
+
 class TextInsertTestCases(ActionsTestCase):
 
     def setUp(self):
@@ -477,7 +555,6 @@ class TextInsertTestCases(ActionsTestCase):
             self.textBuffer.insertPrintableWithPairing(*args)
             self.textBuffer.parseDocument()
         tb = self.textBuffer
-        self.assertEqual(len(tb.lines), 1)
         insert(ord('o'), None)
         insert(ord('('), None)
         checkRow(self, tb, 0, 'o(')
@@ -503,7 +580,6 @@ class TextInsertTestCases(ActionsTestCase):
             self.textBuffer.insertPrintableWithPairing(*args)
             self.textBuffer.parseDocument()
         tb = self.textBuffer
-        self.assertEqual(len(tb.lines), 1)
         insert(ord('o'), None)
         insert(ord('('), None)
         checkRow(self, tb, 0, 'o()')

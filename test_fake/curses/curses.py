@@ -34,6 +34,9 @@ import sys
 import time
 import traceback
 import types
+import unicodedata
+
+import app.curses_util
 
 from . import ascii
 from . import constants
@@ -45,7 +48,7 @@ DEBUG_COLOR_PAIR_MASK = (DEBUG_COLOR_PAIR_BASE * 2) - 1
 def isStringType(value):
     if sys.version_info[0] == 2:
         return type(value) in types.StringTypes
-    return type(value) is str
+    return isinstance(value, str)
 
 
 # Avoiding importing app.curses_util.
@@ -53,21 +56,6 @@ def isStringType(value):
 BRACKETED_PASTE_BEGIN = (91, 50, 48, 48, 126)  # i.e. "[200~"
 BRACKETED_PASTE_END = (91, 50, 48, 49, 126)  # i.e. "[201~"
 BRACKETED_PASTE = ("terminal_paste",)  # Pseudo event type.
-MIN_DOUBLE_WIDE_CHARACTER = u"\u3000"
-def columnWidth(string):
-    """When rendering |string| how many character cells will be used? For ASCII
-    characters this will equal len(string). For many Chinese characters and
-    emoji the value will be greater than len(string), since many of them use two
-    cells.
-    """
-    assert isinstance(string, unicode), repr(string)
-    width = 0
-    for i in string:
-        if i > MIN_DOUBLE_WIDE_CHARACTER:
-            width += 2
-        else:
-            width += 1
-    return width
 
 
 class error(BaseException):
@@ -122,7 +110,7 @@ class FakeInput:
                 assert not self.waitingForRefresh
                 self.inputsIndex += 1
                 cmd = self.inputs[self.inputsIndex]
-                if type(cmd) == types.FunctionType:
+                if isinstance(cmd, types.FunctionType):
                     result = cmd(self.fakeDisplay, self.inputsIndex)
                     if result is not None:
                         self.waitingForRefresh = True
@@ -130,12 +118,13 @@ class FakeInput:
                         return result
                     self.log("next(f)", repr(cmd)[:8], repr(result))
                 elif isStringType(cmd) and len(cmd) == 1:
+                    # A single character.
                     if (not self.inBracketedPaste) and cmd != ascii.ESC:
                         self.waitingForRefresh = True
                     self.log("next(q) ", repr(cmd), ord(cmd))
                     return ord(cmd)
-                elif (type(cmd) is tuple and len(cmd) > 1 and
-                      type(cmd[0]) is int):
+                elif (isinstance(cmd, tuple) and len(cmd) > 1 and
+                      isinstance(cmd[0], int)):
                     if cmd == BRACKETED_PASTE_BEGIN:
                         self.inBracketedPaste = True
                     self.log("next(s) ", cmd, type(cmd))
@@ -144,19 +133,23 @@ class FakeInput:
                         self.tupleIndex = -1
                         if cmd == BRACKETED_PASTE_END:
                             self.inBracketedPaste = False
-                        if cmd != BRACKETED_PASTE_BEGIN:
-                            self.waitingForRefresh = True
                         self.log("next(u)", cmd, type(cmd))
                         self.log("return", constants.ERR)
                         return constants.ERR
+                    if (self.tupleIndex + 1 == len(cmd) and
+                            cmd != BRACKETED_PASTE_BEGIN):
+                        self.waitingForRefresh = True
                     self.inputsIndex -= 1
-                    self.log("return", cmd[self.tupleIndex])
+                    self.log("return", cmd[self.tupleIndex], self.tupleIndex,
+                        len(cmd))
                     return cmd[self.tupleIndex]
-                else:
+                elif isinstance(cmd, int) or  isinstance(cmd, bytes):
                     if (not self.inBracketedPaste) and cmd != ascii.ESC:
                         self.waitingForRefresh = True
                     self.log("return", cmd, type(cmd))
                     return cmd
+                else:
+                    assert False, (cmd, type(cmd))
         self.log("return", constants.ERR)
         return constants.ERR
 
@@ -198,7 +191,10 @@ class FakeDisplay:
 
     def checkStyle(self, row, col, height, width, colorPair):
         #assert (colorPair & DEBUG_COLOR_PAIR_MASK) in self.colors.values()
+        assert colorPair is not None
         assert colorPair >= DEBUG_COLOR_PAIR_BASE
+        assert height != 0
+        assert width != 0
         for i in range(height):
             for k in range(width):
                 d = self.displayStyle[row + i][col + k]
@@ -217,19 +213,19 @@ class FakeDisplay:
         assert isinstance(verbose, int)
         for i in range(len(lines)):
             line = lines[i]
-            for k in range(len(line)):
+            displayCol = col
+            for ch in line:
                 if row + i >= self.rows:
                     return u"\n  Row %d is outside of the %d row display" % (
                         row + i, self.rows)
-                if col + k >= self.cols:
+                if displayCol >= self.cols:
                     return (u"\n  Column %d is outside of the %d column display"
-                            % (col + k, self.cols))
-                d = self.displayText[row + i][col + k]
-                c = line[k]
-                if d != c:
+                            % (displayCol, self.cols))
+                displayCh = self.displayText[row + i][displayCol]
+                if displayCh != ch:
                     #self.show()
                     result = u"\n  row %s, col %s mismatch '%s' != '%s'" % (
-                        row + i, col + k, d, c)
+                        row + i, displayCol, displayCh, ch)
                     if verbose >= 1:
                         actualLine = u"".join(self.displayText[row + i])
                         result += u"\n  actual:   |%s|" % actualLine
@@ -238,8 +234,9 @@ class FakeDisplay:
                         result += u"\n  expected: %s|%s|" % (u" " * col,
                                                              expectedText)
                     if verbose >= 3:
-                        result += u"\n  mismatch:  %*s^" % (col + k, u"")
+                        result += u"\n  mismatch:  %*s^" % (displayCol, u"")
                     return result
+                displayCol += app.curses_util.charWidth(displayCh, displayCol)
         return None
 
     def draw(self, cursorRow, cursorCol, text, colorPair):
@@ -256,7 +253,7 @@ class FakeDisplay:
                 self.displayText[cursorRow][cursorCol] = i
                 self.displayStyle[cursorRow][cursorCol] = colorPair
                 cursorCol += 1
-                if columnWidth(i) > 1:
+                if app.curses_util.charWidth(i, cursorCol) > 1:
                     self.displayText[cursorRow][cursorCol] = u" "
                     self.displayStyle[cursorRow][cursorCol] = colorPair
                     cursorCol += 1
@@ -291,7 +288,17 @@ class FakeDisplay:
         ]
 
     def getText(self):
-        return [u"".join(self.displayText[i]) for i in range(self.rows)]
+        rows = []
+        for rowIndex in range(self.rows):
+            rowChars = self.displayText[rowIndex]
+            line = []
+            limit = len(rowChars)
+            col = 0
+            while col < limit:
+                line.append(rowChars[col])
+                col += app.curses_util.charWidth(rowChars[col], col)
+            rows.append(u"".join(line))
+        return rows
 
     def setScreenSize(self, rows, cols):
         self.rows = rows

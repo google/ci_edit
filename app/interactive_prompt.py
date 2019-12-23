@@ -27,6 +27,7 @@ import re
 import subprocess
 
 import app.controller
+import app.formatter
 
 
 def functionTestEq(a, b):
@@ -100,7 +101,6 @@ class InteractivePrompt(app.controller.Controller):
     def setTextBuffer(self, textBuffer):
         app.controller.Controller.setTextBuffer(self, textBuffer)
         self.textBuffer = textBuffer
-        self.textBuffer.lines = [u""]
         self.commands = {
             u'bm': self.bookmarkCommand,
             u'build': self.buildCommand,
@@ -154,20 +154,26 @@ class InteractivePrompt(app.controller.Controller):
         self.textBuffer.selectionAll()
 
     def formatCommand(self, cmdLine, lines):
-        formatter = {
+        formatters = {
             #".js": app.format_javascript.format
-            #".py": app.format_python.format
             #".html": app.format_html.format,
+            ".py": app.formatter.formatPython
         }
 
-        def noOp(data):
-            return data
-
         fileName, ext = os.path.splitext(self.view.host.textBuffer.fullPath)
+
         app.log.info(fileName, ext)
-        lines = self.view.host.textBuffer.doDataToLines(
-            formatter.get(ext,
-                          noOp)(self.view.host.textBuffer.doLinesToData(lines)))
+        formatter = formatters.get(ext)
+
+        if not formatter:
+            return lines, u'No formatter for extension {}'.format(ext)
+
+        try:
+            formattedText = formatter(self.view.host.textBuffer.parser.data)
+        except RuntimeError as err:
+            return lines, str(err)
+
+        lines = formattedText.split(u"\n")
         return lines, u'Changed %d lines' % (len(lines),)
 
     def makeCommand(self, cmdLine, view):
@@ -206,23 +212,20 @@ class InteractivePrompt(app.controller.Controller):
 
     def execute(self):
         try:
-            inputLines = self.textBuffer.lines
-            if not len(inputLines) or not len(inputLines[0]):
+            cmdLine = self.textBuffer.parser.data
+            if not len(cmdLine):
                 self.changeToHostWindow()
                 return
-            cmdLine = inputLines[0]
             tb = self.view.host.textBuffer
             lines = list(tb.getSelectedText())
             if cmdLine[0] in self.subExecute:
-                data = self.view.host.textBuffer.doLinesToData(lines).encode(
-                    'utf-8')
+                data = self.view.host.textBuffer.parser.data.encode('utf-8')
                 output, message = self.subExecute.get(cmdLine[0])(cmdLine[1:],
                                                                   data)
                 if app.config.strict_debug:
                     assert isinstance(output, bytes)
                     assert isinstance(message, unicode)
-                output = tb.doDataToLines(output.decode('utf-8'))
-                tb.editPasteLines(tuple(output))
+                tb.editPasteLines(tuple(output.decode('utf-8').split(u"\n")))
                 tb.setMessage(message)
             else:
                 cmd = re.split(u'\\W', cmdLine)[0]
@@ -330,10 +333,10 @@ class InteractivePrompt(app.controller.Controller):
         except ValueError:
             return (lines, u'''Separator punctuation missing, there should be'''
                     u''' three '%s'.''' % (separator,))
-        data = self.view.host.textBuffer.doLinesToData(lines)
+        data = self.view.host.textBuffer.parser.data
         output = self.view.host.textBuffer.findReplaceText(
             find, replace, flags, data)
-        lines = self.view.host.textBuffer.doDataToLines(output)
+        lines = output.split(u"\n")
         return lines, u'Changed %d lines' % (len(lines),)
 
     def upperSelectedLines(self, cmdLine, lines):

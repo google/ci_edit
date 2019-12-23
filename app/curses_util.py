@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # Copyright 2016 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,10 +31,9 @@ import signal
 import struct
 import sys
 import termios
+import unicodedata
 
 import app.config
-
-MIN_DOUBLE_WIDE_CHARACTER = u"\u3000"
 
 # Strings are found using the cursesKeyName() function.
 # Constants are found using the curses.getch() function.
@@ -393,16 +394,55 @@ def renderedSubStr(string, beginCol, endCol=None):
                 output.append(ch)
     return u"".join(output)
 
-def charWidth(ch, column):
-    if ch == u"\t":
-        tabWidth = 8
-        return tabWidth - (column % tabWidth)
-    elif ch > MIN_DOUBLE_WIDE_CHARACTER:
-        return 2
-    elif ch == u"":
-        return 0
-    else:
+
+if sys.version_info[0] == 2:
+
+    def charWidth(ch, column, tabWidth=8):
+        if ch == u"\t":
+            return tabWidth - (column % tabWidth)
+        elif ch == u"" or ch < u" ":
+            return 0
+        elif ch < u"ᄀ":
+            # Optimization.
+            return 1
+        elif unicodedata.east_asian_width(ch) in (u"F", r"W"):
+            return 2
         return 1
+
+    def isDoubleWidth(ch):
+        if ch == u"" or ch < u"ᄀ":
+            # Optimization.
+            return False
+        width = unicodedata.east_asian_width(ch)
+        if width in (u"F", u"W"):
+            return True
+        return False
+
+    def isZeroWidth(ch):
+        return ch == u"" or ch < u" "  #or unicodedata.east_asian_width(ch) == "N"
+else:
+
+    def charWidth(ch, column, tabWidth=8):
+        if ch == u"\t":
+            return tabWidth - (column % tabWidth)
+        elif ch == u"" or ch < u" ":
+            return 0
+        elif ch < u"ᄀ":
+            # Optimization.
+            return 1
+        elif unicodedata.east_asian_width(ch) == u"W":
+            return 2
+        return 1
+
+    def isDoubleWidth(ch):
+        if ch == u"" or ch < u"ᄀ":
+            # Optimization.
+            return False
+        return unicodedata.east_asian_width(ch) == "W"
+
+    def isZeroWidth(ch):
+        return ch == u"" or ch < u" "  #or unicodedata.east_asian_width(ch) == "N"
+
 
 def floorCol(column, line):
     """Round off the column so that it aligns with the start of a character.
@@ -421,6 +461,7 @@ def floorCol(column, line):
         floorColumn += width
     return floorColumn
 
+
 def priorCharCol(column, line):
     """Return the start column of the character before |column|.
     """
@@ -436,6 +477,7 @@ def priorCharCol(column, line):
             return priorColumn
         priorColumn += width
     return None
+
 
 def columnWidth(string):
     """When rendering |string| how many character cells will be used? For ASCII

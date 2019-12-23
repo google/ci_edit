@@ -77,7 +77,7 @@ class DirectoryList(app.window.Window):
 
     def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
         row = self.scrollRow + paneRow
-        if row >= len(self.textBuffer.lines):
+        if row >= self.textBuffer.parser.rowCount():
             return
         self.controller.openFileOrDir(row)
 
@@ -228,14 +228,15 @@ class FileManagerWindow(app.window.Window):
         self.parent.layout()
         self.controller.focus()
         # Set the initial path each time the window is focused.
-        inputWindow = self.parent.inputWindow
-        if len(inputWindow.textBuffer.fullPath) == 0:
-            path = os.getcwd()
-        else:
-            path = os.path.dirname(inputWindow.textBuffer.fullPath)
-        if len(path) != 0:
-            path += os.path.sep
-        self.pathWindow.controller.setEncodedPath(unicode(path))
+        if not self.pathWindow.controller.decodedPath():
+            inputWindow = self.parent.inputWindow
+            if len(inputWindow.textBuffer.fullPath) == 0:
+                path = os.getcwd()
+            else:
+                path = os.path.dirname(inputWindow.textBuffer.fullPath)
+            if len(path) != 0:
+                path += os.path.sep
+            self.pathWindow.controller.setEncodedPath(unicode(path))
         self.changeFocusTo(self.pathWindow)
 
     def onPrefChanged(self, category, name):
@@ -276,5 +277,7 @@ class FileManagerWindow(app.window.Window):
         self.modeTitle[u'name'] = modeTitles[mode]
 
     def unfocus(self):
+        # Clear the path.
+        self.pathWindow.controller.setEncodedPath(u"")
         app.window.Window.unfocus(self)
         self.detach()

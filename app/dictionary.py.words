@@ -318,6 +318,7 @@ spawnvef
 spawnvp
 spawnvpe
 splitext
+splitlines
 sprevious
 sre
 sright

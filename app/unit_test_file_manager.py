@@ -61,8 +61,7 @@ class FileManagerTestCases(app.fake_curses_testing.FakeCursesTestCase):
             self.writeText(self.pathToSample(u"")),
             self.displayCheck(3, 0, [u"./     ", u"../     "]),
             self.displayCheck(5, 0, [u"._ A name with cr\\r/"]),
-            self.addMouseInfo(0, 5, 0,
-                              curses.BUTTON1_PRESSED), curses.KEY_MOUSE,
+            self.mouseEvent(0, 5, 0, curses.BUTTON1_PRESSED),
             self.displayCheck(5, 0, [u"example"]),
             self.displayFindCheck(u"/._ A name with ",
                                   u"cr\\r/"), KEY_ESCAPE, curses.ERR,
@@ -73,6 +72,32 @@ class FileManagerTestCases(app.fake_curses_testing.FakeCursesTestCase):
             self.displayCheck(5, 0, [u"example"]),
             self.displayFindCheck(u"/._ A name with ", u"cr\\r/"), CTRL_Q,
             CTRL_Q
+        ])
+
+    def test_mouse_scroll(self):
+        #self.setMovieMode(True)
+        dirList = [
+            u"./     ", u"../     ", u"._ A name with cr\\r/",
+        ]
+        self.runWithFakeInputs([
+            self.displayCheck(0, 0, [u" ci     "]),
+            self.displayCheck(2, 7, [u"     "]), CTRL_O,
+            self.displayCheck(0, 0, [u" ci    Open File  "]), CTRL_A,
+            self.writeText(self.pathToSample(u"")),
+            self.displayCheck(3, 0, dirList[0:3]),
+            self.mouseEvent(0, 5, 0, curses.REPORT_MOUSE_POSITION),
+            self.displayCheck(3, 0, dirList[0:3]),
+            self.mouseEvent(1, 5, 0, curses.REPORT_MOUSE_POSITION),
+            self.displayCheck(3, 0, dirList[1:3]),
+            self.mouseEvent(2, 5, 0, curses.REPORT_MOUSE_POSITION),
+            self.displayCheck(3, 0, dirList[2:3]),
+            self.mouseEvent(0, 5, 0, curses.BUTTON4_PRESSED),
+            self.displayCheck(3, 0, dirList[1:3]),
+            self.mouseEvent(1, 5, 0, curses.BUTTON4_PRESSED),
+            self.displayCheck(3, 0, dirList[0:3]),
+            self.mouseEvent(2, 5, 0, curses.BUTTON4_PRESSED),
+            self.displayCheck(3, 0, dirList[0:3]),
+            CTRL_Q, CTRL_Q
         ])
 
     def test_open(self):
@@ -130,8 +155,7 @@ class FileManagerTestCases(app.fake_curses_testing.FakeCursesTestCase):
             self.displayCheck(0, 0, [u" ci     "]),
             CTRL_O,
             self.displayCheck(0, 0, [u" ci    Open"]),
-            self.addClickInfo(1000, u"[x]sizes", curses.BUTTON1_PRESSED),
-            curses.KEY_MOUSE,
+            self.findTextAndClick(1000, u"[x]sizes", curses.BUTTON1_PRESSED),
             CTRL_Q
         ])
 

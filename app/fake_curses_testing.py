@@ -56,7 +56,7 @@ class FakeCursesTestCase(unittest.TestCase):
         # can create races between tests running in parallel.
         self.prg.clipboard.setOsHandlers(None, None)
 
-    def addClickInfo(self, timeStamp, screenText, bState):
+    def findTextAndClick(self, timeStamp, screenText, bState):
         caller = inspect.stack()[1]
         callerText = u"\n  %s:%s:%s(): " % (os.path.split(caller[1])[1],
                                             caller[2], caller[3])
@@ -73,7 +73,30 @@ class FakeCursesTestCase(unittest.TestCase):
             # Note that the mouse info is x,y (col, row).
             info = (timeStamp, col, row, 0, bState)
             curses.addMouseEvent(info)
-            return None
+            return curses.KEY_MOUSE
+
+        return createEvent
+
+    def mouseEvent(self, timeStamp, mouseRow, mouseCol, bState):
+        """
+        bState may be a logical or of:
+          curses.BUTTON1_PRESSED;
+          curses.BUTTON1_RELEASED;
+          ...
+          curses.BUTTON_SHIFT
+          curses.BUTTON_CTRL
+          curses.BUTTON_ALT
+        """
+        assert isinstance(timeStamp, int)
+        assert isinstance(mouseRow, int)
+        assert isinstance(mouseCol, int)
+        assert isinstance(bState, int)
+        # Note that the mouse info is x,y (col, row).
+        info = (timeStamp, mouseCol, mouseRow, 0, bState)
+
+        def createEvent(display, cmdIndex):
+            curses.addMouseEvent(info)
+            return curses.KEY_MOUSE
 
         return createEvent
 
@@ -99,6 +122,22 @@ class FakeCursesTestCase(unittest.TestCase):
             return None
 
         return createEvent
+
+    def call(self, *args):
+        """Call arbitrary function as a 'fake input'."""
+        caller = inspect.stack()[1]
+        callerText = u"\n  %s:%s:%s(): " % (os.path.split(caller[1])[1],
+                                            caller[2], caller[3])
+        def caller(display, cmdIndex):
+            try:
+                args[0](*args[1:])
+            except Exception as e:
+                output = callerText + u' at index ' + str(cmdIndex)
+                print(output)
+                self.fail(e)
+            return None
+
+        return caller
 
     def displayCheck(self, *args):
         assert isinstance(args[0], int)
@@ -170,6 +209,11 @@ class FakeCursesTestCase(unittest.TestCase):
         return displayCheckerNot
 
     def displayCheckStyle(self, *args):
+        """*args are (row, col, height, width, colorPair)."""
+        (row, col, height, width, colorPair) = args
+        assert height != 0
+        assert width != 0
+        assert colorPair is not None
         caller = inspect.stack()[1]
         callerText = u"\n  %s:%s:%s(): " % (os.path.split(caller[1])[1],
                                             caller[2], caller[3])
@@ -199,10 +243,16 @@ class FakeCursesTestCase(unittest.TestCase):
                                            caller[2], caller[3])
 
         def cursorChecker(display, cmdIndex):
-            penRow, penCol = self.cursesScreen.getyx()
             if self.cursesScreen.movie:
                 return None
-            self.assertEqual((expectedRow, expectedCol), (penRow, penCol),
+            win = self.prg.programWindow.focusedWindow
+            tb = win.textBuffer
+            screenRow, screenCol = self.cursesScreen.getyx()
+            self.assertEqual((win.top + tb.penRow - win.scrollRow,
+                              win.left + tb.penCol - win.scrollCol),
+                             (screenRow, screenCol),
+                             callerText + u"internal mismatch")
+            self.assertEqual((expectedRow, expectedCol), (screenRow, screenCol),
                              callerText)
             return None
 
@@ -232,6 +282,32 @@ class FakeCursesTestCase(unittest.TestCase):
             return None
 
         return prefChecker
+
+    def printParserState(self):
+        caller = inspect.stack()[1]
+        callerText = u"in %s:%s:%s(): " % (os.path.split(caller[1])[1],
+                                           caller[2], caller[3])
+
+        def redoChain(display, cmdIndex):
+            print("Parser state", callerText)
+            tb = self.prg.programWindow.focusedWindow.textBuffer
+            tb.parser.debugLog(print, tb.parser.data)
+            return None
+
+        return redoChain
+
+    def printRedoState(self):
+        caller = inspect.stack()[1]
+        callerText = u"in %s:%s:%s(): " % (os.path.split(caller[1])[1],
+                                           caller[2], caller[3])
+
+        def redoState(display, cmdIndex):
+            print("Redo state", callerText)
+            tb = self.prg.programWindow.focusedWindow.textBuffer
+            tb.printRedoState(print)
+            return None
+
+        return redoState
 
     def resizeScreen(self, rows, cols):
         assert isinstance(rows, int)
@@ -282,13 +358,13 @@ class FakeCursesTestCase(unittest.TestCase):
         callerText = u"\n  %s:%s:%s(): " % (os.path.split(caller[1])[1],
                                             caller[2], caller[3])
 
-        def displayStyleChecker(display, cmdIndex):
+        def checkEndOfInputs(display, cmdIndex):
             self.fail(callerText +
                     "\n  Unexpectedly ran out of fake inputs. Consider adding"
                     " CTRL_Q (and 'n' if necessary).")
             return None
 
-        return displayStyleChecker
+        return checkEndOfInputs
 
     def runWithFakeInputs(self, fakeInputs, argv=None):
         assert hasattr(fakeInputs, "__getitem__") or hasattr(

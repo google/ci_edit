@@ -87,3 +87,39 @@ ends with tab>\t
             CTRL_Q, u"n"
         ])
         self.prg.prefs.editor['lineLimitIndicator'] = lineLimitIndicator
+
+    def test_draw_line_endings(self):
+        #self.setMovieMode(True)
+        assert self.prg.color.get(u'text', 0) != self.prg.color.get(
+                u'selected', 0)
+        self.runWithFakeInputs([
+            self.displayCheck(2, 7, [u"      "]),
+            self.writeText(u"text\none\ntwo\nthree\n"),
+            self.displayCheck(2, 7, [u"text  ", u"one  ", u"two  ", u"three  "]),
+            self.displayCheckStyle(2, 7, 4, 10,
+                                   self.prg.color.get(u'text', 0)),
+            self.selectionCheck(4, 0, 0, 0, 0), KEY_UP, KEY_UP, KEY_UP, KEY_UP,
+            KEY_RIGHT, KEY_SHIFT_RIGHT,
+            self.selectionCheck(0, 2, 0, 1, 3),
+            self.displayCheckStyle(2, 7, 1, 1,
+                                   self.prg.color.get(u'text', 0)),
+            self.displayCheckStyle(2, 8, 1, 1,
+                                   self.prg.color.get(u'selected', 0)),
+            self.displayCheckStyle(2, 9, 1, 3,
+                                   self.prg.color.get(u'text', 0)),
+            KEY_SHIFT_RIGHT, KEY_SHIFT_RIGHT, KEY_SHIFT_RIGHT, KEY_SHIFT_RIGHT,
+            self.displayCheckStyle(2, 7, 1, 1,
+                                   self.prg.color.get(u'text', 0)),
+            self.displayCheckStyle(2, 8, 1, 4,
+                                   self.prg.color.get(u'selected', 0)),
+            self.displayCheckStyle(3, 7, 1, 1,
+                                   self.prg.color.get(u'selected', 0)),
+            KEY_SHIFT_RIGHT, KEY_SHIFT_RIGHT, KEY_SHIFT_RIGHT, KEY_SHIFT_RIGHT,
+            self.displayCheckStyle(2, 7, 1, 1,
+                                   self.prg.color.get(u'text', 0)),
+            self.displayCheckStyle(2, 8, 1, 4,
+                                   self.prg.color.get(u'selected', 0)),
+            self.displayCheckStyle(3, 7, 1, 4,
+                                   self.prg.color.get(u'selected', 0)),
+            CTRL_Q, u"n"
+        ])

@@ -107,31 +107,34 @@ class Selectable(app.line_buffer.LineBuffer):
             assert kSelectionNone <= selectionMode < kSelectionModeCount
         lines = []
         if selectionMode == kSelectionBlock:
-            if (lowerRow + 1 < len(self.lines)):
+            if (lowerRow + 1 < self.parser.rowCount()):
                 lowerRow += 1
             for i in range(upperRow, lowerRow):
-                lines.append(self.lines[i][upperCol:lowerCol])
+                lines.append(self.parser.rowText(i, upperCol, lowerCol))
         elif (selectionMode == kSelectionAll or
               selectionMode == kSelectionCharacter or
               selectionMode == kSelectionLine or
               selectionMode == kSelectionWord):
             if upperRow == lowerRow:
-                lines.append(self.lines[upperRow][upperCol:lowerCol])
+                lines.append(self.parser.rowText(upperRow, upperCol, lowerCol))
             else:
                 for i in range(upperRow, lowerRow + 1):
                     if i == upperRow:
-                        lines.append(self.lines[i][upperCol:])
+                        lines.append(self.parser.rowText(i, upperCol))
                     elif i == lowerRow:
-                        lines.append(self.lines[i][:lowerCol])
+                        lines.append(self.parser.rowText(i, 0, lowerCol))
                     else:
-                        lines.append(self.lines[i])
+                        lines.append(self.parser.rowText(i))
         return tuple(lines)
 
     def doDeleteSelection(self):
+        """Call doDelete() with current pen and marker values."""
         upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
         self.doDelete(upperRow, upperCol, lowerRow, lowerCol)
 
     def doDelete(self, upperRow, upperCol, lowerRow, lowerCol):
+        """Delete characters from (upperRow, upperCol) up to (lowerRow,
+        lowerCol) using the current selection mode."""
         if app.config.strict_debug:
             assert isinstance(upperRow, int)
             assert isinstance(upperCol, int)
@@ -139,22 +142,14 @@ class Selectable(app.line_buffer.LineBuffer):
             assert isinstance(lowerCol, int)
             assert upperRow <= lowerRow
             assert upperRow != lowerRow or upperCol <= lowerCol
-        if self.upperChangedRow > upperRow:
-            self.upperChangedRow = upperRow
         if self.selectionMode == kSelectionBlock:
-            for i in range(upperRow, lowerRow + 1):
-                line = self.lines[i]
-                self.lines[i] = line[:upperCol] + line[lowerCol:]
+            self.parser.deleteBlock(upperRow, upperCol, lowerRow, lowerCol)
         elif (self.selectionMode == kSelectionNone or
               self.selectionMode == kSelectionAll or
               self.selectionMode == kSelectionCharacter or
               self.selectionMode == kSelectionLine or
               self.selectionMode == kSelectionWord):
-            upperLine = self.lines[upperRow]
-            lowerLine = self.lines[lowerRow]
-            self.lines[upperRow] = upperLine[:upperCol] + lowerLine[lowerCol:]
-            if upperRow != lowerRow:
-                del self.lines[upperRow + 1:lowerRow + 1]
+            self.parser.deleteRange(upperRow, upperCol, lowerRow, lowerCol)
 
     def insertLines(self, lines):
         if app.config.strict_debug:
@@ -167,37 +162,32 @@ class Selectable(app.line_buffer.LineBuffer):
             assert isinstance(col, int)
             assert isinstance(lines, tuple)
             assert isinstance(selectionMode, int)
-        if len(lines) == 0:
-            return
+        if len(lines) <= 1:
+            if len(lines) == 0 or len(lines[0]) == 0:
+                # Optimization. There's nothing to insert.
+                return
         lines = list(lines)
-        if self.upperChangedRow > row:
-            self.upperChangedRow = row
         if selectionMode == kSelectionBlock:
-            for i, line in enumerate(lines):
-                self.lines[row + i] = (self.lines[row + i][:col] + line +
-                                       self.lines[row + i][col:])
+            self.parser.insertBlock(row, col, lines)
         elif (selectionMode == kSelectionNone or
               selectionMode == kSelectionAll or
               selectionMode == kSelectionCharacter or
               selectionMode == kSelectionLine or
               selectionMode == kSelectionWord):
-            lines.reverse()
-            firstLine = self.lines[row]
             if len(lines) == 1:
-                self.lines[row] = (firstLine[:col] + lines[0] + firstLine[col:])
+                self.parser.insert(row, col, lines[0])
             else:
-                self.lines[row] = (firstLine[:col] + lines[-1])
-                currentRow = row + 1
-                self.lines.insert(currentRow, lines[0] + firstLine[col:])
-                for line in lines[1:-1]:
-                    self.lines.insert(currentRow, line)
+                self.parser.insertLines(row, col, lines)
         else:
             app.log.info('selection mode not recognized', selectionMode)
 
     def __extendWords(self, upperRow, upperCol, lowerRow, lowerCol):
         """Extends and existing selection to the nearest word boundaries. The
         pen and marker will be extended away from each other. The extension may
-        occur in one, both, or neither direction."""
+        occur in one, both, or neither direction.
+
+        Returns: tuple of (upperCol, lowerCol).
+        """
         line = self.parser.rowText(upperRow)
         for segment in re.finditer(app.regex.kReWordBoundary, line):
             if segment.start() <= upperCol < segment.end():
@@ -211,8 +201,13 @@ class Selectable(app.line_buffer.LineBuffer):
         return upperCol, lowerCol
 
     def extendSelection(self):
-        """Get a tuple of:
-        (penRow, penCol, markerRow, markerCol, selectionMode)"""
+        """Expand the current selection to fit the selection mode. E.g. if the
+        pen in the middle of a word, selection word will extend the selection to
+        the left and right so that the whole word is selected.
+
+        Returns: tuple of (penRow, penCol, markerRow, markerCol, selectionMode)
+            which are the delta values to accomplish the selection mode.
+        """
         if self.selectionMode == kSelectionNone:
             return (0, 0, -self.markerRow, -self.markerCol, 0)
         elif self.selectionMode == kSelectionAll:

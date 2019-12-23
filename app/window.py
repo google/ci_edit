@@ -80,7 +80,7 @@ class ViewWindow:
             app.log.check_le(row, self.rows)
             app.log.check_le(col, self.cols)
         self.program.backgroundFrame.addStr(self.top + row, self.left + col,
-                                  text.encode('utf-8'), colorPair)
+                                            text.encode('utf-8'), colorPair)
 
     def reattach(self):
         self.setParent(self.parent)
@@ -344,8 +344,9 @@ class ViewWindow:
             assert isinstance(text, unicode)
         text = text[:self.cols]
         text = text + u' ' * max(0, self.cols - len(text))
-        self.program.backgroundFrame.addStr(self.top + self.writeLineRow, self.left,
-                                  text.encode(u'utf-8'), color)
+        self.program.backgroundFrame.addStr(self.top + self.writeLineRow,
+                                            self.left, text.encode(u'utf-8'),
+                                            color)
         self.writeLineRow += 1
 
     def getProgram(self):
@@ -428,7 +429,7 @@ class Window(ActiveWindow):
             self.textBuffer.mouseWheelUp(shift, ctrl, alt)
 
     def preferredSize(self, rowLimit, colLimit):
-        return min(rowLimit, len(self.textBuffer.lines)), colLimit
+        return min(rowLimit, self.textBuffer.parser.rowCount()), colLimit
 
     def render(self):
         if self.textBuffer:
@@ -451,11 +452,11 @@ class Window(ActiveWindow):
         """returns whether work is finished (no need to call again)."""
         finished = True
         tb = self.textBuffer
-        if tb is not None and tb.parser.fullyParsedToLine < len(tb.lines):
+        if tb is not None and tb.parser.resumeAtRow < tb.parser.rowCount():
             tb.parseDocument()
             # If a user event came in while parsing, the parsing will be paused
             # (to be resumed after handling the event).
-            finished = tb.parser.fullyParsedToLine >= len(tb.lines)
+            finished = tb.parser.resumeAtRow >= tb.parser.rowCount()
         for child in self.zOrder:
             finished = finished and child.longTimeSlice()
         return finished
@@ -465,7 +466,7 @@ class Window(ActiveWindow):
         tb = self.textBuffer
         if tb is not None:
             tb.parseScreenMaybe()
-            return tb.parser.fullyParsedToLine >= len(tb.lines)
+            return tb.parser.resumeAtRow >= tb.parser.rowCount()
         return True
 
 
@@ -608,8 +609,14 @@ class LineNumbers(ViewWindow):
         self.host = host
 
     def drawLineNumbers(self):
+        if app.config.strict_debug:
+            assert isinstance(self.rows, int)
+            assert isinstance(self.host.scrollRow, int)
+            assert self.rows >= 1
+            assert self.host.textBuffer.parser.rowCount() >= 1
+            assert self.host.scrollRow >= 0
         limit = min(self.rows,
-                    len(self.host.textBuffer.lines) - self.host.scrollRow)
+                    self.host.textBuffer.parser.rowCount() - self.host.scrollRow)
         cursorBookmarkColorIndex = None
         visibleBookmarks = self.getVisibleBookmarks(self.host.scrollRow,
                                                     self.host.scrollRow + limit)
@@ -638,7 +645,8 @@ class LineNumbers(ViewWindow):
         if self.host.scrollCol > 0:
             color = colorPrefs.get(u'line_overflow')
             for i in range(limit):
-                if len(self.host.textBuffer.lines[self.host.scrollRow + i]) > 0:
+                if self.host.textBuffer.parser.rowWidth(
+                        self.host.scrollRow + i) > 0:
                     self.addStr(i, 6, u' ', color)
         # Draw blank line number rows past the end of the document.
         color = colorPrefs.get(u'outside_document')
@@ -686,7 +694,7 @@ class LineNumbers(ViewWindow):
             return
         self.host.changeFocusTo(self.host)
         tb = self.host.textBuffer
-        if self.host.scrollRow + paneRow >= len(tb.lines):
+        if self.host.scrollRow + paneRow >= tb.parser.rowCount():
             tb.selectionNone()
             return
         if shift:
@@ -705,7 +713,7 @@ class LineNumbers(ViewWindow):
 
     def mouseMoved(self, paneRow, paneCol, shift, ctrl, alt):
         app.log.info(paneRow, paneCol, shift)
-        self.host.textBuffer.mouseClick(paneRow, paneCol - self.cols, True,
+        self.host.textBuffer.mouseMoved(paneRow, paneCol - self.cols, True,
                                         ctrl, alt)
 
     def mouseRelease(self, paneRow, paneCol, shift, ctrl, alt):
@@ -942,10 +950,10 @@ class StatusLine(ViewWindow):
         # Percentages.
         rowPercentage = 0
         colPercentage = 0
-        lineCount = len(tb.lines)
+        lineCount = tb.parser.rowCount()
         if lineCount:
             rowPercentage = self.host.textBuffer.penRow * 100 // lineCount
-            charCount = len(tb.lines[self.host.textBuffer.penRow])
+            charCount = tb.parser.rowWidth(self.host.textBuffer.penRow)
             if charCount and self.host.textBuffer.penCol != 0:
                 colPercentage = self.host.textBuffer.penCol * 100 // charCount
         # Format.
@@ -978,19 +986,19 @@ class TopInfo(ViewWindow):
         tb = self.host.textBuffer
         lines = []
         # TODO: Make dynamic topInfo work properly
-        if len(tb.lines):
+        if tb.parser.rowCount():
             lineCursor = self.host.scrollRow
             line = ""
             # Check for extremely small window.
-            if len(tb.lines) > lineCursor:
+            if tb.parser.rowCount() > lineCursor:
                 while len(line) == 0 and lineCursor > 0:
-                    line = tb.lines[lineCursor]
+                    line = tb.parser.rowText(lineCursor)
                     lineCursor -= 1
             if len(line):
                 indent = len(line) - len(line.lstrip(u' '))
                 lineCursor += 1
-                while lineCursor < len(tb.lines):
-                    line = tb.lines[lineCursor]
+                while lineCursor < tb.parser.rowCount():
+                    line = tb.parser.rowText(lineCursor)
                     if not len(line):
                         continue
                     z = len(line) - len(line.lstrip(u' '))
@@ -1000,7 +1008,7 @@ class TopInfo(ViewWindow):
                     else:
                         break
                 while indent and lineCursor > 0:
-                    line = tb.lines[lineCursor]
+                    line = tb.parser.rowText(lineCursor)
                     if len(line):
                         z = len(line) - len(line.lstrip(u' '))
                         if z < indent:
@@ -1203,12 +1211,11 @@ class InputWindow(Window):
         """Draw makers to indicate text extending past the right edge of the
         window."""
         maxRow, maxCol = self.rows, self.cols
-        limit = min(maxRow, len(self.textBuffer.lines) - self.scrollRow)
+        limit = min(maxRow, self.textBuffer.parser.rowCount() - self.scrollRow)
         colorPrefs = self.program.color
         for i in range(limit):
             color = colorPrefs.get('right_column')
-            if len(self.textBuffer.lines[
-                    i + self.scrollRow]) - self.scrollCol > maxCol:
+            if self.textBuffer.parser.rowWidth(i + self.scrollRow) - self.scrollCol > maxCol:
                 color = colorPrefs.get('line_overflow')
             self.rightColumn.addStr(i, 0, u' ', color)
         color = colorPrefs.get('outside_document')
@@ -1275,7 +1282,7 @@ class InputWindow(Window):
             if f['row'] is not None:
                 if f['col'] is not None:
                     tb.selectText(f['row'], f['col'], 0,
-                            app.selectable.kSelectionNone)
+                                  app.selectable.kSelectionNone)
                 else:
                     tb.selectText(f['row'], 0, 0, app.selectable.kSelectionNone)
         if self.program.prefs.startup.get('readStdin'):
