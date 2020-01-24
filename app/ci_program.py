@@ -435,7 +435,7 @@ class CiProgram:
             try:
                 cursesWindow.addstr(*i)
             except curses.error:
-                #app.log.error('failed to draw', repr(i))
+                app.log.error('failed to draw', repr(i))
                 pass
         if cursor is not None:
             curses.curs_set(1)  # Show cursor.
@@ -446,6 +446,7 @@ class CiProgram:
                 cursesWindow.refresh()
                 cursesWindow.leaveok(1)  # Don't update cursor position.
             except curses.error:
+                app.log.error('failed to move cursor', repr(i))
                 pass
         # This is a workaround to allow background processing (and parser screen
         # redraw) to interact well with the test harness. The intent is to tell
@@ -463,6 +464,9 @@ class CiProgram:
             self.dirPrefs = os.path.join(homePath, 'prefs')
             if not os.path.isdir(self.dirPrefs):
                 os.makedirs(self.dirPrefs)
+            userDictionaries = os.path.join(homePath, 'dictionaries')
+            if not os.path.isdir(userDictionaries):
+                os.makedirs(userDictionaries)
         except Exception as e:
             app.log.exception(e)
 

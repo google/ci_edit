@@ -122,11 +122,12 @@ class Dictionary:
                     index = 0
                     while not len(lines[index]) or lines[index][0] == '#':
                         index += 1
+                    app.log.startup(len(lines) - index, "words from", path)
                     # TODO(dschuyler): Word contractions are hacked by storing
                     # the components of the contraction. So didn, doesn, and isn
                     # are considered 'words'.
                     self.grammarWords[grammarName] = set([
-                        p for l in lines for w in l.split()
+                        p for l in lines[index:] for w in l.split()
                         for p in w.split("'")
                     ])
 
