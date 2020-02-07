@@ -13,12 +13,14 @@
 # limitations under the License.
 
 # This is a list of non-English words that are in Rust libraries (crates).
+cst
 bstate
 endwin
 eprintln
 fmt
 getch
 getmouse
+glutin
 initscr
 iters
 itertools
@@ -39,6 +41,7 @@ printw
 rfind
 rng
 rustc
+rw
 scrollok
 setlocale
 stdscr
