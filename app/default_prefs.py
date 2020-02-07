@@ -154,6 +154,7 @@ color8 = {
     "right_column": 6,
     "rs_byte_string1": 3,
     "rs_byte_string2": 3,
+    "rs_label_or_char": 3,
     "rs_raw_string": 3,
     "selected": 5,
     "special": 1,
@@ -232,6 +233,7 @@ color16 = {
     "right_column": outsideOfBufferColor16Index,
     "rs_byte_string1": stringColor16Index,
     "rs_byte_string2": stringColor16Index,
+    "rs_label_or_char": stringColor16Index,
     "rs_raw_string": stringColor16Index,
     "selected": selectedColor16Index,
     "special": specialsColor16Index,
@@ -308,6 +310,7 @@ color256 = {
     "right_column": outsideOfBufferColorIndex,
     "rs_byte_string1": stringColorIndex,
     "rs_byte_string2": stringColorIndex,
+    "rs_label_or_char": stringColorIndex,
     "rs_raw_string": stringColorIndex,
     "selected": selectedColor,
     "special": specialsColorIndex,
@@ -1195,9 +1198,6 @@ prefs = {
                 "virtual", "where", "while", "yield"
             ],
             "special": [
-                #r"(?<!\w)__.*?__(?!\w)",
-                "<\s*'",
-                "&\s*'",
             ],
             "types": [
                 "bool", "char", "i8", "i16", "i32", "i64", "isize", "u8", "u16",
@@ -1206,10 +1206,11 @@ prefs = {
             "contains": [
                 "cpp_block_comment",
                 "cpp_line_comment",
-                "c_string1",
+                # Using "rs_label_or_char" rather than "c_string1".
                 "c_string2",
                 "rs_byte_string1",
                 "rs_byte_string2",
+                "rs_label_or_char",
                 "rs_raw_string",
             ],
         },
@@ -1220,6 +1221,13 @@ prefs = {
         "rs_byte_string2": {
             "begin": "b\"",
             "end": "\"",
+        },
+        # Rust uses ' for both the start of a label and the start of a character
+        # literal.
+        "rs_label_or_char": {
+            "begin": "'\\w*'?",
+            "end": None,
+            "single_line": True,
         },
         "rs_raw_string": {
             "begin": "b?r#*\"",
