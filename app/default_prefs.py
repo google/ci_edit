@@ -152,6 +152,7 @@ color8 = {
     "quoted_string2": 2,
     "regex_string": 2,
     "right_column": 6,
+    "rs_block_comment": 2,
     "rs_byte_string1": 3,
     "rs_byte_string2": 3,
     "rs_label_or_char": 3,
@@ -231,6 +232,7 @@ color16 = {
     "quoted_string2": stringColor16Index,
     "regex_string": stringColor16Index,
     "right_column": outsideOfBufferColor16Index,
+    "rs_block_comment": commentColor16Index,
     "rs_byte_string1": stringColor16Index,
     "rs_byte_string2": stringColor16Index,
     "rs_label_or_char": stringColor16Index,
@@ -308,6 +310,7 @@ color256 = {
     "quoted_string2": stringColorIndex,
     "regex_string": stringColorIndex,
     "right_column": outsideOfBufferColorIndex,
+    "rs_block_comment": commentColorIndex,
     "rs_byte_string1": stringColorIndex,
     "rs_byte_string2": stringColorIndex,
     "rs_label_or_char": stringColorIndex,
@@ -1198,13 +1201,15 @@ prefs = {
                 "virtual", "where", "while", "yield"
             ],
             "special": [
+                "assert_eq!", "None", "Option", "Result", "Some",
+                "unimplemented!"
             ],
             "types": [
                 "bool", "char", "i8", "i16", "i32", "i64", "isize", "u8", "u16",
                 "u32", "u64", "usize", "array", "slice", "tuple"
             ],
             "contains": [
-                "cpp_block_comment",
+                "rs_block_comment",
                 "cpp_line_comment",
                 # Using "rs_label_or_char" rather than "c_string1".
                 "c_string2",
@@ -1212,6 +1217,23 @@ prefs = {
                 "rs_byte_string2",
                 "rs_label_or_char",
                 "rs_raw_string",
+            ],
+        },
+        # Rust block comments may be nested (unlike cpp_block_comments).
+        "rs_block_comment": {
+            "begin": r"/\*",
+            "continuation": " * ",
+            "end": r"\*/",
+            "indent": "  ",
+            "keywords": [],
+            "special": [
+                r"\bNOTE:",
+                _todo,
+                __chrome_extension,
+                __sha_1,
+            ],
+            "contains": [
+                "rs_block_comment",
             ],
         },
         "rs_byte_string1": {
