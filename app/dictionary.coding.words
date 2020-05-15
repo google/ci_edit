@@ -81,7 +81,9 @@ bzip
 calc
 canonicalize
 canonicalized
+cfenv
 cfg
+cfloat
 cgi
 chan
 changelist
@@ -90,6 +92,7 @@ chans
 checkbox
 checkboxes
 chr
+cinttypes
 cli
 cmake
 cmd
@@ -108,13 +111,17 @@ cp
 cpp
 crc
 crtl
+csetjmp
 css
+cstdarg
+cstdint
 ctor
 ctrl
 ctx
 cua
 cwd
 cxx
+dartfmt
 datagram
 dbus
 deallocation
@@ -154,6 +161,7 @@ ecx
 edu
 edx
 elif
+ellipsized
 emacs
 enablement
 encodings
@@ -208,7 +216,9 @@ gfx
 github
 gitignore
 glibc
+gofmt
 goto
+graphable
 grey
 guid
 gz
@@ -216,6 +226,7 @@ gzip
 hardcode
 hardcoded
 hasher
+hh
 hostname
 hostnames
 hpp
@@ -266,8 +277,11 @@ len
 lexing
 lf
 lhs
+libbsd
 libc
+libcxx
 libs
+libstdc
 lifecycle
 lifo
 lk
@@ -350,6 +364,7 @@ prefetch
 prerender
 prerendered
 presubmit
+presubmits
 prev
 prg
 proc
@@ -403,6 +418,9 @@ rrggbbaa
 rtti
 runtime
 runtimes
+rustc
+rustdoc
+rustfmt
 rv
 rvalue
 rvalues
@@ -517,6 +535,7 @@ vdso
 versioning
 vi
 vimrc
+virtualization
 vkey
 vpn
 vpns
@@ -524,6 +543,7 @@ vsync
 waitable
 wasm
 wav
+wavl
 wb
 webkit
 websocket
