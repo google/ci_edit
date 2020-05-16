@@ -16,6 +16,7 @@
 cst
 bstate
 endwin
+eprint
 eprintln
 fmt
 getch

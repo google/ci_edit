@@ -97,7 +97,6 @@ __special_string_escapes = [
     r"\\t",
     r"\\v",
     r"\\0[0-7]{0,3}",
-    #r"%#?-?[0-9]*\.?[0-9]*z?.",
     __chrome_extension,
     __sha_1,
 ]
@@ -736,7 +735,10 @@ prefs = {
             "end": "\"",
             "escaped": "\\\\\"",
             "indent": "  ",
-            "special": __special_string_escapes + ["\\\\\""],
+            "special": __special_string_escapes + [
+                "\\\\\"",
+                r"%#?-?[0-9]*\.?[0-9]*z?.",
+            ],
             "single_line": True,
         },
         "c_path_bracketed_file": {
