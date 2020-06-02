@@ -353,6 +353,9 @@ class Actions(app.mutator.Mutator):
         grammar = self.parser.grammarAt(self.penRow, self.penCol)
         self.redoAddChange((u'n', 1, self.getCursorMove(1, -self.penCol)))
         self.redo()
+        if not self.program.prefs.editor["autoIndent"]:
+            self.updateBasicScrollPosition()
+            return
         grammarIndent = grammar.get(u'indent')
         if grammarIndent:
             # TODO(): Hack fix. Reconsider how it should be done.

@@ -364,6 +364,8 @@ prefs = {
         },
     },
     "editor": {
+        # Whether to automatically indent after pressing carriage return.
+        "autoIndent": True,
         # E.g. When key "(" is pressed, "()" is typed.
         "autoInsertClosingCharacter": False,
         # When opening a path that starts with "//", the value is used to
