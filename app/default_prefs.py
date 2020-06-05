@@ -742,7 +742,7 @@ prefs = {
             "indent": "  ",
             "special": __special_string_escapes + [
                 "\\\\\"",
-                r"%#?-?[0-9]*\.?[0-9]*z?.",
+                r"%?:#?-?[0-9]*\.?[0-9]*z?\w",
             ],
             "single_line": True,
         },
