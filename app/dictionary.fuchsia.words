@@ -13,6 +13,13 @@
 # limitations under the License.
 
 # This is a list of non-English words that are in the open source Fuchsia OS.
+ffx
+testonly
+netprotocol
+netaddr
+netcp
+netls
+netruncmd
 asan
 lsan
 vlogs

@@ -14,6 +14,16 @@
 
 # This is a list of non-English words that are commonly found in programming
 # source code files.
+protobufs
+sshd
+sigkill
+daemonized
+misconfigured
+ntop
+getsockname
+awk
+chmod
+netstat
 a
 aarrggbb
 ab
