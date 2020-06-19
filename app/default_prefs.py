@@ -833,8 +833,12 @@ prefs = {
                 "super", "switch", "sync", "this", "throw", "true", "try",
                 "typedef", "var", "void", "while", "with", "yield"
             ],
+            "types": [
+                "bool", "Iterable", "String", "Map", "Int64", "Future", "int",
+                "Timestamp",
+            ],
             "special": [
-                "@override",
+                "@immutable", "@override", "@protected", "@required",
             ],
             "contains": [
                 # This list is carefully ordered. Don"t sort it.
