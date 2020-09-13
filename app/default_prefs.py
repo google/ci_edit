@@ -36,9 +36,9 @@ __c_keywords = __common_keywords + [
 
 __linux_commands = [
     "ag", "basename", "bash", "cd", "chmod", "cp", "dircolors", "dirname",
-    "echo", "egrep", "find", "grep", "ixoff", "ixon", "lesspipe", "ln", "ls",
-    "mkdir", "read", "rm", "rmdir", "rxvt", "sed", "sh", "shell", "sleep",
-    "ssh", "tput", "wc"
+    "echo", "egrep", "find", "grep", "inotify", "inotifywait", "ixoff", "ixon",
+    "lesspipe", "ln", "ls", "mkdir", "read", "rm", "rmdir", "rxvt", "sed", "sh",
+    "shell", "sleep", "ssh", "tput", "uname", "wc", "which", "xargs"
 ]
 
 if sys.version_info[0] == 2:
@@ -480,6 +480,11 @@ prefs = {
             "grammar": "dart",
             "tabToSpaces": True,
         },
+        "fidl": {
+            "ext": [".fidl"],
+            "grammar": "fidl",
+            "tabToSpaces": True,
+        },
         "gn": {
             "ext": [".gn", ".gni"],
             "grammar": "gn",
@@ -594,9 +599,9 @@ prefs = {
             "indent":
             "  ",
             "keywords": [
-                "break", "case", "continue", "do", "done", "echo", "else",
-                "esac", "exit", "fi", "if", "for", "return", "switch", "then",
-                "while"
+                "break", "case", "continue", "declare", "do", "done", "echo",
+                "elif", "else", "esac", "exit", "fi", "if", "for", "return",
+                "switch", "then", "while"
             ],
             # Not really types.
             "types": __linux_commands,
@@ -745,7 +750,7 @@ prefs = {
             "indent": "  ",
             "special": __special_string_escapes + [
                 "\\\\\"",
-                r"%?:#?-?[0-9]*\.?[0-9]*z?\w",
+                r"%:#?-?[0-9]*\.?[0-9]*z?\w",
             ],
             "single_line": True,
         },
@@ -895,6 +900,19 @@ prefs = {
         "error": {
             "indent": "  ",
             "spelling": False,
+        },
+        "fidl": {
+            "indent": "  ",
+            "keywords": ["bits", "compose", "enum", "error", "library",
+                "protocol", "struct", "table", "union", "using"],
+            "special": ["\[Discoverable\]"],
+            "types": ["array", "handle", "int8", "int16", "int32", "int64",
+                "string", "uint8", "uint16", "uint32", "uint64", "vector"],
+            "contains": [
+                "cpp_line_comment",
+                "c_string1",
+                "c_string2",
+            ],
         },
         # Generate Ninja language.
         "gn": {
