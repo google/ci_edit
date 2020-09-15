@@ -1257,8 +1257,8 @@ prefs = {
                 "virtual", "where", "while", "yield"
             ],
             "special": [
-                "assert_eq!", "None", "Option", "Result", "Some",
-                "unimplemented!"
+                "\\bassert_eq!", "\\bNone\\b", "\\bOption\\b", "\\bResult\\b",
+                "\\bSome\\b", "\\bunimplemented!"
             ],
             "types": [
                 "bool", "char", "i8", "i16", "i32", "i64", "isize", "u8", "u16",
