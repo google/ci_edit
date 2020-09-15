@@ -14,6 +14,42 @@
 
 # This is a list of non-English words that are commonly found in programming
 # source code files.
+daemonize
+ffi
+xattr
+mdns
+hvf
+swiftshader
+chown
+homebrew
+femu
+aemu
+qemu
+tuntap
+sourceforge
+ki
+gi
+gi
+ti
+pi
+ei
+zi
+yi
+pseudocode
+kibibyte
+mebibyte
+gibibyte
+tebibyte
+pebibyte
+exbibyte
+zebibyte
+yobibyte
+refetching
+mebibyte
+roadmap
+cls
+bootloader
+bootloaders
 protobufs
 sshd
 sigkill
