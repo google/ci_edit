@@ -137,6 +137,7 @@ color8 = {
     "matching_bracket": 1,
     "matching_find": 1,
     "md_code": 2,
+    "md_heading": 3,
     "md_link": 2,
     "message_line": 3,
     "misspelling": 3,
@@ -219,6 +220,7 @@ color16 = {
     "matching_bracket": 15,
     "matching_find": 9,
     "md_code": stringColor16Index,
+    "md_heading": specialsColor16Index,
     "md_link": stringColor16Index,
     "message_line": borderColor16Index,
     "misspelling": 9,
@@ -299,6 +301,7 @@ color256 = {
     "matching_bracket": 201,
     "matching_find": 9,
     "md_code": stringColorIndex,
+    "md_heading": specialsColorIndex,
     "md_link": stringColorIndex,
     "message_line": 3,
     "misspelling": 9,
@@ -1073,11 +1076,12 @@ prefs = {
         "md": {
             "indent": "  ",
             "keywords": [],
-            "special": [ r"#.*" ],
+            #"special": [ r"#.*" ],
             #"special": [r"\[[^]]+\]\([^)]+\)"],
             "contains": [
                 "md_link",
                 "md_code",
+                "md_heading",
                 #"quoted_string1", "quoted_string2"
             ],
         },
@@ -1085,6 +1089,17 @@ prefs = {
             "begin": "`",
             "end": "`",
             "indent": "  ",
+        },
+        "md_heading": {
+            "begin": "^#",
+            "continuation": "# ",
+            "end": r"\n",
+            "indent": "  ",
+            "keywords": [],
+            "special": [
+                r"\bNOTE:",
+                _todo,
+            ],
         },
         "md_link": {
             "begin": "\[",
