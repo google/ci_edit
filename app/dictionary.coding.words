@@ -14,16 +14,6 @@
 
 # This is a list of non-English words that are commonly found in programming
 # source code files.
-protobufs
-sshd
-sigkill
-daemonized
-misconfigured
-ntop
-getsockname
-awk
-chmod
-netstat
 a
 aarrggbb
 ab
@@ -58,6 +48,7 @@ accessors
 acos
 adate
 addr
+aemu
 alignof
 alloc
 apis
@@ -74,6 +65,7 @@ attr
 attrs
 auth
 authenticator
+awk
 backtrace
 baz
 bbggrr
@@ -84,6 +76,8 @@ blitter
 bool
 booleans
 bools
+bootloader
+bootloaders
 bsp
 buf
 bugzilla
@@ -101,9 +95,12 @@ changelog
 chans
 checkbox
 checkboxes
+chmod
+chown
 chr
 cinttypes
 cli
+cls
 cmake
 cmd
 cmp
@@ -131,6 +128,8 @@ ctx
 cua
 cwd
 cxx
+daemonize
+daemonized
 dartfmt
 datagram
 dbus
@@ -170,6 +169,7 @@ ebx
 ecx
 edu
 edx
+ei
 elif
 ellipsized
 emacs
@@ -190,6 +190,7 @@ esc
 etags
 ethernet
 eval
+exbibyte
 exe
 exec
 exts
@@ -197,7 +198,9 @@ fcntl
 fd
 fdio
 fds
+femu
 ff
+ffi
 fi
 fifo
 fifos
@@ -221,8 +224,11 @@ gaia
 gamepad
 gamepads
 ge
+getsockname
 getter
 gfx
+gi
+gibibyte
 github
 gitignore
 glibc
@@ -237,11 +243,13 @@ hardcode
 hardcoded
 hasher
 hh
+homebrew
 hostname
 hostnames
 hpp
 htm
 https
+hvf
 hw
 hxx
 ia
@@ -281,6 +289,8 @@ json
 keyframe
 keyframed
 keyframes
+ki
+kibibyte
 lambdas
 le
 len
@@ -305,11 +315,14 @@ lvalue
 lvalues
 makefile
 makefiles
+mdns
+mebibyte
 mem
 memoize
 memoized
 microkernel
 minified
+misconfigured
 mixin
 mixins
 mmu
@@ -335,9 +348,11 @@ ne
 neq
 netmask
 netmasks
+netstat
 noop
 nsec
 nsecs
+ntop
 nullability
 nullable
 nulled
@@ -356,7 +371,9 @@ overscroll
 overscrolling
 patcher
 pcm
+pebibyte
 pem
+pi
 pid
 pipelining
 pkgs
@@ -379,7 +396,9 @@ prev
 prg
 proc
 proto
+protobufs
 psec
+pseudocode
 pthread
 pthreads
 ptr
@@ -390,6 +409,7 @@ px
 py
 pyc
 pyo
+qemu
 qux
 raii
 rar
@@ -403,6 +423,7 @@ rects
 recurses
 recursing
 reenable
+refetching
 refptr
 regex
 regexes
@@ -422,6 +443,7 @@ requeued
 requeuing
 rhs
 ro
+roadmap
 rpc
 rrggbb
 rrggbbaa
@@ -445,17 +467,20 @@ shader
 shtml
 sig
 sigbus
+sigkill
 signin
 sigtrap
 sizeof
 skia
 smp
 solaris
+sourceforge
 sp
 sql
 src
 srcs
 ssh
+sshd
 std
 stderr
 stdin
@@ -476,6 +501,7 @@ stylesheet
 sudo
 svg
 svn
+swiftshader
 symlink
 symlinks
 syncable
@@ -486,12 +512,14 @@ syslog
 sz
 tar
 tcp
+tebibyte
 templated
 templatizer
 templatizers
 textbox
 tgz
 throbber
+ti
 tid
 tk
 tmp
@@ -508,6 +536,7 @@ trackpad
 traversable
 trie
 tty
+tuntap
 tx
 txt
 typdef
@@ -567,6 +596,7 @@ wifi
 wildcard
 wildcards
 wireframe
+xattr
 xhtml
 xorg
 xss
@@ -574,7 +604,11 @@ xterm
 xy
 xyz
 xz
+yi
+yobibyte
 yz
+zebibyte
+zi
 zsh
 zterm
 zyyy

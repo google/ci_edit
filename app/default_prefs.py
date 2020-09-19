@@ -36,9 +36,9 @@ __c_keywords = __common_keywords + [
 
 __linux_commands = [
     "ag", "basename", "bash", "cd", "chmod", "cp", "dircolors", "dirname",
-    "echo", "egrep", "find", "grep", "ixoff", "ixon", "lesspipe", "ln", "ls",
-    "mkdir", "read", "rm", "rmdir", "rxvt", "sed", "sh", "shell", "sleep",
-    "ssh", "tput", "wc"
+    "echo", "egrep", "find", "grep", "inotify", "inotifywait", "ixoff", "ixon",
+    "lesspipe", "ln", "ls", "mkdir", "read", "rm", "rmdir", "rxvt", "sed", "sh",
+    "shell", "sleep", "ssh", "tput", "uname", "wc", "which", "xargs"
 ]
 
 if sys.version_info[0] == 2:
@@ -137,6 +137,7 @@ color8 = {
     "matching_bracket": 1,
     "matching_find": 1,
     "md_code": 2,
+    "md_heading": 3,
     "md_link": 2,
     "message_line": 3,
     "misspelling": 3,
@@ -219,6 +220,7 @@ color16 = {
     "matching_bracket": 15,
     "matching_find": 9,
     "md_code": stringColor16Index,
+    "md_heading": specialsColor16Index,
     "md_link": stringColor16Index,
     "message_line": borderColor16Index,
     "misspelling": 9,
@@ -299,6 +301,7 @@ color256 = {
     "matching_bracket": 201,
     "matching_find": 9,
     "md_code": stringColorIndex,
+    "md_heading": specialsColorIndex,
     "md_link": stringColorIndex,
     "message_line": 3,
     "misspelling": 9,
@@ -480,6 +483,11 @@ prefs = {
             "grammar": "dart",
             "tabToSpaces": True,
         },
+        "fidl": {
+            "ext": [".fidl"],
+            "grammar": "fidl",
+            "tabToSpaces": True,
+        },
         "gn": {
             "ext": [".gn", ".gni"],
             "grammar": "gn",
@@ -594,9 +602,9 @@ prefs = {
             "indent":
             "  ",
             "keywords": [
-                "break", "case", "continue", "do", "done", "echo", "else",
-                "esac", "exit", "fi", "if", "for", "return", "switch", "then",
-                "while"
+                "break", "case", "continue", "declare", "do", "done", "echo",
+                "elif", "else", "esac", "exit", "fi", "if", "for", "return",
+                "switch", "then", "while"
             ],
             # Not really types.
             "types": __linux_commands,
@@ -745,7 +753,7 @@ prefs = {
             "indent": "  ",
             "special": __special_string_escapes + [
                 "\\\\\"",
-                r"%?:#?-?[0-9]*\.?[0-9]*z?\w",
+                r"%:#?-?[0-9]*\.?[0-9]*z?\w",
             ],
             "single_line": True,
         },
@@ -833,8 +841,12 @@ prefs = {
                 "super", "switch", "sync", "this", "throw", "true", "try",
                 "typedef", "var", "void", "while", "with", "yield"
             ],
+            "types": [
+                "bool", "Iterable", "String", "Map", "Int64", "Future", "int",
+                "Timestamp",
+            ],
             "special": [
-                "@override",
+                "@immutable", "@override", "@protected", "@required",
             ],
             "contains": [
                 # This list is carefully ordered. Don"t sort it.
@@ -891,6 +903,19 @@ prefs = {
         "error": {
             "indent": "  ",
             "spelling": False,
+        },
+        "fidl": {
+            "indent": "  ",
+            "keywords": ["bits", "compose", "enum", "error", "library",
+                "protocol", "struct", "table", "union", "using"],
+            "special": ["\[Discoverable\]"],
+            "types": ["array", "handle", "int8", "int16", "int32", "int64",
+                "string", "uint8", "uint16", "uint32", "uint64", "vector"],
+            "contains": [
+                "cpp_line_comment",
+                "c_string1",
+                "c_string2",
+            ],
         },
         # Generate Ninja language.
         "gn": {
@@ -1051,11 +1076,12 @@ prefs = {
         "md": {
             "indent": "  ",
             "keywords": [],
-            "special": [ r"#.*" ],
+            #"special": [ r"#.*" ],
             #"special": [r"\[[^]]+\]\([^)]+\)"],
             "contains": [
                 "md_link",
                 "md_code",
+                "md_heading",
                 #"quoted_string1", "quoted_string2"
             ],
         },
@@ -1063,6 +1089,17 @@ prefs = {
             "begin": "`",
             "end": "`",
             "indent": "  ",
+        },
+        "md_heading": {
+            "begin": "^#",
+            "continuation": "# ",
+            "end": r"\n",
+            "indent": "  ",
+            "keywords": [],
+            "special": [
+                r"\bNOTE:",
+                _todo,
+            ],
         },
         "md_link": {
             "begin": "\[",
@@ -1235,8 +1272,8 @@ prefs = {
                 "virtual", "where", "while", "yield"
             ],
             "special": [
-                "assert_eq!", "None", "Option", "Result", "Some",
-                "unimplemented!"
+                "\\bassert_eq!", "\\bNone\\b", "\\bOption\\b", "\\bResult\\b",
+                "\\bSome\\b", "\\bunimplemented!"
             ],
             "types": [
                 "bool", "char", "i8", "i16", "i32", "i64", "isize", "u8", "u16",

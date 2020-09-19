@@ -1,4 +1,4 @@
-# Copyright 2018 Google Inc.
+# Copyright 2020 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,50 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This is a list of non-English words that are in Rust libraries (crates).
-deref
-thiserror
-rngs
-termion
-ntapi
-crossterm
-tui
-millis
-serde
-argh
-cst
-bstate
-endwin
-eprint
-eprintln
-fmt
-getch
-getmouse
-glutin
-initscr
-iters
-itertools
-izip
-lc
-leaveok
-mevent
-mmask
-mousemask
-multizip
-mut
-mv
-ncurses
-noecho
-peekable
-println
-printw
-rfind
-rng
-rustc
-rw
-scrollok
-setlocale
-stdscr
-structopt
-vec
-writeln
+# This is a list of non-English words that are commonly found in fidl source
+# code files.
+
+channelcontrol

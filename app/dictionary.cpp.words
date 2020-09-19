@@ -14,6 +14,13 @@
 
 # This is a list of non-English words that are in the C++ programming language
 # libraries.
+stoull
+cbegin
+cend
+crbegin
+crend
+rfind
+cstdlib
 acosh
 addrstrlen
 af

@@ -219,7 +219,7 @@ class InteractivePrompt(app.controller.Controller):
             tb = self.view.host.textBuffer
             lines = list(tb.getSelectedText())
             if cmdLine[0] in self.subExecute:
-                data = self.view.host.textBuffer.parser.data.encode('utf-8')
+                data = "\n".join(lines).encode('utf-8')
                 output, message = self.subExecute.get(cmdLine[0])(cmdLine[1:],
                                                                   data)
                 if app.config.strict_debug:
