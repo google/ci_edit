@@ -149,6 +149,7 @@ hglobal
 hinstance
 hmenu
 hwnd
+iexec
 iglob
 ignorecase
 init
@@ -157,6 +158,7 @@ ino
 insort
 inventwithpython
 ioerr
+isabs
 isalnum
 isalpha
 isatty
@@ -269,6 +271,7 @@ repl
 repr
 resizeterm
 restype
+returncode
 rfind
 rit
 rmdir

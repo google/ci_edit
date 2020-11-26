@@ -14,13 +14,6 @@
 
 # This is a list of non-English words that are in the C++ programming language
 # libraries.
-stoull
-cbegin
-cend
-crbegin
-crend
-rfind
-cstdlib
 acosh
 addrstrlen
 af
@@ -44,9 +37,11 @@ bsearch
 btowc
 calloc
 cassert
+cbegin
 ccomplex
 cctype
 ceil
+cend
 cerr
 cin
 clearerr
@@ -58,9 +53,12 @@ copyfmt
 countof
 cout
 cplusplus
+crbegin
 creat
+crend
 cstddef
 cstdio
+cstdlib
 cstream
 cstring
 ctime
@@ -285,6 +283,7 @@ recvfrom
 refcounted
 resetiosflags
 ret
+rfind
 scanf
 seekdir
 seekg
@@ -337,6 +336,7 @@ stddef
 stdint
 stdlib
 stoi
+stoull
 strcat
 strchr
 strcmp

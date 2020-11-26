@@ -13,10 +13,6 @@
 # limitations under the License.
 
 # This is a list of non-English words that are in Bash/shell scripts.
-mktemp
-rsync
-xattr
-chown
 autoconf
 awk
 cd
@@ -28,6 +24,7 @@ env
 grep
 ls
 mkdir
+mktemp
 rf
 rm
 rmdir
@@ -42,4 +39,5 @@ vcs
 vlog
 wc
 xargs
+xattr
 xserver

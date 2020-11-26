@@ -15,24 +15,6 @@
 # This word list is a fallback for times when an OS dictionary is not available.
 # It's not a full list of English words (not by a long way).
 # Additional abbreviations, acronyms, and names are in dictionary.en-misc.words.
-aground
-abbreviating
-sortable
-anecdote
-anecdotes
-empathic
-outlier
-outliers
-oversubscribe
-oversubscribed
-oversubscribing
-oversubscribes
-extensibility
-sharded
-declarer
-repurpose
-repurposed
-repurposing
 a
 aah
 aardvark
@@ -49,6 +31,7 @@ abbr
 abbrev
 abbreviate
 abbreviated
+abbreviating
 abbreviation
 abbreviations
 abed
@@ -490,6 +473,8 @@ aggregated
 aggregates
 aggregating
 aggregation
+aggregator
+aggregators
 aggression
 aggressive
 aggressively
@@ -509,6 +494,7 @@ agreement
 agreements
 agrees
 agriculture
+aground
 ah
 aha
 ahead
@@ -762,6 +748,7 @@ analogs
 analogue
 analogy
 analysis
+analyst
 analytics
 analyze
 analyzed
@@ -784,6 +771,8 @@ and
 android
 androids
 anecdotal
+anecdote
+anecdotes
 anesthetize
 anew
 angel
@@ -1916,8 +1905,11 @@ birds
 birdsong
 birth
 birthday
+birthed
+birthing
 birthmark
 birthplace
+births
 bis
 biscotti
 biscotto
@@ -2159,6 +2151,7 @@ booster
 boosting
 boosts
 boot
+bootable
 booted
 booth
 booting
@@ -3501,6 +3494,7 @@ colorization
 colorize
 colorized
 colors
+colorway
 cols
 colt
 column
@@ -4855,6 +4849,7 @@ declarative
 declaratory
 declare
 declared
+declarer
 declares
 declaring
 decline
@@ -6381,6 +6376,7 @@ emotional
 emotionally
 emotionless
 emotions
+empathic
 emperor
 emphasis
 emphasize
@@ -7042,6 +7038,7 @@ extended
 extender
 extending
 extends
+extensibility
 extensible
 extension
 extensions
@@ -10785,6 +10782,7 @@ layman
 layout
 layouts
 lays
+layup
 lazily
 laziness
 lazy
@@ -12190,6 +12188,7 @@ morel
 moreover
 mores
 morning
+morningstar
 morocco
 morph
 morphed
@@ -13170,6 +13169,8 @@ outgrown
 outlaw
 outlet
 outlets
+outlier
+outliers
 outline
 outlined
 outlines
@@ -13272,6 +13273,10 @@ overshot
 oversight
 oversize
 overstock
+oversubscribe
+oversubscribed
+oversubscribes
+oversubscribing
 overt
 overthrows
 overtime
@@ -14414,6 +14419,10 @@ prefix
 prefixed
 prefixes
 prefixing
+preflight
+preflighted
+preflighting
+preflights
 preform
 prefs
 prehistoric
@@ -15066,6 +15075,7 @@ quiche
 quick
 quicker
 quickly
+quickstep
 quid
 quiesce
 quiesced
@@ -16037,6 +16047,9 @@ repulse
 repulsed
 repulses
 repulsing
+repurpose
+repurposed
+repurposing
 reputation
 reputations
 request
@@ -16302,6 +16315,7 @@ revers
 reversal
 reverse
 reversed
+reverser
 reverses
 reversible
 reversing
@@ -17246,6 +17260,7 @@ shaped
 shapes
 shaping
 shard
+sharded
 shards
 share
 shareable
@@ -17937,6 +17952,7 @@ sorrow
 sorry
 sort
 sorta
+sortable
 sorted
 sorter
 sorters
@@ -18118,6 +18134,8 @@ spin
 spinal
 spindly
 spine
+spinel
+spinelle
 spinnaker
 spinner
 spinners
@@ -18297,6 +18315,8 @@ stained
 staircase
 staircases
 stairs
+stakeholder
+stakeholders
 stale
 stalk
 stalked

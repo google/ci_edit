@@ -14,27 +14,18 @@
 
 
 # Acronyms (acronyms that match trademarks are not a challenge to said marks)
-osrb
-lto
-ses
-fdt
-jedec
-iec
-swe
-mvp
-ivf
-vp
-svp
-apk
-ipa
 absl
 acl
+acm
 adt
 afaict
 afaik
 afk
 ai
+amd
 ansi
+aot
+apk
 ar
 arpa
 ast
@@ -66,6 +57,7 @@ cnri
 cpu
 cpus
 cq
+crd
 csv
 ctl
 cua
@@ -82,6 +74,7 @@ doa
 dq
 drm
 ebnf
+emmc
 eos
 et
 eula
@@ -89,6 +82,7 @@ eulas
 faq
 fc
 fde
+fdt
 fg
 fil
 fpu
@@ -134,6 +128,7 @@ icu
 idc
 ide
 ie
+iec
 ieee
 ietf
 ifc
@@ -141,6 +136,7 @@ iiuc
 ime
 imes
 io
+ipa
 ipc
 ipcs
 ipp
@@ -149,8 +145,10 @@ ips
 ir
 iso
 iu
+ivf
 ja
 jdk
+jedec
 jit
 jni
 jvm
@@ -176,6 +174,7 @@ lsb
 lsbs
 lsd
 lte
+lto
 ltr
 ltrs
 lv
@@ -194,8 +193,10 @@ msc
 msdn
 msvc
 mvc
+mvp
 mx
 nafta
+nand
 nasa
 nb
 ncsa
@@ -216,6 +217,7 @@ oobe
 oop
 os
 oses
+osrb
 oss
 osx
 ota
@@ -255,6 +257,7 @@ sdk
 sdks
 sec
 serp
+ses
 sftp
 sgml
 sgmls
@@ -276,7 +279,9 @@ ssl
 sso
 ssp
 sv
+svp
 sw
+swe
 swf
 sz
 tb
@@ -299,12 +304,14 @@ tw
 ty
 ucs
 udp
+uefi
 uk
 un
 uri
 uris
 url
 urls
+usa
 usb
 usbs
 utc
@@ -315,9 +322,11 @@ vm
 vma
 vmo
 vmos
+vp
 vr
 vv
 wep
+wfh
 wip
 www
 wx
