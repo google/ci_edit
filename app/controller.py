@@ -355,7 +355,7 @@ class MainController:
     def onChange(self):
         tb = self.view.textBuffer
         if tb.message is None and tb.selectionMode != app.selectable.kSelectionNone:
-            charCount, lineCount = tb.countSelected()
+            charCount, lineCount = tb.count_selected()
             tb.setMessage(
                 u'%d characters (%d lines) selected' % (charCount, lineCount))
         self.controller.onChange()

@@ -72,7 +72,7 @@ class Selectable(app.line_buffer.LineBuffer):
         self.markerCol = 0
         self.selectionMode = kSelectionNone
 
-    def countSelected(self):
+    def count_selected(self):
         lines = self.getSelectedText()
         chars = len(lines) - 1  # Count carriage returns.
         for line in lines:
