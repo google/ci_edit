@@ -25,11 +25,11 @@ import app.line_buffer
 
 class LineBufferTestCases(unittest.TestCase):
 
-    def setUp(self):
+    def set_up(self):
         self.line_buffer = app.line_buffer.LineBuffer(app.ci_program.CiProgram())
         app.log.shouldWritePrintLog = True
 
-    def tearDown(self):
+    def tear_down(self):
         self.line_buffer = None
 
     def test_create(self):

@@ -26,28 +26,28 @@ class RegexTestCases(unittest.TestCase):
 
     def test_common_numbers(self):
 
-        def testNumber(strInput, reg):
+        def test_number(strInput, reg):
             sre = app.regex.kReNumbers.search(strInput)
             if sre is None:
                 self.assertEqual(sre, reg)
                 return
             self.assertEqual(reg, sre.regs[0])
 
-        testNumber('quick', None)
-        testNumber('0342', (0, 4))
-        testNumber('2342', (0, 4))
-        testNumber('0x42', (0, 4))
-        testNumber('0x0', (0, 3))
-        testNumber('.2342', (0, 5))
-        testNumber('2.342', (0, 5))
-        testNumber('23.42', (0, 5))
-        testNumber('234.2', (0, 5))
-        testNumber('2342.', (0, 5))
-        testNumber('23q42.', (0, 2))
-        testNumber(' 2u ', (1, 3))
-        testNumber(' 2U ', (1, 3))
-        testNumber(' 2ull ', (1, 5))
-        testNumber(' 2ULL ', (1, 5))
-        testNumber(' 2.f ', (1, 4))
-        testNumber(' .3f ', (1, 4))
-        testNumber(' 4.7234e-11 ', (1, 11))
+        test_number('quick', None)
+        test_number('0342', (0, 4))
+        test_number('2342', (0, 4))
+        test_number('0x42', (0, 4))
+        test_number('0x0', (0, 3))
+        test_number('.2342', (0, 5))
+        test_number('2.342', (0, 5))
+        test_number('23.42', (0, 5))
+        test_number('234.2', (0, 5))
+        test_number('2342.', (0, 5))
+        test_number('23q42.', (0, 2))
+        test_number(' 2u ', (1, 3))
+        test_number(' 2U ', (1, 3))
+        test_number(' 2ull ', (1, 5))
+        test_number(' 2ULL ', (1, 5))
+        test_number(' 2.f ', (1, 4))
+        test_number(' .3f ', (1, 4))
+        test_number(' 4.7234e-11 ', (1, 11))

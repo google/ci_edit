@@ -31,41 +31,41 @@ kTestFile = u'#startup_test_file_with_unlikely_file_name~'
 
 class StartupTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
-    def setUp(self):
+    def set_up(self):
         self.longMessage = True
-        app.fake_curses_testing.FakeCursesTestCase.setUp(self)
+        app.fake_curses_testing.FakeCursesTestCase.set_up(self)
 
     def test_no_args(self):
-        self.runWithFakeInputs([
-            self.displayCheck(2, 7, [u"      "]),
-            self.cursorCheck(2, 7),
+        self.run_with_fake_inputs([
+            self.display_check(2, 7, [u"      "]),
+            self.cursor_check(2, 7),
             CTRL_Q
         ])
 
     def test_one_file(self):
-        #self.setMovieMode(True)
-        self.runWithFakeInputs([
-            self.displayCheck(2, 7, [u"// Copyright "]),
-            self.cursorCheck(2, 7),
+        #self.set_movie_mode(True)
+        self.run_with_fake_inputs([
+            self.display_check(2, 7, [u"// Copyright "]),
+            self.cursor_check(2, 7),
             CTRL_Q
-        ], [sys.argv[0], self.pathToSample(u"sample.cc")])
+        ], [sys.argv[0], self.path_to_sample(u"sample.cc")])
 
     def test_two_files(self):
-        #self.setMovieMode(True)
-        self.runWithFakeInputs([
+        #self.set_movie_mode(True)
+        self.run_with_fake_inputs([
             KEY_PAGE_DOWN,
-            self.displayCheck(5, 7, [u"// This is a C++ sample file"]),
-            self.cursorCheck(2, 7), CTRL_W,
+            self.display_check(5, 7, [u"// This is a C++ sample file"]),
+            self.cursor_check(2, 7), CTRL_W,
             KEY_PAGE_DOWN,
-            self.displayCheck(5, 7, [u"// This is a C++ sample header"]),
+            self.display_check(5, 7, [u"// This is a C++ sample header"]),
             CTRL_Q
-        ], [sys.argv[0], self.pathToSample(u"sample.cc"),
-        self.pathToSample(u"sample.h")])
+        ], [sys.argv[0], self.path_to_sample(u"sample.cc"),
+        self.path_to_sample(u"sample.h")])
 
     def test_one_file_line(self):
-        #self.setMovieMode(True)
-        self.runWithFakeInputs([
-            self.displayCheck(2, 7, [u"// distributed under the License"]),
-            self.cursorCheck(4, 7),
+        #self.set_movie_mode(True)
+        self.run_with_fake_inputs([
+            self.display_check(2, 7, [u"// distributed under the License"]),
+            self.cursor_check(4, 7),
             CTRL_Q
-        ], [sys.argv[0], self.pathToSample(u"sample.cc:12")])
+        ], [sys.argv[0], self.path_to_sample(u"sample.cc:12")])

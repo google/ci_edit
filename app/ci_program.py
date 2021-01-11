@@ -66,7 +66,7 @@ import app.window
 userConsoleMessage = None
 
 
-def userMessage(*args):
+def user_message(*args):
     global userConsoleMessage
     if not userConsoleMessage:
         userConsoleMessage = ''
@@ -102,7 +102,7 @@ class CiProgram:
         self.ch = 0
         self.bg = None
 
-    def setUpCurses(self, cursesScreen):
+    def set_up_curses(self, cursesScreen):
         self.cursesScreen = cursesScreen
         curses.mousemask(-1)
         curses.mouseinterval(0)
@@ -120,8 +120,8 @@ class CiProgram:
         try:
             curses.start_color()
             if not curses.has_colors():
-                userMessage("This terminal does not support color.")
-                self.quitNow()
+                user_message("This terminal does not support color.")
+                self.quit_now()
             else:
                 curses.use_default_colors()
         except curses.error as e:
@@ -148,7 +148,7 @@ class CiProgram:
             cursesWindow.keypad(1)
             app.window.mainCursesWindow = cursesWindow
 
-    def commandLoop(self):
+    def command_loop(self):
         # Cache the thread setting.
         useBgThread = self.prefs.editor['useBgThread']
         cmdCount = 0
@@ -167,9 +167,9 @@ class CiProgram:
         if useBgThread:
             self.bg.put(u"cmdList", [])
         else:
-            self.programWindow.shortTimeSlice()
+            self.programWindow.short_time_slice()
             self.programWindow.render()
-            self.backgroundFrame.setCmdCount(0)
+            self.backgroundFrame.set_cmd_count(0)
         # This is the 'main loop'. Execution doesn't leave this loop until the
         # application is closing down.
         while not self.exiting:
@@ -192,7 +192,7 @@ class CiProgram:
             while not len(cmdList):
                 if not useBgThread:
                     (drawList, cursor,
-                     frameCmdCount) = self.backgroundFrame.grabFrame()
+                     frameCmdCount) = self.backgroundFrame.grab_frame()
                     if frameCmdCount is not None:
                         self.frontFrame = (drawList, cursor, frameCmdCount)
                 if self.frontFrame is not None:
@@ -203,7 +203,7 @@ class CiProgram:
                     eventInfo = None
                     if self.exiting:
                         return
-                    ch = self.getCh()
+                    ch = self.get_ch()
                     # assert isinstance(ch, int), type(ch)
                     if ch == curses.ascii.ESC:
                         # Some keys are sent from the terminal as a sequence of
@@ -212,10 +212,10 @@ class CiProgram:
                         # callback functions) the sequence is converted into
                         # tuple.
                         keySequence = []
-                        n = self.getCh()
+                        n = self.get_ch()
                         while n != curses.ERR:
                             keySequence.append(n)
-                            n = self.getCh()
+                            n = self.get_ch()
                         #app.log.info('sequence\n', keySequence)
                         # Check for Bracketed Paste Mode begin.
                         paste_begin = app.curses_util.BRACKETED_PASTE_BEGIN
@@ -227,7 +227,7 @@ class CiProgram:
                             while tuple(
                                     keySequence[-len(paste_end):]) != paste_end:
                                 #app.log.info('waiting in paste mode')
-                                n = self.getCh()
+                                n = self.get_ch()
                                 if n != curses.ERR:
                                     keySequence.append(n)
                             keySequence = keySequence[:-(len(paste_end))]
@@ -247,18 +247,18 @@ class CiProgram:
                         u = None
                         if (ch & 0xe0) == 0xc0:
                             # Two byte utf-8.
-                            b = self.getCh()
+                            b = self.get_ch()
                             u = bytes_to_unicode((ch, b))
                         elif (ch & 0xf0) == 0xe0:
                             # Three byte utf-8.
-                            b = self.getCh()
-                            c = self.getCh()
+                            b = self.get_ch()
+                            c = self.get_ch()
                             u = bytes_to_unicode((ch, b, c))
                         elif (ch & 0xf8) == 0xf0:
                             # Four byte utf-8.
-                            b = self.getCh()
-                            c = self.getCh()
-                            d = self.getCh()
+                            b = self.get_ch()
+                            c = self.get_ch()
+                            d = self.get_ch()
                             u = bytes_to_unicode((ch, b, c, d))
                         assert u is not None
                         eventInfo = u
@@ -279,19 +279,19 @@ class CiProgram:
                 if useBgThread:
                     self.bg.put(u"cmdList", cmdList)
                 else:
-                    self.programWindow.executeCommandList(cmdList)
-                    self.programWindow.shortTimeSlice()
+                    self.programWindow.execute_command_list(cmdList)
+                    self.programWindow.short_time_slice()
                     self.programWindow.render()
                     cmdCount += len(cmdList)
-                    self.backgroundFrame.setCmdCount(cmdCount)
+                    self.backgroundFrame.set_cmd_count(cmdCount)
 
-    def processBackgroundMessages(self):
-        while self.bg.hasMessage():
+    def process_background_messages(self):
+        while self.bg.has_message():
             instruction, message = self.bg.get()
             if instruction == u"exception":
                 for line in message:
-                    userMessage(line[:-1])
-                self.quitNow()
+                    user_message(line[:-1])
+                self.quit_now()
                 return
             elif instruction == u"render":
                 # It's unlikely that more than one frame would be present in the
@@ -301,7 +301,7 @@ class CiProgram:
             else:
                 assert False
 
-    def getCh(self):
+    def get_ch(self):
         """Get an input character (or event) from curses."""
         if self.exiting:
             return -1
@@ -310,7 +310,7 @@ class CiProgram:
         while ch == 0:
             if self.bg is not None:
                 # Hmm, will ch ever equal 0 when self.bg is None?
-                self.processBackgroundMessages()
+                self.process_background_messages()
             if self.exiting:
                 return -1
             ch = self.cursesWindowGetCh()
@@ -328,7 +328,7 @@ class CiProgram:
         self.programWindow.inputWindow.startup()
         self.programWindow.focus()
 
-    def parseArgs(self):
+    def parse_args(self):
         """Interpret the command line arguments."""
         app.log.startup('isatty', sys.stdin.isatty())
         debugRedo = False
@@ -336,7 +336,7 @@ class CiProgram:
         cliFiles = []
         openToLine = None
         profile = False
-        readStdin = not sys.stdin.isatty()
+        read_stdin = not sys.stdin.isatty()
         takeAll = False  # Take all args as file paths.
         timeStartup = False
         numColors = min(curses.COLORS, 256)
@@ -354,52 +354,52 @@ class CiProgram:
                 elif i == '--log':
                     showLogWindow = True
                 elif i == '--d':
-                    app.log.channelEnable('debug', True)
+                    app.log.channel_enable('debug', True)
                 elif i == '--m':
-                    app.log.channelEnable('mouse', True)
+                    app.log.channel_enable('mouse', True)
                 elif i == '--p':
-                    app.log.channelEnable('info', True)
-                    app.log.channelEnable('debug', True)
-                    app.log.channelEnable('detail', True)
-                    app.log.channelEnable('error', True)
+                    app.log.channel_enable('info', True)
+                    app.log.channel_enable('debug', True)
+                    app.log.channel_enable('detail', True)
+                    app.log.channel_enable('error', True)
                 elif i == '--parser':
-                    app.log.channelEnable('parser', True)
+                    app.log.channel_enable('parser', True)
                 elif i == '--singleThread':
                     self.prefs.editor['useBgThread'] = False
                 elif i == '--startup':
-                    app.log.channelEnable('startup', True)
+                    app.log.channel_enable('startup', True)
                 elif i == '--timeStartup':
                     timeStartup = True
                 elif i == '--':
                     # All remaining args are file paths.
                     takeAll = True
                 elif i == '--help':
-                    userMessage(app.help.docs['command line'])
-                    self.quitNow()
+                    user_message(app.help.docs['command line'])
+                    self.quit_now()
                 elif i == '--keys':
-                    userMessage(app.help.docs['key bindings'])
-                    self.quitNow()
+                    user_message(app.help.docs['key bindings'])
+                    self.quit_now()
                 elif i == '--clearHistory':
-                    self.history.clearUserHistory()
-                    self.quitNow()
+                    self.history.clear_user_history()
+                    self.quit_now()
                 elif i == '--eightColors':
                     numColors = 8
                 elif i == '--version':
-                    userMessage(app.help.docs['version'])
-                    self.quitNow()
+                    user_message(app.help.docs['version'])
+                    self.quit_now()
                 elif i.startswith('--'):
-                    userMessage("unknown command line argument", i)
-                    self.quitNow()
+                    user_message("unknown command line argument", i)
+                    self.quit_now()
                 continue
             if i == '-':
-                readStdin = True
+                read_stdin = True
             else:
                 cliFiles.append({'path': unicode(i)})
         # If there's no line specified, try to reinterpret the paths.
         if openToLine is None:
             decodedPaths = []
             for file in cliFiles:
-                path, openToRow, openToColumn = app.buffer_file.pathRowColumn(
+                path, openToRow, openToColumn = app.buffer_file.path_row_column(
                     file[u"path"], self.prefs.editor[u"baseDirEnv"])
                 decodedPaths.append({
                     'path': path,
@@ -413,13 +413,13 @@ class CiProgram:
             'cliFiles': cliFiles,
             'openToLine': openToLine,
             'profile': profile,
-            'readStdin': readStdin,
+            'read_stdin': read_stdin,
             'timeStartup': timeStartup,
             'numColors': numColors,
         }
         self.showLogWindow = showLogWindow
 
-    def quitNow(self):
+    def quit_now(self):
         """Set the intent to exit the program. The actual exit will occur a bit
         later."""
         app.log.info()
@@ -454,7 +454,7 @@ class CiProgram:
         if hasattr(cursesWindow, 'test_rendered_command_count'):
             cursesWindow.test_rendered_command_count(cmdCount)
 
-    def makeHomeDirs(self, homePath):
+    def make_home_dirs(self, homePath):
         try:
             if not os.path.isdir(homePath):
                 os.makedirs(homePath)
@@ -471,19 +471,19 @@ class CiProgram:
             app.log.exception(e)
 
     def run(self):
-        self.parseArgs()
-        self.setUpPalette()
+        self.parse_args()
+        self.set_up_palette()
         homePath = self.prefs.userData.get('homePath')
-        self.makeHomeDirs(homePath)
-        self.history.loadUserHistory()
-        app.curses_util.hackCursesFixes()
+        self.make_home_dirs(homePath)
+        self.history.load_user_history()
+        app.curses_util.hack_curses_fixes()
         self.startup()
         if self.prefs.editor['useBgThread']:
-            self.bg = app.background.startupBackground(self.programWindow)
+            self.bg = app.background.startup_background(self.programWindow)
         if self.prefs.startup.get('profile'):
             profile = cProfile.Profile()
             profile.enable()
-            self.commandLoop()
+            self.command_loop()
             profile.disable()
             output = io.StringIO.StringIO()
             stats = pstats.Stats(
@@ -491,27 +491,27 @@ class CiProgram:
             stats.print_stats()
             app.log.info(output.getvalue())
         else:
-            self.commandLoop()
+            self.command_loop()
         if self.prefs.editor['useBgThread']:
             self.bg.put(u"quit", None)
             self.bg.join()
 
-    def setUpPalette(self):
+    def set_up_palette(self):
 
-        def applyPalette(name):
+        def apply_palette(name):
             palette = self.prefs.palette[name]
             foreground = palette['foregroundIndexes']
             background = palette['backgroundIndexes']
             for i in range(1, self.prefs.startup['numColors']):
                 curses.init_pair(i, foreground[i], background[i])
 
-        def twoTries(primary, fallback):
+        def two_tries(primary, fallback):
             try:
-                applyPalette(primary)
+                apply_palette(primary)
                 app.log.startup(u"Primary color scheme applied")
             except curses.error:
                 try:
-                    applyPalette(fallback)
+                    apply_palette(fallback)
                     app.log.startup(u"Fallback color scheme applied")
                 except curses.error:
                     app.log.startup(u"No color scheme applied")
@@ -522,28 +522,28 @@ class CiProgram:
         elif self.prefs.startup['numColors'] == 8:
             self.prefs.color = self.prefs.color8
             app.log.startup('using 8 colors')
-            twoTries(self.prefs.editor['palette8'], 'default8')
+            two_tries(self.prefs.editor['palette8'], 'default8')
         elif self.prefs.startup['numColors'] == 16:
             self.prefs.color = self.prefs.color16
             app.log.startup('using 16 colors')
-            twoTries(self.prefs.editor['palette16'], 'default16')
+            two_tries(self.prefs.editor['palette16'], 'default16')
         elif self.prefs.startup['numColors'] == 256:
             self.prefs.color = self.prefs.color256
             app.log.startup('using 256 colors')
-            twoTries(self.prefs.editor['palette'], 'default')
+            two_tries(self.prefs.editor['palette'], 'default')
         else:
             raise Exception('unknown palette color count ' +
                             repr(self.prefs.startup['numColors']))
 
     if 1:  # For unit tests/debugging.
 
-        def getDocumentSelection(self):
+        def get_document_selection(self):
             """This is primarily for testing."""
             tb = self.programWindow.inputWindow.textBuffer
             return (tb.penRow, tb.penCol, tb.markerRow, tb.markerCol,
                     tb.selectionMode)
 
-        def getSelection(self):
+        def get_selection(self):
             """This is primarily for testing."""
             tb = self.programWindow.focusedWindow.textBuffer
             return (tb.penRow, tb.penCol, tb.markerRow, tb.markerCol,
@@ -553,16 +553,16 @@ class CiProgram:
 def wrapped_ci(cursesScreen):
     try:
         prg = CiProgram()
-        prg.setUpCurses(cursesScreen)
+        prg.set_up_curses(cursesScreen)
         prg.run()
     except Exception:
-        userMessage('---------------------------------------')
-        userMessage('Super sorry, something went very wrong.')
-        userMessage('Please create a New Issue and paste this info there.\n')
+        user_message('---------------------------------------')
+        user_message('Super sorry, something went very wrong.')
+        user_message('Please create a New Issue and paste this info there.\n')
         errorType, value, tracebackInfo = sys.exc_info()
         out = traceback.format_exception(errorType, value, tracebackInfo)
         for i in out:
-            userMessage(i[:-1])
+            user_message(i[:-1])
             #app.log.error(i[:-1])
 
 
@@ -574,14 +574,14 @@ def run_ci():
         curses.wrapper(wrapped_ci)
     finally:
         app.log.flush()
-        app.log.writeToFile('~/.ci_edit/recentLog')
+        app.log.write_to_file('~/.ci_edit/recentLog')
         # Disable Bracketed Paste Mode.
         sys.stdout.write('\033[?2004l')
         # Disable mouse tracking in xterm.
         sys.stdout.write('\033[?1002;l')
         sys.stdout.flush()
     if userConsoleMessage:
-        fullPath = app.buffer_file.expandFullPath(
+        fullPath = app.buffer_file.expand_full_path(
             '~/.ci_edit/userConsoleMessage')
         with io.open(fullPath, 'w+') as f:
             f.write(userConsoleMessage)

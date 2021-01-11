@@ -36,22 +36,22 @@ class ViEdit(app.controller.Controller):
         app.controller.Controller.__init__(self, view, 'ViEdit')
         self.commandDefault = None
 
-    def setTextBuffer(self, textBuffer):
-        app.controller.Controller.setTextBuffer(self, textBuffer)
+    def set_text_buffer(self, textBuffer):
+        app.controller.Controller.set_text_buffer(self, textBuffer)
         normalCommandSet = {
-            ord('^'): textBuffer.cursorStartOfLine,
-            ord('$'): textBuffer.cursorEndOfLine,
-            ord('h'): textBuffer.cursorLeft,
-            ord('i'): self.switchToCommandSetInsert,
-            ord('j'): textBuffer.cursorDown,
-            ord('k'): textBuffer.cursorUp,
-            ord('l'): textBuffer.cursorRight,
+            ord('^'): textBuffer.cursor_start_of_line,
+            ord('$'): textBuffer.cursor_end_of_line,
+            ord('h'): textBuffer.cursor_left,
+            ord('i'): self.switch_to_command_set_insert,
+            ord('j'): textBuffer.cursor_down,
+            ord('k'): textBuffer.cursor_up,
+            ord('l'): textBuffer.cursor_right,
         }
         self.commandSet = normalCommandSet
         self.commandSet_Insert = {
-            curses.ascii.ESC: self.switchToCommandSetNormal,
+            curses.ascii.ESC: self.switch_to_command_set_normal,
         }
-        self.commandDefault = self.textBuffer.insertPrintable
+        self.commandDefault = self.textBuffer.insert_printable
 
     def info(self):
         app.log.info('ViEdit Command set main')
@@ -60,18 +60,18 @@ class ViEdit(app.controller.Controller):
     def focus(self):
         app.log.info('VimEdit.focus')
         if not self.commandDefault:
-            self.commandDefault = self.textBuffer.noOp
+            self.commandDefault = self.textBuffer.no_op
             self.commandSet = self.commandSet_Normal
 
-    def onChange(self):
+    def on_change(self):
         pass
 
-    def switchToCommandSetInsert(self, ignored=1):
+    def switch_to_command_set_insert(self, ignored=1):
         app.log.info('insert mode')
-        self.commandDefault = self.textBuffer.insertPrintable
+        self.commandDefault = self.textBuffer.insert_printable
         self.commandSet = self.commandSet_Insert
 
-    def switchToCommandSetNormal(self, ignored=1):
+    def switch_to_command_set_normal(self, ignored=1):
         app.log.info('normal mode')
-        self.commandDefault = self.textBuffer.noOp
+        self.commandDefault = self.textBuffer.no_op
         self.commandSet = self.commandSet_Normal

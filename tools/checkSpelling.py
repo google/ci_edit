@@ -54,9 +54,9 @@ dictionaryList = [os.path.basename(i)[11:-6] for i in dictionaryList]
 print(pprint.pprint(dictionaryList))
 pathPrefs = []
 dictionary = app.spelling.Dictionary(dictionaryList, pathPrefs)
-assert dictionary.isCorrect(u"has", 'cpp')
+assert dictionary.is_correct(u"has", 'cpp')
 
-def handleFile(fileName, unrecognizedWords):
+def handle_file(fileName, unrecognizedWords):
     # print(fileName, end="")
     try:
         with io.open(fileName, "r") as f:
@@ -65,7 +65,7 @@ def handleFile(fileName, unrecognizedWords):
             for sre in kReSubwords.finditer(data):
                 #print(repr(sre.groups()))
                 word = sre.groups()[0].lower()
-                if not dictionary.isCorrect(word, 'cpp'):
+                if not dictionary.is_correct(word, 'cpp'):
                     if word not in unrecognizedWords:
                         print (word, end=",")
                     unrecognizedWords.add(word)
@@ -73,7 +73,7 @@ def handleFile(fileName, unrecognizedWords):
         print("Error decoding:", fileName)
 
 
-def walkTree(root):
+def walk_tree(root):
     unrecognizedWords = set()
     for (dirPath, dirNames, fileNames) in os.walk(root):
         if kReIgnoreDirs.search(dirPath):
@@ -82,7 +82,7 @@ def walkTree(root):
             if kReIgnoreFiles.search(fileName):
                 continue
             if kReIncludeFiles.search(fileName):
-                handleFile(os.path.join(dirPath, fileName), unrecognizedWords)
+                handle_file(os.path.join(dirPath, fileName), unrecognizedWords)
     if unrecognizedWords:
         print('found', fileName)
         print(unrecognizedWords)
@@ -91,9 +91,9 @@ def walkTree(root):
 
 
 if os.path.isfile(root):
-    print(handleFile(root))
+    print(handle_file(root))
 elif os.path.isdir(root):
-    words = sorted(walkTree(root))
+    words = sorted(walk_tree(root))
     for i in words:
         print(i)
 else:

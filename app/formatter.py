@@ -18,7 +18,7 @@ from __future__ import division
 from __future__ import print_function
 
 
-def formatPython(text):
+def format_python(text):
     try:
         import black
     except ImportError:

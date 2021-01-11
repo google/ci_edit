@@ -95,8 +95,8 @@ class Dictionary:
         self.pathPrefs = pathPrefs
 
         self.grammarWords = {}
-        self.loadWords(os.path.dirname(__file__))
-        self.loadWords(os.path.expanduser("~/.ci_edit/dictionaries"))
+        self.load_words(os.path.dirname(__file__))
+        self.load_words(os.path.expanduser("~/.ci_edit/dictionaries"))
 
         words = set()
         for i in dictionaryList:
@@ -104,7 +104,7 @@ class Dictionary:
         self.baseWords = words
         self.pathWords = set()
 
-    def setUpWordsForPath(self, path):
+    def set_up_words_for_path(self, path):
         self.pathWords = set()
         # app.log.info(repr(self.pathPrefs))
         for k,v in self.pathPrefs.items():
@@ -112,7 +112,7 @@ class Dictionary:
                 for i in v:
                     self.pathWords.update(self.grammarWords.get(i, set()))
 
-    def loadWords(self, dirPath):
+    def load_words(self, dirPath):
         dirPath = os.path.join(dirPath, 'dictionary.')
         for path in glob.iglob(dirPath + '*.words'):
             if os.path.isfile(path):
@@ -131,7 +131,7 @@ class Dictionary:
                         for p in w.split("'")
                     ])
 
-    def isCorrect(self, word, grammarName):
+    def is_correct(self, word, grammarName):
         if len(word) <= 1:
             return True
         words = self.baseWords

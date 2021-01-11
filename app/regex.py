@@ -19,11 +19,11 @@ from __future__ import print_function
 import re
 
 
-def joinReList(reList):
+def join_re_list(reList):
     return r"(" + r")|(".join(reList) + r")"
 
 
-def joinReWordList(reList):
+def join_re_word_list(reList):
     return r"(\b" + r"\b)|(\b".join(reList) + r"\b)"
 
 

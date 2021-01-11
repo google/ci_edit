@@ -27,11 +27,11 @@ import app.selectable
 
 class SelectableTestCases(unittest.TestCase):
 
-    def setUp(self):
+    def set_up(self):
         self.selectable = app.selectable.Selectable(app.ci_program.CiProgram())
         app.log.shouldWritePrintLog = True
 
-    def tearDown(self):
+    def tear_down(self):
         self.selectable = None
 
     def test_default_values(self):
@@ -41,83 +41,83 @@ class SelectableTestCases(unittest.TestCase):
     def test_selection_none(self):
         selectable = self.selectable
         selectable.parser.data = u"oneTwo\n\nfive"
-        selectable.parseDocument()
+        selectable.parse_document()
         selectable.selectionMode = app.selectable.kSelectionNone
-        self.assertEqual(selectable.extendSelection(), (0, 0, 0, 0, 0))
+        self.assertEqual(selectable.extend_selection(), (0, 0, 0, 0, 0))
         selectable.penCol = 3
-        self.assertEqual(selectable.extendSelection(), (0, 0, 0, 0, 0))
+        self.assertEqual(selectable.extend_selection(), (0, 0, 0, 0, 0))
 
     def test_selection_all(self):
         selectable = self.selectable
         selectable.parser.data = u"oneTwo\n\nfive"
-        selectable.parseDocument()
+        selectable.parse_document()
         selectable.selectionMode = app.selectable.kSelectionAll
-        self.assertEqual(selectable.extendSelection(), (2, 4, 0, 0, 0))
+        self.assertEqual(selectable.extend_selection(), (2, 4, 0, 0, 0))
         selectable.penCol = 3
-        self.assertEqual(selectable.extendSelection(), (2, 1, 0, 0, 0))
+        self.assertEqual(selectable.extend_selection(), (2, 1, 0, 0, 0))
 
     def test_selection_block(self):
         selectable = self.selectable
         selectable.parser.data = u"oneTwo\n\nfive"
-        selectable.parseDocument()
+        selectable.parse_document()
         selectable.selectionMode = app.selectable.kSelectionBlock
-        self.assertEqual(selectable.extendSelection(), (0, 0, 0, 0, 0))
+        self.assertEqual(selectable.extend_selection(), (0, 0, 0, 0, 0))
         selectable.penCol = 3
-        self.assertEqual(selectable.extendSelection(), (0, 0, 0, 0, 0))
+        self.assertEqual(selectable.extend_selection(), (0, 0, 0, 0, 0))
 
     def test_selection_character(self):
         selectable = self.selectable
         selectable.parser.data = u"oneTwo\n\nfive"
-        selectable.parseDocument()
+        selectable.parse_document()
         selectable.selectionMode = app.selectable.kSelectionCharacter
-        self.assertEqual(selectable.extendSelection(), (0, 0, 0, 0, 0))
+        self.assertEqual(selectable.extend_selection(), (0, 0, 0, 0, 0))
         selectable.penCol = 3
-        self.assertEqual(selectable.extendSelection(), (0, 0, 0, 0, 0))
+        self.assertEqual(selectable.extend_selection(), (0, 0, 0, 0, 0))
 
     def test_selection_line(self):
         selectable = self.selectable
         selectable.parser.data = u"one two\n\nfive"
-        selectable.parseDocument()
+        selectable.parse_document()
         selectable.penRow = 1
         selectable.selectionMode = app.selectable.kSelectionLine
-        app.log.debug(u"selectable.extendSelection",
-                      selectable.extendSelection())
-        self.assertEqual(selectable.extendSelection(), (0, 0, 0, 0, 0))
+        app.log.debug(u"selectable.extend_selection",
+                      selectable.extend_selection())
+        self.assertEqual(selectable.extend_selection(), (0, 0, 0, 0, 0))
         selectable.penRow = 3
         selectable.penCol = 3
         selectable.markerRow = 1
         selectable.markerCol = 4
-        self.assertEqual(selectable.extendSelection(), (0, -3, 0, -4, 0))
+        self.assertEqual(selectable.extend_selection(), (0, -3, 0, -4, 0))
 
     def test_selection_word(self):
         selectable = self.selectable
         selectable.parser.data = u"one two\nSeveral test words\nfive"
-        selectable.parseDocument()
+        selectable.parse_document()
         selectable.selectionMode = app.selectable.kSelectionWord
         selectable.penRow = 1
         selectable.penCol = 2
-        self.assertEqual(selectable.extendSelection(), (0, 5, 0, 0, 0))
+        self.assertEqual(selectable.extend_selection(), (0, 5, 0, 0, 0))
         selectable.penRow = 1
         selectable.penCol = 9
         selectable.markerCol = 2
-        self.assertEqual(selectable.extendSelection(), (0, 3, 0, -2, 0))
+        self.assertEqual(selectable.extend_selection(), (0, 3, 0, -2, 0))
 
     # Deletion tests.
 
     def test_deletion_none(self):
         selectable = self.selectable
         selectable.parser.data = u"one two\nSeveral test words.\nfive"
-        selectable.parseDocument()
+        selectable.parse_document()
         selectable.selectionMode = app.selectable.kSelectionNone
         selectable.penCol = 1
-        selectable.doDeleteSelection()
+        selectable.do_delete_selection()
         self.assertEqual(selectable.parser.data,
                          u"one two\nSeveral test words.\nfive")
 
     def test_deletion_all(self):
         selectable = self.selectable
 
-        def applySelection(args):
+        def apply_selection(args):
             selectable.penRow += args[0]
             selectable.penCol += args[1]
             selectable.markerRow += args[2]
@@ -126,90 +126,90 @@ class SelectableTestCases(unittest.TestCase):
 
         self.assertEqual(selectable.selection(), (0, 0, 0, 0))
         selectable.parser.data = u"oneTwo\n\nfive"
-        selectable.parseDocument()
+        selectable.parse_document()
         self.assertEqual(selectable.selection(), (0, 0, 0, 0))
         selectable.selectionMode = app.selectable.kSelectionAll
-        self.assertEqual(selectable.extendSelection(), (2, 4, 0, 0, 0))
+        self.assertEqual(selectable.extend_selection(), (2, 4, 0, 0, 0))
         selectable.penCol = 3
-        self.assertEqual(selectable.extendSelection(), (2, 1, 0, 0, 0))
+        self.assertEqual(selectable.extend_selection(), (2, 1, 0, 0, 0))
 
-        applySelection(selectable.extendSelection())
+        apply_selection(selectable.extend_selection())
         self.assertEqual(selectable.selection(), (2, 4, 0, 0))
-        selectable.doDeleteSelection()
+        selectable.do_delete_selection()
         self.assertEqual(selectable.parser.data, u"")
 
-        selectable.insertLinesAt(0, 0, (u"wx", u"", u"yz"),
+        selectable.insert_lines_at(0, 0, (u"wx", u"", u"yz"),
                 app.selectable.kSelectionAll)
         self.assertEqual(selectable.parser.data, u"wx\n\nyz")
 
     def test_deletion_block(self):
         selectable = self.selectable
         selectable.parser.data = u"oneTwo\n\nfive"
-        selectable.parseDocument()
+        selectable.parse_document()
         selectable.selectionMode = app.selectable.kSelectionBlock
-        self.assertEqual(selectable.extendSelection(), (0, 0, 0, 0, 0))
+        self.assertEqual(selectable.extend_selection(), (0, 0, 0, 0, 0))
         selectable.markerRow = 0
         selectable.markerCol = 1
         selectable.penRow = 2
         selectable.penCol = 3
-        self.assertEqual(selectable.extendSelection(), (0, 0, 0, 0, 0))
+        self.assertEqual(selectable.extend_selection(), (0, 0, 0, 0, 0))
         self.assertEqual(selectable.parser.data, u"oneTwo\n\nfive")
-        selectable.doDeleteSelection()
+        selectable.do_delete_selection()
         self.assertEqual(selectable.parser.data, u"oTwo\n\nfe")
-        selectable.insertLinesAt(0, 1, (u"wx", u"", u"yz"),
+        selectable.insert_lines_at(0, 1, (u"wx", u"", u"yz"),
                 app.selectable.kSelectionBlock)
         self.assertEqual(selectable.parser.data, u"owxTwo\n\nfyze")
 
     def test_deletion_character(self):
         selectable = self.selectable
         selectable.parser.data = u"one two\nSeveral test words.\nfive"
-        selectable.parseDocument()
+        selectable.parse_document()
         selectable.selectionMode = app.selectable.kSelectionCharacter
         selectable.penCol = 1
-        selectable.doDeleteSelection()
+        selectable.do_delete_selection()
         self.assertEqual(selectable.parser.data,
                          u"ne two\nSeveral test words.\nfive")
         selectable.markerCol = 3
-        selectable.doDeleteSelection()
+        selectable.do_delete_selection()
         self.assertEqual(selectable.parser.data,
                          u"ntwo\nSeveral test words.\nfive")
         selectable.penRow = 1
         selectable.penCol = 1
-        selectable.doDeleteSelection()
+        selectable.do_delete_selection()
         self.assertEqual(selectable.parser.data, u"ntweveral test words.\nfive")
 
     def test_deletion_line(self):
         selectable = self.selectable
         selectable.parser.data = u"one two\n\nfive"
-        selectable.parseDocument()
+        selectable.parse_document()
         selectable.penRow = 1
         selectable.selectionMode = app.selectable.kSelectionLine
-        app.log.debug(u"selectable.extendSelection",
-                      selectable.extendSelection())
-        self.assertEqual(selectable.extendSelection(), (0, 0, 0, 0, 0))
+        app.log.debug(u"selectable.extend_selection",
+                      selectable.extend_selection())
+        self.assertEqual(selectable.extend_selection(), (0, 0, 0, 0, 0))
         selectable.penRow = 3
         selectable.penCol = 3
         selectable.markerRow = 1
         selectable.markerCol = 4
-        self.assertEqual(selectable.extendSelection(), (0, -3, 0, -4, 0))
+        self.assertEqual(selectable.extend_selection(), (0, -3, 0, -4, 0))
 
     def test_deletion_word(self):
         selectable = self.selectable
         selectable.parser.data = u"one two\nSeveral test words.\nfive"
-        selectable.parseDocument()
+        selectable.parse_document()
         selectable.selectionMode = app.selectable.kSelectionWord
         selectable.penRow = 1
         selectable.penCol = 2
-        self.assertEqual(selectable.extendSelection(), (0, 5, 0, 0, 0))
+        self.assertEqual(selectable.extend_selection(), (0, 5, 0, 0, 0))
         selectable.penRow = 1
         selectable.penCol = 9
         selectable.markerCol = 2
-        self.assertEqual(selectable.extendSelection(), (0, 3, 0, -2, 0))
+        self.assertEqual(selectable.extend_selection(), (0, 3, 0, -2, 0))
 
     def test_unicode(self):
         selectable = self.selectable
         selectable.parser.data = u"one two\n😀Several test words.\nfive"
-        selectable.parseDocument()
+        selectable.parse_document()
         selectable.selectionMode = app.selectable.kSelectionCharacter
         selectable.penRow = 1
         selectable.penCol = 0

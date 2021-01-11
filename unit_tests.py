@@ -128,7 +128,7 @@ TESTS = {
 }
 
 
-def runTests(tests, stopOnFailure=False):
+def run_tests(tests, stopOnFailure=False):
     """Run through the list of tests."""
     for test in tests:
         suite = unittest.TestLoader().loadTestsFromTestCase(test)
@@ -152,7 +152,7 @@ def usage():
         print(' ', i)
 
 
-def parseArgList(argList):
+def parse_arg_list(argList):
     testList = list(TESTS.values())
     try:
         argList.remove('--help')
@@ -178,10 +178,10 @@ def parseArgList(argList):
             for i in argList[1:]:
                 testList.append(TESTS[i])
     if useAppLog:
-        app.log.wrapper(lambda: runTests(testList, True))
+        app.log.wrapper(lambda: run_tests(testList, True))
     else:
-        sys.exit(runTests(testList, True))
+        sys.exit(run_tests(testList, True))
 
 
 if __name__ == '__main__':
-    parseArgList(sys.argv)
+    parse_arg_list(sys.argv)

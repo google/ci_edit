@@ -40,9 +40,9 @@ class FakeView:
         self.scrollRow = 0
         self.scrollCol = 0
 
-def checkRow(test, text_buffer, row, expected):
-    text_buffer.parseDocument()
-    if not (expected == text_buffer.parser.rowText(row)):
+def check_row(test, text_buffer, row, expected):
+    text_buffer.parse_document()
+    if not (expected == text_buffer.parser.row_text(row)):
         test.fail("\n\nExpected these to match: "
             "row {}: expected {}, parser {}".format(
                 row, repr(expected),
@@ -51,10 +51,10 @@ def checkRow(test, text_buffer, row, expected):
 
 class ActionsTestCase(unittest.TestCase):
 
-    def currentRowText(self):
-        return self.textBuffer.parser.rowText(self.textBuffer.penRow)
+    def current_row_text(self):
+        return self.textBuffer.parser.row_text(self.textBuffer.penRow)
 
-    def setMarkerPenRowCol(self, mRow, mCol, row, col):
+    def set_marker_pen_row_col(self, mRow, mCol, row, col):
         self.assertTrue(isinstance(mRow, int))
         self.assertTrue(isinstance(mCol, int))
         self.assertTrue(isinstance(row, int))
@@ -70,18 +70,18 @@ class ActionsTestCase(unittest.TestCase):
         self.textBuffer.penCol = col
         self.textBuffer.goalCol = col
 
-    def markerPenRowCol(self):
+    def marker_pen_row_col(self):
         return (self.textBuffer.markerRow, self.textBuffer.markerCol,
                 self.textBuffer.penRow, self.textBuffer.penCol)
 
 
 class MouseTestCases(ActionsTestCase):
 
-    def setUp(self):
+    def set_up(self):
         app.log.shouldWritePrintLog = False
         self.prg = app.ci_program.CiProgram()
         self.textBuffer = app.text_buffer.TextBuffer(self.prg)
-        self.textBuffer.setView(FakeView())
+        self.textBuffer.set_view(FakeView())
         test = """/* first comment */
 two
 // second comment
@@ -89,89 +89,89 @@ apple banana carrot
 #include "test.h"
 void blah();
 """
-        self.textBuffer.insertLines(tuple(test.split('\n')))
-        self.textBuffer.parseDocument()
+        self.textBuffer.insert_lines(tuple(test.split('\n')))
+        self.textBuffer.parse_document()
         #self.assertEqual(self.textBuffer.scrollRow, 0)
         #self.assertEqual(self.textBuffer.scrollCol, 0)
-        self.assertEqual(self.textBuffer.parser.rowText(1), 'two')
+        self.assertEqual(self.textBuffer.parser.row_text(1), 'two')
 
-    def tearDown(self):
+    def tear_down(self):
         self.textBuffer = None
 
     def test_mouse_selection(self):
-        self.textBuffer.mouseClick(3, 9, False, False, False)
+        self.textBuffer.mouse_click(3, 9, False, False, False)
         self.assertEqual(self.textBuffer.penRow, 3)
         self.assertEqual(self.textBuffer.penCol, 9)
 
-        self.textBuffer.mouseClick(3, 8, True, False, False)
-        self.assertEqual(self.markerPenRowCol(), (3, 9, 3, 8))
+        self.textBuffer.mouse_click(3, 8, True, False, False)
+        self.assertEqual(self.marker_pen_row_col(), (3, 9, 3, 8))
 
-        self.textBuffer.mouseClick(4, 8, True, False, False)
-        self.assertEqual(self.markerPenRowCol(), (3, 9, 4, 8))
+        self.textBuffer.mouse_click(4, 8, True, False, False)
+        self.assertEqual(self.marker_pen_row_col(), (3, 9, 4, 8))
 
-        self.textBuffer.mouseClick(3, 8, True, False, False)
-        self.assertEqual(self.markerPenRowCol(), (3, 9, 3, 8))
+        self.textBuffer.mouse_click(3, 8, True, False, False)
+        self.assertEqual(self.marker_pen_row_col(), (3, 9, 3, 8))
 
-        self.textBuffer.mouseClick(4, 8, True, False, False)
-        self.textBuffer.mouseClick(4, 9, True, False, False)
-        self.assertEqual(self.markerPenRowCol(), (3, 9, 4, 9))
+        self.textBuffer.mouse_click(4, 8, True, False, False)
+        self.textBuffer.mouse_click(4, 9, True, False, False)
+        self.assertEqual(self.marker_pen_row_col(), (3, 9, 4, 9))
 
-        self.textBuffer.mouseClick(4, 10, True, False, False)
-        self.assertEqual(self.markerPenRowCol(), (3, 9, 4, 10))
+        self.textBuffer.mouse_click(4, 10, True, False, False)
+        self.assertEqual(self.marker_pen_row_col(), (3, 9, 4, 10))
 
-        self.textBuffer.mouseClick(4, 11, True, False, False)
-        self.assertEqual(self.markerPenRowCol(), (3, 9, 4, 11))
+        self.textBuffer.mouse_click(4, 11, True, False, False)
+        self.assertEqual(self.marker_pen_row_col(), (3, 9, 4, 11))
 
     def test_mouse_word_selection(self):
         #self.assertEqual(self.textBuffer.scrollCol, 0)
-        self.textBuffer.selectionWord()
+        self.textBuffer.selection_word()
         #self.assertEqual(self.textBuffer.scrollCol, 0)
         row = 3
         col = 9
         wordBegin = 6
         wordEnd = 12
-        self.textBuffer.mouseClick(row, col, False, False, False)
+        self.textBuffer.mouse_click(row, col, False, False, False)
         self.assertEqual(self.textBuffer.penRow, row)
         self.assertEqual(self.textBuffer.penCol, col)
 
-        self.textBuffer.mouseDoubleClick(row, col - 1, False, False, False)
+        self.textBuffer.mouse_double_click(row, col - 1, False, False, False)
         self.assertEqual(self.textBuffer.markerRow, row)
         self.assertEqual(self.textBuffer.markerCol, wordBegin)
         self.assertEqual(self.textBuffer.penRow, row)
         self.assertEqual(self.textBuffer.penCol, wordEnd)
 
-        self.textBuffer.mouseMoved(row, wordBegin, False, False, False)
+        self.textBuffer.mouse_moved(row, wordBegin, False, False, False)
         self.assertEqual(self.textBuffer.markerRow, row)
         self.assertEqual(self.textBuffer.markerCol, wordBegin)
         self.assertEqual(self.textBuffer.penRow, row)
         self.assertEqual(self.textBuffer.penCol, wordEnd)
 
-        self.textBuffer.mouseMoved(row, wordBegin - 1, False, False, False)
+        self.textBuffer.mouse_moved(row, wordBegin - 1, False, False, False)
         self.assertEqual(self.textBuffer.markerRow, row)
         self.assertEqual(self.textBuffer.penCol, 0)
         self.assertEqual(self.textBuffer.markerCol, wordEnd)
         self.assertEqual(self.textBuffer.penRow, row)
         self.assertEqual(self.textBuffer.penCol, 0)
 
-        self.textBuffer.mouseMoved(row, 1, False, False, False)
+        self.textBuffer.mouse_moved(row, 1, False, False, False)
         self.assertEqual(self.textBuffer.markerRow, row)
         self.assertEqual(self.textBuffer.markerCol, wordEnd)
         self.assertEqual(self.textBuffer.penRow, row)
         self.assertEqual(self.textBuffer.penCol, 0)
 
-        self.textBuffer.mouseMoved(row + 1, 0, False, False, False)
+        self.textBuffer.mouse_moved(row + 1, 0, False, False, False)
         self.assertEqual(self.textBuffer.markerRow, row)
         self.assertEqual(self.textBuffer.markerCol, wordBegin)
         self.assertEqual(self.textBuffer.penRow, row + 1)
         self.assertEqual(self.textBuffer.penCol, 1)
 
-        self.textBuffer.mouseMoved(row + 1, 1, False, False, False)
+        self.textBuffer.mouse_moved(row + 1, 1, False, False, False)
         self.assertEqual(self.textBuffer.markerRow, row)
         self.assertEqual(self.textBuffer.markerCol, wordBegin)
         self.assertEqual(self.textBuffer.penRow, row + 1)
         self.assertEqual(self.textBuffer.penCol, 8)
 
-        self.textBuffer.mouseMoved(row, 1, False, False, False)
+        self.textBuffer.mouse_moved(row, 1, False, False, False)
         self.assertEqual(self.textBuffer.markerRow, row)
         self.assertEqual(self.textBuffer.markerCol, wordEnd)
         self.assertEqual(self.textBuffer.penRow, row)
@@ -181,11 +181,11 @@ void blah();
 
 class SelectionTestCases(ActionsTestCase):
 
-    def setUp(self):
+    def set_up(self):
         app.log.shouldWritePrintLog = False
         self.prg = app.ci_program.CiProgram()
         self.textBuffer = app.text_buffer.TextBuffer(self.prg)
-        self.textBuffer.setView(FakeView())
+        self.textBuffer.set_view(FakeView())
         test = """/* first comment */
 two
 // second comment
@@ -198,290 +198,290 @@ a\twith tab
 \twhile
 {
 """
-        self.textBuffer.setFileType(u"text")
-        self.textBuffer.insertLines(tuple(test.split('\n')))
-        self.textBuffer.parseDocument()
-        #self.textBuffer.parser.debugLog(print, test)
+        self.textBuffer.set_file_type(u"text")
+        self.textBuffer.insert_lines(tuple(test.split('\n')))
+        self.textBuffer.parse_document()
+        #self.textBuffer.parser.debug_log(print, test)
         #self.assertEqual(self.textBuffer.scrollRow, 0)
         #self.assertEqual(self.textBuffer.scrollCol, 0)
-        self.assertEqual(self.textBuffer.parser.rowText(1), 'two')
-        self.assertEqual(self.textBuffer.parser.rowTextAndWidth(8),
+        self.assertEqual(self.textBuffer.parser.row_text(1), 'two')
+        self.assertEqual(self.textBuffer.parser.row_text_and_width(8),
                 ('\t\t', 16))
 
     def test_cursor_col_delta(self):
-        self.setMarkerPenRowCol(0, 0, 0, 2)
-        self.assertEqual(self.textBuffer.cursorColDelta(4), 0)
-        self.assertEqual(self.textBuffer.cursorColDelta(6), -2)
-        self.setMarkerPenRowCol(0, 0, 0, 12)
-        self.assertEqual(self.textBuffer.cursorColDelta(4), 0)
-        self.assertEqual(self.textBuffer.cursorColDelta(6), -3)
+        self.set_marker_pen_row_col(0, 0, 0, 2)
+        self.assertEqual(self.textBuffer.cursor_col_delta(4), 0)
+        self.assertEqual(self.textBuffer.cursor_col_delta(6), -2)
+        self.set_marker_pen_row_col(0, 0, 0, 12)
+        self.assertEqual(self.textBuffer.cursor_col_delta(4), 0)
+        self.assertEqual(self.textBuffer.cursor_col_delta(6), -3)
 
     def test_cursor_move(self):
-        self.setMarkerPenRowCol(0, 0, 2, 5)
-        self.assertEqual(self.currentRowText(), u"// second comment")
-        self.textBuffer.cursorMoveLeft()
-        self.assertEqual(self.markerPenRowCol(), (0, 0, 2, 4))
-        self.textBuffer.cursorMoveRight()
-        self.assertEqual(self.markerPenRowCol(), (0, 0, 2, 5))
+        self.set_marker_pen_row_col(0, 0, 2, 5)
+        self.assertEqual(self.current_row_text(), u"// second comment")
+        self.textBuffer.cursor_move_left()
+        self.assertEqual(self.marker_pen_row_col(), (0, 0, 2, 4))
+        self.textBuffer.cursor_move_right()
+        self.assertEqual(self.marker_pen_row_col(), (0, 0, 2, 5))
 
-        self.setMarkerPenRowCol(0, 0, 8, 16)
-        self.assertEqual(self.currentRowText(), u"\t\t")
-        self.textBuffer.cursorMoveLeft()
-        self.assertEqual(self.markerPenRowCol(), (0, 0, 8, 8))
-        self.textBuffer.cursorMoveLeft()
-        self.assertEqual(self.markerPenRowCol(), (0, 0, 8, 0))
-        self.textBuffer.cursorMoveLeft()
-        self.assertEqual(self.currentRowText(), u"a\twith tab")
-        self.assertEqual(self.markerPenRowCol(), (0, 0, 7, 16))
-        self.textBuffer.cursorMoveRight()
-        self.assertEqual(self.currentRowText(), u"\t\t")
-        self.assertEqual(self.markerPenRowCol(), (0, 0, 8, 0))
-        self.textBuffer.cursorMoveRight()
-        self.assertEqual(self.markerPenRowCol(), (0, 0, 8, 8))
-        self.textBuffer.cursorMoveRight()
-        self.assertEqual(self.markerPenRowCol(), (0, 0, 8, 16))
-        self.textBuffer.cursorMoveRight()
-        self.assertEqual(self.currentRowText(), u"\twhile")
-        self.assertEqual(self.markerPenRowCol(), (0, 0, 9, 0))
-        self.textBuffer.cursorMoveRight()
-        self.assertEqual(self.markerPenRowCol(), (0, 0, 9, 8))
-        self.textBuffer.cursorMoveRight()
-        self.assertEqual(self.markerPenRowCol(), (0, 0, 9, 9))
-        self.textBuffer.cursorMoveRight()
-        self.assertEqual(self.markerPenRowCol(), (0, 0, 9, 10))
-        self.textBuffer.cursorMoveUpOrBegin()
-        self.assertEqual(self.currentRowText(), u"\t\t")
-        self.assertEqual(self.markerPenRowCol(), (0, 0, 8, 8))
-        self.textBuffer.cursorMoveUpOrBegin()
-        self.assertEqual(self.currentRowText(), u"a\twith tab")
+        self.set_marker_pen_row_col(0, 0, 8, 16)
+        self.assertEqual(self.current_row_text(), u"\t\t")
+        self.textBuffer.cursor_move_left()
+        self.assertEqual(self.marker_pen_row_col(), (0, 0, 8, 8))
+        self.textBuffer.cursor_move_left()
+        self.assertEqual(self.marker_pen_row_col(), (0, 0, 8, 0))
+        self.textBuffer.cursor_move_left()
+        self.assertEqual(self.current_row_text(), u"a\twith tab")
+        self.assertEqual(self.marker_pen_row_col(), (0, 0, 7, 16))
+        self.textBuffer.cursor_move_right()
+        self.assertEqual(self.current_row_text(), u"\t\t")
+        self.assertEqual(self.marker_pen_row_col(), (0, 0, 8, 0))
+        self.textBuffer.cursor_move_right()
+        self.assertEqual(self.marker_pen_row_col(), (0, 0, 8, 8))
+        self.textBuffer.cursor_move_right()
+        self.assertEqual(self.marker_pen_row_col(), (0, 0, 8, 16))
+        self.textBuffer.cursor_move_right()
+        self.assertEqual(self.current_row_text(), u"\twhile")
+        self.assertEqual(self.marker_pen_row_col(), (0, 0, 9, 0))
+        self.textBuffer.cursor_move_right()
+        self.assertEqual(self.marker_pen_row_col(), (0, 0, 9, 8))
+        self.textBuffer.cursor_move_right()
+        self.assertEqual(self.marker_pen_row_col(), (0, 0, 9, 9))
+        self.textBuffer.cursor_move_right()
+        self.assertEqual(self.marker_pen_row_col(), (0, 0, 9, 10))
+        self.textBuffer.cursor_move_up_or_begin()
+        self.assertEqual(self.current_row_text(), u"\t\t")
+        self.assertEqual(self.marker_pen_row_col(), (0, 0, 8, 8))
+        self.textBuffer.cursor_move_up_or_begin()
+        self.assertEqual(self.current_row_text(), u"a\twith tab")
         # The column is 10 because of the prior move right which set goalCol.
-        self.assertEqual(self.markerPenRowCol(), (0, 0, 7, 10))
-        self.textBuffer.cursorMoveLeft()
-        self.assertEqual(self.markerPenRowCol(), (0, 0, 7, 9))
-        self.textBuffer.cursorMoveLeft()
-        self.assertEqual(self.markerPenRowCol(), (0, 0, 7, 8))
-        self.textBuffer.cursorMoveLeft()
-        self.assertEqual(self.markerPenRowCol(), (0, 0, 7, 1))
-        self.textBuffer.cursorMoveDownOrEnd()
-        self.assertEqual(self.currentRowText(), u"\t\t")
-        self.assertEqual(self.markerPenRowCol(), (0, 0, 8, 0))
+        self.assertEqual(self.marker_pen_row_col(), (0, 0, 7, 10))
+        self.textBuffer.cursor_move_left()
+        self.assertEqual(self.marker_pen_row_col(), (0, 0, 7, 9))
+        self.textBuffer.cursor_move_left()
+        self.assertEqual(self.marker_pen_row_col(), (0, 0, 7, 8))
+        self.textBuffer.cursor_move_left()
+        self.assertEqual(self.marker_pen_row_col(), (0, 0, 7, 1))
+        self.textBuffer.cursor_move_down_or_end()
+        self.assertEqual(self.current_row_text(), u"\t\t")
+        self.assertEqual(self.marker_pen_row_col(), (0, 0, 8, 0))
 
     def test_backspace(self):
-        self.setMarkerPenRowCol(0, 0, 6, 8)
-        self.assertEqual(self.currentRowText(), u"\ta\t")
+        self.set_marker_pen_row_col(0, 0, 6, 8)
+        self.assertEqual(self.current_row_text(), u"\ta\t")
         self.textBuffer.backspace()
-        self.textBuffer.parseDocument()
-        self.assertEqual(self.markerPenRowCol(), (0, 0, 6, 0))
-        self.assertEqual(self.currentRowText(), u"a\t")
-        self.textBuffer.cursorMoveRight()
-        self.assertEqual(self.markerPenRowCol(), (0, 0, 6, 1))
+        self.textBuffer.parse_document()
+        self.assertEqual(self.marker_pen_row_col(), (0, 0, 6, 0))
+        self.assertEqual(self.current_row_text(), u"a\t")
+        self.textBuffer.cursor_move_right()
+        self.assertEqual(self.marker_pen_row_col(), (0, 0, 6, 1))
 
     def test_cursor_select_word_left(self):
         tb = self.textBuffer
-        self.setMarkerPenRowCol(0, 0, 2, 5)
+        self.set_marker_pen_row_col(0, 0, 2, 5)
 
-        self.assertEqual(self.currentRowText(), u"// second comment")
-        self.textBuffer.cursorSelectWordLeft()
-        self.assertEqual(self.markerPenRowCol(), (2, 5, 2, 3))
+        self.assertEqual(self.current_row_text(), u"// second comment")
+        self.textBuffer.cursor_select_word_left()
+        self.assertEqual(self.marker_pen_row_col(), (2, 5, 2, 3))
 
-        self.textBuffer.cursorSelectWordLeft()
-        self.assertEqual(self.markerPenRowCol(), (2, 5, 2, 0))
+        self.textBuffer.cursor_select_word_left()
+        self.assertEqual(self.marker_pen_row_col(), (2, 5, 2, 0))
 
-        self.textBuffer.cursorSelectWordLeft()
-        self.assertEqual(self.markerPenRowCol(), (2, 5, 1, 3))
+        self.textBuffer.cursor_select_word_left()
+        self.assertEqual(self.marker_pen_row_col(), (2, 5, 1, 3))
 
-        self.textBuffer.cursorSelectWordLeft()
-        self.assertEqual(self.markerPenRowCol(), (2, 5, 1, 0))
+        self.textBuffer.cursor_select_word_left()
+        self.assertEqual(self.marker_pen_row_col(), (2, 5, 1, 0))
 
-        self.textBuffer.cursorSelectWordLeft()
-        self.assertEqual(self.markerPenRowCol(), (2, 5, 0, 19))
+        self.textBuffer.cursor_select_word_left()
+        self.assertEqual(self.marker_pen_row_col(), (2, 5, 0, 19))
 
-        self.textBuffer.cursorSelectWordLeft()
-        self.assertEqual(self.markerPenRowCol(), (2, 5, 0, 16))
+        self.textBuffer.cursor_select_word_left()
+        self.assertEqual(self.marker_pen_row_col(), (2, 5, 0, 16))
 
-        self.textBuffer.cursorSelectWordLeft()
-        self.assertEqual(self.markerPenRowCol(), (2, 5, 0, 9))
+        self.textBuffer.cursor_select_word_left()
+        self.assertEqual(self.marker_pen_row_col(), (2, 5, 0, 9))
 
-        self.textBuffer.cursorSelectWordLeft()
-        self.assertEqual(self.markerPenRowCol(), (2, 5, 0, 8))
+        self.textBuffer.cursor_select_word_left()
+        self.assertEqual(self.marker_pen_row_col(), (2, 5, 0, 8))
 
-        self.textBuffer.cursorSelectWordLeft()
-        self.assertEqual(self.markerPenRowCol(), (2, 5, 0, 3))
+        self.textBuffer.cursor_select_word_left()
+        self.assertEqual(self.marker_pen_row_col(), (2, 5, 0, 3))
 
-        self.textBuffer.cursorSelectWordLeft()
-        self.assertEqual(self.markerPenRowCol(), (2, 5, 0, 0))
+        self.textBuffer.cursor_select_word_left()
+        self.assertEqual(self.marker_pen_row_col(), (2, 5, 0, 0))
 
         # Top of document. This call should have no effect (and not crash).
-        self.textBuffer.cursorSelectWordLeft()
-        self.assertEqual(self.markerPenRowCol(), (2, 5, 0, 0))
+        self.textBuffer.cursor_select_word_left()
+        self.assertEqual(self.marker_pen_row_col(), (2, 5, 0, 0))
 
 
 class TextIndentTestCases(ActionsTestCase):
 
-    def setUp(self):
+    def set_up(self):
         app.log.shouldWritePrintLog = False
         self.prg = app.ci_program.CiProgram()
         self.textBuffer = app.text_buffer.TextBuffer(self.prg)
-        self.textBuffer.setView(FakeView())
+        self.textBuffer.set_view(FakeView())
         #self.assertEqual(self.textBuffer.scrollRow, 0)
         #self.assertEqual(self.textBuffer.scrollCol, 0)
 
-    def tearDown(self):
+    def tear_down(self):
         self.textBuffer = None
 
     def test_auto_indent(self):
         self.prg.prefs.editor['autoInsertClosingCharacter'] = False
         def insert(*args):
-            self.textBuffer.insertPrintableWithPairing(*args)
-            self.textBuffer.parseDocument()
+            self.textBuffer.insert_printable_with_pairing(*args)
+            self.textBuffer.parse_document()
         tb = self.textBuffer
-        self.assertEqual(tb.parser.rowCount(), 1)
+        self.assertEqual(tb.parser.row_count(), 1)
         insert(ord('a'), None)
         insert(ord(':'), None)
         self.assertEqual(tb.penRow, 0)
-        tb.carriageReturn()
+        tb.carriage_return()
         self.assertEqual(tb.penRow, 1)
-        checkRow(self, tb, 0, 'a:')
-        checkRow(self, tb, 1, '')
+        check_row(self, tb, 0, 'a:')
+        check_row(self, tb, 1, '')
 
         # Replace member function to return a grammar with and indent.
-        def grammarAt(row, col):
+        def grammar_at(row, col):
             return {'indent': '  '}
 
-        tb.parser.grammarAt = grammarAt
+        tb.parser.grammar_at = grammar_at
         tb.backspace()
-        tb.carriageReturn()
-        checkRow(self, tb, 0, 'a:')
-        checkRow(self, tb, 1, '  ')
+        tb.carriage_return()
+        check_row(self, tb, 0, 'a:')
+        check_row(self, tb, 1, '  ')
         insert(ord('b'), None)
         insert(ord(':'), None)
-        tb.carriageReturn()
+        tb.carriage_return()
         insert(ord('c'), None)
         insert(ord(':'), None)
-        tb.carriageReturn()
-        checkRow(self, tb, 0, 'a:')
-        checkRow(self, tb, 1, '  b:')
-        checkRow(self, tb, 2, '    c:')
+        tb.carriage_return()
+        check_row(self, tb, 0, 'a:')
+        check_row(self, tb, 1, '  b:')
+        check_row(self, tb, 2, '    c:')
 
     def test_indent_unindent_lines(self):
         def insert(*args):
-            self.textBuffer.insertPrintableWithPairing(*args)
-            self.textBuffer.parseDocument()
+            self.textBuffer.insert_printable_with_pairing(*args)
+            self.textBuffer.parse_document()
         tb = self.textBuffer
-        self.assertEqual(tb.parser.rowCount(), 1)
+        self.assertEqual(tb.parser.row_count(), 1)
         insert(ord('a'), None)
-        tb.carriageReturn()
+        tb.carriage_return()
         insert(ord('b'), None)
-        tb.carriageReturn()
+        tb.carriage_return()
         insert(ord('c'), None)
-        tb.carriageReturn()
+        tb.carriage_return()
         insert(ord('d'), None)
-        tb.carriageReturn()
-        checkRow(self, tb, 0, 'a')
-        checkRow(self, tb, 1, 'b')
-        checkRow(self, tb, 2, 'c')
-        checkRow(self, tb, 3, 'd')
+        tb.carriage_return()
+        check_row(self, tb, 0, 'a')
+        check_row(self, tb, 1, 'b')
+        check_row(self, tb, 2, 'c')
+        check_row(self, tb, 3, 'd')
         tb.penRow = 1
         tb.markerRow = 2
-        tb.indentLines()
-        checkRow(self, tb, 0, 'a')
-        checkRow(self, tb, 1, '  b')
-        checkRow(self, tb, 2, '  c')
-        checkRow(self, tb, 3, 'd')
+        tb.indent_lines()
+        check_row(self, tb, 0, 'a')
+        check_row(self, tb, 1, '  b')
+        check_row(self, tb, 2, '  c')
+        check_row(self, tb, 3, 'd')
         tb.penRow = 0
         tb.markerRow = 3
-        tb.indentLines()
-        checkRow(self, tb, 0, '  a')
-        checkRow(self, tb, 1, '    b')
-        checkRow(self, tb, 2, '    c')
-        checkRow(self, tb, 3, '  d')
-        tb.unindentLines()
-        checkRow(self, tb, 0, 'a')
-        checkRow(self, tb, 1, '  b')
-        checkRow(self, tb, 2, '  c')
-        checkRow(self, tb, 3, 'd')
-        tb.unindentLines()
-        checkRow(self, tb, 0, 'a')
-        checkRow(self, tb, 1, 'b')
-        checkRow(self, tb, 2, 'c')
-        checkRow(self, tb, 3, 'd')
+        tb.indent_lines()
+        check_row(self, tb, 0, '  a')
+        check_row(self, tb, 1, '    b')
+        check_row(self, tb, 2, '    c')
+        check_row(self, tb, 3, '  d')
+        tb.unindent_lines()
+        check_row(self, tb, 0, 'a')
+        check_row(self, tb, 1, '  b')
+        check_row(self, tb, 2, '  c')
+        check_row(self, tb, 3, 'd')
+        tb.unindent_lines()
+        check_row(self, tb, 0, 'a')
+        check_row(self, tb, 1, 'b')
+        check_row(self, tb, 2, 'c')
+        check_row(self, tb, 3, 'd')
         tb.penRow = 1
         tb.markerRow = 1
-        tb.indentLines()
-        checkRow(self, tb, 0, 'a')
-        checkRow(self, tb, 1, '  b')
-        checkRow(self, tb, 2, 'c')
-        checkRow(self, tb, 3, 'd')
-        tb.indentLines()
-        checkRow(self, tb, 0, 'a')
-        checkRow(self, tb, 1, '    b')
-        checkRow(self, tb, 2, 'c')
-        checkRow(self, tb, 3, 'd')
-        tb.unindentLines()
-        checkRow(self, tb, 0, 'a')
-        checkRow(self, tb, 1, '  b')
-        checkRow(self, tb, 2, 'c')
-        checkRow(self, tb, 3, 'd')
+        tb.indent_lines()
+        check_row(self, tb, 0, 'a')
+        check_row(self, tb, 1, '  b')
+        check_row(self, tb, 2, 'c')
+        check_row(self, tb, 3, 'd')
+        tb.indent_lines()
+        check_row(self, tb, 0, 'a')
+        check_row(self, tb, 1, '    b')
+        check_row(self, tb, 2, 'c')
+        check_row(self, tb, 3, 'd')
+        tb.unindent_lines()
+        check_row(self, tb, 0, 'a')
+        check_row(self, tb, 1, '  b')
+        check_row(self, tb, 2, 'c')
+        check_row(self, tb, 3, 'd')
         tb.penRow = 3
         tb.markerRow = 3
-        tb.indentLines()
-        checkRow(self, tb, 0, 'a')
-        checkRow(self, tb, 1, '  b')
-        checkRow(self, tb, 2, 'c')
-        checkRow(self, tb, 3, '  d')
+        tb.indent_lines()
+        check_row(self, tb, 0, 'a')
+        check_row(self, tb, 1, '  b')
+        check_row(self, tb, 2, 'c')
+        check_row(self, tb, 3, '  d')
         tb.penRow = 0
         tb.markerRow = 3
-        tb.indentLines()
-        checkRow(self, tb, 0, '  a')
-        checkRow(self, tb, 1, '    b')
-        checkRow(self, tb, 2, '  c')
-        checkRow(self, tb, 3, '    d')
+        tb.indent_lines()
+        check_row(self, tb, 0, '  a')
+        check_row(self, tb, 1, '    b')
+        check_row(self, tb, 2, '  c')
+        check_row(self, tb, 3, '    d')
         tb.penRow = 3
         tb.markerRow = 3
-        tb.unindentLines()
-        checkRow(self, tb, 0, '  a')
-        checkRow(self, tb, 1, '    b')
-        checkRow(self, tb, 2, '  c')
-        checkRow(self, tb, 3, '  d')
-        tb.unindentLines()
-        checkRow(self, tb, 0, '  a')
-        checkRow(self, tb, 1, '    b')
-        checkRow(self, tb, 2, '  c')
-        checkRow(self, tb, 3, 'd')
-        tb.unindentLines()
-        checkRow(self, tb, 0, '  a')
-        checkRow(self, tb, 1, '    b')
-        checkRow(self, tb, 2, '  c')
-        checkRow(self, tb, 3, 'd')
+        tb.unindent_lines()
+        check_row(self, tb, 0, '  a')
+        check_row(self, tb, 1, '    b')
+        check_row(self, tb, 2, '  c')
+        check_row(self, tb, 3, '  d')
+        tb.unindent_lines()
+        check_row(self, tb, 0, '  a')
+        check_row(self, tb, 1, '    b')
+        check_row(self, tb, 2, '  c')
+        check_row(self, tb, 3, 'd')
+        tb.unindent_lines()
+        check_row(self, tb, 0, '  a')
+        check_row(self, tb, 1, '    b')
+        check_row(self, tb, 2, '  c')
+        check_row(self, tb, 3, 'd')
         tb.penRow = 0
         tb.markerRow = 0
-        tb.unindentLines()
-        checkRow(self, tb, 0, 'a')
-        checkRow(self, tb, 1, '    b')
-        checkRow(self, tb, 2, '  c')
-        checkRow(self, tb, 3, 'd')
-        tb.unindentLines()
-        checkRow(self, tb, 0, 'a')
-        checkRow(self, tb, 1, '    b')
-        checkRow(self, tb, 2, '  c')
-        checkRow(self, tb, 3, 'd')
+        tb.unindent_lines()
+        check_row(self, tb, 0, 'a')
+        check_row(self, tb, 1, '    b')
+        check_row(self, tb, 2, '  c')
+        check_row(self, tb, 3, 'd')
+        tb.unindent_lines()
+        check_row(self, tb, 0, 'a')
+        check_row(self, tb, 1, '    b')
+        check_row(self, tb, 2, '  c')
+        check_row(self, tb, 3, 'd')
 
     def test_indent_unindent_lines2(self):
 
         def insert(input):
             for i in input:
                 if i == u"\n":
-                    self.textBuffer.carriageReturn()
+                    self.textBuffer.carriage_return()
                 else:
-                    self.textBuffer.insertPrintableWithPairing(ord(i), None)
-                    self.textBuffer.parseDocument()
+                    self.textBuffer.insert_printable_with_pairing(ord(i), None)
+                    self.textBuffer.parse_document()
             self.assertEqual(self.textBuffer.parser.data, input)
 
-        def checkPenMarker(penRow, penCol, markerRow, markerCol):
+        def check_pen_marker(penRow, penCol, markerRow, markerCol):
             self.assertEqual((penRow, penCol, markerRow, markerCol), (
                     tb.penRow, tb.penCol, tb.markerRow, tb.markerCol))
 
-        def selectChar(penRow, penCol, markerRow, markerCol):
+        def select_char(penRow, penCol, markerRow, markerCol):
             self.textBuffer.penRow = penRow
             self.textBuffer.penCol = penCol
             self.textBuffer.markerRow = markerRow
@@ -489,126 +489,126 @@ class TextIndentTestCases(ActionsTestCase):
             self.textBuffer.selectionMode = app.selectable.kSelectionCharacter
 
         tb = self.textBuffer
-        self.assertEqual(tb.parser.rowCount(), 1)
-        checkPenMarker(0, 0, 0, 0)
+        self.assertEqual(tb.parser.row_count(), 1)
+        check_pen_marker(0, 0, 0, 0)
         insert(u"apple\nbanana\ncarrot\ndate\neggplant\n")
-        checkRow(self, tb, 0, 'apple')
-        checkRow(self, tb, 1, 'banana')
-        checkRow(self, tb, 2, 'carrot')
-        checkRow(self, tb, 3, 'date')
-        checkRow(self, tb, 4, 'eggplant')
-        selectChar(0, 3, 2, 2)
-        checkPenMarker(0, 3, 2, 2)
+        check_row(self, tb, 0, 'apple')
+        check_row(self, tb, 1, 'banana')
+        check_row(self, tb, 2, 'carrot')
+        check_row(self, tb, 3, 'date')
+        check_row(self, tb, 4, 'eggplant')
+        select_char(0, 3, 2, 2)
+        check_pen_marker(0, 3, 2, 2)
         tb.indent()
-        checkRow(self, tb, 0, '  apple')
-        checkRow(self, tb, 1, '  banana')
-        checkRow(self, tb, 2, '  carrot')
-        checkRow(self, tb, 3, 'date')
-        checkRow(self, tb, 4, 'eggplant')
-        checkPenMarker(0, 5, 2, 4)
+        check_row(self, tb, 0, '  apple')
+        check_row(self, tb, 1, '  banana')
+        check_row(self, tb, 2, '  carrot')
+        check_row(self, tb, 3, 'date')
+        check_row(self, tb, 4, 'eggplant')
+        check_pen_marker(0, 5, 2, 4)
         tb.indent()
-        checkRow(self, tb, 0, '    apple')
-        checkRow(self, tb, 1, '    banana')
-        checkRow(self, tb, 2, '    carrot')
-        checkRow(self, tb, 3, 'date')
-        checkRow(self, tb, 4, 'eggplant')
-        checkPenMarker(0, 7, 2, 6)
+        check_row(self, tb, 0, '    apple')
+        check_row(self, tb, 1, '    banana')
+        check_row(self, tb, 2, '    carrot')
+        check_row(self, tb, 3, 'date')
+        check_row(self, tb, 4, 'eggplant')
+        check_pen_marker(0, 7, 2, 6)
 
-        selectChar(0, 3, 0, 2)
+        select_char(0, 3, 0, 2)
         tb.unindent()
-        checkRow(self, tb, 0, '  apple')
-        checkRow(self, tb, 1, '    banana')
-        checkRow(self, tb, 2, '    carrot')
-        checkRow(self, tb, 3, 'date')
-        checkRow(self, tb, 4, 'eggplant')
-        checkPenMarker(0, 1, 0, 0)
+        check_row(self, tb, 0, '  apple')
+        check_row(self, tb, 1, '    banana')
+        check_row(self, tb, 2, '    carrot')
+        check_row(self, tb, 3, 'date')
+        check_row(self, tb, 4, 'eggplant')
+        check_pen_marker(0, 1, 0, 0)
 
-        selectChar(0, 3, 2, 2)
+        select_char(0, 3, 2, 2)
         tb.indent()
-        checkRow(self, tb, 0, '    apple')
-        checkRow(self, tb, 1, '      banana')
-        checkRow(self, tb, 2, '      carrot')
-        checkRow(self, tb, 3, 'date')
-        checkRow(self, tb, 4, 'eggplant')
-        checkPenMarker(0, 5, 2, 4)
+        check_row(self, tb, 0, '    apple')
+        check_row(self, tb, 1, '      banana')
+        check_row(self, tb, 2, '      carrot')
+        check_row(self, tb, 3, 'date')
+        check_row(self, tb, 4, 'eggplant')
+        check_pen_marker(0, 5, 2, 4)
         tb.indent()
-        checkPenMarker(0, 7, 2, 6)
+        check_pen_marker(0, 7, 2, 6)
         tb.indent()
-        checkPenMarker(0, 9, 2, 8)
+        check_pen_marker(0, 9, 2, 8)
 
 class TextInsertTestCases(ActionsTestCase):
 
-    def setUp(self):
+    def set_up(self):
         app.log.shouldWritePrintLog = False
         self.prg = app.ci_program.CiProgram()
         self.textBuffer = app.text_buffer.TextBuffer(self.prg)
-        self.textBuffer.setView(FakeView())
+        self.textBuffer.set_view(FakeView())
         #self.assertEqual(self.textBuffer.scrollRow, 0)
         #self.assertEqual(self.textBuffer.scrollCol, 0)
 
-    def tearDown(self):
+    def tear_down(self):
         self.textBuffer = None
 
     def test_auto_insert_pair_disable(self):
         self.prg.prefs.editor['autoInsertClosingCharacter'] = False
         def insert(*args):
-            self.textBuffer.insertPrintableWithPairing(*args)
-            self.textBuffer.parseDocument()
+            self.textBuffer.insert_printable_with_pairing(*args)
+            self.textBuffer.parse_document()
         tb = self.textBuffer
         insert(ord('o'), None)
         insert(ord('('), None)
-        checkRow(self, tb, 0, 'o(')
+        check_row(self, tb, 0, 'o(')
         insert(ord('a'), None)
-        checkRow(self, tb, 0, 'o(a')
-        tb.editUndo()
-        checkRow(self, tb, 0, 'o(')
-        tb.editUndo()
-        checkRow(self, tb, 0, 'o')
-        tb.editUndo()
-        checkRow(self, tb, 0, '')
+        check_row(self, tb, 0, 'o(a')
+        tb.edit_undo()
+        check_row(self, tb, 0, 'o(')
+        tb.edit_undo()
+        check_row(self, tb, 0, 'o')
+        tb.edit_undo()
+        check_row(self, tb, 0, '')
         # Don't insert pair if the next char is not whitespace.
         insert(ord('o'), None)
-        checkRow(self, tb, 0, 'o')
-        tb.cursorLeft()
-        checkRow(self, tb, 0, 'o')
+        check_row(self, tb, 0, 'o')
+        tb.cursor_left()
+        check_row(self, tb, 0, 'o')
         insert(ord('('), None)
-        checkRow(self, tb, 0, '(o')
+        check_row(self, tb, 0, '(o')
 
     def test_auto_insert_pair_enable(self):
         self.prg.prefs.editor['autoInsertClosingCharacter'] = True
         def insert(*args):
-            self.textBuffer.insertPrintableWithPairing(*args)
-            self.textBuffer.parseDocument()
+            self.textBuffer.insert_printable_with_pairing(*args)
+            self.textBuffer.parse_document()
         tb = self.textBuffer
         insert(ord('o'), None)
         insert(ord('('), None)
-        checkRow(self, tb, 0, 'o()')
+        check_row(self, tb, 0, 'o()')
         insert(ord('a'), None)
-        checkRow(self, tb, 0, 'o(a)')
-        tb.editUndo()
-        checkRow(self, tb, 0, 'o()')
-        tb.editUndo()
-        checkRow(self, tb, 0, '')
+        check_row(self, tb, 0, 'o(a)')
+        tb.edit_undo()
+        check_row(self, tb, 0, 'o()')
+        tb.edit_undo()
+        check_row(self, tb, 0, '')
         # Don't insert pair if the next char is not whitespace.
         insert(ord('o'), None)
-        checkRow(self, tb, 0, 'o')
-        tb.cursorLeft()
-        checkRow(self, tb, 0, 'o')
+        check_row(self, tb, 0, 'o')
+        tb.cursor_left()
+        check_row(self, tb, 0, 'o')
         insert(ord('('), None)
-        checkRow(self, tb, 0, '(o')
+        check_row(self, tb, 0, '(o')
 
 class GrammarDeterminationTestCases(ActionsTestCase):
 
-    def setUp(self):
+    def set_up(self):
         app.log.shouldWritePrintLog = False
         self.prg = app.ci_program.CiProgram()
         self.textBuffer = app.text_buffer.TextBuffer(self.prg)
-        self.textBuffer.setView(FakeView())
+        self.textBuffer.set_view(FakeView())
 
-    def tearDown(self):
+    def tear_down(self):
         self.textBuffer = None
 
     def test_message_backspace(self):
         tb = self.textBuffer
-        self.assertEqual(tb._determineRootGrammar(*os.path.splitext("test.cc")),
+        self.assertEqual(tb._determine_root_grammar(*os.path.splitext("test.cc")),
             self.prg.prefs.grammars.get(self.prg.prefs.extensions.get('.cc')))

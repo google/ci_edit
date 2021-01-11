@@ -34,60 +34,60 @@ class PredictionList(app.window.Window):
         self.host = host
         self.isFocusable = False
         self.controller = app.cu_editor.PredictionList(self)
-        self.setTextBuffer(app.text_buffer.TextBuffer(self.program))
+        self.set_text_buffer(app.text_buffer.TextBuffer(self.program))
         # Set up table headers.
         color = host.program.color.get(u'top_info')
         self.optionsRow = app.window.OptionsSelectionWindow(self.program, self)
-        self.optionsRow.setParent(self)
+        self.optionsRow.set_parent(self)
         self.typeColumn = app.window.SortableHeaderWindow(
             self.program, self.optionsRow, u'Type', u'editor',
             u'predictionSortAscendingByType', 8)
         label = app.window.LabelWindow(self.program, self.optionsRow, u'|')
-        label.setParent(self.optionsRow)
+        label.set_parent(self.optionsRow)
         label.color = color
         self.nameColumn = app.window.SortableHeaderWindow(
             self.program, self.optionsRow, u'Name', u'editor',
             u'predictionSortAscendingByName', -61)
         label = app.window.LabelWindow(self.program, self.optionsRow, u'|')
-        label.setParent(self.optionsRow)
+        label.set_parent(self.optionsRow)
         label.color = color
         self.statusColumn = app.window.SortableHeaderWindow(
             self.program, self.optionsRow, u'Status ', u'editor',
             u'predictionSortAscendingByStatus', -7)
         label = app.window.LabelWindow(self.program, self.optionsRow, u'|')
-        label.setParent(self.optionsRow)
+        label.set_parent(self.optionsRow)
         label.color = color
 
-    def highlightLine(self, row):
-        self.textBuffer.penRow = min(row, self.textBuffer.parser.rowCount() - 1)
+    def highlight_line(self, row):
+        self.textBuffer.penRow = min(row, self.textBuffer.parser.row_count() - 1)
         self.textBuffer.penCol = 0
         app.log.info(self.textBuffer.penRow)
 
-    def mouseClick(self, paneRow, paneCol, shift, ctrl, alt):
-        self.highlightLine(self.scrollRow + paneRow)
+    def mouse_click(self, paneRow, paneCol, shift, ctrl, alt):
+        self.highlight_line(self.scrollRow + paneRow)
         row = self.scrollRow + paneRow
-        if row >= self.textBuffer.parser.rowCount():
+        if row >= self.textBuffer.parser.row_count():
             return
-        self.controller.openFileOrDir(row)
+        self.controller.open_file_or_dir(row)
 
-    def mouseDoubleClick(self, paneRow, paneCol, shift, ctrl, alt):
+    def mouse_double_click(self, paneRow, paneCol, shift, ctrl, alt):
         app.log.info()
         assert False
 
-    #def mouseMoved(self, paneRow, paneCol, shift, ctrl, alt):
+    #def mouse_moved(self, paneRow, paneCol, shift, ctrl, alt):
     #  app.log.info()
 
-    #def mouseRelease(self, paneRow, paneCol, shift, ctrl, alt):
+    #def mouse_release(self, paneRow, paneCol, shift, ctrl, alt):
     #  app.log.info()
 
-    #def mouseTripleClick(self, paneRow, paneCol, shift, ctrl, alt):
+    #def mouse_triple_click(self, paneRow, paneCol, shift, ctrl, alt):
     #  app.log.info()
 
-    def mouseWheelDown(self, shift, ctrl, alt):
-        self.textBuffer.mouseWheelDown(shift, ctrl, alt)
+    def mouse_wheel_down(self, shift, ctrl, alt):
+        self.textBuffer.mouse_wheel_down(shift, ctrl, alt)
 
-    def mouseWheelUp(self, shift, ctrl, alt):
-        self.textBuffer.mouseWheelUp(shift, ctrl, alt)
+    def mouse_wheel_up(self, shift, ctrl, alt):
+        self.textBuffer.mouse_wheel_up(shift, ctrl, alt)
 
     def update(self, items):
         # Filter the list. (The filter function is not used so as to edit the
@@ -121,27 +121,27 @@ class PredictionList(app.window.Window):
         elif sortByName is not None:
             items.sort(reverse=not sortByName, key=lambda x: x[1])
         # Write the lines to the text buffer.
-        def fitPathToWidth(path, width):
+        def fit_path_to_width(path, width):
             if len(path) < width:
                 return path
             return path[-width:]
 
         if len(items) == 0:
-            self.textBuffer.replaceLines((u'',))
+            self.textBuffer.replace_lines((u'',))
         else:
-            self.textBuffer.replaceLines(
+            self.textBuffer.replace_lines(
                 tuple([
                     u"%*s %*s %.*s" %
                     (self.typeColumn.cols, i[3], -self.nameColumn.cols,
-                     fitPathToWidth(i[1], self.nameColumn.cols),
+                     fit_path_to_width(i[1], self.nameColumn.cols),
                      self.statusColumn.cols, i[2]) for i in items
                 ]))
-        self.textBuffer.parseScreenMaybe()  # TODO(dschuyler): Add test.
-        self.textBuffer.cursorMoveToBegin()
+        self.textBuffer.parse_screen_maybe()  # TODO(dschuyler): Add test.
+        self.textBuffer.cursor_move_to_begin()
 
-    def onPrefChanged(self, category, name):
-        self.controller.optionChanged(category, name)
-        app.window.Window.onPrefChanged(self, category, name)
+    def on_pref_changed(self, category, name):
+        self.controller.option_changed(category, name)
+        app.window.Window.on_pref_changed(self, category, name)
 
     def reshape(self, top, left, rows, cols):
         """Change self and sub-windows to fit within the given rectangle."""
@@ -151,14 +151,14 @@ class PredictionList(app.window.Window):
         rows -= 1
         app.window.Window.reshape(self, top, left, rows, cols)
 
-    def setTextBuffer(self, textBuffer):
+    def set_text_buffer(self, textBuffer):
         if app.config.strict_debug:
             assert textBuffer is not self.host.textBuffer
         textBuffer.lineLimitIndicator = 0
         textBuffer.highlightCursorLine = True
         textBuffer.highlightTrailingWhitespace = False
-        app.window.Window.setTextBuffer(self, textBuffer)
-        self.controller.setTextBuffer(textBuffer)
+        app.window.Window.set_text_buffer(self, textBuffer)
+        self.controller.set_text_buffer(textBuffer)
 
 
 class PredictionInputWindow(app.window.Window):
@@ -170,19 +170,19 @@ class PredictionInputWindow(app.window.Window):
         app.window.Window.__init__(self, program, host)
         self.host = host
         self.controller = app.cu_editor.PredictionInputController(self)
-        self.setTextBuffer(app.text_buffer.TextBuffer(self.program))
+        self.set_text_buffer(app.text_buffer.TextBuffer(self.program))
 
-    def getPath(self):
-        return self.textBuffer.parser.rowText(0)
+    def get_path(self):
+        return self.textBuffer.parser.row_text(0)
 
-    def setPath(self, path):
-        self.textBuffer.replaceLines((path,))
+    def set_path(self, path):
+        self.textBuffer.replace_lines((path,))
 
-    def setTextBuffer(self, textBuffer):
+    def set_text_buffer(self, textBuffer):
         textBuffer.lineLimitIndicator = 0
         textBuffer.highlightTrailingWhitespace = False
-        app.window.Window.setTextBuffer(self, textBuffer)
-        self.controller.setTextBuffer(textBuffer)
+        app.window.Window.set_text_buffer(self, textBuffer)
+        self.controller.set_text_buffer(textBuffer)
 
 
 class PredictionWindow(app.window.Window):
@@ -192,27 +192,27 @@ class PredictionWindow(app.window.Window):
 
         self.showTips = False
         self.controller = app.cu_editor.PredictionController(self)
-        self.setTextBuffer(app.text_buffer.TextBuffer(self.program))
+        self.set_text_buffer(app.text_buffer.TextBuffer(self.program))
 
         self.titleRow = app.window.OptionsRow(self.program, self)
-        self.titleRow.addLabel(u' ci   ')
-        self.titleRow.setParent(self)
+        self.titleRow.add_label(u' ci   ')
+        self.titleRow.set_parent(self)
 
         self.predictionInputWindow = PredictionInputWindow(self.program, self)
-        self.predictionInputWindow.setParent(self)
+        self.predictionInputWindow.set_parent(self)
 
         self.predictionList = PredictionList(self.program, self)
-        self.predictionList.setParent(self)
+        self.predictionList.set_parent(self)
 
         if 1:
             self.optionsRow = app.window.RowWindow(self.program, self, 2)
-            self.optionsRow.setParent(self)
+            self.optionsRow.set_parent(self)
             colorPrefs = host.program.color
             self.optionsRow.color = colorPrefs.get(u'top_info')
             label = app.window.LabelWindow(self.program, self.optionsRow,
                                            u'Show:')
             label.color = colorPrefs.get(u'top_info')
-            label.setParent(self.optionsRow)
+            label.set_parent(self.optionsRow)
             toggle = app.window.OptionsToggle(self.program, self.optionsRow,
                                               u'open', u'editor',
                                               u'predictionShowOpenFiles')
@@ -227,9 +227,9 @@ class PredictionWindow(app.window.Window):
             toggle.color = colorPrefs.get(u'top_info')
 
         self.messageLine = app.window.LabelWindow(self.program, self, u"")
-        self.messageLine.setParent(self)
+        self.messageLine.set_parent(self)
 
-    def bringChildToFront(self, child):
+    def bring_child_to_front(self, child):
         # The PredictionWindow window doesn't reorder children.
         pass
 
@@ -237,14 +237,14 @@ class PredictionWindow(app.window.Window):
         self.reattach()
         self.parent.layout()
         app.window.Window.focus(self)
-        self.changeFocusTo(self.predictionInputWindow)
+        self.change_focus_to(self.predictionInputWindow)
 
-    def getPath(self):
-        return self.predictionInputWindow.getPath()
+    def get_path(self):
+        return self.predictionInputWindow.get_path()
 
-    def onPrefChanged(self, category, name):
-        self.predictionList.controller.optionChanged(category, name)
-        app.window.Window.onPrefChanged(self, category, name)
+    def on_pref_changed(self, category, name):
+        self.predictionList.controller.option_changed(category, name)
+        app.window.Window.on_pref_changed(self, category, name)
 
     def reshape(self, top, left, rows, cols):
         """Change self and sub-windows to fit within the given rectangle."""
@@ -261,8 +261,8 @@ class PredictionWindow(app.window.Window):
         rows -= 1
         self.predictionList.reshape(top, left, rows, cols)
 
-    def setPath(self, path):
-        self.predictionInputWindow.setPath(path)
+    def set_path(self, path):
+        self.predictionInputWindow.set_path(path)
 
     def unfocus(self):
         app.window.Window.unfocus(self)

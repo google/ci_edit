@@ -32,14 +32,14 @@ kTestFile = u'#application_test_file_with_unlikely_file_name~'
 
 class CopyPasteTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
-    def setUp(self):
+    def set_up(self):
         self.longMessage = True
-        app.fake_curses_testing.FakeCursesTestCase.setUp(self)
+        app.fake_curses_testing.FakeCursesTestCase.set_up(self)
 
     def test_bracketed_paste(self):
-        self.assertEqual(app.curses_util.charWidth(u"ế", 0), 1)
-        self.runWithFakeInputs([
-                self.displayCheck(2, 7, [u"      "]),
+        self.assertEqual(app.curses_util.char_width(u"ế", 0), 1)
+        self.run_with_fake_inputs([
+                self.display_check(2, 7, [u"      "]),
                 curses.ascii.ESC,
                 app.curses_util.BRACKETED_PASTE_BEGIN,
                 u't',
@@ -50,17 +50,17 @@ class CopyPasteTestCases(app.fake_curses_testing.FakeCursesTestCase):
                 u't',
                 curses.ascii.ESC,
                 app.curses_util.BRACKETED_PASTE_END,
-                self.displayCheck(2, 7, [u'te\u1ebft ']),
+                self.display_check(2, 7, [u'te\u1ebft ']),
                 CTRL_Q,
                 u'n'
             ])
 
     def test_cut_paste_undo_redo(self):
-        #self.setMovieMode(True)
-        self.runWithFakeInputs([
-                self.displayCheck(2, 7, [u"      "]),
-                self.writeText(u'apple\nbanana\ncarrot\ndate\neggplant\nfig'),
-                self.displayCheck(2, 7, [
+        #self.set_movie_mode(True)
+        self.run_with_fake_inputs([
+                self.display_check(2, 7, [u"      "]),
+                self.write_text(u'apple\nbanana\ncarrot\ndate\neggplant\nfig'),
+                self.display_check(2, 7, [
                     u'apple   ',
                     u'banana   ',
                     u'carrot   ',
@@ -69,23 +69,23 @@ class CopyPasteTestCases(app.fake_curses_testing.FakeCursesTestCase):
                     u'fig   ',
                     u'         ',
                     ]),
-                self.selectionCheck(5, 3, 0, 0, 0),
+                self.selection_check(5, 3, 0, 0, 0),
                 KEY_UP, KEY_UP,
                 KEY_SHIFT_UP,
                 KEY_SHIFT_UP,
                 KEY_SHIFT_LEFT,
-                self.selectionCheck(1, 2, 3, 3, 3),
+                self.selection_check(1, 2, 3, 3, 3),
                 CTRL_X,
-                self.displayCheck(2, 7, [
+                self.display_check(2, 7, [
                     u'apple   ',
                     u'bae   ',
                     u'eggplant   ',
                     u'fig   ',
                     u'         ',
                     ]),
-                self.selectionCheck(1, 2, 1, 2, 0),
+                self.selection_check(1, 2, 1, 2, 0),
                 CTRL_V,
-                self.displayCheck(2, 7, [
+                self.display_check(2, 7, [
                     u'apple   ',
                     u'banana   ',
                     u'carrot   ',
@@ -94,9 +94,9 @@ class CopyPasteTestCases(app.fake_curses_testing.FakeCursesTestCase):
                     u'fig   ',
                     u'         ',
                     ]),
-                self.selectionCheck(3, 3, 1, 2, 0),
+                self.selection_check(3, 3, 1, 2, 0),
                 CTRL_V,
-                self.displayCheck(2, 7, [
+                self.display_check(2, 7, [
                     u'apple   ',
                     u'banana   ',
                     u'carrot   ',
@@ -107,9 +107,9 @@ class CopyPasteTestCases(app.fake_curses_testing.FakeCursesTestCase):
                     u'fig   ',
                     u'         ',
                     ]),
-                self.selectionCheck(5, 3, 1, 2, 0),
+                self.selection_check(5, 3, 1, 2, 0),
                 CTRL_Z,
-                self.displayCheck(2, 7, [
+                self.display_check(2, 7, [
                     u'apple   ',
                     u'banana   ',
                     u'carrot   ',
@@ -118,19 +118,19 @@ class CopyPasteTestCases(app.fake_curses_testing.FakeCursesTestCase):
                     u'fig   ',
                     u'         ',
                     ]),
-                self.selectionCheck(3, 3, 1, 2, 0),
+                self.selection_check(3, 3, 1, 2, 0),
                 CTRL_Z,
-                self.displayCheck(2, 7, [
+                self.display_check(2, 7, [
                     u'apple   ',
                     u'bae   ',
                     u'eggplant   ',
                     u'fig   ',
                     u'         ',
                     ]),
-                self.selectionCheck(1, 2, 1, 2, 0),
+                self.selection_check(1, 2, 1, 2, 0),
                 CTRL_Y,
                 CTRL_Y,
-                self.displayCheck(2, 7, [
+                self.display_check(2, 7, [
                     u'apple   ',
                     u'banana   ',
                     u'carrot   ',
@@ -141,12 +141,12 @@ class CopyPasteTestCases(app.fake_curses_testing.FakeCursesTestCase):
                     u'fig   ',
                     u'         ',
                     ]),
-                self.selectionCheck(5, 3, 1, 2, 0),
+                self.selection_check(5, 3, 1, 2, 0),
                 CTRL_Q, u'n'
             ])
 
     def test_write_text(self):
-        self.runWithFakeInputs([
-            self.writeText(u'test\n'),
+        self.run_with_fake_inputs([
+            self.write_text(u'test\n'),
             CTRL_Q, u'n'
         ])

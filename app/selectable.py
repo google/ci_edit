@@ -73,7 +73,7 @@ class Selectable(app.line_buffer.LineBuffer):
         self.selectionMode = kSelectionNone
 
     def count_selected(self):
-        lines = self.getSelectedText()
+        lines = self.get_selected_text()
         chars = len(lines) - 1  # Count carriage returns.
         for line in lines:
             chars += len(line)
@@ -82,15 +82,15 @@ class Selectable(app.line_buffer.LineBuffer):
     def selection(self):
         return (self.penRow, self.penCol, self.markerRow, self.markerCol)
 
-    def selectionModeName(self):
+    def selection_mode_name(self):
         return kSelectionModeNames[self.selectionMode]
 
-    def getSelectedText(self):
-        upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
-        return self.getText(upperRow, upperCol, lowerRow, lowerCol,
+    def get_selected_text(self):
+        upperRow, upperCol, lowerRow, lowerCol = self.start_and_end()
+        return self.get_text(upperRow, upperCol, lowerRow, lowerCol,
                             self.selectionMode)
 
-    def getText(self,
+    def get_text(self,
                 upperRow,
                 upperCol,
                 lowerRow,
@@ -107,32 +107,32 @@ class Selectable(app.line_buffer.LineBuffer):
             assert kSelectionNone <= selectionMode < kSelectionModeCount
         lines = []
         if selectionMode == kSelectionBlock:
-            if (lowerRow + 1 < self.parser.rowCount()):
+            if (lowerRow + 1 < self.parser.row_count()):
                 lowerRow += 1
             for i in range(upperRow, lowerRow):
-                lines.append(self.parser.rowText(i, upperCol, lowerCol))
+                lines.append(self.parser.row_text(i, upperCol, lowerCol))
         elif (selectionMode == kSelectionAll or
               selectionMode == kSelectionCharacter or
               selectionMode == kSelectionLine or
               selectionMode == kSelectionWord):
             if upperRow == lowerRow:
-                lines.append(self.parser.rowText(upperRow, upperCol, lowerCol))
+                lines.append(self.parser.row_text(upperRow, upperCol, lowerCol))
             else:
                 for i in range(upperRow, lowerRow + 1):
                     if i == upperRow:
-                        lines.append(self.parser.rowText(i, upperCol))
+                        lines.append(self.parser.row_text(i, upperCol))
                     elif i == lowerRow:
-                        lines.append(self.parser.rowText(i, 0, lowerCol))
+                        lines.append(self.parser.row_text(i, 0, lowerCol))
                     else:
-                        lines.append(self.parser.rowText(i))
+                        lines.append(self.parser.row_text(i))
         return tuple(lines)
 
-    def doDeleteSelection(self):
-        """Call doDelete() with current pen and marker values."""
-        upperRow, upperCol, lowerRow, lowerCol = self.startAndEnd()
-        self.doDelete(upperRow, upperCol, lowerRow, lowerCol)
+    def do_delete_selection(self):
+        """Call do_delete() with current pen and marker values."""
+        upperRow, upperCol, lowerRow, lowerCol = self.start_and_end()
+        self.do_delete(upperRow, upperCol, lowerRow, lowerCol)
 
-    def doDelete(self, upperRow, upperCol, lowerRow, lowerCol):
+    def do_delete(self, upperRow, upperCol, lowerRow, lowerCol):
         """Delete characters from (upperRow, upperCol) up to (lowerRow,
         lowerCol) using the current selection mode."""
         if app.config.strict_debug:
@@ -143,20 +143,20 @@ class Selectable(app.line_buffer.LineBuffer):
             assert upperRow <= lowerRow
             assert upperRow != lowerRow or upperCol <= lowerCol
         if self.selectionMode == kSelectionBlock:
-            self.parser.deleteBlock(upperRow, upperCol, lowerRow, lowerCol)
+            self.parser.delete_block(upperRow, upperCol, lowerRow, lowerCol)
         elif (self.selectionMode == kSelectionNone or
               self.selectionMode == kSelectionAll or
               self.selectionMode == kSelectionCharacter or
               self.selectionMode == kSelectionLine or
               self.selectionMode == kSelectionWord):
-            self.parser.deleteRange(upperRow, upperCol, lowerRow, lowerCol)
+            self.parser.delete_range(upperRow, upperCol, lowerRow, lowerCol)
 
-    def insertLines(self, lines):
+    def insert_lines(self, lines):
         if app.config.strict_debug:
             assert isinstance(lines, tuple)
-        self.insertLinesAt(self.penRow, self.penCol, lines, self.selectionMode)
+        self.insert_lines_at(self.penRow, self.penCol, lines, self.selectionMode)
 
-    def insertLinesAt(self, row, col, lines, selectionMode):
+    def insert_lines_at(self, row, col, lines, selectionMode):
         if app.config.strict_debug:
             assert isinstance(row, int)
             assert isinstance(col, int)
@@ -168,7 +168,7 @@ class Selectable(app.line_buffer.LineBuffer):
                 return
         lines = list(lines)
         if selectionMode == kSelectionBlock:
-            self.parser.insertBlock(row, col, lines)
+            self.parser.insert_block(row, col, lines)
         elif (selectionMode == kSelectionNone or
               selectionMode == kSelectionAll or
               selectionMode == kSelectionCharacter or
@@ -177,30 +177,30 @@ class Selectable(app.line_buffer.LineBuffer):
             if len(lines) == 1:
                 self.parser.insert(row, col, lines[0])
             else:
-                self.parser.insertLines(row, col, lines)
+                self.parser.insert_lines(row, col, lines)
         else:
             app.log.info('selection mode not recognized', selectionMode)
 
-    def __extendWords(self, upperRow, upperCol, lowerRow, lowerCol):
+    def __extend_words(self, upperRow, upperCol, lowerRow, lowerCol):
         """Extends and existing selection to the nearest word boundaries. The
         pen and marker will be extended away from each other. The extension may
         occur in one, both, or neither direction.
 
         Returns: tuple of (upperCol, lowerCol).
         """
-        line = self.parser.rowText(upperRow)
+        line = self.parser.row_text(upperRow)
         for segment in re.finditer(app.regex.kReWordBoundary, line):
             if segment.start() <= upperCol < segment.end():
                 upperCol = segment.start()
                 break
-        line = self.parser.rowText(lowerRow)
+        line = self.parser.row_text(lowerRow)
         for segment in re.finditer(app.regex.kReWordBoundary, line):
             if segment.start() < lowerCol < segment.end():
                 lowerCol = segment.end()
                 break
         return upperCol, lowerCol
 
-    def extendSelection(self):
+    def extend_selection(self):
         """Expand the current selection to fit the selection mode. E.g. if the
         pen in the middle of a word, selection word will extend the selection to
         the left and right so that the whole word is selected.
@@ -211,8 +211,8 @@ class Selectable(app.line_buffer.LineBuffer):
         if self.selectionMode == kSelectionNone:
             return (0, 0, -self.markerRow, -self.markerCol, 0)
         elif self.selectionMode == kSelectionAll:
-            lowerRow = self.parser.rowCount() - 1
-            lowerCol = self.parser.rowWidth(-1)
+            lowerRow = self.parser.row_count() - 1
+            lowerCol = self.parser.row_width(-1)
             return (lowerRow - self.penRow,
                     lowerCol - self.penCol, -self.markerRow,
                     -self.markerCol, 0)
@@ -222,18 +222,18 @@ class Selectable(app.line_buffer.LineBuffer):
             if self.penRow > self.markerRow or (self.penRow == self.markerRow
                                                 and
                                                 self.penCol > self.markerCol):
-                upperCol, lowerCol = self.__extendWords(
+                upperCol, lowerCol = self.__extend_words(
                     self.markerRow, self.markerCol, self.penRow, self.penCol)
                 return (0, lowerCol - self.penCol, 0, upperCol - self.markerCol,
                         0)
             else:
-                upperCol, lowerCol = self.__extendWords(
+                upperCol, lowerCol = self.__extend_words(
                     self.penRow, self.penCol, self.markerRow, self.markerCol)
                 return (0, upperCol - self.penCol, 0, lowerCol - self.markerCol,
                         0)
         return (0, 0, 0, 0, 0)
 
-    def startAndEnd(self):
+    def start_and_end(self):
         """Get the marker and pen pair as the earlier of the two then the later
         of the two. The result accounts for the current selection mode."""
         upperRow = 0
@@ -248,8 +248,8 @@ class Selectable(app.line_buffer.LineBuffer):
         elif self.selectionMode == kSelectionAll:
             upperRow = 0
             upperCol = 0
-            lowerRow = self.parser.rowCount() - 1
-            lowerCol = self.parser.rowWidth(-1)
+            lowerRow = self.parser.row_count() - 1
+            lowerCol = self.parser.row_width(-1)
         elif self.selectionMode == kSelectionBlock:
             upperRow = min(self.markerRow, self.penRow)
             upperCol = min(self.markerCol, self.penCol)

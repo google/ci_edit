@@ -70,39 +70,39 @@ class ProgramWindow(app.window.ActiveWindow):
         # Put the input window in front on startup.
         self.inputWindow.reattach()
 
-    def changeFocusTo(self, changeTo):
-        self.focusedWindow.controller.onChange()
+    def change_focus_to(self, change_to):
+        self.focusedWindow.controller.on_change()
         # Unfocus all the windows from the prior focused window to the common
         # root.
-        commonRoot = self.findCommonRoot(self.focusedWindow, changeTo)
+        commonRoot = self.find_common_root(self.focusedWindow, change_to)
         current = self.focusedWindow
         while current != commonRoot:
             if current.isFocusable:
                 current.unfocus()
             current = current.parent
-        self.setFocusedWindow(changeTo)
+        self.set_focused_window(change_to)
 
-    def debugDraw(self, win):
+    def debug_draw(self, win):
         if self.showLogWindow:
-            self.debugWindow.debugDraw(self.program, win)
-            self.debugUndoWindow.debugUndoDraw(win)
+            self.debugWindow.debug_draw(self.program, win)
+            self.debugUndoWindow.debug_undo_draw(win)
 
-    def executeCommandList(self, cmdList):
+    def execute_command_list(self, cmdList):
         for cmd, eventInfo in cmdList:
-            self.doPreCommand()
+            self.do_pre_command()
             if cmd == curses.KEY_RESIZE:
-                self.handleScreenResize(self.focusedWindow)
+                self.handle_screen_resize(self.focusedWindow)
                 continue
-            self.focusedWindow.controller.doCommand(cmd, eventInfo)
+            self.focusedWindow.controller.do_command(cmd, eventInfo)
             if cmd == curses.KEY_MOUSE:
-                self.handleMouse(eventInfo)
-            self.focusedWindow.controller.onChange()
+                self.handle_mouse(eventInfo)
+            self.focusedWindow.controller.on_change()
 
-    def findCommonRoot(self, first, second):
+    def find_common_root(self, first, second):
         """Find the Window that is the parent of both |first| and |second|. If
         |first| is a (grand*)parent of |second|, return |first| (or vice versa).
         """
-        # assert self.focusedWindow is not changeTo
+        # assert self.focusedWindow is not change_to
         if first is second:
             return first
         firstPath = [first]
@@ -126,9 +126,9 @@ class ProgramWindow(app.window.ActiveWindow):
         return root
 
     def focus(self):
-        self.setFocusedWindow(self.zOrder[-1])
+        self.set_focused_window(self.zOrder[-1])
 
-    def setFocusedWindow(self, window):
+    def set_focused_window(self, window):
         # Depth-first search for focusable window.
         depth = [window]
         while len(depth):
@@ -140,44 +140,44 @@ class ProgramWindow(app.window.ActiveWindow):
                     assert possibility.controller
                 self.focusedWindow = possibility
                 self.focusedWindow.focus()
-                self.focusedWindow.textBuffer.compoundChangePush()
+                self.focusedWindow.textBuffer.compound_change_push()
                 return
             depth += possibility.zOrder
             app.log.info(depth)
         app.log.error("focusable window not found")
 
-    def doPreCommand(self):
+    def do_pre_command(self):
         # Reset UI elements that adjust when new commands are issued.
-        # E.g. setMessage()
+        # E.g. set_message()
         win = self.focusedWindow
         while win is not None and win is not self:
-            win.doPreCommand()
+            win.do_pre_command()
             win = win.parent
 
-    def longTimeSlice(self):
+    def long_time_slice(self):
         """returns whether work is finished (no need to call again)."""
         win = self.focusedWindow
         while win is not None and win is not self:
-            if not win.longTimeSlice():
+            if not win.long_time_slice():
                 return False
             win = win.parent
         return True
 
-    def shortTimeSlice(self):
+    def short_time_slice(self):
         """returns whether work is finished (no need to call again)."""
         win = self.focusedWindow
         while win is not None and win is not self:
-            if not win.shortTimeSlice():
+            if not win.short_time_slice():
                 return False
             #assert win is not win.parent
             win = win.parent
         return True
 
-    def clickedNearby(self, row, col):
+    def clicked_nearby(self, row, col):
         y, x = self.priorClickRowCol
         return y - 1 <= row <= y + 1 and x - 1 <= col <= x + 1
 
-    def handleMouse(self, info):
+    def handle_mouse(self, info):
         """Mouse handling is a special case. The getch() curses function will
         signal the existence of a mouse event, but the event must be fetched and
         parsed separately."""
@@ -186,19 +186,19 @@ class ProgramWindow(app.window.ActiveWindow):
         eventTime = info[1]
         rapidClickTimeout = .5
 
-        def findWindow(parent, mouseRow, mouseCol):
+        def find_window(parent, mouseRow, mouseCol):
             for window in reversed(parent.zOrder):
                 if window.contains(mouseRow, mouseCol):
-                    return findWindow(window, mouseRow, mouseCol)
+                    return find_window(window, mouseRow, mouseCol)
             return parent
 
-        window = findWindow(self, mouseRow, mouseCol)
+        window = find_window(self, mouseRow, mouseCol)
         if window == self:
             app.log.mouse('click landed on screen')
             return
         if self.focusedWindow != window and window.isFocusable:
             app.log.debug('before change focus')
-            window.changeFocusTo(window)
+            window.change_focus_to(window)
             app.log.debug('after change focus')
         mouseRow -= window.top
         mouseCol -= window.left
@@ -206,12 +206,12 @@ class ProgramWindow(app.window.ActiveWindow):
         app.log.mouse("\n", window)
         button1WasDown = self.savedMouseButton1Down
         self.savedMouseButton1Down = False
-        #app.log.info('bState', app.curses_util.mouseButtonName(bState))
+        #app.log.info('bState', app.curses_util.mouse_button_name(bState))
         if bState & curses.BUTTON1_RELEASED:
             if button1WasDown:
                 app.log.mouse(bState, curses.BUTTON1_RELEASED)
                 if self.priorClick + rapidClickTimeout <= eventTime:
-                    window.mouseRelease(
+                    window.mouse_release(
                         mouseRow, mouseCol, bState & curses.BUTTON_SHIFT,
                         bState & curses.BUTTON_CTRL, bState & curses.BUTTON_ALT)
                 #else:
@@ -224,15 +224,15 @@ class ProgramWindow(app.window.ActiveWindow):
         elif bState & curses.BUTTON1_PRESSED:
             self.savedMouseButton1Down = True
             if (self.priorClick + rapidClickTimeout > eventTime and
-                    self.clickedNearby(mouseRow, mouseCol)):
+                    self.clicked_nearby(mouseRow, mouseCol)):
                 self.clicks += 1
                 self.priorClick = eventTime
                 if self.clicks == 2:
-                    window.mouseDoubleClick(
+                    window.mouse_double_click(
                         mouseRow, mouseCol, bState & curses.BUTTON_SHIFT,
                         bState & curses.BUTTON_CTRL, bState & curses.BUTTON_ALT)
                 else:
-                    window.mouseTripleClick(
+                    window.mouse_triple_click(
                         mouseRow, mouseCol, bState & curses.BUTTON_SHIFT,
                         bState & curses.BUTTON_CTRL, bState & curses.BUTTON_ALT)
                     self.clicks = 1
@@ -240,11 +240,11 @@ class ProgramWindow(app.window.ActiveWindow):
                 self.clicks = 1
                 self.priorClick = eventTime
                 self.priorClickRowCol = (mouseRow, mouseCol)
-                window.mouseClick(
+                window.mouse_click(
                     mouseRow, mouseCol, bState & curses.BUTTON_SHIFT,
                     bState & curses.BUTTON_CTRL, bState & curses.BUTTON_ALT)
         elif bState & (curses.BUTTON2_PRESSED | 0x200000):
-            window.mouseWheelUp(bState & curses.BUTTON_SHIFT,
+            window.mouse_wheel_up(bState & curses.BUTTON_SHIFT,
                                 bState & curses.BUTTON_CTRL,
                                 bState & curses.BUTTON_ALT)
         elif bState & (curses.BUTTON4_PRESSED | curses.REPORT_MOUSE_POSITION):
@@ -257,12 +257,12 @@ class ProgramWindow(app.window.ActiveWindow):
             if self.savedMouseX == mouseCol and self.savedMouseY == mouseRow:
                 if bState & curses.REPORT_MOUSE_POSITION:
                     # This is a hack for dtterm mouse wheel on Mac OS X.
-                    window.mouseWheelUp(bState & curses.BUTTON_SHIFT,
+                    window.mouse_wheel_up(bState & curses.BUTTON_SHIFT,
                                         bState & curses.BUTTON_CTRL,
                                         bState & curses.BUTTON_ALT)
                 else:
                     # This is the normal case:
-                    window.mouseWheelDown(bState & curses.BUTTON_SHIFT,
+                    window.mouse_wheel_down(bState & curses.BUTTON_SHIFT,
                                           bState & curses.BUTTON_CTRL,
                                           bState & curses.BUTTON_ALT)
             else:
@@ -271,7 +271,7 @@ class ProgramWindow(app.window.ActiveWindow):
                     mouseRow += window.top - self.savedMouseWindow.top
                     mouseCol += window.left - self.savedMouseWindow.left
                     window = self.savedMouseWindow
-                window.mouseMoved(
+                window.mouse_moved(
                     mouseRow, mouseCol, bState & curses.BUTTON_SHIFT,
                     bState & curses.BUTTON_CTRL, bState & curses.BUTTON_ALT)
         elif bState & curses.BUTTON4_RELEASED:
@@ -279,23 +279,23 @@ class ProgramWindow(app.window.ActiveWindow):
             app.log.mouse("BUTTON4_RELEASED")
             pass
         else:
-            app.log.mouse('got bState', app.curses_util.mouseButtonName(bState),
+            app.log.mouse('got bState', app.curses_util.mouse_button_name(bState),
                           hex(bState))
         self.savedMouseWindow = window
         self.savedMouseX = mouseCol
         self.savedMouseY = mouseRow
 
-    def handleScreenResize(self, window):
-        #app.log.debug('handleScreenResize -----------------------')
+    def handle_screen_resize(self, window):
+        #app.log.debug('handle_screen_resize -----------------------')
         if sys.platform == 'darwin':
             # Some terminals seem to resize the terminal and others leave it
             # to the application to resize the curses terminal.
-            rows, cols = app.curses_util.terminalSize()
+            rows, cols = app.curses_util.terminal_size()
             curses.resizeterm(rows, cols)
         self.top = self.left = 0
         self.rows, self.cols = app.window.mainCursesWindow.getmaxyx()
         self.layout()
-        window.controller.onChange()
+        window.controller.on_change()
         self.render()
 
     def hide(self):
@@ -327,51 +327,51 @@ class ProgramWindow(app.window.ActiveWindow):
             self.zOrder[-1].reshape(eachRows * (count - 1), 0,
                                     rows - eachRows * (count - 1), inputWidth)
 
-    def nextFocusableWindow(self, start, reverse=False):
+    def next_focusable_window(self, start, reverse=False):
         # Keep the tab focus in the child branch. (The child view will call
         # this, tell the child there is nothing to tab to up here).
         return None
 
     def normalize(self):
-        self.presentModal(None)
+        self.present_modal(None)
 
-    def onPrefChanged(self, category, name):
+    def on_pref_changed(self, category, name):
         pass
 
-    def presentModal(self, changeTo, top=0, left=0):
+    def present_modal(self, change_to, top=0, left=0):
         if self.modalUi is not None:
-            #self.modalUi.controller.onChange()
+            #self.modalUi.controller.on_change()
             self.modalUi.hide()
-        app.log.info('\n', changeTo)
-        self.modalUi = changeTo
+        app.log.info('\n', change_to)
+        self.modalUi = change_to
         if self.modalUi is not None:
-            self.modalUi.moveSizeToFit(top, left)
-            self.modalUi.bringToFront()
+            self.modalUi.move_size_to_fit(top, left)
+            self.modalUi.bring_to_front()
 
-    def quitNow(self):
-        self.program.quitNow()
+    def quit_now(self):
+        self.program.quit_now()
 
     def render(self):
         if self.showLogWindow:
             self.logWindow.render()
         app.window.ActiveWindow.render(self)
         window = self.focusedWindow
-        self.debugDraw(window)
+        self.debug_draw(window)
         penRow = window.textBuffer.penRow
         penCol = window.textBuffer.penCol
         if (window.showCursor and penRow >= window.scrollRow and
                 penRow < window.scrollRow + window.rows):
-            self.program.backgroundFrame.setCursor(
+            self.program.backgroundFrame.set_cursor(
                 (window.top + penRow - window.scrollRow,
                  window.left + penCol - window.scrollCol))
         else:
-            self.program.backgroundFrame.setCursor(None)
+            self.program.backgroundFrame.set_cursor(None)
 
     def reshape(self, top, left, rows, cols):
         app.window.ActiveWindow.reshape(self, top, left, rows, cols)
         self.layout()
 
-    def bringToFront(self):
+    def bring_to_front(self):
         pass
 
     def unfocus(self):

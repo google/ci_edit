@@ -30,7 +30,7 @@ import app.controller
 import app.text_buffer
 
 
-def parseInt(inStr):
+def parse_int(inStr):
     if app.config.strict_debug:
         assert isinstance(inStr, unicode), type(inStr)
     i = 0
@@ -45,15 +45,15 @@ def parseInt(inStr):
     return 0
 
 
-def test_parseInt():
-    assert parseInt('0') == 0
-    assert parseInt('0e') == 0
-    assert parseInt('text') == 0
-    assert parseInt('10') == 10
-    assert parseInt('+10') == 10
-    assert parseInt('-10') == -10
-    assert parseInt('--10') == 0
-    assert parseInt('--10') == 0
+def test_parse_int():
+    assert parse_int('0') == 0
+    assert parse_int('0e') == 0
+    assert parse_int('text') == 0
+    assert parse_int('10') == 10
+    assert parse_int('+10') == 10
+    assert parse_int('-10') == -10
+    assert parse_int('--10') == 0
+    assert parse_int('--10') == 0
 
 
 class InteractivePrediction(app.controller.Controller):
@@ -68,43 +68,43 @@ class InteractivePrediction(app.controller.Controller):
     def cancel(self):
         self.items = [(self.priorTextBuffer, self.priorTextBuffer.fullPath, '')]
         self.index = 0
-        self.changeToHostWindow()
+        self.change_to_host_window()
 
-    def cursorMoveTo(self, row, col):
+    def cursor_move_to(self, row, col):
         if app.config.strict_debug:
             assert isinstance(row, int)
             assert isinstance(col, int)
         textBuffer = self.view.host.textBuffer
-        textBuffer.cursorMoveTo(row, col)
-        textBuffer.cursorScrollToMiddle()
+        textBuffer.cursor_move_to(row, col)
+        textBuffer.cursor_scroll_to_middle()
         textBuffer.redo()
 
     def focus(self):
         app.log.info('InteractivePrediction.focus')
         app.controller.Controller.focus(self)
         self.priorTextBuffer = self.view.host.textBuffer
-        self.index = self.buildFileList(self.view.host.textBuffer.fullPath)
-        self.view.host.setTextBuffer(text_buffer.TextBuffer())
-        self.commandDefault = self.view.textBuffer.insertPrintable
+        self.index = self.build_file_list(self.view.host.textBuffer.fullPath)
+        self.view.host.set_text_buffer(text_buffer.TextBuffer())
+        self.commandDefault = self.view.textBuffer.insert_printable
         self.view.host.textBuffer.lineLimitIndicator = 0
         self.view.host.textBuffer.rootGrammar = \
-            self.view.program.prefs.getGrammar('_pre')
+            self.view.program.prefs.get_grammar('_pre')
 
     def info(self):
         app.log.info('InteractivePrediction command set')
 
-    def buildFileList(self, currentFile):
+    def build_file_list(self, currentFile):
         if app.config.strict_debug:
             assert isinstance(currentFile, str)
         self.items = []
         bufferManager = self.view.program.bufferManager
         for i in bufferManager.buffers:
-            dirty = '*' if i.isDirty() else '.'
+            dirty = '*' if i.is_dirty() else '.'
             if i.fullPath:
                 self.items.append((i, i.fullPath, dirty))
             else:
                 self.items.append(
-                    (i, '<new file> %s' % (i.parser.rowText(0)[:20]), dirty))
+                    (i, '<new file> %s' % (i.parser.row_text(0)[:20]), dirty))
         dirPath, fileName = os.path.split(currentFile)
         fileName, ext = os.path.splitext(fileName)
         # TODO(dschuyler): rework this ignore list.
@@ -145,7 +145,7 @@ class InteractivePrediction(app.controller.Controller):
         # Suggest item.
         return (len(bufferManager.buffers) - 2) % len(self.items)
 
-    def onChange(self):
+    def on_change(self):
         assert False
         clip = []
         limit = max(5, self.view.host.cols - 10)
@@ -154,18 +154,18 @@ class InteractivePrediction(app.controller.Controller):
             suffix = ' <--' if i == self.index else ''
             clip.append(
                 "%s %s %s%s" % (prefix, item[1][-limit:], item[2], suffix))
-        self.view.host.textBuffer.selectionAll()
-        self.view.host.textBuffer.editPasteLines(tuple(clip))
-        self.cursorMoveTo(self.index, 0)
+        self.view.host.textBuffer.selection_all()
+        self.view.host.textBuffer.edit_paste_lines(tuple(clip))
+        self.cursor_move_to(self.index, 0)
 
-    def nextItem(self):
+    def next_item(self):
         self.index = (self.index + 1) % len(self.items)
 
-    def priorItem(self):
+    def prior_item(self):
         self.index = (self.index - 1) % len(self.items)
 
-    def selectItem(self):
-        self.changeToHostWindow()
+    def select_item(self):
+        self.change_to_host_window()
 
     def unfocus(self):
         app.controller.Controller.unfocus(self)
@@ -174,12 +174,12 @@ class InteractivePrediction(app.controller.Controller):
         bufferManager = self.view.program.bufferManager
         textBuffer, fullPath = self.items[self.index][:2]
         if textBuffer is not None:
-            self.view.host.setTextBuffer(
-                bufferManager.getValidTextBuffer(textBuffer))
+            self.view.host.set_text_buffer(
+                bufferManager.get_valid_text_buffer(textBuffer))
         else:
             expandedPath = os.path.abspath(os.path.expanduser(fullPath))
-            textBuffer = bufferManager.loadTextBuffer(expandedPath)
-            self.view.host.setTextBuffer(textBuffer)
+            textBuffer = bufferManager.load_text_buffer(expandedPath)
+            self.view.host.set_text_buffer(textBuffer)
         self.items = None
 
 
@@ -192,26 +192,26 @@ class InteractiveFind(app.controller.Controller):
             assert issubclass(view.__class__, app.window.ViewWindow), view
         app.controller.Controller.__init__(self, view, 'find')
 
-    def findNext(self):
-        self.findCmd = self.view.host.textBuffer.findNext
+    def find_next(self):
+        self.findCmd = self.view.host.textBuffer.find_next
 
-    def findPrior(self):
-        self.findCmd = self.view.host.textBuffer.findPrior
+    def find_prior(self):
+        self.findCmd = self.view.host.textBuffer.find_prior
 
     def focus(self):
         self.findCmd = self.view.host.textBuffer.find
-        selection = self.view.host.textBuffer.getSelectedText()
+        selection = self.view.host.textBuffer.get_selected_text()
         if selection:
-            self.view.findLine.textBuffer.selectionAll()
+            self.view.findLine.textBuffer.selection_all()
             # Make a single regex line.
             selection = "\\n".join(selection)
             app.log.info(selection)
             self.view.findLine.textBuffer.insert(re.escape(selection))
-        self.view.findLine.textBuffer.selectionAll()
+        self.view.findLine.textBuffer.selection_all()
 
-    def onChange(self):
-        self.view.findLine.textBuffer.parseScreenMaybe()
-        searchFor = self.view.findLine.textBuffer.parser.rowText(0)
+    def on_change(self):
+        self.view.findLine.textBuffer.parse_screen_maybe()
+        searchFor = self.view.findLine.textBuffer.parser.row_text(0)
         try:
             self.findCmd(searchFor)
         except re.error as e:
@@ -223,15 +223,15 @@ class InteractiveFind(app.controller.Controller):
                 self.error = u"invalid regex"
         self.findCmd = self.view.host.textBuffer.find
 
-    def replaceAndNext(self):
-        replaceWith = self.view.replaceLine.textBuffer.parser.rowText(0)
-        self.view.host.textBuffer.replaceFound(replaceWith)
-        self.findCmd = self.view.host.textBuffer.findNext
+    def replace_and_next(self):
+        replaceWith = self.view.replaceLine.textBuffer.parser.row_text(0)
+        self.view.host.textBuffer.replace_found(replaceWith)
+        self.findCmd = self.view.host.textBuffer.find_next
 
-    def replaceAndPrior(self):
-        replaceWith = self.view.replaceLine.textBuffer.parser.rowText(0)
-        self.view.host.textBuffer.replaceFound(replaceWith)
-        self.findCmd = self.view.host.textBuffer.findPrior
+    def replace_and_prior(self):
+        replaceWith = self.view.replaceLine.textBuffer.parser.row_text(0)
+        self.view.host.textBuffer.replace_found(replaceWith)
+        self.findCmd = self.view.host.textBuffer.find_prior
 
 
 class InteractiveFindInput(app.controller.Controller):
@@ -243,31 +243,31 @@ class InteractiveFindInput(app.controller.Controller):
             assert issubclass(view.__class__, app.window.ViewWindow), view
         app.controller.Controller.__init__(self, view, 'find')
 
-    def nextFocusableWindow(self):
-        self.view.parent.expandFindWindow(True)
-        app.controller.Controller.nextFocusableWindow(self)
+    def next_focusable_window(self):
+        self.view.parent.expand_find_window(True)
+        app.controller.Controller.next_focusable_window(self)
 
-    #def priorFocusableWindow(self):
-    #  if not app.controller.Controller.priorFocusableWindow(self):
-    #    self.view.host.expandFindWindow(False)
+    #def prior_focusable_window(self):
+    #  if not app.controller.Controller.prior_focusable_window(self):
+    #    self.view.host.expand_find_window(False)
 
-    def findNext(self):
-        self.parentController().findNext()
+    def find_next(self):
+        self.parent_controller().find_next()
 
-    def findPrior(self):
-        self.parentController().findPrior()
+    def find_prior(self):
+        self.parent_controller().find_prior()
 
     def info(self):
         app.log.info('InteractiveFind command set')
 
-    def onChange(self):
-        self.parentController().onChange()
+    def on_change(self):
+        self.parent_controller().on_change()
 
-    def replaceAndNext(self):
-        self.parentController().replaceAndNext()
+    def replace_and_next(self):
+        self.parent_controller().replace_and_next()
 
-    def replaceAndPrior(self):
-        self.parentController().replaceAndPrior()
+    def replace_and_prior(self):
+        self.parent_controller().replace_and_prior()
 
 
 class InteractiveGoto(app.controller.Controller):
@@ -281,46 +281,46 @@ class InteractiveGoto(app.controller.Controller):
 
     def focus(self):
         app.log.info('InteractiveGoto.focus')
-        self.textBuffer.selectionAll()
+        self.textBuffer.selection_all()
         self.textBuffer.insert(unicode(self.view.host.textBuffer.penRow + 1))
-        self.textBuffer.selectionAll()
+        self.textBuffer.selection_all()
 
     def info(self):
         app.log.info(u"InteractiveGoto command set")
 
-    def gotoBottom(self):
+    def goto_bottom(self):
         app.log.info()
-        self.textBuffer.selectionAll()
+        self.textBuffer.selection_all()
         self.textBuffer.insert(
-                unicode(self.view.host.textBuffer.parser.rowCount()))
-        self.changeToHostWindow()
+                unicode(self.view.host.textBuffer.parser.row_count()))
+        self.change_to_host_window()
 
-    def gotoHalfway(self):
-        self.textBuffer.selectionAll()
+    def goto_halfway(self):
+        self.textBuffer.selection_all()
         self.textBuffer.insert(
-                unicode(self.view.host.textBuffer.parser.rowCount() // 2 + 1))
-        self.changeToHostWindow()
+                unicode(self.view.host.textBuffer.parser.row_count() // 2 + 1))
+        self.change_to_host_window()
 
-    def gotoTop(self):
-        self.textBuffer.selectionAll()
+    def goto_top(self):
+        self.textBuffer.selection_all()
         self.textBuffer.insert(u"0")
-        self.changeToHostWindow()
+        self.change_to_host_window()
 
-    def cursorMoveTo(self, row, col):
+    def cursor_move_to(self, row, col):
         if app.config.strict_debug:
             assert isinstance(row, int)
             assert isinstance(col, int)
         textBuffer = self.view.host.textBuffer
-        textBuffer.cursorMoveTo(row, col)
-        textBuffer.cursorScrollToMiddle()
+        textBuffer.cursor_move_to(row, col)
+        textBuffer.cursor_scroll_to_middle()
         textBuffer.redo()
 
-    def onChange(self):
+    def on_change(self):
         app.log.info()
-        self.textBuffer.parseDocument()
-        line = self.textBuffer.parser.rowText(0)
+        self.textBuffer.parse_document()
+        line = self.textBuffer.parser.row_text(0)
         gotoLine, gotoCol = (line.split(U',') + [U'0', U'0'])[:2]
-        self.cursorMoveTo(parseInt(gotoLine) - 1, parseInt(gotoCol))
+        self.cursor_move_to(parse_int(gotoLine) - 1, parse_int(gotoCol))
 
 
 class ToggleController(app.controller.Controller):
@@ -331,16 +331,16 @@ class ToggleController(app.controller.Controller):
             assert issubclass(view.__class__, app.window.ViewWindow), view
         app.controller.Controller.__init__(self, view, u"toggle")
 
-    def clearValue(self):
+    def clear_value(self):
         category = self.view.prefCategory
         name = self.view.prefName
         prefs = self.view.program.prefs
         prefs.save(category, name, None)
-        self.view.onPrefChanged(category, name)
+        self.view.on_pref_changed(category, name)
 
-    def toggleValue(self):
+    def toggle_value(self):
         category = self.view.prefCategory
         name = self.view.prefName
         prefs = self.view.program.prefs
         prefs.save(category, name, not prefs.category(category)[name])
-        self.view.onPrefChanged(category, name)
+        self.view.on_pref_changed(category, name)

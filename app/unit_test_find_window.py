@@ -27,111 +27,111 @@ import app.fake_curses_testing
 
 class FindWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
-    def setUp(self):
+    def set_up(self):
         self.longMessage = True
-        app.fake_curses_testing.FakeCursesTestCase.setUp(self)
+        app.fake_curses_testing.FakeCursesTestCase.set_up(self)
 
     def test_find(self):
-        self.runWithFakeInputs([
-            self.displayCheck(-1, 0, [u"      "]),
+        self.run_with_fake_inputs([
+            self.display_check(-1, 0, [u"      "]),
             CTRL_F,
-            self.displayCheck(-3, 0, [u"Find: "]),
+            self.display_check(-3, 0, [u"Find: "]),
             CTRL_J,
-            self.displayCheck(-1, 0, [u"      "]),
+            self.display_check(-1, 0, [u"      "]),
             CTRL_F,
-            self.displayCheck(-3, 0, [u"Find: "]),
+            self.display_check(-3, 0, [u"Find: "]),
             CTRL_I,
-            self.displayCheck(-3, 0, [u"Find: ", u"Replace: ", u"["]),
-            #KEY_BTAB, KEY_BTAB, self.displayCheck(-1, 0, [u"Find: "]),
+            self.display_check(-3, 0, [u"Find: ", u"Replace: ", u"["]),
+            #KEY_BTAB, KEY_BTAB, self.display_check(-1, 0, [u"Find: "]),
             CTRL_Q
         ])
 
     def test_find_forward_and_reverse(self):
-        self.runWithFakeInputs([
-            self.writeText(u"ten one two three\nfour one one five\n"
+        self.run_with_fake_inputs([
+            self.write_text(u"ten one two three\nfour one one five\n"
                            u" six seven one\none\n"),
-            self.displayCheck(2, 7, [u"ten one two three  "]),
-            self.displayCheck(-1, 0, [u"      "]), CTRL_F,
-            self.displayCheck(-3, 0, [u"Find: "]),
-            self.writeText(u'one'),
-            self.selectionDocumentCheck(0, 4, 0, 7, 3), CTRL_F,
-            self.selectionDocumentCheck(1, 5, 1, 8, 3), CTRL_F,
-            self.selectionDocumentCheck(1, 9, 1, 12, 3), CTRL_R,
-            self.selectionDocumentCheck(1, 5, 1, 8, 3), CTRL_R,
-            self.selectionDocumentCheck(0, 4, 0, 7, 3), CTRL_R,
-            self.selectionDocumentCheck(3, 0, 3, 3, 3), CTRL_R,
-            self.selectionDocumentCheck(2, 11, 2, 14, 3), CTRL_R,
-            self.selectionDocumentCheck(1, 9, 1, 12, 3), CTRL_R,
-            self.selectionDocumentCheck(1, 5, 1, 8, 3), CTRL_F,
-            self.selectionDocumentCheck(1, 9, 1, 12, 3), CTRL_F,
-            self.selectionDocumentCheck(2, 11, 2, 14, 3), CTRL_F,
-            self.selectionDocumentCheck(3, 0, 3, 3, 3), CTRL_F,
-            self.selectionDocumentCheck(0, 4, 0, 7, 3), CTRL_F,
-            self.selectionDocumentCheck(1, 5, 1, 8, 3), CTRL_Q, u"n"
+            self.display_check(2, 7, [u"ten one two three  "]),
+            self.display_check(-1, 0, [u"      "]), CTRL_F,
+            self.display_check(-3, 0, [u"Find: "]),
+            self.write_text(u'one'),
+            self.selection_document_check(0, 4, 0, 7, 3), CTRL_F,
+            self.selection_document_check(1, 5, 1, 8, 3), CTRL_F,
+            self.selection_document_check(1, 9, 1, 12, 3), CTRL_R,
+            self.selection_document_check(1, 5, 1, 8, 3), CTRL_R,
+            self.selection_document_check(0, 4, 0, 7, 3), CTRL_R,
+            self.selection_document_check(3, 0, 3, 3, 3), CTRL_R,
+            self.selection_document_check(2, 11, 2, 14, 3), CTRL_R,
+            self.selection_document_check(1, 9, 1, 12, 3), CTRL_R,
+            self.selection_document_check(1, 5, 1, 8, 3), CTRL_F,
+            self.selection_document_check(1, 9, 1, 12, 3), CTRL_F,
+            self.selection_document_check(2, 11, 2, 14, 3), CTRL_F,
+            self.selection_document_check(3, 0, 3, 3, 3), CTRL_F,
+            self.selection_document_check(0, 4, 0, 7, 3), CTRL_F,
+            self.selection_document_check(1, 5, 1, 8, 3), CTRL_Q, u"n"
         ])
 
     def test_replace(self):
-        #self.setMovieMode(True)
-        self.runWithFakeInputs([
-            self.writeText(u"aDog\n"),
-            self.displayCheck(2, 7, [u"aDog  "]), CTRL_F,
-            self.writeText(u'a(.*)'),
-            self.displayCheck(-3, 0, [u"Find: a(.*)  "]), CTRL_I,
-            self.writeText(u'x\\1\\1'),
-            self.displayCheck(-2, 0, [u"Replace: x\\1\\1  "]), CTRL_G,
-            self.displayCheck(2, 7, [u"xDogDog  "]), CTRL_Q, u"n"
+        #self.set_movie_mode(True)
+        self.run_with_fake_inputs([
+            self.write_text(u"aDog\n"),
+            self.display_check(2, 7, [u"aDog  "]), CTRL_F,
+            self.write_text(u'a(.*)'),
+            self.display_check(-3, 0, [u"Find: a(.*)  "]), CTRL_I,
+            self.write_text(u'x\\1\\1'),
+            self.display_check(-2, 0, [u"Replace: x\\1\\1  "]), CTRL_G,
+            self.display_check(2, 7, [u"xDogDog  "]), CTRL_Q, u"n"
         ])
 
     def test_invalid_replace(self):
-        #self.setMovieMode(True)
-        self.runWithFakeInputs([
-            self.writeText(u"aDog aDog\n"),
-            self.displayCheck(2, 7, [u"aDog aDog  "]),
+        #self.set_movie_mode(True)
+        self.run_with_fake_inputs([
+            self.write_text(u"aDog aDog\n"),
+            self.display_check(2, 7, [u"aDog aDog  "]),
             CTRL_F,
-            self.writeText(u"a"),
-            self.displayCheck(-3, 0, [u"Find: a  "]),
-            self.selectionDocumentCheck(0, 0, 0, 1, 3),
+            self.write_text(u"a"),
+            self.display_check(-3, 0, [u"Find: a  "]),
+            self.selection_document_check(0, 0, 0, 1, 3),
             CTRL_I,
-            self.writeText(u'x\\1\\1'),
-            self.displayCheck(-2, 0, [u"Replace: x\\1\\1  "]),
+            self.write_text(u'x\\1\\1'),
+            self.display_check(-2, 0, [u"Replace: x\\1\\1  "]),
             CTRL_G,
             # The replacement will have failed (there is no \1 group). The
             # display should not have changed.
-            self.displayCheck(2, 7, [u"aDog aDog  "]),
+            self.display_check(2, 7, [u"aDog aDog  "]),
             # Since the replacement has an error, the selection should not move.
-            #self.selectionDocumentCheck(0, 0, 0, 1, 3),
+            #self.selection_document_check(0, 0, 0, 1, 3),
             # Doing a find doesn't involve the error in the replacement string,
             # so the selection should move.
-            #CTRL_F, self.selectionDocumentCheck(0, 5, 0, 6, 3),
+            #CTRL_F, self.selection_document_check(0, 5, 0, 6, 3),
             CTRL_Q,
             u"n"
         ])
 
     def test_find_replace_groups(self):
-        #self.setMovieMode(True)
-        self.runWithFakeInputs([
-            self.writeText(u'a\nb\na\nb\na\nb\n'),
-            self.displayCheck(2, 7, [u"a ", u"b ", u"a ", u"b ", u"a ", u"b "]),
+        #self.set_movie_mode(True)
+        self.run_with_fake_inputs([
+            self.write_text(u'a\nb\na\nb\na\nb\n'),
+            self.display_check(2, 7, [u"a ", u"b ", u"a ", u"b ", u"a ", u"b "]),
 
             # Enter Find and make two document replacements.
             CTRL_F,
-            self.writeText(u'(a)'),
-            self.displayCheck(-3, 0, [u"Find: (a)  "]),
+            self.write_text(u'(a)'),
+            self.display_check(-3, 0, [u"Find: (a)  "]),
             CTRL_I,
-            self.writeText(u'\\1!\\1'),
-            self.displayCheck(-2, 0, [u"Replace: \\1!\\1  "]),
+            self.write_text(u'\\1!\\1'),
+            self.display_check(-2, 0, [u"Replace: \\1!\\1  "]),
             CTRL_G,
-            self.displayCheck(2, 7,
+            self.display_check(2, 7,
                               [u"a!a ", u"b ", u"a ", u"b ", u"a ", u"b "]),
             CTRL_G,
-            self.displayCheck(2, 7,
+            self.display_check(2, 7,
                               [u"a!a ", u"b ", u"a!a ", u"b ", u"a ", u"b "]),
 
             # Leave Find and Undo the document changes.
             KEY_ESCAPE,
             curses.ERR,
             CTRL_Z,
-            self.displayCheck(2, 7, [u"a ", u"b ", u"a ", u"b ", u"a ", u"b "]),
+            self.display_check(2, 7, [u"a ", u"b ", u"a ", u"b ", u"a ", u"b "]),
 
             # Go to bottom of document.
             CTRL_G,
@@ -144,10 +144,10 @@ class FindWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
             CTRL_R,
             CTRL_I,
             CTRL_R,
-            self.displayCheck(2, 7,
+            self.display_check(2, 7,
                               [u"a ", u"b ", u"a ", u"b ", u"a!a ", u"b "]),
             # TODO(dschuyler): CTRL_R,
-            # TODO(dschuyler): self.displayCheck(2, 7, [u"a ", u"b ", u"a!a ",
+            # TODO(dschuyler): self.display_check(2, 7, [u"a ", u"b ", u"a!a ",
             # u"b ", u"a!a ", u"b "]),
 
             # Quit without saving.
@@ -156,74 +156,74 @@ class FindWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
         ])
 
     def test_find_esc_from_find(self):
-        self.runWithFakeInputs([
+        self.run_with_fake_inputs([
             # Check initial state.
-            self.displayCheck(-1, 0, [u"      "]),
-            self.displayCheckStyle(-2, 0, 1, 10,
+            self.display_check(-1, 0, [u"      "]),
+            self.display_check_style(-2, 0, 1, 10,
                                    self.prg.color.get(u'status_line', 0)),
 
             # Basic open and close.
             CTRL_F,
-            self.displayCheck(-3, 0, [u"Find: "]),
+            self.display_check(-3, 0, [u"Find: "]),
             KEY_ESCAPE,
             curses.ERR,
-            self.displayCheck(-3, 0, [u"   ", u"   ", u"   "]),
-            self.displayCheckStyle(-2, 0, 1, 10,
+            self.display_check(-3, 0, [u"   ", u"   ", u"   "]),
+            self.display_check_style(-2, 0, 1, 10,
                                    self.prg.color.get(u'status_line', 0)),
 
             # Open, expand, and close.
             CTRL_F,
-            self.displayCheck(-3, 0, [u"Find: "]),
+            self.display_check(-3, 0, [u"Find: "]),
             CTRL_I,
-            self.displayCheck(-3, 0, [u"Find: ", u"Replace: ", u"["]),
+            self.display_check(-3, 0, [u"Find: ", u"Replace: ", u"["]),
             KEY_ESCAPE,
             curses.ERR,
-            self.displayCheck(-3, 0, [u"   ", u"   ", u"   "]),
-            self.displayCheckStyle(-2, 0, 1, 10,
+            self.display_check(-3, 0, [u"   ", u"   ", u"   "]),
+            self.display_check_style(-2, 0, 1, 10,
                                    self.prg.color.get(u'status_line', 0)),
 
             # Regression test one for
             # https://github.com/google/ci_edit/issues/170.
             CTRL_F,
-            self.displayCheck(-3, 0, [u"Find: ", u"Replace: ", u"["]),
+            self.display_check(-3, 0, [u"Find: ", u"Replace: ", u"["]),
             CTRL_I,
             CTRL_I,
-            self.displayCheck(-3, 0, [u"Find: ", u"Replace: ", u"["]),
+            self.display_check(-3, 0, [u"Find: ", u"Replace: ", u"["]),
             KEY_ESCAPE,
             curses.ERR,
-            self.displayCheck(-3, 0, [u"   ", u"   ", u"   "]),
-            self.displayCheckStyle(-2, 0, 1, 10,
+            self.display_check(-3, 0, [u"   ", u"   ", u"   "]),
+            self.display_check_style(-2, 0, 1, 10,
                                    self.prg.color.get(u'status_line', 0)),
 
             # Regression test two for
             # https://github.com/google/ci_edit/issues/170.
             CTRL_F,
-            self.displayCheck(-3, 0, [u"Find: ", u"Replace: ", u"["]),
-            self.mouseEvent(0, 2, 10, curses.BUTTON1_PRESSED),
-            #self.displayCheck(-3, 0, ["   ", "   ", "   "]),
-            self.displayCheckStyle(-2, 0, 1, 10,
+            self.display_check(-3, 0, [u"Find: ", u"Replace: ", u"["]),
+            self.mouse_event(0, 2, 10, curses.BUTTON1_PRESSED),
+            #self.display_check(-3, 0, ["   ", "   ", "   "]),
+            self.display_check_style(-2, 0, 1, 10,
                                    self.prg.color.get(u'status_line', 0)),
             CTRL_Q
         ])
 
     def test_replace_style_parse(self):
-        self.runWithFakeInputs([
-            #self.displayCheck(2, 7, [u"      "]),
-            #self.displayCheckStyle(2, 7, 1, 10,
+        self.run_with_fake_inputs([
+            #self.display_check(2, 7, [u"      "]),
+            #self.display_check_style(2, 7, 1, 10,
             #    self.prg.color.get(u'text', 0)),
-            self.writeText(u'focusedWindow\n'),
+            self.write_text(u'focusedWindow\n'),
             CTRL_F,
-            #self.displayCheck(-1, 0, [u"Find:         "]),
-            self.writeText(u'focused'),
+            #self.display_check(-1, 0, [u"Find:         "]),
+            self.write_text(u'focused'),
             CTRL_I,
-            #self.displayCheck(
+            #self.display_check(
             #    -3, 0, [u"Find: focused", "Replace:          ", u"["]),
-            self.writeText(u'  focused'),
-            #self.displayCheck(
+            self.write_text(u'  focused'),
+            #self.display_check(
             #    -3, 0, [u"Find: focused", "Replace:   focused", u"["]),
             CTRL_G,
             # Regression, replace causes 'Windo' to show as a misspelling.
-            self.displayCheckStyle(2, 17, 1, 10, self.prg.color.get(u'text',
+            self.display_check_style(2, 17, 1, 10, self.prg.color.get(u'text',
                                                                     0)),
             CTRL_Q,
             ord('n')

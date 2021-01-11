@@ -44,11 +44,11 @@ class Prefs():
         self.startup = {}
         self.status = prefs.get(u"status", {})
         self.userData = prefs.get(u"userData", {})
-        self.__setUpGrammars(prefs.get(u"grammar", {}))
-        self.__setUpFileTypes(prefs.get(u"fileType", {}))
+        self.__set_up_grammars(prefs.get(u"grammar", {}))
+        self.__set_up_file_types(prefs.get(u"fileType", {}))
         self.init()
 
-    def loadPrefs(self, fileName, category):
+    def load_prefs(self, fileName, category):
         # Check the user home directory for preferences.
         prefsPath = os.path.expanduser(
             os.path.expandvars(
@@ -67,14 +67,14 @@ class Prefs():
         return category
 
     def init(self):
-        self.editor = self.loadPrefs('editor', self.editor)
-        self.status = self.loadPrefs('status', self.status)
+        self.editor = self.load_prefs('editor', self.editor)
+        self.status = self.load_prefs('status', self.status)
 
         self.colorSchemeName = self.editor['colorScheme']
         if self.colorSchemeName == 'custom':
             # Check the user home directory for a color scheme preference. If
             # found load it to replace the default color scheme.
-            self.color = self.loadPrefs('color_scheme', self.color)
+            self.color = self.load_prefs('color_scheme', self.color)
 
         defaultColor = self.color['default']
         defaultKeywordsColor = self.color['keyword']
@@ -96,7 +96,7 @@ class Prefs():
             'startup': self.startup,
         }[name]
 
-    def getFileType(self, filePath):
+    def get_file_type(self, filePath):
         if filePath is None:
             return self.grammars.get('text')
         name = os.path.split(filePath)[1]
@@ -106,14 +106,14 @@ class Prefs():
             fileType = self.extensions.get(fileExtension, 'text')
         return fileType
 
-    def tabsToSpaces(self, fileType):
+    def tabs_to_spaces(self, fileType):
         prefs = app.default_prefs.prefs.get(u"fileType", {})
         if fileType is None or prefs is None:
             return False
         file_prefs = prefs.get(fileType)
         return file_prefs and file_prefs.get(u"tabToSpaces")
 
-    def getGrammar(self, fileType):
+    def get_grammar(self, fileType):
         return self.grammars.get(fileType)
 
     def save(self, category, label, value):
@@ -130,13 +130,13 @@ class Prefs():
                 app.log.error('error writing prefs')
                 app.log.exception(e)
 
-    def _raiseGrammarNotFound(self):
+    def _raise_grammar_not_found(self):
         app.log.startup('Available grammars:')
         for k, v in self.grammars.items():
             app.log.startup('  ', k, ':', len(v))
         raise Exception('missing grammar for "' + grammarName + '" in prefs.py')
 
-    def __setUpGrammars(self, defaultGrammars):
+    def __set_up_grammars(self, defaultGrammars):
         self.grammars = {}
         # Arrange all the grammars by name.
         for k, v in defaultGrammars.items():
@@ -148,12 +148,12 @@ class Prefs():
             if 0:
                 # keywords re.
                 v['keywordsRe'] = re.compile(
-                    app.regex.joinReWordList(
+                    app.regex.join_re_word_list(
                         v.get('keywords', []) + v.get('types', [])))
                 v['errorsRe'] = re.compile(
-                    app.regex.joinReList(v.get('errors', [])))
+                    app.regex.join_re_list(v.get('errors', [])))
                 v['specialsRe'] = re.compile(
-                    app.regex.joinReList(v.get('special', [])))
+                    app.regex.join_re_list(v.get('special', [])))
             # contains and end re.
             matchGrammars = []
             markers = []
@@ -177,14 +177,14 @@ class Prefs():
             for grammarName in v.get('contains', []):
                 g = self.grammars.get(grammarName, None)
                 if g is None:
-                    self._raiseGrammarNotFound()
+                    self._raise_grammar_not_found()
                 markers.append(g.get('begin', g.get('matches', u"")))
                 matchGrammars.append(g)
             # |Next| markers start after |contains|.
             for grammarName in v.get('next', []):
                 g = self.grammars.get(grammarName, None)
                 if g is None:
-                    self._raiseGrammarNotFound()
+                    self._raise_grammar_not_found()
                 markers.append(g['begin'])
                 matchGrammars.append(g)
             # |Errors| markers start after |next| markers.
@@ -204,7 +204,7 @@ class Prefs():
             # Carriage return characters are at index [-1] in markers.
             markers.append(r'\n')
             #app.log.startup('markers', v['name'], markers)
-            v['matchRe'] = re.compile(app.regex.joinReList(markers))
+            v['matchRe'] = re.compile(app.regex.join_re_list(markers))
             v['markers'] = markers
             v['matchGrammars'] = matchGrammars
             containsGrammarIndexLimit = 2 + len(v.get('contains', []))
@@ -222,7 +222,7 @@ class Prefs():
         # Reset the re.cache for user regexes.
         re.purge()
 
-    def __setUpFileTypes(self, defaultFileTypes):
+    def __set_up_file_types(self, defaultFileTypes):
         self.nameToType = {}
         self.extensions = {}
         fileTypes = {}

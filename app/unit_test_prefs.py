@@ -25,34 +25,34 @@ import app.prefs
 
 class PrefsTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
-    def setUp(self):
+    def set_up(self):
         self.longMessage = True
-        app.fake_curses_testing.FakeCursesTestCase.setUp(self)
+        app.fake_curses_testing.FakeCursesTestCase.set_up(self)
         self.prefs = app.prefs.Prefs()
 
     def test_default_prefs(self):
-        self.runWithFakeInputs([
-            self.prefCheck(u'editor', u'saveUndo', True),
+        self.run_with_fake_inputs([
+            self.pref_check(u'editor', u'saveUndo', True),
             CTRL_Q,
         ])
 
     def test_get_file_type(self):
-        getFileType = self.prefs.getFileType
-        self.assertEqual(getFileType(""), "words")
-        self.assertEqual(getFileType("a.py"), "py")
-        self.assertEqual(getFileType("a.cc"), "cpp")
-        self.assertEqual(getFileType("a.c"), "c")
-        self.assertEqual(getFileType("a.h"), "cpp")
-        self.assertEqual(getFileType("Makefile"), "make")
-        self.assertEqual(getFileType("BUILD"), "bazel")
-        self.assertEqual(getFileType("build"), "words")
-        self.assertEqual(getFileType("BUILD.gn"), "gn")
-        self.assertEqual(getFileType("a.md"), "md")
+        get_file_type = self.prefs.get_file_type
+        self.assertEqual(get_file_type(""), "words")
+        self.assertEqual(get_file_type("a.py"), "py")
+        self.assertEqual(get_file_type("a.cc"), "cpp")
+        self.assertEqual(get_file_type("a.c"), "c")
+        self.assertEqual(get_file_type("a.h"), "cpp")
+        self.assertEqual(get_file_type("Makefile"), "make")
+        self.assertEqual(get_file_type("BUILD"), "bazel")
+        self.assertEqual(get_file_type("build"), "words")
+        self.assertEqual(get_file_type("BUILD.gn"), "gn")
+        self.assertEqual(get_file_type("a.md"), "md")
 
     def test_tabs_to_spaces(self):
-        tabsToSpaces = self.prefs.tabsToSpaces
-        self.assertEqual(tabsToSpaces("words"), True)
-        self.assertEqual(tabsToSpaces("make"), False)
-        self.assertEqual(tabsToSpaces("cpp"), True)
-        self.assertEqual(tabsToSpaces(None), False)
-        self.assertEqual(tabsToSpaces("foo"), None)
+        tabs_to_spaces = self.prefs.tabs_to_spaces
+        self.assertEqual(tabs_to_spaces("words"), True)
+        self.assertEqual(tabs_to_spaces("make"), False)
+        self.assertEqual(tabs_to_spaces("cpp"), True)
+        self.assertEqual(tabs_to_spaces(None), False)
+        self.assertEqual(tabs_to_spaces("foo"), None)

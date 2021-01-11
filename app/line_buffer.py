@@ -37,22 +37,22 @@ class LineBuffer:
         self.parser = app.parser.Parser(program.prefs)
         self.parserTime = 0.0
         self.message = (u"New buffer", None)
-        self.setFileType("words")
+        self.set_file_type("words")
 
-    def setFileType(self, fileType):
+    def set_file_type(self, fileType):
         self.fileType = fileType
-        self.rootGrammar = self.program.prefs.getGrammar(self.fileType)
+        self.rootGrammar = self.program.prefs.get_grammar(self.fileType)
         # Parse from the beginning.
         self.parser.resumeAtRow = 0
 
-    def escapeBinaryChars(self, data):
+    def escape_binary_chars(self, data):
         if app.config.strict_debug:
             assert isinstance(data, unicode)
         # Performance: in a 1000 line test it appears fastest to do some simple
         # .replace() calls to minimize the number of calls to parse().
         data = data.replace(u'\r\n', u'\n')
         data = data.replace(u'\r', u'\n')
-        if self.program.prefs.tabsToSpaces(self.fileType):
+        if self.program.prefs.tabs_to_spaces(self.fileType):
             tabSize = self.program.prefs.editor.get(u"tabSize", 8)
             data = data.expandtabs(tabSize)
 
@@ -63,7 +63,7 @@ class LineBuffer:
         data = re.sub(u'([\0-\x09\x0b-\x1f])', parse, data)
         return data
 
-    def unescapeBinaryChars(self, data):
+    def unescape_binary_chars(self, data):
 
         def encode(line):
             return chr(int(line.groups()[0], 16))
@@ -73,20 +73,20 @@ class LineBuffer:
             assert isinstance(out, unicode)
         return out
 
-    def doParse(self, begin, end):
+    def do_parse(self, begin, end):
         start = time.time()
         self.parser.parse(self.program.bg, self.parser.data,
                           self.rootGrammar, begin, end)
         self.debugUpperChangedRow = self.parser.resumeAtRow
         self.parserTime = time.time() - start
 
-    def isEmpty(self):
+    def is_empty(self):
         return len(self.parser.data) == 0
 
-    def parseDocument(self):
-        self.doParse(self.parser.resumeAtRow, sys.maxsize)
+    def parse_document(self):
+        self.do_parse(self.parser.resumeAtRow, sys.maxsize)
 
-    def setMessage(self, *args, **kwargs):
+    def set_message(self, *args, **kwargs):
         if not len(args):
             self.message = None
             #app.log.caller()

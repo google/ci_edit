@@ -29,14 +29,14 @@ class PerformanceTestCases(unittest.TestCase):
         setup += '''def get(n):\n'''
         setup += '''  return data[n]\n'''
         setup += '''class B:\n'''
-        setup += '''  def getViaMember(self, n):\n'''
+        setup += '''  def get_via_member(self, n):\n'''
         setup += '''    return data[n]\n'''
         setup += '''  def __getitem__(self, n):\n'''
         setup += '''    return data[n]\n'''
         setup += '''b = B()\n'''
         a = timeit('''x = data[5]\n''', setup=setup, number=10000)
         b = timeit('''x = get(5)\n''', setup=setup, number=10000)
-        c = timeit('''x = b.getViaMember(5)\n''', setup=setup, number=10000)
+        c = timeit('''x = b.get_via_member(5)\n''', setup=setup, number=10000)
         d = timeit('''x = b[5]\n''', setup=setup, number=10000)
         #print("\n%s | %s %s | %s %s | %s %s" % (a, b, a/b, c, a/c, d, a/d))
         # Calling a function or member is significantly slower than direct
@@ -63,14 +63,14 @@ class PerformanceTestCases(unittest.TestCase):
             self.assertGreater(c, a * 0.4)  # a and c are similar.
 
     def test_default_parameter(self):
-        setup = '''def withDefault(a, b=None):\n'''
+        setup = '''def with_default(a, b=None):\n'''
         setup += '''  if b is not None: return b\n'''
         setup += '''  return a*a\n'''
-        setup += '''def withoutDefault(a, b):\n'''
+        setup += '''def without_default(a, b):\n'''
         setup += '''  if b is -1: return b\n'''
         setup += '''  return a*b\n'''
-        a = timeit('''withDefault(5);''' * 100, setup=setup, number=10000)
-        b = timeit('''withoutDefault(5, 0);''' * 100, setup=setup, number=10000)
+        a = timeit('''with_default(5);''' * 100, setup=setup, number=10000)
+        b = timeit('''without_default(5, 0);''' * 100, setup=setup, number=10000)
         # Assert that neither too much faster than the other
         # Note: empirically, this is affected (on a MacBook Air) by whether the
         # machine is running from battery or plugged in.

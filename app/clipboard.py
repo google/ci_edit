@@ -30,7 +30,7 @@ class Clipboard():
 
     def __init__(self):
         self._clipList = []
-        self.setOsHandlers(clipboard.copy, clipboard.paste)
+        self.set_os_handlers(clipboard.copy, clipboard.paste)
 
     def copy(self, text):
         """Add text onto clipList. Empty |text| is not stored."""
@@ -56,6 +56,6 @@ class Clipboard():
             return self._clipList[clipIndex % len(self._clipList)]
         return None
 
-    def setOsHandlers(self, copy, paste):
+    def set_os_handlers(self, copy, paste):
         self._copy = copy
         self._paste = paste

@@ -47,7 +47,7 @@ DECODE = {
 }
 
 
-def pathEncode(path):
+def path_encode(path):
     if app.config.strict_debug:
         assert isinstance(path, unicode), repr(path)
     out = u""
@@ -63,7 +63,7 @@ def pathEncode(path):
     return out
 
 
-def pathDecode(path):
+def path_decode(path):
     if app.config.strict_debug:
         assert isinstance(path, unicode)
     out = u''

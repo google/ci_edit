@@ -26,7 +26,7 @@ import os
 import app.config
 
 
-def pathRowColumn(path, projectDir):
+def path_row_column(path, projectDir):
     """Guess whether unrecognized file path refers to another file or has line
     and column information.
 
@@ -81,5 +81,5 @@ def pathRowColumn(path, projectDir):
     return path, openToRow, openToColumn
 
 
-def expandFullPath(path):
+def expand_full_path(path):
     return os.path.abspath(os.path.expanduser(os.path.expandvars(path)))

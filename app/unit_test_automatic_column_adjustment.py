@@ -28,16 +28,16 @@ kTestFile = u'#automatic_column_adjustment_test_file_with_unlikely_file_name~'
 class AutomaticColumnAdjustmentCases(
         app.fake_curses_testing.FakeCursesTestCase):
 
-    def setUp(self):
-        app.fake_curses_testing.FakeCursesTestCase.setUp(self)
+    def set_up(self):
+        app.fake_curses_testing.FakeCursesTestCase.set_up(self)
 
-    def tearDown(self):
-        app.fake_curses_testing.FakeCursesTestCase.tearDown(self)
+    def tear_down(self):
+        app.fake_curses_testing.FakeCursesTestCase.tear_down(self)
 
     def test_column_adjustment_on_moving_by_one_line(self):
-        # self.setMovieMode(True)
-        self.runWithFakeInputs([
-            self.displayCheck(0, 0, [
+        # self.set_movie_mode(True)
+        self.run_with_fake_inputs([
+            self.display_check(0, 0, [
                 u" ci     .                               ",
                 u"                                        ",
                 u"     1                                  ",
@@ -54,12 +54,12 @@ class AutomaticColumnAdjustmentCases(
                 u"New buffer         |    1, 1 |   0%,  0%",
                 u"                                        "
             ]),
-            self.writeText(u"short line"),
+            self.write_text(u"short line"),
             CTRL_J,
-            self.writeText(u"super long line that should go past the screen"),
+            self.write_text(u"super long line that should go past the screen"),
             CTRL_J,
-            self.writeText(u"line that slightly goes off screen"),
-            self.displayCheck(0, 0, [
+            self.write_text(u"line that slightly goes off screen"),
+            self.display_check(0, 0, [
                 u" ci     *                               ",
                 u"                                        ",
                 u"     1 rt line                          ",
@@ -78,7 +78,7 @@ class AutomaticColumnAdjustmentCases(
             ]),
             KEY_UP,
             KEY_END,  # Place cursor at the end of the second line.
-            self.displayCheck(0, 0, [
+            self.display_check(0, 0, [
                 u" ci     *                               ",
                 u"                                        ",
                 u"     1                                  ",
@@ -97,7 +97,7 @@ class AutomaticColumnAdjustmentCases(
             ]),
             # scrollCol should be set to 0 since line 1 fits on screen.
             KEY_UP,
-            self.displayCheck(0, 0, [
+            self.display_check(0, 0, [
                 u" ci     *                               ",
                 u"                                        ",
                 u"     1 short line                       ",
@@ -116,7 +116,7 @@ class AutomaticColumnAdjustmentCases(
             ]),
             # cursor should snap back to the end of the second line.
             KEY_DOWN,
-            self.displayCheck(0, 0, [
+            self.display_check(0, 0, [
                 u" ci     *                               ",
                 u"                                        ",
                 u"     1                                  ",
@@ -136,7 +136,7 @@ class AutomaticColumnAdjustmentCases(
             # scrollCol should not change since line 1 doesn't fit on
             # screen.
             KEY_DOWN,
-            self.displayCheck(0, 0, [
+            self.display_check(0, 0, [
                 u" ci     *                               ",
                 u"                                        ",
                 u"     1                                  ",
@@ -154,7 +154,7 @@ class AutomaticColumnAdjustmentCases(
                 u"                                        "
             ]),
             KEY_UP,  # cursor moves back to original position.
-            self.displayCheck(0, 0, [
+            self.display_check(0, 0, [
                 u" ci     *                               ",
                 u"                                        ",
                 u"     1                                  ",
@@ -181,7 +181,7 @@ class AutomaticColumnAdjustmentCases(
             # Since line 3 now fits on screen, this should set scrollCol to
             # 0.
             KEY_DOWN,
-            self.displayCheck(0, 0, [
+            self.display_check(0, 0, [
                 u" ci     *                               ",
                 u"                                        ",
                 u"     1 short line                       ",
@@ -209,9 +209,9 @@ class AutomaticColumnAdjustmentCases(
         same line, the cursor should also be at the same position as when
         it first arrived on that line.
         """
-        # self.setMovieMode(True)
-        self.runWithFakeInputs([
-            self.displayCheck(0, 0, [
+        # self.set_movie_mode(True)
+        self.run_with_fake_inputs([
+            self.display_check(0, 0, [
                 u" ci     .                               ",
                 u"                                        ",
                 u"     1                                  ",
@@ -228,18 +228,18 @@ class AutomaticColumnAdjustmentCases(
                 u"New buffer         |    1, 1 |   0%,  0%",
                 u"                                        "
             ]),
-            self.writeText(u"short line"),
+            self.write_text(u"short line"),
             CTRL_J,
-            self.writeText(u"super long line that should go past the screen"),
+            self.write_text(u"super long line that should go past the screen"),
             CTRL_J,
-            self.writeText(u"line that slightly goes off screen"),
+            self.write_text(u"line that slightly goes off screen"),
             CTRL_J,
-            self.writeText(u"short line"),
+            self.write_text(u"short line"),
             CTRL_J,
-            self.writeText(u"medium-short line"),
+            self.write_text(u"medium-short line"),
             CTRL_J,
-            self.writeText(u"medium-long line that can fit"),
-            self.displayCheck(0, 0, [
+            self.write_text(u"medium-long line that can fit"),
+            self.display_check(0, 0, [
                 u" ci     *                               ",
                 u"                                        ",
                 u"     1 short line                       ",
@@ -257,7 +257,7 @@ class AutomaticColumnAdjustmentCases(
                 u"                                        "
             ]),
             KEY_UP,  # Goes to end of 5th line.
-            self.displayCheck(0, 0, [
+            self.display_check(0, 0, [
                 u" ci     *                               ",
                 u"                                        ",
                 u"     1 short line                       ",
@@ -275,7 +275,7 @@ class AutomaticColumnAdjustmentCases(
                 u"                                        "
             ]),
             KEY_UP,  # Goes to end of 4th line.
-            self.displayCheck(0, 0, [
+            self.display_check(0, 0, [
                 u" ci     *                               ",
                 u"                                        ",
                 u"     1 short line                       ",
@@ -295,7 +295,7 @@ class AutomaticColumnAdjustmentCases(
             # Should go to column 30 of line 3 since we started at column
             # 30.
             KEY_UP,
-            self.displayCheck(0, 0, [
+            self.display_check(0, 0, [
                 u" ci     *                               ",
                 u"                                        ",
                 u"     1 short line                       ",
@@ -313,7 +313,7 @@ class AutomaticColumnAdjustmentCases(
                 u"                                        "
             ]),
             KEY_UP,  # Goes to column 30 of line 2.
-            self.displayCheck(0, 0, [
+            self.display_check(0, 0, [
                 u" ci     *                               ",
                 u"                                        ",
                 u"     1 short line                       ",
@@ -331,7 +331,7 @@ class AutomaticColumnAdjustmentCases(
                 u"                                        "
             ]),
             KEY_UP,  # Goes to end of line 1.
-            self.displayCheck(0, 0, [
+            self.display_check(0, 0, [
                 u" ci     *                               ",
                 u"                                        ",
                 u"     1 short line                       ",
@@ -350,7 +350,7 @@ class AutomaticColumnAdjustmentCases(
             ]),
             # All subsequent KEY_DOWNs should mirror the previous displays.
             KEY_DOWN,
-            self.displayCheck(0, 0, [
+            self.display_check(0, 0, [
                 u" ci     *                               ",
                 u"                                        ",
                 u"     1 short line                       ",
@@ -368,7 +368,7 @@ class AutomaticColumnAdjustmentCases(
                 u"                                        "
             ]),
             KEY_DOWN,
-            self.displayCheck(0, 0, [
+            self.display_check(0, 0, [
                 u" ci     *                               ",
                 u"                                        ",
                 u"     1 short line                       ",
@@ -386,7 +386,7 @@ class AutomaticColumnAdjustmentCases(
                 u"                                        "
             ]),
             KEY_DOWN,
-            self.displayCheck(0, 0, [
+            self.display_check(0, 0, [
                 u" ci     *                               ",
                 u"                                        ",
                 u"     1 short line                       ",
@@ -404,7 +404,7 @@ class AutomaticColumnAdjustmentCases(
                 u"                                        "
             ]),
             KEY_DOWN,
-            self.displayCheck(0, 0, [
+            self.display_check(0, 0, [
                 u" ci     *                               ",
                 u"                                        ",
                 u"     1 short line                       ",
@@ -422,7 +422,7 @@ class AutomaticColumnAdjustmentCases(
                 u"                                        "
             ]),
             KEY_DOWN,
-            self.displayCheck(0, 0, [
+            self.display_check(0, 0, [
                 u" ci     *                               ",
                 u"                                        ",
                 u"     1 short line                       ",

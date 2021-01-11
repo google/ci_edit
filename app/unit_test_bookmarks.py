@@ -32,7 +32,7 @@ kTestFile = '#bookmarks_test_file_with_unlikely_file_name~'
 
 class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
-    def setUp(self):
+    def set_up(self):
         self.prg = app.ci_program.CiProgram()
         self.fakeHost = app.window.ViewWindow(self.prg, None)
         self.textBuffer = app.text_buffer.TextBuffer(self.prg)
@@ -43,10 +43,10 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
         self.fakeHost.lineNumberColumn = self.lineNumbers
         self.fakeHost.textBuffer = self.textBuffer
         self.fakeHost.scrollRow = self.fakeHost.cursorRow = 0
-        app.fake_curses_testing.FakeCursesTestCase.setUp(self)
+        app.fake_curses_testing.FakeCursesTestCase.set_up(self)
 
-    def tearDown(self):
-        app.fake_curses_testing.FakeCursesTestCase.tearDown(self)
+    def tear_down(self):
+        app.fake_curses_testing.FakeCursesTestCase.tear_down(self)
 
     def test_bookmark_comparisons(self):
         b1 = Bookmark(1, 5, {})
@@ -121,7 +121,7 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
     def test_bookmark_contains(self):
 
-        def checkRanges(bookmark):
+        def check_ranges(bookmark):
             """
             Checks that every integer between the bookmark's interval is 'in'
             the bookmark. It also checks if the two integers outside of the
@@ -137,14 +137,14 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
             self.assertFalse(end + 1 in bookmark)
             self.assertFalse(end + 2 in bookmark)
 
-        checkRanges(Bookmark(1, 5, {}))
-        checkRanges(Bookmark(-3, 3, {}))
-        checkRanges(Bookmark(-5000, -4990, {}))
+        check_ranges(Bookmark(1, 5, {}))
+        check_ranges(Bookmark(-3, 3, {}))
+        check_ranges(Bookmark(-5000, -4990, {}))
 
         # Check intervals of length 0.
-        checkRanges(Bookmark(0, 0, {}))
-        checkRanges(Bookmark(5000, 5000, {}))
-        checkRanges(Bookmark(-5000, 5000, {}))
+        check_ranges(Bookmark(0, 0, {}))
+        check_ranges(Bookmark(5000, 5000, {}))
+        check_ranges(Bookmark(-5000, 5000, {}))
 
         b = Bookmark(-3.99, 3.99,
                      {})  # Floats get cast to int (rounds towards zero).
@@ -310,13 +310,13 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
             colors = set()
             expectedNumberOfColors = 5
             for _ in range(expectedNumberOfColors):
-                color = self.textBuffer.getBookmarkColor()
+                color = self.textBuffer.get_bookmark_color()
                 # Make sure that a color index is returned.
                 self.assertEqual(type(color), int)
                 colors.add(color)
             # Test that all colors were different.
             self.assertEqual(len(colors), expectedNumberOfColors)
-            color = self.textBuffer.getBookmarkColor()
+            color = self.textBuffer.get_bookmark_color()
             colors.add(color)
             # Test that the function rotates 5 colors.
             self.assertEqual(len(colors), expectedNumberOfColors)
@@ -336,7 +336,7 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
             Bookmark(30, 30, {}),
             Bookmark(40, 40, {})
         ]
-        visibleBookmarks = self.lineNumbers.getVisibleBookmarks(
+        visibleBookmarks = self.lineNumbers.get_visible_bookmarks(
             self.fakeHost.scrollRow,
             self.fakeHost.scrollRow + self.lineNumbers.rows)
         expectedBookmarks = {
@@ -352,7 +352,7 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
         self.assertEqual(len(visibleBookmarks), len(expectedBookmarks))
 
         self.fakeHost.scrollRow = 20
-        visibleBookmarks = self.lineNumbers.getVisibleBookmarks(
+        visibleBookmarks = self.lineNumbers.get_visible_bookmarks(
             self.fakeHost.scrollRow, 20 + self.lineNumbers.rows)
         expectedBookmarks = {
             Bookmark(20, 20, {}),
@@ -363,7 +363,7 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
         self.assertEqual(len(visibleBookmarks), len(expectedBookmarks))
 
         self.fakeHost.scrollRow = 21
-        visibleBookmarks = self.lineNumbers.getVisibleBookmarks(
+        visibleBookmarks = self.lineNumbers.get_visible_bookmarks(
             self.fakeHost.scrollRow,
             self.fakeHost.scrollRow + self.lineNumbers.rows)
         expectedBookmarks = {Bookmark(30, 30, {}), Bookmark(40, 40, {})}
@@ -372,7 +372,7 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
         self.fakeHost.scrollRow = 21
         self.lineNumbers.rows = 10
-        visibleBookmarks = self.lineNumbers.getVisibleBookmarks(
+        visibleBookmarks = self.lineNumbers.get_visible_bookmarks(
             self.fakeHost.scrollRow,
             self.fakeHost.scrollRow + self.lineNumbers.rows)
         expectedBookmarks = {Bookmark(30, 30, {})}
@@ -380,7 +380,7 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
         self.assertEqual(len(visibleBookmarks), len(expectedBookmarks))
 
         self.lineNumbers.rows = 9
-        visibleBookmarks = self.lineNumbers.getVisibleBookmarks(
+        visibleBookmarks = self.lineNumbers.get_visible_bookmarks(
             self.fakeHost.scrollRow,
             self.fakeHost.scrollRow + self.lineNumbers.rows)
         expectedBookmarks = {}
@@ -394,7 +394,7 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
             Bookmark(46, 49, {})
         ]
         self.lineNumbers.rows = 15
-        visibleBookmarks = self.lineNumbers.getVisibleBookmarks(
+        visibleBookmarks = self.lineNumbers.get_visible_bookmarks(
             self.fakeHost.scrollRow,
             self.fakeHost.scrollRow + self.lineNumbers.rows)
         expectedBookmarks = {Bookmark(0, 10, {}), Bookmark(11, 29, {})}
@@ -402,11 +402,11 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
         self.assertEqual(len(visibleBookmarks), len(expectedBookmarks))
 
     def test_bookmarks_jump(self):
-        # self.setMovieMode(True)
-        self.runWithTestFile(
+        # self.set_movie_mode(True)
+        self.run_with_test_file(
             kTestFile,
             [
-                self.displayCheck(0, 0, [
+                self.display_check(0, 0, [
                     u" ci    _file_with_unlikely_file_name~ . ",
                     u"                                        ",
                     u"     1                                  ",
@@ -423,7 +423,7 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
                     u"Creating new file  |    1, 1 |   0%,  0%",
                     u"                                        "
                 ]),
-                self.writeText(u'one'),
+                self.write_text(u'one'),
                 CTRL_E,
                 'b',
                 'm',
@@ -433,57 +433,57 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
                 'b',
                 'm',
                 CTRL_J,  # Create bookmark.
-                self.writeText(u'two'),
+                self.write_text(u'two'),
                 CTRL_J,
-                self.writeText(u'three'),
+                self.write_text(u'three'),
                 CTRL_E,
                 'b',
                 'm',
                 CTRL_J,
                 CTRL_J,  # Create bookmark and go to next line.
-                self.writeText(u'four'),
+                self.write_text(u'four'),
                 CTRL_J,
-                self.writeText(u'five'),
+                self.write_text(u'five'),
                 CTRL_J,
-                self.writeText(u'six'),
+                self.write_text(u'six'),
                 CTRL_J,
-                self.writeText(u'seven'),
+                self.write_text(u'seven'),
                 CTRL_J,
-                self.writeText(u'eight'),
+                self.write_text(u'eight'),
                 CTRL_J,
                 CTRL_E,
                 'b',
                 'm',
                 CTRL_J,  # Create a new bookmark.
-                self.writeText(u'nine'),
+                self.write_text(u'nine'),
                 CTRL_J,
-                self.writeText(u'ten'),
+                self.write_text(u'ten'),
                 CTRL_J,
-                self.writeText(u'eleven'),
+                self.write_text(u'eleven'),
                 CTRL_J,
-                self.writeText(u'twelve'),
+                self.write_text(u'twelve'),
                 CTRL_J,
-                self.writeText(u'thirteen'),
+                self.write_text(u'thirteen'),
                 CTRL_J,
-                self.writeText(u'fourteen'),
+                self.write_text(u'fourteen'),
                 CTRL_J,
-                self.writeText(u'fifteen'),
+                self.write_text(u'fifteen'),
                 CTRL_J,
-                self.writeText(u'sixteen'),
+                self.write_text(u'sixteen'),
                 CTRL_J,
-                self.writeText(u'seventeen'),
+                self.write_text(u'seventeen'),
                 CTRL_J,
-                self.writeText(u'eighteen'),
+                self.write_text(u'eighteen'),
                 CTRL_J,
-                self.writeText(u'nineteen'),
+                self.write_text(u'nineteen'),
                 CTRL_J,
-                self.writeText(u'twenty'),
+                self.write_text(u'twenty'),
                 CTRL_J,
-                self.writeText(u'twenty-one'),
+                self.write_text(u'twenty-one'),
                 CTRL_J,
-                self.writeText(u'twenty-two'),
+                self.write_text(u'twenty-two'),
                 CTRL_J,
-                self.writeText(u'twenty-three'),
+                self.write_text(u'twenty-three'),
                 CTRL_E,
                 'b',
                 'm',
@@ -491,7 +491,7 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
                 # Bookmarks are at positions (1, 4), (2, 1), (3, 6) (9, 1),
                 # (23, 13).
                 # Note that rows here start at 1, so 1 is the first row.
-                self.displayCheck(0, 0, [
+                self.display_check(0, 0, [
                     u" ci    _file_with_unlikely_file_name~ * ",
                     u"                                        ",
                     u"    13 thirteen                         ",
@@ -509,7 +509,7 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
                     u"                                        "
                 ]),
                 KEY_F2,  # Jump to the first bookmark (1, 4).
-                self.displayCheck(0, 0, [
+                self.display_check(0, 0, [
                     u" ci    _file_with_unlikely_file_name~ * ",
                     u"                                        ",
                     u"     1 one                              ",
@@ -529,7 +529,7 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
                 KEY_F2,  # Jump to the second bookmark (2, 1).
                 # The display doesn't move because the bookmark is already in
                 # the optimal position.
-                self.displayCheck(0, 0, [
+                self.display_check(0, 0, [
                     u" ci    _file_with_unlikely_file_name~ * ",
                     u"                                        ",
                     u"     1 one                              ",
@@ -547,7 +547,7 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
                     u"                                        "
                 ]),
                 KEY_F2,  # Jump to the third bookmark (3, 6).
-                self.displayCheck(0, 0, [
+                self.display_check(0, 0, [
                     u" ci    _file_with_unlikely_file_name~ * ",
                     u"                                        ",
                     u"     1 one                              ",
@@ -566,7 +566,7 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
                 ]),
                 KEY_F2,  # Jump to the third bookmark (9, 6).
                 # This moves the bookmark to the optimal scroll position.
-                self.displayCheck(0, 0, [
+                self.display_check(0, 0, [
                     u" ci    _file_with_unlikely_file_name~ * ",
                     u"                                        ",
                     u"     7 seven                            ",
@@ -585,7 +585,7 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
                 ]),
                 KEY_F2,  # Jump to the fourth bookmark (23, 13).
                 # This moves the bookmark to the optimal scroll position.
-                self.displayCheck(0, 0, [
+                self.display_check(0, 0, [
                     u" ci    _file_with_unlikely_file_name~ * ",
                     u"                                        ",
                     u"    21 twenty-one                       ",
@@ -604,7 +604,7 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
                 ]),
                 KEY_F2,  # Jump to the first bookmark (1, 4).
                 # This moves the bookmark to the optimal scroll position.
-                self.displayCheck(0, 0, [
+                self.display_check(0, 0, [
                     u" ci    _file_with_unlikely_file_name~ * ",
                     u"                                        ",
                     u"     1 one                              ",
@@ -623,7 +623,7 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
                 ]),
                 KEY_SHIFT_F2,  # Go back to the fourth bookmark (23, 13).
                 # This moves the bookmark to the optimal scroll position.
-                self.displayCheck(0, 0, [
+                self.display_check(0, 0, [
                     u" ci    _file_with_unlikely_file_name~ * ",
                     u"                                        ",
                     u"    21 twenty-one                       ",
@@ -642,7 +642,7 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
                 ]),
                 KEY_SHIFT_F2,  # Go back to the third bookmark (8, 6).
                 # This moves the bookmark to the optimal scroll position.
-                self.displayCheck(0, 0, [
+                self.display_check(0, 0, [
                     u" ci    _file_with_unlikely_file_name~ * ",
                     u"                                        ",
                     u"     7 seven                            ",
@@ -661,7 +661,7 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
                 ]),
                 KEY_SHIFT_F2,  # Go back to the second bookmark (2, 1).
                 # This moves the bookmark to the optimal scroll position.
-                self.displayCheck(0, 0, [
+                self.display_check(0, 0, [
                     u" ci    _file_with_unlikely_file_name~ * ",
                     u"                                        ",
                     u"     1 one                              ",
@@ -681,7 +681,7 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
                 KEY_SHIFT_F2,  # Go back to the first bookmark (1, 4).
                 # The display doesn't move because the bookmark is already in
                 # the optimal position.
-                self.displayCheck(0, 0, [
+                self.display_check(0, 0, [
                     u" ci    _file_with_unlikely_file_name~ * ",
                     u"                                        ",
                     u"     1 one                              ",

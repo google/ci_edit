@@ -50,7 +50,7 @@ if __name__ == '__main__':
     if '--test' in args:
         import unit_tests
         args.remove('--test')
-        sys.exit(unit_tests.parseArgList(args))
+        sys.exit(unit_tests.parse_arg_list(args))
     if '--p2' not in args:
         version_check()
     else:

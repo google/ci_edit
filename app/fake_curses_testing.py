@@ -48,21 +48,21 @@ def debug_print_stack(*args):
 
 class FakeCursesTestCase(unittest.TestCase):
 
-    def setUp(self):
+    def set_up(self):
         self.cursesScreen = curses.StandardScreen()
         self.prg = app.ci_program.CiProgram()
-        self.prg.setUpCurses(self.cursesScreen)
+        self.prg.set_up_curses(self.cursesScreen)
         # For testing, use the internal clipboard. Using the system clipboard
         # can create races between tests running in parallel.
-        self.prg.clipboard.setOsHandlers(None, None)
+        self.prg.clipboard.set_os_handlers(None, None)
 
-    def findTextAndClick(self, timeStamp, screenText, bState):
+    def find_text_and_click(self, timeStamp, screenText, bState):
         caller = inspect.stack()[1]
         callerText = u"\n  %s:%s:%s(): " % (os.path.split(caller[1])[1],
                                             caller[2], caller[3])
 
-        def createEvent(display, cmdIndex):
-            row, col = self.findText(screenText)
+        def create_event(display, cmdIndex):
+            row, col = self.find_text(screenText)
             if row < 0:
                 output = u"%s at index %d, did not find %r" % (
                     callerText, cmdIndex, screenText)
@@ -72,12 +72,12 @@ class FakeCursesTestCase(unittest.TestCase):
                     self.fail(output)
             # Note that the mouse info is x,y (col, row).
             info = (timeStamp, col, row, 0, bState)
-            curses.addMouseEvent(info)
+            curses.add_mouse_event(info)
             return curses.KEY_MOUSE
 
-        return createEvent
+        return create_event
 
-    def mouseEvent(self, timeStamp, mouseRow, mouseCol, bState):
+    def mouse_event(self, timeStamp, mouseRow, mouseCol, bState):
         """
         bState may be a logical or of:
           curses.BUTTON1_PRESSED;
@@ -94,13 +94,13 @@ class FakeCursesTestCase(unittest.TestCase):
         # Note that the mouse info is x,y (col, row).
         info = (timeStamp, mouseCol, mouseRow, 0, bState)
 
-        def createEvent(display, cmdIndex):
-            curses.addMouseEvent(info)
+        def create_event(display, cmdIndex):
+            curses.add_mouse_event(info)
             return curses.KEY_MOUSE
 
-        return createEvent
+        return create_event
 
-    def addMouseInfo(self, timeStamp, mouseRow, mouseCol, bState):
+    def add_mouse_info(self, timeStamp, mouseRow, mouseCol, bState):
         """
         bState may be a logical or of:
           curses.BUTTON1_PRESSED;
@@ -117,11 +117,11 @@ class FakeCursesTestCase(unittest.TestCase):
         # Note that the mouse info is x,y (col, row).
         info = (timeStamp, mouseCol, mouseRow, 0, bState)
 
-        def createEvent(display, cmdIndex):
-            curses.addMouseEvent(info)
+        def create_event(display, cmdIndex):
+            curses.add_mouse_event(info)
             return None
 
-        return createEvent
+        return create_event
 
     def call(self, *args):
         """Call arbitrary function as a 'fake input'."""
@@ -139,7 +139,7 @@ class FakeCursesTestCase(unittest.TestCase):
 
         return caller
 
-    def displayCheck(self, *args):
+    def display_check(self, *args):
         assert isinstance(args[0], int)
         assert isinstance(args[1], int)
         assert isinstance(args[2], list)
@@ -147,8 +147,8 @@ class FakeCursesTestCase(unittest.TestCase):
         callerText = u"\n  %s:%s:%s(): " % (os.path.split(caller[1])[1],
                                             caller[2], caller[3])
 
-        def displayChecker(display, cmdIndex):
-            result = display.checkText(*args)
+        def display_checker(display, cmdIndex):
+            result = display.check_text(*args)
             if result is not None:
                 output = callerText + u' at index ' + str(cmdIndex) + result
                 if self.cursesScreen.movie:
@@ -157,9 +157,9 @@ class FakeCursesTestCase(unittest.TestCase):
                     self.fail(output)
             return None
 
-        return displayChecker
+        return display_checker
 
-    def displayFindCheck(self, *args):
+    def display_find_check(self, *args):
         """
         Args:
             find_string (unicode): locate this string.
@@ -172,10 +172,10 @@ class FakeCursesTestCase(unittest.TestCase):
         callerText = u"\n  %s:%s:%s(): " % (os.path.split(caller[1])[1],
                                             caller[2], caller[3])
 
-        def displayFindChecker(display, cmdIndex):
+        def display_find_checker(display, cmdIndex):
             find_string, check_string = args
-            row, col = display.findText(find_string)
-            result = display.checkText(row, col + len(find_string),
+            row, col = display.find_text(find_string)
+            result = display.check_text(row, col + len(find_string),
                                        [check_string])
             if result is not None:
                 output = callerText + u' at index ' + str(cmdIndex) + result
@@ -185,9 +185,9 @@ class FakeCursesTestCase(unittest.TestCase):
                     self.fail(output)
             return None
 
-        return displayFindChecker
+        return display_find_checker
 
-    def displayCheckNot(self, *args):
+    def display_check_not(self, *args):
         """
         Verify that the display does not match.
         """
@@ -196,8 +196,8 @@ class FakeCursesTestCase(unittest.TestCase):
         callerText = "\n  %s:%s:%s(): " % (os.path.split(caller[1])[1],
                                            caller[2], caller[3])
 
-        def displayCheckerNot(display, cmdIndex):
-            result = display.checkText(*args)
+        def display_checker_not(display, cmdIndex):
+            result = display.check_text(*args)
             if result is None:
                 output = callerText + u' at index ' + str(cmdIndex)
                 if self.cursesScreen.movie:
@@ -206,9 +206,9 @@ class FakeCursesTestCase(unittest.TestCase):
                     self.fail(output)
             return None
 
-        return displayCheckerNot
+        return display_checker_not
 
-    def displayCheckStyle(self, *args):
+    def display_check_style(self, *args):
         """*args are (row, col, height, width, colorPair)."""
         (row, col, height, width, colorPair) = args
         assert height != 0
@@ -218,8 +218,8 @@ class FakeCursesTestCase(unittest.TestCase):
         callerText = u"\n  %s:%s:%s(): " % (os.path.split(caller[1])[1],
                                             caller[2], caller[3])
 
-        def displayStyleChecker(display, cmdIndex):
-            result = display.checkStyle(*args)
+        def display_style_checker(display, cmdIndex):
+            result = display.check_style(*args)
             if result is not None:
                 output = callerText + u' at index ' + str(cmdIndex) + result
                 if self.cursesScreen.movie:
@@ -228,21 +228,21 @@ class FakeCursesTestCase(unittest.TestCase):
                     self.fail(output)
             return None
 
-        return displayStyleChecker
+        return display_style_checker
 
-    def findText(self, screenText):
+    def find_text(self, screenText):
         """Locate |screenText| on the display, returning row, col.
         """
         return self.cursesScreen.test_find_text(screenText)
 
-    def cursorCheck(self, expectedRow, expectedCol):
+    def cursor_check(self, expectedRow, expectedCol):
         assert isinstance(expectedRow, int)
         assert isinstance(expectedCol, int)
         caller = inspect.stack()[1]
         callerText = u"in %s:%s:%s(): " % (os.path.split(caller[1])[1],
                                            caller[2], caller[3])
 
-        def cursorChecker(display, cmdIndex):
+        def cursor_checker(display, cmdIndex):
             if self.cursesScreen.movie:
                 return None
             win = self.prg.programWindow.focusedWindow
@@ -256,13 +256,13 @@ class FakeCursesTestCase(unittest.TestCase):
                              callerText)
             return None
 
-        return cursorChecker
+        return cursor_checker
 
-    def pathToSample(self, relPath):
+    def path_to_sample(self, relPath):
         path = os.path.dirname(os.path.dirname(__file__))
         return os.path.join(path, u"sample", relPath)
 
-    def prefCheck(self, *args):
+    def pref_check(self, *args):
         assert isinstance(args[0], unicode)
         assert isinstance(args[1], unicode)
         assert isinstance(args[2], (int, bool))
@@ -270,7 +270,7 @@ class FakeCursesTestCase(unittest.TestCase):
         callerText = u"\n  %s:%s:%s(): " % (os.path.split(caller[1])[1],
                                             caller[2], caller[3])
 
-        def prefChecker(display, cmdIndex):
+        def pref_checker(display, cmdIndex):
             result = self.prg.prefs.category(args[0])[args[1]]
             if result != args[2]:
                 output = u"%s at index %s, expected %r, found %r" % (
@@ -281,74 +281,74 @@ class FakeCursesTestCase(unittest.TestCase):
                     self.fail(output)
             return None
 
-        return prefChecker
+        return pref_checker
 
-    def printParserState(self):
+    def print_parser_state(self):
         caller = inspect.stack()[1]
         callerText = u"in %s:%s:%s(): " % (os.path.split(caller[1])[1],
                                            caller[2], caller[3])
 
-        def redoChain(display, cmdIndex):
+        def redo_chain(display, cmdIndex):
             print("Parser state", callerText)
             tb = self.prg.programWindow.focusedWindow.textBuffer
-            tb.parser.debugLog(print, tb.parser.data)
+            tb.parser.debug_log(print, tb.parser.data)
             return None
 
-        return redoChain
+        return redo_chain
 
-    def printRedoState(self):
+    def print_redo_state(self):
         caller = inspect.stack()[1]
         callerText = u"in %s:%s:%s(): " % (os.path.split(caller[1])[1],
                                            caller[2], caller[3])
 
-        def redoState(display, cmdIndex):
+        def redo_state(display, cmdIndex):
             print("Redo state", callerText)
             tb = self.prg.programWindow.focusedWindow.textBuffer
-            tb.printRedoState(print)
+            tb.print_redo_state(print)
             return None
 
-        return redoState
+        return redo_state
 
-    def resizeScreen(self, rows, cols):
+    def resize_screen(self, rows, cols):
         assert isinstance(rows, int)
         assert isinstance(cols, int)
 
-        def setScreenSize(display, cmdIndex):
-            self.cursesScreen.fakeDisplay.setScreenSize(rows, cols)
+        def set_screen_size(display, cmdIndex):
+            self.cursesScreen.fakeDisplay.set_screen_size(rows, cols)
             return curses.KEY_RESIZE
 
-        return setScreenSize
+        return set_screen_size
 
-    def setClipboard(self, text):
+    def set_clipboard(self, text):
         assert isinstance(text, str)
         caller = inspect.stack()[1]
         callerText = u"in %s:%s:%s(): " % (os.path.split(caller[1])[1],
                                            caller[2], caller[3])
 
-        def copyToClipboard(display, cmdIndex):
+        def copy_to_clipboard(display, cmdIndex):
             self.assertTrue(self.prg.clipboard.copy, callerText)
             self.prg.clipboard.copy(text)
             return None
 
-        return copyToClipboard
+        return copy_to_clipboard
 
-    def setMovieMode(self, enabled):
+    def set_movie_mode(self, enabled):
         self.cursesScreen.movie = enabled
         self.cursesScreen.fakeInput.isVerbose = enabled
 
-    def writeText(self, text):
+    def write_text(self, text):
         assert isinstance(text, unicode), type(text)
         caller = inspect.stack()[1]
         callerText = u"in %s:%s:%s(): " % (os.path.split(caller[1])[1],
                                            caller[2], caller[3])
 
-        def copyToClipboard(display, cmdIndex):
+        def copy_to_clipboard(display, cmdIndex):
             self.assertTrue(self.prg.clipboard.copy, callerText)
             self.prg.clipboard.copy(text)
             return app.curses_util.CTRL_V
-        return copyToClipboard
+        return copy_to_clipboard
 
-    def checkNotReached(self, depth=1):
+    def check_not_reached(self, depth=1):
         """Check that this step doesn't occur. E.g. verify the app exited.
 
         Args:
@@ -358,27 +358,27 @@ class FakeCursesTestCase(unittest.TestCase):
         callerText = u"\n  %s:%s:%s(): " % (os.path.split(caller[1])[1],
                                             caller[2], caller[3])
 
-        def checkEndOfInputs(display, cmdIndex):
+        def check_end_of_inputs(display, cmdIndex):
             self.fail(callerText +
                     "\n  Unexpectedly ran out of fake inputs. Consider adding"
                     " CTRL_Q (and 'n' if necessary).")
             return None
 
-        return checkEndOfInputs
+        return check_end_of_inputs
 
-    def runWithFakeInputs(self, fakeInputs, argv=None):
+    def run_with_fake_inputs(self, fakeInputs, argv=None):
         assert hasattr(fakeInputs, "__getitem__") or hasattr(
             fakeInputs, "__iter__")
         if argv is None:
             argv = ["no_argv"]
         sys.argv = argv
-        self.cursesScreen.setFakeInputs(fakeInputs + [
-            self.checkNotReached(2),
+        self.cursesScreen.set_fake_inputs(fakeInputs + [
+            self.check_not_reached(2),
         ])
         self.assertTrue(self.prg)
         self.assertFalse(self.prg.exiting)
         self.prg.run()
-        #curses.printFakeDisplay()
+        #curses.print_fake_display()
         if app.ci_program.userConsoleMessage:
             message = app.ci_program.userConsoleMessage
             app.ci_program.userConsoleMessage = None
@@ -395,13 +395,13 @@ class FakeCursesTestCase(unittest.TestCase):
                                               caller[2], caller[3])
             print(u'\n-------- finished', callerText)
 
-    def runWithTestFile(self, kTestFile, fakeInputs):
+    def run_with_test_file(self, kTestFile, fakeInputs):
         if os.path.isfile(kTestFile):
             os.unlink(kTestFile)
         self.assertFalse(os.path.isfile(kTestFile))
-        self.runWithFakeInputs(fakeInputs, ["ci_test_program", kTestFile])
+        self.run_with_fake_inputs(fakeInputs, ["ci_test_program", kTestFile])
 
-    def selectionDocumentCheck(self, expectedPenRow, expectedPenCol,
+    def selection_document_check(self, expectedPenRow, expectedPenCol,
                                expectedMarkerRow, expectedMarkerCol,
                                expectedMode):
         caller = inspect.stack()[1]
@@ -409,28 +409,28 @@ class FakeCursesTestCase(unittest.TestCase):
                                            caller[2], caller[3])
 
         def checker(display, cmdIndex):
-            selection = self.prg.getDocumentSelection()
+            selection = self.prg.get_document_selection()
             self.assertEqual((expectedPenRow, expectedPenCol, expectedMarkerRow,
                               expectedMarkerCol, expectedMode), selection,
                              callerText)
 
         return checker
 
-    def selectionCheck(self, expectedPenRow, expectedPenCol, expectedMarkerRow,
+    def selection_check(self, expectedPenRow, expectedPenCol, expectedMarkerRow,
                        expectedMarkerCol, expectedMode):
         caller = inspect.stack()[1]
         callerText = u"in %s:%s:%s(): " % (os.path.split(caller[1])[1],
                                            caller[2], caller[3])
 
         def checker(display, cmdIndex):
-            selection = self.prg.getSelection()
+            selection = self.prg.get_selection()
             self.assertEqual((expectedPenRow, expectedPenCol, expectedMarkerRow,
                               expectedMarkerCol, expectedMode), selection,
                              callerText)
 
         return checker
 
-    def tearDown(self):
+    def tear_down(self):
         # Disable mouse tracking in xterm.
         sys.stdout.write(u"\033[?1002l")
         # Disable Bracketed Paste Mode.

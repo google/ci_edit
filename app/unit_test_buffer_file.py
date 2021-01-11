@@ -34,10 +34,10 @@ import app.buffer_file as test_buffer_file
 
 class pathRowColumnTestCases(unittest.TestCase):
 
-    def setUp(self):
+    def set_up(self):
         pass
 
-    def tearDown(self):
+    def tear_down(self):
         pass
 
     def test_path_row_column(self):
@@ -45,7 +45,7 @@ class pathRowColumnTestCases(unittest.TestCase):
             return
         # Shortcuts.
         originalIsFile = test_buffer_file.os.path.isfile
-        decode = test_buffer_file.pathRowColumn
+        decode = test_buffer_file.path_row_column
         Mock = unittest.mock.MagicMock
 
         mock = Mock(side_effect=[False, True])

@@ -36,11 +36,11 @@ shouldWritePrintLog = False
 startTime = time.time()
 
 
-def getLines():
+def get_lines():
     return screenLog
 
 
-def parseLines(frame, logChannel, *args):
+def parse_lines(frame, logChannel, *args):
     if not len(args):
         args = [u""]
     msg = str(args[0])
@@ -56,10 +56,10 @@ def parseLines(frame, logChannel, *args):
     return msg.split(u"\n")
 
 
-def channelEnable(logChannel, isEnabled):
+def channel_enable(logChannel, isEnabled):
     global fullLog, shouldWritePrintLog
     fullLog += [
-        u"%10s %10s: %s %r" % (u'logging', u'channelEnable', logChannel,
+        u"%10s %10s: %s %r" % (u'logging', u'channel_enable', logChannel,
                                isEnabled)
     ]
     if isEnabled:
@@ -72,7 +72,7 @@ def channelEnable(logChannel, isEnabled):
 def channel(logChannel, *args):
     global fullLog, screenLog
     if logChannel in enabledChannels:
-        lines = parseLines(inspect.stack()[2], logChannel, *args)
+        lines = parse_lines(inspect.stack()[2], logChannel, *args)
         screenLog += lines
         fullLog += lines
 
@@ -82,14 +82,14 @@ def caller(*args):
     priorCaller = inspect.stack()[2]
     msg = (u"%s %s %s" % (os.path.split(priorCaller[1])[1], priorCaller[2],
                           priorCaller[3]),) + args
-    lines = parseLines(inspect.stack()[1], u"caller", *msg)
+    lines = parse_lines(inspect.stack()[1], u"caller", *msg)
     screenLog += lines
     fullLog += lines
 
 
 def exception(e, *args):
     global fullLog
-    lines = parseLines(inspect.stack()[1], u'except', *args)
+    lines = parse_lines(inspect.stack()[1], u'except', *args)
     fullLog += lines
     errorType, value, tracebackInfo = sys.exc_info()
     out = traceback.format_exception(errorType, value, tracebackInfo)
@@ -180,7 +180,7 @@ def quick(*args):
 def debug(*args):
     global fullLog, screenLog
     if u'debug' in enabledChannels:
-        lines = parseLines(inspect.stack()[1], u'debug_@@@', *args)
+        lines = parse_lines(inspect.stack()[1], u'debug_@@@', *args)
         screenLog += lines
         fullLog += lines
 
@@ -188,13 +188,13 @@ def debug(*args):
 def detail(*args):
     global fullLog
     if u'detail' in enabledChannels:
-        lines = parseLines(inspect.stack()[1], u'detail', *args)
+        lines = parse_lines(inspect.stack()[1], u'detail', *args)
         fullLog += lines
 
 
 def error(*args):
     global fullLog
-    lines = parseLines(inspect.stack()[1], u'error', *args)
+    lines = parse_lines(inspect.stack()[1], u'error', *args)
     fullLog += lines
 
 
@@ -221,8 +221,8 @@ def wrapper(function, shouldWrite=True):
     return r
 
 
-def writeToFile(path):
-    fullPath = app.buffer_file.expandFullPath(path)
+def write_to_file(path):
+    fullPath = app.buffer_file.expand_full_path(path)
     with io.open(fullPath, 'w+', encoding=u'UTF-8') as out:
         out.write(u"\n".join(fullLog) + u"\n")
 

@@ -45,7 +45,7 @@ DEBUG_COLOR_PAIR_BASE = 256
 DEBUG_COLOR_PAIR_MASK = (DEBUG_COLOR_PAIR_BASE * 2) - 1
 
 
-def isStringType(value):
+def is_string_type(value):
     if sys.version_info[0] == 2:
         return type(value) in types.StringTypes
     return isinstance(value, str)
@@ -68,9 +68,9 @@ class FakeInput:
 
     def __init__(self, display):
         self.fakeDisplay = display
-        self.setInputs([])
+        self.set_inputs([])
 
-    def setInputs(self, cmdList):
+    def set_inputs(self, cmdList):
         self.inputs = cmdList
         self.inputsIndex = -1
         self.inBracketedPaste = False
@@ -117,7 +117,7 @@ class FakeInput:
                         self.log("next(k)", repr(cmd)[:8], repr(result))
                         return result
                     self.log("next(f)", repr(cmd)[:8], repr(result))
-                elif isStringType(cmd) and len(cmd) == 1:
+                elif is_string_type(cmd) and len(cmd) == 1:
                     # A single character.
                     if (not self.inBracketedPaste) and cmd != ascii.ESC:
                         self.waitingForRefresh = True
@@ -153,7 +153,7 @@ class FakeInput:
         self.log("return", constants.ERR)
         return constants.ERR
 
-def testLog(log_level, *msg):
+def test_log(log_level, *msg):
     # Adjust constant to increase verbosity.
     if log_level >= 0:
         return
@@ -171,7 +171,7 @@ def testLog(log_level, *msg):
 getchCallback = None
 
 
-def setGetchCallback(callback):
+def set_getch_callback(callback):
     global getchCallback
     getchCallback = callback
 
@@ -189,7 +189,7 @@ class FakeDisplay:
         self.displayText = None
         self.reset()
 
-    def checkStyle(self, row, col, height, width, colorPair):
+    def check_style(self, row, col, height, width, colorPair):
         #assert (colorPair & DEBUG_COLOR_PAIR_MASK) in self.colors.values()
         assert colorPair is not None
         assert colorPair >= DEBUG_COLOR_PAIR_BASE
@@ -205,7 +205,7 @@ class FakeDisplay:
                         % (row + i, col + k, d, colorPair))
         return None
 
-    def checkText(self, row, col, lines, verbose=3):
+    def check_text(self, row, col, lines, verbose=3):
         assert isinstance(row, int)
         assert isinstance(col, int)
         assert isinstance(lines, list)
@@ -236,7 +236,7 @@ class FakeDisplay:
                     if verbose >= 3:
                         result += u"\n  mismatch:  %*s^" % (displayCol, u"")
                     return result
-                displayCol += app.curses_util.charWidth(displayCh, displayCol)
+                displayCol += app.curses_util.char_width(displayCh, displayCol)
         return None
 
     def draw(self, cursorRow, cursorCol, text, colorPair):
@@ -253,7 +253,7 @@ class FakeDisplay:
                 self.displayText[cursorRow][cursorCol] = i
                 self.displayStyle[cursorRow][cursorCol] = colorPair
                 cursorCol += 1
-                if app.curses_util.charWidth(i, cursorCol) > 1:
+                if app.curses_util.char_width(i, cursorCol) > 1:
                     self.displayText[cursorRow][cursorCol] = u" "
                     self.displayStyle[cursorRow][cursorCol] = colorPair
                     cursorCol += 1
@@ -261,7 +261,7 @@ class FakeDisplay:
                 raise error()
         return cursorRow, cursorCol
 
-    def findText(self, screenText):
+    def find_text(self, screenText):
         assert isinstance(screenText, unicode)
         for row in range(len(self.displayText)):
             line = self.displayText[row]
@@ -272,13 +272,13 @@ class FakeDisplay:
         self.show()
         return -1, -1
 
-    def getColorPair(self, colorIndex):
+    def get_color_pair(self, colorIndex):
         assert colorIndex < DEBUG_COLOR_PAIR_BASE
         colorPair = self.colors.setdefault(
             colorIndex, DEBUG_COLOR_PAIR_BASE + len(self.colors))
         return colorPair
 
-    def getStyle(self):
+    def get_style(self):
         return [
             u"".join([
                 unichr((c & DEBUG_COLOR_PAIR_MASK) - DEBUG_COLOR_PAIR_BASE + 91)
@@ -287,7 +287,7 @@ class FakeDisplay:
             for i in range(self.rows)
         ]
 
-    def getText(self):
+    def get_text(self):
         rows = []
         for rowIndex in range(self.rows):
             rowChars = self.displayText[rowIndex]
@@ -296,11 +296,11 @@ class FakeDisplay:
             col = 0
             while col < limit:
                 line.append(rowChars[col])
-                col += app.curses_util.charWidth(rowChars[col], col)
+                col += app.curses_util.char_width(rowChars[col], col)
             rows.append(u"".join(line))
         return rows
 
-    def setScreenSize(self, rows, cols):
+    def set_screen_size(self, rows, cols):
         self.rows = rows
         self.cols = cols
         self.reset()
@@ -311,7 +311,7 @@ class FakeDisplay:
         print(u'   %*s   %s' % (-self.cols, u'display', u'style'))
         print(u'  +' + u'-' * self.cols + u'+ +' + u'-' * self.cols + u'+')
         for i, (line, styles) in enumerate(
-                zip(self.getText(), self.getStyle())):
+                zip(self.get_text(), self.get_style())):
             print(u"%2d|%s| |%s|" % (i, line, styles))
         print(u'  +' + u'-' * self.cols + u'+ +' + u'-' * self.cols + u'+')
 
@@ -329,11 +329,11 @@ fakeInput = None
 mouseEvents = []
 
 
-def getFakeDisplay():
+def get_fake_display():
     return fakeDisplay
 
 
-def printFakeDisplay():
+def print_fake_display():
     fakeDisplay.show()
 
 
@@ -349,7 +349,7 @@ class FakeCursesWindow:
         self.cursorCol = 0
 
     def addstr(self, *args):
-        testLog(4, *args)
+        test_log(4, *args)
         cursorRow = args[0]
         cursorCol = args[1]
         assert isinstance(cursorRow, int)
@@ -362,7 +362,7 @@ class FakeCursesWindow:
             cursorRow, cursorCol, text, color)
 
     def getch(self):
-        testLog(4)
+        test_log(4)
         if 1:
             if getchCallback:
                 val = getchCallback()
@@ -376,21 +376,21 @@ class FakeCursesWindow:
         return val
 
     def getyx(self):
-        testLog(2)
+        test_log(2)
         return (self.cursorRow, self.cursorCol)
 
     def getmaxyx(self):
-        testLog(2)
+        test_log(2)
         return (fakeDisplay.rows, fakeDisplay.cols)
 
     def keypad(self, *args):
-        testLog(2, *args)
+        test_log(2, *args)
 
     def leaveok(self, *args):
-        testLog(2, *args)
+        test_log(2, *args)
 
     def move(self, a, b):
-        testLog(2, a, b)
+        test_log(2, a, b)
         self.cursorRow = a
         self.cursorCol = b
 
@@ -398,23 +398,23 @@ class FakeCursesWindow:
         pass
 
     def refresh(self):
-        testLog(2)
+        test_log(2)
 
     def resize(self, a, b):
-        testLog(2, a, b)
+        test_log(2, a, b)
 
     def scrollok(self, *args):
-        testLog(2, *args)
+        test_log(2, *args)
 
     def timeout(self, *args):
-        testLog(2, *args)
+        test_log(2, *args)
 
 
 class StandardScreen(FakeCursesWindow):
 
     def __init__(self):
         global fakeDisplay, fakeInput
-        testLog(2)
+        test_log(2)
         FakeCursesWindow.__init__(self, 0, 0)
         self.cmdCount = -1
         fakeDisplay = FakeDisplay()
@@ -423,18 +423,18 @@ class StandardScreen(FakeCursesWindow):
         self.fakeInput = fakeInput
         self.movie = False
 
-    def setFakeInputs(self, cmdList):
-        self.fakeInput.setInputs(cmdList)
+    def set_fake_inputs(self, cmdList):
+        self.fakeInput.set_inputs(cmdList)
 
     def getmaxyx(self):
-        testLog(2)
+        test_log(2)
         return (self.fakeDisplay.rows, self.fakeDisplay.cols)
 
     def refresh(self, *args):
-        testLog(2, *args)
+        test_log(2, *args)
 
     def test_find_text(self, screenText):
-        return fakeDisplay.findText(screenText)
+        return fakeDisplay.find_text(screenText)
 
     def test_rendered_command_count(self, cmdCount):
         if self.cmdCount != cmdCount:
@@ -445,62 +445,62 @@ class StandardScreen(FakeCursesWindow):
 
 
 def baudrate(*args):
-    testLog(2, *args)
+    test_log(2, *args)
     return -1
 
 
 def can_change_color(*args):
-    testLog(2, *args)
+    test_log(2, *args)
     return 1
 
 
 def color_content(*args):
-    testLog(2, *args)
+    test_log(2, *args)
 
 
 def color_pair(*args):
-    testLog(2, *args)
-    return fakeDisplay.getColorPair(*args)
+    test_log(2, *args)
+    return fakeDisplay.get_color_pair(*args)
 
 
 def curs_set(*args):
-    testLog(2, *args)
+    test_log(2, *args)
 
 
 def errorpass(*args):
-    testLog(2, *args)
+    test_log(2, *args)
 
 
 def getch(*args):
-    testLog(2, *args)
+    test_log(2, *args)
     return constants.ERR
 
 
-def addMouseEvent(mouseEvent):
-    testLog(2)
-    return mouseEvents.append(mouseEvent)
+def add_mouse_event(mouse_event):
+    test_log(2)
+    return mouseEvents.append(mouse_event)
 
 
 def getmouse(*args):
-    testLog(2, *args)
+    test_log(2, *args)
     return mouseEvents.pop()
 
 
 def has_colors(*args):
-    testLog(2, *args)
+    test_log(2, *args)
     return True
 
 
 def init_color(*args):
-    testLog(2, *args)
+    test_log(2, *args)
 
 
 def init_pair(*args):
-    testLog(4, *args)
+    test_log(4, *args)
 
 
 def keyname(*args):
-    testLog(2, *args)
+    test_log(2, *args)
     # Raise expected exception types.
     a = int(*args)  # ValueError.
     if a >= 2**31:
@@ -510,45 +510,45 @@ def keyname(*args):
 
 
 def meta(*args):
-    testLog(2, *args)
+    test_log(2, *args)
 
 
 def mouseinterval(*args):
-    testLog(2, *args)
+    test_log(2, *args)
 
 
 def mousemask(*args):
-    testLog(2, *args)
+    test_log(2, *args)
 
 
 def newwin(*args):
-    testLog(2, *args)
+    test_log(2, *args)
     return FakeCursesWindow(args[0], args[1])
 
 
 def raw(*args):
-    testLog(2, *args)
+    test_log(2, *args)
 
 
 def resizeterm(*args):
-    testLog(2, *args)
+    test_log(2, *args)
 
 
 def start_color(*args):
-    testLog(2, *args)
+    test_log(2, *args)
 
 
 def ungetch(*args):
-    testLog(2, *args)
+    test_log(2, *args)
 
 
 def use_default_colors(*args):
-    testLog(2, *args)
+    test_log(2, *args)
 
 
 def get_pair(*args):
-    fakeDisplay.getColorPair(*args)
-    testLog(2, *args)
+    fakeDisplay.get_color_pair(*args)
+    test_log(2, *args)
 
 
 def wrapper(fun, *args, **kw):
