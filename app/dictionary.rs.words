@@ -19,6 +19,7 @@ crossterm
 cst
 deref
 endwin
+envs
 eprint
 eprintln
 fmt
@@ -41,6 +42,7 @@ millis
 mmask
 mockall
 mousemask
+mpsc
 multizip
 mut
 mv
@@ -71,5 +73,6 @@ tempfile
 termion
 thiserror
 tui
+valico
 vec
 writeln

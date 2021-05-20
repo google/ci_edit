@@ -74,12 +74,14 @@ doa
 dq
 drm
 ebnf
+efi
 emmc
 eos
 et
 eula
 eulas
 faq
+faqs
 fc
 fde
 fdt
@@ -88,6 +90,7 @@ fil
 fpu
 fpus
 fsl
+ftl
 fubar
 fxl
 fyi
@@ -112,6 +115,7 @@ gtg
 gtk
 gu
 guids
+hal
 hsv
 html
 http
@@ -178,6 +182,7 @@ lto
 ltr
 ltrs
 lv
+lz
 mb
 mbs
 mdn
@@ -300,6 +305,7 @@ tp
 tpm
 ttf
 ttfn
+tuf
 tw
 ty
 ucs

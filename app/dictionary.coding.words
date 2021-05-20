@@ -302,6 +302,7 @@ libc
 libcxx
 libs
 libstdc
+libvulcan
 lifecycle
 lifo
 lk
@@ -336,6 +337,7 @@ multisample
 multisampled
 multisampling
 multithread
+musl
 mutex
 mutexes
 na
@@ -395,6 +397,7 @@ presubmits
 prev
 prg
 proc
+prog
 proto
 protobufs
 psec
@@ -487,6 +490,7 @@ stdin
 stdout
 stl
 str
+strace
 strchr
 strdup
 stringified
@@ -511,6 +515,7 @@ sysex
 syslog
 sz
 tar
+tarballs
 tcp
 tebibyte
 templated
@@ -572,12 +577,14 @@ variadic
 vc
 vdso
 versioning
+vfs
 vi
 vimrc
 virtualization
 vkey
 vpn
 vpns
+vscode
 vsync
 waitable
 wasm
@@ -609,6 +616,10 @@ yobibyte
 yz
 zebibyte
 zi
+zlogin
+zprofile
 zsh
+zshenv
+zshrc
 zterm
 zyyy

@@ -14,7 +14,6 @@
 
 # This is a list of non-English words that are in gn scripts.
 serde
-pytype
 browsertests
 buildargs
 cflags
@@ -26,5 +25,9 @@ javagen
 ldflags
 objcc
 plist
+pytype
+serde
+tempfile
+termion
 testonly
 toplevel
