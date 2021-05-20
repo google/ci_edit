@@ -53,6 +53,8 @@ for (dir, dirs, files) in os.walk(sys.argv[1]):
                         x.group(1)),
                     f.read())
             f.seek(0)
+            if path.find("/unit_test_") != -1:
+                data = re.sub("\bdef set_up\b", "def set_up", data)
             f.write(data)
 
 
