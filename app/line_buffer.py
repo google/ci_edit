@@ -15,6 +15,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+
 try:
     unicode
 except NameError:
@@ -29,8 +30,8 @@ import app.config
 import app.log
 import app.parser
 
-class LineBuffer:
 
+class LineBuffer:
     def __init__(self, program):
         self.program = program
         self.isBinary = False
@@ -50,8 +51,8 @@ class LineBuffer:
             assert isinstance(data, unicode)
         # Performance: in a 1000 line test it appears fastest to do some simple
         # .replace() calls to minimize the number of calls to parse().
-        data = data.replace(u'\r\n', u'\n')
-        data = data.replace(u'\r', u'\n')
+        data = data.replace(u"\r\n", u"\n")
+        data = data.replace(u"\r", u"\n")
         if self.program.prefs.tabs_to_spaces(self.fileType):
             tabSize = self.program.prefs.editor.get(u"tabSize", 8)
             data = data.expandtabs(tabSize)
@@ -59,24 +60,24 @@ class LineBuffer:
         def parse(sre):
             return u"\x01%02x" % ord(sre.groups()[0])
 
-        #data = re.sub(u'([\0-\x09\x0b-\x1f\x7f-\xff])', parse, data)
-        data = re.sub(u'([\0-\x09\x0b-\x1f])', parse, data)
+        # data = re.sub(u'([\0-\x09\x0b-\x1f\x7f-\xff])', parse, data)
+        data = re.sub(u"([\0-\x09\x0b-\x1f])", parse, data)
         return data
 
     def unescape_binary_chars(self, data):
-
         def encode(line):
             return chr(int(line.groups()[0], 16))
 
-        out = re.sub(u'\x01([0-9a-fA-F][0-9a-fA-F])', encode, data)
+        out = re.sub(u"\x01([0-9a-fA-F][0-9a-fA-F])", encode, data)
         if app.config.strict_debug:
             assert isinstance(out, unicode)
         return out
 
     def do_parse(self, begin, end):
         start = time.time()
-        self.parser.parse(self.program.bg, self.parser.data,
-                          self.rootGrammar, begin, end)
+        self.parser.parse(
+            self.program.bg, self.parser.data, self.rootGrammar, begin, end
+        )
         self.debugUpperChangedRow = self.parser.resumeAtRow
         self.parserTime = time.time() - start
 
@@ -89,15 +90,15 @@ class LineBuffer:
     def set_message(self, *args, **kwargs):
         if not len(args):
             self.message = None
-            #app.log.caller()
+            # app.log.caller()
             return
         msg = str(args[0])
         prior = msg
         for i in args[1:]:
-            if not len(prior) or prior[-1] != '\n':
-                msg += ' '
+            if not len(prior) or prior[-1] != "\n":
+                msg += " "
             prior = str(i)
             msg += prior
         if app.config.strict_debug:
             app.log.caller("\n", msg)
-        self.message = (repr(msg)[1:-1], kwargs.get('color'))
+        self.message = (repr(msg)[1:-1], kwargs.get("color"))

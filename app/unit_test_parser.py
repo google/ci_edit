@@ -29,7 +29,6 @@ import app.prefs
 
 
 class ParserTestCases(unittest.TestCase):
-
     def setUp(self):
         self.parser = app.parser.Parser(app.prefs.Prefs())
 
@@ -52,8 +51,7 @@ class ParserTestCases(unittest.TestCase):
             actualNode = actual[startIndex + index]
             self.assertTrue(isinstance(actualNode, tuple))
             # print("Node:", startIndex + index, expectedNode, actualNode[1:])
-            self.assertEqual(expectedNode[kGrammar],
-                    actualNode[kGrammar]["name"])
+            self.assertEqual(expectedNode[kGrammar], actualNode[kGrammar]["name"])
             self.assertEqual(expectedNode[kBegin], actualNode[kBegin])
             self.assertEqual(expectedNode[kPrior], actualNode[kPrior])
             self.assertEqual(expectedNode[kVisual], actualNode[kVisual])
@@ -109,21 +107,18 @@ void blah();
 """,
         ]
         for test in tests:
-            #self.assertEqual(test.splitlines(), test.split(u"\n"))
+            # self.assertEqual(test.splitlines(), test.split(u"\n"))
             lines = test.split(u"\n")
             self.prefs = app.prefs.Prefs()
-            self.parser.parse(None, test,
-                              self.prefs.grammars[u'cpp'], 0, 99999)
-            #self.parser.debug_log(print, test)
+            self.parser.parse(None, test, self.prefs.grammars[u"cpp"], 0, 99999)
+            # self.parser.debug_log(print, test)
             self.assertEqual(len(lines), self.parser.row_count())
             for i, line in enumerate(lines):
                 self.assertEqual(self.parser.row_text(i), line)
-                self.assertEqual(
-                    self.parser.row_text_and_width(i), (line, len(line)))
+                self.assertEqual(self.parser.row_text_and_width(i), (line, len(line)))
             for node in self.parser.parserNodes:
                 # These tests have no double wide characters.
-                self.assertEqual(node[app.parser.kBegin],
-                                 node[app.parser.kVisual])
+                self.assertEqual(node[app.parser.kBegin], node[app.parser.kVisual])
             self.parser.debug_check_lines(None, test)
 
     def test_parse_cpp_literal(self):
@@ -133,21 +128,18 @@ char stuff = R"mine(two
 void blah();
 """
         self.prefs = app.prefs.Prefs()
-        self.parser.parse(None, test, self.prefs.grammars['cpp'], 0,
-                          99999)
+        self.parser.parse(None, test, self.prefs.grammars["cpp"], 0, 99999)
         # self.parser.debug_log(print, test)
         self.assertEqual(self.parser.row_text(0), u"/* first comment */")
         self.assertEqual(self.parser.row_text(1), u"""char stuff = R"mine(two""")
         self.assertEqual(
-            self.parser.grammar_at(0, 0),
-            self.prefs.grammars[u'cpp_block_comment'])
+            self.parser.grammar_at(0, 0), self.prefs.grammars[u"cpp_block_comment"]
+        )
+        self.assertEqual(self.parser.grammar_at(1, 8), self.prefs.grammars[u"cpp"])
         self.assertEqual(
-            self.parser.grammar_at(1, 8), self.prefs.grammars[u'cpp'])
-        self.assertEqual(
-            self.parser.grammar_at(1, 18),
-            self.prefs.grammars[u'cpp_string_literal'])
-        self.assertEqual(
-            self.parser.grammar_at(3, 7), self.prefs.grammars[u'cpp'])
+            self.parser.grammar_at(1, 18), self.prefs.grammars[u"cpp_string_literal"]
+        )
+        self.assertEqual(self.parser.grammar_at(3, 7), self.prefs.grammars[u"cpp"])
 
     def test_parse_rs_raw_string(self):
         test = u"""// one
@@ -158,25 +150,26 @@ fn main { }
 // two
 """
         self.prefs = app.prefs.Prefs()
-        self.parser.parse(None, test, self.prefs.grammars[u'rs'], 0,
-                          99999)
+        self.parser.parse(None, test, self.prefs.grammars[u"rs"], 0, 99999)
         self.assertEqual(self.parser.row_text(0), u"// one")
         self.assertEqual(self.parser.row_text(1), u"""let stuff = r###"two""")
         self.assertEqual(
-            self.parser.grammar_at(0, 0),
-            self.prefs.grammars[u'cpp_line_comment'])
+            self.parser.grammar_at(0, 0), self.prefs.grammars[u"cpp_line_comment"]
+        )
+        self.assertEqual(self.parser.grammar_at(1, 8), self.prefs.grammars[u"rs"])
         self.assertEqual(
-            self.parser.grammar_at(1, 8), self.prefs.grammars[u'rs'])
+            self.parser.grammar_at(1, 18), self.prefs.grammars[u"rs_raw_string"]
+        )
         self.assertEqual(
-            self.parser.grammar_at(1, 18), self.prefs.grammars[u'rs_raw_string'])
+            self.parser.grammar_at(2, 12), self.prefs.grammars[u"rs_raw_string"]
+        )
         self.assertEqual(
-            self.parser.grammar_at(2, 12), self.prefs.grammars[u'rs_raw_string'])
+            self.parser.grammar_at(3, 15), self.prefs.grammars[u"rs_raw_string"]
+        )
         self.assertEqual(
-            self.parser.grammar_at(3, 15), self.prefs.grammars[u'rs_raw_string'])
-        self.assertEqual(
-            self.parser.grammar_at(3, 12), self.prefs.grammars[u'rs_raw_string'])
-        self.assertEqual(
-            self.parser.grammar_at(4, 7), self.prefs.grammars[u'rs'])
+            self.parser.grammar_at(3, 12), self.prefs.grammars[u"rs_raw_string"]
+        )
+        self.assertEqual(self.parser.grammar_at(4, 7), self.prefs.grammars[u"rs"])
 
     def test_parse_tabs(self):
         test = u"""\t<tab
@@ -193,11 +186,10 @@ parse\t\t\tz
 """
         self.prefs = app.prefs.Prefs()
         p = self.parser
-        self.parser.parse(None, test, self.prefs.grammars[u'rs'], 0,
-                          99999)
+        self.parser.parse(None, test, self.prefs.grammars[u"rs"], 0, 99999)
         if 0:
             print("")
-            for i,t in enumerate(test.splitlines()):
+            for i, t in enumerate(test.splitlines()):
                 print("{}: {}".format(i, repr(t)))
             p.debug_log(print, test)
 
@@ -258,8 +250,7 @@ parse\t\t\tz
         self.assertEqual(p.grammar_index_from_row_col(0, 8), 2)
         self.assertEqual(p.grammar_index_from_row_col(1, 0), 1)
 
-        #self.assertEqual(p.grammar_at(0, 0), 0)
-
+        # self.assertEqual(p.grammar_at(0, 0), 0)
 
         self.assertEqual(p.next_char_row_col(999999, 0), None)
         # Test u"\t<tab".
@@ -397,11 +388,10 @@ line\tち\ttabs
 """
         self.prefs = app.prefs.Prefs()
         p = self.parser
-        self.parser.parse(None, test, self.prefs.grammars[u'rs'], 0,
-                          99999)
+        self.parser.parse(None, test, self.prefs.grammars[u"rs"], 0, 99999)
         if 0:
             print("")
-            for i,t in enumerate(test.splitlines()):
+            for i, t in enumerate(test.splitlines()):
                 print("{}: {}".format(i, repr(t)))
             p.debug_log(print, test)
 
@@ -561,12 +551,11 @@ line\tち\ttabs
         self.prefs = app.prefs.Prefs()
         p = self.parser
         self.assertEqual(p.resumeAtRow, 0)
-        self.parser.parse(None, test, self.prefs.grammars[u'rs'], 0,
-                          99999)
+        self.parser.parse(None, test, self.prefs.grammars[u"rs"], 0, 99999)
         self.assertEqual(p.resumeAtRow, 10)
         if 0:
             print("")
-            for i,t in enumerate(test.splitlines()):
+            for i, t in enumerate(test.splitlines()):
                 print("{}: {}".format(i, repr(t)))
             p.debug_log(print, test)
         self.assertEqual(p.data_offset(4, 5), 34)
@@ -646,12 +635,11 @@ line\tち\ttabs
         self.prefs = app.prefs.Prefs()
         p = self.parser
         self.assertEqual(p.resumeAtRow, 0)
-        self.parser.parse(None, test, self.prefs.grammars[u'rs'], 0,
-                          99999)
+        self.parser.parse(None, test, self.prefs.grammars[u"rs"], 0, 99999)
         self.assertEqual(p.resumeAtRow, 10)
         if 0:
             print("")
-            for i,t in enumerate(test.splitlines()):
+            for i, t in enumerate(test.splitlines()):
                 print("{}: {}".format(i, repr(t)))
             p.debug_log(print, test)
 
@@ -711,12 +699,11 @@ line\tち\ttabs
         self.prefs = app.prefs.Prefs()
         p = self.parser
         self.assertEqual(p.resumeAtRow, 0)
-        self.parser.parse(None, test, self.prefs.grammars[u'rs'], 0,
-                          99999)
+        self.parser.parse(None, test, self.prefs.grammars[u"rs"], 0, 99999)
         self.assertEqual(p.resumeAtRow, 10)
         if 0:
             print("")
-            for i,t in enumerate(test.splitlines()):
+            for i, t in enumerate(test.splitlines()):
                 print("{}: {}".format(i, repr(t)))
             p.debug_log(print, test)
 
@@ -743,20 +730,20 @@ e
         expectedRows = [0, 3, 4]
         self.prefs = app.prefs.Prefs()
         p = self.parser
-        self.parser.parse(None, test, self.prefs.grammars[u'rs'], 0, 99999)
+        self.parser.parse(None, test, self.prefs.grammars[u"rs"], 0, 99999)
         if 0:
             print("")
-            for i,t in enumerate(test.splitlines()):
+            for i, t in enumerate(test.splitlines()):
                 print("{}: {}".format(i, repr(t)))
             p.debug_log(print, test)
 
         self.check_parser_nodes(expectedNodes, p.parserNodes)
         self.check_parser_rows(expectedRows, p.rows)
         # Regression test: a reparse should not add nodes.
-        self.parser.parse(None, test, self.prefs.grammars[u'rs'], 3, 4)
-        self.parser.parse(None, test, self.prefs.grammars[u'rs'], 3, 4)
-        self.parser.parse(None, test, self.prefs.grammars[u'rs'], 3, 4)
-        self.parser.parse(None, test, self.prefs.grammars[u'rs'], 3, 4)
+        self.parser.parse(None, test, self.prefs.grammars[u"rs"], 3, 4)
+        self.parser.parse(None, test, self.prefs.grammars[u"rs"], 3, 4)
+        self.parser.parse(None, test, self.prefs.grammars[u"rs"], 3, 4)
+        self.parser.parse(None, test, self.prefs.grammars[u"rs"], 3, 4)
         self.check_parser_nodes(expectedNodes, p.parserNodes)
         self.check_parser_rows(expectedRows, p.rows)
 
@@ -766,10 +753,10 @@ e
 """
         self.prefs = app.prefs.Prefs()
         p = self.parser
-        self.parser.parse(None, test, self.prefs.grammars[u'rs'], 0, 99999)
+        self.parser.parse(None, test, self.prefs.grammars[u"rs"], 0, 99999)
         if 0:
             print("")
-            for i,t in enumerate(test.splitlines()):
+            for i, t in enumerate(test.splitlines()):
                 print("{}: {}".format(i, repr(t)))
             p.debug_log(print, test)
 
@@ -798,71 +785,94 @@ e
         self.prefs = app.prefs.Prefs()
         p = self.parser
         self.assertEqual(p.resumeAtRow, 0)
-        self.parser.parse(None, u"", self.prefs.grammars[u'rs'], 0,
-                          99999)
+        self.parser.parse(None, u"", self.prefs.grammars[u"rs"], 0, 99999)
         self.assertEqual(p.resumeAtRow, 1)
         if 0:
             print("")
-            for i,t in enumerate(test.splitlines()):
+            for i, t in enumerate(test.splitlines()):
                 print("{}: {}".format(i, repr(t)))
             p.debug_log(print, test)
 
-        self.check_parser_nodes([(u"rs", 0, None, 0),], p.parserNodes)
+        self.check_parser_nodes(
+            [
+                (u"rs", 0, None, 0),
+            ],
+            p.parserNodes,
+        )
         self.assertEqual(p.data_offset(4, 5), None)
         p.insert(0, 0, u"a")
-        self.check_parser_nodes([(u"rs", 0, None, 0),], p.parserNodes)
+        self.check_parser_nodes(
+            [
+                (u"rs", 0, None, 0),
+            ],
+            p.parserNodes,
+        )
         self.assertEqual(p.row_text_and_width(0), (u"a", 1))
-        self.check_parser_nodes([
-            (u"rs", 0, None, 0),
-            (u"rs", 0, None, 0),
-            (u"rs", 1, None, 1),
-            ], p.parserNodes)
+        self.check_parser_nodes(
+            [
+                (u"rs", 0, None, 0),
+                (u"rs", 0, None, 0),
+                (u"rs", 1, None, 1),
+            ],
+            p.parserNodes,
+        )
         # An insert to an invalid row, col will append to the end.
         p.insert(2, 2, u"z")
         self.assertEqual(p.row_count(), 1)
         self.assertEqual(p.row_text_and_width(0), (u"az", 2))
-        self.check_parser_nodes([
-            (u"rs", 0, None, 0),
-            (u"rs", 0, None, 0),
-            (u"rs", 2, None, 2),
-            ], p.parserNodes)
+        self.check_parser_nodes(
+            [
+                (u"rs", 0, None, 0),
+                (u"rs", 0, None, 0),
+                (u"rs", 2, None, 2),
+            ],
+            p.parserNodes,
+        )
         p.insert(0, 0, u"ち")
         self.assertEqual(p.row_text_and_width(0), (u"ちaz", 4))
-        self.check_parser_nodes([
-            (u"rs", 0, None, 0),
-            (u"rs", 0, None, 0),
-            (u"rs", 1, None, 2),
-            (u"rs", 3, None, 4),
-            ], p.parserNodes)
+        self.check_parser_nodes(
+            [
+                (u"rs", 0, None, 0),
+                (u"rs", 0, None, 0),
+                (u"rs", 1, None, 2),
+                (u"rs", 3, None, 4),
+            ],
+            p.parserNodes,
+        )
         p.insert(0, 2, u"b")
         self.assertEqual(p.row_text_and_width(0), (u"ちbaz", 5))
-        self.check_parser_nodes([
-            (u"rs", 0, None, 0),
-            (u"rs", 0, None, 0),
-            (u"rs", 1, None, 2),
-            (u"rs", 4, None, 5),
-            ], p.parserNodes)
+        self.check_parser_nodes(
+            [
+                (u"rs", 0, None, 0),
+                (u"rs", 0, None, 0),
+                (u"rs", 1, None, 2),
+                (u"rs", 4, None, 5),
+            ],
+            p.parserNodes,
+        )
         p.insert(0, 0, u"x")
         self.assertEqual(p.row_text_and_width(0), (u"xちbaz", 6))
-        #p.debug_log(print, p.data)
-        #self.print_parser_nodes(p.parserNodes)
+        # p.debug_log(print, p.data)
+        # self.print_parser_nodes(p.parserNodes)
 
     def test_data_offset(self):
         test = u"xちbaz"
         self.prefs = app.prefs.Prefs()
         p = self.parser
         self.assertEqual(p.resumeAtRow, 0)
-        self.parser.parse(None, test, self.prefs.grammars[u'rs'], 0,
-                          99999)
+        self.parser.parse(None, test, self.prefs.grammars[u"rs"], 0, 99999)
         self.assertEqual(p.resumeAtRow, 1)
 
-        self.check_parser_nodes([
-            (u"rs", 0, None, 0),
-            (u"rs", 0, None, 0),
-            (u"rs", 1, None, 1),
-            (u"rs", 2, None, 3),
-            (u"rs", 5, None, 6),
-            ], p.parserNodes)
+        self.check_parser_nodes(
+            [
+                (u"rs", 0, None, 0),
+                (u"rs", 0, None, 0),
+                (u"rs", 1, None, 1),
+                (u"rs", 2, None, 3),
+                (u"rs", 5, None, 6),
+            ],
+            p.parserNodes,
+        )
         self.assertEqual(p.data[p.data_offset(0, 0)], u"x")
         self.assertEqual(p.data[p.data_offset(0, 1)], u"ち")
         self.assertEqual(p.data[p.data_offset(0, 2)], u"ち")
@@ -871,17 +881,19 @@ e
         self.assertEqual(p.data[p.data_offset(0, 5)], u"z")
 
         test = u"xちbちaz"
-        self.parser.parse(None, test, self.prefs.grammars[u'rs'], 0,
-                          99999)
-        self.check_parser_nodes([
-            (u"rs", 0, None, 0),
-            (u"rs", 0, None, 0),
-            (u"rs", 1, None, 1),
-            (u"rs", 2, None, 3),
-            (u"rs", 3, None, 4),
-            (u"rs", 4, None, 6),
-            (u"rs", 6, None, 8),
-            ], p.parserNodes)
+        self.parser.parse(None, test, self.prefs.grammars[u"rs"], 0, 99999)
+        self.check_parser_nodes(
+            [
+                (u"rs", 0, None, 0),
+                (u"rs", 0, None, 0),
+                (u"rs", 1, None, 1),
+                (u"rs", 2, None, 3),
+                (u"rs", 3, None, 4),
+                (u"rs", 4, None, 6),
+                (u"rs", 6, None, 8),
+            ],
+            p.parserNodes,
+        )
         self.assertEqual(p.data[p.data_offset(0, 0)], u"x")
         self.assertEqual(p.data[p.data_offset(0, 1)], u"ち")
         self.assertEqual(p.data[p.data_offset(0, 2)], u"ち")
@@ -892,28 +904,29 @@ e
         self.assertEqual(p.data[p.data_offset(0, 7)], u"z")
 
         test = u"ちbち"
-        self.parser.parse(None, test, self.prefs.grammars[u'rs'], 0,
-                          99999)
-        self.check_parser_nodes([
-            (u"rs", 0, None, 0),
-            (u"rs", 0, None, 0),
-            (u"rs", 1, None, 2),
-            (u"rs", 2, None, 3),
-            (u"rs", 3, None, 5),
-            ], p.parserNodes)
+        self.parser.parse(None, test, self.prefs.grammars[u"rs"], 0, 99999)
+        self.check_parser_nodes(
+            [
+                (u"rs", 0, None, 0),
+                (u"rs", 0, None, 0),
+                (u"rs", 1, None, 2),
+                (u"rs", 2, None, 3),
+                (u"rs", 3, None, 5),
+            ],
+            p.parserNodes,
+        )
         self.assertEqual(p.data[p.data_offset(0, 0)], u"ち")
         self.assertEqual(p.data[p.data_offset(0, 1)], u"ち")
         self.assertEqual(p.data[p.data_offset(0, 2)], u"b")
         self.assertEqual(p.data[p.data_offset(0, 3)], u"ち")
         self.assertEqual(p.data[p.data_offset(0, 4)], u"ち")
 
-
     if 0:
 
         def test_profile_parse(self):
             profile = cProfile.Profile()
             parser = app.parser.Parser()
-            path = u'app/actions.py'
+            path = u"app/actions.py"
             data = io.open(path).read()
             fileType = self.prefs.get_file_type(path)
             grammar = self.prefs.get_grammar(fileType)
@@ -923,9 +936,6 @@ e
             profile.disable()
 
             output = io.StringIO.StringIO()
-            stats = pstats.Stats(
-                profile, stream=output).sort_stats(u'cumulative')
+            stats = pstats.Stats(profile, stream=output).sort_stats(u"cumulative")
             stats.print_stats()
             print(output.getvalue())
-
-

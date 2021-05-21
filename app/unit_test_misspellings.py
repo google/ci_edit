@@ -23,25 +23,28 @@ import app.fake_curses_testing
 
 
 class MisspellingsTestCases(app.fake_curses_testing.FakeCursesTestCase):
-
     def setUp(self):
         self.longMessage = True
         app.fake_curses_testing.FakeCursesTestCase.set_up(self)
 
     def test_highlight_misspellings(self):
-        #self.set_movie_mode(True)
-        self.run_with_fake_inputs([
-            self.display_check(0, 0, [u" ci  "]),
-            self.cursor_check(2, 7),
-            self.write_text(u'test asdf orange'),
-            self.selection_check(0, 16, 0, 0, 0),
-            self.display_check_style(2, 7, 1, len(u"test "),
-                                   self.prg.color.get(u'text', 0)),
-            self.display_check_style(2, 12, 1, len(u"asdf"),
-                                   self.prg.color.get(u'misspelling', 0)),
-            self.display_check_style(2, 16, 1, len(u" orange"),
-                                   self.prg.color.get(u'text', 0)),
-            CTRL_Q,
-            u'n',
-        ])
-
+        # self.set_movie_mode(True)
+        self.run_with_fake_inputs(
+            [
+                self.display_check(0, 0, [u" ci  "]),
+                self.cursor_check(2, 7),
+                self.write_text(u"test asdf orange"),
+                self.selection_check(0, 16, 0, 0, 0),
+                self.display_check_style(
+                    2, 7, 1, len(u"test "), self.prg.color.get(u"text", 0)
+                ),
+                self.display_check_style(
+                    2, 12, 1, len(u"asdf"), self.prg.color.get(u"misspelling", 0)
+                ),
+                self.display_check_style(
+                    2, 16, 1, len(u" orange"), self.prg.color.get(u"text", 0)
+                ),
+                CTRL_Q,
+                u"n",
+            ]
+        )

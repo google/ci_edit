@@ -65,21 +65,21 @@ class Bookmark(object):
 
     def overlaps(self, bookmark):
         """
-    Takes in another bookmark object and returns True if this bookmark
-    shares any rows with the passed in bookmark.
-    """
+        Takes in another bookmark object and returns True if this bookmark
+        shares any rows with the passed in bookmark.
+        """
         begin1, end1 = self.range
         begin2, end2 = bookmark.range
         return begin1 <= end2 and end1 >= begin2
 
     def __contains__(self, row):
         """
-    Args:
-      row (int): the row that you want to check.
+        Args:
+          row (int): the row that you want to check.
 
-    Returns:
-      True if the passed in row is inside the bookmark's range.
-    """
+        Returns:
+          True if the passed in row is inside the bookmark's range.
+        """
         return self.begin <= row <= self.end
 
     def __lt__(self, other):

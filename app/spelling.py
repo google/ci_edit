@@ -26,11 +26,10 @@ import app.log
 
 
 class OsDictionary:
-
     def __init__(self):
-        path = '/usr/share/dict/words'
+        path = "/usr/share/dict/words"
         try:
-            self.file = io.open(path, 'r')
+            self.file = io.open(path, "r")
             self.fileLength = self.file.seek(0, 2)  # Seek to end of file.
             self.pageSize = 1024 * 8  # Arbitrary.
             # Add one to pick up any partial page at the end.
@@ -54,19 +53,18 @@ class OsDictionary:
             while True:
                 if not leash:
                     # There's likely a bug in this function if we hit this.
-                    app.log.info('spelling leash', word)
+                    app.log.info("spelling leash", word)
                     return False
                 leash -= 1
                 page = low + (high - low) // 2
                 self.file.seek(page * self.pageSize)
                 # Add 100 to catch any words that straddle a page.
-                size = min(self.pageSize + 100,
-                           self.fileLength - page * self.pageSize)
+                size = min(self.pageSize + 100, self.fileLength - page * self.pageSize)
                 if not size:
                     self.cache[word] = False
                     return False
                 chunk = self.file.read(size)
-                chunk = chunk[chunk.find('\n'):chunk.rfind('\n')]
+                chunk = chunk[chunk.find("\n") : chunk.rfind("\n")]
                 if not chunk:
                     self.cache[word] = False
                     return False
@@ -89,7 +87,6 @@ class OsDictionary:
 
 
 class Dictionary:
-
     def __init__(self, dictionaryList, pathPrefs):
         self.osDictionary = OsDictionary()
         self.pathPrefs = pathPrefs
@@ -107,29 +104,33 @@ class Dictionary:
     def set_up_words_for_path(self, path):
         self.pathWords = set()
         # app.log.info(repr(self.pathPrefs))
-        for k,v in self.pathPrefs.items():
+        for k, v in self.pathPrefs.items():
             if k in path:
                 for i in v:
                     self.pathWords.update(self.grammarWords.get(i, set()))
 
     def load_words(self, dirPath):
-        dirPath = os.path.join(dirPath, 'dictionary.')
-        for path in glob.iglob(dirPath + '*.words'):
+        dirPath = os.path.join(dirPath, "dictionary.")
+        for path in glob.iglob(dirPath + "*.words"):
             if os.path.isfile(path):
-                grammarName = path[len(dirPath):-len('.words')]
-                with io.open(path, 'r') as f:
+                grammarName = path[len(dirPath) : -len(".words")]
+                with io.open(path, "r") as f:
                     lines = f.readlines()
                     index = 0
-                    while not len(lines[index]) or lines[index][0] == '#':
+                    while not len(lines[index]) or lines[index][0] == "#":
                         index += 1
                     app.log.startup(len(lines) - index, "words from", path)
                     # TODO(dschuyler): Word contractions are hacked by storing
                     # the components of the contraction. So didn, doesn, and isn
                     # are considered 'words'.
-                    self.grammarWords[grammarName] = set([
-                        p for l in lines[index:] for w in l.split()
-                        for p in w.split("'")
-                    ])
+                    self.grammarWords[grammarName] = set(
+                        [
+                            p
+                            for l in lines[index:]
+                            for w in l.split()
+                            for p in w.split("'")
+                        ]
+                    )
 
     def is_correct(self, word, grammarName):
         if len(word) <= 1:
@@ -140,31 +141,31 @@ class Dictionary:
             return True
         if lowerWord in self.grammarWords.get(grammarName, set()):
             return True
-        if lowerWord.startswith('sub') and lowerWord[3:] in words:
+        if lowerWord.startswith("sub") and lowerWord[3:] in words:
             return True
-        if lowerWord.startswith('un') and lowerWord[2:] in words:
+        if lowerWord.startswith("un") and lowerWord[2:] in words:
             return True
         if lowerWord in self.pathWords:
             return True
         if 1:
-            if len(word) == 2 and word[1] == 's' and word[0].isupper():
+            if len(word) == 2 and word[1] == "s" and word[0].isupper():
                 # Upper case, with an 's' for plurality (e.g. PDFs).
                 return True
         if 0:
-            if len(re.sub('[A-Z]', '', word)) == 0:
+            if len(re.sub("[A-Z]", "", word)) == 0:
                 # All upper case.
                 return True
         if 0:
             # TODO(dschuyler): This is an experiment. Considering a py specific
             # word list instead.
-            if grammarName == 'py':
+            if grammarName == "py":
                 # Handle run together (undelineated) words.
-                if len(re.sub('[a-z]+', '', word)) == 0:
+                if len(re.sub("[a-z]+", "", word)) == 0:
                     for i in range(len(word), 0, -1):
                         if word[:i] in words and word[i:] in words:
                             return True
         if 1:  # Experimental.
             # Fallback to the OS dictionary.
             return self.osDictionary.check(word)
-        #app.log.info(grammarName, word)
+        # app.log.info(grammarName, word)
         return False

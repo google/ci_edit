@@ -27,127 +27,156 @@ import app.ci_program
 import app.curses_util
 import app.fake_curses_testing
 
-kTestFile = u'#application_test_file_with_unlikely_file_name~'
+kTestFile = u"#application_test_file_with_unlikely_file_name~"
 
 
 class CopyPasteTestCases(app.fake_curses_testing.FakeCursesTestCase):
-
     def setUp(self):
         self.longMessage = True
         app.fake_curses_testing.FakeCursesTestCase.set_up(self)
 
     def test_bracketed_paste(self):
         self.assertEqual(app.curses_util.char_width(u"ế", 0), 1)
-        self.run_with_fake_inputs([
+        self.run_with_fake_inputs(
+            [
                 self.display_check(2, 7, [u"      "]),
                 curses.ascii.ESC,
                 app.curses_util.BRACKETED_PASTE_BEGIN,
-                u't',
-                u'e',
+                u"t",
+                u"e",
                 225,
                 186,
                 191,  # Send an "" in utf-8.
-                u't',
+                u"t",
                 curses.ascii.ESC,
                 app.curses_util.BRACKETED_PASTE_END,
-                self.display_check(2, 7, [u'te\u1ebft ']),
+                self.display_check(2, 7, [u"te\u1ebft "]),
                 CTRL_Q,
-                u'n'
-            ])
+                u"n",
+            ]
+        )
 
     def test_cut_paste_undo_redo(self):
-        #self.set_movie_mode(True)
-        self.run_with_fake_inputs([
+        # self.set_movie_mode(True)
+        self.run_with_fake_inputs(
+            [
                 self.display_check(2, 7, [u"      "]),
-                self.write_text(u'apple\nbanana\ncarrot\ndate\neggplant\nfig'),
-                self.display_check(2, 7, [
-                    u'apple   ',
-                    u'banana   ',
-                    u'carrot   ',
-                    u'date   ',
-                    u'eggplant   ',
-                    u'fig   ',
-                    u'         ',
-                    ]),
+                self.write_text(u"apple\nbanana\ncarrot\ndate\neggplant\nfig"),
+                self.display_check(
+                    2,
+                    7,
+                    [
+                        u"apple   ",
+                        u"banana   ",
+                        u"carrot   ",
+                        u"date   ",
+                        u"eggplant   ",
+                        u"fig   ",
+                        u"         ",
+                    ],
+                ),
                 self.selection_check(5, 3, 0, 0, 0),
-                KEY_UP, KEY_UP,
+                KEY_UP,
+                KEY_UP,
                 KEY_SHIFT_UP,
                 KEY_SHIFT_UP,
                 KEY_SHIFT_LEFT,
                 self.selection_check(1, 2, 3, 3, 3),
                 CTRL_X,
-                self.display_check(2, 7, [
-                    u'apple   ',
-                    u'bae   ',
-                    u'eggplant   ',
-                    u'fig   ',
-                    u'         ',
-                    ]),
+                self.display_check(
+                    2,
+                    7,
+                    [
+                        u"apple   ",
+                        u"bae   ",
+                        u"eggplant   ",
+                        u"fig   ",
+                        u"         ",
+                    ],
+                ),
                 self.selection_check(1, 2, 1, 2, 0),
                 CTRL_V,
-                self.display_check(2, 7, [
-                    u'apple   ',
-                    u'banana   ',
-                    u'carrot   ',
-                    u'date   ',
-                    u'eggplant   ',
-                    u'fig   ',
-                    u'         ',
-                    ]),
+                self.display_check(
+                    2,
+                    7,
+                    [
+                        u"apple   ",
+                        u"banana   ",
+                        u"carrot   ",
+                        u"date   ",
+                        u"eggplant   ",
+                        u"fig   ",
+                        u"         ",
+                    ],
+                ),
                 self.selection_check(3, 3, 1, 2, 0),
                 CTRL_V,
-                self.display_check(2, 7, [
-                    u'apple   ',
-                    u'banana   ',
-                    u'carrot   ',
-                    u"datnana   ",
-                    u'carrot   ',
-                    u"date   ",
-                    u'eggplant   ',
-                    u'fig   ',
-                    u'         ',
-                    ]),
+                self.display_check(
+                    2,
+                    7,
+                    [
+                        u"apple   ",
+                        u"banana   ",
+                        u"carrot   ",
+                        u"datnana   ",
+                        u"carrot   ",
+                        u"date   ",
+                        u"eggplant   ",
+                        u"fig   ",
+                        u"         ",
+                    ],
+                ),
                 self.selection_check(5, 3, 1, 2, 0),
                 CTRL_Z,
-                self.display_check(2, 7, [
-                    u'apple   ',
-                    u'banana   ',
-                    u'carrot   ',
-                    u'date   ',
-                    u'eggplant   ',
-                    u'fig   ',
-                    u'         ',
-                    ]),
+                self.display_check(
+                    2,
+                    7,
+                    [
+                        u"apple   ",
+                        u"banana   ",
+                        u"carrot   ",
+                        u"date   ",
+                        u"eggplant   ",
+                        u"fig   ",
+                        u"         ",
+                    ],
+                ),
                 self.selection_check(3, 3, 1, 2, 0),
                 CTRL_Z,
-                self.display_check(2, 7, [
-                    u'apple   ',
-                    u'bae   ',
-                    u'eggplant   ',
-                    u'fig   ',
-                    u'         ',
-                    ]),
+                self.display_check(
+                    2,
+                    7,
+                    [
+                        u"apple   ",
+                        u"bae   ",
+                        u"eggplant   ",
+                        u"fig   ",
+                        u"         ",
+                    ],
+                ),
                 self.selection_check(1, 2, 1, 2, 0),
                 CTRL_Y,
                 CTRL_Y,
-                self.display_check(2, 7, [
-                    u'apple   ',
-                    u'banana   ',
-                    u'carrot   ',
-                    u"datnana   ",
-                    u'carrot   ',
-                    u"date   ",
-                    u'eggplant   ',
-                    u'fig   ',
-                    u'         ',
-                    ]),
+                self.display_check(
+                    2,
+                    7,
+                    [
+                        u"apple   ",
+                        u"banana   ",
+                        u"carrot   ",
+                        u"datnana   ",
+                        u"carrot   ",
+                        u"date   ",
+                        u"eggplant   ",
+                        u"fig   ",
+                        u"         ",
+                    ],
+                ),
                 self.selection_check(5, 3, 1, 2, 0),
-                CTRL_Q, u'n'
-            ])
+                CTRL_Q,
+                u"n",
+            ]
+        )
 
     def test_write_text(self):
-        self.run_with_fake_inputs([
-            self.write_text(u'test\n'),
-            CTRL_Q, u'n'
-        ])
-
+        self.run_with_fake_inputs([self.write_text(u"test\n"), CTRL_Q, u"n"])

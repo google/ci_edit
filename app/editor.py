@@ -16,6 +16,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+
 try:
     unicode
 except NameError:
@@ -35,7 +36,7 @@ def parse_int(inStr):
         assert isinstance(inStr, unicode), type(inStr)
     i = 0
     k = 0
-    if len(inStr) > i and inStr[i] in ('+', '-'):
+    if len(inStr) > i and inStr[i] in ("+", "-"):
         i += 1
     k = i
     while len(inStr) > k and inStr[k].isdigit():
@@ -46,14 +47,14 @@ def parse_int(inStr):
 
 
 def test_parse_int():
-    assert parse_int('0') == 0
-    assert parse_int('0e') == 0
-    assert parse_int('text') == 0
-    assert parse_int('10') == 10
-    assert parse_int('+10') == 10
-    assert parse_int('-10') == -10
-    assert parse_int('--10') == 0
-    assert parse_int('--10') == 0
+    assert parse_int("0") == 0
+    assert parse_int("0e") == 0
+    assert parse_int("text") == 0
+    assert parse_int("10") == 10
+    assert parse_int("+10") == 10
+    assert parse_int("-10") == -10
+    assert parse_int("--10") == 0
+    assert parse_int("--10") == 0
 
 
 class InteractivePrediction(app.controller.Controller):
@@ -66,7 +67,7 @@ class InteractivePrediction(app.controller.Controller):
         app.controller.Controller.__init__(self, view, u"prediction")
 
     def cancel(self):
-        self.items = [(self.priorTextBuffer, self.priorTextBuffer.fullPath, '')]
+        self.items = [(self.priorTextBuffer, self.priorTextBuffer.fullPath, "")]
         self.index = 0
         self.change_to_host_window()
 
@@ -80,18 +81,19 @@ class InteractivePrediction(app.controller.Controller):
         textBuffer.redo()
 
     def focus(self):
-        app.log.info('InteractivePrediction.focus')
+        app.log.info("InteractivePrediction.focus")
         app.controller.Controller.focus(self)
         self.priorTextBuffer = self.view.host.textBuffer
         self.index = self.build_file_list(self.view.host.textBuffer.fullPath)
         self.view.host.set_text_buffer(text_buffer.TextBuffer())
         self.commandDefault = self.view.textBuffer.insert_printable
         self.view.host.textBuffer.lineLimitIndicator = 0
-        self.view.host.textBuffer.rootGrammar = \
-            self.view.program.prefs.get_grammar('_pre')
+        self.view.host.textBuffer.rootGrammar = self.view.program.prefs.get_grammar(
+            "_pre"
+        )
 
     def info(self):
-        app.log.info('InteractivePrediction command set')
+        app.log.info("InteractivePrediction command set")
 
     def build_file_list(self, currentFile):
         if app.config.strict_debug:
@@ -99,49 +101,53 @@ class InteractivePrediction(app.controller.Controller):
         self.items = []
         bufferManager = self.view.program.bufferManager
         for i in bufferManager.buffers:
-            dirty = '*' if i.is_dirty() else '.'
+            dirty = "*" if i.is_dirty() else "."
             if i.fullPath:
                 self.items.append((i, i.fullPath, dirty))
             else:
                 self.items.append(
-                    (i, '<new file> %s' % (i.parser.row_text(0)[:20]), dirty))
+                    (i, "<new file> %s" % (i.parser.row_text(0)[:20]), dirty)
+                )
         dirPath, fileName = os.path.split(currentFile)
         fileName, ext = os.path.splitext(fileName)
         # TODO(dschuyler): rework this ignore list.
-        ignoreExt = set((
-            '.pyc',
-            '.pyo',
-            '.o',
-            '.obj',
-            '.tgz',
-            '.zip',
-            '.tar',
-        ))
+        ignoreExt = set(
+            (
+                ".pyc",
+                ".pyo",
+                ".o",
+                ".obj",
+                ".tgz",
+                ".zip",
+                ".tar",
+            )
+        )
         try:
             contents = os.listdir(
-                os.path.expandvars(os.path.expanduser(dirPath)) or '.')
+                os.path.expandvars(os.path.expanduser(dirPath)) or "."
+            )
         except OSError:
             contents = []
         contents.sort()
         for i in contents:
             f, e = os.path.splitext(i)
             if fileName == f and ext != e and e not in ignoreExt:
-                self.items.append((None, os.path.join(dirPath, i), '='))
+                self.items.append((None, os.path.join(dirPath, i), "="))
         if 1:
             app.log.info()
             # Chromium specific hack.
-            if currentFile.endswith('-extracted.js'):
-                chromiumPath = currentFile[:-len('-extracted.js')] + '.html'
+            if currentFile.endswith("-extracted.js"):
+                chromiumPath = currentFile[: -len("-extracted.js")] + ".html"
                 app.log.info(chromiumPath)
                 if os.path.isfile(chromiumPath):
                     app.log.info()
-                    self.items.append((None, chromiumPath, '='))
-            elif currentFile.endswith('.html'):
+                    self.items.append((None, chromiumPath, "="))
+            elif currentFile.endswith(".html"):
                 app.log.info()
-                chromiumPath = currentFile[:-len('.html')] + '-extracted.js'
+                chromiumPath = currentFile[: -len(".html")] + "-extracted.js"
                 if os.path.isfile(chromiumPath):
                     app.log.info()
-                    self.items.append((None, chromiumPath, '='))
+                    self.items.append((None, chromiumPath, "="))
         # Suggest item.
         return (len(bufferManager.buffers) - 2) % len(self.items)
 
@@ -150,10 +156,9 @@ class InteractivePrediction(app.controller.Controller):
         clip = []
         limit = max(5, self.view.host.cols - 10)
         for i, item in enumerate(self.items):
-            prefix = '-->' if i == self.index else '   '
-            suffix = ' <--' if i == self.index else ''
-            clip.append(
-                "%s %s %s%s" % (prefix, item[1][-limit:], item[2], suffix))
+            prefix = "-->" if i == self.index else "   "
+            suffix = " <--" if i == self.index else ""
+            clip.append("%s %s %s%s" % (prefix, item[1][-limit:], item[2], suffix))
         self.view.host.textBuffer.selection_all()
         self.view.host.textBuffer.edit_paste_lines(tuple(clip))
         self.cursor_move_to(self.index, 0)
@@ -175,7 +180,8 @@ class InteractivePrediction(app.controller.Controller):
         textBuffer, fullPath = self.items[self.index][:2]
         if textBuffer is not None:
             self.view.host.set_text_buffer(
-                bufferManager.get_valid_text_buffer(textBuffer))
+                bufferManager.get_valid_text_buffer(textBuffer)
+            )
         else:
             expandedPath = os.path.abspath(os.path.expanduser(fullPath))
             textBuffer = bufferManager.load_text_buffer(expandedPath)
@@ -190,7 +196,7 @@ class InteractiveFind(app.controller.Controller):
         if app.config.strict_debug:
             assert issubclass(self.__class__, InteractiveFind), self
             assert issubclass(view.__class__, app.window.ViewWindow), view
-        app.controller.Controller.__init__(self, view, 'find')
+        app.controller.Controller.__init__(self, view, "find")
 
     def find_next(self):
         self.findCmd = self.view.host.textBuffer.find_next
@@ -215,9 +221,9 @@ class InteractiveFind(app.controller.Controller):
         try:
             self.findCmd(searchFor)
         except re.error as e:
-            if hasattr(e, 'msg'):
+            if hasattr(e, "msg"):
                 self.error = e.msg
-            elif hasattr(e, 'message'):
+            elif hasattr(e, "message"):
                 self.error = e.message
             else:
                 self.error = u"invalid regex"
@@ -241,13 +247,13 @@ class InteractiveFindInput(app.controller.Controller):
         if app.config.strict_debug:
             assert issubclass(self.__class__, InteractiveFindInput), self
             assert issubclass(view.__class__, app.window.ViewWindow), view
-        app.controller.Controller.__init__(self, view, 'find')
+        app.controller.Controller.__init__(self, view, "find")
 
     def next_focusable_window(self):
         self.view.parent.expand_find_window(True)
         app.controller.Controller.next_focusable_window(self)
 
-    #def prior_focusable_window(self):
+    # def prior_focusable_window(self):
     #  if not app.controller.Controller.prior_focusable_window(self):
     #    self.view.host.expand_find_window(False)
 
@@ -258,7 +264,7 @@ class InteractiveFindInput(app.controller.Controller):
         self.parent_controller().find_prior()
 
     def info(self):
-        app.log.info('InteractiveFind command set')
+        app.log.info("InteractiveFind command set")
 
     def on_change(self):
         self.parent_controller().on_change()
@@ -277,10 +283,10 @@ class InteractiveGoto(app.controller.Controller):
         if app.config.strict_debug:
             assert issubclass(self.__class__, InteractiveGoto), self
             assert issubclass(view.__class__, app.window.ViewWindow), view
-        app.controller.Controller.__init__(self, view, 'goto')
+        app.controller.Controller.__init__(self, view, "goto")
 
     def focus(self):
-        app.log.info('InteractiveGoto.focus')
+        app.log.info("InteractiveGoto.focus")
         self.textBuffer.selection_all()
         self.textBuffer.insert(unicode(self.view.host.textBuffer.penRow + 1))
         self.textBuffer.selection_all()
@@ -291,14 +297,14 @@ class InteractiveGoto(app.controller.Controller):
     def goto_bottom(self):
         app.log.info()
         self.textBuffer.selection_all()
-        self.textBuffer.insert(
-                unicode(self.view.host.textBuffer.parser.row_count()))
+        self.textBuffer.insert(unicode(self.view.host.textBuffer.parser.row_count()))
         self.change_to_host_window()
 
     def goto_halfway(self):
         self.textBuffer.selection_all()
         self.textBuffer.insert(
-                unicode(self.view.host.textBuffer.parser.row_count() // 2 + 1))
+            unicode(self.view.host.textBuffer.parser.row_count() // 2 + 1)
+        )
         self.change_to_host_window()
 
     def goto_top(self):
@@ -319,12 +325,11 @@ class InteractiveGoto(app.controller.Controller):
         app.log.info()
         self.textBuffer.parse_document()
         line = self.textBuffer.parser.row_text(0)
-        gotoLine, gotoCol = (line.split(U',') + [U'0', U'0'])[:2]
+        gotoLine, gotoCol = (line.split(u",") + [u"0", u"0"])[:2]
         self.cursor_move_to(parse_int(gotoLine) - 1, parse_int(gotoCol))
 
 
 class ToggleController(app.controller.Controller):
-
     def __init__(self, view):
         if app.config.strict_debug:
             assert issubclass(self.__class__, ToggleController), self

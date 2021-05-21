@@ -22,8 +22,7 @@ import sys
 dirPath = os.path.split(os.path.abspath(os.path.dirname(__file__)))[0]
 
 docs = {
-    'command line': \
-"""\
+    "command line": """\
 Command line help
 %s [args] [file...]
 
@@ -36,10 +35,9 @@ Command line help
   --singleThread  Do not use a background thread for parsing.
   --test          Run unit tests and exit.
   --version       Print version and license information then exit.\
-""" % (sys.argv[0],),
-
-    'key bindings': \
-"""\
+"""
+    % (sys.argv[0],),
+    "key bindings": """\
 Key Bindings
 
 Within the main text window:
@@ -110,8 +108,7 @@ Within the Goto line prompt:
 
   * Affects goto: prompt, not the document.\
 """,
-
-    'tips': [
+    "tips": [
         """Welcome to ci_edit.""",
         "",
         """Tips: press ctrl+q to quit, ctrl+s (aka ^s) to save, """
@@ -121,13 +118,11 @@ Within the Goto line prompt:
         """      ^g goto line. ^e and ^p are need more explanation, """
         """see help.md file.""",
         "",
-        #"""What do you think of the help text above?""",
-        #"""Please add feedback"""
-        #""" to https://github.com/google/ci_edit/issues/107""",
+        # """What do you think of the help text above?""",
+        # """Please add feedback"""
+        # """ to https://github.com/google/ci_edit/issues/107""",
     ],
-
-    'version': \
-"""\
+    "version": """\
   Version (build iteration): v51
   Within Python %s
   See LICENSE for license information
@@ -135,10 +130,12 @@ Within the Goto line prompt:
   Both files may be found in "%s"
   Please give the gift of feedback and bug reports at
     https://github.com/google/ci_edit/issues\
-""" % (sys.version, dirPath,),
-
-    'welcome': \
-"""\
+"""
+    % (
+        sys.version,
+        dirPath,
+    ),
+    "welcome": """\
 Welcome to the ci_edit text editor.\
 """,
 }

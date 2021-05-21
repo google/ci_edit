@@ -20,6 +20,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+
 try:
     FileNotFoundError
 except NameError:
@@ -58,7 +59,7 @@ def calculate_checksum(filePath, data=None):
                 return None
             hasher.update(data.encode(u"utf-8"))
         else:
-            with open(filePath, 'rb') as dataFile:
+            with open(filePath, "rb") as dataFile:
                 data = dataFile.read()
                 if len(data) == 0:
                     return None
@@ -109,8 +110,7 @@ def get_file_info(filePath, data=None):
     return (checksum, fileSize)
 
 
-class History():
-
+class History:
     def __init__(self, pathToHistory):
         self.userHistory = {}
         self.pathToHistory = pathToHistory
@@ -123,7 +123,7 @@ class History():
           None.
         """
         if os.path.isfile(self.pathToHistory):
-            with open(self.pathToHistory, 'rb') as historyFile:
+            with open(self.pathToHistory, "rb") as historyFile:
                 try:
                     self.userHistory = pickle.load(historyFile)
                 except ValueError as e:
@@ -150,9 +150,9 @@ class History():
                     app.log.info(u"Failed to checksum", repr(filePath))
                     return
                 self.userHistory[(newChecksum, newFileSize)] = fileHistory
-                with open(self.pathToHistory, 'wb') as historyFile:
+                with open(self.pathToHistory, "wb") as historyFile:
                     pickle.dump(self.userHistory, historyFile)
-                app.log.info('wrote pickle')
+                app.log.info("wrote pickle")
         except Exception as e:
             app.log.exception(e)
 
@@ -178,7 +178,7 @@ class History():
             fileHistory = {}
         else:
             fileHistory = self.userHistory.get((checksum, fileSize), {})
-        fileHistory['adate'] = time.time()
+        fileHistory["adate"] = time.time()
         return fileHistory
 
     def get_recent_files(self):
@@ -188,7 +188,7 @@ class History():
         """
         files = []
         for entry in self.userHistory.values():
-            path = entry.get('path')
+            path = entry.get("path")
             if path is not None:
                 files.append(path)
         return files
@@ -208,4 +208,4 @@ class History():
             os.remove(self.pathToHistory)
             app.log.info("user history cleared")
         except Exception as e:
-            app.log.error('clear_user_history exception', e)
+            app.log.error("clear_user_history exception", e)

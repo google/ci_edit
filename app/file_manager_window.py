@@ -15,6 +15,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+
 try:
     unicode
 except NameError:
@@ -33,13 +34,12 @@ import app.window
 
 # todo remove or use this.
 class PathRow(app.window.ViewWindow):
-
     def __init__(self, program, host):
         if app.config.strict_debug:
             assert host
         app.window.ViewWindow.__init__(self, program, host)
         self.host = host
-        self.path = u''
+        self.path = u""
 
     def mouse_click(self, paneRow, paneCol, shift, ctrl, alt):
         col = self.scrollCol + paneCol
@@ -48,11 +48,11 @@ class PathRow(app.window.ViewWindow):
         self.host.controller.shownDirectory = None
         if col >= len(line):
             return
-        slash = line[col:].find(u'/')
-        self.path = line[:col + slash + 1]
+        slash = line[col:].find(u"/")
+        self.path = line[: col + slash + 1]
 
     def render(self):
-        color = self.program.color.get(u'message_line')
+        color = self.program.color.get(u"message_line")
         self.writeLineRow = 0
         self.write_line(self.path, color)
 
@@ -137,8 +137,8 @@ class PathWindow(app.window.Window):
         self.parent.directoryList.controller.shownDirectory = None
         if col >= len(line):
             return
-        slash = line[col:].find(u'/')
-        self.controller.set_encoded_path(line[:col + slash + 1])
+        slash = line[col:].find(u"/")
+        self.controller.set_encoded_path(line[: col + slash + 1])
 
     def set_text_buffer(self, textBuffer):
         textBuffer.lineLimitIndicator = 0
@@ -148,46 +148,60 @@ class PathWindow(app.window.Window):
 
 
 class FileManagerWindow(app.window.Window):
-
     def __init__(self, program, host, inputWindow):
         app.window.Window.__init__(self, program, host)
         self.inputWindow = inputWindow
         self.inputWindow.fileManagerWindow = self
 
-        self.mode = u'open'
+        self.mode = u"open"
         self.showTips = False
         self.controller = app.cu_editor.FileOpener(self)
         self.set_text_buffer(app.text_buffer.TextBuffer(self.program))
 
         self.titleRow = app.window.OptionsRow(self.program, self)
-        self.titleRow.add_label(u' ci   ')
-        self.modeTitle = self.titleRow.add_label(u'x')
-        self.set_mode(u'open')
+        self.titleRow.add_label(u" ci   ")
+        self.modeTitle = self.titleRow.add_label(u"x")
+        self.set_mode(u"open")
         self.titleRow.set_parent(self)
 
         self.pathWindow = PathWindow(self.program, self)
         self.pathWindow.set_parent(self)
 
         # Set up table headers.
-        color = self.program.color.get(u'top_info')
+        color = self.program.color.get(u"top_info")
         self.tableHeaders = app.window.OptionsSelectionWindow(self.program, self)
         self.tableHeaders.set_parent(self)
-        app.window.SortableHeaderWindow(self.program, self.tableHeaders, u'Name',
-                                        u'editor', u'filesSortAscendingByName',
-                                        -41)
-        label = app.window.LabelWindow(self.program, self.tableHeaders, u'|')
+        app.window.SortableHeaderWindow(
+            self.program,
+            self.tableHeaders,
+            u"Name",
+            u"editor",
+            u"filesSortAscendingByName",
+            -41,
+        )
+        label = app.window.LabelWindow(self.program, self.tableHeaders, u"|")
         label.set_parent(self.tableHeaders)
         label.color = color
-        app.window.SortableHeaderWindow(self.program, self.tableHeaders, u'Size ',
-                                        u'editor', u'filesSortAscendingBySize',
-                                        16)
-        label = app.window.LabelWindow(self.program, self.tableHeaders, u'|')
+        app.window.SortableHeaderWindow(
+            self.program,
+            self.tableHeaders,
+            u"Size ",
+            u"editor",
+            u"filesSortAscendingBySize",
+            16,
+        )
+        label = app.window.LabelWindow(self.program, self.tableHeaders, u"|")
         label.set_parent(self.tableHeaders)
         label.color = color
-        app.window.SortableHeaderWindow(self.program, self.tableHeaders,
-                                        u'Modified ', u'editor',
-                                        u'filesSortAscendingByModifiedDate', 25)
-        label = app.window.LabelWindow(self.program, self.tableHeaders, u'|')
+        app.window.SortableHeaderWindow(
+            self.program,
+            self.tableHeaders,
+            u"Modified ",
+            u"editor",
+            u"filesSortAscendingByModifiedDate",
+            25,
+        )
+        label = app.window.LabelWindow(self.program, self.tableHeaders, u"|")
         label.set_parent(self.tableHeaders)
         label.color = color
 
@@ -198,23 +212,30 @@ class FileManagerWindow(app.window.Window):
             self.optionsRow = app.window.RowWindow(self.program, self, 2)
             self.optionsRow.set_parent(self)
             colorPrefs = self.program.color
-            self.optionsRow.color = colorPrefs.get(u'top_info')
-            label = app.window.LabelWindow(self.program, self.optionsRow,
-                                           u'Show:')
-            label.color = colorPrefs.get(u'top_info')
+            self.optionsRow.color = colorPrefs.get(u"top_info")
+            label = app.window.LabelWindow(self.program, self.optionsRow, u"Show:")
+            label.color = colorPrefs.get(u"top_info")
             label.set_parent(self.optionsRow)
-            toggle = app.window.OptionsToggle(self.program, self.optionsRow,
-                                              u'dotFiles', u'editor',
-                                              u'filesShowDotFiles')
-            toggle.color = colorPrefs.get(u'top_info')
-            toggle = app.window.OptionsToggle(self.program, self.optionsRow,
-                                              u'sizes', u'editor',
-                                              u'filesShowSizes')
-            toggle.color = colorPrefs.get(u'top_info')
-            toggle = app.window.OptionsToggle(self.program, self.optionsRow,
-                                              u'modified', u'editor',
-                                              u'filesShowModifiedDates')
-            toggle.color = colorPrefs.get(u'top_info')
+            toggle = app.window.OptionsToggle(
+                self.program,
+                self.optionsRow,
+                u"dotFiles",
+                u"editor",
+                u"filesShowDotFiles",
+            )
+            toggle.color = colorPrefs.get(u"top_info")
+            toggle = app.window.OptionsToggle(
+                self.program, self.optionsRow, u"sizes", u"editor", u"filesShowSizes"
+            )
+            toggle.color = colorPrefs.get(u"top_info")
+            toggle = app.window.OptionsToggle(
+                self.program,
+                self.optionsRow,
+                u"modified",
+                u"editor",
+                u"filesShowModifiedDates",
+            )
+            toggle.color = colorPrefs.get(u"top_info")
 
         self.messageLine = app.window.LabelWindow(self.program, self, u"")
         self.messageLine.set_parent(self)
@@ -250,7 +271,7 @@ class FileManagerWindow(app.window.Window):
 
     def reshape(self, top, left, rows, cols):
         """Change self and sub-windows to fit within the given rectangle."""
-        app.log.detail(u'reshape', top, left, rows, cols)
+        app.log.detail(u"reshape", top, left, rows, cols)
         app.window.Window.reshape(self, top, left, rows, cols)
         self.titleRow.reshape(top, left, 1, cols)
         top += 1
@@ -270,11 +291,11 @@ class FileManagerWindow(app.window.Window):
     def set_mode(self, mode):
         self.mode = mode
         modeTitles = {
-            u'open': u'Open File',
-            u'saveAs': u'Save File As',
-            u'selectDir': u'Select a Directory',
+            u"open": u"Open File",
+            u"saveAs": u"Save File As",
+            u"selectDir": u"Select a Directory",
         }
-        self.modeTitle[u'name'] = modeTitles[mode]
+        self.modeTitle[u"name"] = modeTitles[mode]
 
     def unfocus(self):
         # Clear the path.

@@ -17,6 +17,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+
 try:
     unicode
 except NameError:
@@ -41,51 +42,51 @@ import app.config
 # Tuple events are preceded by an escape (27).
 BRACKETED_PASTE_BEGIN = (91, 50, 48, 48, 126)  # i.e. "[200~"
 BRACKETED_PASTE_END = (91, 50, 48, 49, 126)  # i.e. "[201~"
-BRACKETED_PASTE = (b'terminal_paste',)  # Pseudo event type.
+BRACKETED_PASTE = (b"terminal_paste",)  # Pseudo event type.
 
-UNICODE_INPUT = (b'unicode_input',)  # Pseudo event type.
+UNICODE_INPUT = (b"unicode_input",)  # Pseudo event type.
 
-CTRL_AT = b'^@'  # 0x00
-CTRL_SPACE = b'^@'  # 0x00
-CTRL_A = b'^A'  # 0x01
-CTRL_B = b'^B'  # 0x02
-CTRL_C = b'^C'  # 0x03
-CTRL_D = b'^D'  # 0x04
-CTRL_E = b'^E'  # 0x05
-CTRL_F = b'^F'  # 0x06
-CTRL_G = b'^G'  # 0x07
-CTRL_H = b'^H'  # 0x08
-CTRL_I = b'^I'  # 0x09
-CTRL_J = b'^J'  # 0x0a
-CTRL_K = b'^K'  # 0x0b
-CTRL_L = b'^L'  # 0x0c
-CTRL_M = b'^M'  # 0x0d
-CTRL_N = b'^N'  # 0x0e
-CTRL_O = b'^O'  # 0x0f
-CTRL_P = b'^P'  # 0x10
-CTRL_Q = b'^Q'  # 0x11
-CTRL_R = b'^R'  # 0x12
-CTRL_S = b'^S'  # 0x13
-CTRL_T = b'^T'  # 0x14
-CTRL_U = b'^U'  # 0x15
-CTRL_V = b'^V'  # 0x16
-CTRL_W = b'^W'  # 0x17
-CTRL_X = b'^X'  # 0x18
-CTRL_Y = b'^Y'  # 0x19
-CTRL_Z = b'^Z'  # 0x1a
-CTRL_OPEN_BRACKET = b'^['  # 0x1b
-CTRL_BACKSLASH = b'^\\'  # 0x1c
-CTRL_CLOSE_BRACKET = b'^]'  # 0x1d
-CTRL_CARROT = b'^^'  # 0x1e
-CTRL_UNDERBAR = b'^_'  # 0x1f
-CTRL_BACKSPACE = b'^BACKSPACE'
+CTRL_AT = b"^@"  # 0x00
+CTRL_SPACE = b"^@"  # 0x00
+CTRL_A = b"^A"  # 0x01
+CTRL_B = b"^B"  # 0x02
+CTRL_C = b"^C"  # 0x03
+CTRL_D = b"^D"  # 0x04
+CTRL_E = b"^E"  # 0x05
+CTRL_F = b"^F"  # 0x06
+CTRL_G = b"^G"  # 0x07
+CTRL_H = b"^H"  # 0x08
+CTRL_I = b"^I"  # 0x09
+CTRL_J = b"^J"  # 0x0a
+CTRL_K = b"^K"  # 0x0b
+CTRL_L = b"^L"  # 0x0c
+CTRL_M = b"^M"  # 0x0d
+CTRL_N = b"^N"  # 0x0e
+CTRL_O = b"^O"  # 0x0f
+CTRL_P = b"^P"  # 0x10
+CTRL_Q = b"^Q"  # 0x11
+CTRL_R = b"^R"  # 0x12
+CTRL_S = b"^S"  # 0x13
+CTRL_T = b"^T"  # 0x14
+CTRL_U = b"^U"  # 0x15
+CTRL_V = b"^V"  # 0x16
+CTRL_W = b"^W"  # 0x17
+CTRL_X = b"^X"  # 0x18
+CTRL_Y = b"^Y"  # 0x19
+CTRL_Z = b"^Z"  # 0x1a
+CTRL_OPEN_BRACKET = b"^["  # 0x1b
+CTRL_BACKSLASH = b"^\\"  # 0x1c
+CTRL_CLOSE_BRACKET = b"^]"  # 0x1d
+CTRL_CARROT = b"^^"  # 0x1e
+CTRL_UNDERBAR = b"^_"  # 0x1f
+CTRL_BACKSPACE = b"^BACKSPACE"
 
 KEY_ALT_A = 165
 KEY_ALT_B = 171
 KEY_ALT_C = 167
 KEY_ALT_S = 159
-KEY_ALT_SHIFT_PAGE_DOWN = b'kNXT4'
-KEY_ALT_SHIFT_PAGE_UP = b'kPRV4'
+KEY_ALT_SHIFT_PAGE_DOWN = b"kNXT4"
+KEY_ALT_SHIFT_PAGE_UP = b"kPRV4"
 KEY_BACKSPACE1 = curses.ascii.BS  # 8
 KEY_BACKSPACE2 = curses.ascii.DEL  # 127
 KEY_BACKSPACE3 = curses.KEY_BACKSPACE  # 263
@@ -121,23 +122,23 @@ if sys.platform == u"darwin":
         67,
     )
 else:
-    KEY_ALT_LEFT = b'kLFT3'
-    KEY_ALT_RIGHT = b'kRIT3'
-    KEY_ALT_SHIFT_LEFT = b'kLFT4'
-    KEY_ALT_SHIFT_RIGHT = b'kRIT4'
+    KEY_ALT_LEFT = b"kLFT3"
+    KEY_ALT_RIGHT = b"kRIT3"
+    KEY_ALT_SHIFT_LEFT = b"kLFT4"
+    KEY_ALT_SHIFT_RIGHT = b"kRIT4"
 
 if u"SSH_CLIENT" in os.environ:
     KEY_ALT_LEFT = (98,)  # Need a better way to sort this out.
     KEY_ALT_RIGHT = (102,)  # ditto
 
-KEY_CTRL_DOWN = b'kDN5'
-KEY_CTRL_SHIFT_DOWN = b'kDN6'
-KEY_CTRL_LEFT = b'kLFT5'
-KEY_CTRL_SHIFT_LEFT = b'kLFT6'
-KEY_CTRL_RIGHT = b'kRIT5'
-KEY_CTRL_SHIFT_RIGHT = b'kRIT6'
-KEY_CTRL_UP = b'kUP5'
-KEY_CTRL_SHIFT_UP = b'kUP6'
+KEY_CTRL_DOWN = b"kDN5"
+KEY_CTRL_SHIFT_DOWN = b"kDN6"
+KEY_CTRL_LEFT = b"kLFT5"
+KEY_CTRL_SHIFT_LEFT = b"kLFT6"
+KEY_CTRL_RIGHT = b"kRIT5"
+KEY_CTRL_SHIFT_RIGHT = b"kRIT6"
+KEY_CTRL_UP = b"kUP5"
+KEY_CTRL_SHIFT_UP = b"kUP6"
 
 KEY_F1 = curses.KEY_F1
 KEY_F2 = curses.KEY_F2
@@ -177,50 +178,50 @@ def mouse_button_name(buttonState):
     """Curses debugging. Prints readable name for state of mouse buttons."""
     result = u""
     if buttonState & curses.BUTTON1_RELEASED:
-        result += u'BUTTON1_RELEASED'
+        result += u"BUTTON1_RELEASED"
     if buttonState & curses.BUTTON1_PRESSED:
-        result += u'BUTTON1_PRESSED'
+        result += u"BUTTON1_PRESSED"
     if buttonState & curses.BUTTON1_CLICKED:
-        result += u'BUTTON1_CLICKED'
+        result += u"BUTTON1_CLICKED"
     if buttonState & curses.BUTTON1_DOUBLE_CLICKED:
-        result += u'BUTTON1_DOUBLE_CLICKED'
+        result += u"BUTTON1_DOUBLE_CLICKED"
 
     if buttonState & curses.BUTTON2_RELEASED:
-        result += u'BUTTON2_RELEASED'
+        result += u"BUTTON2_RELEASED"
     if buttonState & curses.BUTTON2_PRESSED:
-        result += u'BUTTON2_PRESSED'
+        result += u"BUTTON2_PRESSED"
     if buttonState & curses.BUTTON2_CLICKED:
-        result += u'BUTTON2_CLICKED'
+        result += u"BUTTON2_CLICKED"
     if buttonState & curses.BUTTON2_DOUBLE_CLICKED:
-        result += u'BUTTON2_DOUBLE_CLICKED'
+        result += u"BUTTON2_DOUBLE_CLICKED"
 
     if buttonState & curses.BUTTON3_RELEASED:
-        result += u'BUTTON3_RELEASED'
+        result += u"BUTTON3_RELEASED"
     if buttonState & curses.BUTTON3_PRESSED:
-        result += u'BUTTON3_PRESSED'
+        result += u"BUTTON3_PRESSED"
     if buttonState & curses.BUTTON3_CLICKED:
-        result += u'BUTTON3_CLICKED'
+        result += u"BUTTON3_CLICKED"
     if buttonState & curses.BUTTON3_DOUBLE_CLICKED:
-        result += u'BUTTON3_DOUBLE_CLICKED'
+        result += u"BUTTON3_DOUBLE_CLICKED"
 
     if buttonState & curses.BUTTON4_RELEASED:
-        result += u'BUTTON4_RELEASED'
+        result += u"BUTTON4_RELEASED"
     if buttonState & curses.BUTTON4_PRESSED:
-        result += u'BUTTON4_PRESSED'
+        result += u"BUTTON4_PRESSED"
     if buttonState & curses.BUTTON4_CLICKED:
-        result += u'BUTTON4_CLICKED'
+        result += u"BUTTON4_CLICKED"
     if buttonState & curses.BUTTON4_DOUBLE_CLICKED:
-        result += u'BUTTON4_DOUBLE_CLICKED'
+        result += u"BUTTON4_DOUBLE_CLICKED"
 
     if buttonState & curses.REPORT_MOUSE_POSITION:
-        result += u'REPORT_MOUSE_POSITION'
+        result += u"REPORT_MOUSE_POSITION"
 
     if buttonState & curses.BUTTON_SHIFT:
-        result += u' SHIFT'
+        result += u" SHIFT"
     if buttonState & curses.BUTTON_CTRL:
-        result += u' CTRL'
+        result += u" CTRL"
     if buttonState & curses.BUTTON_ALT:
-        result += u' ALT'
+        result += u" ALT"
     return result
 
 
@@ -309,7 +310,7 @@ def rendered_find_iter(string, beginCol, endCol, charGroups, numbers, eolSpaces)
             break
         c = string[index]
         if column >= beginCol:
-            if numbers and c in '0123456789':
+            if numbers and c in "0123456789":
                 sre = app.regex.kReNumbers.match(string[index:])
                 begin = index
                 length = min(sre.regs[0][1], endCol - column)
@@ -322,7 +323,7 @@ def rendered_find_iter(string, beginCol, endCol, charGroups, numbers, eolSpaces)
                         begin = index
                         while index < limit and string[index] in group:
                             index += 1
-                        #if
+                        # if
                         yield string[begin:index], column, index - begin, id
                         column += index - begin
                         break
@@ -332,9 +333,9 @@ def rendered_find_iter(string, beginCol, endCol, charGroups, numbers, eolSpaces)
         else:
             column += char_width(c, column)
             index += 1
-    if eolSpaces and limit and string[-1] == ' ':
+    if eolSpaces and limit and string[-1] == " ":
         index = limit - 1
-        while index and string[index - 1] == ' ':
+        while index and string[index - 1] == " ":
             index -= 1
         yield string[index:], index, index, len(charGroups) + 1
 
@@ -384,8 +385,7 @@ def rendered_sub_str(string, beginCol, endCol=None):
         i += 1
         if column > endCol:
             # Split the trailing character.
-            paddingWidth = min(endCol - (column - lastCharWidth),
-                               lastCharWidth - 1)
+            paddingWidth = min(endCol - (column - lastCharWidth), lastCharWidth - 1)
             output.append(u" " * paddingWidth)
         else:
             if ch == u"\t":
@@ -419,7 +419,9 @@ if sys.version_info[0] == 2:
         return False
 
     def is_zero_width(ch):
-        return ch == u"" or ch < u" "  #or unicodedata.east_asian_width(ch) == "N"
+        return ch == u"" or ch < u" "  # or unicodedata.east_asian_width(ch) == "N"
+
+
 else:
 
     def char_width(ch, column, tabWidth=8):
@@ -441,7 +443,7 @@ else:
         return unicodedata.east_asian_width(ch) == "W"
 
     def is_zero_width(ch):
-        return ch == u"" or ch < u" "  #or unicodedata.east_asian_width(ch) == "N"
+        return ch == u"" or ch < u" "  # or unicodedata.east_asian_width(ch) == "N"
 
 
 def floor_col(column, line):
@@ -463,8 +465,7 @@ def floor_col(column, line):
 
 
 def prior_char_col(column, line):
-    """Return the start column of the character before |column|.
-    """
+    """Return the start column of the character before |column|."""
     if app.config.strict_debug:
         assert isinstance(column, int)
         assert isinstance(line, unicode)
@@ -534,14 +535,13 @@ def wrap_lines(lines, indent, width):
 # In Python 2 it's done by hand.
 def terminal_size():
     h, w = struct.unpack(
-        b'HHHH',
-        fcntl.ioctl(0, termios.TIOCGWINSZ, struct.pack(b'HHHH', 0, 0, 0,
-                                                       0)))[:2]
+        b"HHHH", fcntl.ioctl(0, termios.TIOCGWINSZ, struct.pack(b"HHHH", 0, 0, 0, 0))
+    )[:2]
     return h, w
 
 
 def hack_curses_fixes():
-    if sys.platform == u'darwin':
+    if sys.platform == u"darwin":
 
         def window_changed_handler(signum, frame):
             curses.ungetch(curses.KEY_RESIZE)

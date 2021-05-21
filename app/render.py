@@ -18,7 +18,6 @@ from __future__ import print_function
 
 
 class Frame:
-
     def __init__(self):
         # Track the total number of commands processed to create this frame.
         # This is used to match a point in the command stream to a frame.

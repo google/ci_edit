@@ -23,7 +23,6 @@ import app.string
 
 
 class StringTestCases(unittest.TestCase):
-
     def test_path_encode(self):
         tests = [
             (u"abcd", u"abcd"),

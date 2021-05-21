@@ -55,7 +55,7 @@ def results():
     return "one\ntwo\nthree"
 
 
-#----------------------------
+# ----------------------------
 # TODO(dschuyler): consider moving this python profile code out of this file.
 import app.log
 import cProfile
@@ -72,6 +72,6 @@ def begin_python_profile():
 def end_python_profile(profile):
     profile.disable()
     output = io.StringIO.StringIO()
-    stats = pstats.Stats(profile, stream=output).sort_stats('cumulative')
+    stats = pstats.Stats(profile, stream=output).sort_stats("cumulative")
     stats.print_stats()
     app.log.info(output.getvalue())

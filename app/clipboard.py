@@ -15,6 +15,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+
 try:
     unicode
 except NameError:
@@ -26,8 +27,7 @@ import third_party.pyperclip as clipboard
 import app.config
 
 
-class Clipboard():
-
+class Clipboard:
     def __init__(self):
         self._clipList = []
         self.set_os_handlers(clipboard.copy, clipboard.paste)

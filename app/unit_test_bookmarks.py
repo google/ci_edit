@@ -27,11 +27,10 @@ import app.prefs
 import app.text_buffer
 import app.window
 
-kTestFile = '#bookmarks_test_file_with_unlikely_file_name~'
+kTestFile = "#bookmarks_test_file_with_unlikely_file_name~"
 
 
 class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
-
     def setUp(self):
         self.prg = app.ci_program.CiProgram()
         self.fakeHost = app.window.ViewWindow(self.prg, None)
@@ -120,7 +119,6 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
         self.assertFalse(hash(b1) == hash(b2))
 
     def test_bookmark_contains(self):
-
         def check_ranges(bookmark):
             """
             Checks that every integer between the bookmark's interval is 'in'
@@ -146,8 +144,7 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
         check_ranges(Bookmark(5000, 5000, {}))
         check_ranges(Bookmark(-5000, 5000, {}))
 
-        b = Bookmark(-3.99, 3.99,
-                     {})  # Floats get cast to int (rounds towards zero).
+        b = Bookmark(-3.99, 3.99, {})  # Floats get cast to int (rounds towards zero).
         self.assertFalse(-4 in b)
         self.assertTrue(-3 in b)
         self.assertFalse(4 in b)
@@ -289,24 +286,30 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
         try:
             import mock
         except ImportError:
-            startYellow = '\033[93m'
-            disableColor = '\033[0m'
-            startBlue = '\033[94m'
+            startYellow = "\033[93m"
+            disableColor = "\033[0m"
+            startBlue = "\033[94m"
             exceptionMessage = (
-                startYellow + "This test could " +
-                "not execute because the 'mock' module could not be found. If "
-                + "you would like to run this test, please install the mock " +
-                "module for python 2.7. You can visit their website at " +
-                startBlue + "https://pypi.python.org/pypi/mock " + startYellow +
-                "or you can " + "try running " + startBlue + "pip install mock."
-                + disableColor)
-            #raise Exception(exceptionMessage)
+                startYellow
+                + "This test could "
+                + "not execute because the 'mock' module could not be found. If "
+                + "you would like to run this test, please install the mock "
+                + "module for python 2.7. You can visit their website at "
+                + startBlue
+                + "https://pypi.python.org/pypi/mock "
+                + startYellow
+                + "or you can "
+                + "try running "
+                + startBlue
+                + "pip install mock."
+                + disableColor
+            )
+            # raise Exception(exceptionMessage)
             print(exceptionMessage)
             return
 
         def test_with_an_x_colored_terminal(x):
-            mock.patch.dict(
-                self.prg.prefs.startup, {'numColors': x}, clear=True)
+            mock.patch.dict(self.prg.prefs.startup, {"numColors": x}, clear=True)
             colors = set()
             expectedNumberOfColors = 5
             for _ in range(expectedNumberOfColors):
@@ -334,15 +337,15 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
             Bookmark(10, 10, {}),
             Bookmark(20, 20, {}),
             Bookmark(30, 30, {}),
-            Bookmark(40, 40, {})
+            Bookmark(40, 40, {}),
         ]
         visibleBookmarks = self.lineNumbers.get_visible_bookmarks(
-            self.fakeHost.scrollRow,
-            self.fakeHost.scrollRow + self.lineNumbers.rows)
+            self.fakeHost.scrollRow, self.fakeHost.scrollRow + self.lineNumbers.rows
+        )
         expectedBookmarks = {
             Bookmark(0, 0, {}),
             Bookmark(10, 10, {}),
-            Bookmark(20, 20, {})
+            Bookmark(20, 20, {}),
         }
 
         # Check that visibleBookmarks contains all the correct bookmarks
@@ -353,19 +356,20 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
         self.fakeHost.scrollRow = 20
         visibleBookmarks = self.lineNumbers.get_visible_bookmarks(
-            self.fakeHost.scrollRow, 20 + self.lineNumbers.rows)
+            self.fakeHost.scrollRow, 20 + self.lineNumbers.rows
+        )
         expectedBookmarks = {
             Bookmark(20, 20, {}),
             Bookmark(30, 30, {}),
-            Bookmark(40, 40, {})
+            Bookmark(40, 40, {}),
         }
         self.assertEqual(set(visibleBookmarks), expectedBookmarks)
         self.assertEqual(len(visibleBookmarks), len(expectedBookmarks))
 
         self.fakeHost.scrollRow = 21
         visibleBookmarks = self.lineNumbers.get_visible_bookmarks(
-            self.fakeHost.scrollRow,
-            self.fakeHost.scrollRow + self.lineNumbers.rows)
+            self.fakeHost.scrollRow, self.fakeHost.scrollRow + self.lineNumbers.rows
+        )
         expectedBookmarks = {Bookmark(30, 30, {}), Bookmark(40, 40, {})}
         self.assertEqual(set(visibleBookmarks), expectedBookmarks)
         self.assertEqual(len(visibleBookmarks), len(expectedBookmarks))
@@ -373,16 +377,16 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
         self.fakeHost.scrollRow = 21
         self.lineNumbers.rows = 10
         visibleBookmarks = self.lineNumbers.get_visible_bookmarks(
-            self.fakeHost.scrollRow,
-            self.fakeHost.scrollRow + self.lineNumbers.rows)
+            self.fakeHost.scrollRow, self.fakeHost.scrollRow + self.lineNumbers.rows
+        )
         expectedBookmarks = {Bookmark(30, 30, {})}
         self.assertEqual(set(visibleBookmarks), expectedBookmarks)
         self.assertEqual(len(visibleBookmarks), len(expectedBookmarks))
 
         self.lineNumbers.rows = 9
         visibleBookmarks = self.lineNumbers.get_visible_bookmarks(
-            self.fakeHost.scrollRow,
-            self.fakeHost.scrollRow + self.lineNumbers.rows)
+            self.fakeHost.scrollRow, self.fakeHost.scrollRow + self.lineNumbers.rows
+        )
         expectedBookmarks = {}
         self.assertEqual(visibleBookmarks, [])
 
@@ -391,12 +395,12 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
             Bookmark(0, 10, {}),
             Bookmark(11, 29, {}),
             Bookmark(30, 45, {}),
-            Bookmark(46, 49, {})
+            Bookmark(46, 49, {}),
         ]
         self.lineNumbers.rows = 15
         visibleBookmarks = self.lineNumbers.get_visible_bookmarks(
-            self.fakeHost.scrollRow,
-            self.fakeHost.scrollRow + self.lineNumbers.rows)
+            self.fakeHost.scrollRow, self.fakeHost.scrollRow + self.lineNumbers.rows
+        )
         expectedBookmarks = {Bookmark(0, 10, {}), Bookmark(11, 29, {})}
         self.assertEqual(set(visibleBookmarks), expectedBookmarks)
         self.assertEqual(len(visibleBookmarks), len(expectedBookmarks))
@@ -406,300 +410,347 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
         self.run_with_test_file(
             kTestFile,
             [
-                self.display_check(0, 0, [
-                    u" ci    _file_with_unlikely_file_name~ . ",
-                    u"                                        ",
-                    u"     1                                  ",
-                    u"                                        ",
-                    u"                                        ",
-                    u"                                        ",
-                    u"                                        ",
-                    u"                                        ",
-                    u"                                        ",
-                    u"                                        ",
-                    u"                                        ",
-                    u"                                        ",
-                    u"                                        ",
-                    u"Creating new file  |    1, 1 |   0%,  0%",
-                    u"                                        "
-                ]),
-                self.write_text(u'one'),
+                self.display_check(
+                    0,
+                    0,
+                    [
+                        u" ci    _file_with_unlikely_file_name~ . ",
+                        u"                                        ",
+                        u"     1                                  ",
+                        u"                                        ",
+                        u"                                        ",
+                        u"                                        ",
+                        u"                                        ",
+                        u"                                        ",
+                        u"                                        ",
+                        u"                                        ",
+                        u"                                        ",
+                        u"                                        ",
+                        u"                                        ",
+                        u"Creating new file  |    1, 1 |   0%,  0%",
+                        u"                                        ",
+                    ],
+                ),
+                self.write_text(u"one"),
                 CTRL_E,
-                'b',
-                'm',
+                "b",
+                "m",
                 CTRL_J,
                 CTRL_J,  # Create bookmark and go to next line.
                 CTRL_E,
-                'b',
-                'm',
+                "b",
+                "m",
                 CTRL_J,  # Create bookmark.
-                self.write_text(u'two'),
+                self.write_text(u"two"),
                 CTRL_J,
-                self.write_text(u'three'),
+                self.write_text(u"three"),
                 CTRL_E,
-                'b',
-                'm',
+                "b",
+                "m",
                 CTRL_J,
                 CTRL_J,  # Create bookmark and go to next line.
-                self.write_text(u'four'),
+                self.write_text(u"four"),
                 CTRL_J,
-                self.write_text(u'five'),
+                self.write_text(u"five"),
                 CTRL_J,
-                self.write_text(u'six'),
+                self.write_text(u"six"),
                 CTRL_J,
-                self.write_text(u'seven'),
+                self.write_text(u"seven"),
                 CTRL_J,
-                self.write_text(u'eight'),
+                self.write_text(u"eight"),
                 CTRL_J,
                 CTRL_E,
-                'b',
-                'm',
+                "b",
+                "m",
                 CTRL_J,  # Create a new bookmark.
-                self.write_text(u'nine'),
+                self.write_text(u"nine"),
                 CTRL_J,
-                self.write_text(u'ten'),
+                self.write_text(u"ten"),
                 CTRL_J,
-                self.write_text(u'eleven'),
+                self.write_text(u"eleven"),
                 CTRL_J,
-                self.write_text(u'twelve'),
+                self.write_text(u"twelve"),
                 CTRL_J,
-                self.write_text(u'thirteen'),
+                self.write_text(u"thirteen"),
                 CTRL_J,
-                self.write_text(u'fourteen'),
+                self.write_text(u"fourteen"),
                 CTRL_J,
-                self.write_text(u'fifteen'),
+                self.write_text(u"fifteen"),
                 CTRL_J,
-                self.write_text(u'sixteen'),
+                self.write_text(u"sixteen"),
                 CTRL_J,
-                self.write_text(u'seventeen'),
+                self.write_text(u"seventeen"),
                 CTRL_J,
-                self.write_text(u'eighteen'),
+                self.write_text(u"eighteen"),
                 CTRL_J,
-                self.write_text(u'nineteen'),
+                self.write_text(u"nineteen"),
                 CTRL_J,
-                self.write_text(u'twenty'),
+                self.write_text(u"twenty"),
                 CTRL_J,
-                self.write_text(u'twenty-one'),
+                self.write_text(u"twenty-one"),
                 CTRL_J,
-                self.write_text(u'twenty-two'),
+                self.write_text(u"twenty-two"),
                 CTRL_J,
-                self.write_text(u'twenty-three'),
+                self.write_text(u"twenty-three"),
                 CTRL_E,
-                'b',
-                'm',
+                "b",
+                "m",
                 CTRL_J,  # Create a new bookmark.
                 # Bookmarks are at positions (1, 4), (2, 1), (3, 6) (9, 1),
                 # (23, 13).
                 # Note that rows here start at 1, so 1 is the first row.
-                self.display_check(0, 0, [
-                    u" ci    _file_with_unlikely_file_name~ * ",
-                    u"                                        ",
-                    u"    13 thirteen                         ",
-                    u"    14 fourteen                         ",
-                    u"    15 fifteen                          ",
-                    u"    16 sixteen                          ",
-                    u"    17 seventeen                        ",
-                    u"    18 eighteen                         ",
-                    u"    19 nineteen                         ",
-                    u"    20 twenty                           ",
-                    u"    21 twenty-one                       ",
-                    u"    22 twenty-two                       ",
-                    u"    23 twenty-three                     ",
-                    u"Added bookmark     |   23,13 |  95%,100%",
-                    u"                                        "
-                ]),
+                self.display_check(
+                    0,
+                    0,
+                    [
+                        u" ci    _file_with_unlikely_file_name~ * ",
+                        u"                                        ",
+                        u"    13 thirteen                         ",
+                        u"    14 fourteen                         ",
+                        u"    15 fifteen                          ",
+                        u"    16 sixteen                          ",
+                        u"    17 seventeen                        ",
+                        u"    18 eighteen                         ",
+                        u"    19 nineteen                         ",
+                        u"    20 twenty                           ",
+                        u"    21 twenty-one                       ",
+                        u"    22 twenty-two                       ",
+                        u"    23 twenty-three                     ",
+                        u"Added bookmark     |   23,13 |  95%,100%",
+                        u"                                        ",
+                    ],
+                ),
                 KEY_F2,  # Jump to the first bookmark (1, 4).
-                self.display_check(0, 0, [
-                    u" ci    _file_with_unlikely_file_name~ * ",
-                    u"                                        ",
-                    u"     1 one                              ",
-                    u"     2 two                              ",
-                    u"     3 three                            ",
-                    u"     4 four                             ",
-                    u"     5 five                             ",
-                    u"     6 six                              ",
-                    u"     7 seven                            ",
-                    u"     8 eight                            ",
-                    u"     9 nine                             ",
-                    u"    10 ten                              ",
-                    u"    11 eleven                           ",
-                    u"                        1, 4 |   0%,100%",
-                    u"                                        "
-                ]),
+                self.display_check(
+                    0,
+                    0,
+                    [
+                        u" ci    _file_with_unlikely_file_name~ * ",
+                        u"                                        ",
+                        u"     1 one                              ",
+                        u"     2 two                              ",
+                        u"     3 three                            ",
+                        u"     4 four                             ",
+                        u"     5 five                             ",
+                        u"     6 six                              ",
+                        u"     7 seven                            ",
+                        u"     8 eight                            ",
+                        u"     9 nine                             ",
+                        u"    10 ten                              ",
+                        u"    11 eleven                           ",
+                        u"                        1, 4 |   0%,100%",
+                        u"                                        ",
+                    ],
+                ),
                 KEY_F2,  # Jump to the second bookmark (2, 1).
                 # The display doesn't move because the bookmark is already in
                 # the optimal position.
-                self.display_check(0, 0, [
-                    u" ci    _file_with_unlikely_file_name~ * ",
-                    u"                                        ",
-                    u"     1 one                              ",
-                    u"     2 two                              ",
-                    u"     3 three                            ",
-                    u"     4 four                             ",
-                    u"     5 five                             ",
-                    u"     6 six                              ",
-                    u"     7 seven                            ",
-                    u"     8 eight                            ",
-                    u"     9 nine                             ",
-                    u"    10 ten                              ",
-                    u"    11 eleven                           ",
-                    u"                        2, 1 |   4%,  0%",
-                    u"                                        "
-                ]),
+                self.display_check(
+                    0,
+                    0,
+                    [
+                        u" ci    _file_with_unlikely_file_name~ * ",
+                        u"                                        ",
+                        u"     1 one                              ",
+                        u"     2 two                              ",
+                        u"     3 three                            ",
+                        u"     4 four                             ",
+                        u"     5 five                             ",
+                        u"     6 six                              ",
+                        u"     7 seven                            ",
+                        u"     8 eight                            ",
+                        u"     9 nine                             ",
+                        u"    10 ten                              ",
+                        u"    11 eleven                           ",
+                        u"                        2, 1 |   4%,  0%",
+                        u"                                        ",
+                    ],
+                ),
                 KEY_F2,  # Jump to the third bookmark (3, 6).
-                self.display_check(0, 0, [
-                    u" ci    _file_with_unlikely_file_name~ * ",
-                    u"                                        ",
-                    u"     1 one                              ",
-                    u"     2 two                              ",
-                    u"     3 three                            ",
-                    u"     4 four                             ",
-                    u"     5 five                             ",
-                    u"     6 six                              ",
-                    u"     7 seven                            ",
-                    u"     8 eight                            ",
-                    u"     9 nine                             ",
-                    u"    10 ten                              ",
-                    u"    11 eleven                           ",
-                    u"                        3, 6 |   8%,100%",
-                    u"                                        "
-                ]),
+                self.display_check(
+                    0,
+                    0,
+                    [
+                        u" ci    _file_with_unlikely_file_name~ * ",
+                        u"                                        ",
+                        u"     1 one                              ",
+                        u"     2 two                              ",
+                        u"     3 three                            ",
+                        u"     4 four                             ",
+                        u"     5 five                             ",
+                        u"     6 six                              ",
+                        u"     7 seven                            ",
+                        u"     8 eight                            ",
+                        u"     9 nine                             ",
+                        u"    10 ten                              ",
+                        u"    11 eleven                           ",
+                        u"                        3, 6 |   8%,100%",
+                        u"                                        ",
+                    ],
+                ),
                 KEY_F2,  # Jump to the third bookmark (9, 6).
                 # This moves the bookmark to the optimal scroll position.
-                self.display_check(0, 0, [
-                    u" ci    _file_with_unlikely_file_name~ * ",
-                    u"                                        ",
-                    u"     7 seven                            ",
-                    u"     8 eight                            ",
-                    u"     9 nine                             ",
-                    u"    10 ten                              ",
-                    u"    11 eleven                           ",
-                    u"    12 twelve                           ",
-                    u"    13 thirteen                         ",
-                    u"    14 fourteen                         ",
-                    u"    15 fifteen                          ",
-                    u"    16 sixteen                          ",
-                    u"    17 seventeen                        ",
-                    u"                        9, 1 |  34%,  0%",
-                    u"                                        "
-                ]),
+                self.display_check(
+                    0,
+                    0,
+                    [
+                        u" ci    _file_with_unlikely_file_name~ * ",
+                        u"                                        ",
+                        u"     7 seven                            ",
+                        u"     8 eight                            ",
+                        u"     9 nine                             ",
+                        u"    10 ten                              ",
+                        u"    11 eleven                           ",
+                        u"    12 twelve                           ",
+                        u"    13 thirteen                         ",
+                        u"    14 fourteen                         ",
+                        u"    15 fifteen                          ",
+                        u"    16 sixteen                          ",
+                        u"    17 seventeen                        ",
+                        u"                        9, 1 |  34%,  0%",
+                        u"                                        ",
+                    ],
+                ),
                 KEY_F2,  # Jump to the fourth bookmark (23, 13).
                 # This moves the bookmark to the optimal scroll position.
-                self.display_check(0, 0, [
-                    u" ci    _file_with_unlikely_file_name~ * ",
-                    u"                                        ",
-                    u"    21 twenty-one                       ",
-                    u"    22 twenty-two                       ",
-                    u"    23 twenty-three                     ",
-                    u"                                        ",
-                    u"                                        ",
-                    u"                                        ",
-                    u"                                        ",
-                    u"                                        ",
-                    u"                                        ",
-                    u"                                        ",
-                    u"                                        ",
-                    u"                       23,13 |  95%,100%",
-                    u"                                        "
-                ]),
+                self.display_check(
+                    0,
+                    0,
+                    [
+                        u" ci    _file_with_unlikely_file_name~ * ",
+                        u"                                        ",
+                        u"    21 twenty-one                       ",
+                        u"    22 twenty-two                       ",
+                        u"    23 twenty-three                     ",
+                        u"                                        ",
+                        u"                                        ",
+                        u"                                        ",
+                        u"                                        ",
+                        u"                                        ",
+                        u"                                        ",
+                        u"                                        ",
+                        u"                                        ",
+                        u"                       23,13 |  95%,100%",
+                        u"                                        ",
+                    ],
+                ),
                 KEY_F2,  # Jump to the first bookmark (1, 4).
                 # This moves the bookmark to the optimal scroll position.
-                self.display_check(0, 0, [
-                    u" ci    _file_with_unlikely_file_name~ * ",
-                    u"                                        ",
-                    u"     1 one                              ",
-                    u"     2 two                              ",
-                    u"     3 three                            ",
-                    u"     4 four                             ",
-                    u"     5 five                             ",
-                    u"     6 six                              ",
-                    u"     7 seven                            ",
-                    u"     8 eight                            ",
-                    u"     9 nine                             ",
-                    u"    10 ten                              ",
-                    u"    11 eleven                           ",
-                    u"                        1, 4 |   0%,100%",
-                    u"                                        "
-                ]),
+                self.display_check(
+                    0,
+                    0,
+                    [
+                        u" ci    _file_with_unlikely_file_name~ * ",
+                        u"                                        ",
+                        u"     1 one                              ",
+                        u"     2 two                              ",
+                        u"     3 three                            ",
+                        u"     4 four                             ",
+                        u"     5 five                             ",
+                        u"     6 six                              ",
+                        u"     7 seven                            ",
+                        u"     8 eight                            ",
+                        u"     9 nine                             ",
+                        u"    10 ten                              ",
+                        u"    11 eleven                           ",
+                        u"                        1, 4 |   0%,100%",
+                        u"                                        ",
+                    ],
+                ),
                 KEY_SHIFT_F2,  # Go back to the fourth bookmark (23, 13).
                 # This moves the bookmark to the optimal scroll position.
-                self.display_check(0, 0, [
-                    u" ci    _file_with_unlikely_file_name~ * ",
-                    u"                                        ",
-                    u"    21 twenty-one                       ",
-                    u"    22 twenty-two                       ",
-                    u"    23 twenty-three                     ",
-                    u"                                        ",
-                    u"                                        ",
-                    u"                                        ",
-                    u"                                        ",
-                    u"                                        ",
-                    u"                                        ",
-                    u"                                        ",
-                    u"                                        ",
-                    u"                       23,13 |  95%,100%",
-                    u"                                        "
-                ]),
+                self.display_check(
+                    0,
+                    0,
+                    [
+                        u" ci    _file_with_unlikely_file_name~ * ",
+                        u"                                        ",
+                        u"    21 twenty-one                       ",
+                        u"    22 twenty-two                       ",
+                        u"    23 twenty-three                     ",
+                        u"                                        ",
+                        u"                                        ",
+                        u"                                        ",
+                        u"                                        ",
+                        u"                                        ",
+                        u"                                        ",
+                        u"                                        ",
+                        u"                                        ",
+                        u"                       23,13 |  95%,100%",
+                        u"                                        ",
+                    ],
+                ),
                 KEY_SHIFT_F2,  # Go back to the third bookmark (8, 6).
                 # This moves the bookmark to the optimal scroll position.
-                self.display_check(0, 0, [
-                    u" ci    _file_with_unlikely_file_name~ * ",
-                    u"                                        ",
-                    u"     7 seven                            ",
-                    u"     8 eight                            ",
-                    u"     9 nine                             ",
-                    u"    10 ten                              ",
-                    u"    11 eleven                           ",
-                    u"    12 twelve                           ",
-                    u"    13 thirteen                         ",
-                    u"    14 fourteen                         ",
-                    u"    15 fifteen                          ",
-                    u"    16 sixteen                          ",
-                    u"    17 seventeen                        ",
-                    u"                        9, 1 |  34%,  0%",
-                    u"                                        "
-                ]),
+                self.display_check(
+                    0,
+                    0,
+                    [
+                        u" ci    _file_with_unlikely_file_name~ * ",
+                        u"                                        ",
+                        u"     7 seven                            ",
+                        u"     8 eight                            ",
+                        u"     9 nine                             ",
+                        u"    10 ten                              ",
+                        u"    11 eleven                           ",
+                        u"    12 twelve                           ",
+                        u"    13 thirteen                         ",
+                        u"    14 fourteen                         ",
+                        u"    15 fifteen                          ",
+                        u"    16 sixteen                          ",
+                        u"    17 seventeen                        ",
+                        u"                        9, 1 |  34%,  0%",
+                        u"                                        ",
+                    ],
+                ),
                 KEY_SHIFT_F2,  # Go back to the second bookmark (2, 1).
                 # This moves the bookmark to the optimal scroll position.
-                self.display_check(0, 0, [
-                    u" ci    _file_with_unlikely_file_name~ * ",
-                    u"                                        ",
-                    u"     1 one                              ",
-                    u"     2 two                              ",
-                    u"     3 three                            ",
-                    u"     4 four                             ",
-                    u"     5 five                             ",
-                    u"     6 six                              ",
-                    u"     7 seven                            ",
-                    u"     8 eight                            ",
-                    u"     9 nine                             ",
-                    u"    10 ten                              ",
-                    u"    11 eleven                           ",
-                    u"                        3, 6 |   8%,100%",
-                    u"                                        "
-                ]),
+                self.display_check(
+                    0,
+                    0,
+                    [
+                        u" ci    _file_with_unlikely_file_name~ * ",
+                        u"                                        ",
+                        u"     1 one                              ",
+                        u"     2 two                              ",
+                        u"     3 three                            ",
+                        u"     4 four                             ",
+                        u"     5 five                             ",
+                        u"     6 six                              ",
+                        u"     7 seven                            ",
+                        u"     8 eight                            ",
+                        u"     9 nine                             ",
+                        u"    10 ten                              ",
+                        u"    11 eleven                           ",
+                        u"                        3, 6 |   8%,100%",
+                        u"                                        ",
+                    ],
+                ),
                 KEY_SHIFT_F2,  # Go back to the first bookmark (1, 4).
                 # The display doesn't move because the bookmark is already in
                 # the optimal position.
-                self.display_check(0, 0, [
-                    u" ci    _file_with_unlikely_file_name~ * ",
-                    u"                                        ",
-                    u"     1 one                              ",
-                    u"     2 two                              ",
-                    u"     3 three                            ",
-                    u"     4 four                             ",
-                    u"     5 five                             ",
-                    u"     6 six                              ",
-                    u"     7 seven                            ",
-                    u"     8 eight                            ",
-                    u"     9 nine                             ",
-                    u"    10 ten                              ",
-                    u"    11 eleven                           ",
-                    u"                        2, 1 |   4%,  0%",
-                    u"                                        "
-                ]),
+                self.display_check(
+                    0,
+                    0,
+                    [
+                        u" ci    _file_with_unlikely_file_name~ * ",
+                        u"                                        ",
+                        u"     1 one                              ",
+                        u"     2 two                              ",
+                        u"     3 three                            ",
+                        u"     4 four                             ",
+                        u"     5 five                             ",
+                        u"     6 six                              ",
+                        u"     7 seven                            ",
+                        u"     8 eight                            ",
+                        u"     9 nine                             ",
+                        u"    10 ten                              ",
+                        u"    11 eleven                           ",
+                        u"                        2, 1 |   4%,  0%",
+                        u"                                        ",
+                    ],
+                ),
                 CTRL_Q,
-                'n',
-            ])
-
-
+                "n",
+            ],
+        )

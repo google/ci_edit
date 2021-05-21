@@ -25,7 +25,7 @@ import app.curses_util
 import app.log
 import app.selectable
 
-#import app.window
+# import app.window
 
 
 class Controller:
@@ -50,56 +50,56 @@ class Controller:
             view = view.parent
 
     def change_to_confirm_close(self):
-        self.find_and_change_to('confirmClose')
+        self.find_and_change_to("confirmClose")
 
     def change_to_confirm_overwrite(self):
-        self.find_and_change_to('confirmOverwrite')
+        self.find_and_change_to("confirmOverwrite")
 
     def change_to_file_manager_window(self, *args):
-        self.find_and_change_to('fileManagerWindow')
+        self.find_and_change_to("fileManagerWindow")
 
     def change_to_confirm_quit(self):
-        self.find_and_change_to('interactiveQuit')
+        self.find_and_change_to("interactiveQuit")
 
     def change_to_host_window(self, *args):
-        host = self.get_named_window('inputWindow')
+        host = self.get_named_window("inputWindow")
         if app.config.strict_debug:
             assert issubclass(self.view.__class__, app.window.Window), self.view
             assert issubclass(host.__class__, app.window.Window), host
         self.view.change_focus_to(host)
 
     def change_to_input_window(self, *args):
-        self.find_and_change_to('inputWindow')
+        self.find_and_change_to("inputWindow")
 
     def change_to_find(self):
-        self.find_and_change_to('interactiveFind')
+        self.find_and_change_to("interactiveFind")
 
     def change_to_find_prior(self):
         curses.ungetch(self.savedCh)
-        self.find_and_change_to('interactiveFind')
+        self.find_and_change_to("interactiveFind")
 
     def change_to_goto(self):
-        self.find_and_change_to('interactiveGoto')
+        self.find_and_change_to("interactiveGoto")
 
     def change_to_palette_window(self):
-        self.find_and_change_to('paletteWindow')
+        self.find_and_change_to("paletteWindow")
 
     def change_to_popup(self):
-        self.find_and_change_to('popupWindow')
+        self.find_and_change_to("popupWindow")
 
     def change_to_prediction(self):
-        self.find_and_change_to('predictionWindow')
-        #self.find_and_change_to('interactivePrediction')
+        self.find_and_change_to("predictionWindow")
+        # self.find_and_change_to('interactivePrediction')
 
     def change_to_prompt(self):
-        self.find_and_change_to('interactivePrompt')
+        self.find_and_change_to("interactivePrompt")
 
     def change_to_quit(self):
-        self.find_and_change_to('interactiveQuit')
+        self.find_and_change_to("interactiveQuit")
 
     def change_to_save_as(self):
-        view = self.get_named_window('fileManagerWindow')
-        view.set_mode('saveAs')
+        view = self.get_named_window("fileManagerWindow")
+        view.set_mode("saveAs")
         view.bring_to_front()
         view.change_focus_to(view)
 
@@ -112,8 +112,9 @@ class Controller:
         # representation.
         self.savedCh = ch
 
-        cmd = (self.commandSet.get(ch) or
-               self.commandSet.get(app.curses_util.curses_key_name(ch)))
+        cmd = self.commandSet.get(ch) or self.commandSet.get(
+            app.curses_util.curses_key_name(ch)
+        )
 
         if cmd:
             cmd()
@@ -127,11 +128,11 @@ class Controller:
             if hasattr(view, windowName):
                 return getattr(view, windowName)
             view = view.parent
-        app.log.fatal(windowName + ' not found')
+        app.log.fatal(windowName + " not found")
         return None
 
     def current_input_window(self):
-        return self.get_named_window('inputWindow')
+        return self.get_named_window("inputWindow")
 
     def find_and_change_to(self, windowName):
         window = self.get_named_window(windowName)
@@ -147,8 +148,8 @@ class Controller:
         pass
 
     def confirmation_prompt_finish(self, *args):
-        window = self.get_named_window('inputWindow')
-        window.userIntent = 'edit'
+        window = self.get_named_window("inputWindow")
+        window.userIntent = "edit"
         window.bring_to_front()
         self.view.change_focus_to(window)
 
@@ -157,7 +158,7 @@ class Controller:
         file."""
         bufferManager = host.program.bufferManager
         bufferManager.close_text_buffer(host.textBuffer)
-        host.userIntent = 'edit'
+        host.userIntent = "edit"
         tb = bufferManager.get_unsaved_buffer()
         if not tb:
             tb = bufferManager.next_buffer()
@@ -167,25 +168,25 @@ class Controller:
 
     def close_file(self):
         app.log.info()
-        host = self.get_named_window('inputWindow')
+        host = self.get_named_window("inputWindow")
         self.__close_host_file(host)
         self.confirmation_prompt_finish()
 
     def close_or_confirm_close(self):
         """If the file is clean, close it. If it is dirty, prompt the user
         about whether to lose unsaved changes."""
-        host = self.get_named_window('inputWindow')
+        host = self.get_named_window("inputWindow")
         tb = host.textBuffer
         if not tb.is_dirty():
             self.__close_host_file(host)
             return
-        if host.userIntent == 'edit':
-            host.userIntent = 'close'
+        if host.userIntent == "edit":
+            host.userIntent = "close"
         self.change_to_confirm_close()
 
     def initiate_close(self):
         """Called from input window controller."""
-        self.view.userIntent = 'close'
+        self.view.userIntent = "close"
         tb = self.view.textBuffer
         if not tb.is_dirty():
             self.__close_host_file(self.view)
@@ -194,7 +195,7 @@ class Controller:
 
     def initiate_quit(self):
         """Called from input window controller."""
-        self.view.userIntent = 'quit'
+        self.view.userIntent = "quit"
         tb = self.view.textBuffer
         if tb.is_dirty():
             self.view.change_focus_to(self.view.interactiveQuit)
@@ -210,7 +211,7 @@ class Controller:
 
     def initiate_save(self):
         """Called from input window controller."""
-        self.view.userIntent = 'edit'
+        self.view.userIntent = "edit"
         tb = self.view.textBuffer
         if tb.fullPath:
             if not tb.is_safe_to_write():
@@ -224,12 +225,12 @@ class Controller:
         """Close the current file and switch to another or create an empty
         file.
         """
-        host = self.get_named_window('inputWindow')
+        host = self.get_named_window("inputWindow")
         host.textBuffer.file_write()
-        if host.userIntent == 'quit':
+        if host.userIntent == "quit":
             self.quit_or_switch_to_confirm_quit()
             return
-        if host.userIntent == 'close':
+        if host.userIntent == "close":
             self.__close_host_file(host)
         self.change_to_host_window()
 
@@ -248,7 +249,7 @@ class Controller:
     def write_or_confirm_overwrite(self):
         """Ask whether the file should be overwritten."""
         app.log.debug()
-        host = self.get_named_window('inputWindow')
+        host = self.get_named_window("inputWindow")
         tb = host.textBuffer
         if not tb.is_safe_to_write():
             self.change_to_confirm_overwrite()
@@ -258,19 +259,19 @@ class Controller:
         # the message? Does this only need to wrap the change_to_host_window()?
         # Store the save message so it is not overwritten.
         saveMessage = tb.message
-        if host.userIntent == 'quit':
+        if host.userIntent == "quit":
             self.quit_or_switch_to_confirm_quit()
             return
-        if host.userIntent == 'close':
+        if host.userIntent == "close":
             self.__close_host_file(host)
         self.change_to_host_window()
         tb.message = saveMessage  # Restore the save message.
 
     def quit_or_switch_to_confirm_quit(self):
         app.log.debug(self, self.view)
-        host = self.get_named_window('inputWindow')
+        host = self.get_named_window("inputWindow")
         tb = host.textBuffer
-        host.userIntent = 'quit'
+        host.userIntent = "quit"
         if tb.is_dirty():
             self.change_to_confirm_quit()
             return
@@ -285,7 +286,7 @@ class Controller:
 
     def save_or_change_to_save_as(self):
         app.log.debug()
-        host = self.get_named_window('inputWindow')
+        host = self.get_named_window("inputWindow")
         if app.config.strict_debug:
             assert issubclass(self.__class__, Controller), self
             assert issubclass(self.view.__class__, app.window.Window), self
@@ -302,14 +303,15 @@ class Controller:
 
     def save_event_change_to_host_window(self, *args):
         curses.ungetch(self.savedCh)
-        host = self.get_named_window('inputWindow')
+        host = self.get_named_window("inputWindow")
         host.bring_to_front()
         self.view.change_focus_to(host)
 
     def set_text_buffer(self, textBuffer):
         if app.config.strict_debug:
-            assert issubclass(textBuffer.__class__,
-                              app.text_buffer.TextBuffer), textBuffer
+            assert issubclass(
+                textBuffer.__class__, app.text_buffer.TextBuffer
+            ), textBuffer
             assert self.view.textBuffer is textBuffer
         self.textBuffer = textBuffer
 
@@ -342,14 +344,16 @@ class MainController:
         self.controller.do_command(ch, meta)
 
     def focus(self):
-        app.log.info('MainController.focus')
+        app.log.info("MainController.focus")
         self.controller.focus()
         if 0:
             self.commandDefault = self.controller.commandDefault
             commandSet = self.controller.commandSet.copy()
-            commandSet.update({
-                app.curses_util.KEY_F2: self.next_controller,
-            })
+            commandSet.update(
+                {
+                    app.curses_util.KEY_F2: self.next_controller,
+                }
+            )
             self.controller.commandSet = commandSet
 
     def on_change(self):
@@ -357,29 +361,30 @@ class MainController:
         if tb.message is None and tb.selectionMode != app.selectable.kSelectionNone:
             charCount, lineCount = tb.count_selected()
             tb.set_message(
-                u'%d characters (%d lines) selected' % (charCount, lineCount))
+                u"%d characters (%d lines) selected" % (charCount, lineCount)
+            )
         self.controller.on_change()
 
     def next_controller(self):
-        app.log.info('next_controller')
+        app.log.info("next_controller")
         if 0:
-            if self.controller is self.controllers['cuaPlus']:
-                app.log.info('MainController.next_controller cua')
-                self.controller = self.controllers['cua']
-            elif self.controller is self.controllers['cua']:
-                app.log.info('MainController.next_controller emacs')
-                self.controller = self.controllers['emacs']
-            elif self.controller is self.controllers['emacs']:
-                app.log.info('MainController.next_controller vi')
-                self.controller = self.controllers['vi']
+            if self.controller is self.controllers["cuaPlus"]:
+                app.log.info("MainController.next_controller cua")
+                self.controller = self.controllers["cua"]
+            elif self.controller is self.controllers["cua"]:
+                app.log.info("MainController.next_controller emacs")
+                self.controller = self.controllers["emacs"]
+            elif self.controller is self.controllers["emacs"]:
+                app.log.info("MainController.next_controller vi")
+                self.controller = self.controllers["vi"]
             else:
-                app.log.info('MainController.next_controller cua')
-                self.controller = self.controllers['cua']
+                app.log.info("MainController.next_controller cua")
+                self.controller = self.controllers["cua"]
             self.controller.set_text_buffer(self.textBuffer)
             self.focus()
 
     def set_text_buffer(self, textBuffer):
-        app.log.info('MainController.set_text_buffer', self.controller)
+        app.log.info("MainController.set_text_buffer", self.controller)
         if app.config.strict_debug:
             assert issubclass(textBuffer.__class__, app.text_buffer.TextBuffer)
         self.textBuffer = textBuffer

@@ -26,11 +26,10 @@ from app.curses_util import *
 import app.ci_program
 import app.fake_curses_testing
 
-kTestFile = u'#undo_redo_test_file_with_unlikely_file_name~'
+kTestFile = u"#undo_redo_test_file_with_unlikely_file_name~"
 
 
 class UndoRedoTestCases(app.fake_curses_testing.FakeCursesTestCase):
-
     def setUp(self):
         self.longMessage = True
         if os.path.isfile(kTestFile):
@@ -39,17 +38,27 @@ class UndoRedoTestCases(app.fake_curses_testing.FakeCursesTestCase):
         app.fake_curses_testing.FakeCursesTestCase.set_up(self)
 
     def test_undo_bracketed_paste(self):
-        #self.set_movie_mode(True)
-        self.run_with_test_file(kTestFile, [
-            self.display_check(2, 7, [u"      "]), curses.ascii.ESC,
-            app.curses_util.BRACKETED_PASTE_BEGIN, u'a', u'b', u'c',
-            curses.ascii.ESC, app.curses_util.BRACKETED_PASTE_END,
-            self.display_check(2, 7, [u'abc ']), CTRL_Z,
-            self.display_check(2, 7, [u"                "]), CTRL_Q
-        ])
+        # self.set_movie_mode(True)
+        self.run_with_test_file(
+            kTestFile,
+            [
+                self.display_check(2, 7, [u"      "]),
+                curses.ascii.ESC,
+                app.curses_util.BRACKETED_PASTE_BEGIN,
+                u"a",
+                u"b",
+                u"c",
+                curses.ascii.ESC,
+                app.curses_util.BRACKETED_PASTE_END,
+                self.display_check(2, 7, [u"abc "]),
+                CTRL_Z,
+                self.display_check(2, 7, [u"                "]),
+                CTRL_Q,
+            ],
+        )
 
     def test_basic_undo(self):
-        #self.set_movie_mode(True)
+        # self.set_movie_mode(True)
         self.run_with_test_file(
             kTestFile,
             [
@@ -83,26 +92,46 @@ class UndoRedoTestCases(app.fake_curses_testing.FakeCursesTestCase):
                 self.display_check(2, 7, [u"sand "]),
                 CTRL_Z,
                 self.display_check(2, 7, [u"     "]),
-                CTRL_Q
-            ])
+                CTRL_Q,
+            ],
+        )
 
     def test_undo_words(self):
-        #self.set_movie_mode(True)
-        self.run_with_test_file(kTestFile, [
-            self.display_check(2, 7, [u"      "]),
-            self.write_text(u"one two "),
-            self.display_check(2, 7, [u"one two "]),
-            self.write_text(u"three four "),
-            self.display_check(2, 7, [u"one two three four", "     "]),
-            KEY_SHIFT_LEFT, KEY_SHIFT_LEFT, KEY_SHIFT_LEFT, KEY_SHIFT_LEFT,
-            KEY_SHIFT_LEFT, KEY_SHIFT_LEFT, KEY_SHIFT_LEFT, KEY_SHIFT_LEFT,
-            KEY_SHIFT_LEFT, KEY_SHIFT_LEFT, KEY_SHIFT_LEFT, KEY_SHIFT_LEFT,
-            KEY_SHIFT_LEFT, KEY_SHIFT_LEFT, KEY_SHIFT_LEFT,
-            self.write_text(u"five "),
-            self.display_check(2, 7, [u"one five"]), CTRL_Z,
-            self.display_check(2, 7, [u"one two three four        "]), CTRL_Z,
-            self.display_check(2, 7, [u"one two        "]), CTRL_Y,
-            self.display_check(2, 7, [u"one two three four        "]), CTRL_Y,
-            self.display_check(2, 7, [u"one five        "]), CTRL_Q, u"n"
-        ])
-
+        # self.set_movie_mode(True)
+        self.run_with_test_file(
+            kTestFile,
+            [
+                self.display_check(2, 7, [u"      "]),
+                self.write_text(u"one two "),
+                self.display_check(2, 7, [u"one two "]),
+                self.write_text(u"three four "),
+                self.display_check(2, 7, [u"one two three four", "     "]),
+                KEY_SHIFT_LEFT,
+                KEY_SHIFT_LEFT,
+                KEY_SHIFT_LEFT,
+                KEY_SHIFT_LEFT,
+                KEY_SHIFT_LEFT,
+                KEY_SHIFT_LEFT,
+                KEY_SHIFT_LEFT,
+                KEY_SHIFT_LEFT,
+                KEY_SHIFT_LEFT,
+                KEY_SHIFT_LEFT,
+                KEY_SHIFT_LEFT,
+                KEY_SHIFT_LEFT,
+                KEY_SHIFT_LEFT,
+                KEY_SHIFT_LEFT,
+                KEY_SHIFT_LEFT,
+                self.write_text(u"five "),
+                self.display_check(2, 7, [u"one five"]),
+                CTRL_Z,
+                self.display_check(2, 7, [u"one two three four        "]),
+                CTRL_Z,
+                self.display_check(2, 7, [u"one two        "]),
+                CTRL_Y,
+                self.display_check(2, 7, [u"one two three four        "]),
+                CTRL_Y,
+                self.display_check(2, 7, [u"one five        "]),
+                CTRL_Q,
+                u"n",
+            ],
+        )

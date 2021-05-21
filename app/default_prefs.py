@@ -25,64 +25,257 @@ import app.regex
 
 _todo = r"TODO\([\S@.]+\)"
 
-__common_keywords = [
-    "break", "continue", "else", "for", "if", "return", "while"
-]
+__common_keywords = ["break", "continue", "else", "for", "if", "return", "while"]
 
 __c_keywords = __common_keywords + [
-    "case", "const", "default", "do", "enum", "goto", "sizeof", "static",
-    "struct", "switch", "typedef"
+    "case",
+    "const",
+    "default",
+    "do",
+    "enum",
+    "goto",
+    "sizeof",
+    "static",
+    "struct",
+    "switch",
+    "typedef",
 ]
 
 __linux_commands = [
-    "ag", "basename", "bash", "cd", "chmod", "cp", "dircolors", "dirname",
-    "echo", "egrep", "find", "grep", "inotify", "inotifywait", "ixoff", "ixon",
-    "lesspipe", "ln", "ls", "mkdir", "read", "rm", "rmdir", "rxvt", "sed", "sh",
-    "shell", "sleep", "ssh", "tput", "uname", "wc", "which", "xargs"
+    "ag",
+    "basename",
+    "bash",
+    "cd",
+    "chmod",
+    "cp",
+    "dircolors",
+    "dirname",
+    "echo",
+    "egrep",
+    "find",
+    "grep",
+    "inotify",
+    "inotifywait",
+    "ixoff",
+    "ixon",
+    "lesspipe",
+    "ln",
+    "ls",
+    "mkdir",
+    "read",
+    "rm",
+    "rmdir",
+    "rxvt",
+    "sed",
+    "sh",
+    "shell",
+    "sleep",
+    "ssh",
+    "tput",
+    "uname",
+    "wc",
+    "which",
+    "xargs",
 ]
 
 if sys.version_info[0] == 2:
     # The Python2 re limits the number of named groups. Reduce the keywords
     # recognized.
     __cpp_keywords = [
-        "auto", "break", "case", "catch", "class", "const", "constexpr",
-        "continue", "default", "delete", "do", "else", "enum", "export",
-        "false", "for", "friend", "if", "inline", "mutable", "namespace", "new",
-        "noexcept", "nullptr", "override", "private", "protected", "public",
-        "return", "sizeof", "static", "struct", "switch", "template", "this",
-        "throw", "true", "typedef", "typename", "virtual", "while"
+        "auto",
+        "break",
+        "case",
+        "catch",
+        "class",
+        "const",
+        "constexpr",
+        "continue",
+        "default",
+        "delete",
+        "do",
+        "else",
+        "enum",
+        "export",
+        "false",
+        "for",
+        "friend",
+        "if",
+        "inline",
+        "mutable",
+        "namespace",
+        "new",
+        "noexcept",
+        "nullptr",
+        "override",
+        "private",
+        "protected",
+        "public",
+        "return",
+        "sizeof",
+        "static",
+        "struct",
+        "switch",
+        "template",
+        "this",
+        "throw",
+        "true",
+        "typedef",
+        "typename",
+        "virtual",
+        "while",
     ]
     __c_primitive_types = [
-        "bool", "char", "double", "float", "int", "int8_t", "int16_t",
-        "int32_t", "int64_t", "int_max_t", "int8_t", "int16_t", "int32_t",
-        "int64_t", "intptr_t", "ptrdiff_t", "size_t", "long", "signed", "short",
-        "uint8_t", "uint16_t", "uint32_t", "uint_max_t", "uintptr_t",
-        "unsigned", "void", "wchar_t"
+        "bool",
+        "char",
+        "double",
+        "float",
+        "int",
+        "int8_t",
+        "int16_t",
+        "int32_t",
+        "int64_t",
+        "int_max_t",
+        "int8_t",
+        "int16_t",
+        "int32_t",
+        "int64_t",
+        "intptr_t",
+        "ptrdiff_t",
+        "size_t",
+        "long",
+        "signed",
+        "short",
+        "uint8_t",
+        "uint16_t",
+        "uint32_t",
+        "uint_max_t",
+        "uintptr_t",
+        "unsigned",
+        "void",
+        "wchar_t",
     ]
 else:
     __cpp_keywords = [
-        "alignas", "alignof", "and", "and_eq", "asm", "audit", "auto", "axiom",
-        "bitand", "bitor", "break", "case", "catch", "class", "compl",
-        "concept", "const", "const_cast", "consteval", "constexpr", "continue",
-        "decltype", "default", "delete", "do", "dynamic_cast", "else", "enum",
-        "explicit", "export", "extern", "false", "final", "for", "friend",
-        "goto", "if", "inline", "mutable", "namespace", "new", "noexcept",
-        "not", "not_eq", "nullptr", "operator", "or", "or_eq", "override",
-        "private", "protected", "public", "register", "reinterpret_cast",
-        "return", "sizeof", "static", "static_assert", "static_cast", "struct",
-        "switch", "template", "this", "thread_local", "throw", "true",
-        "typedef", "typename", "virtual", "volatile", "while", "xor", "xor_eq"
+        "alignas",
+        "alignof",
+        "and",
+        "and_eq",
+        "asm",
+        "audit",
+        "auto",
+        "axiom",
+        "bitand",
+        "bitor",
+        "break",
+        "case",
+        "catch",
+        "class",
+        "compl",
+        "concept",
+        "const",
+        "const_cast",
+        "consteval",
+        "constexpr",
+        "continue",
+        "decltype",
+        "default",
+        "delete",
+        "do",
+        "dynamic_cast",
+        "else",
+        "enum",
+        "explicit",
+        "export",
+        "extern",
+        "false",
+        "final",
+        "for",
+        "friend",
+        "goto",
+        "if",
+        "inline",
+        "mutable",
+        "namespace",
+        "new",
+        "noexcept",
+        "not",
+        "not_eq",
+        "nullptr",
+        "operator",
+        "or",
+        "or_eq",
+        "override",
+        "private",
+        "protected",
+        "public",
+        "register",
+        "reinterpret_cast",
+        "return",
+        "sizeof",
+        "static",
+        "static_assert",
+        "static_cast",
+        "struct",
+        "switch",
+        "template",
+        "this",
+        "thread_local",
+        "throw",
+        "true",
+        "typedef",
+        "typename",
+        "virtual",
+        "volatile",
+        "while",
+        "xor",
+        "xor_eq",
     ]
     __c_primitive_types = [
-        "bool", "char", "double", "float", "int", "int8_t", "int16_t",
-        "int32_t", "int64_t", "int_fast8_t", "int_fast16_t", "int_fast32_t",
-        "int_fast64_t", "int_least8_t", "int_least16_t", "int_least32_t",
-        "int_least64_t", "int_max_t", "int8_t", "int16_t", "int32_t", "int64_t",
-        "intptr_t", "ptrdiff_t", "size_t", "long", "signed", "short", "uint8_t",
-        "uint16_t", "uint32_t", "uint64_t", "uint_fast8_t", "uint_fast16_t",
-        "uint_fast32_t", "uint_fast64_t", "uint_least8_t", "uint_least16_t",
-        "uint_least32_t", "uint_least64_t", "uint_max_t", "uintptr_t",
-        "unsigned", "void", "wchar_t"
+        "bool",
+        "char",
+        "double",
+        "float",
+        "int",
+        "int8_t",
+        "int16_t",
+        "int32_t",
+        "int64_t",
+        "int_fast8_t",
+        "int_fast16_t",
+        "int_fast32_t",
+        "int_fast64_t",
+        "int_least8_t",
+        "int_least16_t",
+        "int_least32_t",
+        "int_least64_t",
+        "int_max_t",
+        "int8_t",
+        "int16_t",
+        "int32_t",
+        "int64_t",
+        "intptr_t",
+        "ptrdiff_t",
+        "size_t",
+        "long",
+        "signed",
+        "short",
+        "uint8_t",
+        "uint16_t",
+        "uint32_t",
+        "uint64_t",
+        "uint_fast8_t",
+        "uint_fast16_t",
+        "uint_fast32_t",
+        "uint_fast64_t",
+        "uint_least8_t",
+        "uint_least16_t",
+        "uint_least32_t",
+        "uint_least64_t",
+        "uint_max_t",
+        "uintptr_t",
+        "unsigned",
+        "void",
+        "wchar_t",
     ]
 
 __chrome_extension = r"""\b[a-z]{32}\b"""
@@ -444,11 +637,22 @@ prefs = {
         },
         "binary": {
             "ext": [
-                ".exe", ".gz", ".gzip", ".jar", ".jpg", ".jpeg", ".o", ".obj",
-                ".png", ".pyc", ".pyo", ".tgz", ".tiff", ".zip"
+                ".exe",
+                ".gz",
+                ".gzip",
+                ".jar",
+                ".jpg",
+                ".jpeg",
+                ".o",
+                ".obj",
+                ".png",
+                ".pyc",
+                ".pyo",
+                ".tgz",
+                ".tiff",
+                ".zip",
             ],
-            "grammar":
-            "binary",
+            "grammar": "binary",
             "tabToSpaces": False,
         },
         "c": {
@@ -466,7 +670,7 @@ prefs = {
                 ".hxx",
                 ".h++",
                 ".inc",
-                ".h"  # Hmm, some source uses .h for cpp headers.
+                ".h",  # Hmm, some source uses .h for cpp headers.
             ],
             "grammar": "cpp",
             "tabToSpaces": True,
@@ -599,12 +803,26 @@ prefs = {
         },
         # Bash shell.
         "bash": {
-            "indent":
-            "  ",
+            "indent": "  ",
             "keywords": [
-                "break", "case", "continue", "declare", "do", "done", "echo",
-                "elif", "else", "esac", "exit", "fi", "if", "for", "return",
-                "switch", "then", "while"
+                "break",
+                "case",
+                "continue",
+                "declare",
+                "do",
+                "done",
+                "echo",
+                "elif",
+                "else",
+                "esac",
+                "exit",
+                "fi",
+                "if",
+                "for",
+                "return",
+                "switch",
+                "then",
+                "while",
             ],
             # Not really types.
             "types": __linux_commands,
@@ -612,11 +830,8 @@ prefs = {
         },
         # Bazel build script. See https://www.bazel.build/
         "bazel": {
-            "indent":
-            "  ",
-            "keywords": [
-                "testonly"
-            ],
+            "indent": "  ",
+            "keywords": ["testonly"],
             "types": "",
             "contains": ["py_string1", "py_string2", "pound_comment"],
         },
@@ -626,36 +841,38 @@ prefs = {
         },
         # C language.
         "c": {
-            "indent":
-            "  ",
-            "keywords":
-            __c_keywords,
-            "types":
-            __c_primitive_types,
+            "indent": "  ",
+            "keywords": __c_keywords,
+            "types": __c_primitive_types,
             "contains": [
-                "cpp_block_comment", "cpp_line_comment", "c_preprocessor",
-                "c_string1", "c_string2"
+                "cpp_block_comment",
+                "cpp_line_comment",
+                "c_preprocessor",
+                "c_string1",
+                "c_string2",
             ],
         },
         # C++ language.
         "cpp": {
-            "indent":
-            "  ",
-            "keywords":
-            __cpp_keywords,
+            "indent": "  ",
+            "keywords": __cpp_keywords,
             "namespaces": [
                 "::",
                 "std::",
             ],
-            "types":
-            __c_primitive_types + [
+            "types": __c_primitive_types
+            + [
                 "char8_t",
                 "char16_t",
                 "char32_t",
             ],
             "contains": [
-                "cpp_block_comment", "cpp_line_comment", "c_preprocessor",
-                "cpp_string_literal", "c_string1", "c_string2"
+                "cpp_block_comment",
+                "cpp_line_comment",
+                "c_preprocessor",
+                "cpp_string_literal",
+                "c_string1",
+                "c_string2",
             ],
         },
         "cpp_block_comment": {
@@ -685,12 +902,9 @@ prefs = {
             ],
         },
         "c_preprocessor": {
-            "begin":
-            r"^#",
-            "end":
-            r"(?<!\\)\n",
-            "indent":
-            "  ",
+            "begin": r"^#",
+            "end": r"(?<!\\)\n",
+            "indent": "  ",
             "special": [
                 r"\bdefine\b",
                 r"\bdefined\b",
@@ -723,19 +937,19 @@ prefs = {
             "special": __special_string_escapes + [r"\\'"],
         },
         "c_raw_string2": {
-            "begin": "[uU]?[rR]\"",
-            "end": "\"",
-            "escaped": "\\\\\"",
+            "begin": '[uU]?[rR]"',
+            "end": '"',
+            "escaped": '\\\\"',
             "indent": "  ",
             "single_line": True,
-            "special": __special_string_escapes + ["\\\\\""],
+            "special": __special_string_escapes + ['\\\\"'],
         },
         "cpp_string_literal": {
-            "begin": "R\"",
+            "begin": 'R"',
             # TODO(dschuyler): backslash and whitespace are invalid in the
             # |end_key|.
             "end_key": """R\"([^(]*)\\(""",
-            "end": "\\)\\0\"",
+            "end": '\\)\\0"',
             "single_line": False,
         },
         "c_string1": {
@@ -747,12 +961,13 @@ prefs = {
             "single_line": True,
         },
         "c_string2": {
-            "begin": "\"(?!\"\")",
-            "end": "\"",
-            "escaped": "\\\\\"",
+            "begin": '"(?!"")',
+            "end": '"',
+            "escaped": '\\\\"',
             "indent": "  ",
-            "special": __special_string_escapes + [
-                "\\\\\"",
+            "special": __special_string_escapes
+            + [
+                '\\\\"',
                 r"%:#?-?[0-9]*\.?[0-9]*z?\w",
             ],
             "single_line": True,
@@ -767,7 +982,7 @@ prefs = {
             # Paths in includes don't allow escapes.
             "begin": '''"[^"\\n]*"''',
             "end": None,  # Leaf grammar.
-            "link_type": "c\"",  # C non-system include file.
+            "link_type": 'c"',  # C non-system include file.
         },
         "carriage_return": {
             "begin": "\\n",
@@ -786,16 +1001,21 @@ prefs = {
             "contains": ["cpp_block_comment", "css_block"],
         },
         "css_block": {
-            "begin":
-            r"\\{",
-            "end":
-            r"\\}",
-            "indent":
-            "  ",
+            "begin": r"\\{",
+            "end": r"\\}",
+            "indent": "  ",
             "keywords": [
-                "background-color", "color", "display", "font-family",
-                "font-size", "height", "max-height", "min-height", "width",
-                "max-width", "min-width"
+                "background-color",
+                "color",
+                "display",
+                "font-family",
+                "font-size",
+                "height",
+                "max-height",
+                "min-height",
+                "width",
+                "max-width",
+                "min-width",
             ],
             "special": [
                 r"@apply\b",
@@ -803,24 +1023,44 @@ prefs = {
             "contains": ["cpp_block_comment", "css_value"],
         },
         "css_value": {
-            "begin":
-            ":",
-            "end":
-            ";",
+            "begin": ":",
+            "end": ";",
             "errors": [
                 r"#(?:[^;]{1,2}|[^;]{5}|[^;]{7}|[^;]{9,})\b",
             ],
-            "indent":
-            "  ",
+            "indent": "  ",
             "keywords": [
-                "absolute", "attr", "block", "border-box", "calc", "center",
-                "default", "ease", "hidden", "inherit", "left", "none", "px",
-                "rgb", "rgba", "right", "rotate[XYZ]?", "scale[XYZ]?", "solid",
-                "transform", "translate[XYZ]?", "transparent", "var"
+                "absolute",
+                "attr",
+                "block",
+                "border-box",
+                "calc",
+                "center",
+                "default",
+                "ease",
+                "hidden",
+                "inherit",
+                "left",
+                "none",
+                "px",
+                "rgb",
+                "rgba",
+                "right",
+                "rotate[XYZ]?",
+                "scale[XYZ]?",
+                "solid",
+                "transform",
+                "translate[XYZ]?",
+                "transparent",
+                "var",
             ],
             "special": [
-                r"@apply\b", r"\d+deg\b", r"\d+em\b", r"\d+px\b", r"\d+rem\b",
-                r"#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3,4})"
+                r"@apply\b",
+                r"\d+deg\b",
+                r"\d+em\b",
+                r"\d+px\b",
+                r"\d+rem\b",
+                r"#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3,4})",
             ],
             "contains": [
                 "cpp_block_comment",
@@ -828,25 +1068,81 @@ prefs = {
         },
         # Dart language.
         "dart": {
-            "indent":
-            "  ",
+            "indent": "  ",
             "keywords": [
-                "abstract", "as", "assert", "async", "async", "await", "break",
-                "case", "catch", "class", "const", "continue", "covariant",
-                "default", "deferred", "do", "dynamic", "else", "enum",
-                "export", "extends", "external", "factory", "false", "final",
-                "finally", "for", "get", "if", "implements", "import", "in",
-                "interface", "is", "library", "mixin", "new", "null",
-                "operator", "part", "rethrow", "return", "set", "static",
-                "super", "switch", "sync", "this", "throw", "true", "try",
-                "typedef", "var", "void", "while", "with", "yield"
+                "abstract",
+                "as",
+                "assert",
+                "async",
+                "async",
+                "await",
+                "break",
+                "case",
+                "catch",
+                "class",
+                "const",
+                "continue",
+                "covariant",
+                "default",
+                "deferred",
+                "do",
+                "dynamic",
+                "else",
+                "enum",
+                "export",
+                "extends",
+                "external",
+                "factory",
+                "false",
+                "final",
+                "finally",
+                "for",
+                "get",
+                "if",
+                "implements",
+                "import",
+                "in",
+                "interface",
+                "is",
+                "library",
+                "mixin",
+                "new",
+                "null",
+                "operator",
+                "part",
+                "rethrow",
+                "return",
+                "set",
+                "static",
+                "super",
+                "switch",
+                "sync",
+                "this",
+                "throw",
+                "true",
+                "try",
+                "typedef",
+                "var",
+                "void",
+                "while",
+                "with",
+                "yield",
             ],
             "types": [
-                "bool", "Iterable", "String", "Map", "Int64", "Future", "int",
+                "bool",
+                "Iterable",
+                "String",
+                "Map",
+                "Int64",
+                "Future",
+                "int",
                 "Timestamp",
             ],
             "special": [
-                "@immutable", "@override", "@protected", "@required",
+                "@immutable",
+                "@override",
+                "@protected",
+                "@required",
             ],
             "contains": [
                 # This list is carefully ordered. Don"t sort it.
@@ -879,14 +1175,10 @@ prefs = {
             ],
         },
         "doc_block_comment": {
-            "begin":
-            r"/\*\*",
-            "continuation":
-            " * ",
-            "end":
-            r"\*/",
-            "indent":
-            "  ",
+            "begin": r"/\*\*",
+            "continuation": " * ",
+            "end": r"\*/",
+            "indent": "  ",
             "keywords": [],
             "special": [
                 r"@param\b",
@@ -906,11 +1198,33 @@ prefs = {
         },
         "fidl": {
             "indent": "  ",
-            "keywords": ["bits", "compose", "enum", "error", "library",
-                "protocol", "struct", "table", "union", "using"],
+            "keywords": [
+                "bits",
+                "compose",
+                "enum",
+                "error",
+                "library",
+                "protocol",
+                "struct",
+                "table",
+                "union",
+                "using",
+            ],
             "special": ["\[Discoverable\]"],
-            "types": ["array", "handle", "int8", "int16", "int32", "int64",
-                "string", "uint8", "uint16", "uint32", "uint64", "vector"],
+            "types": [
+                "array",
+                "handle",
+                "int8",
+                "int16",
+                "int32",
+                "int64",
+                "string",
+                "uint8",
+                "uint16",
+                "uint32",
+                "uint64",
+                "vector",
+            ],
             "contains": [
                 "cpp_line_comment",
                 "c_string1",
@@ -931,45 +1245,66 @@ prefs = {
         },
         # Go Language.
         "golang": {
-            "indent":
-            "  ",
+            "indent": "  ",
             "keywords": [
-                "break", "case", "chan", "const", "continue", "default",
-                "defer", "else", "fallthrough", "for", "func", "go", "goto",
-                "if", "import", "interface", "map", "nil", "package", "range",
-                "return", "select", "struct", "switch", "type", "var"
+                "break",
+                "case",
+                "chan",
+                "const",
+                "continue",
+                "default",
+                "defer",
+                "else",
+                "fallthrough",
+                "for",
+                "func",
+                "go",
+                "goto",
+                "if",
+                "import",
+                "interface",
+                "map",
+                "nil",
+                "package",
+                "range",
+                "return",
+                "select",
+                "struct",
+                "switch",
+                "type",
+                "var",
             ],
             "special": [
-                #r"(?<!\w)__.*?__(?!\w)",
+                # r"(?<!\w)__.*?__(?!\w)",
             ],
             "contains": [
-                "cpp_block_comment", "cpp_line_comment", "cpp_string_literal",
-                "c_string1", "c_string2"
+                "cpp_block_comment",
+                "cpp_line_comment",
+                "cpp_string_literal",
+                "c_string1",
+                "c_string2",
             ],
         },
         "grd": {
             "keywords": ["flattenhtml", "allowexternalscript"],
         },
         "html": {
-            "begin":
-            "<html>",
-            "end":
-            app.regex.kNonMatchingRegex,
+            "begin": "<html>",
+            "end": app.regex.kNonMatchingRegex,
             "errors": [
                 "</br>",
                 "</hr>",
                 "</img>",
                 "</input>",
             ],
-            "indent":
-            "  ",
+            "indent": "  ",
             "keywords": [
-                #"body", "button", "div", "head", "html", "href", "img",
-                #"input", "script", "select", "span", "style",
+                # "body", "button", "div", "head", "html", "href", "img",
+                # "input", "script", "select", "span", "style",
             ],
             "special": [
                 r"&.{1,5}?;",
-                "<if\s+expr=\"[^\"]*[^>]*>",
+                '<if\s+expr="[^"]*[^>]*>',
                 "</if>",
             ],
             "contains": [
@@ -998,38 +1333,67 @@ prefs = {
             ],
         },
         "html_element_attribute": {
-            "begin": "\\??=\"",
-            "end": "\"",
+            "begin": '\\??="',
+            "end": '"',
         },
         "html_element_end": {
             "begin": r"</\\w+",
             "end": ">",
         },
         "java": {
-            "indent":
-            "  ",
-            "keywords":
-            __common_keywords + [
-                "case", "class", "default", "do", "false", "interface",
-                "switch", "this", "true"
+            "indent": "  ",
+            "keywords": __common_keywords
+            + [
+                "case",
+                "class",
+                "default",
+                "do",
+                "false",
+                "interface",
+                "switch",
+                "this",
+                "true",
             ],
-            "contains":
-            ["c_string1", "c_string2", "cpp_block_comment", "cpp_line_comment"],
+            "contains": [
+                "c_string1",
+                "c_string2",
+                "cpp_block_comment",
+                "cpp_line_comment",
+            ],
         },
         # JavaScript language.
         "js": {
-            "begin":
-            "<script",
-            "end":
-            "</script>",
-            "indent":
-            "  ",
+            "begin": "<script",
+            "end": "</script>",
+            "indent": "  ",
             "keywords": [
-                "arguments", "break", "case", "class", "const", "continue",
-                "default", "delete", "document", "else", "false", "for",
-                "function", "if", "instanceof", "let", "of", "return", "static",
-                "switch", "super", "this", "true", "undefined", "var", "while",
-                "yield"
+                "arguments",
+                "break",
+                "case",
+                "class",
+                "const",
+                "continue",
+                "default",
+                "delete",
+                "document",
+                "else",
+                "false",
+                "for",
+                "function",
+                "if",
+                "instanceof",
+                "let",
+                "of",
+                "return",
+                "static",
+                "switch",
+                "super",
+                "this",
+                "true",
+                "undefined",
+                "var",
+                "while",
+                "yield",
             ],
             "special": [
                 "\bsetTimeout\b",
@@ -1052,8 +1416,7 @@ prefs = {
             "end": r"`",
             "escaped": r"\\`",
             "indent": "  ",
-            "special":
-            __special_string_escapes + [r"\\`", r"(?<!\\)\$\{[^}]*\}"],
+            "special": __special_string_escapes + [r"\\`", r"(?<!\\)\$\{[^}]*\}"],
             "single_line": False,
         },
         "keyword": {
@@ -1064,9 +1427,25 @@ prefs = {
         "make": {
             "indent": "\t",
             "keywords": [
-                "ifeq", "endif", "ifneq", "break", "case", "continue", "do",
-                "done", "echo", "else", "esac", "exit", "fi", "if", "for",
-                "return", "switch", "then", "while"
+                "ifeq",
+                "endif",
+                "ifneq",
+                "break",
+                "case",
+                "continue",
+                "do",
+                "done",
+                "echo",
+                "else",
+                "esac",
+                "exit",
+                "fi",
+                "if",
+                "for",
+                "return",
+                "switch",
+                "then",
+                "while",
             ],
             # Not really types.
             "types": __linux_commands,
@@ -1076,13 +1455,13 @@ prefs = {
         "md": {
             "indent": "  ",
             "keywords": [],
-            #"special": [ r"#.*" ],
-            #"special": [r"\[[^]]+\]\([^)]+\)"],
+            # "special": [ r"#.*" ],
+            # "special": [r"\[[^]]+\]\([^)]+\)"],
             "contains": [
                 "md_link",
                 "md_code",
                 "md_heading",
-                #"quoted_string1", "quoted_string2"
+                # "quoted_string1", "quoted_string2"
             ],
         },
         "md_code": {
@@ -1112,19 +1491,31 @@ prefs = {
         },
         # Proto buffer language.
         "proto": {
-            "indent":
-            "  ",
-            "keywords":
-            __common_keywords +
-            ["message", "option", "package", "returns", "rpc", "syntax"],
+            "indent": "  ",
+            "keywords": __common_keywords
+            + ["message", "option", "package", "returns", "rpc", "syntax"],
             "namespaces": [],
             "special": [
-                #r"(?<!\w)__.*?__(?!\w)",
+                # r"(?<!\w)__.*?__(?!\w)",
             ],
             "types": [
-                "bool", "bytes", "double", "enum", "float", "int8", "int16",
-                "int32", "int64", "optional", "repeated", "required", "string",
-                "uint8", "uint16", "uint32", "uint64"
+                "bool",
+                "bytes",
+                "double",
+                "enum",
+                "float",
+                "int8",
+                "int16",
+                "int32",
+                "int64",
+                "optional",
+                "repeated",
+                "required",
+                "string",
+                "uint8",
+                "uint16",
+                "uint32",
+                "uint64",
             ],
             "contains": [
                 # This list is carefully ordered. Don"t sort it.
@@ -1135,15 +1526,40 @@ prefs = {
         },
         # Python language.
         "py": {
-            "indent":
-            "    ",
-            "keywords":
-            __common_keywords + [
-                "and", "as", "assert", "class", "def", "del", "dict", "elif",
-                "except", "False", "finally", "from", "global", "import", "in",
-                "is", "len", "list", "None", "not", "or", "pass", "raise",
-                "range", "self", "True", "try", "tuple", "until", "with",
-                "yield"
+            "indent": "    ",
+            "keywords": __common_keywords
+            + [
+                "and",
+                "as",
+                "assert",
+                "class",
+                "def",
+                "del",
+                "dict",
+                "elif",
+                "except",
+                "False",
+                "finally",
+                "from",
+                "global",
+                "import",
+                "in",
+                "is",
+                "len",
+                "list",
+                "None",
+                "not",
+                "or",
+                "pass",
+                "raise",
+                "range",
+                "self",
+                "True",
+                "try",
+                "tuple",
+                "until",
+                "with",
+                "yield",
             ],
             "namespaces": [
                 "os\.",
@@ -1153,7 +1569,7 @@ prefs = {
                 "re\.",
             ],
             "special": [
-                #r"(?<!\w)__.*?__(?!\w)",
+                # r"(?<!\w)__.*?__(?!\w)",
             ],
             "types": [
                 "Exception",
@@ -1216,28 +1632,28 @@ prefs = {
             "end": "'''",
             "escaped": r"\\'",
             "indent": "  ",
-            #"special": ["\"\"?\"?$"],
+            # "special": ["\"\"?\"?$"],
         },
         "py_raw_string2": {
-            "begin": "[uU]?[rR]\"\"\"",
-            "end": "\"\"\"",
-            "escaped": "\\\\\"",
+            "begin": '[uU]?[rR]"""',
+            "end": '"""',
+            "escaped": '\\\\"',
             "indent": "  ",
-            #"special": ["\\\\\""],
+            # "special": ["\\\\\""],
         },
         "py_string1": {
             "begin": "[uU]?'''",
             "end": "'''",
             "escaped": r"\\'",
-            #"indent": "  ",
+            # "indent": "  ",
             "special": __special_string_escapes + [r"\\'"],
         },
         "py_string2": {
-            "begin": "[uU]?\"\"\"",
-            "end": "\"\"\"",
-            "escaped": "\\\\\"",
-            #"indent": "  ",
-            "special": __special_string_escapes + ["\\\\\""],
+            "begin": '[uU]?"""',
+            "end": '"""',
+            "escaped": '\\\\"',
+            # "indent": "  ",
+            "special": __special_string_escapes + ['\\\\"'],
         },
         "quoted_string1": {
             # This is not a programming string, there are no escape chars.
@@ -1246,8 +1662,8 @@ prefs = {
         },
         "quoted_string2": {
             # This is not a programming string, there are no escape chars.
-            "begin": "\"",
-            "end": "\"",
+            "begin": '"',
+            "end": '"',
         },
         "regex_string": {
             "begin": r"(?<=[\n=:;([{,])(?:\s*)/(?![/*])",
@@ -1259,25 +1675,88 @@ prefs = {
         },
         # Rust language.
         "rs": {
-            "indent":
-            "    ",
+            "indent": "    ",
             "keywords": [
-                "abstract", "alignof", "as", "async", "await", "become", "box",
-                "break", "const", "continue", "crate", "do", "dyn", "else",
-                "enum", "extern", "false", "final", "fn", "for", "if", "impl",
-                "in", "let", "loop", "macro", "match", "mod", "move", "mut",
-                "offsetof", "override", "priv", "pub", "pure", "ref", "return",
-                "Self", "self", "sizeof", "static", "struct", "super", "trait",
-                "true", "type", "typeof", "try", "unsafe", "unsized", "use",
-                "virtual", "where", "while", "yield"
+                "abstract",
+                "alignof",
+                "as",
+                "async",
+                "await",
+                "become",
+                "box",
+                "break",
+                "const",
+                "continue",
+                "crate",
+                "do",
+                "dyn",
+                "else",
+                "enum",
+                "extern",
+                "false",
+                "final",
+                "fn",
+                "for",
+                "if",
+                "impl",
+                "in",
+                "let",
+                "loop",
+                "macro",
+                "match",
+                "mod",
+                "move",
+                "mut",
+                "offsetof",
+                "override",
+                "priv",
+                "pub",
+                "pure",
+                "ref",
+                "return",
+                "Self",
+                "self",
+                "sizeof",
+                "static",
+                "struct",
+                "super",
+                "trait",
+                "true",
+                "type",
+                "typeof",
+                "try",
+                "unsafe",
+                "unsized",
+                "use",
+                "virtual",
+                "where",
+                "while",
+                "yield",
             ],
             "special": [
-                "\\bassert_eq!", "\\bNone\\b", "\\bOption\\b", "\\bResult\\b",
-                "\\bSome\\b", "\\bunimplemented!"
+                "\\bassert_eq!",
+                "\\bNone\\b",
+                "\\bOption\\b",
+                "\\bResult\\b",
+                "\\bSome\\b",
+                "\\bunimplemented!",
             ],
             "types": [
-                "bool", "char", "i8", "i16", "i32", "i64", "isize", "u8", "u16",
-                "u32", "u64", "usize", "array", "slice", "tuple"
+                "bool",
+                "char",
+                "i8",
+                "i16",
+                "i32",
+                "i64",
+                "isize",
+                "u8",
+                "u16",
+                "u32",
+                "u64",
+                "usize",
+                "array",
+                "slice",
+                "tuple",
             ],
             "contains": [
                 "rs_block_comment",
@@ -1312,8 +1791,8 @@ prefs = {
             "end": "'",
         },
         "rs_byte_string2": {
-            "begin": "b\"",
-            "end": "\"",
+            "begin": 'b"',
+            "end": '"',
         },
         # Rust uses ' for both the start of a label and the start of a character
         # literal.
@@ -1323,11 +1802,11 @@ prefs = {
             "single_line": True,
         },
         "rs_raw_string": {
-            "begin": "b?r#*\"",
+            "begin": 'b?r#*"',
             # TODO(dschuyler): backslash and whitespace are invalid in the
             # |end_key|.
             "end_key": """b?r(#*)\"""",
-            "end": "\"\\0",
+            "end": '"\\0',
             "single_line": False,
         },
         "special": {
@@ -1367,13 +1846,49 @@ prefs = {
         "dark": {
             # This series repeats 8 times (32 * 8 = 256).
             "foregroundIndexes": [
-                14, 202, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 12, 13, 14, 15,
-                202, 14, 14, 202, 202, 202, 22, 23, 24, 25, 26, 27, 28, 29, 30,
-                57
-            ] * 8,
+                14,
+                202,
+                39,
+                39,
+                39,
+                39,
+                39,
+                39,
+                39,
+                39,
+                39,
+                39,
+                12,
+                13,
+                14,
+                15,
+                202,
+                14,
+                14,
+                202,
+                202,
+                202,
+                22,
+                23,
+                24,
+                25,
+                26,
+                27,
+                28,
+                29,
+                30,
+                57,
+            ]
+            * 8,
             # Each of the foreground colors repeat 8 times (32 * 8 = 256).
-            "backgroundIndexes": [232] * 32 + [229] * 32 + [6] * 32 + [221] * 32
-            + [245] * 32 + [244] * 32 + [243] * 32 + [225] * 32,
+            "backgroundIndexes": [232] * 32
+            + [229] * 32
+            + [6] * 32
+            + [221] * 32
+            + [245] * 32
+            + [244] * 32
+            + [243] * 32
+            + [225] * 32,
         },
         "default8": {
             # With only 8 colors, make a custom pair for each slot.
@@ -1386,30 +1901,80 @@ prefs = {
             # With only 16 colors, make a custom pair for each slot.
             # 0: black, 1: red, 2: green, 3: yellow, 4: blue, 5: pink, 6: cyan,
             # 7: gray.
-            "foregroundIndexes":
-            [0, 1, 2, 3, 4, 5, 6, 7, 8, 4, 2, 3, 4, 5, 6, 0],
-            "backgroundIndexes":
-            [0, 15, 15, 15, 15, 15, 15, 15, 7, 7, 7, 7, 7, 7, 7, 15],
+            "foregroundIndexes": [0, 1, 2, 3, 4, 5, 6, 7, 8, 4, 2, 3, 4, 5, 6, 0],
+            "backgroundIndexes": [
+                0,
+                15,
+                15,
+                15,
+                15,
+                15,
+                15,
+                15,
+                7,
+                7,
+                7,
+                7,
+                7,
+                7,
+                7,
+                15,
+            ],
         },
         "default256": {
             # This series repeats 8 times (32 * 8 = 256).
             "foregroundIndexes": [
-                18, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 94, 134,
-                0, 240, 138, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 57
-            ] * 8,
+                18,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                94,
+                134,
+                0,
+                240,
+                138,
+                21,
+                22,
+                23,
+                24,
+                25,
+                26,
+                27,
+                28,
+                29,
+                30,
+                57,
+            ]
+            * 8,
             # Each of the foreground colors repeat 8 times (32 * 8 = 256).
-            "backgroundIndexes": [231] * 32 + [229] * 32 + [14] * 32 +
-            [221] * 32 + [255] * 32 + [254] * 32 + [253] * 32 + [225] * 32,
+            "backgroundIndexes": [231] * 32
+            + [229] * 32
+            + [14] * 32
+            + [221] * 32
+            + [255] * 32
+            + [254] * 32
+            + [253] * 32
+            + [225] * 32,
         },
     },
     "status": {
         "showTips": False,
     },
     "userData": {
-        "homePath":
-        os.path.expanduser("~/.ci_edit"),
-        "historyPath":
-        os.path.join(os.path.expanduser("~/.ci_edit"), "history.dat"),
+        "homePath": os.path.expanduser("~/.ci_edit"),
+        "historyPath": os.path.join(os.path.expanduser("~/.ci_edit"), "history.dat"),
     },
 }
 

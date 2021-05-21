@@ -26,7 +26,6 @@ import app.curses_util
 
 
 class CursesUtilTestCases(unittest.TestCase):
-
     def test_curses_key_name(self):
         # These actually test the fake curses.
         def test1():
@@ -40,48 +39,67 @@ class CursesUtilTestCases(unittest.TestCase):
         self.assertRaises(TypeError, test2)
 
         def test3():
-            curses.keyname(9**999)
+            curses.keyname(9 ** 999)
 
         self.assertRaises(OverflowError, test3)
 
     def test_rendered_find_iter(self):
-
         def test(line, startCol, endCol, matches):
             matches.reverse()
             for s, column, length, index in app.curses_util.rendered_find_iter(
-                    line, startCol, endCol, (u'[]{}()',), True, True):
+                line, startCol, endCol, (u"[]{}()",), True, True
+            ):
                 self.assertEqual(matches.pop(), (s, column, length, index))
 
         # Float and leading zero.
         line = u"""5.32e+30 a 000808"""
-        test(line, 0, len(line), [
-            (u'5.32e+30', 0, 8, 1),
-            (u'000808', 11, 6, 1),
-        ])
+        test(
+            line,
+            0,
+            len(line),
+            [
+                (u"5.32e+30", 0, 8, 1),
+                (u"000808", 11, 6, 1),
+            ],
+        )
 
         # Parenthesis and number.
         line = u"""(23432ull a"""
-        test(line, 0, len(line), [
-            (u'(', 0, 1, 0),
-            (u'23432ull', 1, 8, 1),
-        ])
+        test(
+            line,
+            0,
+            len(line),
+            [
+                (u"(", 0, 1, 0),
+                (u"23432ull", 1, 8, 1),
+            ],
+        )
 
         # Multiple numbers and string of brackets.
         line = u"""23 five )}]](23432ull a"""
-        test(line, 0, len(line), [
-            (u'23', 0, 2, 1),
-            (u')}]](', 8, 5, 0),
-            (u'23432ull', 13, 8, 1),
-        ])
+        test(
+            line,
+            0,
+            len(line),
+            [
+                (u"23", 0, 2, 1),
+                (u")}]](", 8, 5, 0),
+                (u"23432ull", 13, 8, 1),
+            ],
+        )
 
         # Constrained columns.
         line = u"""23 five )}]](23432ull a"""
-        test(line, 1,
-             len(line) - 4, [
-                 (u'3', 1, 1, 1),
-                 (u')}]](', 8, 5, 0),
-                 (u'23432u', 13, 6, 1),
-             ])
+        test(
+            line,
+            1,
+            len(line) - 4,
+            [
+                (u"3", 1, 1, 1),
+                (u")}]](", 8, 5, 0),
+                (u"23432u", 13, 6, 1),
+            ],
+        )
 
     def test_unicode_data(self):
         self.assertEqual(unicodedata.east_asian_width(u"a"), "Na")
@@ -135,7 +153,6 @@ class CursesUtilTestCases(unittest.TestCase):
         self.assertIs(None, app.curses_util.column_to_index(10, u"こんにちは"))
         self.assertIs(None, app.curses_util.column_to_index(11, u"こんにちは"))
         self.assertIs(None, app.curses_util.column_to_index(12, u"こんにちは"))
-
 
     def test_char_at_column(self):
         cu = app.curses_util
@@ -227,31 +244,22 @@ class CursesUtilTestCases(unittest.TestCase):
         self.assertEqual(u"", app.curses_util.rendered_sub_str(u"test", 0, 0))
         self.assertEqual(u"es", app.curses_util.rendered_sub_str(u"test", 1, 3))
         self.assertEqual(u"", app.curses_util.rendered_sub_str(u"test", 2, 2))
-        self.assertEqual(u"eight", app.curses_util.rendered_sub_str(
-            u"eight", 0, 5))
+        self.assertEqual(u"eight", app.curses_util.rendered_sub_str(u"eight", 0, 5))
         self.assertEqual(u"igh", app.curses_util.rendered_sub_str(u"eight", 1, 4))
         self.assertEqual(u"g", app.curses_util.rendered_sub_str(u"eight", 2, 3))
         self.assertEqual(u"", app.curses_util.rendered_sub_str(u"eight", 3, 3))
-        self.assertEqual(u"こんにちは",
-                         app.curses_util.rendered_sub_str(u"こんにちは", 0, 10))
-        self.assertEqual(u" んにちは",
-                         app.curses_util.rendered_sub_str(u"こんにちは", 1, 10))
-        self.assertEqual(u"んにちは", app.curses_util.rendered_sub_str(
-            u"こんにちは", 2, 10))
-        self.assertEqual(u" にちは", app.curses_util.rendered_sub_str(
-            u"こんにちは", 3, 10))
-        self.assertEqual(u"にちは", app.curses_util.rendered_sub_str(
-            u"こんにちは", 4, 10))
+        self.assertEqual(u"こんにちは", app.curses_util.rendered_sub_str(u"こんにちは", 0, 10))
+        self.assertEqual(u" んにちは", app.curses_util.rendered_sub_str(u"こんにちは", 1, 10))
+        self.assertEqual(u"んにちは", app.curses_util.rendered_sub_str(u"こんにちは", 2, 10))
+        self.assertEqual(u" にちは", app.curses_util.rendered_sub_str(u"こんにちは", 3, 10))
+        self.assertEqual(u"にちは", app.curses_util.rendered_sub_str(u"こんにちは", 4, 10))
         self.assertEqual(u"は", app.curses_util.rendered_sub_str(u"こんにちは", 8))
         self.assertEqual(u"は", app.curses_util.rendered_sub_str(u"こんにちは", 8, 10))
         self.assertEqual(u" ", app.curses_util.rendered_sub_str(u"こんにちは", 9, 10))
         self.assertEqual(u"", app.curses_util.rendered_sub_str(u"こんにちは", 10, 10))
-        self.assertEqual(u"こんにち ", app.curses_util.rendered_sub_str(
-            u"こんにちは", 0, 9))
-        self.assertEqual(u"こんにち", app.curses_util.rendered_sub_str(
-            u"こんにちは", 0, 8))
-        self.assertEqual(u"こんに ", app.curses_util.rendered_sub_str(
-            u"こんにちは", 0, 7))
+        self.assertEqual(u"こんにち ", app.curses_util.rendered_sub_str(u"こんにちは", 0, 9))
+        self.assertEqual(u"こんにち", app.curses_util.rendered_sub_str(u"こんにちは", 0, 8))
+        self.assertEqual(u"こんに ", app.curses_util.rendered_sub_str(u"こんにちは", 0, 7))
         self.assertEqual(u"こんに", app.curses_util.rendered_sub_str(u"こんにちは", 0, 6))
         self.assertEqual(u"こん ", app.curses_util.rendered_sub_str(u"こんにちは", 0, 5))
         self.assertEqual(u"こん", app.curses_util.rendered_sub_str(u"こんにちは", 0, 4))
@@ -265,33 +273,41 @@ class CursesUtilTestCases(unittest.TestCase):
         self.assertEqual(u"test", app.curses_util.rendered_sub_str(u"test", 0, 8))
 
         # Test with tabs.
-        self.assertEqual(u"   ", app.curses_util.rendered_sub_str(
-            u"\tこんにちは", 0, 3))
-        self.assertEqual(u"     こ",
-                         app.curses_util.rendered_sub_str(u"\tこんにちは", 3, 10))
-        self.assertEqual(u"        こん",
-                         app.curses_util.rendered_sub_str(u"\tこんにちは", 0, 12))
-        self.assertEqual(u"        <tab",
-                         app.curses_util.rendered_sub_str(u"\t<tab", 0, None))
+        self.assertEqual(u"   ", app.curses_util.rendered_sub_str(u"\tこんにちは", 0, 3))
+        self.assertEqual(u"     こ", app.curses_util.rendered_sub_str(u"\tこんにちは", 3, 10))
+        self.assertEqual(
+            u"        こん", app.curses_util.rendered_sub_str(u"\tこんにちは", 0, 12)
+        )
+        self.assertEqual(
+            u"        <tab", app.curses_util.rendered_sub_str(u"\t<tab", 0, None)
+        )
         self.assertEqual(
             u"         <tab+space",
-            app.curses_util.rendered_sub_str(u"\t <tab+space", 0, None))
+            app.curses_util.rendered_sub_str(u"\t <tab+space", 0, None),
+        )
         self.assertEqual(
             u"        <space+tab",
-            app.curses_util.rendered_sub_str(u" \t<space+tab", 0, None))
-        self.assertEqual(u"a       <",
-                         app.curses_util.rendered_sub_str(u"a\t<", 0, None))
+            app.curses_util.rendered_sub_str(u" \t<space+tab", 0, None),
+        )
+        self.assertEqual(
+            u"a       <", app.curses_util.rendered_sub_str(u"a\t<", 0, None)
+        )
         self.assertEqual(
             u"some text.>     <",
-            app.curses_util.rendered_sub_str(u"some text.>\t<", 0, None))
-        self.assertEqual(u"                <2tabs",
-                         app.curses_util.rendered_sub_str(u"\t\t<2tabs", 0, None))
+            app.curses_util.rendered_sub_str(u"some text.>\t<", 0, None),
+        )
+        self.assertEqual(
+            u"                <2tabs",
+            app.curses_util.rendered_sub_str(u"\t\t<2tabs", 0, None),
+        )
         self.assertEqual(
             u"line    with    tabs",
-            app.curses_util.rendered_sub_str(u"line\twith\ttabs", 0, None))
+            app.curses_util.rendered_sub_str(u"line\twith\ttabs", 0, None),
+        )
         self.assertEqual(
             u"ends with tab>  ",
-            app.curses_util.rendered_sub_str(u"ends with tab>\t", 0, None))
+            app.curses_util.rendered_sub_str(u"ends with tab>\t", 0, None),
+        )
 
     def test_rendered_width(self):
         self.assertEqual(0, app.curses_util.column_width(u""))

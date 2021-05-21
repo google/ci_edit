@@ -17,6 +17,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+
 try:
     unicode
 except NameError:
@@ -53,8 +54,8 @@ kVisual = 3
 
 class ParserNode:
     """A parser node represents a span of grammar. i.e. from this point to that
-      point is HTML. Another parser node would represent the next segment, of
-      grammar (maybe JavaScript, CSS, comment, or quoted string for example."""
+    point is HTML. Another parser node would represent the next segment, of
+    grammar (maybe JavaScript, CSS, comment, or quoted string for example."""
 
     def __init__(self, grammar, begin, prior, visual):
         self.grammar = grammar
@@ -66,9 +67,17 @@ class ParserNode:
         self.visual = visual
 
     def debug_log(self, out, indent, data):
-        out('%sParserNode %26s prior %4s, b%4d, v%4d %s' %
-            (indent, self.grammar.get('name', 'None'), self.prior, self.begin,
-             self.visual, repr(data[self.begin:self.begin + 15])[1:-1]))
+        out(
+            "%sParserNode %26s prior %4s, b%4d, v%4d %s"
+            % (
+                indent,
+                self.grammar.get("name", "None"),
+                self.prior,
+                self.begin,
+                self.visual,
+                repr(data[self.begin : self.begin + 15])[1:-1],
+            )
+        )
 
 
 class Parser:
@@ -76,7 +85,7 @@ class Parser:
 
     def __init__(self, appPrefs):
         self.appPrefs = appPrefs
-        self._defaultGrammar = appPrefs.grammars['none']
+        self._defaultGrammar = appPrefs.grammars["none"]
         self.data = u""
         self.emptyNode = ParserNode({}, None, None, 0)
         self.endNode = ({}, sys.maxsize, sys.maxsize, sys.maxsize)
@@ -91,7 +100,7 @@ class Parser:
         # Each entry in |self.rows| is an index into the |self.parserNodes|
         # array to the parerNode that begins that row.
         self.rows = [0]  # Row parserNodes index.
-        app.log.parser('__init__')
+        app.log.parser("__init__")
 
     def backspace(self, row, col):
         """Delete the character prior to |row, col|.
@@ -114,7 +123,7 @@ class Parser:
             col -= 2
         else:
             col -= 1
-        self.data = self.data[:offset - 1] + self.data[offset:]
+        self.data = self.data[: offset - 1] + self.data[offset:]
         self._begin_parsing_at(row)
         if app.config.strict_debug:
             assert isinstance(self.data, unicode)
@@ -151,8 +160,7 @@ class Parser:
         else:
             # The requested column is past the end of the document.
             return None
-        subnode = self.parserNodes[
-            rowIndex + self.grammar_index_from_row_col(row, col)]
+        subnode = self.parserNodes[rowIndex + self.grammar_index_from_row_col(row, col)]
         subnodeCol = subnode[kVisual] - node[kVisual]
         subnodeColDelta = col - subnodeCol
         offset = subnode[kBegin]
@@ -235,7 +243,7 @@ class Parser:
         if offset is None:
             # Bottom of file, nothing to do.
             return
-        self.data = self.data[:offset] + self.data[offset + 1:]
+        self.data = self.data[:offset] + self.data[offset + 1 :]
         self._begin_parsing_at(row)
 
     def delete_range(self, upperRow, upperCol, lowerRow, lowerCol):
@@ -274,12 +282,10 @@ class Parser:
             assert row < len(self.rows), (row, len(self.rows), repr(self.data))
         if row == len(self.rows) - 1:
             # The last line.
-            assert row + 1 >= len(
-                self.rows)
-            gl = self.parserNodes[self.rows[row]:] + [self.endNode]
+            assert row + 1 >= len(self.rows)
+            gl = self.parserNodes[self.rows[row] :] + [self.endNode]
         else:
-            gl = self.parserNodes[self.rows[row]:self.rows[row + 1]] + [
-              self.endNode]
+            gl = self.parserNodes[self.rows[row] : self.rows[row + 1]] + [self.endNode]
         offset = gl[0][kVisual] + col
         # Binary search to find the node for the column.
         low = 0
@@ -291,7 +297,7 @@ class Parser:
             elif offset < gl[index][kVisual]:
                 high = index
             else:
-                #assert index < len(gl)  # Never return index to self.endNode.
+                # assert index < len(gl)  # Never return index to self.endNode.
                 return index
 
     def grammar_at(self, row, col):
@@ -343,8 +349,10 @@ class Parser:
         grammarIndex = self.grammar_index_from_row_col(row, col)
         node = self.parserNodes[rowIndex + grammarIndex]
         nextNode = self.parserNodes[rowIndex + grammarIndex + 1]
-        return (self.data[node[kBegin]:nextNode[kBegin]],
-                node[kGrammar].get(u"link_type"))
+        return (
+            self.data[node[kBegin] : nextNode[kBegin]],
+            node[kGrammar].get(u"link_type"),
+        )
 
     def in_document(self, row, col):
         if app.config.strict_debug:
@@ -353,8 +361,7 @@ class Parser:
             assert row >= 0
             assert col >= 0
         self._fully_parse_to(row)
-        return (row < len(self.rows) and
-            col < self.parserNodes[self.rows[row]][kVisual])
+        return row < len(self.rows) and col < self.parserNodes[self.rows[row]][kVisual]
 
     def insert(self, row, col, text):
         if app.config.strict_debug:
@@ -385,7 +392,7 @@ class Parser:
         if app.config.strict_debug:
             assert isinstance(row, int)
             assert isinstance(col, int)
-            #assert isinstance(lines, tuple)
+            # assert isinstance(lines, tuple)
             assert row >= 0
             assert col >= 0
             assert len(lines) > 0
@@ -455,11 +462,11 @@ class Parser:
         self.data = data
         self._begin_parsing_at(beginRow)
         self._fully_parse_to(endRow, bgThread)
-        #self.debug_check_lines(app.log.parser, data)
-        #startTime = time.time()
-        if app.log.enabledChannels.get('parser', False):
+        # self.debug_check_lines(app.log.parser, data)
+        # startTime = time.time()
+        if app.log.enabledChannels.get("parser", False):
             self.debug_log(app.log.parser, data)
-        #app.log.startup('parsing took', time.time() - startTime)
+        # app.log.startup('parsing took', time.time() - startTime)
 
     def _begin_parsing_at(self, beginRow):
         if app.config.strict_debug:
@@ -473,7 +480,7 @@ class Parser:
         if beginRow > 0:
             # Trim partially parsed data.
             if beginRow < len(self.rows):
-                self.parserNodes = self.parserNodes[:self.rows[beginRow]]
+                self.parserNodes = self.parserNodes[: self.rows[beginRow]]
                 self.rows = self.rows[:beginRow]
             self.resumeAtRow = len(self.rows)
         else:
@@ -498,7 +505,7 @@ class Parser:
         # between |visual| and |visualStartCol| is the column index of the line.
         visualStartCol = 0
         while True:
-            while offset < limit and data[offset] != '\n':
+            while offset < limit and data[offset] != "\n":
                 if data[offset] < u"ᄀ":
                     # The char is less than the first double width character.
                     # (An optimization to avoid calling char_width().)
@@ -506,8 +513,9 @@ class Parser:
                 else:
                     # From here on, the width of the character is messy to
                     # determine, ask an authority.
-                    visual += app.curses_util.char_width(data[offset],
-                            visual - visualStartCol)
+                    visual += app.curses_util.char_width(
+                        data[offset], visual - visualStartCol
+                    )
                 offset += 1
             if offset >= limit:
                 # The document is missing the last new-line.
@@ -646,7 +654,7 @@ class Parser:
         if row + 1 < len(self.rows):
             end = self.parserNodes[self.rows[row + 1]][kBegin]
             visualEnd = self.parserNodes[self.rows[row + 1]][kVisual]
-            if len(self.data) and self.data[end - 1] == '\n':
+            if len(self.data) and self.data[end - 1] == "\n":
                 end -= 1
                 visualEnd -= 1
         else:
@@ -679,7 +687,7 @@ class Parser:
         if row + 1 < len(self.rows):
             end = self.parserNodes[self.rows[row + 1]][kBegin]
             visualEnd = self.parserNodes[self.rows[row + 1]][kVisual]
-            if len(self.data) and self.data[end - 1] == '\n':
+            if len(self.data) and self.data[end - 1] == "\n":
                 visualEnd -= 1
         else:
             # There is a sentinel node at the end that records the end of
@@ -703,10 +711,12 @@ class Parser:
         # If we are at the start of a grammar, skip the 'begin' part of the
         # grammar.
         if 0:
-            if (len(self.parserNodes) == 1 or
-                    (topNode[kGrammar] is not self.parserNodes[-2][kGrammar]) and
-                    topNode[kGrammar].get("end") is not None):
-                beginRegex = topNode[kGrammar].get('begin')
+            if (
+                len(self.parserNodes) == 1
+                or (topNode[kGrammar] is not self.parserNodes[-2][kGrammar])
+                and topNode[kGrammar].get("end") is not None
+            ):
+                beginRegex = topNode[kGrammar].get("begin")
                 if beginRegex is not None:
                     sre = re.match(beginRegex, self.data[cursor:])
                     if sre is not None:
@@ -716,22 +726,22 @@ class Parser:
                         visual += sre.regs[0][1]
         while len(self.rows) <= self.pauseAtRow:
             if not leash:
-                #app.log.error('grammar likely caught in a loop')
+                # app.log.error('grammar likely caught in a loop')
                 break
             leash -= 1
             if bgThread and bgThread.has_user_event():
                 break
             subdata = self.data[cursor:]
-            found = self.parserNodes[-1][kGrammar].get('matchRe').search(
-                subdata)
+            found = self.parserNodes[-1][kGrammar].get("matchRe").search(subdata)
             if not found:
-                #app.log.info('parser exit, match not found')
+                # app.log.info('parser exit, match not found')
                 # todo(dschuyler): mark parent grammars as unterminated (if they
                 # expect be terminated). e.g. unmatched string quote or xml tag.
                 if cursor != len(self.data):
                     # The last bit of the last line.
-                    self.parserNodes.append((topNode[kGrammar], cursor,
-                                             topNode[kPrior], visual))
+                    self.parserNodes.append(
+                        (topNode[kGrammar], cursor, topNode[kPrior], visual)
+                    )
                 break
             index = -1
             foundGroups = found.groups()
@@ -747,8 +757,12 @@ class Parser:
                 continue
             if index == len(foundGroups) - 1:
                 # Found new line.
-                child = (self.parserNodes[-1][kGrammar], cursor + reg[1],
-                         self.parserNodes[-1][kPrior], visual + reg[1])
+                child = (
+                    self.parserNodes[-1][kGrammar],
+                    cursor + reg[1],
+                    self.parserNodes[-1][kPrior],
+                    visual + reg[1],
+                )
                 cursor += reg[1]
                 visual += reg[1]
                 self.rows.append(len(self.parserNodes))
@@ -759,44 +773,54 @@ class Parser:
                 width = app.curses_util.char_width
                 if regBegin > 0:
                     # Add single wide characters.
-                    self.parserNodes.append((topNode[kGrammar], cursor,
-                                             topNode[kPrior], visual))
+                    self.parserNodes.append(
+                        (topNode[kGrammar], cursor, topNode[kPrior], visual)
+                    )
                     cursor += regBegin
                     visual += regBegin
                     regEnd -= regBegin
                     regBegin = 0
                 while regBegin < regEnd:
                     # Check for zero width characters.
-                    while (regBegin < regEnd and
-                            width(self.data[cursor + regBegin], 0) == 0):
+                    while (
+                        regBegin < regEnd
+                        and width(self.data[cursor + regBegin], 0) == 0
+                    ):
                         regBegin += 1
                     if regBegin > 0:
                         # Add zero width characters.
-                        self.parserNodes.append((topNode[kGrammar], cursor,
-                                                 topNode[kPrior], visual))
+                        self.parserNodes.append(
+                            (topNode[kGrammar], cursor, topNode[kPrior], visual)
+                        )
                         cursor += regBegin
                         regEnd -= regBegin
                         regBegin = 0
                     # Check for single wide characters.
-                    while (regBegin < regEnd and
-                            width(self.data[cursor + regBegin], 0) == 1):
+                    while (
+                        regBegin < regEnd
+                        and width(self.data[cursor + regBegin], 0) == 1
+                    ):
                         regBegin += 1
                     if regBegin > 0:
                         # Add single wide characters.
-                        self.parserNodes.append((topNode[kGrammar], cursor,
-                                                 topNode[kPrior], visual))
+                        self.parserNodes.append(
+                            (topNode[kGrammar], cursor, topNode[kPrior], visual)
+                        )
                         cursor += regBegin
                         visual += regBegin
                         regEnd -= regBegin
                         regBegin = 0
                     # Check for double wide characters.
-                    while (regBegin < regEnd and
-                            width(self.data[cursor + regBegin], 0) == 2):
+                    while (
+                        regBegin < regEnd
+                        and width(self.data[cursor + regBegin], 0) == 2
+                    ):
                         regBegin += 1
                     if regBegin > 0:
                         # Add double wide characters.
-                        self.parserNodes.append((topNode[kGrammar], cursor,
-                                                 topNode[kPrior], visual))
+                        self.parserNodes.append(
+                            (topNode[kGrammar], cursor, topNode[kPrior], visual)
+                        )
                         cursor += regBegin
                         visual += regBegin * 2
                         regEnd -= regBegin
@@ -808,8 +832,9 @@ class Parser:
                 regBegin, regEnd = reg
                 # First, add any preceding single wide characters.
                 if regBegin > 0:
-                    self.parserNodes.append((topNode[kGrammar], cursor,
-                                             topNode[kPrior], visual))
+                    self.parserNodes.append(
+                        (topNode[kGrammar], cursor, topNode[kPrior], visual)
+                    )
                     cursor += regBegin
                     visual += regBegin
                     # Remove the regular text from reg values.
@@ -819,8 +844,9 @@ class Parser:
                 rowStart = self.parserNodes[self.rows[-1]][kVisual]
                 col = visual - rowStart
                 # Advance to the next tab stop.
-                self.parserNodes.append((appPrefs.grammars['tabs'], cursor,
-                        topNode[kPrior], visual))
+                self.parserNodes.append(
+                    (appPrefs.grammars["tabs"], cursor, topNode[kPrior], visual)
+                )
                 cursor += regEnd
                 visual = rowStart + ((col + 8) // 8 * 8)
                 visual += (regEnd - 1) * 8
@@ -832,151 +858,216 @@ class Parser:
                     self.parserNodes[self.parserNodes[-1][kPrior]][kGrammar],
                     cursor + reg[1],
                     self.parserNodes[self.parserNodes[-1][kPrior]][kPrior],
-                    visual + reg[1])
+                    visual + reg[1],
+                )
                 cursor = child[kBegin]
                 visual += reg[1]
-                if subdata[reg[1] - 1] == '\n':
+                if subdata[reg[1] - 1] == "\n":
                     # This 'end' ends with a new line.
                     self.rows.append(len(self.parserNodes))
             else:
                 [
-                    containsGrammarIndexLimit, nextGrammarIndexLimit,
-                    errorIndexLimit, keywordIndexLimit, typeIndexLimit,
-                    specialIndexLimit
-                ] = self.parserNodes[-1][kGrammar]['indexLimits']
+                    containsGrammarIndexLimit,
+                    nextGrammarIndexLimit,
+                    errorIndexLimit,
+                    keywordIndexLimit,
+                    typeIndexLimit,
+                    specialIndexLimit,
+                ] = self.parserNodes[-1][kGrammar]["indexLimits"]
                 if index < containsGrammarIndexLimit:
                     # A new grammar within this grammar (a 'contains').
-                    if subdata[reg[0]] == '\n':
+                    if subdata[reg[0]] == "\n":
                         # This 'begin' begins with a new line.
                         self.rows.append(len(self.parserNodes))
                     priorGrammar = self.parserNodes[-1][kGrammar].get(
-                        'matchGrammars', [])[index]
-                    if priorGrammar['end'] is None:
+                        "matchGrammars", []
+                    )[index]
+                    if priorGrammar["end"] is None:
                         # Found single regex match (a leaf grammar).
-                        self.parserNodes.append((priorGrammar, cursor + reg[0],
-                                                 len(self.parserNodes) - 1,
-                                                 visual + reg[0]))
+                        self.parserNodes.append(
+                            (
+                                priorGrammar,
+                                cursor + reg[0],
+                                len(self.parserNodes) - 1,
+                                visual + reg[0],
+                            )
+                        )
                         # Resume the current grammar.
-                        child = (self.parserNodes[self.parserNodes[-1][kPrior]]
-                                 [kGrammar], cursor + reg[1], self.parserNodes[
-                                     self.parserNodes[-1][kPrior]][kPrior],
-                                 visual + reg[1])
+                        child = (
+                            self.parserNodes[self.parserNodes[-1][kPrior]][kGrammar],
+                            cursor + reg[1],
+                            self.parserNodes[self.parserNodes[-1][kPrior]][kPrior],
+                            visual + reg[1],
+                        )
                     else:
-                        if priorGrammar.get('end_key'):
+                        if priorGrammar.get("end_key"):
                             # A dynamic end tag.
-                            hereKey = re.search(priorGrammar['end_key'],
-                                                subdata[reg[0]:]).groups()[0]
-                            markers = priorGrammar['markers']
-                            markers[1] = priorGrammar['end'].replace(
-                                r'\0', re.escape(hereKey))
-                            priorGrammar['matchRe'] = re.compile(
-                                app.regex.join_re_list(markers))
-                        child = (priorGrammar, cursor + reg[0],
-                                 len(self.parserNodes) - 1, visual + reg[0])
+                            hereKey = re.search(
+                                priorGrammar["end_key"], subdata[reg[0] :]
+                            ).groups()[0]
+                            markers = priorGrammar["markers"]
+                            markers[1] = priorGrammar["end"].replace(
+                                r"\0", re.escape(hereKey)
+                            )
+                            priorGrammar["matchRe"] = re.compile(
+                                app.regex.join_re_list(markers)
+                            )
+                        child = (
+                            priorGrammar,
+                            cursor + reg[0],
+                            len(self.parserNodes) - 1,
+                            visual + reg[0],
+                        )
                     cursor += reg[1]
                     visual += reg[1]
                 elif index < nextGrammarIndexLimit:
                     # A new grammar follows this grammar (a 'begin').
-                    if subdata[reg[0]] == '\n':
+                    if subdata[reg[0]] == "\n":
                         # This 'begin' begins with a new line.
                         self.rows.append(len(self.parserNodes))
                     priorGrammar = self.parserNodes[-1][kGrammar].get(
-                        'matchGrammars', [])[index]
-                    if priorGrammar.get('end_key'):
+                        "matchGrammars", []
+                    )[index]
+                    if priorGrammar.get("end_key"):
                         # A dynamic end tag.
-                        hereKey = re.search(priorGrammar['end_key'],
-                                            subdata[reg[0]:]).groups()[0]
-                        markers = priorGrammar['markers']
-                        markers[1] = priorGrammar['end'].replace(
-                            r'\0', re.escape(hereKey))
-                        priorGrammar['matchRe'] = re.compile(
-                            app.regex.join_re_list(markers))
-                    child = (priorGrammar, cursor + reg[0],
-                             len(self.parserNodes) - 2, visual + reg[0])
+                        hereKey = re.search(
+                            priorGrammar["end_key"], subdata[reg[0] :]
+                        ).groups()[0]
+                        markers = priorGrammar["markers"]
+                        markers[1] = priorGrammar["end"].replace(
+                            r"\0", re.escape(hereKey)
+                        )
+                        priorGrammar["matchRe"] = re.compile(
+                            app.regex.join_re_list(markers)
+                        )
+                    child = (
+                        priorGrammar,
+                        cursor + reg[0],
+                        len(self.parserNodes) - 2,
+                        visual + reg[0],
+                    )
                     cursor += reg[1]
                     visual += reg[1]
                 elif index < errorIndexLimit:
                     # A special doesn't change the nodeIndex.
                     self.parserNodes.append(
-                        (appPrefs.grammars['error'], cursor + reg[0],
-                         len(self.parserNodes) - 1, visual + reg[0]))
+                        (
+                            appPrefs.grammars["error"],
+                            cursor + reg[0],
+                            len(self.parserNodes) - 1,
+                            visual + reg[0],
+                        )
+                    )
                     # Resume the current grammar.
                     child = (
-                        self.parserNodes[self.parserNodes[-1]
-                                         [kPrior]][kGrammar], cursor + reg[1],
+                        self.parserNodes[self.parserNodes[-1][kPrior]][kGrammar],
+                        cursor + reg[1],
                         self.parserNodes[self.parserNodes[-1][kPrior]][kPrior],
-                        visual + reg[1])
+                        visual + reg[1],
+                    )
                     cursor += reg[1]
                     visual += reg[1]
                 elif index < keywordIndexLimit:
                     # A keyword doesn't change the nodeIndex.
                     self.parserNodes.append(
-                        (appPrefs.grammars['keyword'], cursor + reg[0],
-                         len(self.parserNodes) - 1, visual + reg[0]))
+                        (
+                            appPrefs.grammars["keyword"],
+                            cursor + reg[0],
+                            len(self.parserNodes) - 1,
+                            visual + reg[0],
+                        )
+                    )
                     # Resume the current grammar.
                     child = (
-                        self.parserNodes[self.parserNodes[-1]
-                                         [kPrior]][kGrammar], cursor + reg[1],
+                        self.parserNodes[self.parserNodes[-1][kPrior]][kGrammar],
+                        cursor + reg[1],
                         self.parserNodes[self.parserNodes[-1][kPrior]][kPrior],
-                        visual + reg[1])
+                        visual + reg[1],
+                    )
                     cursor += reg[1]
                     visual += reg[1]
                 elif index < typeIndexLimit:
                     # A type doesn't change the nodeIndex.
                     self.parserNodes.append(
-                        (appPrefs.grammars['type'], cursor + reg[0],
-                         len(self.parserNodes) - 1, visual + reg[0]))
+                        (
+                            appPrefs.grammars["type"],
+                            cursor + reg[0],
+                            len(self.parserNodes) - 1,
+                            visual + reg[0],
+                        )
+                    )
                     # Resume the current grammar.
                     child = (
-                        self.parserNodes[self.parserNodes[-1]
-                                         [kPrior]][kGrammar], cursor + reg[1],
+                        self.parserNodes[self.parserNodes[-1][kPrior]][kGrammar],
+                        cursor + reg[1],
                         self.parserNodes[self.parserNodes[-1][kPrior]][kPrior],
-                        visual + reg[1])
+                        visual + reg[1],
+                    )
                     cursor += reg[1]
                     visual += reg[1]
                 elif index < specialIndexLimit:
                     # A special doesn't change the nodeIndex.
                     self.parserNodes.append(
-                        (appPrefs.grammars['special'], cursor + reg[0],
-                         len(self.parserNodes) - 1, visual + reg[0]))
+                        (
+                            appPrefs.grammars["special"],
+                            cursor + reg[0],
+                            len(self.parserNodes) - 1,
+                            visual + reg[0],
+                        )
+                    )
                     # Resume the current grammar.
                     child = (
-                        self.parserNodes[self.parserNodes[-1]
-                                         [kPrior]][kGrammar], cursor + reg[1],
+                        self.parserNodes[self.parserNodes[-1][kPrior]][kGrammar],
+                        cursor + reg[1],
                         self.parserNodes[self.parserNodes[-1][kPrior]][kPrior],
-                        visual + reg[1])
+                        visual + reg[1],
+                    )
                     cursor += reg[1]
                     visual += reg[1]
                 else:
-                    app.log.error('invalid grammar index')
+                    app.log.error("invalid grammar index")
             self.parserNodes.append(child)
         self.resumeAtRow = len(self.rows)
 
     def _print_last_node(self, msg):
         node = self.parserNodes[-1]
-        print("_print_node", node[0]["name"], node[1], node[2], node[3], msg,
-                repr(self.data))
+        print(
+            "_print_node",
+            node[0]["name"],
+            node[1],
+            node[2],
+            node[3],
+            msg,
+            repr(self.data),
+        )
 
     def _print_node(self, node, msg):
         print("_print_node", node[0]["name"], node[1], node[2], node[3], msg)
 
     def debug_log(self, out, data):
-        out('parser debug:')
-        out('RowList ----------------', len(self.rows))
+        out("parser debug:")
+        out("RowList ----------------", len(self.rows))
         for i, start in enumerate(self.rows):
             if i + 1 < len(self.rows):
                 end = self.rows[i + 1]
             else:
                 end = len(self.parserNodes)
-            out('row', i, '(line', str(i + 1) + ') index', start, 'to', end)
+            out("row", i, "(line", str(i + 1) + ") index", start, "to", end)
             for node in self.parserNodes[start:end]:
                 if node is None:
-                    out('a None')
+                    out("a None")
                     continue
                 nodeBegin = node[kBegin]
-                out('  ParserNode %26s prior %4s, b%4d, v%4d, %s' % (
-                    node[kGrammar].get('name', 'None'), node[kPrior], nodeBegin,
-                    node[kVisual], repr(data[nodeBegin:nodeBegin + 15])[1:-1]))
+                out(
+                    "  ParserNode %26s prior %4s, b%4d, v%4d, %s"
+                    % (
+                        node[kGrammar].get("name", "None"),
+                        node[kPrior],
+                        nodeBegin,
+                        node[kVisual],
+                        repr(data[nodeBegin : nodeBegin + 15])[1:-1],
+                    )
+                )
 
     def debug_check_lines(self, out, data):
         """Debug test that all the lines were recognized by the parser. This is
@@ -990,10 +1081,12 @@ class Parser:
         for i, line in enumerate(lines):
             parsedLine, column_width = self.row_text_and_width(i)
             assert line == parsedLine, "\nexpected:{}\n  actual:{}".format(
-                repr(line), repr(parsedLine))
+                repr(line), repr(parsedLine)
+            )
             parsedLine = self.row_text(i)
             assert line == parsedLine, "\nexpected:{}\n  actual:{}".format(
-                line, parsedLine)
+                line, parsedLine
+            )
 
             if out is not None:
                 out("----------- ", line)
@@ -1002,14 +1095,15 @@ class Parser:
             grammarIndex = 0
             while True:
                 node, preceding, remaining, eol = self.grammar_at_index(
-                    i, k, grammarIndex)
+                    i, k, grammarIndex
+                )
                 grammarIndex += 1
-                piecedLine += line[k - preceding:k + remaining]
+                piecedLine += line[k - preceding : k + remaining]
                 if out is not None:
                     out(i, preceding, remaining, i, k, piecedLine)
                 if eol:
-                    assert piecedLine == line, (
-                        "\nexpected:{}\n  actual:{}".format(
-                            repr(line), repr(piecedLine)))
+                    assert piecedLine == line, "\nexpected:{}\n  actual:{}".format(
+                        repr(line), repr(piecedLine)
+                    )
                     break
                 k += remaining

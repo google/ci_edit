@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 # Copyright 2017 Google Inc.
 #
@@ -26,7 +25,6 @@ import app.selectable
 
 
 class SelectableTestCases(unittest.TestCase):
-
     def setUp(self):
         self.selectable = app.selectable.Selectable(app.ci_program.CiProgram())
         app.log.shouldWritePrintLog = True
@@ -80,8 +78,7 @@ class SelectableTestCases(unittest.TestCase):
         selectable.parse_document()
         selectable.penRow = 1
         selectable.selectionMode = app.selectable.kSelectionLine
-        app.log.debug(u"selectable.extend_selection",
-                      selectable.extend_selection())
+        app.log.debug(u"selectable.extend_selection", selectable.extend_selection())
         self.assertEqual(selectable.extend_selection(), (0, 0, 0, 0, 0))
         selectable.penRow = 3
         selectable.penCol = 3
@@ -111,8 +108,7 @@ class SelectableTestCases(unittest.TestCase):
         selectable.selectionMode = app.selectable.kSelectionNone
         selectable.penCol = 1
         selectable.do_delete_selection()
-        self.assertEqual(selectable.parser.data,
-                         u"one two\nSeveral test words.\nfive")
+        self.assertEqual(selectable.parser.data, u"one two\nSeveral test words.\nfive")
 
     def test_deletion_all(self):
         selectable = self.selectable
@@ -138,8 +134,9 @@ class SelectableTestCases(unittest.TestCase):
         selectable.do_delete_selection()
         self.assertEqual(selectable.parser.data, u"")
 
-        selectable.insert_lines_at(0, 0, (u"wx", u"", u"yz"),
-                app.selectable.kSelectionAll)
+        selectable.insert_lines_at(
+            0, 0, (u"wx", u"", u"yz"), app.selectable.kSelectionAll
+        )
         self.assertEqual(selectable.parser.data, u"wx\n\nyz")
 
     def test_deletion_block(self):
@@ -156,8 +153,9 @@ class SelectableTestCases(unittest.TestCase):
         self.assertEqual(selectable.parser.data, u"oneTwo\n\nfive")
         selectable.do_delete_selection()
         self.assertEqual(selectable.parser.data, u"oTwo\n\nfe")
-        selectable.insert_lines_at(0, 1, (u"wx", u"", u"yz"),
-                app.selectable.kSelectionBlock)
+        selectable.insert_lines_at(
+            0, 1, (u"wx", u"", u"yz"), app.selectable.kSelectionBlock
+        )
         self.assertEqual(selectable.parser.data, u"owxTwo\n\nfyze")
 
     def test_deletion_character(self):
@@ -167,12 +165,10 @@ class SelectableTestCases(unittest.TestCase):
         selectable.selectionMode = app.selectable.kSelectionCharacter
         selectable.penCol = 1
         selectable.do_delete_selection()
-        self.assertEqual(selectable.parser.data,
-                         u"ne two\nSeveral test words.\nfive")
+        self.assertEqual(selectable.parser.data, u"ne two\nSeveral test words.\nfive")
         selectable.markerCol = 3
         selectable.do_delete_selection()
-        self.assertEqual(selectable.parser.data,
-                         u"ntwo\nSeveral test words.\nfive")
+        self.assertEqual(selectable.parser.data, u"ntwo\nSeveral test words.\nfive")
         selectable.penRow = 1
         selectable.penCol = 1
         selectable.do_delete_selection()
@@ -184,8 +180,7 @@ class SelectableTestCases(unittest.TestCase):
         selectable.parse_document()
         selectable.penRow = 1
         selectable.selectionMode = app.selectable.kSelectionLine
-        app.log.debug(u"selectable.extend_selection",
-                      selectable.extend_selection())
+        app.log.debug(u"selectable.extend_selection", selectable.extend_selection())
         self.assertEqual(selectable.extend_selection(), (0, 0, 0, 0, 0))
         selectable.penRow = 3
         selectable.penCol = 3
@@ -217,7 +212,6 @@ class SelectableTestCases(unittest.TestCase):
         selectable.penCol = 2
         self.assertEqual(selectable.markerCol, 0)
 
+
 if __name__ == "__main__":
     unittest.main()
-
-

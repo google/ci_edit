@@ -19,8 +19,7 @@ from __future__ import print_function
 import curses
 
 
-class Colors():
-
+class Colors:
     def __init__(self, colorPrefs):
         self.__colorPrefs = colorPrefs
         self.colors = 256
@@ -34,6 +33,6 @@ class Colors():
         colorIndex = min(self.colors - 1, colorIndex + delta)
         color = self.__cache.get(colorIndex) or curses.color_pair(colorIndex)
         self.__cache[colorIndex] = color
-        if colorType in ('error', 'misspelling'):
+        if colorType in ("error", "misspelling"):
             color |= curses.A_BOLD | curses.A_REVERSE
         return color

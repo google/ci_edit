@@ -21,6 +21,7 @@ library."""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+
 try:
     unicode
 except NameError:
@@ -59,13 +60,11 @@ BRACKETED_PASTE = ("terminal_paste",)  # Pseudo event type.
 
 
 class error(BaseException):
-
     def __init__(self):
         BaseException.__init__(self)
 
 
 class FakeInput:
-
     def __init__(self, display):
         self.fakeDisplay = display
         self.set_inputs([])
@@ -89,8 +88,7 @@ class FakeInput:
         frame = inspect.stack()[3]
         callingFile = os.path.split(frame[1])[1]
         callingLine = frame[2]
-        caller = "%16s %5s %3s %s " % (callingFile, callingLine,
-                                            function, functionLine)
+        caller = "%16s %5s %3s %s " % (callingFile, callingLine, function, functionLine)
         waiting = u"waitingForRefresh" if self.waitingForRefresh else ""
         print(caller + " ".join([repr(i) for i in msg]), waiting)
 
@@ -123,8 +121,9 @@ class FakeInput:
                         self.waitingForRefresh = True
                     self.log("next(q) ", repr(cmd), ord(cmd))
                     return ord(cmd)
-                elif (isinstance(cmd, tuple) and len(cmd) > 1 and
-                      isinstance(cmd[0], int)):
+                elif (
+                    isinstance(cmd, tuple) and len(cmd) > 1 and isinstance(cmd[0], int)
+                ):
                     if cmd == BRACKETED_PASTE_BEGIN:
                         self.inBracketedPaste = True
                     self.log("next(s) ", cmd, type(cmd))
@@ -136,14 +135,12 @@ class FakeInput:
                         self.log("next(u)", cmd, type(cmd))
                         self.log("return", constants.ERR)
                         return constants.ERR
-                    if (self.tupleIndex + 1 == len(cmd) and
-                            cmd != BRACKETED_PASTE_BEGIN):
+                    if self.tupleIndex + 1 == len(cmd) and cmd != BRACKETED_PASTE_BEGIN:
                         self.waitingForRefresh = True
                     self.inputsIndex -= 1
-                    self.log("return", cmd[self.tupleIndex], self.tupleIndex,
-                        len(cmd))
+                    self.log("return", cmd[self.tupleIndex], self.tupleIndex, len(cmd))
                     return cmd[self.tupleIndex]
-                elif isinstance(cmd, int) or  isinstance(cmd, bytes):
+                elif isinstance(cmd, int) or isinstance(cmd, bytes):
                     if (not self.inBracketedPaste) and cmd != ascii.ESC:
                         self.waitingForRefresh = True
                     self.log("return", cmd, type(cmd))
@@ -152,6 +149,7 @@ class FakeInput:
                     assert False, (cmd, type(cmd))
         self.log("return", constants.ERR)
         return constants.ERR
+
 
 def test_log(log_level, *msg):
     # Adjust constant to increase verbosity.
@@ -163,8 +161,13 @@ def test_log(log_level, *msg):
     callingFile = os.path.split(frame[1])[1]
     callingLine = frame[2]
     callingFunction = frame[3]
-    caller = "%20s %5s %20s %3s %s " % (callingFile, callingLine,
-                                        callingFunction, functionLine, function)
+    caller = "%20s %5s %20s %3s %s " % (
+        callingFile,
+        callingLine,
+        callingFunction,
+        functionLine,
+        function,
+    )
     print(caller + " ".join([repr(i) for i in msg]))
 
 
@@ -178,7 +181,6 @@ def set_getch_callback(callback):
 
 # Test output. Use |display| to check the screen output.
 class FakeDisplay:
-
     def __init__(self):
         self.rows = 15
         self.cols = 40
@@ -190,7 +192,7 @@ class FakeDisplay:
         self.reset()
 
     def check_style(self, row, col, height, width, colorPair):
-        #assert (colorPair & DEBUG_COLOR_PAIR_MASK) in self.colors.values()
+        # assert (colorPair & DEBUG_COLOR_PAIR_MASK) in self.colors.values()
         assert colorPair is not None
         assert colorPair >= DEBUG_COLOR_PAIR_BASE
         assert height != 0
@@ -200,9 +202,12 @@ class FakeDisplay:
                 d = self.displayStyle[row + i][col + k]
                 if d != colorPair:
                     self.show()
-                    return (
-                        u"\n  row %s, col %s color/style mismatch '%d' != '%d'"
-                        % (row + i, col + k, d, colorPair))
+                    return u"\n  row %s, col %s color/style mismatch '%d' != '%d'" % (
+                        row + i,
+                        col + k,
+                        d,
+                        colorPair,
+                    )
         return None
 
     def check_text(self, row, col, lines, verbose=3):
@@ -217,22 +222,29 @@ class FakeDisplay:
             for ch in line:
                 if row + i >= self.rows:
                     return u"\n  Row %d is outside of the %d row display" % (
-                        row + i, self.rows)
+                        row + i,
+                        self.rows,
+                    )
                 if displayCol >= self.cols:
-                    return (u"\n  Column %d is outside of the %d column display"
-                            % (displayCol, self.cols))
+                    return u"\n  Column %d is outside of the %d column display" % (
+                        displayCol,
+                        self.cols,
+                    )
                 displayCh = self.displayText[row + i][displayCol]
                 if displayCh != ch:
-                    #self.show()
+                    # self.show()
                     result = u"\n  row %s, col %s mismatch '%s' != '%s'" % (
-                        row + i, displayCol, displayCh, ch)
+                        row + i,
+                        displayCol,
+                        displayCh,
+                        ch,
+                    )
                     if verbose >= 1:
                         actualLine = u"".join(self.displayText[row + i])
                         result += u"\n  actual:   |%s|" % actualLine
                     if verbose >= 2:
                         expectedText = u"".join(line)
-                        result += u"\n  expected: %s|%s|" % (u" " * col,
-                                                             expectedText)
+                        result += u"\n  expected: %s|%s|" % (u" " * col, expectedText)
                     if verbose >= 3:
                         result += u"\n  mismatch:  %*s^" % (displayCol, u"")
                     return result
@@ -240,13 +252,13 @@ class FakeDisplay:
         return None
 
     def draw(self, cursorRow, cursorCol, text, colorPair):
-        #assert (colorPair & DEBUG_COLOR_PAIR_MASK) in self.colors.values()
+        # assert (colorPair & DEBUG_COLOR_PAIR_MASK) in self.colors.values()
         assert isinstance(cursorRow, int)
         assert isinstance(cursorCol, int)
         assert isinstance(text, unicode)
         assert colorPair >= DEBUG_COLOR_PAIR_BASE
         for i in text:
-            if i == '\r':
+            if i == "\r":
                 cursorCol = 0
                 continue
             try:
@@ -275,15 +287,18 @@ class FakeDisplay:
     def get_color_pair(self, colorIndex):
         assert colorIndex < DEBUG_COLOR_PAIR_BASE
         colorPair = self.colors.setdefault(
-            colorIndex, DEBUG_COLOR_PAIR_BASE + len(self.colors))
+            colorIndex, DEBUG_COLOR_PAIR_BASE + len(self.colors)
+        )
         return colorPair
 
     def get_style(self):
         return [
-            u"".join([
-                unichr((c & DEBUG_COLOR_PAIR_MASK) - DEBUG_COLOR_PAIR_BASE + 91)
-                for c in self.displayStyle[i]
-            ])
+            u"".join(
+                [
+                    unichr((c & DEBUG_COLOR_PAIR_MASK) - DEBUG_COLOR_PAIR_BASE + 91)
+                    for c in self.displayStyle[i]
+                ]
+            )
             for i in range(self.rows)
         ]
 
@@ -306,22 +321,18 @@ class FakeDisplay:
         self.reset()
 
     def show(self):
-        assert self.displayStyle[0][0] != -1, \
-            u"Error: showing display before drawing to it."
-        print(u'   %*s   %s' % (-self.cols, u'display', u'style'))
-        print(u'  +' + u'-' * self.cols + u'+ +' + u'-' * self.cols + u'+')
-        for i, (line, styles) in enumerate(
-                zip(self.get_text(), self.get_style())):
+        assert (
+            self.displayStyle[0][0] != -1
+        ), u"Error: showing display before drawing to it."
+        print(u"   %*s   %s" % (-self.cols, u"display", u"style"))
+        print(u"  +" + u"-" * self.cols + u"+ +" + u"-" * self.cols + u"+")
+        for i, (line, styles) in enumerate(zip(self.get_text(), self.get_style())):
             print(u"%2d|%s| |%s|" % (i, line, styles))
-        print(u'  +' + u'-' * self.cols + u'+ +' + u'-' * self.cols + u'+')
+        print(u"  +" + u"-" * self.cols + u"+ +" + u"-" * self.cols + u"+")
 
     def reset(self):
-        self.displayStyle = [
-            [-1 for _ in range(self.cols)] for _ in range(self.rows)
-        ]
-        self.displayText = [
-            [u"x" for _ in range(self.cols)] for _ in range(self.rows)
-        ]
+        self.displayStyle = [[-1 for _ in range(self.cols)] for _ in range(self.rows)]
+        self.displayText = [[u"x" for _ in range(self.cols)] for _ in range(self.rows)]
 
 
 fakeDisplay = None
@@ -341,7 +352,6 @@ def print_fake_display():
 
 
 class FakeCursesWindow:
-
     def __init__(self, rows, cols):
         self.rows = rows
         self.cols = cols
@@ -359,7 +369,8 @@ class FakeCursesWindow:
         color = args[3]
         assert isinstance(cursorRow, int)
         self.cursorRow, self.cursorCol = fakeDisplay.draw(
-            cursorRow, cursorCol, text, color)
+            cursorRow, cursorCol, text, color
+        )
 
     def getch(self):
         test_log(4)
@@ -411,7 +422,6 @@ class FakeCursesWindow:
 
 
 class StandardScreen(FakeCursesWindow):
-
     def __init__(self):
         global fakeDisplay, fakeInput
         test_log(2)
@@ -503,7 +513,7 @@ def keyname(*args):
     test_log(2, *args)
     # Raise expected exception types.
     a = int(*args)  # ValueError.
-    if a >= 2**31:
+    if a >= 2 ** 31:
         raise OverflowError()
     if a < 0:
         raise ValueError()

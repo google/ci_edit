@@ -32,8 +32,8 @@ class CiEdit(app.controller.Controller):
     """Keyboard mappings for ci."""
 
     def __init__(self, prg, textBuffer):
-        app.controller.Controller.__init__(self, prg, None, 'CiEdit')
-        self.prg.log('CiEdit.__init__')
+        app.controller.Controller.__init__(self, prg, None, "CiEdit")
+        self.prg.log("CiEdit.__init__")
         self.textBuffer = textBuffer
         self.commandSet_Main = {
             CTRL_SPACE: self.switch_to_command_set_cmd,
@@ -62,58 +62,58 @@ class CiEdit(app.controller.Controller):
             CTRL_Y: self.redo,
             CTRL_Z: self.undo,
             CTRL_BACKSLASH: self.changeToCmdMode,
-            #ord('/'): self.switch_to_command_set_cmd,
+            # ord('/'): self.switch_to_command_set_cmd,
         }
 
         self.commandSet_Cmd = {
-            ord('a'): self.switch_to_command_set_application,
-            ord('f'): self.switch_to_command_set_file,
-            ord('s'): self.switch_to_command_set_select,
-            ord(';'): self.switch_to_command_set_main,
+            ord("a"): self.switch_to_command_set_application,
+            ord("f"): self.switch_to_command_set_file,
+            ord("s"): self.switch_to_command_set_select,
+            ord(";"): self.switch_to_command_set_main,
             ord("'"): self.marker_place,
         }
 
         self.commandSet_Application = {
-            ord('q'): self.prg.quit,
-            ord('t'): self.test,
-            ord('w'): self.file_write,
-            ord(';'): self.switch_to_command_set_main,
+            ord("q"): self.prg.quit,
+            ord("t"): self.test,
+            ord("w"): self.file_write,
+            ord(";"): self.switch_to_command_set_main,
         }
 
         self.commandSet_File = {
-            ord('o'): self.switch_to_command_set_file_open,
-            ord('w'): self.file_write,
-            ord(';'): self.switch_to_command_set_main,
+            ord("o"): self.switch_to_command_set_file_open,
+            ord("w"): self.file_write,
+            ord(";"): self.switch_to_command_set_main,
         }
 
         self.commandSet_FileOpen = {
-            ord(';'): self.switch_to_command_set_main,
+            ord(";"): self.switch_to_command_set_main,
         }
 
         self.commandSet_Select = {
-            ord('a'): self.selection_all,
-            ord('b'): self.selection_block,
-            ord('c'): self.selection_character,
-            ord('l'): self.selection_line,
-            ord('x'): self.selection_none,
-            ord(';'): self.switch_to_command_set_main,
+            ord("a"): self.selection_all,
+            ord("b"): self.selection_block,
+            ord("c"): self.selection_character,
+            ord("l"): self.selection_line,
+            ord("x"): self.selection_none,
+            ord(";"): self.switch_to_command_set_main,
         }
 
         self.commandDefault = self.insert_printable
         self.commandSet = self.commandSet_Main
 
     def switch_to_command_set_main(self, ignored=1):
-        self.log('ci main', repr(self.prg))
+        self.log("ci main", repr(self.prg))
         self.commandDefault = self.insert_printable
         self.commandSet = self.commandSet_Main
 
     def switch_to_command_set_cmd(self):
-        self.log('ci cmd')
+        self.log("ci cmd")
         self.commandDefault = self.textBuffer.no_op
         self.commandSet = self.commandSet_Cmd
 
     def switch_to_command_set_application(self):
-        self.log('ci application')
+        self.log("ci application")
         self.commandDefault = self.textBuffer.no_op
         self.commandSet = self.commandSet_Application
 
@@ -122,17 +122,17 @@ class CiEdit(app.controller.Controller):
         self.commandSet = self.commandSet_File
 
     def switch_to_command_set_file_open(self):
-        self.log('switch_to_command_set_file_open')
+        self.log("switch_to_command_set_file_open")
         self.commandDefault = self.pathInsertPrintable
         self.commandSet = self.commandSet_FileOpen
 
     def switch_to_main_and_do_command(self, ch):
-        self.log('switch_to_main_and_do_command')
+        self.log("switch_to_main_and_do_command")
         self.switch_to_command_set_main()
         self.do_command(ch)
 
     def switch_to_command_set_select(self):
-        self.log('ci select')
+        self.log("ci select")
         self.commandDefault = self.SwitchToMainAndDoCommand
         self.commandSet = self.commandSet_Select
         self.selection_character()

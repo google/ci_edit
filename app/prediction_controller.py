@@ -15,6 +15,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+
 try:
     unicode
 except NameError:
@@ -32,13 +33,11 @@ import app.string
 
 
 class PredictionListController(app.controller.Controller):
-    """Gather and prepare file directory information.
-    """
+    """Gather and prepare file directory information."""
 
     def __init__(self, view):
         assert self is not view
-        app.controller.Controller.__init__(self, view,
-                                           'PredictionListController')
+        app.controller.Controller.__init__(self, view, "PredictionListController")
         self.filter = None
         # |items| is a tuple of: buffer, path, flags, type.
         self.items = None
@@ -53,14 +52,21 @@ class PredictionListController(app.controller.Controller):
         if 1:
             # Add open buffers.
             def add_buffer(items, buffer, prediction):
-                dirty = '*' if buffer.is_dirty() else '.'
+                dirty = "*" if buffer.is_dirty() else "."
                 if buffer.fullPath:
-                    items.append((buffer, buffer.fullPath, dirty, 'open', prediction))
+                    items.append((buffer, buffer.fullPath, dirty, "open", prediction))
                     added.add(buffer.fullPath)
                 else:
                     items.append(
-                        (buffer, '<new file> %s' % (buffer.parser.row_text(0)[:20]), dirty,
-                         'open', prediction))
+                        (
+                            buffer,
+                            "<new file> %s" % (buffer.parser.row_text(0)[:20]),
+                            dirty,
+                            "open",
+                            prediction,
+                        )
+                    )
+
             bufferManager = self.view.program.bufferManager
             # Add the most resent buffer to allow flipping back and forth
             # between two files.
@@ -77,18 +83,18 @@ class PredictionListController(app.controller.Controller):
             # Add recent files.
             for recentFile in self.view.program.history.get_recent_files():
                 if recentFile not in added:
-                    items.append((None, recentFile, '=', 'recent', 50000))
+                    items.append((None, recentFile, "=", "recent", 50000))
                     added.add(recentFile)
         if 1:
             # Add alternate files.
             dirPath, fileName = os.path.split(currentFile)
             fileName, ext = os.path.splitext(fileName)
             # TODO(dschuyler): rework this ignore list.
-            ignoreExt = set(('.pyc', '.pyo', '.o', '.obj', '.tgz', '.zip',
-                             '.tar'))
+            ignoreExt = set((".pyc", ".pyo", ".o", ".obj", ".tgz", ".zip", ".tar"))
             try:
                 contents = os.listdir(
-                    os.path.expandvars(os.path.expanduser(dirPath)) or '.')
+                    os.path.expandvars(os.path.expanduser(dirPath)) or "."
+                )
             except OSError:
                 contents = []
             contents.sort()
@@ -97,21 +103,19 @@ class PredictionListController(app.controller.Controller):
                 if fileName == f and ext != e and e not in ignoreExt:
                     fullPath = os.path.join(dirPath, i)
                     if fullPath not in added:
-                        items.append((None, fullPath, '=', 'alt', 20000))
+                        items.append((None, fullPath, "=", "alt", 20000))
                         added.add(fullPath)
             if 1:
                 # Chromium specific hack.
-                if currentFile.endswith('-extracted.js'):
-                    chromiumPath = currentFile[:-len('-extracted.js')] + '.html'
-                    if os.path.isfile(
-                            chromiumPath) and chromiumPath not in added:
-                        items.append((None, chromiumPath, '=', 'alt', 20000))
+                if currentFile.endswith("-extracted.js"):
+                    chromiumPath = currentFile[: -len("-extracted.js")] + ".html"
+                    if os.path.isfile(chromiumPath) and chromiumPath not in added:
+                        items.append((None, chromiumPath, "=", "alt", 20000))
                         added.add(chromiumPath)
-                elif currentFile.endswith('.html'):
-                    chromiumPath = currentFile[:-len('.html')] + '-extracted.js'
-                    if os.path.isfile(
-                            chromiumPath) and chromiumPath not in added:
-                        items.append((None, chromiumPath, '=', 'alt', 20000))
+                elif currentFile.endswith(".html"):
+                    chromiumPath = currentFile[: -len(".html")] + "-extracted.js"
+                    if os.path.isfile(chromiumPath) and chromiumPath not in added:
+                        items.append((None, chromiumPath, "=", "alt", 20000))
                         added.add(chromiumPath)
         if self.filter is not None:
             try:
@@ -130,12 +134,12 @@ class PredictionListController(app.controller.Controller):
                 self.view.textBuffer.set_message(u"invalid regex")
 
     def focus(self):
-        #app.log.info('PredictionListController')
+        # app.log.info('PredictionListController')
         self.on_change()
         app.controller.Controller.focus(self)
 
     def info(self):
-        app.log.info('PredictionListController command set')
+        app.log.info("PredictionListController command set")
 
     def on_change(self):
         controller = self.view.parent.predictionInputWindow.controller
@@ -152,7 +156,7 @@ class PredictionListController(app.controller.Controller):
 
     def open_alt_file(self):
         for row, item in enumerate(self.items):
-            if item[3] == 'alt':
+            if item[3] == "alt":
                 self.open_file_or_dir(row)
 
     def open_file_or_dir(self, row):
@@ -192,20 +196,19 @@ class PredictionListController(app.controller.Controller):
 
 
 class PredictionController(app.controller.Controller):
-    """Create or open files.
-    """
+    """Create or open files."""
 
     def __init__(self, view):
-        app.controller.Controller.__init__(self, view, 'PredictionController')
+        app.controller.Controller.__init__(self, view, "PredictionController")
 
     def perform_primary_action(self):
         self.view.pathWindow.controller.perform_primary_action()
 
     def info(self):
-        app.log.info('PredictionController command set')
+        app.log.info("PredictionController command set")
 
     def on_change(self):
-        #app.log.info('PredictionController')
+        # app.log.info('PredictionController')
         self.view.predictionList.controller.on_change()
         app.controller.Controller.on_change(self)
 
@@ -217,12 +220,10 @@ class PredictionController(app.controller.Controller):
 
 
 class PredictionInputController(app.controller.Controller):
-    """Manipulate query string.
-    """
+    """Manipulate query string."""
 
     def __init__(self, view):
-        app.controller.Controller.__init__(self, view,
-                                           'PredictionInputController')
+        app.controller.Controller.__init__(self, view, "PredictionInputController")
 
     def decoded_path(self):
         if app.config.strict_debug:
@@ -236,57 +237,61 @@ class PredictionInputController(app.controller.Controller):
         return self.textBuffer.replace_lines((app.string.path_encode(path),))
 
     def focus(self):
-        #app.log.info('PredictionInputController')
+        # app.log.info('PredictionInputController')
         self.set_encoded_path(u"")
-        #self.get_named_window('predictionList').controller.set_filter(u"py")
-        self.get_named_window('predictionList').focus()
+        # self.get_named_window('predictionList').controller.set_filter(u"py")
+        self.get_named_window("predictionList").focus()
         app.controller.Controller.focus(self)
 
     def info(self):
-        app.log.info('PredictionInputController command set')
+        app.log.info("PredictionInputController command set")
 
     def on_change(self):
-        #app.log.info('PredictionInputController', self.view.parent.get_path())
-        self.get_named_window('predictionList').controller.on_change()
+        # app.log.info('PredictionInputController', self.view.parent.get_path())
+        self.get_named_window("predictionList").controller.on_change()
         app.controller.Controller.on_change(self)
 
     def option_changed(self, name, value):
         if app.config.strict_debug:
             assert isinstance(name, unicode)
             assert isinstance(value, unicode)
-        self.get_named_window('predictionList').controller.shownList = None
+        self.get_named_window("predictionList").controller.shownList = None
 
     def pass_event_to_prediction_list(self):
-        self.get_named_window('predictionList').controller.do_command(
-            self.savedCh, None)
+        self.get_named_window("predictionList").controller.do_command(
+            self.savedCh, None
+        )
 
     def open_alternate_file(self):
-        app.log.info('PredictionInputController')
-        predictionList = self.get_named_window('predictionList')
+        app.log.info("PredictionInputController")
+        predictionList = self.get_named_window("predictionList")
         predictionList.controller.open_alt_file()
 
     def perform_primary_action(self):
-        app.log.info('PredictionInputController')
-        predictionList = self.get_named_window('predictionList')
+        app.log.info("PredictionInputController")
+        predictionList = self.get_named_window("predictionList")
         row = predictionList.textBuffer.penRow
         predictionList.controller.open_file_or_dir(row)
 
     def prediction_list_next(self):
-        predictionList = self.get_named_window('predictionList')
-        if (predictionList.textBuffer.penRow ==
-                predictionList.textBuffer.parser.row_count() - 1):
+        predictionList = self.get_named_window("predictionList")
+        if (
+            predictionList.textBuffer.penRow
+            == predictionList.textBuffer.parser.row_count() - 1
+        ):
             predictionList.textBuffer.cursor_move_to(0, 0)
         else:
             predictionList.textBuffer.cursor_down()
 
     def prediction_list_prior(self):
-        predictionList = self.get_named_window('predictionList')
+        predictionList = self.get_named_window("predictionList")
         if predictionList.textBuffer.penRow == 0:
             predictionList.textBuffer.cursor_move_to(
-                predictionList.textBuffer.parser.row_count(), 0)
+                predictionList.textBuffer.parser.row_count(), 0
+            )
         else:
             predictionList.textBuffer.cursor_up()
 
     def unfocus(self):
-        self.get_named_window('predictionList').unfocus()
+        self.get_named_window("predictionList").unfocus()
         app.controller.Controller.unfocus(self)

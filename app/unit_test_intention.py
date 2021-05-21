@@ -26,11 +26,10 @@ from app.curses_util import *
 import app.ci_program
 import app.fake_curses_testing
 
-kTestFile = u'#application_test_file_with_unlikely_file_name~'
+kTestFile = u"#application_test_file_with_unlikely_file_name~"
 
 
 class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
-
     def setUp(self):
         self.longMessage = True
         app.fake_curses_testing.FakeCursesTestCase.set_up(self)
@@ -39,36 +38,57 @@ class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
         self.run_with_test_file(kTestFile, [CTRL_Q])
 
     def test_new_file_quit(self):
-        self.run_with_test_file(kTestFile,
-                             [self.display_check(2, 7, [u"        "]), CTRL_Q])
+        self.run_with_test_file(
+            kTestFile, [self.display_check(2, 7, [u"        "]), CTRL_Q]
+        )
 
     def test_quit_cancel(self):
-        #self.set_movie_mode(True)
-        self.run_with_fake_inputs([
-            self.display_check(0, 0, [
-                u" ci     .                               ",
-            ]), u'x', CTRL_Q, u'c',
-            self.write_text(u' after cancel'),
-            self.display_check(2, 7, [
-                u"x after cancel ",
-            ]), CTRL_Q, u'n'
-        ])
+        # self.set_movie_mode(True)
+        self.run_with_fake_inputs(
+            [
+                self.display_check(
+                    0,
+                    0,
+                    [
+                        u" ci     .                               ",
+                    ],
+                ),
+                u"x",
+                CTRL_Q,
+                u"c",
+                self.write_text(u" after cancel"),
+                self.display_check(
+                    2,
+                    7,
+                    [
+                        u"x after cancel ",
+                    ],
+                ),
+                CTRL_Q,
+                u"n",
+            ]
+        )
 
     def test_quit_save_as(self):
-        #self.set_movie_mode(True)
+        # self.set_movie_mode(True)
         self.assertFalse(os.path.isfile(kTestFile))
-        self.run_with_fake_inputs([
-            self.display_check(0, 0, [
-                u" ci     .                               ",
-            ]),
-            u'x',
-            CTRL_Q,
-            u'y',
-            self.write_text(kTestFile),
-            CTRL_J,
-            CTRL_Q,
-        ])
+        self.run_with_fake_inputs(
+            [
+                self.display_check(
+                    0,
+                    0,
+                    [
+                        u" ci     .                               ",
+                    ],
+                ),
+                u"x",
+                CTRL_Q,
+                u"y",
+                self.write_text(kTestFile),
+                CTRL_J,
+                CTRL_Q,
+            ]
+        )
         self.assertTrue(os.path.isfile(kTestFile))
         os.unlink(kTestFile)
         self.assertFalse(os.path.isfile(kTestFile))
-

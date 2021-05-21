@@ -15,6 +15,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+
 try:
     unicode
 except NameError:
@@ -23,6 +24,7 @@ except NameError:
 
 import os
 import unittest
+
 try:
     import unittest.mock
 except ImportError:
@@ -33,7 +35,6 @@ import app.buffer_file as test_buffer_file
 
 
 class pathRowColumnTestCases(unittest.TestCase):
-
     def setUp(self):
         pass
 
@@ -41,7 +42,7 @@ class pathRowColumnTestCases(unittest.TestCase):
         pass
 
     def test_path_row_column(self):
-        if not hasattr(unittest, 'mock'):
+        if not hasattr(unittest, "mock"):
             return
         # Shortcuts.
         originalIsFile = test_buffer_file.os.path.isfile
@@ -65,8 +66,7 @@ class pathRowColumnTestCases(unittest.TestCase):
         self.assertEqual(decode(u"/", u""), (u"/", None, None))
 
         os.path.isfile = Mock(side_effect=[False, False])
-        self.assertEqual(decode(u"//apple", u"/stuff"),
-                (u"/stuff/apple", None, None))
+        self.assertEqual(decode(u"//apple", u"/stuff"), (u"/stuff/apple", None, None))
 
         os.path.isfile = Mock(side_effect=[False, False])
         self.assertEqual(decode(u"//apple", None), (u"//apple", None, None))
@@ -78,15 +78,13 @@ class pathRowColumnTestCases(unittest.TestCase):
         self.assertEqual(decode(u"/:5", u""), (u"/", 4, None))
 
         os.path.isfile = Mock(side_effect=[False, False, False])
-        self.assertEqual(decode(u"//apple:5", u"/stuff"),
-                (u"/stuff/apple", 4, None))
+        self.assertEqual(decode(u"//apple:5", u"/stuff"), (u"/stuff/apple", 4, None))
 
         os.path.isfile = Mock(side_effect=[False, False, False])
         self.assertEqual(decode(u"//apple:5", None), (u"//apple", 4, None))
 
         os.path.isfile = Mock(side_effect=[False, True])
-        self.assertEqual(decode(u"//apple", u"/stuff"),
-                (u"/stuff/apple", None, None))
+        self.assertEqual(decode(u"//apple", u"/stuff"), (u"/stuff/apple", None, None))
 
         os.path.isfile = Mock(side_effect=[False, True])
         self.assertEqual(decode(u"//apple", None), (u"apple", None, None))
@@ -98,8 +96,7 @@ class pathRowColumnTestCases(unittest.TestCase):
         self.assertEqual(decode(u"/:5", u""), (u"/", 4, None))
 
         os.path.isfile = Mock(side_effect=[False, True])
-        self.assertEqual(decode(u"//apple:5", u"/stuff"),
-                (u"/stuff/apple", 4, None))
+        self.assertEqual(decode(u"//apple:5", u"/stuff"), (u"/stuff/apple", 4, None))
 
         os.path.isfile = Mock(side_effect=[False, True, True])
         self.assertEqual(decode(u"//apple:5", None), (u"apple", 4, None))
@@ -114,13 +111,11 @@ class pathRowColumnTestCases(unittest.TestCase):
         self.assertEqual(decode(u"//apple:5:9:", None), (u"apple", 4, 8))
 
         os.path.isfile = Mock(side_effect=[False, True, True])
-        self.assertEqual(decode(u"apple:banana", None),
-                (u"apple:banana", None, None))
+        self.assertEqual(decode(u"apple:banana", None), (u"apple:banana", None, None))
 
         os.path.isfile = Mock(side_effect=[False, True, True])
-        self.assertEqual(decode(u"//apple:banana:cat:", None),
-                (u"apple:banana:cat:", None, None))
+        self.assertEqual(
+            decode(u"//apple:banana:cat:", None), (u"apple:banana:cat:", None, None)
+        )
 
         os.path.isfile = originalIsFile
-
-

@@ -28,9 +28,9 @@ import app.buffer_file
 screenLog = [u"--- screen log ---"]
 fullLog = [u"--- begin log ---"]
 enabledChannels = {
-    u'meta': True,
+    u"meta": True,
     #'mouse': True,
-    u'startup': True,
+    u"startup": True,
 }
 shouldWritePrintLog = False
 startTime = time.time()
@@ -45,13 +45,18 @@ def parse_lines(frame, logChannel, *args):
         args = [u""]
     msg = str(args[0])
     if 1:
-        msg = u"%s %s %s %s: %s" % (logChannel, os.path.split(frame[1])[1],
-                                    frame[2], frame[3], msg)
+        msg = u"%s %s %s %s: %s" % (
+            logChannel,
+            os.path.split(frame[1])[1],
+            frame[2],
+            frame[3],
+            msg,
+        )
     prior = msg
     for i in args[1:]:
         if not len(prior) or prior[-1] != u"\n":
             msg += u" "
-        prior = repr(i)  #unicode(i)
+        prior = repr(i)  # unicode(i)
         msg += prior
     return msg.split(u"\n")
 
@@ -59,8 +64,7 @@ def parse_lines(frame, logChannel, *args):
 def channel_enable(logChannel, isEnabled):
     global fullLog, shouldWritePrintLog
     fullLog += [
-        u"%10s %10s: %s %r" % (u'logging', u'channel_enable', logChannel,
-                               isEnabled)
+        u"%10s %10s: %s %r" % (u"logging", u"channel_enable", logChannel, isEnabled)
     ]
     if isEnabled:
         enabledChannels[logChannel] = isEnabled
@@ -80,8 +84,10 @@ def channel(logChannel, *args):
 def caller(*args):
     global fullLog, screenLog
     priorCaller = inspect.stack()[2]
-    msg = (u"%s %s %s" % (os.path.split(priorCaller[1])[1], priorCaller[2],
-                          priorCaller[3]),) + args
+    msg = (
+        u"%s %s %s"
+        % (os.path.split(priorCaller[1])[1], priorCaller[2], priorCaller[3]),
+    ) + args
     lines = parse_lines(inspect.stack()[1], u"caller", *msg)
     screenLog += lines
     fullLog += lines
@@ -89,7 +95,7 @@ def caller(*args):
 
 def exception(e, *args):
     global fullLog
-    lines = parse_lines(inspect.stack()[1], u'except', *args)
+    lines = parse_lines(inspect.stack()[1], u"except", *args)
     fullLog += lines
     errorType, value, tracebackInfo = sys.exc_info()
     out = traceback.format_exception(errorType, value, tracebackInfo)
@@ -98,32 +104,32 @@ def exception(e, *args):
 
 
 def check_failed(prefix, a, op, b):
-    stack(u'failed %s %r %s %r' % (prefix, a, op, b))
-    raise Exception('fatal error')
+    stack(u"failed %s %r %s %r" % (prefix, a, op, b))
+    raise Exception("fatal error")
 
 
 def check_ge(a, b):
     if a >= b:
         return
-    check_failed(u'check_ge', a, u'>=', b)
+    check_failed(u"check_ge", a, u">=", b)
 
 
 def check_gt(a, b):
     if a > b:
         return
-    check_failed(u'check_lt', a, u'<', b)
+    check_failed(u"check_lt", a, u"<", b)
 
 
 def check_le(a, b):
     if a <= b:
         return
-    check_failed(u'check_le', a, u'<=', b)
+    check_failed(u"check_le", a, u"<=", b)
 
 
 def check_lt(a, b):
     if a < b:
         return
-    check_failed(u'check_lt', a, u'<', b)
+    check_failed(u"check_lt", a, u"<", b)
 
 
 def stack(*args):
@@ -132,8 +138,8 @@ def stack(*args):
     callStack.reverse()
     for i, frame in enumerate(callStack):
         line = [
-            u"stack %2d %14s %4s %s" % (i, os.path.split(frame[1])[1], frame[2],
-                                        frame[3])
+            u"stack %2d %14s %4s %s"
+            % (i, os.path.split(frame[1])[1], frame[2], frame[3])
         ]
         screenLog += line
         fullLog += line
@@ -143,24 +149,24 @@ def stack(*args):
 
 
 def info(*args):
-    channel(u'info', *args)
+    channel(u"info", *args)
 
 
 def meta(*args):
     """Log information related to logging."""
-    channel(u'meta', *args)
+    channel(u"meta", *args)
 
 
 def mouse(*args):
-    channel(u'mouse', *args)
+    channel(u"mouse", *args)
 
 
 def parser(*args):
-    channel(u'parser', *args)
+    channel(u"parser", *args)
 
 
 def startup(*args):
-    channel(u'startup', *args)
+    channel(u"startup", *args)
 
 
 def quick(*args):
@@ -168,8 +174,8 @@ def quick(*args):
     msg = str(args[0])
     prior = msg
     for i in args[1:]:
-        if not len(prior) or prior[-1] != u'\n':
-            msg += u' '
+        if not len(prior) or prior[-1] != u"\n":
+            msg += u" "
         prior = i  # unicode(i)
         msg += prior
     lines = msg.split(u"\n")
@@ -179,28 +185,28 @@ def quick(*args):
 
 def debug(*args):
     global fullLog, screenLog
-    if u'debug' in enabledChannels:
-        lines = parse_lines(inspect.stack()[1], u'debug_@@@', *args)
+    if u"debug" in enabledChannels:
+        lines = parse_lines(inspect.stack()[1], u"debug_@@@", *args)
         screenLog += lines
         fullLog += lines
 
 
 def detail(*args):
     global fullLog
-    if u'detail' in enabledChannels:
-        lines = parse_lines(inspect.stack()[1], u'detail', *args)
+    if u"detail" in enabledChannels:
+        lines = parse_lines(inspect.stack()[1], u"detail", *args)
         fullLog += lines
 
 
 def error(*args):
     global fullLog
-    lines = parse_lines(inspect.stack()[1], u'error', *args)
+    lines = parse_lines(inspect.stack()[1], u"error", *args)
     fullLog += lines
 
 
 def when(*args):
     args = (time.time() - startTime,) + args
-    channel(u'info', *args)
+    channel(u"info", *args)
 
 
 def wrapper(function, shouldWrite=True):
@@ -223,7 +229,7 @@ def wrapper(function, shouldWrite=True):
 
 def write_to_file(path):
     fullPath = app.buffer_file.expand_full_path(path)
-    with io.open(fullPath, 'w+', encoding=u'UTF-8') as out:
+    with io.open(fullPath, "w+", encoding=u"UTF-8") as out:
         out.write(u"\n".join(fullLog) + u"\n")
 
 

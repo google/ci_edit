@@ -21,6 +21,7 @@ from __future__ import print_function
 
 import sys
 
+
 def version_check():
     if sys.version_info[0] <= 2:
         msg = """
@@ -45,19 +46,23 @@ line when running ci_edit.
         print(msg)
         sys.exit(1)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     args = sys.argv
-    if '--test' in args:
+    if "--test" in args:
         import unit_tests
-        args.remove('--test')
+
+        args.remove("--test")
         sys.exit(unit_tests.parse_arg_list(args))
-    if '--p2' not in args:
+    if "--p2" not in args:
         version_check()
     else:
-        args.remove('--p2')
-    if '--strict' in args:
+        args.remove("--p2")
+    if "--strict" in args:
         import app.config
-        args.remove('--strict')
+
+        args.remove("--strict")
         app.config.strict_debug = True
     import app.ci_program
+
     app.ci_program.run_ci()

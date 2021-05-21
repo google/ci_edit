@@ -14,4 +14,5 @@
 
 from .constants import *
 from .curses import *
-#__all__ = ["ascii", "contants", "curses"]
+
+# __all__ = ["ascii", "contants", "curses"]
