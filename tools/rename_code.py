@@ -43,6 +43,8 @@ for (dir, dirs, files) in os.walk(sys.argv[1]):
     for file in files:
         if not file.endswith(".py"):
             continue
+        if file == "rename_code.py":
+            continue
         path = os.path.join(dir, file)
         print("-----", path)
         with open(path, "r+") as f:
@@ -54,7 +56,9 @@ for (dir, dirs, files) in os.walk(sys.argv[1]):
                     f.read())
             f.seek(0)
             if path.find("/unit_test_") != -1:
-                data = re.sub("\bdef set_up\b", "def set_up", data)
+                print("----- [correcting] ", path)
+                data = re.sub(r"\bdef set_up\b", "def setUp", data)
+                data = re.sub(r"\bdef tear_down\b", "def tearDown", data)
             f.write(data)
 
 
