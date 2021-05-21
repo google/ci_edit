@@ -39,13 +39,13 @@ def lowest(key, value):
         profiles[key] = value
 
 
-def highestDelta(key, startTime):
+def highest_delta(key, startTime):
     delta = time.time() - startTime
     if delta > profiles.get(key):
         profiles[key] = delta
 
 
-def runningDelta(key, startTime):
+def running_delta(key, startTime):
     delta = time.time() - startTime
     bleed = 0.501
     profiles[key] = delta * bleed + profiles.get(key, delta) * (1 - bleed)
@@ -55,7 +55,7 @@ def results():
     return "one\ntwo\nthree"
 
 
-#----------------------------
+# ----------------------------
 # TODO(dschuyler): consider moving this python profile code out of this file.
 import app.log
 import cProfile
@@ -63,15 +63,15 @@ import pstats
 import io
 
 
-def beginPythonProfile():
+def begin_python_profile():
     profile = cProfile.Profile()
     profile.enable()
     return profile
 
 
-def endPythonProfile(profile):
+def end_python_profile(profile):
     profile.disable()
     output = io.StringIO.StringIO()
-    stats = pstats.Stats(profile, stream=output).sort_stats('cumulative')
+    stats = pstats.Stats(profile, stream=output).sort_stats("cumulative")
     stats.print_stats()
     app.log.info(output.getvalue())

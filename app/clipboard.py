@@ -16,26 +16,38 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+try:
+    unicode
+except NameError:
+    unicode = str
+    unichr = chr
+
 import third_party.pyperclip as clipboard
 
+import app.config
 
-class Clipboard():
 
+class Clipboard:
     def __init__(self):
         self._clipList = []
+        self.set_os_handlers(clipboard.copy, clipboard.paste)
 
     def copy(self, text):
         """Add text onto clipList. Empty |text| is not stored."""
+        if app.config.strict_debug:
+            assert isinstance(text, unicode), type(text)
         if text and len(text):
             self._clipList.append(text)
-            if clipboard.copy:
-                clipboard.copy(text)
+            if self._copy:
+                self._copy(text)
 
     def paste(self, clipIndex=None):
         """Fetch top of clipList; or clip at index |clipIndex|. The |clipIndex|
         will wrap around if it's larger than the clipList length."""
+        if app.config.strict_debug:
+            assert clipIndex is None or isinstance(clipIndex, int)
         if clipIndex is None:
-            osClip = clipboard.paste and clipboard.paste()
+            osClip = self._paste and self._paste()
             if osClip:
                 return osClip
             # Get the top of the clipList instead.
@@ -43,3 +55,7 @@ class Clipboard():
         if len(self._clipList):
             return self._clipList[clipIndex % len(self._clipList)]
         return None
+
+    def set_os_handlers(self, copy, paste):
+        self._copy = copy
+        self._paste = paste

@@ -13,8 +13,6 @@
 # limitations under the License.
 
 # This is a list of non-English words that are in Python libraries.
-unhexlify
-pprint
 abspath
 addstr
 altsep
@@ -99,6 +97,7 @@ fstat
 fstatvfs
 fsync
 ftruncate
+fullmatch
 getattr
 getch
 getcheckinterval
@@ -150,6 +149,7 @@ hglobal
 hinstance
 hmenu
 hwnd
+iexec
 iglob
 ignorecase
 init
@@ -158,6 +158,7 @@ ino
 insort
 inventwithpython
 ioerr
+isabs
 isalnum
 isalpha
 isatty
@@ -201,6 +202,7 @@ makedev
 makedirs
 max
 maxsize
+maxsplit
 maxunicode
 memmove
 metavar
@@ -246,6 +248,7 @@ pid
 plen
 popen
 ppage
+pprint
 prog
 prv
 ps
@@ -264,9 +267,11 @@ regex
 regs
 relpath
 removedirs
+repl
 repr
 resizeterm
 restype
+returncode
 rfind
 rit
 rmdir
@@ -316,6 +321,7 @@ spawnvef
 spawnvp
 spawnvpe
 splitext
+splitlines
 sprevious
 sre
 sright
@@ -346,6 +352,7 @@ uid
 umask
 uname
 ungetch
+unhexlify
 unichr
 unicodetext
 unittest

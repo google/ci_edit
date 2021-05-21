@@ -16,6 +16,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+
 try:
     unicode
 except NameError:
@@ -46,44 +47,42 @@ class BufferManager:
         # ordered list turns out to be more valuable.
         self.buffers = []
 
-    def closeTextBuffer(self, textBuffer):
+    def close_text_buffer(self, textBuffer):
         """Warning this will throw away the buffer. Please be sure the user is
         ok with this before calling."""
         if app.config.strict_debug:
             assert issubclass(self.__class__, BufferManager), self
             assert issubclass(textBuffer.__class__, app.text_buffer.TextBuffer)
-        self.untrackBuffer_(textBuffer)
+        self.untrack_buffer_(textBuffer)
 
-    def getUnsavedBuffer(self):
+    def get_unsaved_buffer(self):
         for fileBuffer in self.buffers:
-            if fileBuffer.isDirty():
+            if fileBuffer.is_dirty():
                 return fileBuffer
         return None
 
-    def newTextBuffer(self):
+    def new_text_buffer(self):
         textBuffer = app.text_buffer.TextBuffer(self.program)
-        textBuffer.lines = [u""]
-        textBuffer.savedAtRedoIndex = 0
         self.buffers.append(textBuffer)
         app.log.info(textBuffer)
-        self.debugLog()
+        self.debug_log()
         return textBuffer
 
-    def nextBuffer(self):
+    def next_buffer(self):
         app.log.info()
-        self.debugLog()
+        self.debug_log()
         if len(self.buffers):
             return self.buffers[0]
         return None
 
-    def topBuffer(self):
+    def top_buffer(self):
         app.log.info()
-        self.debugLog()
+        self.debug_log()
         if len(self.buffers):
-            return self.buffers[0]
+            return self.buffers[-1]
         return None
 
-    def getValidTextBuffer(self, textBuffer):
+    def get_valid_text_buffer(self, textBuffer):
         """If |textBuffer| is a managed buffer return it, otherwise create a new
         buffer. Primarily used to determine if a held reference to a textBuffer
         is still valid."""
@@ -95,11 +94,11 @@ class BufferManager:
         self.buffers.append(textBuffer)
         return textBuffer
 
-    def loadTextBuffer(self, relPath):
+    def load_text_buffer(self, relPath):
         if app.config.strict_debug:
             assert issubclass(self.__class__, BufferManager), self
             assert isinstance(relPath, unicode), type(relPath)
-        fullPath = app.buffer_file.fullPath(relPath)
+        fullPath = app.buffer_file.expand_full_path(relPath)
         app.log.info(fullPath)
         textBuffer = None
         for i, tb in enumerate(self.buffers):
@@ -108,31 +107,31 @@ class BufferManager:
                 del self.buffers[i]
                 self.buffers.append(tb)
                 break
-        app.log.info(u'Searched for textBuffer', repr(textBuffer))
+        app.log.info(u"Searched for textBuffer", repr(textBuffer))
         if not textBuffer:
             if os.path.isdir(fullPath):
-                app.log.info(u'Tried to open directory as a file', fullPath)
+                app.log.info(u"Tried to open directory as a file", fullPath)
                 return
             if not os.path.isfile(fullPath):
-                app.log.info(u'creating a new file at\n ', fullPath)
+                app.log.info(u"creating a new file at\n ", fullPath)
             textBuffer = app.text_buffer.TextBuffer(self.program)
-            textBuffer.setFilePath(fullPath)
-            textBuffer.fileLoad()
+            textBuffer.set_file_path(fullPath)
+            textBuffer.file_load()
             self.buffers.append(textBuffer)
         if 0:
-            self.debugLog()
+            self.debug_log()
         return textBuffer
 
-    def debugLog(self):
-        bufferList = u''
+    def debug_log(self):
+        bufferList = u""
         for i in self.buffers:
-            bufferList += u'\n  ' + repr(i.fullPath)
-            bufferList += u'\n    ' + repr(i)
-            bufferList += u'\n    dirty: ' + str(i.isDirty())
-        app.log.info(u'BufferManager' + bufferList)
+            bufferList += u"\n  " + repr(i.fullPath)
+            bufferList += u"\n    " + repr(i)
+            bufferList += u"\n    dirty: " + str(i.is_dirty())
+        app.log.info(u"BufferManager" + bufferList)
 
-    def readStdin(self):
-        app.log.info(u'reading from stdin')
+    def read_stdin(self):
+        app.log.info(u"reading from stdin")
         # Create a new input stream for the file data.
         # Fd is short for file descriptor. os.dup and os.dup2 will duplicate
         # file descriptors.
@@ -141,18 +140,18 @@ class BufferManager:
         newStdin = io.open(u"/dev/tty")
         os.dup2(newStdin.fileno(), stdinFd)
         # Create a text buffer to read from alternate stream.
-        textBuffer = self.newTextBuffer()
+        textBuffer = self.new_text_buffer()
         try:
             with io.open(newFd, u"r") as fileInput:
-                textBuffer.fileFilter(fileInput.read())
+                textBuffer.file_filter(fileInput.read())
         except Exception as e:
             app.log.exception(e)
-        app.log.info(u'finished reading from stdin')
+        app.log.info(u"finished reading from stdin")
         return textBuffer
 
-    def untrackBuffer_(self, fileBuffer):
+    def untrack_buffer_(self, fileBuffer):
         app.log.debug(fileBuffer.fullPath)
         self.buffers.remove(fileBuffer)
 
-    def fileClose(self, path):
+    def file_close(self, path):
         pass

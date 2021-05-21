@@ -26,42 +26,46 @@ import app.fake_curses_testing
 
 
 class PredictionWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
-
     def setUp(self):
         self.longMessage = True
-        app.fake_curses_testing.FakeCursesTestCase.setUp(self)
+        app.fake_curses_testing.FakeCursesTestCase.set_up(self)
 
     def test_prediction(self):
-        #self.setMovieMode(True)
+        # self.set_movie_mode(True)
         sys.argv = []
-        self.runWithFakeInputs([
-            self.displayCheck(0, 0, [u" ci     "]),
-            self.displayCheck(2, 7, [u"     "]),
-            CTRL_P,
-            self.displayCheck(0, 0, [u" ci               "]),
-            self.displayCheck(2, 2, [u"v Type|Name "]),
-            self.displayCheck(3, 0, [u"    open <new file> "]),
-            self.addClickInfo(1000, u"[x]open", curses.BUTTON1_PRESSED),
-            curses.KEY_MOUSE,
-            self.displayCheckNot(3, 0, [u"    open <new file> "]),
-            self.displayCheck(2, 2, [u"v Type|Name "]),
-            self.addClickInfo(2000, u"[ ]open", curses.BUTTON1_PRESSED),
-            curses.KEY_MOUSE,
-            # TODO(dschuyler): Look into why this fails:
-            #self.displayCheck(3, 0, ["    open <new file> "]),
-            CTRL_Q
-        ])
+        self.run_with_fake_inputs(
+            [
+                self.display_check(0, 0, [u" ci     "]),
+                self.display_check(2, 7, [u"     "]),
+                CTRL_P,
+                self.display_check(0, 0, [u" ci               "]),
+                self.display_check(2, 2, [u"- Type|Name "]),
+                # self.display_check_not(3, 0, [u"    open <new file> "]),
+                self.find_text_and_click(1000, u"[x]open", curses.BUTTON1_PRESSED),
+                self.display_check_not(3, 0, [u"    open <new file> "]),
+                self.display_check(2, 2, [u"- Type|Name "]),
+                self.find_text_and_click(2000, u"[ ]open", curses.BUTTON1_PRESSED),
+                # TODO(dschuyler): Look into why this fails:
+                # self.display_check(3, 0, ["    open <new file> "]),
+                CTRL_Q,
+            ]
+        )
 
     def test_save_as_to_quit(self):
-        #self.setMovieMode(True)
+        # self.set_movie_mode(True)
         sys.argv = []
-        self.runWithFakeInputs([
-            self.displayCheck(0, 0, [u" ci     "]),
-            self.displayCheck(2, 7, [u"     "]),
-            ord('a'),
-            self.displayCheck(2, 7, [u"a    "]), CTRL_S,
-            self.displayCheck(0, 0, [u" ci    Save File As"]), CTRL_Q,
-            self.displayCheck(0, 0, [u" ci     "]),
-            self.displayCheck(-2, 0, [u"      "]), CTRL_Q,
-            ord('n')
-        ])
+        self.run_with_fake_inputs(
+            [
+                self.display_check(0, 0, [u" ci     "]),
+                self.display_check(2, 7, [u"     "]),
+                ord("a"),
+                self.display_check(2, 7, [u"a    "]),
+                CTRL_S,
+                self.display_check(0, 0, [u" ci    Save File As"]),
+                CTRL_Q,
+                self.display_check(0, 0, [u" ci     "]),
+                self.display_check(-2, 0, [u"      "]),
+                CTRL_Q,
+                ord("n"),
+            ]
+        )

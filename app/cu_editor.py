@@ -28,107 +28,82 @@ import app.prediction_controller
 import app.text_buffer
 
 
-def initCommandSet(controller, textBuffer):
+def init_command_set(controller, textBuffer):
     """The basic command set includes line editing controls."""
     return {
-        CTRL_A: textBuffer.selectionAll,
-        CTRL_C: textBuffer.editCopy,
-        #CTRL_H: textBuffer.backspace,
-        CTRL_L: textBuffer.cursorSelectLine,
-        CTRL_Q: controller.quitOrSwitchToConfirmQuit,
-        CTRL_S: controller.saveOrChangeToSaveAs,
-        CTRL_V: textBuffer.editPaste,
-        CTRL_W: controller.closeOrConfirmClose,
-        CTRL_X: textBuffer.editCut,
-        CTRL_Y: textBuffer.editRedo,
-        CTRL_Z: textBuffer.editUndo,
+        CTRL_A: textBuffer.selection_all,
+        CTRL_C: textBuffer.edit_copy,
+        # CTRL_H: textBuffer.backspace,
+        CTRL_L: textBuffer.cursor_select_line,
+        CTRL_Q: controller.quit_or_switch_to_confirm_quit,
+        CTRL_S: controller.save_or_change_to_save_as,
+        CTRL_V: textBuffer.edit_paste,
+        CTRL_W: controller.close_or_confirm_close,
+        CTRL_X: textBuffer.edit_cut,
+        CTRL_Y: textBuffer.edit_redo,
+        CTRL_Z: textBuffer.edit_undo,
         KEY_BACKSPACE1: textBuffer.backspace,
         KEY_BACKSPACE2: textBuffer.backspace,
         KEY_BACKSPACE3: textBuffer.backspace,
+        CTRL_BACKSPACE: textBuffer.backspace_word,
         KEY_DELETE: textBuffer.delete,
-        KEY_HOME: textBuffer.cursorStartOfLine,
-        KEY_END: textBuffer.cursorEndOfLine,
-        KEY_SHOME: textBuffer.cursorSelectToStartOfLine,
-        KEY_SEND: textBuffer.cursorSelectToEndOfLine,
-
-        # KEY_DOWN: textBuffer.cursorDown,
-        KEY_LEFT: textBuffer.cursorLeft,
-        KEY_RIGHT: textBuffer.cursorRight,
-        # KEY_UP: textBuffer.cursorUp,
-        KEY_ALT_LEFT: textBuffer.cursorMoveSubwordLeft,
-        KEY_ALT_SHIFT_LEFT: textBuffer.cursorSelectSubwordLeft,
-        KEY_ALT_RIGHT: textBuffer.cursorMoveSubwordRight,
-        KEY_ALT_SHIFT_RIGHT: textBuffer.cursorSelectSubwordRight,
-        KEY_CTRL_LEFT: textBuffer.cursorMoveWordLeft,
-        KEY_CTRL_SHIFT_LEFT: textBuffer.cursorSelectWordLeft,
-        KEY_CTRL_RIGHT: textBuffer.cursorMoveWordRight,
-        KEY_CTRL_SHIFT_RIGHT: textBuffer.cursorSelectWordRight,
+        KEY_HOME: textBuffer.cursor_start_of_line,
+        KEY_END: textBuffer.cursor_end_of_line,
+        KEY_SHOME: textBuffer.cursor_select_to_start_of_line,
+        KEY_SEND: textBuffer.cursor_select_to_end_of_line,
+        # KEY_DOWN: textBuffer.cursor_down,
+        KEY_LEFT: textBuffer.cursor_left,
+        KEY_RIGHT: textBuffer.cursor_right,
+        # KEY_UP: textBuffer.cursor_up,
+        KEY_ALT_LEFT: textBuffer.cursor_move_subword_left,
+        KEY_ALT_SHIFT_LEFT: textBuffer.cursor_select_subword_left,
+        KEY_ALT_RIGHT: textBuffer.cursor_move_subword_right,
+        KEY_ALT_SHIFT_RIGHT: textBuffer.cursor_select_subword_right,
+        KEY_CTRL_LEFT: textBuffer.cursor_move_word_left,
+        KEY_CTRL_SHIFT_LEFT: textBuffer.cursor_select_word_left,
+        KEY_CTRL_RIGHT: textBuffer.cursor_move_word_right,
+        KEY_CTRL_SHIFT_RIGHT: textBuffer.cursor_select_word_right,
     }
 
 
-def mainWindowCommands(controller, textBuffer):
+def main_window_commands(controller, textBuffer):
     """The command set for a window (rather than a single line)."""
-    commands = initCommandSet(controller, textBuffer).copy()
-    commands.update({
-        KEY_ESCAPE:
-        textBuffer.normalize,
-        KEY_F1:
-        controller.info,
-        KEY_BTAB:
-        textBuffer.unindent,
-        KEY_PAGE_UP:
-        textBuffer.cursorSelectNonePageUp,
-        KEY_PAGE_DOWN:
-        textBuffer.cursorSelectNonePageDown,
-        KEY_SHIFT_PAGE_UP:
-        textBuffer.cursorSelectCharacterPageUp,
-        KEY_SHIFT_PAGE_DOWN:
-        textBuffer.cursorSelectCharacterPageDown,
-        KEY_ALT_SHIFT_PAGE_UP:
-        textBuffer.cursorSelectBlockPageUp,
-        KEY_ALT_SHIFT_PAGE_DOWN:
-        textBuffer.cursorSelectBlockPageDown,
-        CTRL_F:
-        controller.changeToFind,
-        CTRL_G:
-        controller.changeToGoto,
-        CTRL_I:
-        textBuffer.indent,
-        CTRL_J:
-        textBuffer.carriageReturn,
-        CTRL_N:
-        controller.createNewTextBuffer,
-        CTRL_O:
-        controller.changeToFileManagerWindow,
-        CTRL_Q:
-        controller.initiateQuit,
-        CTRL_R:
-        controller.changeToFindPrior,
-        CTRL_S:
-        controller.initiateSave,
-        CTRL_W:
-        controller.initiateClose,
-        KEY_DOWN:
-        textBuffer.cursorDown,
-        KEY_SHIFT_LEFT:
-        textBuffer.cursorSelectLeft,
-        KEY_SHIFT_RIGHT:
-        textBuffer.cursorSelectRight,
-        KEY_UP:
-        textBuffer.cursorUp,
-        KEY_SHIFT_DOWN:
-        textBuffer.cursorSelectDown,
-        KEY_SHIFT_UP:
-        textBuffer.cursorSelectUp,
-        KEY_CTRL_DOWN:
-        textBuffer.cursorDownScroll,
-        KEY_CTRL_SHIFT_DOWN:
-        textBuffer.cursorSelectDownScroll,
-        KEY_CTRL_UP:
-        textBuffer.cursorUpScroll,
-        KEY_CTRL_SHIFT_UP:
-        textBuffer.cursorSelectUpScroll,
-    })
+    commands = init_command_set(controller, textBuffer).copy()
+    commands.update(
+        {
+            KEY_ESCAPE: textBuffer.normalize,
+            KEY_F1: controller.info,
+            KEY_BTAB: textBuffer.unindent,
+            KEY_PAGE_UP: textBuffer.cursor_select_none_page_up,
+            KEY_PAGE_DOWN: textBuffer.cursor_select_none_page_down,
+            KEY_SHIFT_PAGE_UP: textBuffer.cursor_select_character_page_up,
+            KEY_SHIFT_PAGE_DOWN: textBuffer.cursor_select_character_page_down,
+            KEY_ALT_SHIFT_PAGE_UP: textBuffer.cursor_select_block_page_up,
+            KEY_ALT_SHIFT_PAGE_DOWN: textBuffer.cursor_select_block_page_down,
+            # CTRL_B:
+            # textBuffer.jump_to_matching_bracket,
+            CTRL_F: controller.change_to_find,
+            CTRL_G: controller.change_to_goto,
+            CTRL_I: textBuffer.indent,
+            CTRL_J: textBuffer.carriage_return,
+            CTRL_N: controller.create_new_text_buffer,
+            CTRL_O: controller.change_to_file_manager_window,
+            CTRL_Q: controller.initiate_quit,
+            CTRL_R: controller.change_to_find_prior,
+            CTRL_S: controller.initiate_save,
+            CTRL_W: controller.initiate_close,
+            KEY_DOWN: textBuffer.cursor_down,
+            KEY_SHIFT_LEFT: textBuffer.cursor_select_left,
+            KEY_SHIFT_RIGHT: textBuffer.cursor_select_right,
+            KEY_UP: textBuffer.cursor_up,
+            KEY_SHIFT_DOWN: textBuffer.cursor_select_down,
+            KEY_SHIFT_UP: textBuffer.cursor_select_up,
+            KEY_CTRL_DOWN: textBuffer.cursor_down_scroll,
+            KEY_CTRL_SHIFT_DOWN: textBuffer.cursor_select_down_scroll,
+            KEY_CTRL_UP: textBuffer.cursor_up_scroll,
+            KEY_CTRL_SHIFT_UP: textBuffer.cursor_select_up_scroll,
+        }
+    )
     return commands
 
 
@@ -136,44 +111,47 @@ class ConfirmClose(app.controller.Controller):
     """Ask about closing a file with unsaved changes."""
 
     def __init__(self, view):
-        app.controller.Controller.__init__(self, view, 'confirmClose')
+        app.controller.Controller.__init__(self, view, "confirmClose")
 
-    def setTextBuffer(self, textBuffer):
-        app.controller.Controller.setTextBuffer(self, textBuffer)
-        commandSet = initCommandSet(self, textBuffer)
-        commandSet.update({
-            ord('n'): self.closeFile,
-            ord('N'): self.closeFile,
-            ord('y'): self.saveOrChangeToSaveAs,
-            ord('Y'): self.saveOrChangeToSaveAs,
-        })
+    def set_text_buffer(self, textBuffer):
+        app.controller.Controller.set_text_buffer(self, textBuffer)
+        commandSet = init_command_set(self, textBuffer)
+        commandSet.update(
+            {
+                ord("n"): self.close_file,
+                ord("N"): self.close_file,
+                ord("y"): self.save_or_change_to_save_as,
+                ord("Y"): self.save_or_change_to_save_as,
+            }
+        )
         self.commandSet = commandSet
-        self.commandDefault = self.confirmationPromptFinish
+        self.commandDefault = self.confirmation_prompt_finish
 
 
 class ConfirmOverwrite(app.controller.Controller):
     """Ask about writing over an existing file."""
 
     def __init__(self, view):
-        app.controller.Controller.__init__(self, view, 'confirmOverwrite')
+        app.controller.Controller.__init__(self, view, "confirmOverwrite")
 
-    def setTextBuffer(self, textBuffer):
-        app.controller.Controller.setTextBuffer(self, textBuffer)
-        commandSet = initCommandSet(self, textBuffer)
-        commandSet.update({
-            ord('y'): self.overwriteHostFile,
-            ord('Y'): self.overwriteHostFile,
-        })
+    def set_text_buffer(self, textBuffer):
+        app.controller.Controller.set_text_buffer(self, textBuffer)
+        commandSet = init_command_set(self, textBuffer)
+        commandSet.update(
+            {
+                ord("y"): self.overwrite_host_file,
+                ord("Y"): self.overwrite_host_file,
+            }
+        )
         self.commandSet = commandSet
-        self.commandDefault = self.confirmationPromptFinish
+        self.commandDefault = self.confirmation_prompt_finish
 
 
 class InteractiveFind(app.editor.InteractiveFind):
-
     def __init__(self, view):
         app.editor.InteractiveFind.__init__(self, view)
 
-    def setTextBuffer(self, textBuffer):
+    def set_text_buffer(self, textBuffer):
         pass
 
 
@@ -185,36 +163,39 @@ class InteractiveFindInput(app.editor.InteractiveFindInput):
 
     def focus(self):
         if self.view.parent.expanded:
-            self.view.parent.parent.textBuffer.setMessage(
-                'Press ctrl+g to find again; ctrl+r find prior.')
+            self.view.parent.parent.textBuffer.set_message(
+                "Press ctrl+g to find again; ctrl+r find prior."
+            )
         else:
-            self.view.parent.parent.textBuffer.setMessage(
-                'Press tab for more options; ctrl+g to find next;'
-                ' ctrl+r find prior.')
+            self.view.parent.parent.textBuffer.set_message(
+                "Press tab for more options; ctrl+g to find next;" " ctrl+r find prior."
+            )
 
-    def setTextBuffer(self, textBuffer):
-        app.editor.InteractiveFindInput.setTextBuffer(self, textBuffer)
-        commandSet = initCommandSet(self, textBuffer)
-        commandSet.update({
-            KEY_BTAB: self.priorFocusableWindow,
-            KEY_ESCAPE: self.changeToHostWindow,
-            KEY_F1: self.info,
-            KEY_F3: self.saveEventChangeToHostWindow,
-            KEY_SHIFT_F3: self.saveEventChangeToHostWindow,
-            #CTRL_E: self.extendFindWindow,
-            CTRL_F: self.findNext,
-            CTRL_G: self.findNext,
-            CTRL_I: self.nextFocusableWindow,
-            CTRL_J: self.changeToHostWindow,
-            CTRL_N: self.saveEventChangeToHostWindow,
-            CTRL_O: self.changeToFileManagerWindow,
-            CTRL_P: self.changeToPrediction,
-            CTRL_R: self.findPrior,
-            #KEY_DOWN: self.findNext,
-            #KEY_UP: self.findPrior,
-        })
+    def set_text_buffer(self, textBuffer):
+        app.editor.InteractiveFindInput.set_text_buffer(self, textBuffer)
+        commandSet = init_command_set(self, textBuffer)
+        commandSet.update(
+            {
+                KEY_BTAB: self.prior_focusable_window,
+                KEY_ESCAPE: self.change_to_host_window,
+                KEY_F1: self.info,
+                KEY_F3: self.save_event_change_to_host_window,
+                KEY_SHIFT_F3: self.save_event_change_to_host_window,
+                # CTRL_E: self.extend_find_window,
+                CTRL_F: self.find_next,
+                CTRL_G: self.find_next,
+                CTRL_I: self.next_focusable_window,
+                CTRL_J: self.change_to_host_window,
+                CTRL_N: self.save_event_change_to_host_window,
+                CTRL_O: self.change_to_file_manager_window,
+                CTRL_P: self.change_to_prediction,
+                CTRL_R: self.find_prior,
+                # KEY_DOWN: self.find_next,
+                # KEY_UP: self.find_prior,
+            }
+        )
         self.commandSet = commandSet
-        self.commandDefault = self.textBuffer.insertPrintable
+        self.commandDefault = self.textBuffer.insert_printable
 
 
 class InteractiveReplaceInput(app.editor.InteractiveFindInput):
@@ -224,35 +205,38 @@ class InteractiveReplaceInput(app.editor.InteractiveFindInput):
         app.editor.InteractiveFindInput.__init__(self, view)
 
     def focus(self):
-        self.view.parent.parent.textBuffer.setMessage(
-            'Press ctrl+g to replace and find next; ctrl+r to replace and find'
-            ' prior.')
+        self.view.parent.parent.textBuffer.set_message(
+            "Press ctrl+g to replace and find next; ctrl+r to replace and find"
+            " prior."
+        )
 
-    def setTextBuffer(self, textBuffer):
-        app.editor.InteractiveFindInput.setTextBuffer(self, textBuffer)
-        commandSet = initCommandSet(self, textBuffer)
-        commandSet.update({
-            KEY_BTAB: self.priorFocusableWindow,
-            KEY_ESCAPE: self.changeToHostWindow,
-            KEY_F1: self.info,
-            KEY_F3: self.saveEventChangeToHostWindow,
-            KEY_SHIFT_F3: self.saveEventChangeToHostWindow,
-            CTRL_E: self.extendFindWindow,
-            CTRL_F: self.findNext,
-            CTRL_G: self.replaceAndNext,
-            CTRL_I: self.nextFocusableWindow,
-            CTRL_J: self.changeToHostWindow,
-            CTRL_N: self.saveEventChangeToHostWindow,
-            CTRL_O: self.changeToFileManagerWindow,
-            CTRL_P: self.changeToPrediction,
-            CTRL_R: self.replaceAndPrior,
-            #KEY_DOWN: self.findNext,
-            #KEY_UP: self.findPrior,
-        })
+    def set_text_buffer(self, textBuffer):
+        app.editor.InteractiveFindInput.set_text_buffer(self, textBuffer)
+        commandSet = init_command_set(self, textBuffer)
+        commandSet.update(
+            {
+                KEY_BTAB: self.prior_focusable_window,
+                KEY_ESCAPE: self.change_to_host_window,
+                KEY_F1: self.info,
+                KEY_F3: self.save_event_change_to_host_window,
+                KEY_SHIFT_F3: self.save_event_change_to_host_window,
+                CTRL_E: self.extend_find_window,
+                CTRL_F: self.find_next,
+                CTRL_G: self.replace_and_next,
+                CTRL_I: self.next_focusable_window,
+                CTRL_J: self.change_to_host_window,
+                CTRL_N: self.save_event_change_to_host_window,
+                CTRL_O: self.change_to_file_manager_window,
+                CTRL_P: self.change_to_prediction,
+                CTRL_R: self.replace_and_prior,
+                # KEY_DOWN: self.find_next,
+                # KEY_UP: self.find_prior,
+            }
+        )
         self.commandSet = commandSet
-        self.commandDefault = self.textBuffer.insertPrintable
+        self.commandDefault = self.textBuffer.insert_printable
 
-    def extendFindWindow(self):
+    def extend_find_window(self):
         self.view.host.toggleExtendedFindWindow()
 
 
@@ -262,25 +246,27 @@ class InteractiveGoto(app.editor.InteractiveGoto):
     def __init__(self, view):
         app.editor.InteractiveGoto.__init__(self, view)
 
-    def setTextBuffer(self, textBuffer):
-        app.editor.InteractiveGoto.setTextBuffer(self, textBuffer)
-        commandSet = initCommandSet(self, textBuffer)
-        commandSet.update({
-            KEY_ESCAPE: self.changeToHostWindow,
-            KEY_F1: self.info,
-            CTRL_F: self.changeToFind,
-            CTRL_J: self.changeToHostWindow,
-            CTRL_N: self.saveEventChangeToHostWindow,
-            CTRL_P: self.changeToPrediction,
-            ord('b'): self.gotoBottom,
-            ord('B'): self.gotoBottom,
-            ord('h'): self.gotoHalfway,
-            ord('H'): self.gotoHalfway,
-            ord('t'): self.gotoTop,
-            ord('T'): self.gotoTop,
-        })
+    def set_text_buffer(self, textBuffer):
+        app.editor.InteractiveGoto.set_text_buffer(self, textBuffer)
+        commandSet = init_command_set(self, textBuffer)
+        commandSet.update(
+            {
+                KEY_ESCAPE: self.change_to_host_window,
+                KEY_F1: self.info,
+                CTRL_F: self.change_to_find,
+                CTRL_J: self.change_to_host_window,
+                CTRL_N: self.save_event_change_to_host_window,
+                CTRL_P: self.change_to_prediction,
+                ord("b"): self.goto_bottom,
+                ord("B"): self.goto_bottom,
+                ord("h"): self.goto_halfway,
+                ord("H"): self.goto_halfway,
+                ord("t"): self.goto_top,
+                ord("T"): self.goto_top,
+            }
+        )
         self.commandSet = commandSet
-        self.commandDefault = self.textBuffer.insertPrintable
+        self.commandDefault = self.textBuffer.insert_printable
 
 
 class DirectoryList(app.file_manager_controller.DirectoryListController):
@@ -289,21 +275,24 @@ class DirectoryList(app.file_manager_controller.DirectoryListController):
     def __init__(self, view):
         app.file_manager_controller.DirectoryListController.__init__(self, view)
 
-    def setTextBuffer(self, textBuffer):
+    def set_text_buffer(self, textBuffer):
         assert textBuffer is self.view.textBuffer, textBuffer
-        app.file_manager_controller.DirectoryListController.setTextBuffer(
-            self, textBuffer)
-        commandSet = initCommandSet(self, textBuffer)
-        commandSet.update({
-            KEY_ESCAPE: self.changeToInputWindow,
+        app.file_manager_controller.DirectoryListController.set_text_buffer(
+            self, textBuffer
+        )
+        commandSet = {
+            KEY_BTAB: self.prior_focusable_window,
+            CTRL_I: self.next_focusable_window,
+            CTRL_J: self.perform_open,
+            KEY_ESCAPE: self.change_to_input_window,
             KEY_F1: self.info,
-            KEY_PAGE_DOWN: textBuffer.cursorSelectNonePageDown,
-            KEY_PAGE_UP: textBuffer.cursorSelectNonePageUp,
-            KEY_DOWN: textBuffer.cursorDown,
-            KEY_UP: textBuffer.cursorUp,
-        })
+            KEY_PAGE_DOWN: textBuffer.cursor_select_none_page_down,
+            KEY_PAGE_UP: textBuffer.cursor_select_none_page_up,
+            KEY_DOWN: textBuffer.cursor_down,
+            KEY_UP: textBuffer.cursor_up,
+        }
         self.commandSet = commandSet
-        self.commandDefault = self.textBuffer.insertPrintable
+        self.commandDefault = self.pass_default_to_path_input
 
 
 class FileOpener(app.file_manager_controller.FileManagerController):
@@ -312,27 +301,30 @@ class FileOpener(app.file_manager_controller.FileManagerController):
     def __init__(self, view):
         app.file_manager_controller.FileManagerController.__init__(self, view)
 
-    def setTextBuffer(self, textBuffer):
-        app.file_manager_controller.FileManagerController.setTextBuffer(
-            self, textBuffer)
-        commandSet = initCommandSet(self, textBuffer)
-        commandSet.update({
-            KEY_ESCAPE: self.changeToInputWindow,
-            KEY_F1: self.info,
-            KEY_PAGE_DOWN: self.passEventToDirectoryList,
-            KEY_PAGE_UP: self.passEventToDirectoryList,
-            KEY_DOWN: self.passEventToDirectoryList,
-            KEY_UP: self.passEventToDirectoryList,
-            CTRL_I: self.tabCompleteExtend,
-            CTRL_J: self.performPrimaryAction,
-            CTRL_N: self.saveEventChangeToHostWindow,
-            CTRL_O: self.performPrimaryAction,
-            CTRL_P: self.changeToPrediction,
-            CTRL_Q: self.saveEventChangeToHostWindow,
-            CTRL_S: self.saveEventChangeToHostWindow,
-        })
+    def set_text_buffer(self, textBuffer):
+        app.file_manager_controller.FileManagerController.set_text_buffer(
+            self, textBuffer
+        )
+        commandSet = init_command_set(self, textBuffer)
+        commandSet.update(
+            {
+                KEY_ESCAPE: self.change_to_input_window,
+                KEY_F1: self.info,
+                KEY_PAGE_DOWN: self.pass_event_to_directory_list,
+                KEY_PAGE_UP: self.pass_event_to_directory_list,
+                KEY_DOWN: self.pass_event_to_directory_list,
+                KEY_UP: self.pass_event_to_directory_list,
+                CTRL_I: self.tab_complete_extend,
+                CTRL_J: self.perform_primary_action,
+                CTRL_N: self.save_event_change_to_host_window,
+                CTRL_O: self.perform_primary_action,
+                CTRL_P: self.change_to_prediction,
+                CTRL_Q: self.save_event_change_to_host_window,
+                CTRL_S: self.save_event_change_to_host_window,
+            }
+        )
         self.commandSet = commandSet
-        self.commandDefault = self.textBuffer.insertPrintable
+        self.commandDefault = self.textBuffer.insert_printable
 
 
 class FilePathInput(app.file_manager_controller.FilePathInputController):
@@ -341,28 +333,31 @@ class FilePathInput(app.file_manager_controller.FilePathInputController):
     def __init__(self, view):
         app.file_manager_controller.FilePathInputController.__init__(self, view)
 
-    def setTextBuffer(self, textBuffer):
-        app.file_manager_controller.FilePathInputController.setTextBuffer(
-            self, textBuffer)
-        commandSet = initCommandSet(self, textBuffer)
-        commandSet.update({
-            KEY_BTAB: self.priorFocusableWindow,
-            KEY_ESCAPE: self.changeToInputWindow,
-            KEY_F1: self.info,
-            KEY_PAGE_DOWN: self.passEventToDirectoryList,
-            KEY_PAGE_UP: self.passEventToDirectoryList,
-            KEY_DOWN: self.passEventToDirectoryList,
-            KEY_UP: self.passEventToDirectoryList,
-            CTRL_I: self.tabCompleteExtend,
-            CTRL_J: self.performPrimaryAction,
-            CTRL_N: self.saveEventChangeToHostWindow,
-            CTRL_O: self.performPrimaryAction,
-            CTRL_P: self.changeToPrediction,
-            CTRL_Q: self.saveEventChangeToHostWindow,
-            CTRL_S: self.saveEventChangeToHostWindow,
-        })
+    def set_text_buffer(self, textBuffer):
+        app.file_manager_controller.FilePathInputController.set_text_buffer(
+            self, textBuffer
+        )
+        commandSet = init_command_set(self, textBuffer)
+        commandSet.update(
+            {
+                KEY_BTAB: self.prior_focusable_window,
+                KEY_ESCAPE: self.change_to_input_window,
+                KEY_F1: self.info,
+                KEY_PAGE_DOWN: self.pass_event_to_directory_list,
+                KEY_PAGE_UP: self.pass_event_to_directory_list,
+                KEY_DOWN: self.pass_event_to_directory_list,
+                KEY_UP: self.pass_event_to_directory_list,
+                CTRL_I: self.tab_complete_extend,
+                CTRL_J: self.perform_primary_action,
+                CTRL_N: self.save_event_change_to_host_window,
+                CTRL_O: self.perform_primary_action,
+                CTRL_P: self.change_to_prediction,
+                CTRL_Q: self.save_event_change_to_host_window,
+                CTRL_S: self.save_event_change_to_host_window,
+            }
+        )
         self.commandSet = commandSet
-        self.commandDefault = self.textBuffer.insertPrintable
+        self.commandDefault = self.textBuffer.insert_printable
 
 
 class InteractivePrediction(app.editor.InteractivePrediction):
@@ -371,24 +366,26 @@ class InteractivePrediction(app.editor.InteractivePrediction):
     def __init__(self, view):
         app.editor.InteractivePrediction.__init__(self, view)
 
-    def setTextBuffer(self, textBuffer):
-        app.editor.InteractivePrediction.setTextBuffer(self, textBuffer)
-        commandSet = initCommandSet(self, textBuffer)
-        commandSet.update({
-            KEY_ESCAPE: self.cancel,
-            KEY_F1: self.info,
-            CTRL_F: self.changeToFind,
-            CTRL_G: self.changeToGoto,
-            CTRL_J: self.selectItem,
-            CTRL_N: self.nextItem,
-            CTRL_O: self.changeToFileManagerWindow,
-            CTRL_P: self.priorItem,
-            CTRL_Q: self.saveEventChangeToHostWindow,
-            KEY_DOWN: self.nextItem,
-            KEY_UP: self.priorItem,
-        })
+    def set_text_buffer(self, textBuffer):
+        app.editor.InteractivePrediction.set_text_buffer(self, textBuffer)
+        commandSet = init_command_set(self, textBuffer)
+        commandSet.update(
+            {
+                KEY_ESCAPE: self.cancel,
+                KEY_F1: self.info,
+                CTRL_F: self.change_to_find,
+                CTRL_G: self.change_to_goto,
+                CTRL_J: self.select_item,
+                CTRL_N: self.next_item,
+                CTRL_O: self.change_to_file_manager_window,
+                CTRL_P: self.prior_item,
+                CTRL_Q: self.save_event_change_to_host_window,
+                KEY_DOWN: self.next_item,
+                KEY_UP: self.prior_item,
+            }
+        )
         self.commandSet = commandSet
-        self.commandDefault = self.textBuffer.insertPrintable
+        self.commandDefault = self.textBuffer.insert_printable
 
 
 class InteractivePrompt(app.interactive_prompt.InteractivePrompt):
@@ -397,57 +394,61 @@ class InteractivePrompt(app.interactive_prompt.InteractivePrompt):
     def __init__(self, view):
         app.interactive_prompt.InteractivePrompt.__init__(self, view)
 
-    def setTextBuffer(self, textBuffer):
-        app.interactive_prompt.InteractivePrompt.setTextBuffer(self, textBuffer)
-        commandSet = initCommandSet(self, textBuffer)
-        commandSet.update({
-            KEY_ESCAPE: self.changeToHostWindow,
-            KEY_F1: self.info,
-            CTRL_J: self.execute,
-            CTRL_N: self.saveEventChangeToHostWindow,
-        })
+    def set_text_buffer(self, textBuffer):
+        app.interactive_prompt.InteractivePrompt.set_text_buffer(self, textBuffer)
+        commandSet = init_command_set(self, textBuffer)
+        commandSet.update(
+            {
+                KEY_ESCAPE: self.change_to_host_window,
+                KEY_F1: self.info,
+                CTRL_J: self.execute,
+                CTRL_N: self.save_event_change_to_host_window,
+            }
+        )
         self.commandSet = commandSet
-        self.commandDefault = self.textBuffer.insertPrintable
+        self.commandDefault = self.textBuffer.insert_printable
 
 
 class InteractiveQuit(app.controller.Controller):
     """Ask about unsaved changes."""
 
     def __init__(self, view):
-        app.controller.Controller.__init__(self, view, 'interactiveQuit')
+        app.controller.Controller.__init__(self, view, "interactiveQuit")
 
-    def setTextBuffer(self, textBuffer):
-        app.controller.Controller.setTextBuffer(self, textBuffer)
+    def set_text_buffer(self, textBuffer):
+        app.controller.Controller.set_text_buffer(self, textBuffer)
         self.textBuffer = textBuffer
-        commandSet = initCommandSet(self, textBuffer)
-        commandSet.update({
-            #KEY_F1: self.info,
-            ord('n'): self.view.quitNow,
-            ord('N'): self.view.quitNow,
-            ord('y'): self.saveOrChangeToSaveAs,
-            ord('Y'): self.saveOrChangeToSaveAs,
-        })
+        commandSet = init_command_set(self, textBuffer)
+        commandSet.update(
+            {
+                # KEY_F1: self.info,
+                ord("n"): self.view.quit_now,
+                ord("N"): self.view.quit_now,
+                ord("y"): self.save_or_change_to_save_as,
+                ord("Y"): self.save_or_change_to_save_as,
+            }
+        )
         self.commandSet = commandSet
-        self.commandDefault = self.confirmationPromptFinish
+        self.commandDefault = self.confirmation_prompt_finish
 
 
 class CuaEdit(app.controller.Controller):
     """Keyboard mappings for CUA. CUA is the Cut/Copy/Paste paradigm."""
 
     def __init__(self, view):
-        app.controller.Controller.__init__(self, view, 'CuaEdit')
-        #self.view = view
+        app.controller.Controller.__init__(self, view, "CuaEdit")
+        # self.view = view
 
-    def setTextBuffer(self, textBuffer):
-        app.controller.Controller.setTextBuffer(self, textBuffer)
-        self.commandSet = mainWindowCommands(self, textBuffer)
-        self.commandDefault = self.textBuffer.insertPrintable
+    def set_text_buffer(self, textBuffer):
+        app.controller.Controller.set_text_buffer(self, textBuffer)
+        self.commandSet = main_window_commands(self, textBuffer)
+        self.commandDefault = self.textBuffer.insert_printable
 
     def info(self):
-        app.log.info('CuaEdit Command set main')
+        app.log.info("CuaEdit Command set main")
         app.log.info(repr(self))
 
-    def onChange(self):
+    def on_change(self):
         pass
 
 
@@ -456,68 +457,70 @@ class CuaPlusEdit(CuaEdit):
 
     def __init__(self, view):
         CuaEdit.__init__(self, view)
-        app.log.info('CuaPlusEdit.__init__')
+        app.log.info("CuaPlusEdit.__init__")
 
     def info(self):
-        app.log.info('CuaPlusEdit Command set main')
+        app.log.info("CuaPlusEdit Command set main")
         app.log.info(repr(self))
 
-    def setTextBuffer(self, textBuffer):
-        CuaEdit.setTextBuffer(self, textBuffer)
+    def set_text_buffer(self, textBuffer):
+        CuaEdit.set_text_buffer(self, textBuffer)
         commandSet = self.commandSet.copy()
-        commandSet.update({
-            CTRL_E: self.changeToPrompt,
-            CTRL_P: self.changeToPrediction,
-            KEY_F1: textBuffer.toggleShowTips,
-            KEY_F2: textBuffer.bookmarkNext,
-            KEY_F3: textBuffer.findAgain,
-            KEY_F4: self.changeToPaletteWindow,
-            KEY_F5: self.changeToPopup,
-            KEY_SHIFT_F2: textBuffer.bookmarkPrior,
-            KEY_SHIFT_F3: textBuffer.findBack,
-        })
+        commandSet.update(
+            {
+                CTRL_E: self.change_to_prompt,
+                CTRL_P: self.change_to_prediction,
+                KEY_F1: textBuffer.toggle_show_tips,
+                KEY_F2: textBuffer.bookmark_next,
+                KEY_F3: textBuffer.find_again,
+                KEY_F4: self.change_to_palette_window,
+                KEY_F5: self.change_to_popup,
+                KEY_SHIFT_F2: textBuffer.bookmark_prior,
+                KEY_SHIFT_F3: textBuffer.find_back,
+            }
+        )
         self.commandSet = commandSet
-        self.commandDefault = self.textBuffer.insertPrintableWithPairing
+        self.commandDefault = self.textBuffer.insert_printable_with_pairing
 
 
 class PopupController(app.controller.Controller):
     """
-  A controller for pop up boxes to notify the user.
-  """
+    A controller for pop up boxes to notify the user.
+    """
 
     def __init__(self, view):
-        app.controller.Controller.__init__(self, view, 'popup')
+        app.controller.Controller.__init__(self, view, "popup")
         self.callerSemaphore = None
 
-        def noOp(ch, meta):
-            app.log.info('noOp in PopupController')
+        def no_op(ch, meta):
+            app.log.info("no_op in PopupController")
 
-        self.commandDefault = noOp
+        self.commandDefault = no_op
         self.commandSet = {
-            KEY_ESCAPE: self.changeToInputWindow,
+            KEY_ESCAPE: self.change_to_input_window,
         }
 
-    def changeToInputWindow(self):
-        self.findAndChangeTo('inputWindow')
+    def change_to_input_window(self):
+        self.find_and_change_to("inputWindow")
         if self.callerSemaphore:
             self.callerSemaphore.release()
             self.callerSemaphore = None
 
-    def setOptions(self, options):
+    def set_options(self, options):
         """
-    This function is used to change the options that are displayed in the
-    popup window as well as their functions.
+        This function is used to change the options that are displayed in the
+        popup window as well as their functions.
 
-    Args:
-      options (dict): A dictionary mapping keys (ints) to its
-                      corresponding action.
+        Args:
+          options (dict): A dictionary mapping keys (ints) to its
+                          corresponding action.
 
-    Returns;
-      None.
-    """
+        Returns;
+          None.
+        """
         self.commandSet = options
 
-    def setTextBuffer(self, textBuffer):
+    def set_text_buffer(self, textBuffer):
         self.textBuffer = textBuffer
 
 
@@ -525,29 +528,29 @@ class PaletteDialogController(app.controller.Controller):
     """."""
 
     def __init__(self, view):
-        app.controller.Controller.__init__(self, view, 'Palette')
+        app.controller.Controller.__init__(self, view, "Palette")
         self.view = view
-        app.log.info('PaletteDialogController.__init__')
+        app.log.info("PaletteDialogController.__init__")
 
-        def noOp(c, meta):
-            app.log.info('noOp in PaletteDialogController')
+        def no_op(c, meta):
+            app.log.info("no_op in PaletteDialogController")
 
-        self.commandDefault = noOp
+        self.commandDefault = no_op
         self.commandSet = {
-            KEY_F4: self.changeToHostWindow,
-            CTRL_J: self.changeToHostWindow,
-            KEY_ESCAPE: self.changeToHostWindow,
+            KEY_F4: self.change_to_host_window,
+            CTRL_J: self.change_to_host_window,
+            KEY_ESCAPE: self.change_to_host_window,
         }
 
-    def changeToHostWindow(self):
+    def change_to_host_window(self):
         mainProgram = self.view.prg
-        mainProgram.changeFocusTo(mainProgram.inputWindow)
+        mainProgram.change_focus_to(mainProgram.inputWindow)
 
     def info(self):
-        app.log.info('PaletteDialogController command set')
+        app.log.info("PaletteDialogController command set")
         app.log.info(repr(self))
 
-    def setTextBuffer(self, textBuffer):
+    def set_text_buffer(self, textBuffer):
         self.textBuffer = textBuffer
 
 
@@ -557,21 +560,24 @@ class PredictionList(app.prediction_controller.PredictionListController):
     def __init__(self, view):
         app.prediction_controller.PredictionListController.__init__(self, view)
 
-    def setTextBuffer(self, textBuffer):
+    def set_text_buffer(self, textBuffer):
         assert textBuffer is self.view.textBuffer, textBuffer
-        app.prediction_controller.PredictionListController.setTextBuffer(
-            self, textBuffer)
-        commandSet = initCommandSet(self, textBuffer)
-        commandSet.update({
-            KEY_ESCAPE: self.changeToInputWindow,
-            KEY_F1: self.info,
-            KEY_PAGE_DOWN: textBuffer.cursorSelectNonePageDown,
-            KEY_PAGE_UP: textBuffer.cursorSelectNonePageUp,
-            KEY_DOWN: textBuffer.cursorDown,
-            KEY_UP: textBuffer.cursorUp,
-        })
+        app.prediction_controller.PredictionListController.set_text_buffer(
+            self, textBuffer
+        )
+        commandSet = init_command_set(self, textBuffer)
+        commandSet.update(
+            {
+                KEY_ESCAPE: self.change_to_input_window,
+                KEY_F1: self.info,
+                KEY_PAGE_DOWN: textBuffer.cursor_select_none_page_down,
+                KEY_PAGE_UP: textBuffer.cursor_select_none_page_up,
+                KEY_DOWN: textBuffer.cursor_down,
+                KEY_UP: textBuffer.cursor_up,
+            }
+        )
         self.commandSet = commandSet
-        self.commandDefault = self.textBuffer.insertPrintable
+        self.commandDefault = self.textBuffer.insert_printable
 
 
 class PredictionController(app.prediction_controller.PredictionController):
@@ -580,59 +586,62 @@ class PredictionController(app.prediction_controller.PredictionController):
     def __init__(self, view):
         app.prediction_controller.PredictionController.__init__(self, view)
 
-    def setTextBuffer(self, textBuffer):
-        app.prediction_controller.PredictionController.setTextBuffer(
-            self, textBuffer)
-        commandSet = initCommandSet(self, textBuffer)
-        commandSet.update({
-            KEY_ESCAPE: self.changeToInputWindow,
-            KEY_F1: self.info,
-            KEY_PAGE_DOWN: self.passEventToDirectoryList,
-            KEY_PAGE_UP: self.passEventToDirectoryList,
-            KEY_DOWN: self.passEventToDirectoryList,
-            KEY_UP: self.passEventToDirectoryList,
-            #CTRL_I: self.tabCompleteExtend,
-            CTRL_J: self.performPrimaryAction,
-            CTRL_N: self.saveEventChangeToHostWindow,
-            CTRL_O: self.performPrimaryAction,
-            CTRL_P: self.changeToPrediction,
-            CTRL_Q: self.saveEventChangeToHostWindow,
-            CTRL_S: self.saveEventChangeToHostWindow,
-        })
+    def set_text_buffer(self, textBuffer):
+        app.prediction_controller.PredictionController.set_text_buffer(self, textBuffer)
+        commandSet = init_command_set(self, textBuffer)
+        commandSet.update(
+            {
+                KEY_ESCAPE: self.change_to_input_window,
+                KEY_F1: self.info,
+                KEY_PAGE_DOWN: self.pass_event_to_directory_list,
+                KEY_PAGE_UP: self.pass_event_to_directory_list,
+                KEY_DOWN: self.pass_event_to_directory_list,
+                KEY_UP: self.pass_event_to_directory_list,
+                # CTRL_I: self.tab_complete_extend,
+                CTRL_J: self.perform_primary_action,
+                CTRL_N: self.save_event_change_to_host_window,
+                CTRL_O: self.perform_primary_action,
+                CTRL_P: self.change_to_prediction,
+                CTRL_Q: self.save_event_change_to_host_window,
+                CTRL_S: self.save_event_change_to_host_window,
+            }
+        )
         self.commandSet = commandSet
-        self.commandDefault = self.textBuffer.insertPrintable
+        self.commandDefault = self.textBuffer.insert_printable
 
 
-class PredictionInputController(
-        app.prediction_controller.PredictionInputController):
+class PredictionInputController(app.prediction_controller.PredictionInputController):
     """Open a file to edit."""
 
     def __init__(self, view):
         app.prediction_controller.PredictionInputController.__init__(self, view)
 
-    def setTextBuffer(self, textBuffer):
-        app.prediction_controller.PredictionInputController.setTextBuffer(
-            self, textBuffer)
-        commandSet = initCommandSet(self, textBuffer)
-        commandSet.update({
-            KEY_BTAB: self.priorFocusableWindow,
-            KEY_ESCAPE: self.changeToInputWindow,
-            KEY_F1: self.info,
-            KEY_PAGE_DOWN: self.passEventToPredictionList,
-            KEY_PAGE_UP: self.passEventToPredictionList,
-            KEY_DOWN: self.passEventToPredictionList,
-            KEY_UP: self.passEventToPredictionList,
-            CTRL_L: self.openAlternateFile,
-            CTRL_I: self.nextFocusableWindow,
-            CTRL_J: self.performPrimaryAction,
-            CTRL_N: self.saveEventChangeToHostWindow,
-            CTRL_O: self.performPrimaryAction,
-            CTRL_P: self.predictionListPrior,
-            CTRL_Q: self.saveEventChangeToHostWindow,
-            CTRL_S: self.saveEventChangeToHostWindow,
-        })
+    def set_text_buffer(self, textBuffer):
+        app.prediction_controller.PredictionInputController.set_text_buffer(
+            self, textBuffer
+        )
+        commandSet = init_command_set(self, textBuffer)
+        commandSet.update(
+            {
+                KEY_BTAB: self.prior_focusable_window,
+                KEY_ESCAPE: self.change_to_input_window,
+                KEY_F1: self.info,
+                KEY_PAGE_DOWN: self.pass_event_to_prediction_list,
+                KEY_PAGE_UP: self.pass_event_to_prediction_list,
+                KEY_DOWN: self.pass_event_to_prediction_list,
+                KEY_UP: self.pass_event_to_prediction_list,
+                CTRL_L: self.open_alternate_file,
+                CTRL_I: self.next_focusable_window,
+                CTRL_J: self.perform_primary_action,
+                CTRL_N: self.save_event_change_to_host_window,
+                CTRL_O: self.perform_primary_action,
+                CTRL_P: self.prediction_list_next,
+                CTRL_Q: self.save_event_change_to_host_window,
+                CTRL_S: self.save_event_change_to_host_window,
+            }
+        )
         self.commandSet = commandSet
-        self.commandDefault = self.textBuffer.insertPrintable
+        self.commandDefault = self.textBuffer.insert_printable
 
 
 class ToggleController(app.editor.ToggleController):
@@ -641,28 +650,30 @@ class ToggleController(app.editor.ToggleController):
     def __init__(self, view):
         app.editor.ToggleController.__init__(self, view)
 
-    def setTextBuffer(self, textBuffer):
-        app.editor.ToggleController.setTextBuffer(self, textBuffer)
-        commandSet = initCommandSet(self, textBuffer)
-        commandSet.update({
-            KEY_BTAB: self.priorFocusableWindow,
-            KEY_ESCAPE: self.changeToHostWindow,
-            KEY_F3: self.saveEventChangeToHostWindow,
-            KEY_SHIFT_F3: self.saveEventChangeToHostWindow,
-            #CTRL_E: self.extendFindWindow,
-            CTRL_F: self.changeToFind,
-            CTRL_G: self.changeToFind,
-            CTRL_I: self.nextFocusableWindow,
-            CTRL_J: self.toggleValue,
-            CTRL_N: self.saveEventChangeToHostWindow,
-            CTRL_O: self.changeToFileManagerWindow,
-            CTRL_P: self.changeToPrediction,
-            CTRL_R: self.changeToFindPrior,
-            ord(' '): self.toggleValue,
-        })
+    def set_text_buffer(self, textBuffer):
+        app.editor.ToggleController.set_text_buffer(self, textBuffer)
+        commandSet = init_command_set(self, textBuffer)
+        commandSet.update(
+            {
+                KEY_BTAB: self.prior_focusable_window,
+                KEY_ESCAPE: self.change_to_host_window,
+                KEY_F3: self.save_event_change_to_host_window,
+                KEY_SHIFT_F3: self.save_event_change_to_host_window,
+                # CTRL_E: self.extend_find_window,
+                CTRL_F: self.change_to_find,
+                CTRL_G: self.change_to_find,
+                CTRL_I: self.next_focusable_window,
+                CTRL_J: self.toggle_value,
+                CTRL_N: self.save_event_change_to_host_window,
+                CTRL_O: self.change_to_file_manager_window,
+                CTRL_P: self.change_to_prediction,
+                CTRL_R: self.change_to_find_prior,
+                ord(" "): self.toggle_value,
+            }
+        )
         self.commandSet = commandSet
 
-        def noOp(ch, meta):
-            app.log.info('noOp in ToggleController')
+        def no_op(ch, meta):
+            app.log.info("no_op in ToggleController")
 
-        self.commandDefault = noOp
+        self.commandDefault = no_op
