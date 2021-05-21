@@ -32,7 +32,7 @@ kTestFile = '#bookmarks_test_file_with_unlikely_file_name~'
 
 class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
-    def set_up(self):
+    def setUp(self):
         self.prg = app.ci_program.CiProgram()
         self.fakeHost = app.window.ViewWindow(self.prg, None)
         self.textBuffer = app.text_buffer.TextBuffer(self.prg)
@@ -45,7 +45,7 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
         self.fakeHost.scrollRow = self.fakeHost.cursorRow = 0
         app.fake_curses_testing.FakeCursesTestCase.set_up(self)
 
-    def tear_down(self):
+    def tearDown(self):
         app.fake_curses_testing.FakeCursesTestCase.tear_down(self)
 
     def test_bookmark_comparisons(self):
@@ -701,3 +701,5 @@ class BookmarkTestCases(app.fake_curses_testing.FakeCursesTestCase):
                 CTRL_Q,
                 'n',
             ])
+
+

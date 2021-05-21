@@ -27,7 +27,7 @@ import app.fake_curses_testing
 
 class FileManagerTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
-    def set_up(self):
+    def setUp(self):
         self.longMessage = True
         app.fake_curses_testing.FakeCursesTestCase.set_up(self)
 
@@ -172,3 +172,4 @@ class FileManagerTestCases(app.fake_curses_testing.FakeCursesTestCase):
             # updates. When that is fixed, this second CTRL_Q should be removed.
             CTRL_Q,
         ])
+

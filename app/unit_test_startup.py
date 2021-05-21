@@ -31,7 +31,7 @@ kTestFile = u'#startup_test_file_with_unlikely_file_name~'
 
 class StartupTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
-    def set_up(self):
+    def setUp(self):
         self.longMessage = True
         app.fake_curses_testing.FakeCursesTestCase.set_up(self)
 
@@ -69,3 +69,4 @@ class StartupTestCases(app.fake_curses_testing.FakeCursesTestCase):
             self.cursor_check(4, 7),
             CTRL_Q
         ], [sys.argv[0], self.path_to_sample(u"sample.cc:12")])
+

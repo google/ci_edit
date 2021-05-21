@@ -30,10 +30,10 @@ import app.prefs
 
 class ParserTestCases(unittest.TestCase):
 
-    def set_up(self):
+    def setUp(self):
         self.parser = app.parser.Parser(app.prefs.Prefs())
 
-    def tear_down(self):
+    def tearDown(self):
         self.parser = None
 
     def check_parser_nodes(self, expected, actual, startIndex=None):
@@ -927,3 +927,5 @@ e
                 profile, stream=output).sort_stats(u'cumulative')
             stats.print_stats()
             print(output.getvalue())
+
+

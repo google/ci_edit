@@ -31,7 +31,7 @@ kTestFile = u'#application_test_file_with_unlikely_file_name~'
 
 class ApplicationTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
-    def set_up(self):
+    def setUp(self):
         self.longMessage = True
         app.fake_curses_testing.FakeCursesTestCase.set_up(self)
 
@@ -378,3 +378,4 @@ class ApplicationTestCases(app.fake_curses_testing.FakeCursesTestCase):
             self.mouse_event(0, 3, 2, curses.BUTTON1_PRESSED),
             CTRL_L, CTRL_Q, u'n'
         ])
+

@@ -28,10 +28,10 @@ kTestFile = u'#automatic_column_adjustment_test_file_with_unlikely_file_name~'
 class AutomaticColumnAdjustmentCases(
         app.fake_curses_testing.FakeCursesTestCase):
 
-    def set_up(self):
+    def setUp(self):
         app.fake_curses_testing.FakeCursesTestCase.set_up(self)
 
-    def tear_down(self):
+    def tearDown(self):
         app.fake_curses_testing.FakeCursesTestCase.tear_down(self)
 
     def test_column_adjustment_on_moving_by_one_line(self):
@@ -442,3 +442,5 @@ class AutomaticColumnAdjustmentCases(
             CTRL_Q,
             u'n',
         ])
+
+

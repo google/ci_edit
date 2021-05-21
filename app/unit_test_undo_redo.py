@@ -31,7 +31,7 @@ kTestFile = u'#undo_redo_test_file_with_unlikely_file_name~'
 
 class UndoRedoTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
-    def set_up(self):
+    def setUp(self):
         self.longMessage = True
         if os.path.isfile(kTestFile):
             os.unlink(kTestFile)
@@ -105,3 +105,4 @@ class UndoRedoTestCases(app.fake_curses_testing.FakeCursesTestCase):
             self.display_check(2, 7, [u"one two three four        "]), CTRL_Y,
             self.display_check(2, 7, [u"one five        "]), CTRL_Q, u"n"
         ])
+

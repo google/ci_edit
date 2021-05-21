@@ -25,7 +25,7 @@ import app.prefs
 
 class PrefsTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
-    def set_up(self):
+    def setUp(self):
         self.longMessage = True
         app.fake_curses_testing.FakeCursesTestCase.set_up(self)
         self.prefs = app.prefs.Prefs()
@@ -56,3 +56,4 @@ class PrefsTestCases(app.fake_curses_testing.FakeCursesTestCase):
         self.assertEqual(tabs_to_spaces("cpp"), True)
         self.assertEqual(tabs_to_spaces(None), False)
         self.assertEqual(tabs_to_spaces("foo"), None)
+

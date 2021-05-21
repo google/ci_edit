@@ -27,7 +27,7 @@ import app.fake_curses_testing
 
 class FindWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
-    def set_up(self):
+    def setUp(self):
         self.longMessage = True
         app.fake_curses_testing.FakeCursesTestCase.set_up(self)
 
@@ -228,3 +228,4 @@ class FindWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
             CTRL_Q,
             ord('n')
         ])
+

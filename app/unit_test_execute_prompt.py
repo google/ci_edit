@@ -27,7 +27,7 @@ import app.fake_curses_testing
 
 class ExecutePromptTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
-    def set_up(self):
+    def setUp(self):
         self.longMessage = True
         app.fake_curses_testing.FakeCursesTestCase.set_up(self)
 
@@ -55,3 +55,4 @@ class ExecutePromptTestCases(app.fake_curses_testing.FakeCursesTestCase):
                 u"           "
             ]), CTRL_Q, u"n"
         ])
+

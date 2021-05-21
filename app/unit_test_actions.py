@@ -77,7 +77,7 @@ class ActionsTestCase(unittest.TestCase):
 
 class MouseTestCases(ActionsTestCase):
 
-    def set_up(self):
+    def setUp(self):
         app.log.shouldWritePrintLog = False
         self.prg = app.ci_program.CiProgram()
         self.textBuffer = app.text_buffer.TextBuffer(self.prg)
@@ -95,7 +95,7 @@ void blah();
         #self.assertEqual(self.textBuffer.scrollCol, 0)
         self.assertEqual(self.textBuffer.parser.row_text(1), 'two')
 
-    def tear_down(self):
+    def tearDown(self):
         self.textBuffer = None
 
     def test_mouse_selection(self):
@@ -181,7 +181,7 @@ void blah();
 
 class SelectionTestCases(ActionsTestCase):
 
-    def set_up(self):
+    def setUp(self):
         app.log.shouldWritePrintLog = False
         self.prg = app.ci_program.CiProgram()
         self.textBuffer = app.text_buffer.TextBuffer(self.prg)
@@ -318,7 +318,7 @@ a\twith tab
 
 class TextIndentTestCases(ActionsTestCase):
 
-    def set_up(self):
+    def setUp(self):
         app.log.shouldWritePrintLog = False
         self.prg = app.ci_program.CiProgram()
         self.textBuffer = app.text_buffer.TextBuffer(self.prg)
@@ -326,7 +326,7 @@ class TextIndentTestCases(ActionsTestCase):
         #self.assertEqual(self.textBuffer.scrollRow, 0)
         #self.assertEqual(self.textBuffer.scrollCol, 0)
 
-    def tear_down(self):
+    def tearDown(self):
         self.textBuffer = None
 
     def test_auto_indent(self):
@@ -538,7 +538,7 @@ class TextIndentTestCases(ActionsTestCase):
 
 class TextInsertTestCases(ActionsTestCase):
 
-    def set_up(self):
+    def setUp(self):
         app.log.shouldWritePrintLog = False
         self.prg = app.ci_program.CiProgram()
         self.textBuffer = app.text_buffer.TextBuffer(self.prg)
@@ -546,7 +546,7 @@ class TextInsertTestCases(ActionsTestCase):
         #self.assertEqual(self.textBuffer.scrollRow, 0)
         #self.assertEqual(self.textBuffer.scrollCol, 0)
 
-    def tear_down(self):
+    def tearDown(self):
         self.textBuffer = None
 
     def test_auto_insert_pair_disable(self):
@@ -599,13 +599,13 @@ class TextInsertTestCases(ActionsTestCase):
 
 class GrammarDeterminationTestCases(ActionsTestCase):
 
-    def set_up(self):
+    def setUp(self):
         app.log.shouldWritePrintLog = False
         self.prg = app.ci_program.CiProgram()
         self.textBuffer = app.text_buffer.TextBuffer(self.prg)
         self.textBuffer.set_view(FakeView())
 
-    def tear_down(self):
+    def tearDown(self):
         self.textBuffer = None
 
     def test_message_backspace(self):

@@ -31,7 +31,7 @@ kTestFile = u'#application_test_file_with_unlikely_file_name~'
 
 class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
-    def set_up(self):
+    def setUp(self):
         self.longMessage = True
         app.fake_curses_testing.FakeCursesTestCase.set_up(self)
 
@@ -71,3 +71,4 @@ class IntentionTestCases(app.fake_curses_testing.FakeCursesTestCase):
         self.assertTrue(os.path.isfile(kTestFile))
         os.unlink(kTestFile)
         self.assertFalse(os.path.isfile(kTestFile))
+

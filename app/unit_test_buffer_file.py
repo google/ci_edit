@@ -34,10 +34,10 @@ import app.buffer_file as test_buffer_file
 
 class pathRowColumnTestCases(unittest.TestCase):
 
-    def set_up(self):
+    def setUp(self):
         pass
 
-    def tear_down(self):
+    def tearDown(self):
         pass
 
     def test_path_row_column(self):
@@ -122,3 +122,5 @@ class pathRowColumnTestCases(unittest.TestCase):
                 (u"apple:banana:cat:", None, None))
 
         os.path.isfile = originalIsFile
+
+

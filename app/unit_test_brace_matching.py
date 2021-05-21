@@ -27,7 +27,7 @@ import app.fake_curses_testing
 
 class BraceMatchingTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
-    def set_up(self):
+    def setUp(self):
         self.longMessage = True
         app.fake_curses_testing.FakeCursesTestCase.set_up(self)
 
@@ -210,4 +210,5 @@ class BraceMatchingTestCases(app.fake_curses_testing.FakeCursesTestCase):
             CTRL_Q,
             u'n'
         ])
+
 

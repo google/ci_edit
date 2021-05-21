@@ -24,7 +24,7 @@ import app.fake_curses_testing
 
 class DrawTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
-    def set_up(self):
+    def setUp(self):
         app.fake_curses_testing.FakeCursesTestCase.set_up(self)
 
     def test_draw_nothing(self):
@@ -123,3 +123,4 @@ ends with tab>\t
                                    self.prg.color.get(u'selected', 0)),
             CTRL_Q, u"n"
         ])
+

@@ -32,7 +32,7 @@ kTestFile = u'#application_test_file_with_unlikely_file_name~'
 
 class CopyPasteTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
-    def set_up(self):
+    def setUp(self):
         self.longMessage = True
         app.fake_curses_testing.FakeCursesTestCase.set_up(self)
 
@@ -150,3 +150,4 @@ class CopyPasteTestCases(app.fake_curses_testing.FakeCursesTestCase):
             self.write_text(u'test\n'),
             CTRL_Q, u'n'
         ])
+

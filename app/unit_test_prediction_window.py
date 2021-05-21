@@ -27,7 +27,7 @@ import app.fake_curses_testing
 
 class PredictionWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
 
-    def set_up(self):
+    def setUp(self):
         self.longMessage = True
         app.fake_curses_testing.FakeCursesTestCase.set_up(self)
 
@@ -63,3 +63,4 @@ class PredictionWindowTestCases(app.fake_curses_testing.FakeCursesTestCase):
             self.display_check(-2, 0, [u"      "]), CTRL_Q,
             ord('n')
         ])
+

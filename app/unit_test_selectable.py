@@ -27,11 +27,11 @@ import app.selectable
 
 class SelectableTestCases(unittest.TestCase):
 
-    def set_up(self):
+    def setUp(self):
         self.selectable = app.selectable.Selectable(app.ci_program.CiProgram())
         app.log.shouldWritePrintLog = True
 
-    def tear_down(self):
+    def tearDown(self):
         self.selectable = None
 
     def test_default_values(self):
@@ -219,3 +219,5 @@ class SelectableTestCases(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
