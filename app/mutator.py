@@ -151,6 +151,12 @@ class Mutator(app.selectable.Selectable):
         return not clean
 
     def is_safe_to_write(self):
+        """Determine whether writing the file to self.fullPath is likely to
+        overwrite data.
+
+        Returns true if the file is not yet written or if the file has not been
+        changed since it was read.
+        """
         if not os.path.exists(self.fullPath):
             return True
         if self.fileStat is None:
@@ -178,6 +184,10 @@ class Mutator(app.selectable.Selectable):
         )
 
     def set_file_path(self, path):
+        """Set the location where this file will be written.
+
+        `path` may be full, relative, or contain env vars.
+        """
         self.fullPath = app.buffer_file.expand_full_path(path)
 
     def __do_move_lines(self, begin, end, to):

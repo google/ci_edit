@@ -1646,14 +1646,16 @@ prefs = {
             "end": "'''",
             "escaped": r"\\'",
             # "indent": "  ",
+            "single_line": False,
             "special": __special_string_escapes + [r"\\'"],
         },
         "py_string2": {
             "begin": '[uU]?"""',
             "end": '"""',
-            "escaped": '\\\\"',
+            "escaped": r'\\"',
             # "indent": "  ",
-            "special": __special_string_escapes + ['\\\\"'],
+            "single_line": False,
+            "special": __special_string_escapes + [r'\\"'],
         },
         "quoted_string1": {
             # This is not a programming string, there are no escape chars.
