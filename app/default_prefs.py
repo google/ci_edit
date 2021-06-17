@@ -1736,7 +1736,7 @@ prefs = {
                 "yield",
             ],
             "special": [
-                "\\bassert_eq!",
+                "\\b\\w+!",
                 "\\bNone\\b",
                 "\\bOption\\b",
                 "\\bResult\\b",
