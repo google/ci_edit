@@ -726,6 +726,11 @@ prefs = {
             "grammar": "js",
             "tabToSpaces": True,
         },
+        "json5": {
+            "ext": [".json5"],
+            "grammar": "json5",
+            "tabToSpaces": True,
+        },
         "make": {
             "ext": [],
             "grammar": "make",
@@ -1422,6 +1427,24 @@ prefs = {
         "keyword": {
             "indent": "  ",
             "spelling": False,
+        },
+        # JSON5 configuration data.
+        "json5": {
+            "indent": "  ",
+            "keywords": [
+            ],
+            "special": [
+                r"\w+:",
+            ],
+            "contains": [
+                "c_string1",
+                "c_string2",
+                "doc_block_comment",
+                "cpp_block_comment",
+                "cpp_line_comment",
+                "regex_string",
+                "js_string",
+            ],
         },
         # Makefile
         "make": {
