@@ -375,12 +375,14 @@ patcher
 pcm
 pebibyte
 pem
+pgrep
 pi
 pid
 pipelining
 pkgs
 png
 popups
+portmap
 pos
 posix
 pragma
@@ -565,6 +567,7 @@ unparsable
 unserializable
 upsampling
 uri
+urlencoded
 usb
 usec
 usecs
@@ -578,6 +581,7 @@ vc
 vdso
 versioning
 vfs
+vga
 vi
 vimrc
 virtualization

@@ -71,6 +71,7 @@ fbl
 fconfig
 fctl
 ffx
+fgsutil
 fidl
 fidlc
 fidlcat
@@ -82,8 +83,12 @@ fms
 fremote
 fsl
 fssh
+fvd
+fvdl
 fvm
 fxb
+fxbug
+fxdev
 fxl
 fzl
 ga
@@ -93,6 +98,7 @@ gni
 googlesource
 googletest
 gpaddr
+grpcwebproxy
 gsi
 gtest
 gzipped
@@ -156,6 +162,8 @@ notreached
 nx
 overnet
 paddr
+pbm
+pbms
 physmap
 pkgctl
 pkgfs
@@ -182,6 +190,7 @@ sm
 smbug
 spinlock
 srv
+sui
 svc
 swd
 syscalls
@@ -201,11 +210,13 @@ ua
 ulib
 unittest
 unittests
+upscript
 userboot
 userspace
 vaddr
 vbmeta
 vboot
+vdl
 vdso
 vec
 versioned

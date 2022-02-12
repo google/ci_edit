@@ -14,7 +14,11 @@
 
 # This is a list of non-English words that are in Rust libraries (crates).
 argh
+atty
+automock
 bstate
+certifi
+consts
 crossterm
 cst
 deref
@@ -30,6 +34,7 @@ getuid
 gid
 glutin
 initscr
+isnt
 iters
 itertools
 izip
@@ -69,6 +74,7 @@ setuid
 splitn
 stdscr
 structopt
+tempdir
 tempfile
 termion
 thiserror

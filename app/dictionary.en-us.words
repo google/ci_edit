@@ -287,6 +287,7 @@ additionally
 additions
 additive
 address
+addressable
 addressed
 addressee
 addresses
@@ -395,6 +396,7 @@ advise
 advised
 adviser
 advises
+advising
 advisory
 advocate
 advocating
@@ -741,6 +743,7 @@ amusingly
 an
 anachronism
 anachronistic
+anagram
 anal
 analog
 analogous
@@ -873,6 +876,7 @@ antis
 antithetical
 antivirus
 antivivisectionist
+antonyms
 ants
 anvil
 anvils
@@ -1117,6 +1121,9 @@ ascent
 ascents
 ascertain
 ascertaining
+ascribe
+ascribed
+ascribing
 ash
 ashamed
 ashamedly
@@ -2652,6 +2659,7 @@ canonical
 canonicalization
 canonicalizes
 canonicalizing
+canonically
 canonize
 canopy
 cans
@@ -5799,6 +5807,7 @@ docked
 docker
 docking
 docks
+dockyard
 docs
 doctor
 doctrines
@@ -7245,6 +7254,7 @@ fay
 fays
 faze
 fazes
+fe
 fealty
 fear
 fearful
@@ -13220,6 +13230,9 @@ overdraw
 overdrawing
 overdrawn
 overdue
+overengineer
+overengineered
+overengineering
 overestimate
 overestimated
 overexerted
@@ -15454,6 +15467,8 @@ recompile
 recompiled
 recompiling
 recompose
+recomputation
+recomputations
 recompute
 recomputed
 recomputes
@@ -16765,6 +16780,7 @@ satellites
 satire
 satisfaction
 satisfactory
+satisfiable
 satisfied
 satisfies
 satisfy
