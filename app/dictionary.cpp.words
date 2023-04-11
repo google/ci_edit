@@ -271,6 +271,7 @@ putwc
 putwchar
 pword
 qsort
+rapidjson
 rbegin
 rcvtimeo
 rdbuf

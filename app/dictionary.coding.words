@@ -46,6 +46,7 @@ abis
 accessor
 accessors
 acos
+acpi
 adate
 addr
 aemu
@@ -63,6 +64,7 @@ aspx
 async
 attr
 attrs
+atty
 auth
 authenticator
 awk
@@ -89,6 +91,7 @@ cfenv
 cfg
 cfloat
 cgi
+cha
 chan
 changelist
 changelog
@@ -252,6 +255,7 @@ https
 hvf
 hw
 hxx
+hypervisor
 ia
 idr
 ifconfig
@@ -372,6 +376,7 @@ openbsd
 overscroll
 overscrolling
 patcher
+pci
 pcm
 pebibyte
 pem
@@ -379,6 +384,7 @@ pgrep
 pi
 pid
 pipelining
+pkce
 pkgs
 png
 popups
@@ -608,6 +614,7 @@ wildcard
 wildcards
 wireframe
 xattr
+xdg
 xhtml
 xorg
 xss

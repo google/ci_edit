@@ -23,6 +23,7 @@ gn
 gni
 javagen
 ldflags
+mockall
 objcc
 plist
 pytype
